@@ -2,7 +2,7 @@ import { Router, IRouter } from 'express';
 import { AuthController } from '../controllers/AuthController';
 import { RegisterUser } from '@/modules/auth/application/use-cases/RegisterUser';
 import { LoginUser } from '@/modules/auth/application/use-cases/LoginUser';
-import { MongoUserRepository } from '@/modules/auth/infrastructure/persistence/MongoUserRepository';
+import { MongoUserRepository } from '@/modules/auth/infrastructure/mongodb/MongoUserRepository';
 import { JwtTokenService } from '@/modules/auth/infrastructure/services/JwtTokenService';
 import { validateRequest } from '@/shared/middlewares/validateRequest';
 import { asyncWrapper } from '@/shared/utils/asyncWrapper';

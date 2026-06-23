@@ -1,5 +1,5 @@
 import { createApp } from '@/app';
-import { connectDatabase } from '@/infrastructure/database/mongodb';
+import { connectDatabase } from '@/config/mongodb';
 import { env } from '@/config/env';
 
 async function bootstrap(): Promise<void> {
@@ -16,7 +16,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = (signal: string) => {
     console.log(`Received ${signal}. Shutting down gracefully...`);
     server.close(async () => {
-      const { disconnectDatabase } = await import('@/infrastructure/database/mongodb');
+      const { disconnectDatabase } = await import('@/config/mongodb');
       await disconnectDatabase();
       console.log('Server closed');
       process.exit(0);
