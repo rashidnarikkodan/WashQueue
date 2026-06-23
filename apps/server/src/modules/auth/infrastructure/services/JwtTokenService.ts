@@ -1,7 +1,7 @@
+import { ITokenService, TokenPayload } from '@/modules/auth/application/ports/ITokenService';
+import { env } from '@/config/env';
+import { HttpError } from '@/shared/errors/HttpError';
 import jwt from 'jsonwebtoken';
-import { ITokenService, TokenPayload } from '../../application/ports/ITokenService';
-import { env } from '../../../../config/env';
-import { HttpError } from '../../../../shared/errors/HttpError';
 
 /**
  * Concrete JWT implementation of ITokenService.

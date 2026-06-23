@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { IUserRepository } from '@/modules/auth/domain/repositories/IUserRepository';
 import { ITokenService } from '../ports/ITokenService';
-import { UserAlreadyExistsError } from '../../domain/errors/AuthErrors';
+import { UserAlreadyExistsError } from '@/modules/auth/domain/errors/AuthErrors';
 import { RegisterInputDTO, RegisterOutputDTO } from '../dtos/auth.dto';
 
 export class RegisterUser {

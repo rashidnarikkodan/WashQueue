@@ -1,5 +1,5 @@
-import { User } from '../../domain/entities/User';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { User } from '@/modules/auth/domain/entities/User';
+import { IUserRepository } from '@/modules/auth/domain/repositories/IUserRepository';
 import { UserModel, IUserDocument } from './UserModel';
 
 /**
@@ -40,7 +40,6 @@ export class MongoUserRepository implements IUserRepository {
       role: data.role,
       isVerified: data.isVerified,
     });
-    // Re-fetch with passwordHash for the return value
     const saved = await UserModel.findById(doc._id).select('+passwordHash');
     return this.toDomain(saved!);
   }

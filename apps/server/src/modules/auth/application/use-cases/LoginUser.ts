@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import { IUserRepository } from '@/modules/auth/domain/repositories/IUserRepository';
 import { ITokenService } from '../ports/ITokenService';
-import { InvalidCredentialsError } from '../../domain/errors/AuthErrors';
+import { InvalidCredentialsError } from '@/modules/auth/domain/errors/AuthErrors';
 import { LoginInputDTO, LoginOutputDTO } from '../dtos/auth.dto';
 
 export class LoginUser {

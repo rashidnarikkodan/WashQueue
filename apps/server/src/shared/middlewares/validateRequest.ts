@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodSchema, ZodError } from 'zod';
-import { HttpError } from '../errors/HttpError';
+import { HttpError } from '@/shared/errors/HttpError';
 
 /**
  * Shared Zod request-body validation middleware factory.

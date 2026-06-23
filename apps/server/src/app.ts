@@ -2,9 +2,9 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-import { errorHandler } from './shared/middlewares/errorHandler';
-import { notFound } from './shared/middlewares/notFound';
-import authRoutes from './modules/auth/presentation/routes/auth.routes';
+import { errorHandler } from '@/shared/middlewares/errorHandler';
+import { notFound } from '@/shared/middlewares/notFound';
+import authRoutes from '@/modules/auth/presentation/routes/auth.routes';
 
 export function createApp(): Application {
   const app = express();

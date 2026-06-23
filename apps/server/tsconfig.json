@@ -13,12 +13,9 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@shared/*": ["shared/*"],
-      "@config/*": ["config/*"],
-      "@modules/*": ["modules/*"],
-      "@infra/*": ["infrastructure/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src/**/*"],

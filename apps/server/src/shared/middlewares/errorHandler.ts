@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError';
-import { env } from '../../config/env';
+import { AppError } from '@/shared/errors/AppError';
+import { env } from '@/config/env';
 
 interface ErrorResponse {
   status: 'error' | 'fail';

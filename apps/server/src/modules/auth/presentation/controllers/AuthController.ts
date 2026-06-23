@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { RegisterUser } from '../../application/use-cases/RegisterUser';
-import { LoginUser } from '../../application/use-cases/LoginUser';
-import { RegisterInputDTO, LoginInputDTO } from '../../application/dtos/auth.dto';
+import { RegisterUser } from '@/modules/auth/application/use-cases/RegisterUser';
+import { LoginUser } from '@/modules/auth/application/use-cases/LoginUser';
+import { RegisterInputDTO, LoginInputDTO } from '@/modules/auth/application/dtos/auth.dto';
 
 /**
  * AuthController — translates HTTP requests into use-case calls.
