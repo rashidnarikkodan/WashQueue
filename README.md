@@ -1,159 +1,207 @@
-# Turborepo starter
+# WashQueue 🚀
 
-This Turborepo starter is maintained by the Turborepo core team.
+## Overview
 
-## Using this example
+WashQueue is a real-time vehicle wash management platform designed for both queue-based station execution and on-site service dispatching.
 
-Run the following command:
+It manages:
+* **Live Queue Operations** at wash stations
+* **Slot-based & Walk-in** bookings
+* **Real-time Service Tracking**
+* **Payments & Settlements**
+* **Provider & Admin Governance**
 
-```sh
-npx create-turbo@latest
+The system is built for high concurrency using Redis, MongoDB, and WebSockets.
+
+---
+
+## Tech Stack
+
+### Monorepo
+* [Turborepo](https://turbo.build/)
+* [pnpm](https://pnpm.io/) workspaces
+
+### Frontend
+* **Next.js** (App Router)
+* **TypeScript**
+* **Tailwind CSS**
+* **TanStack Query** (Server state management)
+* **Zustand** (Client state management)
+* **Socket.IO Client**
+
+### Backend
+* **Node.js**
+* **Express.js**
+* **MongoDB (Atlas)**
+* **Redis** (Queues, cache, distributed locks)
+* **Socket.IO** (Real-time updates)
+* **BullMQ** (Background jobs)
+
+### Auth & Payments
+* **JWT-based auth** + OTP verification
+* **Razorpay** payment gateway integration
+
+### Third-party Services
+* **Firebase Cloud Messaging (FCM)** for push notifications
+* **SendGrid** for transactional emails
+* **Sentry** for performance monitoring & error tracking
+
+---
+
+## Project Structure (Turborepo)
+
+```bash
+apps/
+  ├── web/        # Next.js web application frontend
+  ├── server/     # Express.js backend server API
+  └── docs/       # Documentation site
+
+packages/
+  ├── ui/                 # Shared React UI component library
+  ├── eslint-config/      # Shared ESLint configuration
+  └── typescript-config/  # Shared tsconfig profiles
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## Installation & Setup
 
-### Apps and Packages
+### 1. Clone Repository
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+git clone https://github.com/your-org/washqueue.git
+cd washqueue
 ```
 
-Without global `turbo`, use your package manager:
+### 2. Install Dependencies
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+Using pnpm workspaces:
+
+```bash
+pnpm install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### 3. Environment Variables Configuration
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Create `.env` files for the respective applications.
 
-```sh
-turbo build --filter=docs
+#### Backend (`apps/server/.env`)
+
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/washqueue
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
+RAZORPAY_KEY=your_razorpay_key
+RAZORPAY_SECRET=your_razorpay_secret
+FCM_SERVER_KEY=your_fcm_key
+SENDGRID_API_KEY=your_sendgrid_key
 ```
 
-Without global `turbo`:
+#### Frontend (`apps/web/.env`)
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
 ```
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+## Running the Project
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+### Start Development Server
 
-```sh
-cd my-turborepo
-turbo dev
+Run the development pipelines for all applications and packages concurrently:
+
+```bash
+pnpm dev
 ```
 
-Without global `turbo`, use your package manager:
+This starts:
+* Next.js Web App on `http://localhost:3000`
+* Express Backend Server on `http://localhost:5000`
+* Shared UI package building/watching
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+### Individual App Commands
+
+You can run commands for specific workspaces:
+
+#### Web Frontend
+```bash
+pnpm --filter web dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
+#### Backend Server
+```bash
+pnpm --filter server dev
 ```
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+## Build & Production Commands
+
+### Build All Workspaces
+```bash
+pnpm build
 ```
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
+### Start Production Bundles
+```bash
+pnpm start
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
+## Core System Architecture
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+WashQueue uses a distributed, decoupled architecture:
+* **UI & Client State**: Next.js handles client-side rendering and user actions, using Zustand and TanStack Query.
+* **API Service**: Express processes business logic and interacts with the database layer.
+* **Persistent Storage**: MongoDB acts as the primary source of truth for structural/relational data.
+* **Distributed Cache & Queues**: Redis manages real-time station queue states, soft locks, capacity windows, and coordinates with BullMQ for running background workers.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## Core Modules
 
-```sh
-turbo link
-```
+### 1. Booking System
+* Hybrid scheduling supporting slot-based appointments and real-time walk-in bookings.
+* Redis-based distributed locking to guarantee concurrency safety and prevent double-booking.
+* Comprehensive status tracking lifecycle (`pending`, `confirmed`, `in_progress`, `completed`, `cancelled`).
 
-Without global `turbo`:
+### 2. Execution & Dispatch Engines
+* **Queue Engine**: Manages physical station workflows, bay allocations, and vehicle sequences.
+* **Dispatch Engine**: Coordinates on-site services, matching field agents to dynamic customer coordinates.
 
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
+### 3. Financial & Wallet Ledger
+* Double-entry ledger system for wallets and refunds.
+* Live Razorpay gateway payment tracking.
+* Automated provider settlement calculation and processing rules.
 
-## Useful Links
+### 4. Pricing & Promos
+* Configurable base rates, platform commission tiers, promotions, and dynamic demand-based pricing adjustments.
 
-Learn more about the power of Turborepo:
+### 5. Intelligence Layer
+* Wait-time prediction algorithms based on station throughput.
+* Security check rules for preventing transactional fraud.
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+
+## Database Schema Model
+
+### MongoDB Collections
+* `users`
+* `stations`
+* `bookings`
+* `vehicles`
+* `payments`
+* `reviews`
+* `wallet_transactions`
+* `notifications`
+
+### Redis Key Structures
+* `station:queue:<id>` (Sorted Sets)
+* `booking:active:<id>` (String/Hash trackers)
+* `capacity:window:<date>` (Hash map slot tracking)
+* `lock:booking:<id>` (Short TTL mutex keys)
