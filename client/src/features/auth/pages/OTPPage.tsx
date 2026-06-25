@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ClipboardEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Droplets, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
@@ -38,34 +38,71 @@ export default function OTPPage() {
     };
   }, [resetForm]);
 
+  // Reactive verification: Auto-submits when all 6 digits are entered
+  useEffect(() => {
+    const code = otpDigits.join("");
+    if (code.length === 6 && !isLoading && !isVerified) {
+      const triggerVerify = async () => {
+        const success = await verifyOTP(code);
+        if (success) {
+          setIsVerified(true);
+        }
+      };
+      triggerVerify();
+    }
+  }, [otpDigits, verifyOTP, isLoading, isVerified]);
+
+  // Auto-redirect to role setup on successful verification after a brief delay
+  useEffect(() => {
+    if (isVerified) {
+      const timer = setTimeout(() => {
+        navigate("/setup-account");
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [isVerified, navigate]);
+
   const handleDigitChange = (index: number, val: string) => {
-    if (/^[0-9]$/.test(val) || val === "") {
-      setOtpDigit(index, val);
+    // Take the last character entered to allow overwriting of values smoothly
+    const lastChar = val.slice(-1);
+    if (/^[0-9]$/.test(lastChar) || lastChar === "") {
+      setOtpDigit(index, lastChar);
 
       // Move focus forward if value entered
-      if (val !== "" && index < 5) {
+      if (lastChar !== "" && index < 5) {
         inputRefs.current[index + 1]?.focus();
       }
     }
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    // Backspace key moves focus backward
-    if (e.key === "Backspace" && otpDigits[index] === "" && index > 0) {
+    if (e.key === "Backspace") {
+      if (otpDigits[index] === "" && index > 0) {
+        // Current input is already empty, move focus to previous and clear it
+        setOtpDigit(index - 1, "");
+        inputRefs.current[index - 1]?.focus();
+        e.preventDefault();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
+      e.preventDefault();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+      e.preventDefault();
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("text").trim();
     if (/^\d{6}$/.test(pasteData)) {
       const newDigits = pasteData.split("");
       setOtpDigits(newDigits);
+      // Focus the last input box
       inputRefs.current[5]?.focus();
-      toast.success("Code pasted successfully!");
+      toast.success("Verification code pasted successfully!");
     } else {
-      toast.error("Please paste a valid 6-digit number");
+      toast.error("Please paste a valid 6-digit verification code");
     }
   };
 
@@ -102,9 +139,6 @@ export default function OTPPage() {
       {/* Top Header branding */}
       <header className="w-full flex items-center justify-between z-10 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Droplets className="h-4.5 w-4.5" />
-          </div>
           <span className="text-xl font-bold italic tracking-tight text-primary">
             WashQueue
           </span>
@@ -141,11 +175,10 @@ export default function OTPPage() {
                     key={i}
                     ref={(el) => { inputRefs.current[i] = el; }}
                     type="text"
-                    maxLength={1}
                     value={digit}
                     onChange={(e) => handleDigitChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    onPaste={i === 0 ? handlePaste : undefined}
+                    onPaste={handlePaste}
                     inputMode="numeric"
                     pattern="[0-9]*"
                     className="w-12 h-12 md:w-16 md:h-16 bg-slate-950/40 border border-slate-800 rounded-xl text-center font-extrabold text-white text-lg md:text-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
