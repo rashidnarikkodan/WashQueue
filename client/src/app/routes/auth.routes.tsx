@@ -1,6 +1,8 @@
-// src/app/routes/auth.routes.tsx
-
 import AuthLayout from "../layouts/AuthLayout";
+import AuthPage from "../../features/auth/pages/AuthPage";
+import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
+import OTPPage from "../../features/auth/pages/OTPPage";
+import SetupAccountPage from "../../features/auth/pages/SetupAccountPage";
 
 export const authRoutes = {
   path: "/",
@@ -8,15 +10,23 @@ export const authRoutes = {
   children: [
     {
       path: "login",
-      element: <div>Signin</div>,
+      element: <AuthPage />,
     },
     {
-      path: "regitser",
-      element: <div>Signup</div>,
+      path: "register",
+      element: <AuthPage />,
     },
     {
       path: "forgot-password",
-      element: <div>Forgot Password</div>,
+      element: <ForgotPasswordPage />,
+    },
+    {
+      path: "verify-email",
+      element: <OTPPage />,
+    },
+    {
+      path: "setup-account",
+      element: <SetupAccountPage />,
     },
   ],
 };

@@ -7,7 +7,7 @@
   --card: 255 255 255;
   --card-foreground: 15 23 42;
 
-  --primary: 6 182 212;
+  --primary: 59 130 246;
   --primary-foreground: 255 255 255;
 
   --muted: 241 245 249;
@@ -17,14 +17,14 @@
 }
 
 .dark {
-  --background: 2 6 23;
+  --background: 2 8 23;
   --foreground: 248 250 252;
 
   --card: 15 23 42;
   --card-foreground: 248 250 252;
 
-  --primary: 34 211 238;
-  --primary-foreground: 255 255 255;
+  --primary: 96 165 250;
+  --primary-foreground: 15 23 42;
 
   --muted: 15 23 42;
   --muted-foreground: 148 163 184;
