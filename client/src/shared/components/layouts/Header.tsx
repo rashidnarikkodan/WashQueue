@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  Menu,
-  X,
-  Search,
-  Heart
-} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Search, Heart } from "lucide-react";
 import ThemeToggle from "../ui/ThemeToggle";
 import LocationSelector from "../ui/LocationSelector";
 import SearchPill from "../ui/SearchPill";
@@ -13,12 +8,13 @@ import NotificationDropdown from "../ui/NotificationDropdown";
 import ProfileDropdown from "../ui/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
-export default function PublicHeader() {
+export default function Header() {
   const location = useLocation();
   const pathname = location.pathname;
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
 
-  const currentRole = user?.role || "user";
+  const currentRole = isAuthenticated && user ? user.role : "user";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,36 +26,73 @@ export default function PublicHeader() {
     setIsSearchExpanded(false);
   }, [pathname]);
 
-  const navLinks = currentRole === "user"
-    ? [
-        { name: "Home", path: "/" },
-        { name: "About", path: "/about" },
-      ]
-    : [
-        { name: "Home", path: "/" },
-      ];
+  // Dynamic Navigation Configurations
+  const navLinks = {
+    admin: [],
+    manager: [
+      { name: "Dashboard", path: "/manager/dashboard" },
+      { name: "Queue Board", path: "/manager/queue" },
+      { name: "Walk-ins", path: "/manager/walk-ins" },
+    ],
+    provider: [
+      { name: "Dashboard", path: "/provider/dashboard" },
+      { name: "Stations", path: "/provider/stations" },
+      { name: "Bookings", path: "/provider/bookings" },
+    ],
+    user: [
+      { name: "Home", path: "/" },
+      { name: "About", path: "/about" },
+    ],
+  };
+
+  const activeLinks = navLinks[currentRole as keyof typeof navLinks] || [];
+
+  // Role Badge Styling
+  const roleBadges = {
+    admin: {
+      label: "Admin",
+      className: "bg-primary/10 text-primary border border-primary/20"
+    },
+    manager: {
+      label: "Manager",
+      className: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+    },
+    provider: {
+      label: "Provider",
+      className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+    },
+    user: null,
+  };
+
+  const activeBadge = roleBadges[currentRole as keyof typeof roleBadges];
 
   return (
     <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
-      <div className="mx-auto w-full px-6 py-3.5 flex items-center justify-between">
+      <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
         
-        {/* Left Side: Brand Logo */}
-        <div className="flex items-center gap-3">
+        {/* Left Side: Brand Logo & Role Badge */}
+        <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-xl font-bold italic tracking-tight text-primary">
               WashQueue
             </span>
           </Link>
+
+          {activeBadge && (
+            <span className={`hidden lg:inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide transition-all duration-300 ${activeBadge.className}`}>
+              {activeBadge.label}
+            </span>
+          )}
         </div>
 
         {/* Center Section: Navigation Links OR Toggleable Search Box */}
-        <div className="flex-1 max-w-lg mx-6 flex justify-center">
+        <div className="col-span-1 flex justify-center max-w-lg mx-auto w-full">
           {isSearchExpanded ? (
             <SearchPill onClose={() => setIsSearchExpanded(false)} />
           ) : (
-            navLinks.length > 0 && (
+            activeLinks.length > 0 && (
               <nav className="hidden md:flex items-center gap-6">
-                {navLinks.map((link) => {
+                {activeLinks.map((link) => {
                   const isActive = pathname === link.path;
                   return (
                     <Link
@@ -82,15 +115,15 @@ export default function PublicHeader() {
         </div>
 
         {/* Right Side: Utilities, Profile & Hamburger Menu */}
-        <div className="flex items-center gap-3">
+        <div className="col-span-1 flex justify-end items-center gap-3">
           
-          {/* Location Selector */}
-          {!isSearchExpanded && (
+          {/* Location Selector (Consumer-only) */}
+          {!isSearchExpanded && currentRole === "user" && (
             <LocationSelector className="hidden lg:flex" />
           )}
 
-          {/* Search Trigger Button */}
-          {!isSearchExpanded && (
+          {/* Search Trigger Button (Consumer-only) */}
+          {!isSearchExpanded && currentRole === "user" && (
             <button
               onClick={() => setIsSearchExpanded(true)}
               className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-all cursor-pointer"
@@ -100,13 +133,16 @@ export default function PublicHeader() {
             </button>
           )}
 
-          {/* Favorites Heart Icon */}
-          <button
-            className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
-            aria-label="View Favorites"
-          >
-            <Heart className="h-4.5 w-4.5" />
-          </button>
+          {/* Favorites Heart Icon (Consumer-only & Authenticated) */}
+          {isAuthenticated && currentRole === "user" && (
+            <Link
+              to="/favorites"
+              className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
+              aria-label="View Favorites"
+            >
+              <Heart className="h-4.5 w-4.5" />
+            </Link>
+          )}
 
           {/* Theme Toggle */}
           <ThemeToggle />
@@ -116,11 +152,20 @@ export default function PublicHeader() {
             <NotificationDropdown />
           )}
 
-          {/* User Profile / Access Dropdown */}
-          <ProfileDropdown currentRole={currentRole} />
+          {/* User Profile / Login trigger */}
+          {isAuthenticated ? (
+            <ProfileDropdown currentRole={currentRole} />
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
+            >
+              Login
+            </button>
+          )}
 
           {/* Mobile Menu Toggle Button */}
-          {navLinks.length > 0 && !isSearchExpanded && (
+          {activeLinks.length > 0 && !isSearchExpanded && (
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors md:hidden text-muted-foreground hover:text-foreground cursor-pointer"
@@ -134,10 +179,10 @@ export default function PublicHeader() {
       </div>
 
       {/* Mobile Navigation Drawer */}
-      {isMobileMenuOpen && navLinks.length > 0 && (
+      {isMobileMenuOpen && activeLinks.length > 0 && (
         <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4 duration-200">
           <div className="space-y-1.5 px-2">
-            {navLinks.map((link) => {
+            {activeLinks.map((link) => {
               const isActive = pathname === link.path;
               return (
                 <Link

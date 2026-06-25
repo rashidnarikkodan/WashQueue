@@ -25,6 +25,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, logout, cycleRole } = useAuthStore();
+  if (!user) return null;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -92,18 +93,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   };
 
   const cta = getCtaContent();
-
-  // If the user is guest or not logged in, render a Login button instead of Avatar
-  if (!user) {
-    return (
-      <button
-        onClick={() => navigate("/login")}
-        className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md text-xs"
-      >
-        Login
-      </button>
-    );
-  }
 
   const initials = user.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) : "U";
 

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import type { KeyboardEvent, ClipboardEvent } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Check, Loader2 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
@@ -133,26 +133,6 @@ export default function OTPPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#020817] text-white p-8 relative overflow-hidden w-full">
-      {/* Background Decor Glow */}
-      <div className="absolute left-[-100px] top-[-100px] h-[400px] w-[400px] rounded-full bg-primary/5 filter blur-3xl"></div>
-
-      {/* Top Header branding */}
-      <header className="w-full flex items-center justify-between z-10 max-w-7xl mx-auto">
-        <Link to="/" className="flex items-center gap-2 group">
-          <span className="text-xl font-bold italic tracking-tight text-primary">
-            WashQueue
-          </span>
-        </Link>
-
-        <Link
-          to="/login"
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Login
-        </Link>
-      </header>
-
       {/* Main Content Area */}
       <main className="flex-grow flex items-center justify-center z-10 p-4">
         {!isVerified ? (
