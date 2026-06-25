@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from "react-router-dom"
-import Header from "../../shared/components/layouts/Header"
+import PrivateHeader from "../../shared/components/layouts/PrivateHeader"
 import { useAuthStore } from "../../features/auth/store/authStore"
 
 const ManagerLayout = () => {
@@ -19,7 +19,7 @@ const ManagerLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <PrivateHeader />
       <main className="flex-1 p-6">
         <Outlet />
       </main>

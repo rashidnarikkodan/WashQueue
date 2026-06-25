@@ -13,24 +13,16 @@ import NotificationDropdown from "../ui/NotificationDropdown";
 import ProfileDropdown from "../ui/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
-const Header = () => {
+export default function PublicHeader() {
   const location = useLocation();
   const pathname = location.pathname;
   const { user, isAuthenticated } = useAuthStore();
 
-  // Detect current role/context from AuthContext or URL path
-  let currentRole: "admin" | "manager" | "provider" | "customer" | "guest" = "guest";
-  
-  if (isAuthenticated && user) {
-    currentRole = user.role;
-  } else {
-    currentRole = "guest";
-  }
+  const currentRole = isAuthenticated && user ? "customer" : "guest";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
 
   // Close menus on route change
   useEffect(() => {
@@ -38,70 +30,26 @@ const Header = () => {
     setIsSearchExpanded(false);
   }, [pathname]);
 
-  // Dynamic Navigation Configurations
-  const navLinks = {
-    admin: [],
-    manager: [
-      { name: "Dashboard", path: "/manager/dashboard" },
-      { name: "Queue Board", path: "/manager/queue" },
-      { name: "Walk-ins", path: "/manager/walk-ins" },
-    ],
-    provider: [
-      { name: "Dashboard", path: "/provider/dashboard" },
-      { name: "Stations", path: "/provider/stations" },
-      { name: "Bookings", path: "/provider/bookings" },
-    ],
-    customer: [
-      { name: "Home", path: "/" },
-      { name: "About", path: "/about" },
-    ],
-    guest: [
-      { name: "Home", path: "/" },
-    ]
-  };
-
-  const activeLinks = navLinks[currentRole];
-
-  // Role Badge Styling
-  const roleBadges = {
-    admin: {
-      label: "Admin",
-      className: "bg-primary/10 text-primary border border-primary/20"
-    },
-    manager: {
-      label: "Manager",
-      className: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-    },
-    provider: {
-      label: "Provider",
-      className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-    },
-    customer: {
-      label: "Customer",
-      className: "bg-primary/10 text-primary border border-primary/20"
-    },
-    guest: null
-  };
-
-  const activeBadge = roleBadges[currentRole];
+  const navLinks = currentRole === "customer"
+    ? [
+        { name: "Home", path: "/" },
+        { name: "About", path: "/about" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+      ];
 
   return (
     <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 flex items-center justify-between">
         
-        {/* Left Side: Brand Logo & Role Badge */}
+        {/* Left Side: Brand Logo */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-xl font-bold italic tracking-tight text-primary">
               WashQueue
             </span>
           </Link>
-
-          {activeBadge && (
-            <span className={`hidden lg:inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide transition-all duration-300 ${activeBadge.className}`}>
-              {activeBadge.label}
-            </span>
-          )}
         </div>
 
         {/* Center Section: Navigation Links OR Toggleable Search Box */}
@@ -109,9 +57,9 @@ const Header = () => {
           {isSearchExpanded ? (
             <SearchPill onClose={() => setIsSearchExpanded(false)} />
           ) : (
-            activeLinks.length > 0 && (
+            navLinks.length > 0 && (
               <nav className="hidden md:flex items-center gap-6">
-                {activeLinks.map((link) => {
+                {navLinks.map((link) => {
                   const isActive = pathname === link.path;
                   return (
                     <Link
@@ -145,7 +93,7 @@ const Header = () => {
           {!isSearchExpanded && (
             <button
               onClick={() => setIsSearchExpanded(true)}
-              className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-all"
+              className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-all cursor-pointer"
               aria-label="Toggle Search"
             >
               <Search className="h-4.5 w-4.5" />
@@ -154,7 +102,7 @@ const Header = () => {
 
           {/* Favorites Heart Icon */}
           <button
-            className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors"
+            className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
             aria-label="View Favorites"
           >
             <Heart className="h-4.5 w-4.5" />
@@ -164,7 +112,7 @@ const Header = () => {
           <ThemeToggle />
 
           {/* Notifications Dropdown */}
-          {currentRole !== "guest" && (
+          {isAuthenticated && (
             <NotificationDropdown />
           )}
 
@@ -172,10 +120,10 @@ const Header = () => {
           <ProfileDropdown currentRole={currentRole} />
 
           {/* Mobile Menu Toggle Button */}
-          {activeLinks.length > 0 && !isSearchExpanded && (
+          {navLinks.length > 0 && !isSearchExpanded && (
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors md:hidden text-muted-foreground hover:text-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors md:hidden text-muted-foreground hover:text-foreground cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
@@ -186,10 +134,10 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation Drawer */}
-      {isMobileMenuOpen && activeLinks.length > 0 && (
+      {isMobileMenuOpen && navLinks.length > 0 && (
         <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4 duration-200">
           <div className="space-y-1.5 px-2">
-            {activeLinks.map((link) => {
+            {navLinks.map((link) => {
               const isActive = pathname === link.path;
               return (
                 <Link
@@ -208,6 +156,4 @@ const Header = () => {
       )}
     </header>
   );
-};
-
-export default Header;
+}
