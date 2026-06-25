@@ -77,7 +77,7 @@ export default function RegisterForm() {
         <div className="flex-1 h-[1px] bg-slate-800/80"></div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <FormInput
           id="name-register-input"
           label="Full Name"

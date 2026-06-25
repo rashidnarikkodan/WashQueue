@@ -1,3 +1,4 @@
+import { z } from "zod"
 import { loginSchema } from "../schemas/login.schema"
 type LoginState = {
   success?: boolean
@@ -23,7 +24,7 @@ export async function loginAction(
   if (!validated.success) {
     return {
       success: false,
-      errors: validated.error.flatten().fieldErrors,
+      errors: z.flattenError(validated.error).fieldErrors,
     }
   }
 
