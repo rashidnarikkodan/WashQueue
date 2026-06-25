@@ -5,7 +5,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "manager" | "provider" | "customer";
+  role: "admin" | "manager" | "provider" | "user";
 }
 
 interface AuthStore {
@@ -16,7 +16,7 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   verifyOTP: (code: string) => Promise<boolean>;
-  setupAccount: (role: "customer" | "provider") => Promise<boolean>;
+  setupAccount: (role: "user" | "provider") => Promise<boolean>;
   logout: () => void;
   cycleRole: () => void;
 }
@@ -55,7 +55,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    let role: "admin" | "manager" | "provider" | "customer" = "customer";
+    let role: "admin" | "manager" | "provider" | "user" = "user";
     let name = "Rashid Narikkodan";
 
     if (email.startsWith("admin")) {
@@ -155,15 +155,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const user = get().user;
     if (!user) return;
     
-    let nextRole: "admin" | "manager" | "provider" | "customer";
-    if (user.role === "customer") {
+    let nextRole: "admin" | "manager" | "provider" | "user";
+    if (user.role === "user") {
       nextRole = "admin";
     } else if (user.role === "admin") {
       nextRole = "manager";
     } else if (user.role === "manager") {
       nextRole = "provider";
     } else {
-      nextRole = "customer";
+      nextRole = "user";
     }
 
     const updated = { ...user, role: nextRole };

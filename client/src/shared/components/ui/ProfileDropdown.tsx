@@ -17,7 +17,7 @@ import {
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
 interface ProfileDropdownProps {
-  currentRole: "admin" | "manager" | "provider" | "customer" | "guest";
+  currentRole: "admin" | "manager" | "provider" | "user";
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
@@ -39,7 +39,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   // Cycle role function for quick switcher demonstration in the footer
   const handleCycleRole = () => {
     setIsOpen(false);
-    if (currentRole === "customer") {
+    if (currentRole === "user") {
       navigate("/admin/dashboard");
     } else if (currentRole === "admin") {
       navigate("/manager/dashboard");
@@ -59,10 +59,10 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         return "Station Manager";
       case "provider":
         return "Verified Provider";
-      case "customer":
-        return "Verified Customer";
+      case "user":
+        return "Verified User";
       default:
-        return "Guest Access";
+        return "User Access";
     }
   };
 
@@ -94,7 +94,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const cta = getCtaContent();
 
   // If the user is guest or not logged in, render a Login button instead of Avatar
-  if (currentRole === "guest" || !user) {
+  if (!user) {
     return (
       <button
         onClick={() => navigate("/login")}
@@ -145,7 +145,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <button
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "customer" ? "/settings" : `/${currentRole}/settings`);
+                navigate(currentRole === "user" ? "/settings" : `/${currentRole}/settings`);
               }}
               className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all cursor-pointer"
               title="Profile Settings"
@@ -163,7 +163,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               <div
                 onClick={() => {
                   setIsOpen(false);
-                  navigate(currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`);
+                  navigate(currentRole === "user" ? "/bookings" : `/${currentRole}/bookings`);
                 }}
                 className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group"
               >
@@ -202,7 +202,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <div
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "customer" ? "/register-provider" : `/${currentRole}/dashboard`);
+                navigate(currentRole === "user" ? "/register-provider" : `/${currentRole}/dashboard`);
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
             >

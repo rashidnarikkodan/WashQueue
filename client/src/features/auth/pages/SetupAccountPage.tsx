@@ -6,13 +6,13 @@ import { useState } from "react";
 export default function SetupAccountPage() {
   const navigate = useNavigate();
   const { setupAccount, isLoading } = useAuthStore();
-  const [selectedRole, setSelectedRole] = useState<"customer" | "provider" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"user" | "provider" | null>(null);
 
-  const handleSelectRole = async (role: "customer" | "provider") => {
+  const handleSelectRole = async (role: "user" | "provider") => {
     setSelectedRole(role);
     const success = await setupAccount(role);
     if (success) {
-      if (role === "customer") {
+      if (role === "user") {
         navigate("/");
       } else {
         navigate("/provider/dashboard");
@@ -76,17 +76,17 @@ export default function SetupAccountPage() {
               </div>
 
               <button
-                onClick={() => handleSelectRole("customer")}
+                onClick={() => handleSelectRole("user")}
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 mt-8 text-sm cursor-pointer flex items-center justify-center gap-2"
               >
-                {isLoading && selectedRole === "customer" ? (
+                {isLoading && selectedRole === "user" ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Setting Up...
                   </>
                 ) : (
-                  "Continue as Customer"
+                  "Continue as User"
                 )}
               </button>
             </div>

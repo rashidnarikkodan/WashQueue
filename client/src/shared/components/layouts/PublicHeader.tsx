@@ -18,7 +18,7 @@ export default function PublicHeader() {
   const pathname = location.pathname;
   const { user, isAuthenticated } = useAuthStore();
 
-  const currentRole = isAuthenticated && user ? "customer" : "guest";
+  const currentRole = user?.role || "user";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function PublicHeader() {
     setIsSearchExpanded(false);
   }, [pathname]);
 
-  const navLinks = currentRole === "customer"
+  const navLinks = currentRole === "user"
     ? [
         { name: "Home", path: "/" },
         { name: "About", path: "/about" },

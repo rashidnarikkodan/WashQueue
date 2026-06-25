@@ -11,7 +11,7 @@ export default function PrivateHeader() {
   const pathname = location.pathname;
   const { user, isAuthenticated } = useAuthStore();
 
-  const currentRole = isAuthenticated && user ? user.role : "guest";
+  const currentRole = isAuthenticated && user ? user.role : "user";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,8 +34,7 @@ export default function PrivateHeader() {
       { name: "Stations", path: "/provider/stations" },
       { name: "Bookings", path: "/provider/bookings" },
     ],
-    customer: [],
-    guest: []
+    user: []
   };
 
   const activeLinks = navLinks[currentRole as keyof typeof navLinks] || [];
@@ -54,8 +53,7 @@ export default function PrivateHeader() {
       label: "Provider",
       className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
     },
-    customer: null,
-    guest: null
+    user: null
   };
 
   const activeBadge = roleBadges[currentRole as keyof typeof roleBadges];

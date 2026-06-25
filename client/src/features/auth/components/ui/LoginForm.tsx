@@ -72,7 +72,7 @@ export default function LoginForm() {
           }
         );
         promise.then(() => {
-          login("customer@washqueue.com", "password123").then(() => navigate("/"));
+          login("user@washqueue.com", "password123").then(() => navigate("/"));
         });
       }} />
 
