@@ -6,8 +6,9 @@ interface FormInputProps {
   label: string;
   type: string;
   placeholder: string;
-  value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  name?: string;
+  value?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   autoComplete?: string;
   required?: boolean;
@@ -18,6 +19,7 @@ export default function FormInput({
   label,
   type,
   placeholder,
+  name,
   value,
   onChange,
   error,
@@ -38,6 +40,7 @@ export default function FormInput({
       <div className="relative">
         <input
           id={id}
+          name={name}
           type={inputType}
           placeholder={placeholder}
           value={value}
