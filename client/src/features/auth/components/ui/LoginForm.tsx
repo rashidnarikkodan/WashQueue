@@ -1,4 +1,4 @@
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -13,11 +13,22 @@ const initialState = {
 
 export default function LoginForm() {
   const navigate = useNavigate()
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
 
   const [state, formAction] = useActionState(
     loginAction,
     initialState
   )
+
+  // Sync server action validation errors to local state
+  useEffect(() => {
+    if (state.errors) {
+      setLocalErrors({
+        email: state.errors.email?.[0] || "",
+        password: state.errors.password?.[0] || ""
+      });
+    }
+  }, [state.errors]);
 
   useEffect(() => {
     if (state.success) {
@@ -86,7 +97,14 @@ export default function LoginForm() {
           type="email"
           name="email"
           placeholder="e.g. rashid@example.com"
-          error={state.errors?.email?.[0]}
+          error={localErrors.email}
+          onChange={(e) => {
+            const val = e.target.value;
+            // Instantly clear email format error as soon as they type a valid email format
+            if (/\S+@\S+\.\S+/.test(val) || val.trim() === "") {
+              setLocalErrors(prev => ({ ...prev, email: "" }));
+            }
+          }}
           autoComplete="username"
           required
         />
@@ -97,7 +115,14 @@ export default function LoginForm() {
           type="password"
           name="password"
           placeholder="••••••••"
-          error={state.errors?.password?.[0]}
+          error={localErrors.password}
+          onChange={(e) => {
+            const val = e.target.value;
+            // Instantly clear password error as soon as it meets the min length condition
+            if (val.length >= 6 || val.trim() === "") {
+              setLocalErrors(prev => ({ ...prev, password: "" }));
+            }
+          }}
           autoComplete="current-password"
           required
         />
