@@ -1,25 +1,33 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Droplets, ArrowLeft, Loader2 } from "lucide-react";
 import FormInput from "../components/ui/FormInput";
+import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const {
+    forgotEmail,
+    errors,
+    setField,
+    validateForgotPassword,
+    resetForm,
+    clearError
+  } = useAuthFormStore();
+
+  // Reset form inputs and errors when component unmounts
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, [resetForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      setError("Email address is required");
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
+    if (!validateForgotPassword()) return;
 
     setIsLoading(true);
     // Simulate API delay
@@ -75,12 +83,12 @@ export default function ForgotPasswordPage() {
               label="Email Address"
               type="email"
               placeholder="e.g. rashid@example.com"
-              value={email}
+              value={forgotEmail}
               onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
+                setField("forgotEmail", e.target.value);
+                clearError("forgotEmail");
               }}
-              error={error}
+              error={errors.forgotEmail}
               autoComplete="username"
               required
             />

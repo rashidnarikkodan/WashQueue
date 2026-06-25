@@ -14,7 +14,7 @@ import {
   UserPlus,
   RefreshCw
 } from "lucide-react";
-import { useAuth } from "../../../features/auth/store/AuthContext";
+import { useAuthStore } from "../../../features/auth/store/authStore";
 
 interface ProfileDropdownProps {
   currentRole: "admin" | "manager" | "provider" | "customer" | "guest";
@@ -24,7 +24,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { user, logout, cycleRole } = useAuth();
+  const { user, logout, cycleRole } = useAuthStore();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

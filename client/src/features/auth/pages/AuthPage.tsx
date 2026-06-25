@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Droplets } from "lucide-react";
 import LoginForm from "../components/ui/LoginForm";
 import RegisterForm from "../components/ui/RegisterForm";
 
@@ -117,16 +116,9 @@ export default function AuthPage() {
           {/* Background Decor Glow */}
           <div className="absolute right-[-50px] top-[-50px] h-[200px] w-[200px] rounded-full bg-white/10 filter blur-2xl"></div>
 
-          {/* Brand Header */}
-          <div className="flex items-center gap-2 z-10">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary font-bold shadow-md">
-              <Droplets className="h-4.5 w-4.5 text-primary" />
-            </div>
-            <span className={`text-xl font-bold italic tracking-tight ${isRegister ? "text-primary" : "text-white"}`}>WashQueue</span>
-          </div>
 
           {/* Message Area */}
-          <div className="relative h-20 w-full z-10">
+          <div className="relative h-40 text-center w-full z-10">
             {/* Login Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${

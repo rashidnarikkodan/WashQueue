@@ -1,94 +1,39 @@
-import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import FormInput from "./FormInput";
 import SocialButton from "./SocialButton";
-import { useAuth } from "../../store/AuthContext";
+import { useAuthStore } from "../../store/authStore";
+import { useAuthFormStore } from "../../store/authFormStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const { register, isLoading } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { register, isLoading } = useAuthStore();
   
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const {
+    name,
+    email,
+    password,
+    confirmPassword,
+    errors,
+    setField,
+    validateRegister,
+    resetForm,
+    clearError
+  } = useAuthFormStore();
 
-  const handlePasswordChange = (val: string) => {
-    setPassword(val);
-    if (val.length > 0 && val.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-    } else {
-      setPasswordError("");
-    }
-    if (confirmPassword && val !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-    } else {
-      setConfirmPasswordError("");
-    }
-  };
-
-  const handleConfirmPasswordChange = (val: string) => {
-    setConfirmPassword(val);
-    if (val !== password) {
-      setConfirmPasswordError("Passwords do not match");
-    } else {
-      setConfirmPasswordError("");
-    }
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    
-    if (!name.trim()) {
-      setNameError("Name is required");
-      isValid = false;
-    } else {
-      setNameError("");
-    }
-
-    if (!email) {
-      setEmailError("Email is required");
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Please enter a valid email");
-      isValid = false;
-    } else {
-      setEmailError("");
-    }
-
-    if (!password) {
-      setPasswordError("Password is required");
-      isValid = false;
-    } else if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      isValid = false;
-    } else {
-      setPasswordError("");
-    }
-
-    if (!confirmPassword) {
-      setConfirmPasswordError("Please confirm your password");
-      isValid = false;
-    } else if (confirmPassword !== password) {
-      setConfirmPasswordError("Passwords do not match");
-      isValid = false;
-    } else {
-      setConfirmPasswordError("");
-    }
-
-    return isValid;
-  };
+  // Reset form inputs and errors when component unmounts
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, [resetForm]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateRegister()) return;
 
     try {
       const success = await register(name, email, password);
@@ -140,10 +85,10 @@ export default function RegisterForm() {
           placeholder="Rashid Narikkodan"
           value={name}
           onChange={(e) => {
-            setName(e.target.value);
-            if (nameError) setNameError("");
+            setField("name", e.target.value);
+            clearError("name");
           }}
-          error={nameError}
+          error={errors.name}
           autoComplete="name"
           required
         />
@@ -155,10 +100,10 @@ export default function RegisterForm() {
           placeholder="rashid@example.com"
           value={email}
           onChange={(e) => {
-            setEmail(e.target.value);
-            if (emailError) setEmailError("");
+            setField("email", e.target.value);
+            clearError("email");
           }}
-          error={emailError}
+          error={errors.email}
           autoComplete="username"
           required
         />
@@ -169,8 +114,11 @@ export default function RegisterForm() {
           type="password"
           placeholder="••••••••"
           value={password}
-          onChange={(e) => handlePasswordChange(e.target.value)}
-          error={passwordError}
+          onChange={(e) => {
+            setField("password", e.target.value);
+            clearError("password");
+          }}
+          error={errors.password}
           autoComplete="new-password"
           required
         />
@@ -181,8 +129,11 @@ export default function RegisterForm() {
           type="password"
           placeholder="••••••••"
           value={confirmPassword}
-          onChange={(e) => handleConfirmPasswordChange(e.target.value)}
-          error={confirmPasswordError}
+          onChange={(e) => {
+            setField("confirmPassword", e.target.value);
+            clearError("confirmPassword");
+          }}
+          error={errors.confirmPassword}
           autoComplete="new-password"
           required
         />

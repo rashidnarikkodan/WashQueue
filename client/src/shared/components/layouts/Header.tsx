@@ -12,12 +12,12 @@ import LocationSelector from "../ui/LocationSelector";
 import SearchPill from "../ui/SearchPill";
 import NotificationDropdown from "../ui/NotificationDropdown";
 import ProfileDropdown from "../ui/ProfileDropdown";
-import { useAuth } from "../../../features/auth/store/AuthContext";
+import { useAuthStore } from "../../../features/auth/store/authStore";
 
 const Header = () => {
   const location = useLocation();
   const pathname = location.pathname;
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuthStore();
 
   // Detect current role/context from AuthContext or URL path
   let currentRole: "admin" | "manager" | "provider" | "customer" | "guest" = "guest";

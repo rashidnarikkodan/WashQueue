@@ -1,9 +1,9 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Header from "../../shared/components/layouts/Header"
-import { useAuth } from "../../features/auth/store/AuthContext"
+import { useAuthStore } from "../../features/auth/store/authStore"
 
 const ManagerLayout = () => {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (

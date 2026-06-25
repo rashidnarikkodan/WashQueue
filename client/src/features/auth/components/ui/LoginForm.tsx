@@ -1,67 +1,46 @@
-import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import FormInput from "./FormInput";
 import SocialButton from "./SocialButton";
-import { useAuth } from "../../store/AuthContext";
+import { useAuthStore } from "../../store/authStore";
+import { useAuthFormStore } from "../../store/authFormStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const { login, isLoading } = useAuthStore();
+  const { 
+    email, 
+    password, 
+    errors, 
+    setField, 
+    validateLogin, 
+    resetForm,
+    clearError
+  } = useAuthFormStore();
 
-  const handlePasswordChange = (val: string) => {
-    setPassword(val);
-    if (val.length > 0 && val.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-    } else {
-      setPasswordError("");
-    }
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    if (!email) {
-      setEmailError("Email is required");
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Please enter a valid email");
-      isValid = false;
-    } else {
-      setEmailError("");
-    }
-
-    if (!password) {
-      setPasswordError("Password is required");
-      isValid = false;
-    } else if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      isValid = false;
-    } else {
-      setPasswordError("");
-    }
-
-    return isValid;
-  };
+  // Reset form inputs and errors when component unmounts
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, [resetForm]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateLogin()) return;
 
     try {
       const success = await login(email, password);
       if (success) {
         if (email.startsWith("admin")) {
-          navigate("/admin/dashboard");
+          navigate("/admin");
         } else if (email.startsWith("manager")) {
-          navigate("/manager/dashboard");
+          navigate("/manager");
         } else if (email.startsWith("provider")) {
-          navigate("/provider/dashboard");
+          navigate("/provider");
         } else {
           navigate("/");
         }
@@ -111,10 +90,10 @@ export default function LoginForm() {
           placeholder="e.g. rashid@example.com"
           value={email}
           onChange={(e) => {
-            setEmail(e.target.value);
-            if (emailError) setEmailError("");
+            setField("email", e.target.value);
+            clearError("email");
           }}
-          error={emailError}
+          error={errors.email}
           autoComplete="username"
           required
         />
@@ -125,8 +104,11 @@ export default function LoginForm() {
           type="password"
           placeholder="••••••••"
           value={password}
-          onChange={(e) => handlePasswordChange(e.target.value)}
-          error={passwordError}
+          onChange={(e) => {
+            setField("password", e.target.value);
+            clearError("password");
+          }}
+          error={errors.password}
           autoComplete="current-password"
           required
         />

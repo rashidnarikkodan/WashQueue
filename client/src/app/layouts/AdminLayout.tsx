@@ -2,10 +2,10 @@ import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
 import { adminSideBarItems } from "../../shared/config/adminSidebar.config"
-import { useAuth } from "../../features/auth/store/AuthContext"
+import { useAuthStore } from "../../features/auth/store/authStore"
 
 const AdminLayout = () => {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (

@@ -1,16 +1,16 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Droplets, ArrowLeft, Check, Loader2 } from "lucide-react";
-import { useAuth } from "../store/AuthContext";
+import { useAuthStore } from "../store/authStore";
+import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
 
 export default function OTPPage() {
   const navigate = useNavigate();
-  const { verifyOTP, isLoading } = useAuth();
+  const { verifyOTP, isLoading } = useAuthStore();
+  const { otpDigits, setOtpDigit, setOtpDigits, resetForm } = useAuthFormStore();
 
-  // OTP Digit inputs state
-  const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Resend code countdown timer
@@ -32,11 +32,15 @@ export default function OTPPage() {
     return () => clearInterval(interval);
   }, [timerCount]);
 
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, [resetForm]);
+
   const handleDigitChange = (index: number, val: string) => {
     if (/^[0-9]$/.test(val) || val === "") {
-      const newDigits = [...digits];
-      newDigits[index] = val;
-      setDigits(newDigits);
+      setOtpDigit(index, val);
 
       // Move focus forward if value entered
       if (val !== "" && index < 5) {
@@ -47,7 +51,7 @@ export default function OTPPage() {
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     // Backspace key moves focus backward
-    if (e.key === "Backspace" && digits[index] === "" && index > 0) {
+    if (e.key === "Backspace" && otpDigits[index] === "" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
@@ -57,7 +61,7 @@ export default function OTPPage() {
     const pasteData = e.clipboardData.getData("text").trim();
     if (/^\d{6}$/.test(pasteData)) {
       const newDigits = pasteData.split("");
-      setDigits(newDigits);
+      setOtpDigits(newDigits);
       inputRefs.current[5]?.focus();
       toast.success("Code pasted successfully!");
     } else {
@@ -75,7 +79,7 @@ export default function OTPPage() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = digits.join("");
+    const code = otpDigits.join("");
     if (code.length === 6) {
       const success = await verifyOTP(code);
       if (success) {
@@ -132,7 +136,7 @@ export default function OTPPage() {
             {/* OTP Digits inputs */}
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="flex justify-center gap-2.5 md:gap-4">
-                {digits.map((digit, i) => (
+                {otpDigits.map((digit, i) => (
                   <input
                     key={i}
                     ref={(el) => { inputRefs.current[i] = el; }}
@@ -155,7 +159,7 @@ export default function OTPPage() {
               <div className="space-y-4 max-w-sm mx-auto">
                 <button
                   type="submit"
-                  disabled={digits.join("").length < 6 || isLoading}
+                  disabled={otpDigits.join("").length < 6 || isLoading}
                   className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-primary/10 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   {isLoading ? (

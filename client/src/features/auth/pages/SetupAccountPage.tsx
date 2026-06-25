@@ -1,11 +1,11 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Droplets, Car, Wrench, ArrowLeft, Loader2 } from "lucide-react";
-import { useAuth } from "../store/AuthContext";
+import { useAuthStore } from "../store/authStore";
 import { useState } from "react";
 
 export default function SetupAccountPage() {
   const navigate = useNavigate();
-  const { setupAccount, isLoading } = useAuth();
+  const { setupAccount, isLoading } = useAuthStore();
   const [selectedRole, setSelectedRole] = useState<"customer" | "provider" | null>(null);
 
   const handleSelectRole = async (role: "customer" | "provider") => {

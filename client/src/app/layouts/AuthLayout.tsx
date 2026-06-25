@@ -1,8 +1,8 @@
 import { Link, Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../../features/auth/store/AuthContext';
+import { useAuthStore } from '../../features/auth/store/authStore';
 
 export default function AuthLayout() {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -27,9 +27,6 @@ export default function AuthLayout() {
             WashQueue
           </span>
         </Link>
-        <nav>
-          
-        </nav>
       </header>
       <main className="flex-1 flex items-center justify-center">
         <Outlet />
