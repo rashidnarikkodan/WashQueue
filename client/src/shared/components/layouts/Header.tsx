@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
-  Droplets,
   Search,
   Heart
 } from "lucide-react";
@@ -93,9 +92,6 @@ const Header = () => {
         {/* Left Side: Brand Logo & Role Badge */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
-              <Droplets className="h-4.5 w-4.5" />
-            </div>
             <span className="text-xl font-bold italic tracking-tight text-primary">
               WashQueue
             </span>
