@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Droplets, Car, Wrench, ArrowLeft, Loader2 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import { ROLE } from "../../../shared/constants/role.const";
 import { useState } from "react";
 
 export default function SetupAccountPage() {
@@ -10,8 +11,8 @@ export default function SetupAccountPage() {
 
   const handleSelectRole = async (role: "user" | "provider") => {
     setSelectedRole(role);
-    const success = await setupAccount(role);
-    if (success) {
+    const success = await setupAccount(role === "user" ? ROLE.CUSTOMER : ROLE.PROVIDER);
+          if (success) {
       if (role === "user") {
         navigate("/");
       } else {

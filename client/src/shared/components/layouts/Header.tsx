@@ -14,7 +14,11 @@ export default function Header() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
 
-  const currentRole = isAuthenticated && user ? user.role : "user";
+  const currentRole = isAuthenticated && user
+    ? (user.role.toLowerCase() as "admin" | "manager" | "provider" | "customer")
+    : "user";
+
+  const isCustomer = currentRole === "user" || currentRole === "customer";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,6 +47,10 @@ export default function Header() {
       { name: "Home", path: "/" },
       { name: "About", path: "/about" },
     ],
+    customer: [
+      { name: "Home", path: "/" },
+      { name: "About", path: "/about" },
+    ],
   };
 
   const activeLinks = navLinks[currentRole as keyof typeof navLinks] || [];
@@ -62,6 +70,7 @@ export default function Header() {
       className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
     },
     user: null,
+    customer: null,
   };
 
   const activeBadge = roleBadges[currentRole as keyof typeof roleBadges];
@@ -69,7 +78,7 @@ export default function Header() {
   return (
     <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
-
+        
         {/* Left Side: Brand Logo & Role Badge */}
         <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
@@ -98,8 +107,9 @@ export default function Header() {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground"
-                        }`}
+                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                        isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                      }`}
                     >
                       {link.name}
                       {isActive && (
@@ -115,14 +125,14 @@ export default function Header() {
 
         {/* Right Side: Utilities, Profile & Hamburger Menu */}
         <div className="col-span-1 flex justify-end items-center gap-3">
-
+          
           {/* Location Selector (Consumer-only) */}
-          {!isSearchExpanded && currentRole === "user" && (
+          {!isSearchExpanded && isCustomer && (
             <LocationSelector className="hidden lg:flex" />
           )}
 
           {/* Search Trigger Button (Consumer-only) */}
-          {!isSearchExpanded && currentRole === "user" && (
+          {!isSearchExpanded && isCustomer && (
             <button
               onClick={() => setIsSearchExpanded(true)}
               className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-all cursor-pointer"
@@ -133,7 +143,7 @@ export default function Header() {
           )}
 
           {/* Favorites Heart Icon (Consumer-only & Authenticated) */}
-          {isAuthenticated && currentRole === "user" && (
+          {isAuthenticated && isCustomer && (
             <Link
               to="/favorites"
               className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
@@ -153,7 +163,7 @@ export default function Header() {
 
           {/* User Profile / Login trigger */}
           {isAuthenticated ? (
-            <ProfileDropdown currentRole={currentRole} />
+            <ProfileDropdown currentRole={currentRole === "user" ? "customer" : currentRole} />
           ) : (
             <button
               onClick={() => navigate("/login")}
@@ -187,8 +197,9 @@ export default function Header() {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    }`}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  }`}
                 >
                   {link.name}
                 </Link>

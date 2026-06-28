@@ -8,7 +8,7 @@ interface SubmitButtonProps {
   className?: string
 }
 
-export default function SubmitButton({
+export default function Submit({
   text = "Submit",
   pendingText = "Submitting...",
   className = "",

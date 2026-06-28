@@ -1,5 +1,6 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Header from "../../shared/components/layouts/Header"
+import { ROLE } from "../../shared/constants/role.const"
 import { useAuthStore } from "../../features/auth/store/authStore"
 
 const ProviderLayout = () => {
@@ -13,7 +14,7 @@ const ProviderLayout = () => {
     );
   }
 
-  if (!isAuthenticated || !user || user.role !== "provider") {
+  if (!isAuthenticated || !user || user.role !== ROLE.PROVIDER) {
     return <Navigate to="/login" replace />;
   }
 

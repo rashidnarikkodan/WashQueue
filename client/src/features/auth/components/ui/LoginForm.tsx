@@ -6,10 +6,11 @@ import { useGoogleLogin } from "@react-oauth/google"
 import FormInput from "../../../../shared/components/ui/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
-import { loginAction } from "../../actions/login.action"
+import { loginAction, type LoginState } from "../../actions/login.action"
 import { useAuthStore } from "../../store/authStore"
+import { ROLE } from "../../../../shared/constants/role.const"
 
-const initialState = {
+const initialState: LoginState = {
   success: false,
 }
 
@@ -35,27 +36,32 @@ export default function LoginForm() {
     initialState
   )
 
-  // Sync server action validation errors to local state
+  // Sync validation errors to local state
   useEffect(() => {
-    if (state.errors) {
-      setLocalErrors({
-        email: state.errors.email?.[0] || "",
-        password: state.errors.password?.[0] || ""
-      });
-    }
+    setLocalErrors({
+      email: state.errors?.email?.[0] || "",
+      password: state.errors?.password?.[0] || ""
+    });
   }, [state.errors]);
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message)
+    if (state.success && state.user) {
+      // Sync auth state to Zustand store and localStorage for persistence
+      useAuthStore.setState({
+        user: state.user,
+        isAuthenticated: true,
+      })
+      localStorage.setItem("wq_user", JSON.stringify(state.user))
+      localStorage.setItem("wq_auth", "true")
 
-      const email = (state as any).email || ""
+      toast.success(state.message || "Login successful")
 
-      if (email.startsWith("admin")) {
+      const role = state.user.role?.toUpperCase()
+      if (role === ROLE.ADMIN) {
         navigate("/admin")
-      } else if (email.startsWith("manager")) {
+      } else if (role === ROLE.MANAGER) {
         navigate("/manager")
-      } else if (email.startsWith("provider")) {
+      } else if (role === ROLE.PROVIDER) {
         navigate("/provider")
       } else {
         navigate("/")
@@ -122,8 +128,8 @@ export default function LoginForm() {
           error={localErrors.password}
           onChange={(e) => {
             const val = e.target.value;
-            // Instantly clear password error as soon as it meets the min length condition
-            if (val.length >= 6 || val.trim() === "") {
+            // Instantly clear password error as soon as it meets the min length condition (8 chars)
+            if (val.length >= 8 || val.trim() === "") {
               setLocalErrors(prev => ({ ...prev, password: "" }));
             }
           }}
@@ -140,7 +146,7 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <Submit />
+        <Submit text="Login" pendingText="Logging..."/>
       </form>
     </div>
   )

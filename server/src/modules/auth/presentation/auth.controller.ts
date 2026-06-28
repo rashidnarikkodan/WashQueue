@@ -9,6 +9,7 @@ import { GoogleAuthUseCase } from "../application/use-cases/google-auth.use-case
 import response from "@/shared/utils/response"
 import { AuthenticatedRequest } from "@/shared/middleware/auth.middleware"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { setAuthCookies, clearAuthCookies } from "@/shared/utils/cookies"
 
 export class AuthController {
   constructor(
@@ -19,13 +20,14 @@ export class AuthController {
     private readonly logoutUseCase: LogoutUseCase,
     private readonly setupAccountUseCase: SetupAccountUseCase,
     private readonly googleAuthUseCase: GoogleAuthUseCase
-  ) {}
+  ) { }
 
   login = async (req: Request, res: Response) => {
-    const result = await this.loginUseCase.execute(req.body)
-    console.log(result)
-    let resJson = response(result,'Login successful')
-    res.status(HTTP_STATUS.OK).json(resJson)
+    const { user, tokens } = await this.loginUseCase.execute(req.body)
+    setAuthCookies(res, tokens.accessToken, tokens.refreshToken)
+    res.status(HTTP_STATUS.OK).json(
+      response(user, 'Login successful')
+    )
   }
 
   signup = async (req: Request, res: Response) => {
@@ -34,20 +36,39 @@ export class AuthController {
   }
 
   verifyOtp = async (req: Request, res: Response) => {
-    const result = await this.verifyOtpUseCase.execute(req.body)
-    res.status(200).json(response(result, "Verification successful"))
+    const { user, tokens } = await this.verifyOtpUseCase.execute(req.body)
+    setAuthCookies(res, tokens.accessToken, tokens.refreshToken)
+    res.status(HTTP_STATUS.OK).json(response(user, "Verification successful"))
   }
 
   googleAuth = async (req: Request, res: Response) => {
     const { token } = req.body
-    const result = await this.googleAuthUseCase.execute(token)
-    res.status(200).json(response(result, "Google Sign-In successful"))
+    const { user, tokens } = await this.googleAuthUseCase.execute(token)
+    setAuthCookies(res, tokens.accessToken, tokens.refreshToken)
+    res.status(HTTP_STATUS.OK).json(response(user, "Google Sign-In successful"))
   }
 
   refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken } = req.body
-    const result = await this.refreshTokenUseCase.execute(refreshToken)
-    res.status(200).json(response(result, "Token refreshed successfully"))
+    let token: string | undefined = req.body.refreshToken
+
+    if (!token && req.headers.cookie) {
+      const cookies = Object.fromEntries(
+        req.headers.cookie.split(";").map((c) => {
+          const parts = c.trim().split("=")
+          return [parts[0], parts.slice(1).join("=")]
+        })
+      )
+      token = cookies.refreshToken
+    }
+
+    if (!token) {
+      res.status(401).json(response(null, "Refresh token is missing"))
+      return
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(token)
+    setAuthCookies(res, accessToken, newRefreshToken)
+    res.status(HTTP_STATUS.OK).json(response(null, "Token refreshed successfully"))
   }
 
   setupAccount = async (req: AuthenticatedRequest, res: Response) => {
@@ -58,7 +79,7 @@ export class AuthController {
       return
     }
     const result = await this.setupAccountUseCase.execute(userId, role)
-    res.status(200).json(response(result, "Account setup successful"))
+    res.status(HTTP_STATUS.OK).json(response(result, "Account setup successful"))
   }
 
   logout = async (req: AuthenticatedRequest, res: Response) => {
@@ -66,9 +87,7 @@ export class AuthController {
     if (userId) {
       await this.logoutUseCase.execute(userId)
     }
-    res.status(200).json(response(null, "Logout successful"))
+    clearAuthCookies(res)
+    res.status(HTTP_STATUS.OK).json(response(null, "Logout successful"))
   }
 }
-
-
-

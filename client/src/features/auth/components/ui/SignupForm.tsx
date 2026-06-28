@@ -1,63 +1,66 @@
-import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import FormInput from "../../../../shared/components/ui/FormInput";
-import SocialButton from "./SocialButton";
-import { useAuthStore } from "../../store/authStore";
-import { useAuthFormStore } from "../../store/authFormStore";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useEffect } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
-import SubmitButton from "./Submit";
+import { useActionState, useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import { useGoogleLogin } from "@react-oauth/google"
+
+import FormInput from "../../../../shared/components/ui/FormInput"
+import SocialButton from "./SocialButton"
+import Submit from "./Submit"
+import { signupAction, type SignupState } from "../../actions/signup.action"
+import { useAuthStore } from "../../store/authStore"
+
+const initialState: SignupState = {
+  success: false,
+}
 
 export default function SignupForm() {
-  const navigate = useNavigate();
-  const { signup, loginWithGoogle, isLoading } = useAuthStore();
+  const navigate = useNavigate()
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
+  const { loginWithGoogle } = useAuthStore()
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      const success = await loginWithGoogle(tokenResponse.access_token);
+      const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
-        navigate("/");
+        navigate("/")
       }
     },
     onError: () => {
-      toast.error("Google sign-up failed");
+      toast.error("Google sign-up failed")
     }
-  });
+  })
 
-  const {
-    name,
-    email,
-    password,
-    confirmPassword,
-    errors,
-    setField,
-    validateSignup,
-    resetForm,
-    clearError
-  } = useAuthFormStore();
+  const [state, formAction] = useActionState(
+    signupAction,
+    initialState
+  )
 
-  // Reset form inputs and errors when component unmounts
+  // Sync validation errors to local state
   useEffect(() => {
-    return () => {
-      resetForm();
-    };
-  }, [resetForm]);
+    setLocalErrors({
+      name: state.errors?.name?.[0] || "",
+      email: state.errors?.email?.[0] || "",
+      password: state.errors?.password?.[0] || "",
+      confirmPassword: state.errors?.confirmPassword?.[0] || "",
+    })
+  }, [state.errors])
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validateSignup()) return;
+  useEffect(() => {
+    if (state.success && state.email && state.name) {
+      // Sync verification context to Zustand store and localStorage
+      useAuthStore.setState({
+        tempUser: { name: state.name, email: state.email }
+      })
+      localStorage.setItem("wq_temp_email", state.email)
 
-    try {
-      const success = await signup(name, email, password);
-      if (success) {
-        navigate("/verify-email");
-      }
-    } catch (err) {
-      toast.error("Registration failed. Please try again.");
+      toast.success(state.message || "Registration successful!")
+      navigate("/verify-email")
     }
-  };
+
+    if (!state.success && state.message) {
+      toast.error(state.message)
+    }
+  }, [state, navigate])
 
   return (
     <div className="space-y-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -78,18 +81,19 @@ export default function SignupForm() {
         <div className="flex-1 h-[1px] bg-border/80"></div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form action={formAction} className="space-y-4" noValidate>
         <FormInput
           id="name-signup-input"
           label="Full Name"
           type="text"
+          name="name"
           placeholder="Rashid Narikkodan"
-          value={name}
-          onChange={(e) => {
-            setField("name", e.target.value);
-            clearError("name");
+          error={localErrors.name}
+          onChange={() => {
+            if (localErrors.name) {
+              setLocalErrors((prev) => ({ ...prev, name: "" }))
+            }
           }}
-          error={errors.name}
           autoComplete="name"
           required
         />
@@ -98,13 +102,16 @@ export default function SignupForm() {
           id="email-signup-input"
           label="Email Address"
           type="email"
+          name="email"
           placeholder="rashid@example.com"
-          value={email}
+          error={localErrors.email}
           onChange={(e) => {
-            setField("email", e.target.value);
-            clearError("email");
+            const val = e.target.value
+            // Instantly clear email format error as soon as they type a valid email format
+            if (/\S+@\S+\.\S+/.test(val) || val.trim() === "") {
+              setLocalErrors((prev) => ({ ...prev, email: "" }))
+            }
           }}
-          error={errors.email}
           autoComplete="username"
           required
         />
@@ -113,13 +120,16 @@ export default function SignupForm() {
           id="password-signup-input"
           label="Password"
           type="password"
+          name="password"
           placeholder="••••••••"
-          value={password}
+          error={localErrors.password}
           onChange={(e) => {
-            setField("password", e.target.value);
-            clearError("password");
+            const val = e.target.value
+            // Instantly clear password error as soon as it meets the min length condition (8 chars)
+            if (val.length >= 8 || val.trim() === "") {
+              setLocalErrors((prev) => ({ ...prev, password: "" }))
+            }
           }}
-          error={errors.password}
           autoComplete="new-password"
           required
         />
@@ -128,34 +138,20 @@ export default function SignupForm() {
           id="confirm-password-signup-input"
           label="Confirm Password"
           type="password"
+          name="confirmPassword"
           placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(e) => {
-            setField("confirmPassword", e.target.value);
-            clearError("confirmPassword");
+          error={localErrors.confirmPassword}
+          onChange={() => {
+            if (localErrors.confirmPassword) {
+              setLocalErrors((prev) => ({ ...prev, confirmPassword: "" }))
+            }
           }}
-          error={errors.confirmPassword}
           autoComplete="new-password"
           required
         />
 
-          <SubmitButton text="Signup" />
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-primary/10 cursor-pointer text-sm flex items-center justify-center gap-2 mt-4"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Signing Up...
-            </>
-          ) : (
-            "Signup"
-          )}
-        </button>
+        <Submit text="Signup" pendingText="Signing Up..."/>
       </form>
     </div>
-  );
+  )
 }

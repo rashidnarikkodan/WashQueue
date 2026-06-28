@@ -12,12 +12,25 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  let token: string | undefined
+
+  // 1. Try to read from Authorization header
   const authHeader = req.headers.authorization
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new UnauthorizedError("Authentication token is missing or invalid")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1]
   }
 
-  const token = authHeader.split(" ")[1]
+  // 2. Try to read from cookies (parse req.headers.cookie)
+  if (!token && req.headers.cookie) {
+    const cookies = Object.fromEntries(
+      req.headers.cookie.split(";").map((c) => {
+        const parts = c.trim().split("=")
+        return [parts[0], parts.slice(1).join("=")]
+      })
+    )
+    token = cookies.accessToken
+  }
+
   if (!token) {
     throw new UnauthorizedError("Authentication token is missing")
   }

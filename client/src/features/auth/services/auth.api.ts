@@ -10,13 +10,13 @@ export const authApi = {
     try {
       const response = await api.post("/auth/login", { email, password })
       const resJson = response.data
-      
+
       return {
-          id: resJson.data.user.id || resJson.data.user._id,
-          name: resJson.data.user.name,
-          email: resJson.data.user.email,
-          role: resJson.data.user.role
-        }
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
+      }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to login"
       throw new Error(message)
@@ -26,19 +26,16 @@ export const authApi = {
   /**
    * Exchange Google ID Token for local credentials
    */
-  loginWithGoogle: async (token: string): Promise<{ user: User; token: string }> => {
+  loginWithGoogle: async (token: string): Promise<User> => {
     try {
       const response = await api.post("/auth/google", { token })
       const resJson = response.data
 
       return {
-        user: {
-          id: resJson.data.user.id || resJson.data.user._id,
-          name: resJson.data.user.name,
-          email: resJson.data.user.email,
-          role: resJson.data.user.role
-        },
-        token: resJson.data.tokens.accessToken
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Google Sign-In failed"
@@ -67,20 +64,20 @@ export const authApi = {
   /**
    * Verify verification OTP code
    */
-  verifyOTP: async (email: string, code: string): Promise<{ success: boolean; user?: User; token?: string }> => {
+  verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
     try {
       const response = await api.post("/auth/verify-otp", { email, code })
       const resJson = response.data
 
+      if (!resJson.success || !resJson.data) {
+        return undefined
+      }
+
       return {
-        success: resJson.success,
-        user: resJson.data.user ? {
-          id: resJson.data.user.id || resJson.data.user._id,
-          name: resJson.data.user.name,
-          email: resJson.data.user.email,
-          role: mapServerRoleToClient(resJson.data.user.role)
-        } : undefined,
-        token: resJson.data.tokens?.accessToken
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "OTP verification failed"
@@ -91,18 +88,16 @@ export const authApi = {
   /**
    * Update role configuration during account setup
    */
-  setupAccount: async (role:RoleType): Promise<{ user: User }> => {
+  setupAccount: async (role: RoleType): Promise<User> => {
     try {
       const response = await api.post("/auth/setup-account", { role })
       const resJson = response.data
 
       return {
-        user: {
-          id: resJson.data.user.id || resJson.data.user._id,
-          name: resJson.data.user.name,
-          email: resJson.data.user.email,
-          role: mapServerRoleToClient(resJson.data.user.role)
-        }
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Account setup failed"

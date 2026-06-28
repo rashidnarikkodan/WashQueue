@@ -8,9 +8,10 @@ import authRouter from "./modules/auth/auth.module"
 const app = express()
 
 app.use(corsConfig)
-app.use(loggerMiddleware)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(loggerMiddleware)
+
 
 app.use("/api/auth", authRouter)
 

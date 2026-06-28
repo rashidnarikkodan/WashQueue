@@ -1,26 +1,35 @@
 import { api } from "../../../shared/config/axios"
 
-export interface LoginState {
+export interface SignupState {
   success: boolean
   message?: string
   errors?: {
+    name?: string[]
     email?: string[]
     password?: string[]
+    confirmPassword?: string[]
   }
-  user?: any
+  email?: string
+  name?: string
 }
 
-export async function loginAction(
-  _prevState: LoginState,
+export async function signupAction(
+  _prevState: SignupState,
   formData: FormData
-): Promise<LoginState> {
+): Promise<SignupState> {
   try {
+    const name = formData.get("name")?.toString().trim() || ""
     const email = formData.get("email")?.toString().trim() || ""
     const password = formData.get("password")?.toString() || ""
+    const confirmPassword = formData.get("confirmPassword")?.toString() || ""
 
-    const errors: LoginState["errors"] = {}
+    const errors: SignupState["errors"] = {}
 
     // validation
+    if (!name) {
+      errors.name = ["Name is required"]
+    }
+
     if (!email) {
       errors.email = ["Email is required"]
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -33,6 +42,12 @@ export async function loginAction(
       errors.password = ["Password must be at least 8 characters"]
     }
 
+    if (!confirmPassword) {
+      errors.confirmPassword = ["Confirm password is required"]
+    } else if (confirmPassword !== password) {
+      errors.confirmPassword = ["Passwords do not match"]
+    }
+
     if (Object.keys(errors).length > 0) {
       return {
         success: false,
@@ -41,22 +56,24 @@ export async function loginAction(
     }
 
     // API call
-    const response = await api.post("/auth/login", {
+    const response = await api.post("/auth/signup", {
+      name,
       email,
       password,
     })
 
     return {
       success: true,
-      message: response.data.message || "Login successful",
-      user: response.data.data,
+      message: response.data.message || "Registration successful! Please verify your email.",
+      email,
+      name,
     }
   } catch (error: any) {
     return {
       success: false,
       message:
         error.response?.data?.message ||
-        "Failed to login",
+        "Registration failed. Please try again.",
     }
   }
 }

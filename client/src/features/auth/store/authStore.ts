@@ -19,7 +19,7 @@ interface AuthStore {
   loginWithGoogle: (token: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   verifyOTP: (code: string) => Promise<boolean>;
-  setupAccount: (role:RoleType) => Promise<boolean>;
+  setupAccount: (role: RoleType) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -52,29 +52,32 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   login: async (email, password) => {
     set({ isLoading: true });
-    
+
     try {
       const user = await authApi.login(email, password);
-      
+
       set({
         user,
         isAuthenticated: true,
+        isLoading: false,
       });
+      localStorage.setItem("wq_user", JSON.stringify(user));
+      localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${user.name}!`);
       return true;
     } catch (e: any) {
       toast.error(e.message)
+      set({ isLoading: false });
       return false
     }
   },
 
   loginWithGoogle: async (token) => {
     set({ isLoading: true });
-    
+
     try {
-      const data = await authApi.loginWithGoogle(token);
-      const loggedInUser = data.user;
-      
+      const loggedInUser = await authApi.loginWithGoogle(token);
+
       set({
         user: loggedInUser,
         isAuthenticated: true,
@@ -82,7 +85,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       });
 
       localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("wq_token", data.token);
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${loggedInUser.name}!`);
       return true;
@@ -95,7 +97,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   signup: async (name, email, password) => {
     set({ isLoading: true });
-    
+
     try {
       await authApi.signup(name, email, password);
       set({
@@ -123,21 +125,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
 
     try {
-      const data = await authApi.verifyOTP(email, code);
-      if (data.success) {
-        if (data.user && data.token) {
-          set({
-            user: data.user,
-            isAuthenticated: true,
-            isLoading: false,
-            tempUser: null,
-          });
-          localStorage.setItem("wq_user", JSON.stringify(data.user));
-          localStorage.setItem("wq_token", data.token);
-          localStorage.setItem("wq_auth", "true");
-        } else {
-          set({ isLoading: false });
-        }
+      const user = await authApi.verifyOTP(email, code);
+      if (user) {
+        set({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          tempUser: null,
+        });
+        localStorage.setItem("wq_user", JSON.stringify(user));
+        localStorage.setItem("wq_auth", "true");
         localStorage.removeItem("wq_temp_email");
         return true;
       }
@@ -152,17 +149,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   setupAccount: async (role) => {
     set({ isLoading: true });
-    
+
     try {
-      const data = await authApi.setupAccount(role);
-      const finalUser = data.user;
-      
+      const finalUser = await authApi.setupAccount(role);
+
       set({
         user: finalUser,
         isAuthenticated: true,
         isLoading: false,
       });
-
       localStorage.setItem("wq_user", JSON.stringify(finalUser));
       localStorage.setItem("wq_auth", "true");
       toast.success("Account setup completed!");
@@ -182,8 +177,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       isAuthenticated: false,
     });
     localStorage.removeItem("wq_user");
-    localStorage.removeItem("wq_token");
     localStorage.removeItem("wq_auth");
+    localStorage.removeItem("wq_token");
     localStorage.removeItem("wq_temp_email");
     toast.info("Logged out successfully.");
   },
