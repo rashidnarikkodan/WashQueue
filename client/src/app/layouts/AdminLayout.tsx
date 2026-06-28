@@ -3,6 +3,7 @@ import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
 import { adminSideBarItems } from "../../shared/config/sidebar.config"
 import { useAuthStore } from "../../features/auth/store/authStore"
+import { ROLE } from "../../shared/constants/role.const"
 
 const AdminLayout = () => {
   const { isAuthenticated, user, isLoading } = useAuthStore();
@@ -15,7 +16,7 @@ const AdminLayout = () => {
     );
   }
 
-  if (!isAuthenticated || !user || user.role !== "admin") {
+  if (!isAuthenticated || !user || user.role !== ROLE.ADMIN) {
     return <Navigate to="/login" replace />;
   }
 

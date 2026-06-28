@@ -1,7 +1,7 @@
 import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/auth/domain/repositories/user.repository"
-import { RegisterInput } from "@/modules/auth/application/schema/register.schema"
+import { SignupInput } from "@/modules/auth/application/schema/signup.schema"
 import { OtpService } from "../services/otp.service"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { User } from "../../domain/entities/User"
@@ -9,14 +9,14 @@ import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
-export class RegisterUseCase {
+export class SignupUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,
     private readonly mailService: MailService
   ) {}
 
-  async execute(data: RegisterInput) {
+  async execute(data: SignupInput) {
 
     //check user existing or not
     const existingUser = await this.userRepository.findByEmail(data.email)
@@ -32,7 +32,7 @@ export class RegisterUseCase {
       name: data.name,
       email: data.email,
       password: hashedPassword,
-      role: ROLE.CUSTOMER, // default registering role
+      role: ROLE.CUSTOMER, // default signuping role
       isVerified: false,
       authProvider: AUTH_PROVIDER.LOCAL,
     })

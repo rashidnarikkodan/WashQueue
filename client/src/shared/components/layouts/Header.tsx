@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Search, Heart } from "lucide-react";
-import ThemeToggle from "../ui/ThemeToggle";
-import LocationSelector from "../ui/LocationSelector";
-import SearchPill from "../ui/SearchPill";
-import NotificationDropdown from "../ui/NotificationDropdown";
-import ProfileDropdown from "../ui/ProfileDropdown";
+import ThemeToggle from "../ui/header/ThemeToggle";
+import LocationSelector from "../ui/header/LocationSelector";
+import SearchPill from "../ui/header/SearchPill";
+import NotificationDropdown from "../ui/header/NotificationDropdown";
+import ProfileDropdown from "../ui/header/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
 export default function Header() {
@@ -69,7 +69,7 @@ export default function Header() {
   return (
     <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
-        
+
         {/* Left Side: Brand Logo & Role Badge */}
         <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
@@ -98,9 +98,8 @@ export default function Header() {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
-                        isActive ? "text-foreground font-semibold" : "text-muted-foreground"
-                      }`}
+                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                        }`}
                     >
                       {link.name}
                       {isActive && (
@@ -116,7 +115,7 @@ export default function Header() {
 
         {/* Right Side: Utilities, Profile & Hamburger Menu */}
         <div className="col-span-1 flex justify-end items-center gap-3">
-          
+
           {/* Location Selector (Consumer-only) */}
           {!isSearchExpanded && currentRole === "user" && (
             <LocationSelector className="hidden lg:flex" />
@@ -188,9 +187,8 @@ export default function Header() {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    }`}
                 >
                   {link.name}
                 </Link>

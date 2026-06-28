@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import FormInput from "./FormInput";
+import FormInput from "../../../../shared/components/ui/FormInput";
 import SocialButton from "./SocialButton";
 import { useAuthStore } from "../../store/authStore";
 import { useAuthFormStore } from "../../store/authFormStore";
@@ -8,11 +8,12 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
+import SubmitButton from "./Submit";
 
-export default function RegisterForm() {
+export default function SignupForm() {
   const navigate = useNavigate();
-  const { register, loginWithGoogle, isLoading } = useAuthStore();
-  
+  const { signup, loginWithGoogle, isLoading } = useAuthStore();
+
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       const success = await loginWithGoogle(tokenResponse.access_token);
@@ -32,7 +33,7 @@ export default function RegisterForm() {
     confirmPassword,
     errors,
     setField,
-    validateRegister,
+    validateSignup,
     resetForm,
     clearError
   } = useAuthFormStore();
@@ -46,10 +47,10 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!validateRegister()) return;
+    if (!validateSignup()) return;
 
     try {
-      const success = await register(name, email, password);
+      const success = await signup(name, email, password);
       if (success) {
         navigate("/verify-email");
       }
@@ -79,7 +80,7 @@ export default function RegisterForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <FormInput
-          id="name-register-input"
+          id="name-signup-input"
           label="Full Name"
           type="text"
           placeholder="Rashid Narikkodan"
@@ -94,7 +95,7 @@ export default function RegisterForm() {
         />
 
         <FormInput
-          id="email-register-input"
+          id="email-signup-input"
           label="Email Address"
           type="email"
           placeholder="rashid@example.com"
@@ -109,7 +110,7 @@ export default function RegisterForm() {
         />
 
         <FormInput
-          id="password-register-input"
+          id="password-signup-input"
           label="Password"
           type="password"
           placeholder="••••••••"
@@ -124,7 +125,7 @@ export default function RegisterForm() {
         />
 
         <FormInput
-          id="confirm-password-register-input"
+          id="confirm-password-signup-input"
           label="Confirm Password"
           type="password"
           placeholder="••••••••"
@@ -137,6 +138,8 @@ export default function RegisterForm() {
           autoComplete="new-password"
           required
         />
+
+          <SubmitButton text="Signup" />
 
         <button
           type="submit"

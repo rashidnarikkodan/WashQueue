@@ -3,7 +3,7 @@ import { MailService } from "@/infrastructure/mail/mail.service"
 import { OtpService } from "./application/services/otp.service"
 import { TokenService } from "./application/services/token.service"
 
-import { RegisterUseCase } from "./application/use-cases/register.use-case"
+import { SignupUseCase } from "./application/use-cases/signup.use-case"
 import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"
 import { LoginUseCase } from "./application/use-cases/login.use-case"
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.use-case"
@@ -21,7 +21,7 @@ const mailService = new MailService()
 const otpService = new OtpService()
 const tokenService = new TokenService()
 
-const registerUseCase = new RegisterUseCase(userRepository, otpService, mailService)
+const signupUseCase = new SignupUseCase(userRepository, otpService, mailService)
 const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpService, tokenService)
 const loginUseCase = new LoginUseCase(userRepository, tokenService)
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
@@ -31,7 +31,7 @@ const googleAuthUseCase = new GoogleAuthUseCase(userRepository, tokenService)
 
 const authController = new AuthController(
   loginUseCase,
-  registerUseCase,
+  signupUseCase,
   verifyOtpUseCase,
   refreshTokenUseCase,
   logoutUseCase,
@@ -46,7 +46,7 @@ export {
   mailService,
   otpService,
   tokenService,
-  registerUseCase,
+  signupUseCase,
   verifyOtpUseCase,
   loginUseCase,
   refreshTokenUseCase,

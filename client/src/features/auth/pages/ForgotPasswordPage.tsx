@@ -1,6 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Droplets, ArrowLeft, Loader2 } from "lucide-react";
-import FormInput from "../components/ui/FormInput";
+import FormInput from "../../../shared/components/ui/FormInput";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const {
     forgotEmail,
     errors,
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
       {/* Background Decor Glow */}
       <div className="absolute left-[-100px] top-[-100px] h-[400px] w-[400px] rounded-full bg-primary/5 filter blur-3xl"></div>
-      
+
       {/* Top Header branding */}
       <header className="w-full flex items-center justify-between z-10 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2 group">

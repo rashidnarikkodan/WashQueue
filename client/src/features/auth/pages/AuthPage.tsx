@@ -1,29 +1,29 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import LoginForm from "../components/ui/LoginForm";
-import RegisterForm from "../components/ui/RegisterForm";
+import SignupForm from "../components/ui/SignupForm";
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   // Detect whether we are in sign-up mode based on pathname
-  const isRegister = location.pathname.startsWith("/register");
+  const isSignup = location.pathname.startsWith("/signup");
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground">
       {/* 1. DESKTOP VIEW WITH DOUBLE SLIDING ANIMATION */}
       <div className="relative w-full min-h-screen bg-background overflow-hidden hidden md:flex items-stretch">
         
-        {/* Left Column (Hosts Register Form) */}
+        {/* Left Column (Hosts Signup Form) */}
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
           <div
             className={`w-full max-w-md transition-all duration-700 ease-in-out ${
-              isRegister
+              isSignup
                 ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
                 : "opacity-0 -translate-x-12 scale-95 pointer-events-none"
             }`}
           >
-            <RegisterForm />
+            <SignupForm />
           </div>
         </div>
 
@@ -31,7 +31,7 @@ export default function AuthPage() {
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
           <div
             className={`w-full max-w-md transition-all duration-700 ease-in-out ${
-              !isRegister
+              !isSignup
                 ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
                 : "opacity-0 translate-x-12 scale-95 pointer-events-none"
             }`}
@@ -43,17 +43,17 @@ export default function AuthPage() {
         {/* Absolutely Positioned Sliding Blue Card */}
         <div
           className={`absolute top-0 bottom-0 left-0 w-1/2 h-full bg-primary text-primary-foreground shadow-2xl z-20 transition-all duration-700 ease-in-out flex flex-col justify-center items-center p-8 md:p-16 overflow-hidden ${
-            isRegister
+            isSignup
               ? "translate-x-full rounded-l-[100px]"
               : "translate-x-0 rounded-r-[100px]"
           }`}
         >
           {/* Centered Switch Panel */}
           <div className="relative w-full max-w-md h-[320px] flex items-center justify-center z-10">
-            {/* View shown during Register state (shows Login redirect) */}
+            {/* View shown during Signup state (shows Login redirect) */}
             <div
               className={`absolute inset-0 flex flex-col items-center justify-center text-center space-y-5 transition-all duration-500 ease-in-out ${
-                isRegister
+                isSignup
                   ? "opacity-100 scale-100 pointer-events-auto delay-200"
                   : "opacity-0 scale-95 pointer-events-none"
               }`}
@@ -81,7 +81,7 @@ export default function AuthPage() {
             {/* View shown during Login state (shows SignUp redirect) */}
             <div
               className={`absolute inset-0 flex flex-col items-center justify-center text-center space-y-5 transition-all duration-500 ease-in-out ${
-                !isRegister
+                !isSignup
                   ? "opacity-100 scale-100 pointer-events-auto delay-200"
                   : "opacity-0 scale-95 pointer-events-none"
               }`}
@@ -98,7 +98,7 @@ export default function AuthPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => navigate("/register")}
+                  onClick={() => navigate("/signup")}
                   className="w-48 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
                 >
                   SignUp
@@ -122,7 +122,7 @@ export default function AuthPage() {
             {/* Login Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
-                isRegister ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
+                isSignup ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
               }`}
             >
               <h1 className="text-2xl font-extrabold tracking-tight">Welcome Back</h1>
@@ -131,10 +131,10 @@ export default function AuthPage() {
               </p>
             </div>
 
-            {/* Register Card Content */}
+            {/* Signup Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
-                isRegister ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                isSignup ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
               }`}
             >
               <h1 className="text-2xl font-extrabold tracking-tight">Welcome to WashQueue</h1>
@@ -148,13 +148,13 @@ export default function AuthPage() {
           <div className="relative h-12 w-full border-t border-primary-foreground/20 pt-2 z-10 flex items-center justify-between">
             <div
               className={`absolute inset-x-0 bottom-0 flex items-center justify-between transition-all duration-500 ${
-                isRegister ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
+                isSignup ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
               }`}
             >
               <span className="text-xs font-medium opacity-85">Don't have an account?</span>
               <button
                 type="button"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/signup")}
                 className="py-1.5 px-4 bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground font-bold rounded-lg text-xs cursor-pointer"
               >
                 SignUp
@@ -163,7 +163,7 @@ export default function AuthPage() {
 
             <div
               className={`absolute inset-x-0 bottom-0 flex items-center justify-between transition-all duration-500 ${
-                isRegister ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                isSignup ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
               }`}
             >
               <span className="text-xs font-medium opacity-85">Already have an account?</span>
@@ -184,7 +184,7 @@ export default function AuthPage() {
             {/* Login form block */}
             <div
               className={`w-full transition-all duration-500 ease-in-out ${
-                !isRegister
+                !isSignup
                   ? "opacity-100 translate-y-0 pointer-events-auto relative"
                   : "opacity-0 -translate-y-4 pointer-events-none absolute inset-x-0 top-0"
               }`}
@@ -192,15 +192,15 @@ export default function AuthPage() {
               <LoginForm />
             </div>
 
-            {/* Register form block */}
+            {/* Signup form block */}
             <div
               className={`w-full transition-all duration-500 ease-in-out ${
-                isRegister
+                isSignup
                   ? "opacity-100 translate-y-0 pointer-events-auto relative"
                   : "opacity-0 translate-y-4 pointer-events-none absolute inset-x-0 top-0"
               }`}
             >
-              <RegisterForm />
+              <SignupForm />
             </div>
           </div>
         </div>

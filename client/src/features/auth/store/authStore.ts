@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { toast } from "sonner";
 import { authApi } from "../services/auth.api";
+import type { RoleType } from "../../../shared/constants/role.const";
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "manager" | "provider" | "user";
+  role: RoleType
 }
 
 interface AuthStore {
@@ -16,9 +17,9 @@ interface AuthStore {
   tempUser: { name: string; email: string } | null;
   login: (email: string, password: string) => Promise<boolean>;
   loginWithGoogle: (token: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  signup: (name: string, email: string, password: string) => Promise<boolean>;
   verifyOTP: (code: string) => Promise<boolean>;
-  setupAccount: (role: "user" | "provider") => Promise<boolean>;
+  setupAccount: (role:RoleType) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -53,23 +54,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true });
     
     try {
-      const data = await authApi.login(email, password);
-      const loggedInUser = data.user;
+      const user = await authApi.login(email, password);
       
       set({
-        user: loggedInUser,
+        user,
         isAuthenticated: true,
-        isLoading: false,
       });
-
-      localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("wq_token", data.token);
-      localStorage.setItem("wq_auth", "true");
-      toast.success(`Welcome back, ${loggedInUser.name}!`);
+      toast.success(`Welcome back, ${user.name}!`);
       return true;
     } catch (e: any) {
       toast.error(e.message)
-      set({ isLoading: false });
       return false
     }
   },
@@ -99,11 +93,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  register: async (name, email, password) => {
+  signup: async (name, email, password) => {
     set({ isLoading: true });
     
     try {
-      await authApi.register(name, email, password);
+      await authApi.signup(name, email, password);
       set({
         tempUser: { name, email },
         isLoading: false,
@@ -123,7 +117,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const tempUser = get().tempUser;
     const email = tempUser?.email || localStorage.getItem("wq_temp_email");
     if (!email) {
-      toast.error("Verification email context not found. Please register again.");
+      toast.error("Verification email context not found. Please signup again.");
       set({ isLoading: false });
       return false;
     }

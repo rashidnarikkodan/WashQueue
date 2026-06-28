@@ -32,7 +32,7 @@ interface AuthFormStore {
 
   // Validators
   validateLogin: () => boolean;
-  validateRegister: () => boolean;
+  validateSignup: () => boolean;
   validateForgotPassword: () => boolean;
 }
 
@@ -102,7 +102,7 @@ export const useAuthFormStore = create<AuthFormStore>((set, get) => ({
     return isValid;
   },
 
-  validateRegister: () => {
+  validateSignup: () => {
     const { name, email, password, confirmPassword } = get();
     const errors: FormErrors = {};
     let isValid = true;

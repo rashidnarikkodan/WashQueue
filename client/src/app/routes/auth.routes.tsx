@@ -13,7 +13,7 @@ export const authRoutes = {
       element: <AuthPage />,
     },
     {
-      path: "register",
+      path: "signup",
       element: <AuthPage />,
     },
     {

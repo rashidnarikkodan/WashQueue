@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { LoginUseCase } from "../application/use-cases/login.use-case"
-import { RegisterUseCase } from "../application/use-cases/register.use-case"
+import { SignupUseCase } from "../application/use-cases/signup.use-case"
 import { VerifyOtpUseCase } from "../application/use-cases/verify-otp.use-case"
 import { RefreshTokenUseCase } from "../application/use-cases/refresh-token.use-case"
 import { LogoutUseCase } from "../application/use-cases/logout.use-case"
@@ -13,7 +13,7 @@ import { HTTP_STATUS } from "@/shared/constants/http.constants"
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
-    private readonly registerUseCase: RegisterUseCase,
+    private readonly signupUseCase: SignupUseCase,
     private readonly verifyOtpUseCase: VerifyOtpUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
@@ -23,12 +23,13 @@ export class AuthController {
 
   login = async (req: Request, res: Response) => {
     const result = await this.loginUseCase.execute(req.body)
+    console.log(result)
     let resJson = response(result,'Login successful')
     res.status(HTTP_STATUS.OK).json(resJson)
   }
 
-  register = async (req: Request, res: Response) => {
-    const result = await this.registerUseCase.execute(req.body)
+  signup = async (req: Request, res: Response) => {
+    const result = await this.signupUseCase.execute(req.body)
     res.status(201).json(response(result, "User registered. Please check your email for the OTP."))
   }
 

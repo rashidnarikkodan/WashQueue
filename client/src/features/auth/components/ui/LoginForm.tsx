@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useGoogleLogin } from "@react-oauth/google"
 
-import FormInput from "./FormInput"
+import FormInput from "../../../../shared/components/ui/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { loginAction } from "../../actions/login.action"
@@ -131,7 +131,7 @@ export default function LoginForm() {
           required
         />
 
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-end pt-1">
           <Link
             to="/forgot-password"
             className="text-xs font-bold text-primary hover:text-primary/90 transition-colors"

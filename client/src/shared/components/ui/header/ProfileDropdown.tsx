@@ -13,10 +13,10 @@ import {
   AlertTriangle,
   UserPlus
 } from "lucide-react";
-import { useAuthStore } from "../../../features/auth/store/authStore";
+import { useAuthStore } from "../../../../features/auth/store/authStore";
 
 interface ProfileDropdownProps {
-  currentRole: "admin" | "manager" | "provider" | "user";
+  currentRole: "admin" | "manager" | "provider" | "customer";
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
@@ -44,7 +44,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         return "Station Manager";
       case "provider":
         return "Verified Provider";
-      case "user":
+      case "customer":
         return "Verified User";
       default:
         return "User Access";
@@ -93,7 +93,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       {/* Profile Panel */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-96 max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-          
+
           {/* Header Section */}
           <div className="flex p-6 pb-4 justify-between items-start border-b border-border/40">
             <div className="flex items-center gap-4">
@@ -102,11 +102,11 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 {initials}
                 <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card bg-emerald-500"></span>
               </div>
-              
+
               <div className="flex flex-col">
                 <h2 className="text-lg font-bold text-foreground leading-tight">{user.name}</h2>
                 <span className="text-xs text-muted-foreground">{user.email}</span>
-                
+
                 {/* Verified Badge */}
                 <span className="inline-flex items-center gap-1 text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-2 uppercase w-fit tracking-wider">
                   <ShieldCheck className="h-3 w-3" />
@@ -118,7 +118,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <button
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "user" ? "/settings" : `/${currentRole}/settings`);
+                navigate(currentRole === "customer" ? "/settings" : `/${currentRole}/settings`);
               }}
               className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all cursor-pointer"
               title="Profile Settings"
@@ -129,14 +129,14 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
           {/* Scrollable Body Content */}
           <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[400px]">
-            
+
             {/* Quick Actions (My Bookings & Wallet Cards) */}
             <div className="space-y-2">
               {/* My Bookings Card */}
               <div
                 onClick={() => {
                   setIsOpen(false);
-                  navigate(currentRole === "user" ? "/bookings" : `/${currentRole}/bookings`);
+                  navigate(currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`);
                 }}
                 className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group"
               >
@@ -149,7 +149,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                     <span className="text-[11px] text-muted-foreground">Track current and previous</span>
                   </div>
                 </div>
-                
+
                 <span className="px-2.5 py-0.5 text-[9px] font-bold bg-primary/10 text-primary border border-primary/20 rounded-md uppercase tracking-wider">
                   2 Active
                 </span>
@@ -166,7 +166,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                     <span className="text-[11px] text-muted-foreground">Refunds, balance, and transactions</span>
                   </div>
                 </div>
-                
+
                 <span className="text-sm font-bold text-foreground">₹2,450</span>
               </div>
             </div>
@@ -175,13 +175,13 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <div
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "user" ? "/register-provider" : `/${currentRole}/dashboard`);
+                navigate(currentRole === "customer" ? "/signup-provider" : `/${currentRole}/dashboard`);
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
             >
               {/* Background Glow Dec */}
               <div className="absolute right-[-15px] bottom-[-15px] h-20 w-20 rounded-full bg-primary/10 filter blur-xl"></div>
-              
+
               <div className="flex items-center gap-4 z-10">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/30 group-hover:scale-105 transition-transform">
                   <Wrench className="h-5 w-5" />
@@ -191,7 +191,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                   <span className="text-[11px] text-primary/80">{cta.desc}</span>
                 </div>
               </div>
-              
+
               <ChevronRight className="h-4.5 w-4.5 text-primary group-hover:translate-x-1 transition-transform z-10" />
             </div>
 

@@ -1,14 +1,6 @@
 import type { User } from "../store/authStore"
 import { api } from "../../../shared/config/axios"
-
-const mapServerRoleToClient = (role: string): "admin" | "manager" | "provider" | "user" => {
-  const r = role.toUpperCase()
-  if (r === "CUSTOMER" || r === "USER") return "user"
-  if (r === "PROVIDER") return "provider"
-  if (r === "ADMIN") return "admin"
-  if (r === "MANAGER") return "manager"
-  return "user"
-}
+import type { RoleType } from "../../../shared/constants/role.const"
 
 export const authApi = {
   /**
@@ -23,7 +15,7 @@ export const authApi = {
           id: resJson.data.user.id || resJson.data.user._id,
           name: resJson.data.user.name,
           email: resJson.data.user.email,
-          role: mapServerRoleToClient(resJson.data.user.role)
+          role: resJson.data.user.role
         }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to login"
@@ -44,7 +36,7 @@ export const authApi = {
           id: resJson.data.user.id || resJson.data.user._id,
           name: resJson.data.user.name,
           email: resJson.data.user.email,
-          role: mapServerRoleToClient(resJson.data.user.role)
+          role: resJson.data.user.role
         },
         token: resJson.data.tokens.accessToken
       }
@@ -57,9 +49,9 @@ export const authApi = {
   /**
    * Send sign up details to backend
    */
-  register: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
+  signup: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/register", { name, email, password })
+      const response = await api.post("/auth/signup", { name, email, password })
       const resJson = response.data
 
       return {
@@ -99,7 +91,7 @@ export const authApi = {
   /**
    * Update role configuration during account setup
    */
-  setupAccount: async (role: "user" | "provider"): Promise<{ user: User }> => {
+  setupAccount: async (role:RoleType): Promise<{ user: User }> => {
     try {
       const response = await api.post("/auth/setup-account", { role })
       const resJson = response.data
