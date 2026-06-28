@@ -1,9 +1,10 @@
-import { Link, Outlet, Navigate } from 'react-router-dom';
+import { Link, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/authStore';
 import Loading from '../../shared/components/ui/Loading';
 
 export default function AuthLayout() {
   const { isAuthenticated, user, isLoading } = useAuthStore();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -11,7 +12,7 @@ export default function AuthLayout() {
     );
   }
 
-  if (isAuthenticated && user) {
+  if (isAuthenticated && user && !["/verify-email", "/setup-account"].includes(location.pathname)) {
     if (user.role === "admin") return <Navigate to="/admin/dashboard" replace />;
     if (user.role === "manager") return <Navigate to="/manager/dashboard" replace />;
     if (user.role === "provider") return <Navigate to="/provider/dashboard" replace />;

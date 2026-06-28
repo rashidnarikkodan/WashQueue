@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
-import { adminSideBarItems } from "../../shared/config/adminSidebar.config"
+import { adminSideBarItems } from "../../shared/config/sidebar.config"
 import { useAuthStore } from "../../features/auth/store/authStore"
 
 const AdminLayout = () => {
@@ -21,7 +21,7 @@ const AdminLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar items={adminSideBarItems}/>
+      <Sidebar items={adminSideBarItems} />
       <div className="flex flex-col flex-1 pl-28 min-h-screen">
         <Header />
         <main className="flex-1 p-6">

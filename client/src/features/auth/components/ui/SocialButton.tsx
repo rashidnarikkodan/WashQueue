@@ -8,7 +8,7 @@ export default function SocialButton({ onClick, label }: SocialButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center justify-center gap-3 w-full bg-[#0F172A] border border-border/80 text-foreground hover:bg-muted/40 font-semibold px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer shadow-sm text-sm"
+      className="flex items-center justify-center gap-3 w-full bg-card border border-border/80 text-foreground hover:bg-muted/40 font-semibold px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer shadow-sm text-sm"
     >
       {/* Simple Google SVG Icon */}
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

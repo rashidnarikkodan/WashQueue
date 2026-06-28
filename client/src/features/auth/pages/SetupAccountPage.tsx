@@ -21,7 +21,7 @@ export default function SetupAccountPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#020817] text-white p-8 relative overflow-hidden w-full">
+    <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
       {/* Background Decor Glow */}
       <div className="absolute left-[-100px] top-[-100px] h-[400px] w-[400px] rounded-full bg-primary/5 filter blur-3xl"></div>
 
@@ -38,7 +38,7 @@ export default function SetupAccountPage() {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Go Back
@@ -47,14 +47,14 @@ export default function SetupAccountPage() {
 
       {/* Main Selection Area */}
       <main className="flex-grow flex items-center justify-center z-10 p-4">
-        <div className="w-full max-w-4xl bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 md:p-12 space-y-10 shadow-2xl animate-in zoom-in duration-300">
+        <div className="w-full max-w-4xl bg-card/60 backdrop-blur-md border border-border/80 rounded-2xl p-8 md:p-12 space-y-10 shadow-2xl animate-in zoom-in duration-300">
           
           {/* Header Title Section */}
           <div className="text-center space-y-3">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-none text-white bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
               Set Up Your Account
             </h1>
-            <p className="text-sm md:text-base text-slate-400 max-w-md mx-auto">
+            <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
               How would you like to use WashQueue?
             </p>
           </div>
@@ -62,14 +62,14 @@ export default function SetupAccountPage() {
           {/* Cards Selection Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1: Customer */}
-            <div className="flex flex-col justify-between p-8 rounded-xl border border-slate-800/80 bg-slate-950/40 hover:border-primary/50 transition-all duration-300 scale-100 hover:scale-[1.02] group">
+            <div className="flex flex-col justify-between p-8 rounded-xl border border-border/80 bg-card/40 hover:border-primary/50 transition-all duration-300 scale-100 hover:scale-[1.02] group">
               <div className="space-y-6">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                   <Car className="h-8 w-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white">Book Washes</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
+                  <h3 className="text-xl font-bold text-foreground">Book Washes</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     Find nearby wash stations and check live queue status.
                   </p>
                 </div>
@@ -78,7 +78,7 @@ export default function SetupAccountPage() {
               <button
                 onClick={() => handleSelectRole("user")}
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 mt-8 text-sm cursor-pointer flex items-center justify-center gap-2"
+                className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 mt-8 text-sm cursor-pointer flex items-center justify-center gap-2"
               >
                 {isLoading && selectedRole === "user" ? (
                   <>
@@ -92,14 +92,14 @@ export default function SetupAccountPage() {
             </div>
 
             {/* Card 2: Provider */}
-            <div className="flex flex-col justify-between p-8 rounded-xl border border-slate-800/80 bg-slate-950/40 hover:border-primary/50 transition-all duration-300 scale-100 hover:scale-[1.02] group">
+            <div className="flex flex-col justify-between p-8 rounded-xl border border-border/80 bg-card/40 hover:border-primary/50 transition-all duration-300 scale-100 hover:scale-[1.02] group">
               <div className="space-y-6">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
                   <Wrench className="h-8 w-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white">List My Wash Station</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
+                  <h3 className="text-xl font-bold text-foreground">List My Wash Station</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     Manage bookings, queues, and customers from your dashboard.
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export default function SetupAccountPage() {
           </div>
 
           {/* Bottom Info Prompt */}
-          <p className="text-center text-xs text-slate-500 font-medium">
+          <p className="text-center text-xs text-muted-foreground font-medium">
             You can switch roles later from your profile settings.
           </p>
 

@@ -10,9 +10,9 @@ export default function AuthPage() {
   const isRegister = location.pathname.startsWith("/register");
 
   return (
-    <div className="w-full min-h-screen bg-[#020817] text-foreground">
+    <div className="w-full min-h-screen bg-background text-foreground">
       {/* 1. DESKTOP VIEW WITH DOUBLE SLIDING ANIMATION */}
-      <div className="relative w-full min-h-screen bg-[#020817] overflow-hidden hidden md:flex items-stretch">
+      <div className="relative w-full min-h-screen bg-background overflow-hidden hidden md:flex items-stretch">
         
         {/* Left Column (Hosts Register Form) */}
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
@@ -71,7 +71,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
-                  className="w-48 py-3 bg-[#1e293b] hover:bg-[#0f172a] text-white font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
+                  className="w-48 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
                 >
                   Login
                 </button>
@@ -99,7 +99,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className="w-48 py-3 bg-[#1e293b] hover:bg-[#0f172a] text-white font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
+                  className="w-48 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
                 >
                   SignUp
                 </button>
@@ -110,9 +110,9 @@ export default function AuthPage() {
       </div>
 
       {/* 2. MOBILE VIEW WITH CLEAN SWITCHING TRANSITION */}
-      <div className="flex flex-col min-h-screen bg-[#020817] md:hidden">
+      <div className="flex flex-col min-h-screen bg-background md:hidden">
         {/* Static Header Panel */}
-        <div className="h-[280px] bg-gradient-to-tr from-primary to-primary/80 text-white rounded-b-[40px] p-8 flex flex-col justify-between relative overflow-hidden shadow-lg shrink-0">
+        <div className="h-[280px] bg-gradient-to-tr from-primary to-primary/80 text-primary-foreground rounded-b-[40px] p-8 flex flex-col justify-between relative overflow-hidden shadow-lg shrink-0">
           {/* Background Decor Glow */}
           <div className="absolute right-[-50px] top-[-50px] h-[200px] w-[200px] rounded-full bg-white/10 filter blur-2xl"></div>
 
@@ -145,7 +145,7 @@ export default function AuthPage() {
           </div>
 
           {/* Switch Prompt */}
-          <div className="relative h-12 w-full border-t border-white/20 pt-2 z-10 flex items-center justify-between">
+          <div className="relative h-12 w-full border-t border-primary-foreground/20 pt-2 z-10 flex items-center justify-between">
             <div
               className={`absolute inset-x-0 bottom-0 flex items-center justify-between transition-all duration-500 ${
                 isRegister ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
@@ -155,7 +155,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => navigate("/register")}
-                className="py-1.5 px-4 bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold rounded-lg text-xs cursor-pointer"
+                className="py-1.5 px-4 bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground font-bold rounded-lg text-xs cursor-pointer"
               >
                 SignUp
               </button>
@@ -170,7 +170,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="py-1.5 px-4 bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold rounded-lg text-xs cursor-pointer"
+                className="py-1.5 px-4 bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground font-bold rounded-lg text-xs cursor-pointer"
               >
                 Login
               </button>

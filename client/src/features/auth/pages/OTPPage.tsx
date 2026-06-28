@@ -132,17 +132,17 @@ export default function OTPPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#020817] text-white p-8 relative overflow-hidden w-full">
+    <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
       {/* Main Content Area */}
       <main className="flex-grow flex items-center justify-center z-10 p-4">
         {!isVerified ? (
           <div className="w-full max-w-xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Header Title Section */}
             <div className="text-center space-y-3">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none text-white bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
                 Confirm Email
               </h1>
-              <p className="text-sm md:text-base text-slate-400 max-w-md mx-auto leading-relaxed">
+              <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
                 Enter the 6-digit verification code sent to your registered email.
               </p>
             </div>
@@ -161,7 +161,7 @@ export default function OTPPage() {
                     onPaste={handlePaste}
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    className="w-12 h-12 md:w-16 md:h-16 bg-slate-950/40 border border-slate-800 rounded-xl text-center font-extrabold text-white text-lg md:text-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                    className="w-12 h-12 md:w-16 md:h-16 bg-muted/50 border border-border rounded-xl text-center font-extrabold text-foreground text-lg md:text-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                     autoFocus={i === 0}
                     disabled={isLoading}
                   />
@@ -188,7 +188,7 @@ export default function OTPPage() {
                 {/* Resend status & triggers */}
                 <div className="text-center space-y-1">
                   {!isResendActive ? (
-                    <span className="text-xs text-slate-500 block">
+                    <span className="text-xs text-muted-foreground block">
                       Resend available in {formatTimer(timerCount)}
                     </span>
                   ) : (
@@ -206,7 +206,7 @@ export default function OTPPage() {
           </div>
         ) : (
           /* Verification Success Modal State */
-          <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl p-8 space-y-6 text-center shadow-2xl animate-in zoom-in duration-300 z-20">
+          <div className="w-full max-w-md bg-card/60 backdrop-blur-md border border-border/80 rounded-2xl p-8 space-y-6 text-center shadow-2xl animate-in zoom-in duration-300 z-20">
             <div className="flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-inner relative">
                 <span className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping opacity-75"></span>
@@ -215,10 +215,10 @@ export default function OTPPage() {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
                 Email Verified
               </h2>
-              <p className="text-sm text-slate-400">Your account setup is ready for role assignment.</p>
+              <p className="text-sm text-muted-foreground">Your account setup is ready for role assignment.</p>
             </div>
 
             <button

@@ -61,10 +61,10 @@ export default function RegisterForm() {
   return (
     <div className="space-y-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="space-y-2">
-        <h1 className="text-4xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
           Create account
         </h1>
-        <p className="text-sm text-slate-400 font-medium">
+        <p className="text-sm text-muted-foreground font-medium">
           Start managing your vehicle wash bookings
         </p>
       </div>
@@ -72,9 +72,9 @@ export default function RegisterForm() {
       <SocialButton label="Sign up with Google" onClick={() => handleGoogleLogin()} />
 
       <div className="flex items-center justify-between gap-4 py-2">
-        <div className="flex-1 h-[1px] bg-slate-800/80"></div>
-        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">or email</span>
-        <div className="flex-1 h-[1px] bg-slate-800/80"></div>
+        <div className="flex-1 h-[1px] bg-border/80"></div>
+        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider">or email</span>
+        <div className="flex-1 h-[1px] bg-border/80"></div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>

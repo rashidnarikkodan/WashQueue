@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#020817] text-white p-8 relative overflow-hidden w-full">
+    <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
       {/* Background Decor Glow */}
       <div className="absolute left-[-100px] top-[-100px] h-[400px] w-[400px] rounded-full bg-primary/5 filter blur-3xl"></div>
       
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
 
         <Link
           to="/login"
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Login
@@ -68,10 +68,10 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {/* Header Title Section */}
           <div className="text-center space-y-3">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none text-white bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
               Reset Password
             </h1>
-            <p className="text-sm md:text-base text-slate-400">
+            <p className="text-sm md:text-base text-muted-foreground">
               Please enter your registered email address
             </p>
           </div>

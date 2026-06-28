@@ -31,11 +31,11 @@ export default function SplitAuthLayout({
       }`}
     >
       {/* Background Decor Glow */}
-      <div className="absolute right-[-50px] top-[-50px] h-[300px] w-[300px] rounded-full bg-white/10 filter blur-3xl"></div>
+      <div className="absolute right-[-50px] top-[-50px] h-[300px] w-[300px] rounded-full bg-primary-foreground/10 filter blur-3xl"></div>
       
       {/* Brand Header */}
       <div className="flex items-center gap-2 z-10">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-primary font-bold shadow-lg">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
           <Droplets className="h-5 w-5" />
         </div>
         <span className={`text-2xl font-bold italic tracking-tight`}>WashQueue</span>
@@ -52,11 +52,11 @@ export default function SplitAuthLayout({
       </div>
 
       {/* Bottom Switch Redirect */}
-      <div className="flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-white/20">
+      <div className="flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20">
         <span className="text-xs md:text-sm font-medium opacity-80">{promptText}</span>
         <button
           onClick={onRedirectClick}
-          className="w-full md:w-56 py-3 px-6 bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
+          className="w-full md:w-56 py-3 px-6 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
         >
           {buttonText}
         </button>
@@ -66,7 +66,7 @@ export default function SplitAuthLayout({
 
   const formPanel = (
     <div
-      className={`flex flex-col justify-center items-center p-8 md:p-16 bg-[#020617] min-h-screen ${
+      className={`flex flex-col justify-center items-center p-8 md:p-16 bg-background min-h-screen ${
         isBlueOnLeft ? "order-2 md:order-2" : "order-2 md:order-1"
       }`}
     >
@@ -77,7 +77,7 @@ export default function SplitAuthLayout({
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 w-full min-h-screen bg-[#020617] overflow-x-hidden">
+    <div className="grid grid-cols-1 md:grid-cols-2 w-full min-h-screen bg-background overflow-x-hidden">
       {isBlueOnLeft ? (
         <>
           {brandingPanel}
