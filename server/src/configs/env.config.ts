@@ -11,6 +11,12 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string(),
   REDIS_HOST: z.string().default("120.0.0.1"),
   REDIS_PORT: z.coerce.number().default(6379),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default("no-reply@washqueue.com"),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 })
 const env = envSchema.parse(process.env)
 

@@ -12,7 +12,13 @@ export const registerSchema = z
       .string()
       .min(1, { message: "Password is required" })
       .min(8, { message: "Password must be at least 8 characters" }),
-    confirmPassword: z.string().min(1, { message: "Confirm password is required" }),
+    confirmPassword: z.string().optional(),
+  })
+  .transform((data) => {
+    if (!data.confirmPassword) {
+      data.confirmPassword = data.password
+    }
+    return data
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -20,3 +26,4 @@ export const registerSchema = z
   })
 
 export type RegisterInput = z.infer<typeof registerSchema>
+

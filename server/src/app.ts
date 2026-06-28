@@ -3,7 +3,7 @@ import corsConfig from "./configs/cors.config"
 import loggerMiddleware from "./shared/middleware/logger.middleware"
 import notFoundMiddleware from "./shared/middleware/not-found.middleware"
 import errorMiddleware from "./shared/middleware/error.middleware"
-import authRouter from "./modules/auth/presentation/auth.routes"
+import authRouter from "./modules/auth/auth.module"
 
 const app = express()
 

@@ -7,11 +7,24 @@ import { useAuthFormStore } from "../../store/authFormStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const { register, isLoading } = useAuthStore();
+  const { register, loginWithGoogle, isLoading } = useAuthStore();
   
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const success = await loginWithGoogle(tokenResponse.access_token);
+      if (success) {
+        navigate("/");
+      }
+    },
+    onError: () => {
+      toast.error("Google sign-up failed");
+    }
+  });
+
   const {
     name,
     email,
@@ -56,20 +69,7 @@ export default function RegisterForm() {
         </p>
       </div>
 
-      <SocialButton label="Sign up with Google" onClick={() => {
-        const promise = new Promise((resolve) => setTimeout(resolve, 800));
-        toast.promise(
-          promise,
-          {
-            loading: 'Connecting with Google...',
-            success: 'Registered with Google!',
-            error: 'Google sign-up failed',
-          }
-        );
-        promise.then(() => {
-          navigate("/verify-email");
-        });
-      }} />
+      <SocialButton label="Sign up with Google" onClick={() => handleGoogleLogin()} />
 
       <div className="flex items-center justify-between gap-4 py-2">
         <div className="flex-1 h-[1px] bg-slate-800/80"></div>

@@ -1,39 +1,28 @@
-import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "../../domain/repositories/user.repository"
+import { OtpService } from "../services/otp.service"
 import { TokenService } from "../services/token.service"
-import { LoginInput } from "../schema/login.schema"
+import { VerifyOtpInput } from "../schema/verify-otp.schema"
 
-export class LoginUseCase {
+export class VerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly otpService: OtpService,
     private readonly tokenService: TokenService
   ) {}
 
-  async execute(data: LoginInput): Promise<any> {
+  async execute(data: VerifyOtpInput) {
+    const isOtpValid = await this.otpService.verifyOtp(data.email, data.otp)
+    if (!isOtpValid) {
+      throw new AppError("Invalid or expired OTP", 400)
+    }
+
     const user = await this.userRepository.findByEmail(data.email)
     if (!user) {
-      throw new AppError("Invalid credentials", 400)
+      throw new AppError("User not found", 404)
     }
 
-    if (!user.password) {
-      throw new AppError("Invalid credentials", 400)
-    }
-
-    const isPasswordValid = await argon2.verify(user.password, data.password)
-    if (!isPasswordValid) {
-      throw new AppError("Invalid credentials", 400)
-    }
-
-    if (user.isBlocked) {
-      throw new AppError("Account is blocked", 403)
-    }
-
-    if (!user.isVerified) {
-      throw new AppError("Account is not verified", 401)
-    }
-
-    // Generate JWT access & refresh tokens
+    // Generate JWT tokens
     const tokenPayload = {
       userId: user._id.toString(),
       role: user.role,
@@ -43,10 +32,10 @@ export class LoginUseCase {
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Save refresh token and update last login timestamp
+    // Save refresh token to user document and set isVerified to true
     await this.userRepository.update(user._id.toString(), {
+      isVerified: true,
       refreshToken,
-      lastLoginAt: new Date(),
     })
 
     return {
@@ -55,7 +44,7 @@ export class LoginUseCase {
         name: user.name,
         email: user.email,
         role: user.role,
-        isVerified: user.isVerified,
+        isVerified: true,
       },
       tokens: {
         accessToken,

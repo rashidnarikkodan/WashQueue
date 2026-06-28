@@ -1,11 +1,13 @@
 import { useActionState, useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
+import { useGoogleLogin } from "@react-oauth/google"
 
 import FormInput from "./FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { loginAction } from "../../actions/login.action"
+import { useAuthStore } from "../../store/authStore"
 
 const initialState = {
   success: false,
@@ -14,6 +16,19 @@ const initialState = {
 export default function LoginForm() {
   const navigate = useNavigate()
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
+  const { loginWithGoogle } = useAuthStore()
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const success = await loginWithGoogle(tokenResponse.access_token)
+      if (success) {
+        navigate("/")
+      }
+    },
+    onError: () => {
+      toast.error("Google login failed")
+    }
+  })
 
   const [state, formAction] = useActionState(
     loginAction,
@@ -66,18 +81,7 @@ export default function LoginForm() {
 
       <SocialButton
         label="Sign in with Google"
-        onClick={() => {
-          toast.promise(
-            new Promise((resolve) =>
-              setTimeout(resolve, 800)
-            ),
-            {
-              loading: "Connecting with Google...",
-              success: "Signed in with Google!",
-              error: "Google login failed",
-            }
-          )
-        }}
+        onClick={() => handleGoogleLogin()}
       />
 
       <div className="flex items-center justify-between gap-4 py-2">

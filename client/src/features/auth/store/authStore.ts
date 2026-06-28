@@ -15,6 +15,7 @@ interface AuthStore {
   isLoading: boolean;
   tempUser: { name: string; email: string } | null;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: (token: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   verifyOTP: (code: string) => Promise<boolean>;
   setupAccount: (role: "user" | "provider") => Promise<boolean>;
@@ -103,6 +104,51 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
       localStorage.setItem("wq_token", "mock-session-token");
+      localStorage.setItem("wq_auth", "true");
+      toast.success(`Welcome back, ${loggedInUser.name}! (Simulated)`);
+      return true;
+    }
+  },
+
+  loginWithGoogle: async (token) => {
+    set({ isLoading: true });
+    
+    try {
+      const data = await authApi.loginWithGoogle(token);
+      const loggedInUser = data.user;
+      
+      set({
+        user: loggedInUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
+      localStorage.setItem("wq_token", data.token);
+      localStorage.setItem("wq_auth", "true");
+      toast.success(`Welcome back, ${loggedInUser.name}!`);
+      return true;
+    } catch (e: any) {
+      console.warn("Backend Google Sign-In failed, falling back to mock mode:", e.message);
+      
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      const loggedInUser: User = {
+        id: Math.random().toString(36).substring(7),
+        name: "Mock Google User",
+        email: "google_mock_user@example.com",
+        role: "user",
+      };
+
+      set({
+        user: loggedInUser,
+        tempUser: { name: loggedInUser.name, email: loggedInUser.email },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
+      localStorage.setItem("wq_token", "mock-google-session-token");
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${loggedInUser.name}! (Simulated)`);
       return true;
