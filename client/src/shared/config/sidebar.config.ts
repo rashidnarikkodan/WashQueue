@@ -83,3 +83,57 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: Settings,
   },
 ];
+
+
+export const providerSideBarItems: SidebarItem[] = [
+  {
+    name: "Dashboard",
+    path: "/provider/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "User Management",
+    path: "/provider/users",
+    icon: Users,
+  },
+  {
+    name: "Station Management",
+    path: "/provider/stations",
+    icon: Fuel,
+  },
+  {
+    name: "Booking Monitoring",
+    path: "/admin/bookings",
+    icon: ReceiptText,
+  },
+  {
+    name: "Queue Monitoring",
+    path: "/admin/queues",
+    icon: Hourglass,
+  },
+  {
+    name: "Reviews & Ratings Moderation",
+    path: "/admin/reviews",
+    icon: MessageSquareMore,
+  },
+  {
+    name: "Fraud Monitoring",
+    path: "/admin/fraud",
+    icon: ShieldAlert,
+  },
+  {
+    name: "Notifications Management",
+    path: "/admin/notifications",
+    icon: Bell,
+  },
+  {
+    name: "Reports & Analytics",
+    path: "/admin/reports",
+    icon: BarChart3,
+  },
+  {
+    name: "System Settings",
+    path: "/admin/settings",
+    icon: Settings,
+  },
+];

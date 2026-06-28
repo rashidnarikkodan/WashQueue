@@ -11,8 +11,7 @@ import {
   Headphones,
   HelpCircle,
   AlertTriangle,
-  UserPlus,
-  RefreshCw
+  UserPlus
 } from "lucide-react";
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
@@ -24,7 +23,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { user, logout, cycleRole } = useAuthStore();
+  const { user, logout } = useAuthStore();
   if (!user) return null;
 
   useEffect(() => {
@@ -36,21 +35,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Cycle role function for quick switcher demonstration in the footer
-  const handleCycleRole = () => {
-    setIsOpen(false);
-    if (currentRole === "user") {
-      navigate("/admin/dashboard");
-    } else if (currentRole === "admin") {
-      navigate("/manager/dashboard");
-    } else if (currentRole === "manager") {
-      navigate("/provider/dashboard");
-    } else {
-      navigate("/");
-    }
-    cycleRole();
-  };
 
   const getRoleLabel = () => {
     switch (currentRole) {
@@ -234,16 +218,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
           </div>
 
           {/* Footer Section */}
-          <div className="flex items-center justify-between p-4 bg-muted/20 border-t border-border/40">
-            {/* Cycle Role Switcher Button */}
-            <button
-              onClick={handleCycleRole}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-xs font-bold text-muted-foreground hover:text-foreground rounded-lg transition-colors border border-border/40 cursor-pointer"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span className="capitalize">{currentRole} Mode</span>
-            </button>
-
+          <div className="flex items-center justify-end p-4 bg-muted/20 border-t border-border/40">
             {/* Logout Button */}
             <button
               onClick={() => {

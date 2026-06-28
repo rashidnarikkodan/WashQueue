@@ -1,7 +1,7 @@
 // Sidebar.tsx
 
 import { NavLink } from "react-router-dom";
-import type { SidebarItem } from "../../config/adminSidebar.config";
+import type { SidebarItem } from "../../config/sidebar.config";
 
 
 type Props = {
@@ -49,17 +49,16 @@ const Sidebar = ({ items }: Props) => {
                 transition-all
                 duration-300
 
-                ${
-                  isActive
-                    ? "bg-[#AFC3FF] text-[#0B2B68]"
-                    : "text-[#C7CEE2] hover:bg-[#13224D]"
+                ${isActive
+                  ? "bg-[#AFC3FF] text-[#0B2B68]"
+                  : "text-[#C7CEE2] hover:bg-[#13224D]"
                 }
               `
               }
             >
               <div className="min-w-7">
                 <Icon
-                  size={28}                />
+                  size={28} />
               </div>
 
               <span
