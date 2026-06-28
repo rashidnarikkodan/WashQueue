@@ -1,16 +1,20 @@
-import express, { Express, Request, Response } from "express";
-import cors from "cors";
+import express from "express"
+import corsConfig from "./configs/cors.config"
+import loggerMiddleware from "./shared/middleware/logger.middleware"
+import notFoundMiddleware from "./shared/middleware/not-found.middleware"
+import errorMiddleware from "./shared/middleware/error.middleware"
+import authRouter from "./modules/auth/presentation/auth.routes"
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = express()
 
-app.get("/health", (req: Request, res: Response) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
+app.use(corsConfig)
+app.use(loggerMiddleware)
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("WashQueue server is running");
-});
+app.use("/api/auth", authRouter)
 
-export default app;
+app.use(notFoundMiddleware)
+app.use(errorMiddleware)
+
+export default app
