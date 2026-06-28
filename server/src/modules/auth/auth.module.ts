@@ -11,9 +11,11 @@ import { LogoutUseCase } from "./application/use-cases/logout.use-case"
 import { SetupAccountUseCase } from "./application/use-cases/setup-account.use-case"
 import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 
+// router and controller
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
+// infrastructures
 const userRepository = new MongooseUserRepository()
 const mailService = new MailService()
 const otpService = new OtpService()

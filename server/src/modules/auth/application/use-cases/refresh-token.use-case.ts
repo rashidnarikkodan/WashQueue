@@ -31,7 +31,7 @@ export class RefreshTokenUseCase {
       }
 
       const tokenPayload = {
-        userId: user._id.toString(),
+        userId: user.id,
         role: user.role,
         email: user.email,
       }
@@ -39,7 +39,7 @@ export class RefreshTokenUseCase {
       const newAccessToken = this.tokenService.generateAccessToken(tokenPayload)
       const newRefreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-      await this.userRepository.update(user._id.toString(), {
+      await this.userRepository.update(user.id, {
         refreshToken: newRefreshToken,
       })
 

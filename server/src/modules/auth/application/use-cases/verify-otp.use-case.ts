@@ -24,7 +24,7 @@ export class VerifyOtpUseCase {
 
     // Generate JWT tokens
     const tokenPayload = {
-      userId: user._id.toString(),
+      userId: user.id,
       role: user.role,
       email: user.email,
     }
@@ -33,14 +33,14 @@ export class VerifyOtpUseCase {
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
     // Save refresh token to user document and set isVerified to true
-    await this.userRepository.update(user._id.toString(), {
+    await this.userRepository.update(user.id, {
       isVerified: true,
       refreshToken,
     })
 
     return {
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,

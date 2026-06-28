@@ -1,17 +1,16 @@
+import { AUTH_PROVIDER, AuthProvider } from "@/shared/constants/authProvider"
+import { ROLE, RoleType } from "@/shared/constants/role.constants"
 import { Schema, model, Document } from "mongoose"
 
-export type UserRole = "CUSTOMER" | "PROVIDER" | "ADMIN" | "MANAGER"
-export type AuthProvider = "LOCAL" | "GOOGLE"
 export interface IUser extends Document {
     name?: string
     email: string
-    role: UserRole
+    role: RoleType
     phone?: string
     password?: string
     refreshToken?: string
     lastLoginAt?: Date
     walletBalance: number
-    // loyaltyPoints?: number // Commented out in dashboard design
     avatar?: string
     authProvider: AuthProvider
     isBlocked: boolean
@@ -31,8 +30,8 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: ["CUSTOMER", "PROVIDER", "ADMIN", "MANAGER"],
-        default: "CUSTOMER",
+        enum: [ROLE.CUSTOMER, ROLE.PROVIDER, ROLE.ADMIN, ROLE.MANAGER],
+        default: ROLE.CUSTOMER,
     },
     phone: { type: String, trim: true },
     password: { type: String },
@@ -42,8 +41,8 @@ const userSchema = new Schema<IUser>({
     avatar: { type: String },
     authProvider: {
         type: String,
-        enum: ["LOCAL", "GOOGLE"],
-        default: "LOCAL",
+        enum: [AUTH_PROVIDER.LOCAL, AUTH_PROVIDER.GOOGLE],
+        default: AUTH_PROVIDER.LOCAL,
     },
     isBlocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false }

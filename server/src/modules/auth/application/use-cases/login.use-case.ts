@@ -33,9 +33,9 @@ export class LoginUseCase {
       throw new AppError("Account is not verified", 401)
     }
 
-    // Generate JWT access & refresh tokens
+      // Generate JWT access & refresh tokens
     const tokenPayload = {
-      userId: user._id.toString(),
+      userId: user.id,
       role: user.role,
       email: user.email,
     }
@@ -44,14 +44,14 @@ export class LoginUseCase {
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
     // Save refresh token and update last login timestamp
-    await this.userRepository.update(user._id.toString(), {
+    await this.userRepository.update(user.id, {
       refreshToken,
       lastLoginAt: new Date(),
     })
 
     return {
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,

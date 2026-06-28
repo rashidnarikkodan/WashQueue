@@ -1,10 +1,11 @@
 import { OAuth2Client } from "google-auth-library"
-import jwt from "jsonwebtoken"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "../../domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
+
+import { User } from "../../domain/entities/User"
 
 export class GoogleAuthUseCase {
   private client: OAuth2Client | null = null
@@ -29,7 +30,12 @@ export class GoogleAuthUseCase {
     let name: string
     let picture: string | undefined
 
-    if (this.client && env.GOOGLE_CLIENT_ID && token.includes(".")) {
+    const isJwt = token.split(".").length === 3
+
+    if (isJwt) {
+      if (!this.client || !env.GOOGLE_CLIENT_ID) {
+        throw new AppError("Google authentication client is not configured on the server", 500)
+      }
       // 1. Verify Google ID token (JWT)
       try {
         const ticket = await this.client.verifyIdToken({
@@ -46,25 +52,6 @@ export class GoogleAuthUseCase {
       } catch (error: any) {
         throw new AppError(error.message || "Google authentication failed", 401)
       }
-    } else if (token.includes(".")) {
-      // Fallback decode for ID Token
-      logger.info("[GOOGLE AUTH DEV FALLBACK] Decoding Google ID token without verification.")
-      try {
-        const decoded = jwt.decode(token) as any
-        if (!decoded || !decoded.email) {
-          email = "google_mock_user@example.com"
-          name = "Mock Google User"
-          picture = ""
-        } else {
-          email = decoded.email
-          name = decoded.name || "Mock Google User"
-          picture = decoded.picture
-        }
-      } catch {
-        email = "google_mock_user@example.com"
-        name = "Mock Google User"
-        picture = ""
-      }
     } else {
       // 2. Treat as Google Access Token and fetch user profile via UserInfo API
       try {
@@ -72,27 +59,24 @@ export class GoogleAuthUseCase {
           headers: { Authorization: `Bearer ${token}` }
         })
         if (!response.ok) {
-          throw new Error("Failed to fetch userinfo from Google")
+          throw new AppError("Failed to fetch user profile from Google", 401)
         }
         const payload = await response.json() as any
         if (!payload || !payload.email) {
-          throw new AppError("Invalid Google access token", 400)
+          throw new AppError("Invalid Google access token payload", 400)
         }
         email = payload.email
         name = payload.name || "Google User"
         picture = payload.picture
       } catch (error: any) {
-        logger.warn({ error }, "Google UserInfo API fetch failed. Using fallback.")
-        // Fallback for mock access token
-        email = "google_mock_user@example.com"
-        name = "Mock Google User"
-        picture = ""
+        if (error instanceof AppError) throw error
+        throw new AppError("Google authentication failed", 401)
       }
     }
 
     let user = await this.userRepository.findByEmail(email)
     if (!user) {
-      user = await this.userRepository.create({
+      const newUser = new User({
         name,
         email: email.toLowerCase(),
         avatar: picture || "",
@@ -100,6 +84,7 @@ export class GoogleAuthUseCase {
         role: "CUSTOMER",
         isVerified: true,
       })
+      user = await this.userRepository.create(newUser)
     }
 
     if (user.isBlocked) {
@@ -107,7 +92,7 @@ export class GoogleAuthUseCase {
     }
 
     const tokenPayload = {
-      userId: user._id.toString(),
+      userId: user.id,
       role: user.role,
       email: user.email,
     }
@@ -115,14 +100,14 @@ export class GoogleAuthUseCase {
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    await this.userRepository.update(user._id.toString(), {
+    await this.userRepository.update(user.id, {
       refreshToken,
       lastLoginAt: new Date(),
     })
 
     return {
       user: {
-        id: user._id.toString(),
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,

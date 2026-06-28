@@ -1,9 +1,9 @@
-import { IUser } from "../../infrastructure/models/user.model"
+import { User } from "../entities/User"
 
 export interface IUserRepository {
-  findById(id: string): Promise<IUser | null>
-  findByEmail(email: string): Promise<IUser | null>
-  create(user: Partial<IUser>): Promise<IUser>
-  update(id: string, user: Partial<IUser>): Promise<IUser | null>
+  findById(id: string): Promise<User | null>
+  findByEmail(email: string): Promise<User | null>
+  create(user: User): Promise<User>
+  update(id: string, user: Partial<User>): Promise<User | null>
   delete(id: string): Promise<boolean>
 }

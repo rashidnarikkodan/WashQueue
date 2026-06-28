@@ -29,7 +29,7 @@ export class SetupAccountUseCase {
 
     return {
       user: {
-        id: updatedUser._id.toString(),
+        id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
         role: role.toLowerCase(), // Return client-compatible role representation

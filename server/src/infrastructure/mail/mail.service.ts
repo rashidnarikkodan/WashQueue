@@ -38,7 +38,7 @@ export class MailService {
 
     if (this.transporter) {
       await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_FROM}>`,
+        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
         to: email,
         subject,
         text,

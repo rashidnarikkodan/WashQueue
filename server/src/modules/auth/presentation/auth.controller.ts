@@ -8,6 +8,7 @@ import { SetupAccountUseCase } from "../application/use-cases/setup-account.use-
 import { GoogleAuthUseCase } from "../application/use-cases/google-auth.use-case"
 import response from "@/shared/utils/response"
 import { AuthenticatedRequest } from "@/shared/middleware/auth.middleware"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
 
 export class AuthController {
   constructor(
@@ -22,7 +23,8 @@ export class AuthController {
 
   login = async (req: Request, res: Response) => {
     const result = await this.loginUseCase.execute(req.body)
-    res.status(200).json(response(result, "Login successful"))
+    let resJson = response(result,'Login successful')
+    res.status(HTTP_STATUS.OK).json(resJson)
   }
 
   register = async (req: Request, res: Response) => {
