@@ -28,7 +28,7 @@ export class SignupUseCase {
     const hashedPassword = await argon2.hash(data.password)
 
     // Save the user in database using Domain Entity
-    const userToCreate = new User({
+    const newUser = new User({
       name: data.name,
       email: data.email,
       password: hashedPassword,
@@ -37,7 +37,7 @@ export class SignupUseCase {
       authProvider: AUTH_PROVIDER.LOCAL,
     })
 
-    const user = await this.userRepository.create(userToCreate)
+    const user = await this.userRepository.create(newUser)
 
     // Generate numeric OTP
     const otp = await this.otpService.generateOtp(user.email)

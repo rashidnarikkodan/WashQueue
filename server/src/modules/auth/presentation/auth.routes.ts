@@ -44,6 +44,12 @@ export const createAuthRouter = (authController: AuthController): Router => {
     asyncHandler(authController.setupAccount)
   )
 
+  router.get(
+    "/me",
+    authenticate,
+    asyncHandler(authController.me)
+  )
+
   router.post(
     "/logout",
     authenticate,

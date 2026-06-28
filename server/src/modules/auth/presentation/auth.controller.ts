@@ -6,6 +6,7 @@ import { RefreshTokenUseCase } from "../application/use-cases/refresh-token.use-
 import { LogoutUseCase } from "../application/use-cases/logout.use-case"
 import { SetupAccountUseCase } from "../application/use-cases/setup-account.use-case"
 import { GoogleAuthUseCase } from "../application/use-cases/google-auth.use-case"
+import { GetMeUseCase } from "../application/use-cases/get-me.use-case"
 import response from "@/shared/utils/response"
 import { AuthenticatedRequest } from "@/shared/middleware/auth.middleware"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
@@ -19,7 +20,8 @@ export class AuthController {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly setupAccountUseCase: SetupAccountUseCase,
-    private readonly googleAuthUseCase: GoogleAuthUseCase
+    private readonly googleAuthUseCase: GoogleAuthUseCase,
+    private readonly getMeUseCase: GetMeUseCase
   ) { }
 
   login = async (req: Request, res: Response) => {
@@ -80,6 +82,16 @@ export class AuthController {
     }
     const result = await this.setupAccountUseCase.execute(userId, role)
     res.status(HTTP_STATUS.OK).json(response(result, "Account setup successful"))
+  }
+
+  me = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json(response(null, "Unauthorized"))
+      return
+    }
+    const result = await this.getMeUseCase.execute(userId)
+    res.status(HTTP_STATUS.OK).json(response(result.user, "User retrieved successfully"))
   }
 
   logout = async (req: AuthenticatedRequest, res: Response) => {
