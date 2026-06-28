@@ -1,6 +1,12 @@
-// src/app/routes/main.routes.tsx
-
 import MainLayout from "../layouts/MainLayout";
+import Landing from "../../features/home/pages/Landing";
+import Home from "../../features/home/pages/Home";
+import { useAuthStore } from "../../features/auth/store/authStore";
+
+const RootPathResolver = () => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <Home /> : <Landing />;
+};
 
 export const mainRoutes = {
   path: "/",
@@ -8,7 +14,7 @@ export const mainRoutes = {
   children: [
     {
       index: true,
-      element: <div>Home</div>,
+      element: <RootPathResolver />,
     },
     {
       path: "about",

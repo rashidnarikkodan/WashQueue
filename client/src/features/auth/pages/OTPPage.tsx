@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import type { KeyboardEvent, ClipboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { Check, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Check, Loader2, ArrowLeft } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ export default function OTPPage() {
   const { otpDigits, setOtpDigit, setOtpDigits, resetForm } = useAuthFormStore();
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const isVerifyingRef = useRef(false);
 
   // Resend code countdown timer
   const [timerCount, setTimerCount] = useState(25);
@@ -41,26 +42,22 @@ export default function OTPPage() {
   // Reactive verification: Auto-submits when all 6 digits are entered
   useEffect(() => {
     const code = otpDigits.join("");
-    if (code.length === 6 && !isLoading && !isVerified) {
+    if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
+      isVerifyingRef.current = true;
       const triggerVerify = async () => {
-        const success = await verifyOTP(code);
-        if (success) {
-          setIsVerified(true);
+        try {
+          const success = await verifyOTP(code);
+          if (success) {
+            setIsVerified(true);
+            navigate("/setup-account");
+          }
+        } finally {
+          isVerifyingRef.current = false;
         }
       };
       triggerVerify();
     }
-  }, [otpDigits, verifyOTP, isLoading, isVerified]);
-
-  // Auto-redirect to role setup on successful verification after a brief delay
-  useEffect(() => {
-    if (isVerified) {
-      const timer = setTimeout(() => {
-        navigate("/setup-account");
-      }, 1800);
-      return () => clearTimeout(timer);
-    }
-  }, [isVerified, navigate]);
+  }, [otpDigits, verifyOTP, isVerified, navigate]);
 
   const handleDigitChange = (index: number, val: string) => {
     // Take the last character entered to allow overwriting of values smoothly
@@ -117,10 +114,16 @@ export default function OTPPage() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otpDigits.join("");
-    if (code.length === 6) {
-      const success = await verifyOTP(code);
-      if (success) {
-        setIsVerified(true);
+    if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
+      isVerifyingRef.current = true;
+      try {
+        const success = await verifyOTP(code);
+        if (success) {
+          setIsVerified(true);
+          navigate("/setup-account");
+        }
+      } finally {
+        isVerifyingRef.current = false;
       }
     }
   };
@@ -132,11 +135,18 @@ export default function OTPPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
+    <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full transition-colors duration-300">
       {/* Main Content Area */}
       <main className="flex-grow flex items-center justify-center z-10 p-4">
         {!isVerified ? (
-          <div className="w-full max-w-xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="w-full max-w-xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col">
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors mb-4 self-start w-fit group"
+            >
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+              Back to Sign Up
+            </Link>
             {/* Header Title Section */}
             <div className="text-center space-y-3">
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">

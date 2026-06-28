@@ -1,4 +1,4 @@
-import { api } from "../../../shared/config/axios"
+import { authApi } from "../services/auth.api"
 
 export interface SignupState {
   success: boolean
@@ -56,15 +56,11 @@ export async function signupAction(
     }
 
     // API call
-    const response = await api.post("/auth/signup", {
-      name,
-      email,
-      password,
-    })
+    await authApi.signup(name,email,password)
 
     return {
       success: true,
-      message: response.data.message || "Registration successful! Please verify your email.",
+      message: "Registration successful! Please verify your email.",
       email,
       name,
     }

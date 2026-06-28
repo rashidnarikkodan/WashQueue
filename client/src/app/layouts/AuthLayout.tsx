@@ -20,11 +20,21 @@ export default function AuthLayout() {
     return <Navigate to="/" replace />;
   }
 
+  const getLogoColor = () => {
+    if (location.pathname === "/login") {
+      return "text-white";
+    }
+    if (location.pathname === "/signup") {
+      return "text-white md:text-primary";
+    }
+    return "text-primary";
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className='absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-6'>
         <Link to="/" className="flex items-center gap-2 group">
-          <span className="text-xl font-bold italic tracking-tight text-primary">
+          <span className={`text-xl font-bold italic tracking-tight transition-colors duration-300 ${getLogoColor()}`}>
             WashQueue
           </span>
         </Link>

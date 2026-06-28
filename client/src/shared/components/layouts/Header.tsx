@@ -8,17 +8,15 @@ import NotificationDropdown from "../ui/header/NotificationDropdown";
 import ProfileDropdown from "../ui/header/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
 
-export default function Header() {
+export default function Header({ role }: { role?: string }) {
   const location = useLocation();
   const pathname = location.pathname;
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
-  const currentRole = isAuthenticated && user
-    ? (user.role.toLowerCase() as "admin" | "manager" | "provider" | "customer")
-    : "user";
+  const currentRole = (role?.toLowerCase() as "admin" | "manager" | "provider" | "customer") || "customer";
 
-  const isCustomer = currentRole === "user" || currentRole === "customer";
+  const isCustomer = currentRole === "customer";
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,20 +31,8 @@ export default function Header() {
   // Dynamic Navigation Configurations
   const navLinks = {
     admin: [],
-    manager: [
-      { name: "Dashboard", path: "/manager/dashboard" },
-      { name: "Queue Board", path: "/manager/queue" },
-      { name: "Walk-ins", path: "/manager/walk-ins" },
-    ],
-    provider: [
-      { name: "Dashboard", path: "/provider/dashboard" },
-      { name: "Stations", path: "/provider/stations" },
-      { name: "Bookings", path: "/provider/bookings" },
-    ],
-    user: [
-      { name: "Home", path: "/" },
-      { name: "About", path: "/about" },
-    ],
+    manager: [],
+    provider: [],
     customer: [
       { name: "Home", path: "/" },
       { name: "About", path: "/about" },
@@ -69,7 +55,6 @@ export default function Header() {
       label: "Provider",
       className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
     },
-    user: null,
     customer: null,
   };
 
@@ -163,7 +148,8 @@ export default function Header() {
 
           {/* User Profile / Login trigger */}
           {isAuthenticated ? (
-            <ProfileDropdown currentRole={currentRole === "user" ? "customer" : currentRole} />
+            <ProfileDropdown currentRole={currentRole} />
+
           ) : (
             <button
               onClick={() => navigate("/login")}
@@ -189,7 +175,7 @@ export default function Header() {
 
       {/* Mobile Navigation Drawer */}
       {isMobileMenuOpen && activeLinks.length > 0 && (
-        <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4 duration-200">
+        <div className="md:hidden border-t border-border bg-card/95 rounded-b-[3rem] backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4 duration-200">
           <div className="space-y-1.5 px-2">
             {activeLinks.map((link) => {
               const isActive = pathname === link.path;

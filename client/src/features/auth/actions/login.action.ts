@@ -1,4 +1,4 @@
-import { api } from "../../../shared/config/axios"
+import { authApi } from "../services/auth.api"
 
 export interface LoginState {
   success: boolean
@@ -41,15 +41,12 @@ export async function loginAction(
     }
 
     // API call
-    const response = await api.post("/auth/login", {
-      email,
-      password,
-    })
+    const user = await authApi.login(email, password)
 
     return {
       success: true,
-      message: response.data.message || "Login successful",
-      user: response.data.data,
+      message: "Login successful",
+      user,
     }
   } catch (error: any) {
     return {

@@ -22,7 +22,7 @@ export default function SignupForm() {
     onSuccess: async (tokenResponse) => {
       const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
-        navigate("/")
+        navigate("/setup-account")
       }
     },
     onError: () => {

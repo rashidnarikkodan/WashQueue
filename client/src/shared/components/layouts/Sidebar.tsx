@@ -14,22 +14,26 @@ const Sidebar = ({ items }: Props) => {
       className="
         group
         fixed
-        left-4
-        top-4
+        left-0
+        top-[96px]
         z-50
         flex
-        h-[95vh]
-        w-[88px]
+        h-auto
+        w-[76px]
         flex-col
-        rounded-[40px]
-        bg-[#06133A]
-        p-4
+        rounded-r-[2rem]
+        border
+        border-border/80
+        bg-card/90
+        backdrop-blur-md
+        p-3
         transition-all
         duration-300
-        hover:w-[340px]
+        hover:w-[280px]
+        shadow-xl
       "
     >
-      <nav className="flex flex-col gap-3">
+      <nav className="flex flex-col gap-1.5 overflow-y-auto max-h-full scrollbar-none">
         {items.map((item) => {
           const Icon = item.icon;
 
@@ -41,37 +45,41 @@ const Sidebar = ({ items }: Props) => {
                 `
                 flex
                 items-center
-                gap-4
+                justify-center
+                group-hover:justify-start
                 overflow-hidden
-                rounded-full
-                px-5
-                py-4
+                rounded-2xl
+                p-3
+                group-hover:px-4
                 transition-all
-                duration-300
+                duration-200
+                border
 
                 ${isActive
-                  ? "bg-[#AFC3FF] text-[#0B2B68]"
-                  : "text-[#C7CEE2] hover:bg-[#13224D]"
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "text-muted-foreground border-transparent hover:bg-muted/40 hover:text-foreground"
                 }
               `
               }
             >
-              <div className="min-w-7">
-                <Icon
-                  size={28} />
+              <div className="w-7 h-7 min-w-7 flex items-center justify-center">
+                <Icon size={20} />
               </div>
 
               <span
-                className={`
+                className="
                   whitespace-nowrap
-                  text-[18px]
-                  font-medium
+                  text-sm
+                  font-semibold
+                  max-w-0
                   opacity-0
+                  overflow-hidden
                   transition-all
-                  duration-300
+                  duration-200
+                  group-hover:max-w-xs
                   group-hover:opacity-100
-                  }
-                `}
+                  group-hover:ml-4
+                "
               >
                 {item.name}
               </span>

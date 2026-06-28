@@ -20,7 +20,7 @@ const ManagerLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <Header role={ROLE.MANAGER} />
       <main className="flex-1 p-6">
         <Outlet />
       </main>

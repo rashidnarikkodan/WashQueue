@@ -1,10 +1,12 @@
-import { Outlet, Navigate } from "react-router-dom"
+import { Outlet, Navigate, useLocation } from "react-router-dom"
 import Header from "../../shared/components/layouts/Header"
 import { ROLE } from "../../shared/constants/role.const"
 import { useAuthStore } from "../../features/auth/store/authStore"
 
 const ProviderLayout = () => {
   const { isAuthenticated, user, isLoading } = useAuthStore();
+
+  const location = useLocation()
 
   if (isLoading) {
     return (
@@ -14,13 +16,13 @@ const ProviderLayout = () => {
     );
   }
 
-  if (!isAuthenticated || !user || user.role !== ROLE.PROVIDER) {
+  if (!isAuthenticated || !user || user.role !== ROLE.PROVIDER && location.pathname !== '/provider/onboarding') {
     return <Navigate to="/login" replace />;
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <Header role={ROLE.PROVIDER} />
       <main className="flex-1 p-6">
         <Outlet />
       </main>

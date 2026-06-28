@@ -21,11 +21,11 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar items={adminSideBarItems} />
-      <div className="flex flex-col flex-1 pl-28 min-h-screen">
-        <Header />
-        <main className="flex-1 p-6">
+    <div className="flex flex-col min-h-screen bg-background">
+      <Header role={ROLE.ADMIN} />
+      <div className="flex flex-1 pt-20 px-6">
+        <Sidebar items={adminSideBarItems} />
+        <main className="flex-1 pl-24 pb-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>

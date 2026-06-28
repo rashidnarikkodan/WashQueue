@@ -1,16 +1,13 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "../../domain/repositories/user.repository"
+import { ROLE, RoleType } from "@/shared/constants/role.constants"
 
 export class SetupAccountUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(userId: string, role: string) {
-    let mappedRole = role.toUpperCase()
-    if (mappedRole === "USER") {
-      mappedRole = "CUSTOMER"
-    }
+  async execute(userId: string, role: RoleType) {
 
-    if (mappedRole !== "CUSTOMER" && mappedRole !== "PROVIDER") {
+    if (role !== ROLE.CUSTOMER && role !== ROLE.PROVIDER) {
       throw new AppError("Invalid role specified", 400)
     }
 
@@ -20,7 +17,7 @@ export class SetupAccountUseCase {
     }
 
     const updatedUser = await this.userRepository.update(userId, {
-      role: mappedRole as any,
+      role,
     })
 
     if (!updatedUser) {
@@ -32,7 +29,7 @@ export class SetupAccountUseCase {
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
-        role: role.toLowerCase(), // Return client-compatible role representation
+        role, // Return client-compatible role representation
         isVerified: updatedUser.isVerified,
       },
     }

@@ -105,6 +105,23 @@ export const authApi = {
     }
   },
 
+  me: async (): Promise<User> => {
+    try {
+      const response = await api.get("/auth/me")
+      const resJson = response.data
+
+      return {
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Failed to fetch user session"
+      throw new Error(message)
+    }
+  },
+
   /**
    * Inform backend of logout (optional)
    */

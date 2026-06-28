@@ -175,7 +175,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <div
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "customer" ? "/signup-provider" : `/${currentRole}/dashboard`);
+                navigate(currentRole === "customer" ? "/provider/onboarding" : `/${currentRole}/dashboard`);
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
             >

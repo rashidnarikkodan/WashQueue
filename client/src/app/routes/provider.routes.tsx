@@ -11,6 +11,10 @@ export const providerRoutes = {
       element: <div>Provider Dashboard</div>,
     },
     {
+      path: "onboarding",
+      element: <div>Provider Onboarding</div>,
+    },
+    {
       path: "stations",
       element: <div>Stations</div>,
     },
