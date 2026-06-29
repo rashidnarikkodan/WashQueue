@@ -16,9 +16,12 @@ const Sidebar = ({ items }: Props) => {
         fixed
         left-0
         top-[96px]
+        [@media(max-height:800px)]:top-[80px]
         z-50
         flex
         h-auto
+        max-h-[calc(100vh-120px)]
+        [@media(max-height:800px)]:max-h-[calc(100vh-100px)]
         w-[76px]
         flex-col
         rounded-r-[2rem]
@@ -27,13 +30,16 @@ const Sidebar = ({ items }: Props) => {
         bg-card/90
         backdrop-blur-md
         p-3
+        [@media(max-height:800px)]:p-2
         transition-all
         duration-300
         hover:w-[280px]
         shadow-xl
+        overflow-y-auto
+        scrollbar-none
       "
     >
-      <nav className="flex flex-col gap-1.5 overflow-y-auto max-h-full scrollbar-none">
+      <nav className="flex flex-col gap-1.5 [@media(max-height:800px)]:gap-1 overflow-y-auto max-h-full scrollbar-none">
         {items.map((item) => {
           const Icon = item.icon;
 
@@ -50,6 +56,7 @@ const Sidebar = ({ items }: Props) => {
                 overflow-hidden
                 rounded-2xl
                 p-3
+                [@media(max-height:800px)]:p-2
                 group-hover:px-4
                 transition-all
                 duration-200
