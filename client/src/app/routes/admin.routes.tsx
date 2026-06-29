@@ -1,6 +1,8 @@
 // src/app/routes/admin.routes.tsx
 
 import AdminLayout from "../layouts/AdminLayout";
+import UserManagement from "../../features/users/pages/UserManagement";
+import UserDetails from "../../features/users/pages/UserDetails";
 
 export const adminRoutes = {
   path: "/admin",
@@ -12,7 +14,11 @@ export const adminRoutes = {
     },
     {
       path: "users",
-      element: <div>User Management</div>,
+      element: <UserManagement />,
+    },
+    {
+      path: "users/:id",
+      element: <UserDetails />,
     },
     {
       path: "providers",
