@@ -1,6 +1,6 @@
 import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
 import { LoginInput } from "../schema/login.schema"
 

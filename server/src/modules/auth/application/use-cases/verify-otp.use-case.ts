@@ -1,5 +1,5 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { OtpService } from "../services/otp.service"
 import { TokenService } from "../services/token.service"
 import { VerifyOtpInput } from "../schema/verify-otp.schema"

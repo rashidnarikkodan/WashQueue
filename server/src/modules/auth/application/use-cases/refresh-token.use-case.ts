@@ -1,6 +1,6 @@
 import { AppError } from "@/shared/errors/app-error"
 import { UnauthorizedError } from "@/shared/errors/unauthorized-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
 
 export class RefreshTokenUseCase {

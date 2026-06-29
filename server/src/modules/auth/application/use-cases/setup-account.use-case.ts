@@ -1,5 +1,5 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { ROLE, RoleType } from "@/shared/constants/role.constants"
 
 export class SetupAccountUseCase {

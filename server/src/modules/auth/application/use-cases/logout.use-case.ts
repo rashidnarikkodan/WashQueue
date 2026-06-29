@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 
 export class LogoutUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

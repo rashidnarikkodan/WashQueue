@@ -1,4 +1,4 @@
-import { MongooseUserRepository } from "./infrastructure/repositories/mongoose-user.repository"
+import { MongooseUserRepository } from "../user/infrastructure/repositories/mongoose-user.repository"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { OtpService } from "./application/services/otp.service"
 import { TokenService } from "./application/services/token.service"

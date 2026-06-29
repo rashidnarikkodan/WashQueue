@@ -1,5 +1,5 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 
 export class GetMeUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

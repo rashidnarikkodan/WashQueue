@@ -1,11 +1,11 @@
 import { OAuth2Client } from "google-auth-library"
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "../../domain/repositories/user.repository"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 
-import { User } from "../../domain/entities/User"
+import { User } from "@/modules/user/infrastructure/models/user.model"
 
 export class GoogleAuthUseCase {
   private client: OAuth2Client | null = null
