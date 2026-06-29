@@ -36,7 +36,8 @@ export const authApi = {
         id: resJson.data.id || resJson.data._id,
         name: resJson.data.name,
         email: resJson.data.email,
-        role: resJson.data.role
+        role: resJson.data.role,
+        isNewUser: resJson.data.isNewUser
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Google Sign-In failed"

@@ -60,13 +60,13 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   router.post(
     "/forgot-password",
-    validateRequest(forgotPasswordSchema, 'body'),
+    validateRequest(forgotPasswordSchema),
     asyncHandler(authController.forgotPassword)
   )
 
   router.post(
     "/reset-password",
-    validateRequest(resetPasswordSchema, 'body'),
+    validateRequest(resetPasswordSchema),
     asyncHandler(authController.resetPassword)
   )
 

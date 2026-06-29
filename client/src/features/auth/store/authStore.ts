@@ -7,7 +7,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: RoleType
+  role: RoleType;
+  isNewUser?: boolean;
 }
 
 interface AuthStore {
