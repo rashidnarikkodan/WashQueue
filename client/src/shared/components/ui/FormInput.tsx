@@ -8,6 +8,7 @@ interface FormInputProps {
   placeholder: string;
   name?: string;
   value?: string;
+  defaultValue?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   autoComplete?: string;
@@ -21,6 +22,7 @@ export default function FormInput({
   placeholder,
   name,
   value,
+  defaultValue,
   onChange,
   error,
   autoComplete,
@@ -44,6 +46,7 @@ export default function FormInput({
           type={inputType}
           placeholder={placeholder}
           value={value}
+          defaultValue={defaultValue}
           onChange={onChange}
           autoComplete={autoComplete}
           required={required}

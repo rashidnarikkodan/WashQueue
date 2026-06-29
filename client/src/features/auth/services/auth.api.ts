@@ -8,7 +8,7 @@ export const authApi = {
    */
   login: async (email: string, password: string): Promise<User> => {
     try {
-      const response = await api.post("/auth/login", { email, password })
+      const response = await api.post("/auth/login", { email, password },{skipToast:true})
       const resJson = response.data
 
       return {
@@ -18,6 +18,7 @@ export const authApi = {
         role: resJson.data.role
       }
     } catch (error: any) {
+      console.log(error)
       const message = error.response?.data?.message || error.message || "Failed to login"
       throw new Error(message)
     }
@@ -48,7 +49,7 @@ export const authApi = {
    */
   signup: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/signup", { name, email, password })
+      const response = await api.post("/auth/signup", { name, email, password }, { skipToast: true })
       const resJson = response.data
 
       return {

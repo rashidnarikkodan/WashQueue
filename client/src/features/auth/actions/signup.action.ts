@@ -17,9 +17,11 @@ export async function signupAction(
   _prevState: SignupState,
   formData: FormData
 ): Promise<SignupState> {
+  let name = ""
+  let email = ""
   try {
-    const name = formData.get("name")?.toString().trim() || ""
-    const email = formData.get("email")?.toString().trim() || ""
+    name = formData.get("name")?.toString().trim() || ""
+    email = formData.get("email")?.toString().trim() || ""
     const password = formData.get("password")?.toString() || ""
     const confirmPassword = formData.get("confirmPassword")?.toString() || ""
 
@@ -52,6 +54,8 @@ export async function signupAction(
       return {
         success: false,
         errors,
+        email,
+        name,
       }
     }
 
@@ -68,8 +72,10 @@ export async function signupAction(
     return {
       success: false,
       message:
-        error.response?.data?.message ||
+        error.message ||
         "Registration failed. Please try again.",
+      email,
+      name,
     }
   }
 }

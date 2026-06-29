@@ -8,14 +8,16 @@ export interface LoginState {
     password?: string[]
   }
   user?: any
+  email?: string
 }
 
 export async function loginAction(
   _prevState: LoginState,
   formData: FormData
 ): Promise<LoginState> {
+  let email = ""
   try {
-    const email = formData.get("email")?.toString().trim() || ""
+    email = formData.get("email")?.toString().trim() || ""
     const password = formData.get("password")?.toString() || ""
 
     const errors: LoginState["errors"] = {}
@@ -37,6 +39,7 @@ export async function loginAction(
       return {
         success: false,
         errors,
+        email,
       }
     }
 
@@ -49,11 +52,11 @@ export async function loginAction(
       user,
     }
   } catch (error: any) {
+    console.log(error)
     return {
       success: false,
-      message:
-        error.response?.data?.message ||
-        "Failed to login",
+      message: error.message || "Failed to login",
+      email,
     }
   }
 }

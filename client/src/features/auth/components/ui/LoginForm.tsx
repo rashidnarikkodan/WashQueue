@@ -2,6 +2,7 @@ import { useActionState, useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { useGoogleLogin } from "@react-oauth/google"
+import { AlertCircle } from "lucide-react"
 
 import FormInput from "../../../../shared/components/ui/FormInput"
 import SocialButton from "./SocialButton"
@@ -68,9 +69,7 @@ export default function LoginForm() {
       }
     }
 
-    if (!state.success && state.message) {
-      toast.error(state.message)
-    }
+    // Error is handled via inline message box inside form
   }, [state, navigate])
 
   return (
@@ -101,12 +100,20 @@ export default function LoginForm() {
       </div>
 
       <form action={formAction} className="space-y-4" noValidate>
+        {(!state.success && state.message) && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+            <AlertCircle className="h-4.5 w-4.5 text-red-400 shrink-0" />
+            <span>{state.message}</span>
+          </div>
+        )}
+
         <FormInput
           id="email-input"
           label="Email Address"
           type="email"
           name="email"
           placeholder="e.g. rashid@example.com"
+          defaultValue={state.email || ""}
           error={localErrors.email}
           onChange={(e) => {
             const val = e.target.value;

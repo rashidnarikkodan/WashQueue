@@ -4,15 +4,14 @@ import Header from "../../shared/components/layouts/Header"
 import { adminSideBarItems } from "../../shared/config/sidebar.config"
 import { useAuthStore } from "../../features/auth/store/authStore"
 import { ROLE } from "../../shared/constants/role.const"
+import Loading from "../../shared/components/ui/Loading"
 
 const AdminLayout = () => {
   const { isAuthenticated, user, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-      </div>
+      <Loading fullScreen text="Loading Administrator Dashboard..." />
     );
   }
 

@@ -9,7 +9,7 @@ export default function AuthLayout() {
 
   if (isLoading) {
     return (
-      <Loading />
+      <Loading fullScreen text="Checking session..." />
     );
   }
 
