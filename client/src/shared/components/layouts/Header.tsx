@@ -35,7 +35,7 @@ export default function Header({ role }: { role?: string }) {
     provider: [],
     customer: [
       { name: "Home", path: "/" },
-      { name: "About", path: "/about" },
+      { name: "Stations", path: "/stations" },
     ],
   };
 
