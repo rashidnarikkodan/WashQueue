@@ -5,6 +5,7 @@ import UserStats from "../components/ui/UserStats";
 import UserTable from "../components/layout/UserTable";
 import FilterCard from "../components/layout/FilterCard";
 import { usersApi, type User } from "../service/users.api";
+import { FILTER_STATUS } from "@/shared/constants/status.const";
 import type { PaginationMeta } from "@/shared/components/ui/Pagination";
 
 const UserManagement = () => {
@@ -30,7 +31,7 @@ const UserManagement = () => {
   // Read URL Search Parameters
   const searchQuery = searchParams.get("q") || "";
   const roleFilter = searchParams.get("role") || "all";
-  const statusFilter = searchParams.get("status") || "all";
+  const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL;
   const activeTab = (searchParams.get("tab") as "all" | "customer" | "provider") || "all";
   const highCancellation = searchParams.get("cancellation") === "true";
   const fraudFlag = searchParams.get("fraud") === "true";
@@ -47,7 +48,7 @@ const UserManagement = () => {
         limit,
         search: searchQuery,
         role: roleFilter === "all" ? undefined : roleFilter,
-        isBlocked: statusFilter === "all" ? undefined : statusFilter === "blocked"
+        isBlocked: statusFilter === FILTER_STATUS.ALL ? undefined : statusFilter === FILTER_STATUS.BLOCKED
       });
 
       // Filter by cancellation and fraud on client side since the backend doesn't support them
@@ -81,7 +82,7 @@ const UserManagement = () => {
     const params = new URLSearchParams(searchParams);
     
     Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null || val === "" || val === false || val === "all") {
+      if (val === null || val === "" || val === false || val === FILTER_STATUS.ALL) {
         params.delete(key);
       } else {
         params.set(key, String(val));

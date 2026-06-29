@@ -9,6 +9,7 @@ export interface User {
   email: string;
   role: RoleType;
   isNewUser?: boolean;
+  walletBalance?: number;
 }
 
 interface AuthStore {

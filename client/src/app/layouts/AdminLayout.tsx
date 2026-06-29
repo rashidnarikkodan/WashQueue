@@ -24,7 +24,7 @@ const AdminLayout = () => {
       <Header role={ROLE.ADMIN} />
       <div className="flex flex-1 pt-20 px-6">
         <Sidebar items={adminSideBarItems} />
-        <main className="flex-1 pl-24 pb-6 overflow-y-auto">
+        <main className="flex-1 md:pl-24 pl-0 pb-24 md:pb-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>

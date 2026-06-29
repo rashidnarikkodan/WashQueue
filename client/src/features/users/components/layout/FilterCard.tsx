@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { ROLE } from "../../../../shared/constants/role.const";
+import { FILTER_STATUS } from "../../../../shared/constants/status.const";
 
 interface FilterCardProps {
   searchQuery: string;
@@ -131,9 +132,9 @@ const FilterCard = ({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full bg-[#2E3447] border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
           >
-            <option value="all">Any Status</option>
-            <option value="active">Active</option>
-            <option value="blocked">Blocked</option>
+            <option value={FILTER_STATUS.ALL}>Any Status</option>
+            <option value={FILTER_STATUS.ACTIVE}>Active</option>
+            <option value={FILTER_STATUS.BLOCKED}>Blocked</option>
           </select>
         </div>
 

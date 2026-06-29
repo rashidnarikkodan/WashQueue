@@ -29,7 +29,7 @@ export const authApi = {
    */
   loginWithGoogle: async (token: string): Promise<User> => {
     try {
-      const response = await api.post("/auth/google", { token })
+      const response = await api.post("/auth/google", { token }, { skipToast: true })
       const resJson = response.data
 
       return {
@@ -68,7 +68,7 @@ export const authApi = {
    */
   verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
     try {
-      const response = await api.post("/auth/verify-otp", { email, code })
+      const response = await api.post("/auth/verify-otp", { email, code }, { skipToast: true })
       const resJson = response.data
 
       if (!resJson.success || !resJson.data) {
@@ -92,14 +92,15 @@ export const authApi = {
    */
   setupAccount: async (role: RoleType): Promise<User> => {
     try {
-      const response = await api.post("/auth/setup-account", { role })
+      const response = await api.post("/auth/setup-account", { role }, { skipToast: true })
       const resJson = response.data
+      const userData = resJson.data?.user || resJson.data
 
       return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role
+        id: userData.id || userData._id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Account setup failed"
@@ -140,7 +141,7 @@ export const authApi = {
    */
   forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/forgot-password", { email })
+      const response = await api.post("/auth/forgot-password", { email }, { skipToast: true })
       const resJson = response.data
       return {
         success: resJson.success,
@@ -157,7 +158,7 @@ export const authApi = {
    */
   resetPassword: async (email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/reset-password", { email, code, password: newPassword })
+      const response = await api.post("/auth/reset-password", { email, code, password: newPassword }, { skipToast: true })
       const resJson = response.data
       return {
         success: resJson.success,

@@ -12,6 +12,8 @@ export interface User {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  authProvider?: string;
+  lastLoginAt?: string;
 }
 
 export interface GetUsersFilters {
@@ -65,7 +67,9 @@ export const usersApi = {
           isBlocked: u.isBlocked,
           isVerified: u.isVerified,
           createdAt: u.createdAt,
-          updatedAt: u.updatedAt
+          updatedAt: u.updatedAt,
+          authProvider: u.authProvider,
+          lastLoginAt: u.lastLoginAt
         })),
         pagination: resJson.data.pagination,
         stats: resJson.data.stats
@@ -91,7 +95,9 @@ export const usersApi = {
         isBlocked: u.isBlocked,
         isVerified: u.isVerified,
         createdAt: u.createdAt,
-        updatedAt: u.updatedAt
+        updatedAt: u.updatedAt,
+        authProvider: u.authProvider,
+        lastLoginAt: u.lastLoginAt
       };
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to retrieve user details";
@@ -101,7 +107,7 @@ export const usersApi = {
 
   updateUser: async (id: string, updates: Partial<User>): Promise<User> => {
     try {
-      const response = await api.patch(`/users/${id}`, updates);
+      const response = await api.patch(`/users/${id}`, updates, { skipToast: true });
       const resJson = response.data;
       const u = resJson.data;
 
@@ -114,7 +120,9 @@ export const usersApi = {
         isBlocked: u.isBlocked,
         isVerified: u.isVerified,
         createdAt: u.createdAt,
-        updatedAt: u.updatedAt
+        updatedAt: u.updatedAt,
+        authProvider: u.authProvider,
+        lastLoginAt: u.lastLoginAt
       };
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to update user";
@@ -124,7 +132,7 @@ export const usersApi = {
 
   deleteUser: async (id: string): Promise<boolean> => {
     try {
-      const response = await api.delete(`/users/${id}`);
+      const response = await api.delete(`/users/${id}`, { skipToast: true });
       return response.data.success;
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to delete user";
