@@ -110,7 +110,7 @@ export const authApi = {
 
   me: async (): Promise<User> => {
     try {
-      const response = await api.get("/auth/me")
+      const response = await api.get("/auth/me", { skipToast: true })
       const resJson = response.data
 
       return {

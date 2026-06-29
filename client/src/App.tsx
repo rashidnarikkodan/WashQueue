@@ -15,9 +15,15 @@ function App() {
   console.log("Auth State Changed:", state)
 })
 
-  useEffect(()=>{
+  useEffect(() => {
     authApi.me()
-  })
+      .then((user) => {
+        useAuthStore.setState({ user, isAuthenticated: true });
+      })
+      .catch(() => {
+        // Handled globally by response interceptor
+      });
+  }, []);
 
   return (    
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

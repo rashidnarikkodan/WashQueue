@@ -15,6 +15,8 @@ import {
   ArrowRight
 } from "lucide-react";
 import { MOCK_DASHBOARD_DATA } from "../mock/dashboard.mock";
+import FeatureLock from "@/shared/components/ui/FeatureLock";
+import { getGreeting } from "@/shared/utils/greeting";
 
 export default function Home() {
   const { user } = useAuthStore();
@@ -29,8 +31,8 @@ export default function Home() {
         
         {/* Welcome Section */}
         <div className="space-y-2 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-none">
-            {data.user.greeting}, <span className="text-primary">{user?.name || data.user.name}</span>
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
+            {getGreeting()}, <span className="text-primary">{user?.name || data.user.name}</span>
           </h1>
           <p className="text-base md:text-lg text-slate-400 font-medium">
             Ready for a fresh wash today?
@@ -279,6 +281,7 @@ export default function Home() {
           </div>
         </section>
 
+            <FeatureLock >
         {/* Wallet & Loyalty Rewards Support Grid */}
         <section className="bg-[#23293C] border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-2xl animate-in fade-in duration-500">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
@@ -310,6 +313,7 @@ export default function Home() {
             </div>
 
             {/* Loyalty points details */}
+
             <div className="md:col-span-4 flex flex-col justify-between space-y-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-end">
@@ -378,6 +382,7 @@ export default function Home() {
 
           </div>
         </section>
+            </FeatureLock>
 
       </div>
     </div>
