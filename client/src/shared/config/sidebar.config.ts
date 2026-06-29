@@ -11,6 +11,8 @@ import {
   Bell,
   BarChart3,
   Settings,
+  Calendar,
+  CreditCard,
 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
@@ -92,48 +94,43 @@ export const providerSideBarItems: SidebarItem[] = [
     icon: LayoutDashboard,
   },
   {
-    name: "User Management",
-    path: "/provider/users",
-    icon: Users,
+    name: "Queue Management",
+    path: "/provider/queues",
+    icon: Hourglass,
   },
   {
-    name: "Station Management",
+    name: "Bookings",
+    path: "/provider/bookings",
+    icon: Calendar,
+  },
+  {
+    name: "My Stations",
     path: "/provider/stations",
     icon: Fuel,
   },
   {
-    name: "Booking Monitoring",
-    path: "/admin/bookings",
-    icon: ReceiptText,
+    name: "Financial Records",
+    path: "/provider/financial-records",
+    icon: CreditCard,
   },
   {
-    name: "Queue Monitoring",
-    path: "/admin/queues",
-    icon: Hourglass,
-  },
-  {
-    name: "Reviews & Ratings Moderation",
-    path: "/admin/reviews",
-    icon: MessageSquareMore,
-  },
-  {
-    name: "Fraud Monitoring",
-    path: "/admin/fraud",
-    icon: ShieldAlert,
-  },
-  {
-    name: "Notifications Management",
-    path: "/admin/notifications",
-    icon: Bell,
-  },
-  {
-    name: "Reports & Analytics",
-    path: "/admin/reports",
+    name: "Analytics",
+    path: "/provider/analytics",
     icon: BarChart3,
   },
   {
-    name: "System Settings",
-    path: "/admin/settings",
-    icon: Settings,
+    name: "Customer Feedback",
+    path: "/provider/feedback",
+    icon: MessageSquareMore,
+  },
+  {
+    name: "Notifications",
+    path: "/provider/notifications",
+    icon: Bell,
+  },
+  {
+    name: "Team & Managers",
+    path: "/provider/team",
+    icon: Users,
   },
 ];

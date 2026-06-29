@@ -1,5 +1,3 @@
-// src/app/routes/admin.routes.tsx
-
 import AdminLayout from "../layouts/AdminLayout";
 import UserManagement from "../../features/users/pages/UserManagement";
 import UserDetails from "../../features/users/pages/UserDetails";
@@ -10,7 +8,7 @@ export const adminRoutes = {
   children: [
     {
       path: "dashboard",
-      element: <div>Admin Dashboard</div>,
+      element: <>Dashboard</>,
     },
     {
       path: "users",
@@ -22,7 +20,43 @@ export const adminRoutes = {
     },
     {
       path: "providers",
-      element: <div>Provider Management</div>,
+      element: <>Provider Verification</>,
+    },
+    {
+      path: "stations",
+      element: <>Station Management</>,
+    },
+    {
+      path: "categories",
+      element: <>Vehicle Category Management</>,
+    },
+    {
+      path: "bookings",
+      element: <>Booking Monitoring</>,
+    },
+    {
+      path: "queues",
+      element: <>Queue Monitoring</>,
+    },
+    {
+      path: "reviews",
+      element: <>Reviews & Ratings Moderation</>,
+    },
+    {
+      path: "fraud",
+      element: <>Fraud Monitoring</>,
+    },
+    {
+      path: "notifications",
+      element: <>Notifications Management</>,
+    },
+    {
+      path: "reports",
+      element: <>Reports & Analytics</>,
+    },
+    {
+      path: "settings",
+      element: <>System Settings</>,
     },
   ],
 };

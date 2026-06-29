@@ -1,5 +1,3 @@
-// src/app/routes/provider.routes.tsx
-
 import ProviderLayout from "../layouts/ProviderLayout";
 
 export const providerRoutes = {
@@ -8,19 +6,43 @@ export const providerRoutes = {
   children: [
     {
       path: "dashboard",
-      element: <div>Provider Dashboard</div>,
+      element: <>Dashboard</>,
     },
     {
-      path: "onboarding",
-      element: <div>Provider Onboarding</div>,
-    },
-    {
-      path: "stations",
-      element: <div>Stations</div>,
+      path: "queues",
+      element: <>Queue Management</>,
     },
     {
       path: "bookings",
-      element: <div>Bookings</div>,
+      element: <>Bookings</>,
+    },
+    {
+      path: "stations",
+      element: <>My Stations</>,
+    },
+    {
+      path: "financial-records",
+      element: <>Financial Records</>,
+    },
+    {
+      path: "analytics",
+      element: <>Analytics</>,
+    },
+    {
+      path: "feedback",
+      element: <>Customer Feedback</>,
+    },
+    {
+      path: "notifications",
+      element: <>Notifications</>,
+    },
+    {
+      path: "team",
+      element: <>Team & Managers</>,
+    },
+    {
+      path: "onboarding",
+      element: <>Provider Onboarding</>,
     },
   ],
 };

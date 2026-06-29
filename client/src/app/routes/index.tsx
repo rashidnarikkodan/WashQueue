@@ -8,6 +8,7 @@ import { providerRoutes } from "./provider.routes";
 import { managerRoutes } from "./manager.routes";
 import { adminRoutes } from "./admin.routes";
 import ErrorBoundary from "../../shared/pages/ErrorBoundary";
+import NotFoundPage from "../../shared/pages/NotFoundPage";
 
 export const router = createBrowserRouter([
   {
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: ( <div>404 Error</div> ),
+    element: <NotFoundPage />,
     errorElement: <ErrorBoundary />,
   }
 ]);
