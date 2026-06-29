@@ -2,6 +2,9 @@ import { User as UserModel } from "../models/user.model"
 import { User } from "../../domain/entities/User"
 import { UserMapper } from "../mappers/user.mapper"
 import { IUserRepository } from "../../domain/repositories/user.repository"
+import { GetUsersQuery } from "../../application/schema/get-users.schema"
+import { buildPaginationMeta, getPagination } from "@/shared/utils/pagination"
+import { PaginationMeta } from "@/shared/types/pagination"
 
 export class MongooseUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
@@ -32,4 +35,72 @@ export class MongooseUserRepository implements IUserRepository {
     const result = await UserModel.findByIdAndDelete(id).exec()
     return !!result
   }
+  async getAllUsers(query: GetUsersQuery):Promise<{
+      users:User[],
+      pagination: PaginationMeta ,
+    }> {
+    const {
+      page,
+      limit,
+      search,
+      role,
+      isBlocked,
+      sortBy,
+      sortOrder,
+    } = query
+
+    const filter: any = {}
+
+    // search
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ]
+    }
+
+    // role filter
+    if (role) {
+      filter.role = role
+    }
+
+    // blocked filter
+    if (typeof isBlocked === "boolean") {
+      filter.isBlocked = isBlocked
+    }
+
+    // sorting
+    const sort: Record<string, 1 | -1> = {
+      [sortBy]: sortOrder === "asc" ? 1 : -1,
+    }
+
+    // pagination
+    const { skip } = getPagination({page,limit})
+
+    const [users, total] = await Promise.all([
+      UserModel.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .select("-password")
+        .lean()
+        .exec(),
+
+      UserModel.countDocuments(filter).exec(),
+    ])
+
+    let paginationMetaData = buildPaginationMeta({
+        total,
+        page,
+        limit,
+      })
+
+    const domainUsers = users.map((user) => UserMapper.toDomain(user))
+
+    return {
+      users: domainUsers,
+      pagination: paginationMetaData,
+    }
+  }
+
 }
