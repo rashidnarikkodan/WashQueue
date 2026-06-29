@@ -4,6 +4,7 @@ import loggerMiddleware from "./shared/middleware/logger.middleware"
 import notFoundMiddleware from "./shared/middleware/not-found.middleware"
 import errorMiddleware from "./shared/middleware/error.middleware"
 import authRouter from "./modules/auth/auth.module"
+import userRouter from "@/modules/user/user.module"
 
 const app = express()
 
@@ -14,6 +15,7 @@ app.use(loggerMiddleware)
 
 
 app.use("/api/auth", authRouter)
+app.use('/api/users', userRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

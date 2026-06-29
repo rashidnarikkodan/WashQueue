@@ -2,7 +2,7 @@ import { Router } from "express"
 import { AuthController } from "./auth.controller"
 import asyncHandler from "@/shared/utils/async-handler"
 import { validateRequest } from "@/shared/middleware/validation.middleware"
-import { authenticate } from "@/shared/middleware/auth.middleware"
+import { authenticate } from "@/shared/middleware/authenticate"
 import { loginSchema } from "../application/schema/login.schema"
 import { signupSchema } from "../application/schema/signup.schema"
 import { verifyOtpSchema } from "../application/schema/verify-otp.schema"
@@ -14,19 +14,19 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   router.post(
     "/signup",
-    validateRequest(signupSchema),
+    validateRequest(signupSchema, 'body'),
     asyncHandler(authController.signup)
   )
 
   router.post(
     "/login",
-    validateRequest(loginSchema),
+    validateRequest(loginSchema, 'body'),
     asyncHandler(authController.login)
   )
 
   router.post(
     "/verify-otp",
-    validateRequest(verifyOtpSchema),
+    validateRequest(verifyOtpSchema, 'body'),
     asyncHandler(authController.verifyOtp)
   )
 

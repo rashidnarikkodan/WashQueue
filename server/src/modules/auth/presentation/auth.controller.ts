@@ -10,7 +10,7 @@ import { GetMeUseCase } from "../application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "../application/use-cases/forgot-password.use-case"
 import { ResetPasswordUseCase } from "../application/use-cases/reset-password.use-case"
 import response from "@/shared/utils/response"
-import { AuthenticatedRequest } from "@/shared/middleware/auth.middleware"
+import { AuthenticatedRequest } from "@/shared/middleware/authenticate"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { setAuthCookies, clearAuthCookies } from "@/shared/utils/cookies"
 
