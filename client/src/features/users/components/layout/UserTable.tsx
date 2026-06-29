@@ -1,46 +1,27 @@
 import { Link } from "react-router-dom";
-import { Search, Mail, Shield, Calendar, Ban, Check, Trash2 } from "lucide-react";
+import { Mail, Shield, Calendar, Ban, Check, Trash2 } from "lucide-react";
+import type { User } from "../../service/users.api";
 import { ROLE } from "../../../../shared/constants/role.const";
 import Pagination, { type PaginationMeta } from "@/shared/components/ui/Pagination";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: keyof typeof ROLE;
-  status: "ACTIVE" | "BLOCKED";
-  joinedDate: string;
-}
-
 interface UserTableProps {
   users: User[];
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  roleFilter: string;
-  setRoleFilter: (r: string) => void;
-  statusFilter: string;
-  setStatusFilter: (s: string) => void;
-  onToggleStatus: (id: string) => void;
-  onDelete: (id: string) => void;
   paginationMeta: PaginationMeta;
   onPageChange: (page: number) => void;
+  onToggleStatus: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const UserTable = ({
   users,
-  searchQuery,
-  setSearchQuery,
-  roleFilter,
-  setRoleFilter,
-  statusFilter,
-  setStatusFilter,
-  onToggleStatus,
-  onDelete,
   paginationMeta,
-  onPageChange
+  onPageChange,
+  onToggleStatus,
+  onDelete
 }: UserTableProps) => {
   // Get Initials for Avatar
   const getInitials = (name: string) => {
+    if (!name) return "U";
     return name
       .split(" ")
       .map(n => n[0])
@@ -62,50 +43,16 @@ const UserTable = ({
     }
   };
 
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toISOString().split("T")[0];
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="border border-border/80 bg-card/60 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden">
-      {/* Filters */}
-      <div className="p-4 border-b border-border flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-muted/40 border border-border/80 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
-          />
-        </div>
-
-        <div className="flex w-full md:w-auto items-center gap-3 self-stretch md:self-auto">
-          <div className="flex-1 md:flex-none">
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full md:w-40 bg-muted/40 border border-border/80 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold"
-            >
-              <option value="ALL">All Roles</option>
-              <option value="ADMIN">Admin</option>
-              <option value="MANAGER">Manager</option>
-              <option value="PROVIDER">Provider</option>
-              <option value="CUSTOMER">Customer</option>
-            </select>
-          </div>
-
-          <div className="flex-1 md:flex-none">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full md:w-40 bg-muted/40 border border-border/80 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold"
-            >
-              <option value="ALL">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="BLOCKED">Blocked</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left border-collapse">
@@ -128,7 +75,9 @@ const UserTable = ({
                         {getInitials(user.name)}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-semibold text-foreground leading-none mb-1 group-hover/item:text-primary transition-colors hover:underline">{user.name}</span>
+                        <span className="font-semibold text-foreground leading-none mb-1 group-hover/item:text-primary transition-colors hover:underline">
+                          {user.name || "Unnamed User"}
+                        </span>
                         <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <Mail size={12} />
                           {user.email}
@@ -145,29 +94,29 @@ const UserTable = ({
                   <td className="py-4 px-6 text-muted-foreground font-medium">
                     <div className="flex items-center gap-1.5">
                       <Calendar size={13} />
-                      {user.joinedDate}
+                      {formatDate(user.createdAt)}
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border ${user.status === "ACTIVE"
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border ${!user.isBlocked
                         ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                         : "bg-rose-500/10 text-rose-500 border-rose-500/20"
                       }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${user.status === "ACTIVE" ? "bg-emerald-500" : "bg-rose-500"}`} />
-                      {user.status}
+                      <span className={`w-1.5 h-1.5 rounded-full ${!user.isBlocked ? "bg-emerald-500" : "bg-rose-500"}`} />
+                      {!user.isBlocked ? "ACTIVE" : "BLOCKED"}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onToggleStatus(user.id)}
-                        title={user.status === "ACTIVE" ? "Block User" : "Activate User"}
-                        className={`p-2 rounded-lg border transition-all ${user.status === "ACTIVE"
+                        title={!user.isBlocked ? "Block User" : "Activate User"}
+                        className={`p-2 rounded-lg border transition-all ${!user.isBlocked
                             ? "border-rose-500/20 text-rose-500 bg-rose-500/5 hover:bg-rose-500 hover:text-white"
                             : "border-emerald-500/20 text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white"
                           }`}
                       >
-                        {user.status === "ACTIVE" ? <Ban size={15} /> : <Check size={15} />}
+                        {!user.isBlocked ? <Ban size={15} /> : <Check size={15} />}
                       </button>
                       <button
                         onClick={() => onDelete(user.id)}

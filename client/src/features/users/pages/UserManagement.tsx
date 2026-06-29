@@ -1,119 +1,156 @@
-import { useState, useEffect } from "react";
-import { UserPlus } from "lucide-react";
-import { ROLE } from "@/shared/constants/role.const";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
 import UserStats from "../components/ui/UserStats";
-import AddUserModal from "../components/ui/AddUserModal";
 import UserTable from "../components/layout/UserTable";
-
-interface UserMock {
-  id: string;
-  name: string;
-  email: string;
-  role: keyof typeof ROLE;
-  status: "ACTIVE" | "BLOCKED";
-  joinedDate: string;
-}
-
-const INITIAL_USERS: UserMock[] = [
-  { id: "1", name: "Alex Rivera", email: "alex.rivera@washqueue.com", role: "ADMIN", status: "ACTIVE", joinedDate: "2026-01-15" },
-  { id: "2", name: "Marcus Chen", email: "marcus.chen@washqueue.com", role: "MANAGER", status: "ACTIVE", joinedDate: "2026-02-10" },
-  { id: "3", name: "Sarah Jenkins", email: "sarah.j@washqueue.com", role: "PROVIDER", status: "ACTIVE", joinedDate: "2026-03-01" },
-  { id: "4", name: "Elena Rostova", email: "elena.r@washqueue.com", role: "CUSTOMER", status: "ACTIVE", joinedDate: "2026-03-12" },
-  { id: "5", name: "James Wilson", email: "j.wilson@washqueue.com", role: "PROVIDER", status: "BLOCKED", joinedDate: "2026-03-24" },
-  { id: "6", name: "Aria Montgomery", email: "aria.m@washqueue.com", role: "CUSTOMER", status: "ACTIVE", joinedDate: "2026-04-02" },
-  { id: "7", name: "David Kim", email: "d.kim@washqueue.com", role: "CUSTOMER", status: "BLOCKED", joinedDate: "2026-04-10" },
-];
+import FilterCard from "../components/layout/FilterCard";
+import { usersApi, type User } from "../service/users.api";
+import type { PaginationMeta } from "@/shared/components/ui/Pagination";
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<UserMock[]>(INITIAL_USERS);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [users, setUsers] = useState<User[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
+    total: 0,
+    page: 1,
+    limit: 5,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    blocked: 0,
+    providers: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Read URL Search Parameters
+  const searchQuery = searchParams.get("q") || "";
+  const roleFilter = searchParams.get("role") || "ALL";
+  const statusFilter = searchParams.get("status") || "ALL";
+  const activeTab = (searchParams.get("tab") as "ALL" | "CUSTOMER" | "PROVIDER") || "ALL";
+  const highCancellation = searchParams.get("cancellation") === "true";
+  const fraudFlag = searchParams.get("fraud") === "true";
+  const currentPage = Number(searchParams.get("page")) || 1;
   const limit = 5;
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, roleFilter, statusFilter]);
+  // Fetch users when parameters change
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    try {
+      const response = await usersApi.getUsers({
+        page: currentPage,
+        limit,
+        search: searchQuery,
+        role: roleFilter,
+        isBlocked: statusFilter === "ALL" ? undefined : statusFilter === "BLOCKED"
+      });
 
-  // Statistics
-  const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.status === "ACTIVE").length;
-  const blockedUsers = users.filter(u => u.status === "BLOCKED").length;
-  const providersCount = users.filter(u => u.role === "PROVIDER").length;
+      // Filter by cancellation and fraud on client side since the backend doesn't support them
+      let processedUsers = response.users;
+      if (highCancellation) {
+        // Since we don't have cancellation rates in the real model, mock it or use 0
+        processedUsers = processedUsers.filter(u => false); 
+      }
+      if (fraudFlag) {
+        processedUsers = processedUsers.filter(u => false);
+      }
+
+      setUsers(processedUsers);
+      setPaginationMeta(response.pagination);
+      if (response.stats) {
+        setStats(response.stats);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to retrieve users");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, searchQuery, roleFilter, statusFilter, highCancellation, fraudFlag]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Helper to update URL params
+  const updateParams = (newParams: Record<string, string | null | number | boolean>) => {
+    const params = new URLSearchParams(searchParams);
+    
+    Object.entries(newParams).forEach(([key, val]) => {
+      if (val === null || val === "" || val === false || val === "ALL") {
+        params.delete(key);
+      } else {
+        params.set(key, String(val));
+      }
+    });
+
+    // Reset pagination to page 1 unless page itself was modified
+    if (!newParams.hasOwnProperty("page")) {
+      params.delete("page");
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
+  // State wrapper setters
+  const setSearchQuery = (q: string) => updateParams({ q });
+  const setRoleFilter = (role: string) => updateParams({ role });
+  const setStatusFilter = (status: string) => updateParams({ status });
+  const setActiveTab = (tab: "ALL" | "CUSTOMER" | "PROVIDER") => updateParams({ tab });
+  const setHighCancellation = (cancellation: boolean) => updateParams({ cancellation });
+  const setFraudFlag = (fraud: boolean) => updateParams({ fraud });
+  const setCurrentPage = (page: number) => updateParams({ page });
 
   // Actions
-  const handleToggleStatus = (id: string) => {
-    setUsers(prev => prev.map(user => {
-      if (user.id === id) {
-        return {
-          ...user,
-          status: user.status === "ACTIVE" ? "BLOCKED" : "ACTIVE"
-        };
-      }
-      return user;
-    }));
+  const handleToggleStatus = async (id: string) => {
+    const targetUser = users.find(u => u.id === id);
+    if (!targetUser) return;
+
+    try {
+      const newBlockedState = !targetUser.isBlocked;
+      await usersApi.updateUser(id, { isBlocked: newBlockedState });
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message || "Failed to update block status");
+    }
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
-      setUsers(prev => prev.filter(user => user.id !== id));
+      try {
+        await usersApi.deleteUser(id);
+        fetchUsers();
+      } catch (err: any) {
+        alert(err.message || "Failed to delete user");
+      }
     }
   };
 
-  const handleAddUser = (newUser: { name: string; email: string; role: keyof typeof ROLE }): boolean => {
-    if (!newUser.name.trim() || !newUser.email.trim()) {
-      setErrorMsg("Please fill in all fields.");
-      return false;
-    }
+  const handleExport = () => {
+    // Generate CSV contents
+    const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"];
+    const rows = users.map(u => [
+      u.id, 
+      u.name || "", 
+      u.email, 
+      u.role, 
+      u.isBlocked ? "BLOCKED" : "ACTIVE", 
+      new Date(u.createdAt).toISOString().split("T")[0]
+    ]);
 
-    if (users.some(u => u.email.toLowerCase() === newUser.email.toLowerCase())) {
-      setErrorMsg("A user with this email already exists.");
-      return false;
-    }
-
-    const createdUser: UserMock = {
-      id: (users.length + 1).toString(),
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      status: "ACTIVE",
-      joinedDate: new Date().toISOString().split("T")[0] || ""
-    };
-
-    setUsers(prev => [createdUser, ...prev]);
-    setErrorMsg("");
-    return true;
-  };
-
-  // Filtered Users
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesRole = roleFilter === "ALL" || user.role === roleFilter;
-    const matchesStatus = statusFilter === "ALL" || user.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // Pagination calculation
-  const total = filteredUsers.length;
-  const totalPages = Math.ceil(total / limit);
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * limit, currentPage * limit);
-
-  const paginationMeta = {
-    total,
-    page: currentPage,
-    limit,
-    totalPages,
-    hasNextPage: currentPage < totalPages,
-    hasPrevPage: currentPage > 1,
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `washqueue_users_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -130,45 +167,62 @@ const UserManagement = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={handleExport}
+          className="flex items-center gap-2 bg-[#3E495D] hover:bg-[#3E495D]/85 text-[#BCC7DE] font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer"
         >
-          <UserPlus size={18} />
-          <span>Add New User</span>
+          <svg className="w-3.5 h-3.5 fill-[#BCC7DE]" viewBox="0 0 10 10">
+            <path d="M4.74448 2.38526L7.62842 5.33429L6.80237 6.17096L5.30272 4.63746L5.24967 9.39133L4.08308 9.37832L4.13613 4.62444L2.60263 6.12409L1.79545 5.2692L4.74448 2.38526ZM8.2703 0.091126C8.59112 0.094706 8.86448 0.211999 9.09039 0.443006C9.31629 0.674013 9.42746 0.949924 9.42388 1.27074L9.40435 3.02063L8.23776 3.00761L8.25728 1.25772L1.25772 1.17961L1.23819 2.9295L0.071599 2.91649L0.091126 1.16659C0.094706 0.84578 0.211999 0.572419 0.443006 0.34651C0.674013 0.120602 0.949924 0.00943805 1.27074 0.013018L8.2703 0.091126Z" />
+          </svg>
+          <span>Export</span>
         </button>
       </div>
 
       {/* Stats Cards */}
       <UserStats 
-        totalUsers={totalUsers}
-        activeUsers={activeUsers}
-        blockedUsers={blockedUsers}
-        providersCount={providersCount}
+        totalUsers={stats.total}
+        activeUsers={stats.active}
+        blockedUsers={stats.blocked}
+        providersCount={stats.providers}
       />
 
-      {/* User Table and Filters layout */}
-      <UserTable 
-        users={paginatedUsers}
+      {/* Tabs and Filters panel */}
+      <FilterCard 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         roleFilter={roleFilter}
         setRoleFilter={setRoleFilter}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
-        onToggleStatus={handleToggleStatus}
-        onDelete={handleDeleteUser}
-        paginationMeta={paginationMeta}
-        onPageChange={setCurrentPage}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        highCancellation={highCancellation}
+        setHighCancellation={setHighCancellation}
+        fraudFlag={fraudFlag}
+        setFraudFlag={setFraudFlag}
       />
 
-      {/* Add User Modal */}
-      <AddUserModal 
-        isOpen={isAddModalOpen}
-        onClose={() => { setIsAddModalOpen(false); setErrorMsg(""); }}
-        onSubmit={handleAddUser}
-        errorMsg={errorMsg}
-        setErrorMsg={setErrorMsg}
-      />
+      {/* Error state */}
+      {errorMsg && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl text-sm font-semibold">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* User Table layout */}
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground text-sm font-semibold">Fetching user directory...</span>
+        </div>
+      ) : (
+        <UserTable 
+          users={users}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDeleteUser}
+          paginationMeta={paginationMeta}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 };

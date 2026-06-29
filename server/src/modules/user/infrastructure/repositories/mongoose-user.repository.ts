@@ -77,7 +77,7 @@ export class MongooseUserRepository implements IUserRepository {
     // pagination
     const { skip } = getPagination({page,limit})
 
-    const [users, total] = await Promise.all([
+    const [users, total, totalAll, active, blocked, providers] = await Promise.all([
       UserModel.find(filter)
         .sort(sort)
         .skip(skip)
@@ -87,6 +87,10 @@ export class MongooseUserRepository implements IUserRepository {
         .exec(),
 
       UserModel.countDocuments(filter).exec(),
+      UserModel.countDocuments({}).exec(),
+      UserModel.countDocuments({ isBlocked: false }).exec(),
+      UserModel.countDocuments({ isBlocked: true }).exec(),
+      UserModel.countDocuments({ role: "PROVIDER" }).exec(),
     ])
 
     let paginationMetaData = buildPaginationMeta({
@@ -100,7 +104,13 @@ export class MongooseUserRepository implements IUserRepository {
     return {
       users: domainUsers,
       pagination: paginationMetaData,
-    }
+      stats: {
+        total: totalAll,
+        active,
+        blocked,
+        providers,
+      }
+    } as any
   }
 
 }
