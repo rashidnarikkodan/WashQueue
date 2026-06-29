@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Shield, Calendar, Ban, Check, Trash2 } from "lucide-react";
 import type { User } from "../../service/users.api";
-import { ROLE } from "../../../../shared/constants/role.const";
+import { ROLE, type RoleType } from "../../../../shared/constants/role.const";
 import Pagination, { type PaginationMeta } from "@/shared/components/ui/Pagination";
 
 interface UserTableProps {
@@ -30,13 +30,13 @@ const UserTable = ({
       .toUpperCase();
   };
 
-  const getRoleBadgeStyle = (role: keyof typeof ROLE) => {
+  const getRoleBadgeStyle = (role: RoleType) => {
     switch (role) {
-      case "ADMIN":
+      case ROLE.ADMIN:
         return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case "MANAGER":
+      case ROLE.MANAGER:
         return "bg-purple-500/10 text-purple-500 border-purple-500/20";
-      case "PROVIDER":
+      case ROLE.PROVIDER:
         return "bg-amber-500/10 text-amber-500 border-amber-500/20";
       default:
         return "bg-green-500/10 text-green-500 border-green-500/20";

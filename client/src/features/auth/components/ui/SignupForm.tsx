@@ -29,7 +29,7 @@ export default function SignupForm() {
         if (user?.isNewUser) {
           navigate("/setup-account")
         } else {
-          const role = user?.role?.toUpperCase()
+          const role = user?.role
           if (role === ROLE.ADMIN) {
             navigate("/admin")
           } else if (role === ROLE.MANAGER) {

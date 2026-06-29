@@ -82,7 +82,7 @@ export class GoogleAuthUseCase {
         email: email.toLowerCase(),
         avatar: picture || "",
         authProvider: "GOOGLE",
-        role: "CUSTOMER",
+        role: "customer",
         isVerified: true,
       })
       user = await this.userRepository.create(newUser)

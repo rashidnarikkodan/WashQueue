@@ -29,9 +29,9 @@ const UserManagement = () => {
 
   // Read URL Search Parameters
   const searchQuery = searchParams.get("q") || "";
-  const roleFilter = searchParams.get("role") || "ALL";
-  const statusFilter = searchParams.get("status") || "ALL";
-  const activeTab = (searchParams.get("tab") as "ALL" | "CUSTOMER" | "PROVIDER") || "ALL";
+  const roleFilter = searchParams.get("role") || "all";
+  const statusFilter = searchParams.get("status") || "all";
+  const activeTab = (searchParams.get("tab") as "all" | "customer" | "provider") || "all";
   const highCancellation = searchParams.get("cancellation") === "true";
   const fraudFlag = searchParams.get("fraud") === "true";
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -46,18 +46,18 @@ const UserManagement = () => {
         page: currentPage,
         limit,
         search: searchQuery,
-        role: roleFilter,
-        isBlocked: statusFilter === "ALL" ? undefined : statusFilter === "BLOCKED"
+        role: roleFilter === "all" ? undefined : roleFilter,
+        isBlocked: statusFilter === "all" ? undefined : statusFilter === "blocked"
       });
 
       // Filter by cancellation and fraud on client side since the backend doesn't support them
       let processedUsers = response.users;
       if (highCancellation) {
         // Since we don't have cancellation rates in the real model, mock it or use 0
-        processedUsers = processedUsers.filter(u => false); 
+        processedUsers = processedUsers.filter(() => false); 
       }
       if (fraudFlag) {
-        processedUsers = processedUsers.filter(u => false);
+        processedUsers = processedUsers.filter(() => false);
       }
 
       setUsers(processedUsers);
@@ -81,7 +81,7 @@ const UserManagement = () => {
     const params = new URLSearchParams(searchParams);
     
     Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null || val === "" || val === false || val === "ALL") {
+      if (val === null || val === "" || val === false || val === "all") {
         params.delete(key);
       } else {
         params.set(key, String(val));
@@ -100,7 +100,7 @@ const UserManagement = () => {
   const setSearchQuery = (q: string) => updateParams({ q });
   const setRoleFilter = (role: string) => updateParams({ role });
   const setStatusFilter = (status: string) => updateParams({ status });
-  const setActiveTab = (tab: "ALL" | "CUSTOMER" | "PROVIDER") => updateParams({ tab });
+  const setActiveTab = (tab: "all" | "customer" | "provider") => updateParams({ tab });
   const setHighCancellation = (cancellation: boolean) => updateParams({ cancellation });
   const setFraudFlag = (fraud: boolean) => updateParams({ fraud });
   const setCurrentPage = (page: number) => updateParams({ page });

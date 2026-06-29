@@ -90,7 +90,7 @@ export class MongooseUserRepository implements IUserRepository {
       UserModel.countDocuments({}).exec(),
       UserModel.countDocuments({ isBlocked: false }).exec(),
       UserModel.countDocuments({ isBlocked: true }).exec(),
-      UserModel.countDocuments({ role: "PROVIDER" }).exec(),
+      UserModel.countDocuments({ role: "provider" }).exec(),
     ])
 
     let paginationMetaData = buildPaginationMeta({

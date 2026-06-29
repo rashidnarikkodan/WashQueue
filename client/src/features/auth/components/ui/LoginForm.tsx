@@ -29,7 +29,7 @@ export default function LoginForm() {
         if (user?.isNewUser) {
           navigate("/setup-account")
         } else {
-          const role = user?.role?.toUpperCase()
+          const role = user?.role
           if (role === ROLE.ADMIN) {
             navigate("/admin")
           } else if (role === ROLE.MANAGER) {
@@ -72,7 +72,7 @@ export default function LoginForm() {
 
       toast.success(state.message || "Login successful")
 
-      const role = state.user.role?.toUpperCase()
+      const role = state.user.role
       if (role === ROLE.ADMIN) {
         navigate("/admin")
       } else if (role === ROLE.MANAGER) {

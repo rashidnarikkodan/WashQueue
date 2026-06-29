@@ -16,7 +16,7 @@ import {
   FileText
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ROLE } from "../../../shared/constants/role.const";
+import { ROLE, type RoleType } from "../../../shared/constants/role.const";
 import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
 
 interface UserProfile {
@@ -24,7 +24,7 @@ interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: keyof typeof ROLE;
+  role: RoleType;
   status: "ACTIVE" | "BLOCKED";
   joinedDate: string;
   lastActive: string;
@@ -38,7 +38,7 @@ const MOCK_USERS_DETAILS: Record<string, UserProfile> = {
     name: "Alex Rivera",
     email: "alex.rivera@washqueue.com",
     phone: "+1 (555) 019-2834",
-    role: "ADMIN",
+    role: "admin",
     status: "ACTIVE",
     joinedDate: "2026-01-15",
     lastActive: "2026-06-29 12:45 PM",
@@ -50,7 +50,7 @@ const MOCK_USERS_DETAILS: Record<string, UserProfile> = {
     name: "Marcus Chen",
     email: "marcus.chen@washqueue.com",
     phone: "+1 (555) 014-9821",
-    role: "MANAGER",
+    role: "manager",
     status: "ACTIVE",
     joinedDate: "2026-02-10",
     lastActive: "2026-06-28 09:30 AM",
@@ -62,7 +62,7 @@ const MOCK_USERS_DETAILS: Record<string, UserProfile> = {
     name: "Sarah Jenkins",
     email: "sarah.j@washqueue.com",
     phone: "+1 (555) 018-7732",
-    role: "PROVIDER",
+    role: "provider",
     status: "ACTIVE",
     joinedDate: "2026-03-01",
     lastActive: "2026-06-29 11:15 AM",
@@ -76,7 +76,7 @@ const DEFAULT_PROFILE: UserProfile = {
   name: "Elena Rostova",
   email: "elena.r@washqueue.com",
   phone: "+1 (555) 013-8844",
-  role: "CUSTOMER",
+  role: "customer",
   status: "ACTIVE",
   joinedDate: "2026-03-12",
   lastActive: "2026-06-29 08:05 AM",
@@ -116,13 +116,13 @@ const UserDetails = () => {
     setTimeout(() => setIsSavedMessageVisible(false), 3000);
   };
 
-  const getRoleBadgeStyle = (role: keyof typeof ROLE) => {
+  const getRoleBadgeStyle = (role: RoleType) => {
     switch (role) {
-      case "ADMIN":
+      case ROLE.ADMIN:
         return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case "MANAGER":
+      case ROLE.MANAGER:
         return "bg-purple-500/10 text-purple-500 border-purple-500/20";
-      case "PROVIDER":
+      case ROLE.PROVIDER:
         return "bg-amber-500/10 text-amber-500 border-amber-500/20";
       default:
         return "bg-green-500/10 text-green-500 border-green-500/20";
@@ -409,13 +409,13 @@ const UserDetails = () => {
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">System Role</label>
                   <select
                     value={editForm.role}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value as keyof typeof ROLE }))}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value as RoleType }))}
                     className="w-full bg-muted/40 border border-border/80 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold"
                   >
-                    <option value="ADMIN">Admin</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="PROVIDER">Provider</option>
-                    <option value="CUSTOMER">Customer</option>
+                    <option value={ROLE.ADMIN}>Admin</option>
+                    <option value={ROLE.MANAGER}>Manager</option>
+                    <option value={ROLE.PROVIDER}>Provider</option>
+                    <option value={ROLE.CUSTOMER}>Customer</option>
                   </select>
                 </div>
               </div>

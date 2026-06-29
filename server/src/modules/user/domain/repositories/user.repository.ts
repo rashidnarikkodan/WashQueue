@@ -7,7 +7,7 @@ interface UsersQuery{
     sortBy: "createdAt" | "name" | "email";
     sortOrder: "asc" | "desc";
     search?: string | undefined;
-    role?: "CUSTOMER" | "ADMIN" | "PROVIDER" | "MANAGER" | undefined;
+    role?: "customer" | "admin" | "provider" | "manager" | undefined;
     isBlocked?: boolean | undefined;
 }
 export interface IUserRepository {

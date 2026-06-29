@@ -8,8 +8,8 @@ interface FilterCardProps {
   setRoleFilter: (r: string) => void;
   statusFilter: string;
   setStatusFilter: (s: string) => void;
-  activeTab: "ALL" | "CUSTOMER" | "PROVIDER";
-  setActiveTab: (tab: "ALL" | "CUSTOMER" | "PROVIDER") => void;
+  activeTab: "all" | "customer" | "provider";
+  setActiveTab: (tab: "all" | "customer" | "provider") => void;
   highCancellation: boolean;
   setHighCancellation: (val: boolean) => void;
   fraudFlag: boolean;
@@ -31,10 +31,10 @@ const FilterCard = ({
   setFraudFlag
 }: FilterCardProps) => {
 
-  const handleTabChange = (tab: "ALL" | "CUSTOMER" | "PROVIDER") => {
+  const handleTabChange = (tab: "all" | "customer" | "provider") => {
     setActiveTab(tab);
-    if (tab === "ALL") {
-      setRoleFilter("ALL");
+    if (tab === "all") {
+      setRoleFilter("all");
     } else {
       setRoleFilter(tab);
     }
@@ -45,9 +45,9 @@ const FilterCard = ({
       {/* Tabs list */}
       <div className="border-b border-border/30 w-full flex gap-6 px-5 pt-3">
         <button
-          onClick={() => handleTabChange("ALL")}
+          onClick={() => handleTabChange("all")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
-            activeTab === "ALL"
+            activeTab === "all"
               ? "border-[#ADC6FF] text-[#ADC6FF]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
@@ -55,9 +55,9 @@ const FilterCard = ({
           All Users
         </button>
         <button
-          onClick={() => handleTabChange("CUSTOMER")}
+          onClick={() => handleTabChange("customer")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
-            activeTab === "CUSTOMER"
+            activeTab === "customer"
               ? "border-[#ADC6FF] text-[#ADC6FF]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
@@ -65,9 +65,9 @@ const FilterCard = ({
           Customers
         </button>
         <button
-          onClick={() => handleTabChange("PROVIDER")}
+          onClick={() => handleTabChange("provider")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
-            activeTab === "PROVIDER"
+            activeTab === "provider"
               ? "border-[#ADC6FF] text-[#ADC6FF]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
@@ -105,19 +105,19 @@ const FilterCard = ({
             onChange={(e) => {
               const val = e.target.value;
               setRoleFilter(val);
-              if (val === "CUSTOMER" || val === "PROVIDER") {
-                setActiveTab(val as "CUSTOMER" | "PROVIDER");
-              } else if (val === "ALL") {
-                setActiveTab("ALL");
+              if (val === "customer" || val === "provider") {
+                setActiveTab(val as "customer" | "provider");
+              } else if (val === "all") {
+                setActiveTab("all");
               }
             }}
             className="w-full bg-[#2E3447] border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
           >
-            <option value="ALL">All Roles</option>
-            <option value="ADMIN">Admin</option>
-            <option value="MANAGER">Manager</option>
-            <option value="PROVIDER">Provider</option>
-            <option value="CUSTOMER">Customer</option>
+            <option value="all">All Roles</option>
+            <option value={ROLE.ADMIN}>Admin</option>
+            <option value={ROLE.MANAGER}>Manager</option>
+            <option value={ROLE.PROVIDER}>Provider</option>
+            <option value={ROLE.CUSTOMER}>Customer</option>
           </select>
         </div>
 
@@ -131,9 +131,9 @@ const FilterCard = ({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full bg-[#2E3447] border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
           >
-            <option value="ALL">Any Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="BLOCKED">Blocked</option>
+            <option value="all">Any Status</option>
+            <option value="active">Active</option>
+            <option value="blocked">Blocked</option>
           </select>
         </div>
 
