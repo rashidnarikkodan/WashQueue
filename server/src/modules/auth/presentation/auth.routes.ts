@@ -6,6 +6,8 @@ import { authenticate } from "@/shared/middleware/auth.middleware"
 import { loginSchema } from "../application/schema/login.schema"
 import { signupSchema } from "../application/schema/signup.schema"
 import { verifyOtpSchema } from "../application/schema/verify-otp.schema"
+import { forgotPasswordSchema } from "../application/schema/forgot-password.schema"
+import { resetPasswordSchema } from "../application/schema/reset-password.schema"
 
 export const createAuthRouter = (authController: AuthController): Router => {
   const router = Router()
@@ -54,6 +56,18 @@ export const createAuthRouter = (authController: AuthController): Router => {
     "/logout",
     authenticate,
     asyncHandler(authController.logout)
+  )
+
+  router.post(
+    "/forgot-password",
+    validateRequest(forgotPasswordSchema, 'body'),
+    asyncHandler(authController.forgotPassword)
+  )
+
+  router.post(
+    "/reset-password",
+    validateRequest(resetPasswordSchema, 'body'),
+    asyncHandler(authController.resetPassword)
   )
 
   return router

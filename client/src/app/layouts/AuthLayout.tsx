@@ -1,17 +1,10 @@
 import { Link, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/authStore';
-import Loading from '../../shared/components/ui/Loading';
 import { ROLE } from '../../shared/constants/role.const';
 
 export default function AuthLayout() {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const location = useLocation();
-
-  if (isLoading) {
-    return (
-      <Loading fullScreen text="Checking session..." />
-    );
-  }
 
   if (isAuthenticated && user && !["/verify-email", "/setup-account"].includes(location.pathname)) {
     if (user.role === ROLE.ADMIN) return <Navigate to="/admin/dashboard" replace />;

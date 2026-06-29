@@ -49,4 +49,32 @@ export class MailService {
       logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
     }
   }
+
+  async sendForgotPasswordEmail(email: string, otp: string): Promise<void> {
+    const subject = "WashQueue - Reset Your Password"
+    const text = `You requested a password reset. Your verification OTP code is: ${otp}. It will expire in 5 minutes.`
+    const html = `
+      <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>Reset Your Password</h2>
+        <p>Please use the OTP code below to reset your password:</p>
+        <div style="font-size: 24px; font-weight: bold; padding: 10px; background-color: #f0f0f0; display: inline-block; border-radius: 4px; letter-spacing: 2px; color: #007bff;">
+          ${otp}
+        </div>
+        <p>This code will expire in 5 minutes. If you did not request this code, please ignore this email.</p>
+      </div>
+    `
+
+    if (this.transporter) {
+      await this.transporter.sendMail({
+        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+        to: email,
+        subject,
+        text,
+        html,
+      })
+      logger.info(`Password reset email sent to ${email}`)
+    } else {
+      logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
+    }
+  }
 }

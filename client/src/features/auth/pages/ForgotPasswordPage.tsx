@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import FormInput from "../../../shared/components/ui/FormInput";
 import { useAuthFormStore } from "../store/authFormStore";
+import { useAuthStore } from "../store/authStore";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
@@ -9,6 +10,7 @@ export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  const { forgotPassword } = useAuthStore();
   const {
     forgotEmail,
     errors,
@@ -30,12 +32,13 @@ export default function ForgotPasswordPage() {
     if (!validateForgotPassword()) return;
 
     setIsLoading(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const success = await forgotPassword(forgotEmail);
     setIsLoading(false);
 
-    toast.success("Verification OTP code sent successfully!");
-    navigate("/verify-email");
+    if (success) {
+      toast.success("Verification OTP code sent successfully!");
+      navigate("/reset-password");
+    }
   };
 
   return (

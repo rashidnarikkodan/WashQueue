@@ -21,6 +21,8 @@ interface AuthStore {
   verifyOTP: (code: string) => Promise<boolean>;
   setupAccount: (role: RoleType) => Promise<boolean>;
   logout: () => void;
+  forgotPassword: (email: string) => Promise<boolean>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<boolean>;
 }
 
 const getInitialState = () => {
@@ -180,6 +182,35 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     localStorage.removeItem("wq_auth");
     localStorage.removeItem("wq_token");
     localStorage.removeItem("wq_temp_email");
+    localStorage.removeItem("wq_reset_email");
     toast.info("Logged out successfully.");
+  },
+
+  forgotPassword: async (email) => {
+    set({ isLoading: true });
+    try {
+      await authApi.forgotPassword(email);
+      set({ isLoading: false });
+      localStorage.setItem("wq_reset_email", email);
+      return true;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to send verification code");
+      set({ isLoading: false });
+      return false;
+    }
+  },
+
+  resetPassword: async (email, code, newPassword) => {
+    set({ isLoading: true });
+    try {
+      await authApi.resetPassword(email, code, newPassword);
+      set({ isLoading: false });
+      localStorage.removeItem("wq_reset_email");
+      return true;
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reset password");
+      set({ isLoading: false });
+      return false;
+    }
   },
 }));

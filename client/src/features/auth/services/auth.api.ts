@@ -132,5 +132,39 @@ export const authApi = {
     } catch (e) {
       console.warn("Logout request to backend failed or was ignored:", e)
     }
+  },
+
+  /**
+   * Request forgot password OTP
+   */
+  forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await api.post("/auth/forgot-password", { email })
+      const resJson = response.data
+      return {
+        success: resJson.success,
+        message: resJson.message
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Failed to send reset code"
+      throw new Error(message)
+    }
+  },
+
+  /**
+   * Reset password with OTP and new password
+   */
+  resetPassword: async (email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await api.post("/auth/reset-password", { email, code, password: newPassword })
+      const resJson = response.data
+      return {
+        success: resJson.success,
+        message: resJson.message
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Failed to reset password"
+      throw new Error(message)
+    }
   }
 }

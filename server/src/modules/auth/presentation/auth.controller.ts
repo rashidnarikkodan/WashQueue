@@ -7,6 +7,8 @@ import { LogoutUseCase } from "../application/use-cases/logout.use-case"
 import { SetupAccountUseCase } from "../application/use-cases/setup-account.use-case"
 import { GoogleAuthUseCase } from "../application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "../application/use-cases/get-me.use-case"
+import { ForgotPasswordUseCase } from "../application/use-cases/forgot-password.use-case"
+import { ResetPasswordUseCase } from "../application/use-cases/reset-password.use-case"
 import response from "@/shared/utils/response"
 import { AuthenticatedRequest } from "@/shared/middleware/auth.middleware"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
@@ -21,7 +23,9 @@ export class AuthController {
     private readonly logoutUseCase: LogoutUseCase,
     private readonly setupAccountUseCase: SetupAccountUseCase,
     private readonly googleAuthUseCase: GoogleAuthUseCase,
-    private readonly getMeUseCase: GetMeUseCase
+    private readonly getMeUseCase: GetMeUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase
   ) { }
 
   login = async (req: Request, res: Response) => {
@@ -101,5 +105,15 @@ export class AuthController {
     }
     clearAuthCookies(res)
     res.status(HTTP_STATUS.OK).json(response(null, "Logout successful"))
+  }
+
+  forgotPassword = async (req: Request, res: Response) => {
+    await this.forgotPasswordUseCase.execute(req.body)
+    res.status(HTTP_STATUS.OK).json(response(null, "Password reset OTP sent to your email"))
+  }
+
+  resetPassword = async (req: Request, res: Response) => {
+    await this.resetPasswordUseCase.execute(req.body)
+    res.status(HTTP_STATUS.OK).json(response(null, "Password reset successful"))
   }
 }
