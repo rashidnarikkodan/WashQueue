@@ -24,7 +24,22 @@ export default function LoginForm() {
     onSuccess: async (tokenResponse) => {
       const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
-        navigate("/")
+        const user = useAuthStore.getState().user
+        console.log("Google login response user:", user)
+        if (user?.isNewUser) {
+          navigate("/setup-account")
+        } else {
+          const role = user?.role?.toUpperCase()
+          if (role === ROLE.ADMIN) {
+            navigate("/admin")
+          } else if (role === ROLE.MANAGER) {
+            navigate("/manager")
+          } else if (role === ROLE.PROVIDER) {
+            navigate("/provider")
+          } else {
+            navigate("/")
+          }
+        }
       }
     },
     onError: () => {

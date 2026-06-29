@@ -9,6 +9,7 @@ import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { signupAction, type SignupState } from "../../actions/signup.action"
 import { useAuthStore } from "../../store/authStore"
+import { ROLE } from "../../../../shared/constants/role.const"
 
 const initialState: SignupState = {
   success: false,
@@ -23,7 +24,22 @@ export default function SignupForm() {
     onSuccess: async (tokenResponse) => {
       const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
-        navigate("/setup-account")
+        const user = useAuthStore.getState().user
+        console.log("Google signup response user:", user)
+        if (user?.isNewUser) {
+          navigate("/setup-account")
+        } else {
+          const role = user?.role?.toUpperCase()
+          if (role === ROLE.ADMIN) {
+            navigate("/admin")
+          } else if (role === ROLE.MANAGER) {
+            navigate("/manager")
+          } else if (role === ROLE.PROVIDER) {
+            navigate("/provider")
+          } else {
+            navigate("/")
+          }
+        }
       }
     },
     onError: () => {

@@ -75,6 +75,7 @@ export class GoogleAuthUseCase {
     }
 
     let user = await this.userRepository.findByEmail(email)
+    let isNewUser = false
     if (!user) {
       const newUser = new User({
         name,
@@ -85,6 +86,7 @@ export class GoogleAuthUseCase {
         isVerified: true,
       })
       user = await this.userRepository.create(newUser)
+      isNewUser = true
     }
 
     if (user.isBlocked) {
@@ -105,6 +107,8 @@ export class GoogleAuthUseCase {
       lastLoginAt: new Date(),
     })
 
+    logger.info(`Google auth: User=${user.email}, isNewUser=${isNewUser}`)
+
     return {
       user: {
         id: user.id,
@@ -112,6 +116,7 @@ export class GoogleAuthUseCase {
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
+        isNewUser,
       },
       tokens: {
         accessToken,
