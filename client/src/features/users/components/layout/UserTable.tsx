@@ -9,7 +9,6 @@ interface UserTableProps {
   paginationMeta: PaginationMeta;
   onPageChange: (page: number) => void;
   onToggleStatus: (id: string) => void;
-  onDelete: (id: string) => void;
 }
 
 const UserTable = ({
@@ -17,7 +16,6 @@ const UserTable = ({
   paginationMeta,
   onPageChange,
   onToggleStatus,
-  onDelete
 }: UserTableProps) => {
   // Get Initials for Avatar
   const getInitials = (name: string) => {
@@ -69,7 +67,7 @@ const UserTable = ({
             {users.length > 0 ? (
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-muted/10 transition-colors">
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-6 ">
                     <Link to={`/admin/users/${user.id}`} className="flex items-center gap-3 group/item">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm border border-primary/10 shadow-inner group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-all">
                         {getInitials(user.name)}
@@ -117,13 +115,6 @@ const UserTable = ({
                           }`}
                       >
                         {!user.isBlocked ? <Ban size={15} /> : <Check size={15} />}
-                      </button>
-                      <button
-                        onClick={() => onDelete(user.id)}
-                        title="Delete User"
-                        className="p-2 rounded-lg border border-border/80 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20 transition-all"
-                      >
-                        <Trash2 size={15} />
                       </button>
                     </div>
                   </td>

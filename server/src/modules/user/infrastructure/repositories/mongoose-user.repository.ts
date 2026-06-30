@@ -31,10 +31,6 @@ export class MongooseUserRepository implements IUserRepository {
     return updatedDoc ? UserMapper.toDomain(updatedDoc) : null
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await UserModel.findByIdAndDelete(id).exec()
-    return !!result
-  }
   async getAllUsers(query: GetUsersQuery):Promise<{
       users:User[],
       pagination: PaginationMeta ,

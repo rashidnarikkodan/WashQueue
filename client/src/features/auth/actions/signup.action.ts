@@ -34,14 +34,30 @@ export async function signupAction(
 
     if (!email) {
       errors.email = ["Email is required"]
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       errors.email = ["Please enter a valid email address"]
     }
 
     if (!password) {
       errors.password = ["Password is required"]
-    } else if (password.length < 8) {
-      errors.password = ["Password must be at least 8 characters"]
+    } else {
+      const passwordErrors: string[] = []
+      if (password.length < 8) {
+        passwordErrors.push("8 characters")
+      }
+      if (!/[A-Z]/.test(password)) {
+        passwordErrors.push("one uppercase letter")
+      }
+      if (!/\d/.test(password)) {
+        passwordErrors.push("one number")
+      }
+      if (!/[@$!%*?&#]/.test(password)) {
+        passwordErrors.push("one special character (@, $, !, %, etc.)")
+      }
+
+      if (passwordErrors.length > 0) {
+        errors.password = [`Password is missing: ${passwordErrors.join(", ")}`]
+      }
     }
 
     if (!confirmPassword) {

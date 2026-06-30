@@ -18,6 +18,7 @@ const initialState: SignupState = {
 export default function SignupForm() {
   const navigate = useNavigate()
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({})
+  const [password, setPassword] = useState("")
   const { loginWithGoogle } = useAuthStore()
 
   const handleGoogleLogin = useGoogleLogin({
@@ -132,7 +133,7 @@ export default function SignupForm() {
           onChange={(e) => {
             const val = e.target.value
             // Instantly clear email format error as soon as they type a valid email format
-            if (/\S+@\S+\.\S+/.test(val) || val.trim() === "") {
+            if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val) || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, email: "" }))
             }
           }}
@@ -149,14 +150,43 @@ export default function SignupForm() {
           error={localErrors.password}
           onChange={(e) => {
             const val = e.target.value
-            // Instantly clear password error as soon as it meets the min length condition (8 chars)
-            if (val.length >= 8 || val.trim() === "") {
+            setPassword(val)
+            const hasMinLength = val.length >= 8
+            const hasCapital = /[A-Z]/.test(val)
+            const hasNumber = /\d/.test(val)
+            const hasSpecial = /[@$!%*?&#]/.test(val)
+            
+            if ((hasMinLength && hasCapital && hasNumber && hasSpecial) || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, password: "" }))
             }
           }}
           autoComplete="new-password"
           required
         />
+
+        {password.length > 0 && (
+          <div className="text-[11px] space-y-1.5 p-3.5 bg-slate-950/30 rounded-2xl border border-slate-800/40 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
+            <p className="font-bold text-slate-400 mb-1">Password Requirements:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${password.length >= 8 ? "bg-emerald-400" : "bg-slate-600"}`} />
+                <span className={`transition-colors duration-300 ${password.length >= 8 ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>At least 8 characters</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/[A-Z]/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
+                <span className={`transition-colors duration-300 ${/[A-Z]/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One capital letter</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/\d/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
+                <span className={`transition-colors duration-300 ${/\d/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One number</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/[@$!%*?&#]/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
+                <span className={`transition-colors duration-300 ${/[@$!%*?&#]/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One special char (@, $, !, %, etc.)</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <FormInput
           id="confirm-password-signup-input"

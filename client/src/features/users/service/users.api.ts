@@ -129,14 +129,4 @@ export const usersApi = {
       throw new Error(message);
     }
   },
-
-  deleteUser: async (id: string): Promise<boolean> => {
-    try {
-      const response = await api.delete(`/users/${id}`, { skipToast: true });
-      return response.data.success;
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to delete user";
-      throw new Error(message);
-    }
-  }
 };

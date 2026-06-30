@@ -120,17 +120,6 @@ const UserManagement = () => {
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      try {
-        await usersApi.deleteUser(id);
-        fetchUsers();
-      } catch (err: any) {
-        alert(err.message || "Failed to delete user");
-      }
-    }
-  };
-
   const handleExport = () => {
     // Generate CSV contents
     const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"];
@@ -219,7 +208,6 @@ const UserManagement = () => {
         <UserTable 
           users={users}
           onToggleStatus={handleToggleStatus}
-          onDelete={handleDeleteUser}
           paginationMeta={paginationMeta}
           onPageChange={setCurrentPage}
         />
