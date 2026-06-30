@@ -242,23 +242,6 @@ const UserDetails = () => {
     }
   };
 
-  // Delete User Handler
-  const handleDeleteUser = async () => {
-    if (!confirm(`Are you absolutely sure you want to permanently delete user: ${user.name || user.email}? This action is irreversible.`)) {
-      return;
-    }
-    setIsDeleting(true);
-    try {
-      await usersApi.deleteUser(user.id);
-      toast.success(`User ${user.name || user.email} deleted successfully.`);
-      navigate("/admin/users");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete user.");
-      setIsDeleting(false);
-    }
-  };
-
-
 
   // Quick Notification Submit
   const handleSendNotification = (e: React.FormEvent) => {
@@ -418,20 +401,6 @@ const UserDetails = () => {
                   <UserX size={14} />
                   <span>Suspend</span>
                 </>
-              )}
-            </button>
-
-            {/* Delete Account Button */}
-            <button
-              onClick={handleDeleteUser}
-              disabled={isDeleting}
-              className="inline-flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 transition-all cursor-pointer"
-              title="Delete User Permanently"
-            >
-              {isDeleting ? (
-                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Trash2 size={15} />
               )}
             </button>
           </div>
