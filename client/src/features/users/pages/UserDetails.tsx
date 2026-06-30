@@ -9,7 +9,6 @@ import {
   Save,
   UserCheck,
   UserX,
-  Trash2,
   Send,
   Edit2,
   Award,
@@ -71,9 +70,7 @@ const UserDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  // Action Pending flags
   const [isSuspending, setIsSuspending] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Editable local variables (for fields not stored in server)
   const address = "";

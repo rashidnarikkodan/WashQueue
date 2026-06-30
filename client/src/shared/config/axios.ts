@@ -6,6 +6,7 @@ declare module "axios" {
   export interface AxiosRequestConfig {
     skipToast?: boolean;
     successToast?: string;
+    _retry?: boolean;
   }
 }
 
@@ -20,7 +21,21 @@ export const api = axios.create({
     timeout: 10000,
 })
 
-// Response interceptor to handle global toasts and auth state cleanup
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  failedQueue = [];
+};
+
+// Interceptor 1: Success Toast Handling
 api.interceptors.response.use(
     (response) => {
         const successToast = response.config?.successToast;
@@ -29,35 +44,95 @@ api.interceptors.response.use(
             toast.success(message);
         }
         return response;
-    },
+    }
+);
+
+// Interceptor 2: Silent Token Refresh (Authentication Recovery)
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error.response?.status;
+        const originalRequest = error.config;
+
+        // Handle Session Expiry (Try silent refresh on 401, unless it's the refresh token or login request itself)
+        if (status === 401 && !originalRequest._retry) {
+            const isRefreshOrLoginRequest = originalRequest.url?.includes("/auth/refresh-token") || originalRequest.url?.includes("/auth/login");
+            
+            if (isRefreshOrLoginRequest) {
+                // If the refresh token or login request itself failed, clear credentials and logout
+                localStorage.removeItem("wq_user");
+                localStorage.removeItem("wq_auth");
+                localStorage.removeItem("wq_temp_email");
+
+                useAuthStore.setState({
+                    user: null,
+                    isAuthenticated: false,
+                });
+                return Promise.reject(error);
+            }
+
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then(() => {
+                        return api(originalRequest);
+                    })
+                    .catch((err) => {
+                        return Promise.reject(err);
+                    });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            return new Promise((resolve, reject) => {
+                api.post("/auth/refresh-token", {}, { skipToast: true })
+                    .then(() => {
+                        processQueue(null);
+                        resolve(api(originalRequest));
+                    })
+                    .catch((err) => {
+                        processQueue(err);
+                        
+                        // Force logout on refresh token failure
+                        localStorage.removeItem("wq_user");
+                        localStorage.removeItem("wq_auth");
+                        localStorage.removeItem("wq_temp_email");
+
+                        useAuthStore.setState({
+                            user: null,
+                            isAuthenticated: false,
+                        });
+                        
+                        reject(err);
+                    })
+                    .finally(() => {
+                        isRefreshing = false;
+                    });
+            });
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+// Interceptor 3: Error Toast Handling
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
         const status = error.response?.status;
         const message = error.response?.data?.message || "Something went wrong";
         const skipToast = error.config?.skipToast;
 
-        // Handle Session Expiry (No Toast)
-        if (status === 401) {
-            localStorage.removeItem("wq_user")
-            localStorage.removeItem("wq_auth")
-            localStorage.removeItem("wq_temp_email")
-
-            // Reset Zustand store
-            useAuthStore.setState({
-                user: null,
-                isAuthenticated: false,
-            })
-            return Promise.reject(error)
+        // Only display error toast if it wasn't a standard 401 that is being retried
+        if (status !== 401) {
+            const isCriticalError = !status || status >= 500;
+            if (isCriticalError || !skipToast) {
+                toast.error(message);
+            }
         }
 
-        // Critical errors that should always toast (no status, 5xx server crash)
-        const isCriticalError = 
-            !status || 
-            status >= 500;
-
-        if (isCriticalError || !skipToast) {
-            toast.error(message);
-        }
-
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-)
+);

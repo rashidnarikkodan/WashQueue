@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Shield, Calendar, Ban, Check, Trash2 } from "lucide-react";
+import { Mail, Shield, Calendar, Ban, Check } from "lucide-react";
 import type { User } from "../../service/users.api";
 import { ROLE, type RoleType } from "../../../../shared/constants/role.const";
 import Pagination, { type PaginationMeta } from "@/shared/components/ui/Pagination";
