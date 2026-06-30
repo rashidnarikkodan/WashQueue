@@ -4,13 +4,14 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { TokenService } from "../../infrastructure/services/token.service"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
-import { User } from "@/modules/user/infrastructure/models/user.model"
+import { User } from "@/modules/user/domain/entities/User"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
 import { IGoogleAuthUseCase } from "../interfaces/auth-usecases.interfaces"
+import { GoogleAuthResponse } from "../dto/google-auth.dto"
 
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
@@ -26,7 +27,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     }
   }
 
-  async execute(token: string) {
+  async execute(token: string): Promise<GoogleAuthResponse> {
     if (!token) {
       throw new AppError(ERROR_MESSAGES.GOOGLE_TOKEN_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }

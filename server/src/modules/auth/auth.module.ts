@@ -1,4 +1,4 @@
-import { MongooseUserRepository } from "../user/infrastructure/repositories/mongoose-user.repository"
+import { UserRepository } from "../user/infrastructure/repositories/user.repository"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
@@ -19,7 +19,7 @@ import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
 // infrastructures
-const userRepository = new MongooseUserRepository()
+const userRepository = new UserRepository()
 const mailService = new MailService()
 const otpService = new OtpService()
 const tokenService = new TokenService()

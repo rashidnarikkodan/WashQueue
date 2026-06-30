@@ -1,10 +1,10 @@
 import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { SignupInput } from "@/modules/auth/application/schema/signup.schema"
+import { SignupInput, SignupResponse } from "../dto/signup.dto"
 import { OtpService } from "../../infrastructure/services/otp.service"
 import { MailService } from "@/infrastructure/mail/mail.service"
-import { User } from "@/modules/user/infrastructure/models/user.model"
+import { User } from "@/modules/user/domain/entities/User"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
@@ -18,7 +18,7 @@ export class SignupUseCase implements ISignupUseCase {
     private readonly mailService: MailService
   ) { }
 
-  async execute(data: SignupInput) {
+  async execute(data: SignupInput): Promise<SignupResponse> {
 
     //check user existing or not
     const existingUser = await this.userRepository.findByEmail(data.email)

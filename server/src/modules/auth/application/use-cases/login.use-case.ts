@@ -2,24 +2,10 @@ import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../../infrastructure/services/token.service"
-import { LoginInput } from "../schema/login.schema"
+import { LoginInput, LoginResponse } from "../dto/login.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 import { ILoginUseCase } from "../interfaces/auth-usecases.interfaces"
-
-export interface LoginResponse {
-  user: {
-    id: string
-    name?: string
-    email: string
-    role: string
-    isVerified: boolean
-  }
-  tokens: {
-    accessToken: string
-    refreshToken: string
-  }
-}
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(

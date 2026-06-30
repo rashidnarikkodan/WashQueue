@@ -1,39 +1,23 @@
-import { LoginInput } from "../schema/login.schema"
-import { SignupInput } from "../schema/signup.schema"
-import { VerifyOtpInput } from "../schema/verify-otp.schema"
-import { ForgotPasswordInput } from "../schema/forgot-password.schema"
-import { ResetPasswordInput } from "../schema/reset-password.schema"
+import { LoginInput, LoginResponse } from "../dto/login.dto"
+import { SignupInput, SignupResponse } from "../dto/signup.dto"
+import { VerifyOtpInput, VerifyOtpResponse } from "../dto/verify-otp.dto"
+import { SetupAccountResponse } from "../dto/setup-account.dto"
+import { GoogleAuthResponse } from "../dto/google-auth.dto"
+import { GetMeResponse } from "../dto/get-me.dto"
+import { ForgotPasswordInput } from "../dto/forgot-password.dto"
+import { ResetPasswordInput } from "../dto/reset-password.dto"
 import { RoleType } from "@/shared/constants/role.constants"
-import { LoginResponse } from "../use-cases/login.use-case"
 
 export interface ILoginUseCase {
   execute(data: LoginInput): Promise<LoginResponse>
 }
 
 export interface ISignupUseCase {
-  execute(data: SignupInput): Promise<{
-    id: string
-    name?: string
-    email: string
-    role: string
-    isVerified: boolean
-  }>
+  execute(data: SignupInput): Promise<SignupResponse>
 }
 
 export interface IVerifyOtpUseCase {
-  execute(data: VerifyOtpInput): Promise<{
-    user: {
-      id: string
-      name?: string
-      email: string
-      role: string
-      isVerified: boolean
-    }
-    tokens: {
-      accessToken: string
-      refreshToken: string
-    }
-  }>
+  execute(data: VerifyOtpInput): Promise<VerifyOtpResponse>
 }
 
 export interface IRefreshTokenUseCase {
@@ -48,47 +32,15 @@ export interface ILogoutUseCase {
 }
 
 export interface ISetupAccountUseCase {
-  execute(userId: string, role: RoleType): Promise<{
-    user: {
-      id: string
-      name?: string
-      email: string
-      role: RoleType
-      isVerified: boolean
-    }
-  }>
+  execute(userId: string, role: RoleType): Promise<SetupAccountResponse>
 }
 
 export interface IGoogleAuthUseCase {
-  execute(token: string): Promise<{
-    user: {
-      id: string
-      name?: string
-      email: string
-      role: string
-      isVerified: boolean
-      isNewUser: boolean
-    }
-    tokens: {
-      accessToken: string
-      refreshToken: string
-    }
-  }>
+  execute(token: string): Promise<GoogleAuthResponse>
 }
 
 export interface IGetMeUseCase {
-  execute(userId: string): Promise<{
-    user: {
-      id: string
-      name?: string
-      email: string
-      phone?: string
-      role: string
-      avatar?: string
-      walletBalance: number
-      isVerified: boolean
-    }
-  }>
+  execute(userId: string): Promise<GetMeResponse>
 }
 
 export interface IForgotPasswordUseCase {

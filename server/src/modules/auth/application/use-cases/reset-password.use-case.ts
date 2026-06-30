@@ -1,7 +1,7 @@
 import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ResetPasswordInput } from "../schema/reset-password.schema"
+import { ResetPasswordInput } from "../dto/reset-password.dto"
 import { OtpService } from "../../infrastructure/services/otp.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 

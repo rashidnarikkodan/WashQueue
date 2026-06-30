@@ -1,6 +1,7 @@
 import z from "zod"
+import { SignupInput } from "../../application/dto/signup.dto"
 
-export const signupSchema = z
+export const signupSchema: z.ZodType<SignupInput> = z
   .object({
     name: z.string().trim().min(1, { message: "Name is required" }),
     email: z
@@ -24,6 +25,4 @@ export const signupSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   })
-
-export type SignupInput = z.infer<typeof signupSchema>
 

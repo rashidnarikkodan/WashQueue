@@ -1,7 +1,8 @@
 import { ROLE } from "@/shared/constants/role.constants"
 import z from "zod"
+import { GetUsersQuery } from "../../application/dto/get-users.dto"
 
-export const usersQuerySchema = z.object({
+export const usersQuerySchema: z.ZodType<GetUsersQuery> = z.object({
   page: z.coerce.number().min(1).default(1),
 
   limit: z.coerce.number().min(1).max(100).default(10),
@@ -25,5 +26,3 @@ export const usersQuerySchema = z.object({
     .enum(["asc", "desc"])
     .default("desc"),
 })
-
-export type GetUsersQuery = z.infer<typeof usersQuerySchema>

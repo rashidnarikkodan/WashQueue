@@ -5,11 +5,12 @@ import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
 import { ISetupAccountUseCase } from "../interfaces/auth-usecases.interfaces"
+import { SetupAccountResponse } from "../dto/setup-account.dto"
 
 export class SetupAccountUseCase implements ISetupAccountUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(userId: string, role: RoleType) {
+  async execute(userId: string, role: RoleType): Promise<SetupAccountResponse> {
 
     if (role !== ROLE.CUSTOMER && role !== ROLE.PROVIDER) {
       throw new AppError(ERROR_MESSAGES.INVALID_ROLE, HTTP_STATUS.BAD_REQUEST)

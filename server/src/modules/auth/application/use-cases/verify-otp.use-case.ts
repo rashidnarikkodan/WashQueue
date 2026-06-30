@@ -2,7 +2,7 @@ import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { OtpService } from "../../infrastructure/services/otp.service"
 import { TokenService } from "../../infrastructure/services/token.service"
-import { VerifyOtpInput } from "../schema/verify-otp.schema"
+import { VerifyOtpInput, VerifyOtpResponse } from "../dto/verify-otp.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
@@ -15,7 +15,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly tokenService: TokenService
   ) { }
 
-  async execute(data: VerifyOtpInput) {
+  async execute(data: VerifyOtpInput): Promise<VerifyOtpResponse> {
     const isOtpValid = await this.otpService.verifyOtp(data.email, data.otp)
     if (!isOtpValid) {
       throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_OTP, HTTP_STATUS.BAD_REQUEST)

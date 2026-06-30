@@ -2,11 +2,11 @@ import { User as UserModel } from "../models/user.model"
 import { User } from "../../domain/entities/User"
 import { UserMapper } from "../mappers/user.mapper"
 import { IUserRepository } from "../../domain/repositories/user.repository"
-import { GetUsersQuery } from "../../application/schema/get-users.schema"
+import { GetUsersQuery } from "../../application/dto/get-users.dto"
 import { buildPaginationMeta, getPagination } from "@/shared/utils/pagination"
 import { PaginationMeta } from "@/shared/types/pagination"
 
-export class MongooseUserRepository implements IUserRepository {
+export class UserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
     const userDoc = await UserModel.findById(id).exec()
     return userDoc ? UserMapper.toDomain(userDoc) : null
@@ -77,7 +77,7 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     // pagination
-    const { skip } = getPagination({page,limit})
+    const { skip } = getPagination({ page, limit })
 
     const [users, total, totalAll, active, blocked, providers] = await Promise.all([
       UserModel.find(filter)
@@ -96,10 +96,10 @@ export class MongooseUserRepository implements IUserRepository {
     ])
 
     const paginationMetaData = buildPaginationMeta({
-        total,
-        page,
-        limit,
-      })
+      total,
+      page,
+      limit,
+    })
 
     const domainUsers = users.map((user) => UserMapper.toDomain(user))
 

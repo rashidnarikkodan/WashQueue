@@ -1,6 +1,7 @@
 import z from "zod"
+import { VerifyOtpInput } from "../../application/dto/verify-otp.dto"
 
-export const verifyOtpSchema = z
+export const verifyOtpSchema: z.ZodType<VerifyOtpInput> = z
   .object({
     email: z
       .string()
@@ -20,9 +21,4 @@ export const verifyOtpSchema = z
       otp: data.otp || data.code || "",
     }
   })
-
-export type VerifyOtpInput = {
-  email: string
-  otp: string
-}
 

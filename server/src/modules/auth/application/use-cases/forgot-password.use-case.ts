@@ -1,6 +1,6 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ForgotPasswordInput } from "../schema/forgot-password.schema"
+import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { OtpService } from "../../infrastructure/services/otp.service"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
