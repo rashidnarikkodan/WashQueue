@@ -57,14 +57,8 @@ export class AuthController {
   refreshToken = async (req: Request, res: Response) => {
     let token: string | undefined = req.body.refreshToken
 
-    if (!token && req.headers.cookie) {
-      const cookies = Object.fromEntries(
-        req.headers.cookie.split(";").map((c) => {
-          const parts = c.trim().split("=")
-          return [parts[0], parts.slice(1).join("=")]
-        })
-      )
-      token = cookies.refreshToken
+    if (!token && req.cookies) {
+      token = req.cookies.refreshToken
     }
 
     if (!token) {

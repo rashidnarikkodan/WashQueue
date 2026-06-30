@@ -1,4 +1,5 @@
 import express from "express"
+import cookieParser from "cookie-parser"
 import corsConfig from "./configs/cors.config"
 import loggerMiddleware from "./shared/middleware/logger.middleware"
 import notFoundMiddleware from "./shared/middleware/not-found.middleware"
@@ -11,6 +12,7 @@ const app = express()
 app.use(corsConfig)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 app.use(loggerMiddleware)
 
 

@@ -22,15 +22,9 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
       token = authHeader.split(" ")[1]
     }
 
-    // 2. Try to read from cookies (parse req.headers.cookie)
-    if (!token && req.headers.cookie) {
-      const cookies = Object.fromEntries(
-        req.headers.cookie.split(";").map((c) => {
-          const parts = c.trim().split("=")
-          return [parts[0], parts.slice(1).join("=")]
-        })
-      )
-      token = cookies.accessToken
+    // 2. Try to read from cookies
+    if (!token && req.cookies) {
+      token = req.cookies.accessToken
     }
 
     if (!token) {
