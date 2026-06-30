@@ -5,11 +5,13 @@ import { ResetPasswordInput } from "../schema/reset-password.schema"
 import { OtpService } from "../services/otp.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 
-export class ResetPasswordUseCase {
+import { IResetPasswordUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class ResetPasswordUseCase implements IResetPasswordUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService
-  ) {}
+  ) { }
 
   async execute(data: ResetPasswordInput): Promise<void> {
     // Verify OTP code

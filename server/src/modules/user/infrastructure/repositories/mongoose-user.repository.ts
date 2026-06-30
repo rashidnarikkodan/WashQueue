@@ -31,10 +31,16 @@ export class MongooseUserRepository implements IUserRepository {
     return updatedDoc ? UserMapper.toDomain(updatedDoc) : null
   }
 
-  async getAllUsers(query: GetUsersQuery):Promise<{
-      users:User[],
-      pagination: PaginationMeta ,
-    }> {
+  async getAllUsers(query: GetUsersQuery): Promise<{
+    users: User[]
+    pagination: PaginationMeta
+    stats?: {
+      total: number
+      active: number
+      blocked: number
+      providers: number
+    }
+  }> {
     const {
       page,
       limit,
@@ -45,7 +51,7 @@ export class MongooseUserRepository implements IUserRepository {
       sortOrder,
     } = query
 
-    const filter: any = {}
+    const filter: Record<string, unknown> = {}
 
     // search
     if (search) {
@@ -89,7 +95,7 @@ export class MongooseUserRepository implements IUserRepository {
       UserModel.countDocuments({ role: "provider" }).exec(),
     ])
 
-    let paginationMetaData = buildPaginationMeta({
+    const paginationMetaData = buildPaginationMeta({
         total,
         page,
         limit,
@@ -106,7 +112,7 @@ export class MongooseUserRepository implements IUserRepository {
         blocked,
         providers,
       }
-    } as any
+    }
   }
 
 }

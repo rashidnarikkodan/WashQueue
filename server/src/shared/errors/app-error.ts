@@ -1,12 +1,14 @@
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+
 export class AppError extends Error {
   public readonly statusCode: number
   public readonly isOperational: boolean
-  public readonly details: any
+  public readonly details: unknown
 
   constructor(
     message: string,
-    statusCode: number = 500,
-    details: any = null,
+    statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    details: unknown = null,
     isOperational: boolean = true
   ) {
     super(message)

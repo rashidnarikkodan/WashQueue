@@ -15,5 +15,14 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>
   create(user: User): Promise<User>
   update(id: string, user: Partial<User>): Promise<User | null>
-  getAllUsers(query:UsersQuery): Promise<{users:User[],pagination:PaginationMeta}>
+  getAllUsers(query:UsersQuery): Promise<{
+    users: User[]
+    pagination: PaginationMeta
+    stats?: {
+      total: number
+      active: number
+      blocked: number
+      providers: number
+    }
+  }>
 }

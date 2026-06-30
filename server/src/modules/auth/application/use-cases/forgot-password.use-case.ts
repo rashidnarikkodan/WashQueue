@@ -6,7 +6,9 @@ import { MailService } from "@/infrastructure/mail/mail.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
-export class ForgotPasswordUseCase {
+import { IForgotPasswordUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,

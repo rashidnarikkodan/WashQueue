@@ -3,8 +3,12 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { OtpService } from "../services/otp.service"
 import { TokenService } from "../services/token.service"
 import { VerifyOtpInput } from "../schema/verify-otp.schema"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
-export class VerifyOtpUseCase {
+import { IVerifyOtpUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,
@@ -14,12 +18,12 @@ export class VerifyOtpUseCase {
   async execute(data: VerifyOtpInput) {
     const isOtpValid = await this.otpService.verifyOtp(data.email, data.otp)
     if (!isOtpValid) {
-      throw new AppError("Invalid or expired OTP", 400)
+      throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_OTP, HTTP_STATUS.BAD_REQUEST)
     }
 
     const user = await this.userRepository.findByEmail(data.email)
     if (!user) {
-      throw new AppError("User not found", 404)
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
     // Generate JWT tokens

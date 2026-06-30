@@ -1,5 +1,5 @@
 import { RoleType } from "@/shared/constants/role.constants"
-import { AuthProvider } from "@/shared/constants/authProvider"
+import { AuthProvider, AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
 export interface UserProps {
     id?: string
@@ -47,7 +47,7 @@ export class User implements UserProps {
         this.lastLoginAt = props.lastLoginAt
         this.walletBalance = props.walletBalance ?? 0
         this.avatar = props.avatar
-        this.authProvider = props.authProvider ?? "LOCAL"
+        this.authProvider = props.authProvider ?? AUTH_PROVIDER.LOCAL
         this.isBlocked = props.isBlocked ?? false
         this.isVerified = props.isVerified ?? false
         this.createdAt = props.createdAt

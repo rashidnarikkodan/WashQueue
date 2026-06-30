@@ -9,7 +9,9 @@ import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
-export class SignupUseCase {
+import { ISignupUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class SignupUseCase implements ISignupUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,

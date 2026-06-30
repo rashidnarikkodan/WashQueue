@@ -42,7 +42,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         role: string
         email: string
       }
-    } catch (error) {
+    } catch {
       throw new UnauthorizedError("Invalid or expired authentication token")
     }
 

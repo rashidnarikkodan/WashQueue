@@ -1,17 +1,21 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
-export class GetMeUseCase {
+import { IGetMeUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class GetMeUseCase implements IGetMeUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(userId: string) {
     const user = await this.userRepository.findById(userId)
     if (!user) {
-      throw new AppError("User not found", 404)
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
     if (user.isBlocked) {
-      throw new AppError("Account is blocked", 403)
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
     return {

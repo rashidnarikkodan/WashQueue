@@ -3,34 +3,51 @@ import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
 import { LoginInput } from "../schema/login.schema"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { ILoginUseCase } from "../interfaces/auth-usecases.interfaces"
 
-export class LoginUseCase {
+export interface LoginResponse {
+  user: {
+    id: string
+    name?: string
+    email: string
+    role: string
+    isVerified: boolean
+  }
+  tokens: {
+    accessToken: string
+    refreshToken: string
+  }
+}
+
+export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService
   ) {}
 
-  async execute(data: LoginInput): Promise<any> {
+  async execute(data: LoginInput): Promise<LoginResponse> {
     const user = await this.userRepository.findByEmail(data.email)
     if (!user) {
-      throw new AppError("Invalid credentials", 400)
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (!user.password) {
-      throw new AppError("Invalid credentials", 400)
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     const isPasswordValid = await argon2.verify(user.password, data.password)
     if (!isPasswordValid) {
-      throw new AppError("Invalid credentials", 400)
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (user.isBlocked) {
-      throw new AppError("Account is blocked", 403)
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
     if (!user.isVerified) {
-      throw new AppError("Account is not verified", 401)
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
     }
 
       // Generate JWT access & refresh tokens

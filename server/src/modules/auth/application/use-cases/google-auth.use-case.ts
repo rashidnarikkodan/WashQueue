@@ -4,10 +4,15 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { TokenService } from "../services/token.service"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
-
 import { User } from "@/modules/user/infrastructure/models/user.model"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { ROLE } from "@/shared/constants/role.constants"
+import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
-export class GoogleAuthUseCase {
+import { IGoogleAuthUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
 
   constructor(
@@ -23,7 +28,7 @@ export class GoogleAuthUseCase {
 
   async execute(token: string) {
     if (!token) {
-      throw new AppError("Google token is required", 400)
+      throw new AppError(ERROR_MESSAGES.GOOGLE_TOKEN_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
     let email: string
@@ -34,7 +39,7 @@ export class GoogleAuthUseCase {
 
     if (isJwt) {
       if (!this.client || !env.GOOGLE_CLIENT_ID) {
-        throw new AppError("Google authentication client is not configured on the server", 500)
+        throw new AppError(ERROR_MESSAGES.GOOGLE_CONFIG_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
       }
       // 1. Verify Google ID token (JWT)
       try {
@@ -44,13 +49,16 @@ export class GoogleAuthUseCase {
         })
         const payload = ticket.getPayload()
         if (!payload || !payload.email) {
-          throw new AppError("Invalid Google token payload", 400)
+          throw new AppError(ERROR_MESSAGES.INVALID_GOOGLE_TOKEN_PAYLOAD, HTTP_STATUS.BAD_REQUEST)
         }
         email = payload.email
         name = payload.name || "Google User"
         picture = payload.picture
-      } catch (error: any) {
-        throw new AppError(error.message || "Google authentication failed", 401)
+      } catch (error: unknown) {
+        throw new AppError(
+          error instanceof Error ? error.message : ERROR_MESSAGES.GOOGLE_AUTH_FAILED,
+          HTTP_STATUS.UNAUTHORIZED
+        )
       }
     } else {
       // 2. Treat as Google Access Token and fetch user profile via UserInfo API
@@ -59,18 +67,18 @@ export class GoogleAuthUseCase {
           headers: { Authorization: `Bearer ${token}` }
         })
         if (!response.ok) {
-          throw new AppError("Failed to fetch user profile from Google", 401)
+          throw new AppError(ERROR_MESSAGES.GOOGLE_PROFILE_FETCH_FAILED, HTTP_STATUS.UNAUTHORIZED)
         }
-        const payload = await response.json() as any
+        const payload = await response.json() as { email: string; name?: string; picture?: string }
         if (!payload || !payload.email) {
-          throw new AppError("Invalid Google access token payload", 400)
+          throw new AppError(ERROR_MESSAGES.INVALID_GOOGLE_ACCESS_TOKEN, HTTP_STATUS.BAD_REQUEST)
         }
         email = payload.email
         name = payload.name || "Google User"
         picture = payload.picture
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error instanceof AppError) throw error
-        throw new AppError("Google authentication failed", 401)
+        throw new AppError(ERROR_MESSAGES.GOOGLE_AUTH_FAILED, HTTP_STATUS.UNAUTHORIZED)
       }
     }
 
@@ -81,8 +89,8 @@ export class GoogleAuthUseCase {
         name,
         email: email.toLowerCase(),
         avatar: picture || "",
-        authProvider: "GOOGLE",
-        role: "customer",
+        authProvider: AUTH_PROVIDER.GOOGLE,
+        role: ROLE.CUSTOMER,
         isVerified: true,
       })
       user = await this.userRepository.create(newUser)
@@ -90,7 +98,7 @@ export class GoogleAuthUseCase {
     }
 
     if (user.isBlocked) {
-      throw new AppError("Account is blocked", 403)
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
     const tokenPayload = {

@@ -2,8 +2,12 @@ import { AppError } from "@/shared/errors/app-error"
 import { UnauthorizedError } from "@/shared/errors/unauthorized-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { TokenService } from "../services/token.service"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
-export class RefreshTokenUseCase {
+import { IRefreshTokenUseCase } from "../interfaces/auth-usecases.interfaces"
+
+export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService
@@ -11,7 +15,7 @@ export class RefreshTokenUseCase {
 
   async execute(refreshToken: string) {
     if (!refreshToken) {
-      throw new UnauthorizedError("Refresh token is required")
+      throw new UnauthorizedError(ERROR_MESSAGES.REFRESH_TOKEN_REQUIRED)
     }
 
     try {
@@ -19,15 +23,15 @@ export class RefreshTokenUseCase {
 
       const user = await this.userRepository.findById(decoded.userId)
       if (!user) {
-        throw new UnauthorizedError("User not found")
+        throw new UnauthorizedError(ERROR_MESSAGES.USER_NOT_FOUND)
       }
 
       if (user.isBlocked) {
-        throw new AppError("Account is blocked", 403)
+        throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
       }
 
       if (user.refreshToken !== refreshToken) {
-        throw new UnauthorizedError("Invalid or expired refresh token")
+        throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
 
       const tokenPayload = {
@@ -47,8 +51,8 @@ export class RefreshTokenUseCase {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       }
-    } catch (error) {
-      throw new UnauthorizedError("Invalid or expired refresh token")
+    } catch {
+      throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
     }
   }
 }

@@ -18,11 +18,11 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   // Intercept the response body
   const originalSend = res.send
-  let responseBody: any
+  let responseBody: unknown
 
-  res.send = function (body) {
+  res.send = function (body?: unknown) {
     responseBody = body
-    return originalSend.apply(res, arguments as any)
+    return originalSend.call(res, body)
   }
 
   res.on("finish", () => {

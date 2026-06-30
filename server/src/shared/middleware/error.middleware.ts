@@ -2,8 +2,10 @@ import { NextFunction, Request, Response } from "express"
 import { AppError } from "../errors/app-error"
 import logger from "../../configs/logger.config"
 import env from "../../configs/env.config"
+import { HTTP_STATUS } from "@/shared/constants/http.constants"
+import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
-const errorMiddleware = (error: Error, req: Request, res: Response, next: NextFunction) => {
+const errorMiddleware = (error: Error, req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof AppError) {
     res.status(error.statusCode).json({
       success: false,
@@ -24,9 +26,9 @@ const errorMiddleware = (error: Error, req: Request, res: Response, next: NextFu
 
   const isProduction = env.NODE_ENV === "production"
 
-  res.status(500).json({
+  res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: isProduction ? "Internal server error" : error.message,
+    message: isProduction ? ERROR_MESSAGES.INTERNAL_SERVER_ERROR : error.message,
     ...(!isProduction ? { stack: error.stack } : {}),
   })
 }
