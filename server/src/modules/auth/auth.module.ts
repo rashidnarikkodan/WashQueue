@@ -1,7 +1,7 @@
 import { MongooseUserRepository } from "../user/infrastructure/repositories/mongoose-user.repository"
 import { MailService } from "@/infrastructure/mail/mail.service"
-import { OtpService } from "./application/services/otp.service"
-import { TokenService } from "./application/services/token.service"
+import { OtpService } from "./infrastructure/services/otp.service"
+import { TokenService } from "./infrastructure/services/token.service"
 
 import { SignupUseCase } from "./application/use-cases/signup.use-case"
 import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"

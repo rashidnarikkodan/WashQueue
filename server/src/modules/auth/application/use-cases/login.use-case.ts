@@ -1,7 +1,7 @@
 import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../services/token.service"
+import { TokenService } from "../../infrastructure/services/token.service"
 import { LoginInput } from "../schema/login.schema"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
@@ -25,7 +25,7 @@ export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService
-  ) {}
+  ) { }
 
   async execute(data: LoginInput): Promise<LoginResponse> {
     const user = await this.userRepository.findByEmail(data.email)
@@ -50,7 +50,7 @@ export class LoginUseCase implements ILoginUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
     }
 
-      // Generate JWT access & refresh tokens
+    // Generate JWT access & refresh tokens
     const tokenPayload = {
       userId: user.id,
       role: user.role,

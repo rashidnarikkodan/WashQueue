@@ -2,7 +2,7 @@ import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { SignupInput } from "@/modules/auth/application/schema/signup.schema"
-import { OtpService } from "../services/otp.service"
+import { OtpService } from "../../infrastructure/services/otp.service"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { User } from "@/modules/user/infrastructure/models/user.model"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
@@ -16,7 +16,7 @@ export class SignupUseCase implements ISignupUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,
     private readonly mailService: MailService
-  ) {}
+  ) { }
 
   async execute(data: SignupInput) {
 

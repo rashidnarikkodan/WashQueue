@@ -1,7 +1,7 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { ForgotPasswordInput } from "../schema/forgot-password.schema"
-import { OtpService } from "../services/otp.service"
+import { OtpService } from "../../infrastructure/services/otp.service"
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
@@ -13,7 +13,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,
     private readonly mailService: MailService
-  ) {}
+  ) { }
 
   async execute(data: ForgotPasswordInput): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)

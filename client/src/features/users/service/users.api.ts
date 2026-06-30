@@ -1,6 +1,7 @@
 import { api } from "@/shared/config/axios";
 import type { RoleType } from "@/shared/constants/role.const";
 import type { PaginationMeta } from "@/shared/components/ui/Pagination";
+import { API_ROUTES } from "@/shared/constants/route.const";
 
 export interface User {
   id: string;
@@ -54,7 +55,7 @@ export const usersApi = {
       if (filters.sortBy) params.sortBy = filters.sortBy;
       if (filters.sortOrder) params.sortOrder = filters.sortOrder;
 
-      const response = await api.get("/users", { params });
+      const response = await api.get(API_ROUTES.USERS.ROOT, { params });
       const resJson = response.data;
 
       return {
@@ -82,7 +83,7 @@ export const usersApi = {
 
   getUser: async (id: string): Promise<User> => {
     try {
-      const response = await api.get(`/users/${id}`);
+      const response = await api.get(API_ROUTES.USERS.BY_ID(id));
       const resJson = response.data;
       const u = resJson.data;
 
@@ -107,7 +108,7 @@ export const usersApi = {
 
   updateUser: async (id: string, updates: Partial<User>): Promise<User> => {
     try {
-      const response = await api.patch(`/users/${id}`, updates, { skipToast: true });
+      const response = await api.patch(API_ROUTES.USERS.BY_ID(id), updates, { skipToast: true });
       const resJson = response.data;
       const u = resJson.data;
 

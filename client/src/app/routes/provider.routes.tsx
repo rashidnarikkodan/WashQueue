@@ -1,7 +1,8 @@
 import ProviderLayout from "../layouts/ProviderLayout";
+import { APP_ROUTES } from "../../shared/constants/route.const";
 
 export const providerRoutes = {
-  path: "/provider",
+  path: APP_ROUTES.PROVIDER.ROOT,
   element: <ProviderLayout />,
   children: [
     {

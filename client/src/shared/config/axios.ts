@@ -1,6 +1,7 @@
 import axios from "axios"
 import { toast } from "sonner"
 import { useAuthStore } from "../../features/auth/store/authStore"
+import { API_ROUTES } from "../constants/route.const"
 
 declare module "axios" {
   export interface AxiosRequestConfig {
@@ -56,7 +57,7 @@ api.interceptors.response.use(
 
         // Handle Session Expiry (Try silent refresh on 401, unless it's the refresh token or login request itself)
         if (status === 401 && !originalRequest._retry) {
-            const isRefreshOrLoginRequest = originalRequest.url?.includes("/auth/refresh-token") || originalRequest.url?.includes("/auth/login");
+            const isRefreshOrLoginRequest = originalRequest.url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) || originalRequest.url?.includes(API_ROUTES.AUTH.LOGIN);
             
             if (isRefreshOrLoginRequest) {
                 // If the refresh token or login request itself failed, clear credentials and logout
@@ -87,7 +88,7 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             return new Promise((resolve, reject) => {
-                api.post("/auth/refresh-token", {}, { skipToast: true })
+                api.post(API_ROUTES.AUTH.REFRESH_TOKEN, {}, { skipToast: true })
                     .then(() => {
                         processQueue(null);
                         resolve(api(originalRequest));

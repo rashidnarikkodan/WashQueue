@@ -8,64 +8,65 @@ import { signupSchema } from "../application/schema/signup.schema"
 import { verifyOtpSchema } from "../application/schema/verify-otp.schema"
 import { forgotPasswordSchema } from "../application/schema/forgot-password.schema"
 import { resetPasswordSchema } from "../application/schema/reset-password.schema"
+import { API_ROUTES } from "@/shared/constants/route.constants"
 
 export const createAuthRouter = (authController: AuthController): Router => {
   const router = Router()
 
   router.post(
-    "/signup",
+    API_ROUTES.AUTH.SIGNUP,
     validateRequest(signupSchema, 'body'),
     asyncHandler(authController.signup)
   )
 
   router.post(
-    "/login",
+    API_ROUTES.AUTH.LOGIN,
     validateRequest(loginSchema, 'body'),
     asyncHandler(authController.login)
   )
 
   router.post(
-    "/verify-otp",
+    API_ROUTES.AUTH.VERIFY_OTP,
     validateRequest(verifyOtpSchema, 'body'),
     asyncHandler(authController.verifyOtp)
   )
 
   router.post(
-    "/google",
+    API_ROUTES.AUTH.GOOGLE,
     asyncHandler(authController.googleAuth)
   )
 
   router.post(
-    "/refresh-token",
+    API_ROUTES.AUTH.REFRESH_TOKEN,
     asyncHandler(authController.refreshToken)
   )
 
   router.post(
-    "/setup-account",
+    API_ROUTES.AUTH.SETUP_ACCOUNT,
     authenticate,
     asyncHandler(authController.setupAccount)
   )
 
   router.get(
-    "/me",
+    API_ROUTES.AUTH.ME,
     authenticate,
     asyncHandler(authController.me)
   )
 
   router.post(
-    "/logout",
+    API_ROUTES.AUTH.LOGOUT,
     authenticate,
     asyncHandler(authController.logout)
   )
 
   router.post(
-    "/forgot-password",
+    API_ROUTES.AUTH.FORGOT_PASSWORD,
     validateRequest(forgotPasswordSchema),
     asyncHandler(authController.forgotPassword)
   )
 
   router.post(
-    "/reset-password",
+    API_ROUTES.AUTH.RESET_PASSWORD,
     validateRequest(resetPasswordSchema),
     asyncHandler(authController.resetPassword)
   )

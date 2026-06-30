@@ -1,9 +1,10 @@
 import AdminLayout from "../layouts/AdminLayout";
 import UserManagement from "../../features/users/pages/UserManagement";
 import UserDetails from "../../features/users/pages/UserDetails";
+import { APP_ROUTES } from "../../shared/constants/route.const";
 
 export const adminRoutes = {
-  path: "/admin",
+  path: APP_ROUTES.ADMIN.ROOT,
   element: <AdminLayout />,
   children: [
     {

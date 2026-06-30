@@ -7,6 +7,7 @@ import SearchPill from "../ui/header/SearchPill";
 import NotificationDropdown from "../ui/header/NotificationDropdown";
 import ProfileDropdown from "../ui/header/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
+import { APP_ROUTES } from "../../constants/route.const";
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation();
@@ -34,7 +35,7 @@ export default function Header({ role }: { role?: string }) {
     manager: [],
     provider: [],
     customer: [
-      { name: "Home", path: "/" },
+      { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
     ],
   };
@@ -152,7 +153,7 @@ export default function Header({ role }: { role?: string }) {
 
           ) : (
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(APP_ROUTES.AUTH.LOGIN)}
               className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
             >
               Login

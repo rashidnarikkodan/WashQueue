@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../services/token.service"
+import { TokenService } from "../../infrastructure/services/token.service"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { User } from "@/modules/user/infrastructure/models/user.model"

@@ -4,6 +4,7 @@ import Landing from "../../features/home/pages/Landing";
 import Home from "../../features/home/pages/Home";
 import { useAuthStore } from "../../features/auth/store/authStore";
 import { ROLE } from "../../shared/constants/role.const";
+import { APP_ROUTES } from "../../shared/constants/route.const";
 
 const RootPathResolver = () => {
   const { isAuthenticated, user } = useAuthStore();
@@ -14,18 +15,18 @@ const RootPathResolver = () => {
 
   switch (user.role) {
     case ROLE.ADMIN:
-      return <Navigate to="/admin/dashboard" replace />;
+      return <Navigate to={APP_ROUTES.ADMIN.DASHBOARD} replace />;
     case ROLE.MANAGER:
-      return <Navigate to="/manager/dashboard" replace />;
+      return <Navigate to={APP_ROUTES.MANAGER.DASHBOARD} replace />;
     case ROLE.PROVIDER:
-      return <Navigate to="/provider/dashboard" replace />;
+      return <Navigate to={APP_ROUTES.PROVIDER.DASHBOARD} replace />;
     default:
       return <Home />;
   }
 };
 
 export const mainRoutes = {
-  path: "/",
+  path: APP_ROUTES.HOME,
   element: <MainLayout />,
   children: [
     {

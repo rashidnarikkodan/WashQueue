@@ -1,7 +1,7 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { OtpService } from "../services/otp.service"
-import { TokenService } from "../services/token.service"
+import { OtpService } from "../../infrastructure/services/otp.service"
+import { TokenService } from "../../infrastructure/services/token.service"
 import { VerifyOtpInput } from "../schema/verify-otp.schema"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
@@ -13,7 +13,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpService: OtpService,
     private readonly tokenService: TokenService
-  ) {}
+  ) { }
 
   async execute(data: VerifyOtpInput) {
     const isOtpValid = await this.otpService.verifyOtp(data.email, data.otp)

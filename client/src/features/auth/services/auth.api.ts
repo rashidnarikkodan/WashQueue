@@ -1,6 +1,7 @@
 import type { User } from "../store/authStore"
 import { api } from "../../../shared/config/axios"
 import type { RoleType } from "../../../shared/constants/role.const"
+import { API_ROUTES } from "../../../shared/constants/route.const"
 
 export const authApi = {
   /**
@@ -8,7 +9,7 @@ export const authApi = {
    */
   login: async (email: string, password: string): Promise<User> => {
     try {
-      const response = await api.post("/auth/login", { email, password },{skipToast:true})
+      const response = await api.post(API_ROUTES.AUTH.LOGIN, { email, password },{skipToast:true})
       const resJson = response.data
 
       return {
@@ -29,7 +30,7 @@ export const authApi = {
    */
   loginWithGoogle: async (token: string): Promise<User> => {
     try {
-      const response = await api.post("/auth/google", { token }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.GOOGLE, { token }, { skipToast: true })
       const resJson = response.data
 
       return {
@@ -50,7 +51,7 @@ export const authApi = {
    */
   signup: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/signup", { name, email, password }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.SIGNUP, { name, email, password }, { skipToast: true })
       const resJson = response.data
 
       return {
@@ -68,7 +69,7 @@ export const authApi = {
    */
   verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
     try {
-      const response = await api.post("/auth/verify-otp", { email, code }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.VERIFY_OTP, { email, code }, { skipToast: true })
       const resJson = response.data
 
       if (!resJson.success || !resJson.data) {
@@ -92,7 +93,7 @@ export const authApi = {
    */
   setupAccount: async (role: RoleType): Promise<User> => {
     try {
-      const response = await api.post("/auth/setup-account", { role }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.SETUP_ACCOUNT, { role }, { skipToast: true })
       const resJson = response.data
       const userData = resJson.data?.user || resJson.data
 
@@ -110,7 +111,7 @@ export const authApi = {
 
   me: async (): Promise<User> => {
     try {
-      const response = await api.get("/auth/me", { skipToast: true })
+      const response = await api.get(API_ROUTES.AUTH.ME, { skipToast: true })
       const resJson = response.data
 
       return {
@@ -130,7 +131,7 @@ export const authApi = {
    */
   logout: async (): Promise<void> => {
     try {
-      await api.post("/auth/logout")
+      await api.post(API_ROUTES.AUTH.LOGOUT)
     } catch (e) {
       console.warn("Logout request to backend failed or was ignored:", e)
     }
@@ -141,7 +142,7 @@ export const authApi = {
    */
   forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/forgot-password", { email }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email }, { skipToast: true })
       const resJson = response.data
       return {
         success: resJson.success,
@@ -158,7 +159,7 @@ export const authApi = {
    */
   resetPassword: async (email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
     try {
-      const response = await api.post("/auth/reset-password", { email, code, password: newPassword }, { skipToast: true })
+      const response = await api.post(API_ROUTES.AUTH.RESET_PASSWORD, { email, code, password: newPassword }, { skipToast: true })
       const resJson = response.data
       return {
         success: resJson.success,

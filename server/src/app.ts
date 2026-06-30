@@ -6,6 +6,7 @@ import notFoundMiddleware from "./shared/middleware/not-found.middleware"
 import errorMiddleware from "./shared/middleware/error.middleware"
 import authRouter from "./modules/auth/auth.module"
 import userRouter from "@/modules/user/user.module"
+import { API_ROUTES } from "@/shared/constants/route.constants"
 
 const app = express()
 
@@ -16,8 +17,8 @@ app.use(cookieParser())
 app.use(loggerMiddleware)
 
 
-app.use("/api/auth", authRouter)
-app.use('/api/users', userRouter)
+app.use(API_ROUTES.AUTH.ROOT, authRouter)
+app.use(API_ROUTES.USERS.ROOT, userRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

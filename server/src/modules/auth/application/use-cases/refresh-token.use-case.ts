@@ -1,7 +1,7 @@
 import { AppError } from "@/shared/errors/app-error"
 import { UnauthorizedError } from "@/shared/errors/unauthorized-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../services/token.service"
+import { TokenService } from "../../infrastructure/services/token.service"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
@@ -11,7 +11,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly tokenService: TokenService
-  ) {}
+  ) { }
 
   async execute(refreshToken: string) {
     if (!refreshToken) {

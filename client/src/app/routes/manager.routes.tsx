@@ -1,9 +1,10 @@
 // src/app/routes/manager.routes.tsx
 
 import ManagerLayout from "../layouts/ManagerLayout";
+import { APP_ROUTES } from "../../shared/constants/route.const";
 
 export const managerRoutes = {
-  path: "/manager",
+  path: APP_ROUTES.MANAGER.ROOT,
   element: <ManagerLayout />,
   children: [
     {
