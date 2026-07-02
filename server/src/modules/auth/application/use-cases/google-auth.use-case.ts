@@ -1,7 +1,9 @@
 import { OAuth2Client } from "google-auth-library"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../../infrastructure/services/token.service"
+import { ITokenService } from "../interfaces/token-service.interface"
+import { IHashService } from "../interfaces/hash-service.interface"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { User } from "@/modules/user/domain/entities/User"
@@ -9,7 +11,6 @@ import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
-
 import { IGoogleAuthUseCase } from "../interfaces/auth-usecases.interfaces"
 import { GoogleAuthResponse } from "../dto/google-auth.dto"
 
@@ -18,7 +19,8 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
 
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService,
+    private readonly hashService: IHashService
   ) {
     if (env.GOOGLE_CLIENT_ID) {
       this.client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
@@ -42,7 +44,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       if (!this.client || !env.GOOGLE_CLIENT_ID) {
         throw new AppError(ERROR_MESSAGES.GOOGLE_CONFIG_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
       }
-      // 1. Verify Google ID token (JWT)
+      // Verify Google ID token (JWT)
       try {
         const ticket = await this.client.verifyIdToken({
           idToken: token,
@@ -62,7 +64,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         )
       }
     } else {
-      // 2. Treat as Google Access Token and fetch user profile via UserInfo API
+      // Treat as Google Access Token and fetch user profile via UserInfo API
       try {
         const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: { Authorization: `Bearer ${token}` }
@@ -102,19 +104,17 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
-    const tokenPayload = {
-      userId: user.id,
-      role: user.role,
-      email: user.email,
-    }
+    // Map payload using mapper
+    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    await this.userRepository.update(user.id, {
-      refreshToken,
-      lastLoginAt: new Date(),
-    })
+    // Secure the refresh token by hashing it
+    const hashedRefreshToken = await this.hashService.hash(refreshToken)
+
+    // Save refresh token and update last login timestamp atomically
+    await this.userRepository.recordLoginSuccess(user.id, hashedRefreshToken, new Date())
 
     logger.info(`Google auth: User=${user.email}, isNewUser=${isNewUser}`)
 

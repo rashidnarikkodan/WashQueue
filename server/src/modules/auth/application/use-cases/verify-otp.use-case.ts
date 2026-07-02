@@ -1,18 +1,20 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { OtpService } from "../../infrastructure/services/otp.service"
-import { TokenService } from "../../infrastructure/services/token.service"
+import { IOtpService } from "../interfaces/otp-service.interface"
+import { ITokenService } from "../interfaces/token-service.interface"
+import { IHashService } from "../interfaces/hash-service.interface"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { VerifyOtpInput, VerifyOtpResponse } from "../dto/verify-otp.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-
 import { IVerifyOtpUseCase } from "../interfaces/auth-usecases.interfaces"
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly otpService: OtpService,
-    private readonly tokenService: TokenService
+    private readonly otpService: IOtpService,
+    private readonly tokenService: ITokenService,
+    private readonly hashService: IHashService
   ) { }
 
   async execute(data: VerifyOtpInput): Promise<VerifyOtpResponse> {
@@ -26,21 +28,17 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
-    // Generate JWT tokens
-    const tokenPayload = {
-      userId: user.id,
-      role: user.role,
-      email: user.email,
-    }
+    // Generate JWT tokens using the payload mapper
+    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Save refresh token to user document and set isVerified to true
-    await this.userRepository.update(user.id, {
-      isVerified: true,
-      refreshToken,
-    })
+    // Secure the refresh token by hashing it
+    const hashedRefreshToken = await this.hashService.hash(refreshToken)
+
+    // Verify user and save session atomically
+    await this.userRepository.verifyUserAndSaveSession(user.id, hashedRefreshToken)
 
     return {
       user: {

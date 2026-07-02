@@ -2,6 +2,7 @@ import { UserRepository } from "../user/infrastructure/repositories/user.reposit
 import { MailService } from "@/infrastructure/mail/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
+import { Argon2HashService } from "./infrastructure/services/hash.service"
 
 import { SignupUseCase } from "./application/use-cases/signup.use-case"
 import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"
@@ -23,17 +24,18 @@ const userRepository = new UserRepository()
 const mailService = new MailService()
 const otpService = new OtpService()
 const tokenService = new TokenService()
+const hashService = new Argon2HashService()
 
-const signupUseCase = new SignupUseCase(userRepository, otpService, mailService)
-const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpService, tokenService)
-const loginUseCase = new LoginUseCase(userRepository, tokenService)
-const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
+const signupUseCase = new SignupUseCase(userRepository, otpService, mailService, hashService)
+const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpService, tokenService, hashService)
+const loginUseCase = new LoginUseCase(userRepository, tokenService, hashService)
+const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService, hashService)
 const logoutUseCase = new LogoutUseCase(userRepository)
 const setupAccountUseCase = new SetupAccountUseCase(userRepository)
-const googleAuthUseCase = new GoogleAuthUseCase(userRepository, tokenService)
+const googleAuthUseCase = new GoogleAuthUseCase(userRepository, tokenService, hashService)
 const getMeUseCase = new GetMeUseCase(userRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpService, mailService)
-const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpService)
+const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpService, hashService)
 
 const authController = new AuthController(
   loginUseCase,

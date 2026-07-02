@@ -1,6 +1,7 @@
-import redis from "@/infrastructure/redis/redis.client"
+import redis from "@/infrastructure/cache/redis.client"
+import { IOtpService } from "../../application/interfaces/otp-service.interface"
 
-export class OtpService {
+export class OtpService implements IOtpService {
   async generateOtp(email: string): Promise<string> {
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     const key = `otp:${email.toLowerCase()}`

@@ -5,6 +5,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { GetUsersQuery } from "../../application/dto/get-users.dto"
 import { buildPaginationMeta, getPagination } from "@/shared/utils/pagination"
 import { PaginationMeta } from "@/shared/types/pagination"
+import { RoleType } from "@/shared/constants/role.constants"
 
 export class UserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
@@ -30,6 +31,77 @@ export class UserRepository implements IUserRepository {
     const updatedDoc = await UserModel.findByIdAndUpdate(id, persistenceData, { new: true }).exec()
     return updatedDoc ? UserMapper.toDomain(updatedDoc) : null
   }
+
+  async recordLoginSuccess(userId: string, hashedRefreshToken: string, timestamp: Date): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          refreshToken: hashedRefreshToken,
+          lastLoginAt: timestamp,
+        },
+      }
+    ).exec()
+  }
+
+  async verifyUserAndSaveSession(userId: string, hashedRefreshToken: string): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          isVerified: true,
+          refreshToken: hashedRefreshToken,
+        },
+      }
+    ).exec()
+  }
+
+  async updateRefreshToken(userId: string, hashedRefreshToken: string): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          refreshToken: hashedRefreshToken,
+        },
+      }
+    ).exec()
+  }
+
+  async clearRefreshToken(userId: string): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          refreshToken: "",
+        },
+      }
+    ).exec()
+  }
+
+  async resetPassword(userId: string, passwordHash: string): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          password: passwordHash,
+          isVerified: true,
+        },
+      }
+    ).exec()
+  }
+
+  async updateRole(userId: string, role: RoleType): Promise<void> {
+    await UserModel.updateOne(
+      { _id: userId },
+      {
+        $set: {
+          role,
+        },
+      }
+    ).exec()
+  }
+
+
 
   async getAllUsers(query: GetUsersQuery): Promise<{
     users: User[]

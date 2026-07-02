@@ -1,34 +1,37 @@
-import argon2 from "argon2"
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../../infrastructure/services/token.service"
+import { IHashService } from "../interfaces/hash-service.interface"
+import { ITokenService } from "../interfaces/token-service.interface"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { LoginInput, LoginResponse } from "../dto/login.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 import { ILoginUseCase } from "../interfaces/auth-usecases.interfaces"
+import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService,
+    private readonly hashService: IHashService
   ) { }
 
   async execute(data: LoginInput): Promise<LoginResponse> {
     const user = await this.userRepository.findByEmail(data.email)
-    if (!user) {
-      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
-    }
+    
+    // Dummy hash check to prevent user enumeration
+    const DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$dummy$dummy"
 
-    if (!user.password) {
-      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
-    }
-
-    const isPasswordValid = await argon2.verify(user.password, data.password)
-    if (!isPasswordValid) {
+    // If no user, or it's a social account that shouldn't use local password login
+    if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL) {
+      // Execute dummy verify to prevent timing attacks
+      await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (user.isBlocked) {
+      // Don't run password check here to save CPU (preventing DoS)
+      // Though it might reveal blocked status, it's accepted for mitigating CPU DoS
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
@@ -36,21 +39,29 @@ export class LoginUseCase implements ILoginUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
     }
 
-    // Generate JWT access & refresh tokens
-    const tokenPayload = {
-      userId: user.id,
-      role: user.role,
-      email: user.email,
+    if (!user.password) {
+      // Unlikely since we check AUTH_PROVIDER.LOCAL, but a safety check
+      await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
+
+    const isPasswordValid = await this.hashService.verify(user.password, data.password)
+    
+    if (!isPasswordValid) {
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Generate JWT access & refresh tokens
+    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Save refresh token and update last login timestamp
-    await this.userRepository.update(user.id, {
-      refreshToken,
-      lastLoginAt: new Date(),
-    })
+    // Hash refresh token for secure persistence
+    const hashedRefreshToken = await this.hashService.hash(refreshToken)
+
+    // Save refresh token and update last login timestamp atomically
+    await this.userRepository.recordLoginSuccess(user.id, hashedRefreshToken, new Date())
 
     return {
       user: {
