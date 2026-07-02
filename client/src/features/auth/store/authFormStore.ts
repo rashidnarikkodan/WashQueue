@@ -1,40 +1,5 @@
 import { create } from "zustand";
-
-interface FormErrors {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  otp?: string;
-  forgotEmail?: string;
-}
-
-interface AuthFormStore {
-  // Input fields
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  otpDigits: string[];
-  forgotEmail: string;
-  
-  // Validation errors
-  errors: FormErrors;
-
-  // Actions
-  setField: (field: "name" | "email" | "password" | "confirmPassword" | "forgotEmail", value: string) => void;
-  setOtpDigit: (index: number, value: string) => void;
-  setOtpDigits: (digits: string[]) => void;
-  setError: (field: keyof FormErrors, message: string) => void;
-  clearError: (field: keyof FormErrors) => void;
-  clearErrors: () => void;
-  resetForm: () => void;
-
-  // Validators
-  validateLogin: () => boolean;
-  validateSignup: () => boolean;
-  validateForgotPassword: () => boolean;
-}
+import type { AuthFormStore, FormErrors } from "../types";
 
 export const useAuthFormStore = create<AuthFormStore>((set, get) => ({
   name: "",

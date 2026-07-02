@@ -4,9 +4,11 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
 import UserStats from "../components/ui/UserStats";
 import UserTable from "../components/layout/UserTable";
 import FilterCard from "../components/layout/FilterCard";
-import { usersApi, type User } from "../service/users.api";
+import { usersApi } from "../service/users.api";
 import { FILTER_STATUS } from "@/shared/constants/status.const";
-import type { PaginationMeta } from "@/shared/components/ui/Pagination";
+import type { PaginationMeta } from "@/shared/types";
+import { getErrorMessage } from "@/shared/utils/error";
+import type { User } from "../types";
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -67,7 +69,7 @@ const UserManagement = () => {
         setStats(response.stats);
       }
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to retrieve users");
+      setErrorMsg(getErrorMessage(err, "Failed to retrieve users"));
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +118,7 @@ const UserManagement = () => {
       await usersApi.updateUser(id, { isBlocked: newBlockedState });
       fetchUsers();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to update block status");
+      alert(getErrorMessage(err, "Failed to update block status"));
     }
   };
 

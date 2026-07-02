@@ -3,15 +3,7 @@ import { toast } from "sonner";
 import { authApi } from "../services/auth.api";
 import type { RoleType } from "../../../shared/constants/role.const";
 import { getErrorMessage } from "../../../shared/utils/error";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: RoleType;
-  isNewUser?: boolean;
-  walletBalance?: number;
-}
+import type { User } from "../types";
 
 interface AuthStore {
   user: User | null;
@@ -71,9 +63,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       toast.success(`Welcome back, ${user.name}!`);
       return true;
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e))
+      toast.error(getErrorMessage(e, "Login failed"));
       set({ isLoading: false });
-      return false
+      return false;
     }
   },
 
@@ -94,9 +86,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       toast.success(`Welcome back, ${loggedInUser.name}!`);
       return true;
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e))
+      toast.error(getErrorMessage(e, "Google sign-in failed"));
       set({ isLoading: false });
-      return false
+      return false;
     }
   },
 
@@ -113,7 +105,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       toast.success("Verification OTP code sent successfully!");
       return true;
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e));
+      toast.error(getErrorMessage(e, "Registration failed"));
       set({ isLoading: false });
       return false;
     }

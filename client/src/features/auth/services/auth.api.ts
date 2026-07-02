@@ -1,40 +1,49 @@
-import type { User } from "../store/authStore"
 import { api } from "../../../shared/config/axios"
-import { ROLE, type RoleType } from "../../../shared/constants/role.const"
+import type { RoleType } from "../../../shared/constants/role.const"
 import { API_ROUTES } from "../../../shared/constants/route.const"
-import { getErrorMessage } from "../../../shared/utils/error"
-
-interface AuthResponseData {
-  id?: string
-  _id?: string
-  name?: string
-  email?: string
-  role?: RoleType
-  isNewUser?: boolean
-  user?: unknown
-}
+import { handleApiError } from "../../../shared/utils/handleApiError"
+import type { User } from "../types"
 
 interface AuthApiResponse {
-  success?: boolean
-  message?: string
-  data?: AuthResponseData | unknown
+  success?: boolean;
+  message?: string;
+  data?: unknown;
 }
 
-const toUser = (payload?: AuthResponseData): User => ({
-  id: payload?.id ?? payload?._id ?? "",
-  name: payload?.name ?? "",
-  email: payload?.email ?? "",
-  role: payload?.role ?? ROLE.CUSTOMER,
-  isNewUser: payload?.isNewUser,
-})
+interface AuthUserPayload {
+  id?: string;
+  _id?: string;
+  name?: string;
+  email?: string;
+  role?: User["role"];
+  isNewUser?: boolean;
+}
 
-const toUserPayload = (value: unknown): AuthResponseData | undefined => {
-  if (typeof value === "object" && value !== null) {
-    return value as AuthResponseData
+const toUserPayload = (data: unknown): AuthUserPayload | undefined => {
+  if (!data || typeof data !== "object") {
+    return undefined;
   }
 
-  return undefined
-}
+  const payload = data as Record<string, unknown>;
+  const id = typeof payload.id === "string"
+    ? payload.id
+    : typeof payload._id === "string"
+      ? payload._id
+      : undefined;
+
+  if (!id && typeof payload.name !== "string" && typeof payload.email !== "string" && typeof payload.role !== "string") {
+    return undefined;
+  }
+
+  return {
+    id,
+    _id: typeof payload._id === "string" ? payload._id : undefined,
+    name: typeof payload.name === "string" ? payload.name : undefined,
+    email: typeof payload.email === "string" ? payload.email : undefined,
+    role: typeof payload.role === "string" ? (payload.role as User["role"]) : undefined,
+    isNewUser: typeof payload.isNewUser === "boolean" ? payload.isNewUser : undefined,
+  };
+};
 
 export const authApi = {
   /**
@@ -46,13 +55,17 @@ export const authApi = {
       const resJson = response.data as AuthApiResponse
       const payload = toUserPayload(resJson.data)
 
-      return toUser(payload)
+      return {
+        id: payload?.id ?? "",
+        name: payload?.name ?? "",
+        email: payload?.email ?? "",
+        role: payload?.role ?? "customer"
+      }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Failed to login")
-      throw new Error(message)
+      handleApiError(error, "Failed to login")
     }
   },
-
+  
   /**
    * Exchange Google ID Token for local credentials
    */
@@ -60,11 +73,17 @@ export const authApi = {
     try {
       const response = await api.post(API_ROUTES.AUTH.GOOGLE, { token }, { skipToast: true })
       const resJson = response.data as AuthApiResponse
+      const payload = toUserPayload(resJson.data)
 
-      return toUser(toUserPayload(resJson.data))
+      return {
+        id: payload?.id ?? "",
+        name: payload?.name ?? "",
+        email: payload?.email ?? "",
+        role: payload?.role ?? "customer",
+        isNewUser: payload?.isNewUser
+      }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Google Sign-In failed")
-      throw new Error(message)
+      handleApiError(error, "Google Sign-In failed")
     }
   },
 
@@ -81,8 +100,7 @@ export const authApi = {
         message: resJson.message ?? "Registration successful"
       }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Registration failed")
-      throw new Error(message)
+      handleApiError(error, "Registration failed")
     }
   },
 
@@ -92,33 +110,41 @@ export const authApi = {
   verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.VERIFY_OTP, { email, code }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload(resJson.data)
+      const resJson = response.data
+      const payload = resJson.data
 
       if (!resJson.success || !payload) {
         return undefined
       }
 
-      return toUser(payload)
+      return {
+        id: resJson.data.id || resJson.data._id,
+        name: resJson.data.name,
+        email: resJson.data.email,
+        role: resJson.data.role
+      }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "OTP verification failed")
-      throw new Error(message)
+      handleApiError(error, "OTP verification failed")
     }
   },
 
-  
-   // Update role configuration during account setup 
+  /**
+   * Update role configuration during account setup
+  */
   setupAccount: async (role: RoleType): Promise<User> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.SETUP_ACCOUNT, { role }, { skipToast: true })
       const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload(resJson.data)
-      const nestedPayload = toUserPayload(payload?.user)
+      const payload = toUserPayload((resJson.data as { user?: unknown } | undefined)?.user ?? resJson.data)
 
-      return toUser(nestedPayload ?? payload)
+      return {
+        id: payload?.id ?? "",
+        name: payload?.name ?? "",
+        email: payload?.email ?? "",
+        role: payload?.role ?? "customer"
+      }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Account setup failed")
-      throw new Error(message)
+      handleApiError(error, "Account setup failed")
     }
   },
 
@@ -128,10 +154,14 @@ export const authApi = {
       const resJson = response.data as AuthApiResponse
       const payload = toUserPayload(resJson.data)
 
-      return toUser(payload)
+      return {
+        id: payload?.id ?? "",
+        name: payload?.name ?? "",
+        email: payload?.email ?? "",
+        role: payload?.role ?? "customer"
+      }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Failed to fetch user session")
-      throw new Error(message)
+      handleApiError(error, "Failed to fetch user session")
     }
   },
 
@@ -141,8 +171,8 @@ export const authApi = {
   logout: async (): Promise<void> => {
     try {
       await api.post(API_ROUTES.AUTH.LOGOUT)
-    } catch (e) {
-      console.warn("Logout request to backend failed or was ignored:", e)
+    } catch (error:unknown) {
+      handleApiError(error, "Logout request to backend failed or was ignored:")
     }
   },
 
@@ -158,8 +188,7 @@ export const authApi = {
         message: resJson.message ?? "Please check your email"
       }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Failed to send reset code")
-      throw new Error(message)
+      handleApiError(error, "Failed to send reset code")
     }
   },
 
@@ -175,8 +204,7 @@ export const authApi = {
         message: resJson.message ?? "Password reset completed"
       }
     } catch (error: unknown) {
-      const message = getErrorMessage(error, "Failed to reset password")
-      throw new Error(message)
+      handleApiError(error, "Failed to reset password")
     }
   }
 }

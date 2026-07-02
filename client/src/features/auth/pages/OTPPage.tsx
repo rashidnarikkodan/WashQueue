@@ -137,7 +137,7 @@ export default function OTPPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full transition-colors duration-300">
       {/* Main Content Area */}
-      <main className="flex-grow flex items-center justify-center z-10 p-4">
+      <main className="grow flex items-center justify-center z-10 p-4">
         {!isVerified ? (
           <div className="w-full max-w-xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col">
             <Link
@@ -149,7 +149,7 @@ export default function OTPPage() {
             </Link>
             {/* Header Title Section */}
             <div className="text-center space-y-3">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-linear-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
                 Confirm Email
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -220,7 +220,7 @@ export default function OTPPage() {
             <div className="flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-inner relative">
                 <span className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping opacity-75"></span>
-                <Check className="h-8 w-8 stroke-[3] relative z-10" />
+                <Check className="h-8 w-8 stroke-3 relative z-10" />
               </div>
             </div>
 
@@ -233,7 +233,7 @@ export default function OTPPage() {
 
             <button
               onClick={() => navigate("/setup-account")}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 cursor-pointer text-sm"
+              className="w-full bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 cursor-pointer text-sm"
             >
               Continue to Role Setup
             </button>

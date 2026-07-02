@@ -7,6 +7,15 @@ interface LocationSelectorProps {
   className?: string;
 }
 
+interface LocationSearchResult {
+  place_id?: number;
+  display_name: string;
+  lat?: string;
+  lon?: string;
+  address?: Record<string, string | undefined>;
+  name?: string;
+}
+
 const PRESETS = [
   "Kavanur, Malappuram",
   "Manjeri, Malappuram",
@@ -24,7 +33,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
   
   const [isLocating, setIsLocating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Array<{ place_id?: string; display_name?: string; lat?: string; lon?: string; address?: Record<string, string>; name?: string }>>([]);
+  const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,7 +80,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const formatLocationName = (result: { address?: Record<string, string>; display_name?: string; name?: string }) => {
+  const formatLocationName = (result: LocationSearchResult) => {
     const addr = result.address;
     if (!addr) {
       const parts = result.display_name?.split(",");
@@ -153,7 +162,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
         aria-haspopup="listbox"
       >
         <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-        <span className="font-semibold truncate max-w-[130px]">{selectedLocation}</span>
+        <span className="font-semibold truncate max-w-32.5">{selectedLocation}</span>
         <ChevronDown className={`h-3 w-3 transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
@@ -178,7 +187,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
             )}
           </div>
 
-          <div className="h-[1px] bg-border my-1.5 px-1"></div>
+          <div className="h-px bg-border my-1.5 px-1"></div>
 
           {/* Conditional content listing */}
           {searchQuery.trim() ? (
@@ -239,7 +248,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
                 </div>
               </button>
 
-              <div className="h-[1px] bg-border my-1 px-1"></div>
+              <div className="h-px bg-border my-1 px-1"></div>
 
               {/* Header Label */}
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2.5 py-1">

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, Shield, Calendar, Ban, Check } from "lucide-react";
-import type { User } from "../../service/users.api";
+import type { User } from "../../types";
 import { ROLE, type RoleType } from "../../../../shared/constants/role.const";
 import Pagination, { type PaginationMeta } from "@/shared/components/ui/Pagination";
 

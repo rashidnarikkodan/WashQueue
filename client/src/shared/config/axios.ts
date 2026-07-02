@@ -51,9 +51,17 @@ api.interceptors.response.use(
 // Interceptor 2: Silent Token Refresh (Authentication Recovery)
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    (error: unknown) => {
+        if (!axios.isAxiosError(error)) {
+            return Promise.reject(error);
+        }
+
         const status = error.response?.status;
         const originalRequest = error.config;
+
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
 
         // Handle Session Expiry (Try silent refresh on 401, unless it's the refresh token or login request itself)
         if (status === 401 && !originalRequest._retry) {
@@ -121,7 +129,11 @@ api.interceptors.response.use(
 // Interceptor 3: Error Toast Handling
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    (error: unknown) => {
+        if (!axios.isAxiosError(error)) {
+            return Promise.reject(error);
+        }
+
         const status = error.response?.status;
         const message = error.response?.data?.message || "Something went wrong";
         const skipToast = error.config?.skipToast;

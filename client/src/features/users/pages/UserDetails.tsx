@@ -22,44 +22,11 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { ROLE } from "../../../shared/constants/role.const";
 import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
-import { usersApi, type User } from "../service/users.api";
+import { usersApi } from "../service/users.api";
+import type { Booking, ProviderProfile, User, Vehicle } from "../types";
 import { toast } from "sonner";
 import FeatureLock from "../../../shared/components/ui/FeatureLock";
-
-// Simulated additional interfaces
-interface Vehicle {
-  id: string;
-  name: string;
-  plate: string;
-  addedDate: string;
-}
-
-interface Booking {
-  id: string;
-  stationName: string;
-  vehicle: string;
-  date: string;
-  amount: number;
-  status: "COMPLETED" | "CANCELLED" | "PENDING";
-}
-
-interface ProviderStation {
-  name: string;
-  location: string;
-  status: "ONLINE" | "OFFLINE" | "MAINTENANCE";
-  sessions: number;
-}
-
-interface ProviderProfile {
-  companyName: string;
-  businessEmail: string;
-  whatsapp: string;
-  kycStatus: string;
-  kycVerified: boolean;
-  stations: ProviderStation[];
-  totalEarnings: number;
-  activeStations: number;
-}
+import { getErrorMessage } from "../../../shared/utils/error";
 
 const UserDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -155,7 +122,7 @@ const UserDetails = () => {
         });
 
       } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : "Failed to load user details");
+        setErrorMsg(getErrorMessage(err, "Failed to load user details"));
       } finally {
         setIsLoading(false);
       }
@@ -233,7 +200,7 @@ const UserDetails = () => {
           : `User ${user.name || user.email} activated successfully!`
       );
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to update block status.");
+      toast.error(getErrorMessage(err, "Failed to update block status."));
     } finally {
       setIsSuspending(false);
     }
@@ -280,7 +247,7 @@ const UserDetails = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl xl:max-w-[1400px] mx-auto px-4 sm:px-6 pb-12 text-[#f8fafc]">
+    <div className="space-y-6 max-w-7xl xl:max-w-350 mx-auto px-4 sm:px-6 pb-12 text-[#f8fafc]">
       {/* Breadcrumbs Row & Back Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Breadcrumbs items={[
@@ -516,7 +483,7 @@ const UserDetails = () => {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[600px]">
+              <table className="w-full text-left border-collapse min-w-150">
                 <thead>
                   <tr className="border-b border-slate-800 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
                     <th className="pb-3">Booking ID</th>
