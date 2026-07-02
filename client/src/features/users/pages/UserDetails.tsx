@@ -154,8 +154,8 @@ const UserDetails = () => {
           activeStations: 0
         });
 
-      } catch (err: any) {
-        setErrorMsg(err.message || "Failed to load user details");
+      } catch (err: unknown) {
+        setErrorMsg(err instanceof Error ? err.message : "Failed to load user details");
       } finally {
         setIsLoading(false);
       }
@@ -232,8 +232,8 @@ const UserDetails = () => {
           ? `User ${user.name || user.email} suspended successfully!` 
           : `User ${user.name || user.email} activated successfully!`
       );
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update block status.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to update block status.");
     } finally {
       setIsSuspending(false);
     }

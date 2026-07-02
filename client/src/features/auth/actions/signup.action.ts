@@ -84,12 +84,11 @@ export async function signupAction(
       email,
       name,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
       message:
-        error.message ||
-        "Registration failed. Please try again.",
+        error instanceof Error ? error.message : "Registration failed. Please try again.",
       email,
       name,
     }

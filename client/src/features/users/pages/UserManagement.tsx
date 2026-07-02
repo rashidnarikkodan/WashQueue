@@ -66,8 +66,8 @@ const UserManagement = () => {
       if (response.stats) {
         setStats(response.stats);
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to retrieve users");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to retrieve users");
     } finally {
       setIsLoading(false);
     }
@@ -115,8 +115,8 @@ const UserManagement = () => {
       const newBlockedState = !targetUser.isBlocked;
       await usersApi.updateUser(id, { isBlocked: newBlockedState });
       fetchUsers();
-    } catch (err: any) {
-      alert(err.message || "Failed to update block status");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to update block status");
     }
   };
 

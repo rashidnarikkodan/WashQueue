@@ -1,4 +1,5 @@
 import { authApi } from "../services/auth.api"
+import type { User } from "../store/authStore"
 
 export interface LoginState {
   success: boolean
@@ -7,7 +8,7 @@ export interface LoginState {
     email?: string[]
     password?: string[]
   }
-  user?: any
+  user?: User
   email?: string
 }
 
@@ -51,11 +52,10 @@ export async function loginAction(
       message: "Login successful",
       user,
     }
-  } catch (error: any) {
-    console.log(error)
+  } catch (error: unknown) {
     return {
       success: false,
-      message: error.message || "Failed to login",
+      message: error instanceof Error ? error.message : "Failed to login",
       email,
     }
   }

@@ -1,7 +1,40 @@
 import type { User } from "../store/authStore"
 import { api } from "../../../shared/config/axios"
-import type { RoleType } from "../../../shared/constants/role.const"
+import { ROLE, type RoleType } from "../../../shared/constants/role.const"
 import { API_ROUTES } from "../../../shared/constants/route.const"
+import { getErrorMessage } from "../../../shared/utils/error"
+
+interface AuthResponseData {
+  id?: string
+  _id?: string
+  name?: string
+  email?: string
+  role?: RoleType
+  isNewUser?: boolean
+  user?: unknown
+}
+
+interface AuthApiResponse {
+  success?: boolean
+  message?: string
+  data?: AuthResponseData | unknown
+}
+
+const toUser = (payload?: AuthResponseData): User => ({
+  id: payload?.id ?? payload?._id ?? "",
+  name: payload?.name ?? "",
+  email: payload?.email ?? "",
+  role: payload?.role ?? ROLE.CUSTOMER,
+  isNewUser: payload?.isNewUser,
+})
+
+const toUserPayload = (value: unknown): AuthResponseData | undefined => {
+  if (typeof value === "object" && value !== null) {
+    return value as AuthResponseData
+  }
+
+  return undefined
+}
 
 export const authApi = {
   /**
@@ -10,17 +43,12 @@ export const authApi = {
   login: async (email: string, password: string): Promise<User> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.LOGIN, { email, password },{skipToast:true})
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
+      const payload = toUserPayload(resJson.data)
 
-      return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role
-      }
-    } catch (error: any) {
-      console.log(error)
-      const message = error.response?.data?.message || error.message || "Failed to login"
+      return toUser(payload)
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Failed to login")
       throw new Error(message)
     }
   },
@@ -31,17 +59,11 @@ export const authApi = {
   loginWithGoogle: async (token: string): Promise<User> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.GOOGLE, { token }, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
 
-      return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role,
-        isNewUser: resJson.data.isNewUser
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Google Sign-In failed"
+      return toUser(toUserPayload(resJson.data))
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Google Sign-In failed")
       throw new Error(message)
     }
   },
@@ -52,14 +74,14 @@ export const authApi = {
   signup: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.SIGNUP, { name, email, password }, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
 
       return {
-        success: resJson.success,
-        message: resJson.message
+        success: Boolean(resJson.success),
+        message: resJson.message ?? "Registration successful"
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Registration failed"
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Registration failed")
       throw new Error(message)
     }
   },
@@ -70,41 +92,32 @@ export const authApi = {
   verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.VERIFY_OTP, { email, code }, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
+      const payload = toUserPayload(resJson.data)
 
-      if (!resJson.success || !resJson.data) {
+      if (!resJson.success || !payload) {
         return undefined
       }
 
-      return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "OTP verification failed"
+      return toUser(payload)
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "OTP verification failed")
       throw new Error(message)
     }
   },
 
-  /**
-   * Update role configuration during account setup
-   */
+  
+   // Update role configuration during account setup 
   setupAccount: async (role: RoleType): Promise<User> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.SETUP_ACCOUNT, { role }, { skipToast: true })
-      const resJson = response.data
-      const userData = resJson.data?.user || resJson.data
+      const resJson = response.data as AuthApiResponse
+      const payload = toUserPayload(resJson.data)
+      const nestedPayload = toUserPayload(payload?.user)
 
-      return {
-        id: userData.id || userData._id,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Account setup failed"
+      return toUser(nestedPayload ?? payload)
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Account setup failed")
       throw new Error(message)
     }
   },
@@ -112,16 +125,12 @@ export const authApi = {
   me: async (): Promise<User> => {
     try {
       const response = await api.get(API_ROUTES.AUTH.ME, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
+      const payload = toUserPayload(resJson.data)
 
-      return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to fetch user session"
+      return toUser(payload)
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Failed to fetch user session")
       throw new Error(message)
     }
   },
@@ -143,13 +152,13 @@ export const authApi = {
   forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email }, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
       return {
-        success: resJson.success,
-        message: resJson.message
+        success: Boolean(resJson.success),
+        message: resJson.message ?? "Please check your email"
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to send reset code"
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Failed to send reset code")
       throw new Error(message)
     }
   },
@@ -160,13 +169,13 @@ export const authApi = {
   resetPassword: async (email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await api.post(API_ROUTES.AUTH.RESET_PASSWORD, { email, code, password: newPassword }, { skipToast: true })
-      const resJson = response.data
+      const resJson = response.data as AuthApiResponse
       return {
-        success: resJson.success,
-        message: resJson.message
+        success: Boolean(resJson.success),
+        message: resJson.message ?? "Password reset completed"
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to reset password"
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Failed to reset password")
       throw new Error(message)
     }
   }

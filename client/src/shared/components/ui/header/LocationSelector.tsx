@@ -24,7 +24,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
   
   const [isLocating, setIsLocating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Array<{ place_id?: string; display_name?: string; lat?: string; lon?: string; address?: Record<string, string>; name?: string }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,11 +71,11 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const formatLocationName = (result: any) => {
+  const formatLocationName = (result: { address?: Record<string, string>; display_name?: string; name?: string }) => {
     const addr = result.address;
     if (!addr) {
-      const parts = result.display_name.split(",");
-      return parts.slice(0, 2).map((p: string) => p.trim()).join(", ");
+      const parts = result.display_name?.split(",");
+      return parts?.slice(0, 2).map((p: string) => p.trim()).join(", ");
     }
     const namePart = addr.city || addr.town || addr.village || addr.suburb || addr.neighbourhood || addr.road || result.name || "Unknown Location";
     const statePart = addr.state || addr.county || "";
@@ -104,7 +104,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
           );
           const data = response.data;
           
-          const cleanName = formatLocationName(data);
+          const cleanName = formatLocationName(data) ?? "Unknown Location";
           
           setSelectedLocation(cleanName);
           localStorage.setItem("wq_selected_location", cleanName);
@@ -197,7 +197,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
                 </div>
               ) : (
                 searchResults.map((result) => {
-                  const cleanName = formatLocationName(result);
+                  const cleanName = formatLocationName(result) ?? "Unknown Location";
                   const isSelected = selectedLocation === cleanName;
                   return (
                     <button

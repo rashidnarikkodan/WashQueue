@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { authApi } from "../services/auth.api";
 import type { RoleType } from "../../../shared/constants/role.const";
+import { getErrorMessage } from "../../../shared/utils/error";
 
 export interface User {
   id: string;
@@ -69,8 +70,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${user.name}!`);
       return true;
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e))
       set({ isLoading: false });
       return false
     }
@@ -92,8 +93,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${loggedInUser.name}!`);
       return true;
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e))
       set({ isLoading: false });
       return false
     }
@@ -111,8 +112,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_temp_email", email);
       toast.success("Verification OTP code sent successfully!");
       return true;
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e));
       set({ isLoading: false });
       return false;
     }
@@ -144,8 +145,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
       set({ isLoading: false });
       return false;
-    } catch (e: any) {
-      toast.error(e.message || "OTP verification failed");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "OTP verification failed"));
       set({ isLoading: false });
       return false;
     }
@@ -166,8 +167,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_auth", "true");
       toast.success("Account setup completed!");
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Account setup failed");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Account setup failed"));
       set({ isLoading: false });
       return false;
     }
@@ -195,8 +196,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ isLoading: false });
       localStorage.setItem("wq_reset_email", email);
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Failed to send verification code");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Failed to send verification code"));
       set({ isLoading: false });
       return false;
     }
@@ -209,8 +210,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ isLoading: false });
       localStorage.removeItem("wq_reset_email");
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Failed to reset password");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Failed to reset password"));
       set({ isLoading: false });
       return false;
     }

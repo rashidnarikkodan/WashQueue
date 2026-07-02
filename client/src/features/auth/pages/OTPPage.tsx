@@ -22,7 +22,7 @@ export default function OTPPage() {
   const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (timerCount > 0) {
       interval = setInterval(() => {
         setTimerCount((prev) => prev - 1);
