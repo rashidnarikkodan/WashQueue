@@ -53,4 +53,5 @@ export class User implements UserProps {
         this.createdAt = props.createdAt
         this.updatedAt = props.updatedAt
     }
+    
 }

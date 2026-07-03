@@ -1,11 +1,9 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ResetPasswordInput } from "../dto/reset-password.dto"
-import { IOtpService } from "../interfaces/otp-service.interface"
-import { IHashService } from "../interfaces/hash-service.interface"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
-import { IResetPasswordUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IHashService, IOtpService, IResetPasswordUseCase } from "../interfaces"
+import { ResetPasswordInput } from "../dto"
 
 export class ResetPasswordUseCase implements IResetPasswordUseCase {
   constructor(

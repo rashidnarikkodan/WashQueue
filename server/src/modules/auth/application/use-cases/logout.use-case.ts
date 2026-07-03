@@ -1,5 +1,5 @@
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ILogoutUseCase } from "../interfaces/auth-usecases.interfaces"
+import { ILogoutUseCase } from "../interfaces"
 
 export class LogoutUseCase implements ILogoutUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

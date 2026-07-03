@@ -1,5 +1,5 @@
 import { api } from "@/shared/config/axios";
-import { API_ROUTES } from "@/shared/constants/route.const";
+import { API_ROUTES } from "@/shared/constants/appRoutes.const";
 import { handleApiError } from "@/shared/utils/handleApiError";
 import type { GetUsersFilters, GetUsersResponse, User } from "../types";
 

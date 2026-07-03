@@ -4,11 +4,3 @@ export interface SignupInput {
   password: string
   confirmPassword?: string
 }
-
-export interface SignupResponse {
-  id: string
-  name?: string
-  email: string
-  role: string
-  isVerified: boolean
-}

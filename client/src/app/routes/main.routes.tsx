@@ -4,7 +4,7 @@ import Landing from "../../features/home/pages/Landing";
 import Home from "../../features/home/pages/Home";
 import { useAuthStore } from "../../features/auth/store/authStore";
 import { ROLE } from "../../shared/constants/role.const";
-import { APP_ROUTES } from "../../shared/constants/route.const";
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
 
 const RootPathResolver = () => {
   const { isAuthenticated, user } = useAuthStore();

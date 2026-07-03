@@ -1,14 +1,14 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { SignupInput, SignupResponse } from "../dto/signup.dto"
-import { IOtpService } from "../interfaces/otp-service.interface"
-import { IMailService } from "../interfaces/mail-service.interface"
-import { IHashService } from "../interfaces/hash-service.interface"
-import { User } from "@/modules/user/domain/entities/User"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
-import { ISignupUseCase } from "../interfaces/auth-usecases.interfaces"
+
+import { User } from "@/modules/user/domain/entities/User"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+
+import { SignupInput } from "../dto"
+import { IHashService, IMailService, IOtpService, ISignupUseCase } from "../interfaces"
+
 
 export class SignupUseCase implements ISignupUseCase {
   constructor(
@@ -18,7 +18,7 @@ export class SignupUseCase implements ISignupUseCase {
     private readonly hashService: IHashService
   ) { }
 
-  async execute(data: SignupInput): Promise<SignupResponse> {
+  async execute(data: SignupInput): Promise<null> {
     // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(data.email)
     if (existingUser) {
@@ -38,7 +38,7 @@ export class SignupUseCase implements ISignupUseCase {
       authProvider: AUTH_PROVIDER.LOCAL,
     })
 
-    const user = await this.userRepository.create(newUser)
+    const user = await this.userRepository.save(newUser)
 
     // Generate numeric OTP
     const otp = await this.otpService.generateOtp(user.email)
@@ -46,12 +46,6 @@ export class SignupUseCase implements ISignupUseCase {
     // Send email with OTP code
     await this.mailService.sendVerificationEmail(user.email, otp)
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isVerified: user.isVerified,
-    }
+    return null
   }
 }

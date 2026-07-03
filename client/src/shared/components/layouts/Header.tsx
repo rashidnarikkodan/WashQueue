@@ -7,7 +7,7 @@ import SearchPill from "../ui/header/SearchPill";
 import NotificationDropdown from "../ui/header/NotificationDropdown";
 import ProfileDropdown from "../ui/header/ProfileDropdown";
 import { useAuthStore } from "../../../features/auth/store/authStore";
-import { APP_ROUTES } from "../../constants/route.const";
+import { APP_ROUTES } from "../../constants/appRoutes.const";
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation();

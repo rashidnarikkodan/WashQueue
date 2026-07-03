@@ -3,10 +3,10 @@ import { toast } from "sonner";
 import { authApi } from "../services/auth.api";
 import type { RoleType } from "../../../shared/constants/role.const";
 import { getErrorMessage } from "../../../shared/utils/error";
-import type { User } from "../types";
+import type { AuthUser } from "../types";
 
 interface AuthStore {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   tempUser: { name: string; email: string } | null;
@@ -26,7 +26,7 @@ const getInitialState = () => {
     const storedAuth = localStorage.getItem("wq_auth");
     if (storedUser && storedAuth === "true") {
       return {
-        user: JSON.parse(storedUser) as User,
+        user: JSON.parse(storedUser) as AuthUser,
         isAuthenticated: true,
       };
     }
@@ -166,8 +166,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  logout: () => {
-    authApi.logout();
+  logout: async () => {
+    await authApi.logout();
 
     set({
       user: null,

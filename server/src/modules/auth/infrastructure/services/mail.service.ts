@@ -1,25 +1,14 @@
 import nodemailer from "nodemailer"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
+import { IMailService } from "../../application/interfaces"
+import transporter from "@/configs/mail.config"
 
-export class MailService {
+export class MailService implements IMailService {
   private transporter: nodemailer.Transporter | null = null
 
   constructor() {
-    if (env.SMTP_HOST && env.SMTP_PORT && env.SMTP_USER && env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransport({
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT,
-        secure: env.SMTP_PORT === 465,
-        auth: {
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASS,
-        },
-      })
-    this.transporter.verify().then(()=>logger.info('NodeMailer is Running...')).catch(()=>logger.error('NodeMailer is Failed to Run'))
-    } else {
-      logger.warn("SMTP credentials not provided. MailService running in development/fallback mode.")
-    }
+   this.transporter = transporter
   }
 
   async sendVerificationEmail(email: string, otp: string): Promise<void> {

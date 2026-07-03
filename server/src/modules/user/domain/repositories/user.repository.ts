@@ -1,6 +1,7 @@
 import { PaginationMeta } from "@/shared/types/pagination";
 import { User } from "../entities/User"
 import { RoleType } from "@/shared/constants/role.constants"
+import { IBaseRepository } from "@/shared/domain/repository/base.repository"
 
 interface UsersQuery{
     page: number;
@@ -8,14 +9,11 @@ interface UsersQuery{
     sortBy: "createdAt" | "name" | "email";
     sortOrder: "asc" | "desc";
     search?: string | undefined;
-    role?: "customer" | "admin" | "provider" | "manager" | undefined;
+    role?: RoleType
     isBlocked?: boolean | undefined;
 }
-export interface IUserRepository {
-  findById(id: string): Promise<User | null>
+export interface IUserRepository extends IBaseRepository<User> {
   findByEmail(email: string): Promise<User | null>
-  create(user: User): Promise<User>
-  update(id: string, user: Partial<User>): Promise<User | null>
   recordLoginSuccess(userId: string, hashedRefreshToken: string, timestamp: Date): Promise<void>
   verifyUserAndSaveSession(userId: string, hashedRefreshToken: string): Promise<void>
   updateRefreshToken(userId: string, hashedRefreshToken: string): Promise<void>

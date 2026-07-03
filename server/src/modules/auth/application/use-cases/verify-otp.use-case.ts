@@ -1,13 +1,10 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { IOtpService } from "../interfaces/otp-service.interface"
-import { ITokenService } from "../interfaces/token-service.interface"
-import { IHashService } from "../interfaces/hash-service.interface"
-import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
-import { VerifyOtpInput, VerifyOtpResponse } from "../dto/verify-otp.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { IVerifyOtpUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { IHashService, IOtpService, ITokenService, IVerifyOtpUseCase } from "../interfaces"
+import { AuthOutput, VerifyOtpInput } from "../dto"
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
@@ -17,7 +14,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly hashService: IHashService
   ) { }
 
-  async execute(data: VerifyOtpInput): Promise<VerifyOtpResponse> {
+  async execute(data: VerifyOtpInput): Promise<AuthOutput> {
     const isOtpValid = await this.otpService.verifyOtp(data.email, data.otp)
     if (!isOtpValid) {
       throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_OTP, HTTP_STATUS.BAD_REQUEST)

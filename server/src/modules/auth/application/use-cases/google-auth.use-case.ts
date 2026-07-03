@@ -1,18 +1,20 @@
 import { OAuth2Client } from "google-auth-library"
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ITokenService } from "../interfaces/token-service.interface"
-import { IHashService } from "../interfaces/hash-service.interface"
-import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+
 import { User } from "@/modules/user/domain/entities/User"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+
+import { IGoogleAuthUseCase, IHashService, ITokenService } from "../interfaces"
+import { AuthOutput } from "../dto"
+
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 import { ROLE } from "@/shared/constants/role.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
-import { IGoogleAuthUseCase } from "../interfaces/auth-usecases.interfaces"
-import { GoogleAuthResponse } from "../dto/google-auth.dto"
+
 
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
@@ -29,7 +31,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     }
   }
 
-  async execute(token: string): Promise<GoogleAuthResponse> {
+  async execute(token: string): Promise<AuthOutput> {
     if (!token) {
       throw new AppError(ERROR_MESSAGES.GOOGLE_TOKEN_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
@@ -96,7 +98,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         role: ROLE.CUSTOMER,
         isVerified: true,
       })
-      user = await this.userRepository.create(newUser)
+      user = await this.userRepository.save(newUser)
       isNewUser = true
     }
 

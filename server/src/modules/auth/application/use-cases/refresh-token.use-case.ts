@@ -1,12 +1,11 @@
 import { AppError } from "@/shared/errors/app-error"
 import { UnauthorizedError } from "@/shared/errors/unauthorized-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ITokenService } from "../interfaces/token-service.interface"
-import { IHashService } from "../interfaces/hash-service.interface"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { IRefreshTokenUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces"
+
 
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(

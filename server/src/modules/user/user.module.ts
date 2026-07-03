@@ -1,7 +1,7 @@
 import { GetUsersUseCase } from "./application/use-cases/get-users";
 import { GetUserUseCase } from "./application/use-cases/get-user";
 import { UpdateUserUseCase } from "./application/use-cases/update-user";
-import { UserRepository } from "./infrastructure/repositories/user.repository";
+import { UserRepository } from "./infrastructure/repository/user.repository";
 import { UserController } from "./presentation/user.controller";
 import { createUsersRouter } from "./presentation/user.routes";
 

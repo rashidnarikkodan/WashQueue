@@ -3,13 +3,13 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { ROLE, RoleType } from "@/shared/constants/role.constants"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { ISetupAccountUseCase } from "../interfaces/auth-usecases.interfaces"
-import { SetupAccountResponse } from "../dto/setup-account.dto"
+import { AuthUser } from "../dto"
+import { ISetupAccountUseCase } from "../interfaces"
 
 export class SetupAccountUseCase implements ISetupAccountUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(userId: string, role: RoleType): Promise<SetupAccountResponse> {
+  async execute(userId: string, role: RoleType): Promise<AuthUser> {
     if (role !== ROLE.CUSTOMER && role !== ROLE.PROVIDER) {
       throw new AppError(ERROR_MESSAGES.INVALID_ROLE, HTTP_STATUS.BAD_REQUEST)
     }
@@ -28,14 +28,12 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
       throw new AppError(ERROR_MESSAGES.ROLE_UPDATE_FAILED, HTTP_STATUS.INTERNAL_SERVER_ERROR)
     }
 
-    return {
-      user: {
+    return  {
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
         isVerified: updatedUser.isVerified,
-      },
     }
   }
 }

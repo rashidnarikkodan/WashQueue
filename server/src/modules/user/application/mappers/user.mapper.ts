@@ -1,7 +1,8 @@
-import { IUser } from "../models/user.model"
+import { IUser } from "../../infrastructure/model/user.model"
 import { User } from "../../domain/entities/User"
+import { IMapper } from "@/shared/infrastructure/database/repository/base.repository"
 
-export class UserMapper {
+export class UserMapper implements IMapper<User, IUser> {
   static toDomain(mongooseDoc: IUser): User {
     return new User({
       id: mongooseDoc._id.toString(),
@@ -38,5 +39,13 @@ export class UserMapper {
       isVerified: domainEntity.isVerified,
     }
     return raw
+  }
+
+  toDomain(raw: IUser): User {
+    return UserMapper.toDomain(raw)
+  }
+
+  toPersistence(entity: Partial<User>): Partial<IUser> {
+    return UserMapper.toPersistence(entity)
   }
 }

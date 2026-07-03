@@ -1,11 +1,9 @@
 import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ForgotPasswordInput } from "../dto/forgot-password.dto"
-import { IOtpService } from "../interfaces/otp-service.interface"
-import { IMailService } from "../interfaces/mail-service.interface"
+import { ForgotPasswordInput } from "../dto"
+import { IForgotPasswordUseCase, IMailService, IOtpService } from "../interfaces"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
-import { IForgotPasswordUseCase } from "../interfaces/auth-usecases.interfaces"
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   constructor(

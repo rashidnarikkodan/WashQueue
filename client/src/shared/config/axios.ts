@@ -1,7 +1,7 @@
 import axios from "axios"
 import { toast } from "sonner"
 import { useAuthStore } from "../../features/auth/store/authStore"
-import { API_ROUTES } from "../constants/route.const"
+import { API_ROUTES } from "../constants/appRoutes.const"
 
 declare module "axios" {
   export interface AxiosRequestConfig {

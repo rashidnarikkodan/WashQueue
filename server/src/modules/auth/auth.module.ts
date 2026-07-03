@@ -1,5 +1,5 @@
-import { UserRepository } from "../user/infrastructure/repositories/user.repository"
-import { MailService } from "@/infrastructure/mail/mail.service"
+import { UserRepository } from "../user/infrastructure/repository/user.repository"
+import { MailService } from "@/shared/infrastructure/mail/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
 import { Argon2HashService } from "./infrastructure/services/hash.service"

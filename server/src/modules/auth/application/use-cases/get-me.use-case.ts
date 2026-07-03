@@ -3,13 +3,13 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
 
-import { IGetMeUseCase } from "../interfaces/auth-usecases.interfaces"
-import { GetMeResponse } from "../dto/get-me.dto"
+import { AuthUser } from "../dto"
+import { IGetMeUseCase } from "../interfaces"
 
 export class GetMeUseCase implements IGetMeUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) { }
 
-  async execute(userId: string): Promise<GetMeResponse> {
+  async execute(userId: string): Promise<AuthUser> {
     const user = await this.userRepository.findById(userId)
     if (!user) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
@@ -20,16 +20,12 @@ export class GetMeUseCase implements IGetMeUseCase {
     }
 
     return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        avatar: user.avatar,
-        walletBalance: user.walletBalance,
-        isVerified: user.isVerified,
-      },
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      isVerified: user.isVerified,
     }
   }
 }

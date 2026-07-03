@@ -1,13 +1,14 @@
 import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { IHashService } from "../interfaces/hash-service.interface"
-import { ITokenService } from "../interfaces/token-service.interface"
-import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
-import { LoginInput, LoginResponse } from "../dto/login.dto"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { ILoginUseCase } from "../interfaces/auth-usecases.interfaces"
 import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
+
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+
+import { IHashService, ILoginUseCase, ITokenService } from "../interfaces"
+import { AuthOutput, LoginInput } from "../dto"
+
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
@@ -16,7 +17,7 @@ export class LoginUseCase implements ILoginUseCase {
     private readonly hashService: IHashService
   ) { }
 
-  async execute(data: LoginInput): Promise<LoginResponse> {
+  async execute(data: LoginInput): Promise<AuthOutput> {
     const user = await this.userRepository.findByEmail(data.email)
     
     // Dummy hash check to prevent user enumeration

@@ -1,210 +1,143 @@
-import { api } from "../../../shared/config/axios"
-import type { RoleType } from "../../../shared/constants/role.const"
-import { API_ROUTES } from "../../../shared/constants/route.const"
-import { handleApiError } from "../../../shared/utils/handleApiError"
-import type { User } from "../types"
+import { api } from "@/shared/config/axios"
+import { API_ROUTES } from "@/shared/constants/api.const"
+import type { RoleType } from "@/shared/constants/role.const"
 
-interface AuthApiResponse {
-  success?: boolean;
-  message?: string;
-  data?: unknown;
+import type { ApiResponse } from "@/shared/types/ApiResponse"
+
+import { asyncHandle } from "@/shared/utils/asyncHandle"
+
+import type { AuthUser } from "../types"
+
+const unwrap = <T>(response: ApiResponse<T>): T => {
+  return response.data
 }
-
-interface AuthUserPayload {
-  id?: string;
-  _id?: string;
-  name?: string;
-  email?: string;
-  role?: User["role"];
-  isNewUser?: boolean;
-}
-
-const toUserPayload = (data: unknown): AuthUserPayload | undefined => {
-  if (!data || typeof data !== "object") {
-    return undefined;
-  }
-
-  const payload = data as Record<string, unknown>;
-  const id = typeof payload.id === "string"
-    ? payload.id
-    : typeof payload._id === "string"
-      ? payload._id
-      : undefined;
-
-  if (!id && typeof payload.name !== "string" && typeof payload.email !== "string" && typeof payload.role !== "string") {
-    return undefined;
-  }
-
-  return {
-    id,
-    _id: typeof payload._id === "string" ? payload._id : undefined,
-    name: typeof payload.name === "string" ? payload.name : undefined,
-    email: typeof payload.email === "string" ? payload.email : undefined,
-    role: typeof payload.role === "string" ? (payload.role as User["role"]) : undefined,
-    isNewUser: typeof payload.isNewUser === "boolean" ? payload.isNewUser : undefined,
-  };
-};
 
 export const authApi = {
-  /**
-   * Send login credentials to backend
-   */
-  login: async (email: string, password: string): Promise<User> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.LOGIN, { email, password },{skipToast:true})
-      const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload(resJson.data)
 
-      return {
-        id: payload?.id ?? "",
-        name: payload?.name ?? "",
-        email: payload?.email ?? "",
-        role: payload?.role ?? "customer"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Failed to login")
-    }
-  },
-  
-  /**
-   * Exchange Google ID Token for local credentials
-   */
-  loginWithGoogle: async (token: string): Promise<User> => {
-    try {
+  login: asyncHandle(
+    async (email: string, password: string): Promise<AuthUser> => {
+      const response = await api.post(API_ROUTES.AUTH.LOGIN, { email, password }, { skipToast: true })
+      return unwrap(response.data)
+    },
+    "Failed to login"
+  ),
+
+
+  loginWithGoogle: asyncHandle(
+    async (token: string): Promise<AuthUser> => {
       const response = await api.post(API_ROUTES.AUTH.GOOGLE, { token }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload(resJson.data)
+      return unwrap(response.data)
+    },
+    "Google Sign-In failed"
+  ),
 
-      return {
-        id: payload?.id ?? "",
-        name: payload?.name ?? "",
-        email: payload?.email ?? "",
-        role: payload?.role ?? "customer",
-        isNewUser: payload?.isNewUser
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Google Sign-In failed")
-    }
-  },
+
+  signup: asyncHandle(
+    async (name: string, email: string, password: string): Promise<void> => {
+      await api.post(API_ROUTES.AUTH.SIGNUP, { name, email, password },
+        { skipToast: true, successToast: "Registration successful" }
+      )
+    },
+    "Registration failed"
+  ),
+
+  verifyOTP: asyncHandle(
+    async (
+      email: string,
+      code: string
+    ): Promise<AuthUser> => {
+      const response = await api.post(
+        API_ROUTES.AUTH.VERIFY_OTP,
+        { email, code },
+        { skipToast: true }
+      )
+
+      return unwrap(response.data)
+    },
+    "OTP verification failed"
+  ),
 
   /**
-   * Send sign up details to backend
+   * Setup account role
    */
-  signup: async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.SIGNUP, { name, email, password }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
+  setupAccount: asyncHandle(
+    async (role: RoleType): Promise<AuthUser> => {
+      const response = await api.post(
+        API_ROUTES.AUTH.SETUP_ACCOUNT,
+        { role },
+        { skipToast: true }
+      )
 
-      return {
-        success: Boolean(resJson.success),
-        message: resJson.message ?? "Registration successful"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Registration failed")
-    }
-  },
+      return unwrap(response.data)
+    },
+    "Account setup failed"
+  ),
 
   /**
-   * Verify verification OTP code
+   * Fetch current session user
    */
-  verifyOTP: async (email: string, code: string): Promise<User | undefined> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.VERIFY_OTP, { email, code }, { skipToast: true })
-      const resJson = response.data
-      const payload = resJson.data
+  me: asyncHandle(
+    async (): Promise<AuthUser> => {
+      const response = await api.get(
+        API_ROUTES.AUTH.ME,
+        { skipToast: true }
+      )
 
-      if (!resJson.success || !payload) {
-        return undefined
-      }
-
-      return {
-        id: resJson.data.id || resJson.data._id,
-        name: resJson.data.name,
-        email: resJson.data.email,
-        role: resJson.data.role
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "OTP verification failed")
-    }
-  },
+      return unwrap(response.data)
+    },
+    "Failed to fetch user session"
+  ),
 
   /**
-   * Update role configuration during account setup
-  */
-  setupAccount: async (role: RoleType): Promise<User> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.SETUP_ACCOUNT, { role }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload((resJson.data as { user?: unknown } | undefined)?.user ?? resJson.data)
-
-      return {
-        id: payload?.id ?? "",
-        name: payload?.name ?? "",
-        email: payload?.email ?? "",
-        role: payload?.role ?? "customer"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Account setup failed")
-    }
-  },
-
-  me: async (): Promise<User> => {
-    try {
-      const response = await api.get(API_ROUTES.AUTH.ME, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      const payload = toUserPayload(resJson.data)
-
-      return {
-        id: payload?.id ?? "",
-        name: payload?.name ?? "",
-        email: payload?.email ?? "",
-        role: payload?.role ?? "customer"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Failed to fetch user session")
-    }
-  },
-
-  /**
-   * Inform backend of logout (optional)
+   * Logout current user
    */
-  logout: async (): Promise<void> => {
-    try {
-      await api.post(API_ROUTES.AUTH.LOGOUT)
-    } catch (error:unknown) {
-      handleApiError(error, "Logout request to backend failed or was ignored:")
-    }
-  },
+  logout: asyncHandle(
+    async (): Promise<void> => {
+      await api.post(
+        API_ROUTES.AUTH.LOGOUT,
+        {},
+        { skipToast: true }
+      )
+    },
+    "Logout failed"
+  ),
 
   /**
-   * Request forgot password OTP
+   * Send forgot password OTP
    */
-  forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      return {
-        success: Boolean(resJson.success),
-        message: resJson.message ?? "Please check your email"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Failed to send reset code")
-    }
-  },
+  forgotPassword: asyncHandle(
+    async (email: string): Promise<void> => {
+      await api.post(
+        API_ROUTES.AUTH.FORGOT_PASSWORD,
+        { email },
+        {
+          skipToast: true,
+          successToast: "Please check your email"
+        }
+      )
+    },
+    "Failed to send reset code"
+  ),
 
   /**
-   * Reset password with OTP and new password
+   * Reset password
    */
-  resetPassword: async (email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post(API_ROUTES.AUTH.RESET_PASSWORD, { email, code, password: newPassword }, { skipToast: true })
-      const resJson = response.data as AuthApiResponse
-      return {
-        success: Boolean(resJson.success),
-        message: resJson.message ?? "Password reset completed"
-      }
-    } catch (error: unknown) {
-      handleApiError(error, "Failed to reset password")
-    }
-  }
+  resetPassword: asyncHandle(
+    async (
+      email: string,
+      code: string,
+      newPassword: string
+    ): Promise<void> => {
+      await api.post(
+        API_ROUTES.AUTH.RESET_PASSWORD,
+        {
+          email,
+          code,
+          password: newPassword
+        },
+        { skipToast: true }
+      )
+    },
+    "Failed to reset password"
+  )
 }

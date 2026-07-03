@@ -2,7 +2,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { User } from "../../domain/entities/User"
 import { UpdateUserInput } from "../dto/update-user.dto"
 import { IUpdateUserUseCase } from "../interfaces/user-usecases.interfaces"
-import redis from "@/infrastructure/cache/redis.client"
+import redis from "@/shared/infrastructure/cache/redis.client"
 
 export class UpdateUserUseCase implements IUpdateUserUseCase {
   constructor(

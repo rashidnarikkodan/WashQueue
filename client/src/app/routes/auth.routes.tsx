@@ -4,7 +4,7 @@ import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage";
 import OTPPage from "../../features/auth/pages/OTPPage";
 import SetupAccountPage from "../../features/auth/pages/SetupAccountPage";
-import { APP_ROUTES } from "../../shared/constants/route.const";
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
 
 export const authRoutes = {
   path: APP_ROUTES.HOME,
