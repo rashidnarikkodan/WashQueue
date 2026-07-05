@@ -1,4 +1,4 @@
-import redis from "@/shared/infrastructure/cache/redis.client"
+import redis from "@/infrastructure/cache/redis.client"
 import { IOtpService } from "../../application/interfaces/otp-service.interface"
 
 export class OtpService implements IOtpService {

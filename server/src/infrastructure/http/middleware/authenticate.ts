@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import env from "@/configs/env.config"
-import { UnauthorizedError } from "../errors/unauthorized-error"
-import redis from "@/shared/infrastructure/cache/redis.client"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import redis from "@/infrastructure/cache/redis.client"
 
 export interface AuthenticatedRequest extends Request {
   user?: {

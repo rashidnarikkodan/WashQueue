@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library"
-import { AppError } from "@/shared/errors/app-error"
+import { AppError } from "@/common/errors/app-error"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
@@ -10,10 +10,10 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IGoogleAuthUseCase, IHashService, ITokenService } from "../interfaces"
 import { AuthOutput } from "../dto"
 
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { ROLE } from "@/shared/constants/role.constants"
-import { AUTH_PROVIDER } from "@/shared/constants/authProvider"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { ROLE } from "@/common/constants/role.constants"
+import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
 
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {

@@ -1,5 +1,5 @@
-import { AUTH_PROVIDER, AuthProvider } from "@/shared/constants/authProvider"
-import { ROLE, RoleType } from "@/shared/constants/role.constants"
+import { AUTH_PROVIDER, AuthProvider } from "@/common/constants/authProvider"
+import { ROLE, RoleType } from "@/common/constants/role.constants"
 import { Schema, model, Document } from "mongoose"
 
 export interface IUser extends Document {

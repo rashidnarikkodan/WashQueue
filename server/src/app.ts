@@ -1,12 +1,12 @@
 import express from "express"
 import cookieParser from "cookie-parser"
 import corsConfig from "./configs/cors.config"
-import loggerMiddleware from "./shared/middleware/logger.middleware"
-import notFoundMiddleware from "./shared/middleware/not-found.middleware"
-import errorMiddleware from "./shared/middleware/error.middleware"
+import loggerMiddleware from "./infrastructure/http/middleware/logger.middleware"
+import notFoundMiddleware from "./infrastructure/http/middleware/not-found.middleware"
+import errorMiddleware from "./infrastructure/http/middleware/error.middleware"
 import authRouter from "./modules/auth/auth.module"
 import userRouter from "@/modules/user/user.module"
-import { API_ROUTES } from "@/shared/constants/route.constants"
+import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
 

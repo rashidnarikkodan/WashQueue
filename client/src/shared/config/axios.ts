@@ -1,7 +1,7 @@
 import axios from "axios"
 import { toast } from "sonner"
 import { useAuthStore } from "../../features/auth/store/authStore"
-import { API_ROUTES } from "../constants/appRoutes.const"
+import { API_ROUTES } from "../constants/api.const";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
@@ -135,7 +135,7 @@ api.interceptors.response.use(
         }
 
         const status = error.response?.status;
-        const message = error.response?.data?.message || "Something went wrong";
+        const message = error.response?.data?.message || "Server Error";
         const skipToast = error.config?.skipToast;
 
         // Only display error toast if it wasn't a standard 401 that is being retried

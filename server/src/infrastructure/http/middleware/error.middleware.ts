@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express"
-import { AppError } from "../errors/app-error"
-import logger from "../../configs/logger.config"
-import env from "../../configs/env.config"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { AppError } from "@/common/errors/app-error"
+import logger from "@/configs/logger.config"
+import env from "@/configs/env.config"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 const errorMiddleware = (error: Error, req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof AppError) {

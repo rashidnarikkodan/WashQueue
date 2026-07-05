@@ -1,6 +1,6 @@
 import { IUser } from "../model/user.model"
 import { User } from "../../domain/entities/User"
-import { IMapper } from "@/shared/domain/repository/base.repository"
+import { IMapper } from "@/core/domain/repository.interface"
 import { UserSummaryDto } from "../../application/dto/get-users.dto"
 
 export class UserMapper implements IMapper<User, IUser> {

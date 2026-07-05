@@ -4,7 +4,7 @@ import { UpdateUserUseCase } from "./application/use-cases/update-user.use-case"
 import { UserRepository } from "./infrastructure/repository/user.repository";
 import { UserController } from "./presentation/user.controller";
 import { createUsersRouter } from "./presentation/user.routes";
-import { RedisCacheService } from "@/shared/infrastructure/cache/redis-cache.service";
+import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service";
 
 // infrastructures
 export const userRepository = new UserRepository()

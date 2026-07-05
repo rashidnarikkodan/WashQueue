@@ -7,7 +7,11 @@ import { ROLE } from "../../shared/constants/role.const";
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
 
 const RootPathResolver = () => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return null; // wait for session check before deciding which page to show
+  }
 
   if (!isAuthenticated || !user) {
     return <Landing />;

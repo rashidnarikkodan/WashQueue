@@ -1,14 +1,14 @@
 import { Router } from "express"
 import { AuthController } from "./auth.controller"
-import asyncHandler from "@/shared/utils/async-handler"
-import { validateRequest } from "@/shared/middleware/validation.middleware"
-import { authenticate } from "@/shared/middleware/authenticate"
+import asyncHandler from "@/common/utils/async-handler"
+import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
+import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { loginSchema } from "./schema/login.schema"
 import { signupSchema } from "./schema/signup.schema"
 import { verifyOtpSchema } from "./schema/verify-otp.schema"
 import { forgotPasswordSchema } from "./schema/forgot-password.schema"
 import { resetPasswordSchema } from "./schema/reset-password.schema"
-import { API_ROUTES } from "@/shared/constants/route.constants"
+import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createAuthRouter = (authController: AuthController): Router => {
   const router = Router()

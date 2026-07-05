@@ -1,5 +1,5 @@
-import { RoleType } from "@/shared/constants/role.constants"
-import { AuthProvider, AUTH_PROVIDER } from "@/shared/constants/authProvider"
+import { RoleType } from "@/common/constants/role.constants"
+import { AuthProvider, AUTH_PROVIDER } from "@/common/constants/authProvider"
 
 export interface UserProps {
     id?: string | undefined

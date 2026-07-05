@@ -1,5 +1,5 @@
 import { Model, Document } from "mongoose"
-import { HasId, IBaseRepository, IMapper } from "@/shared/domain/repository/base.repository"
+import { HasId, IBaseRepository, IMapper } from "@/core/domain/repository.interface"
 
 export abstract class BaseRepository<TDomain extends HasId, TPersist extends Document> implements IBaseRepository<TDomain> {
   constructor(

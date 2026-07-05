@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import { z } from "zod"
-import { ValidationError } from "../errors/validation-error"
+import { ValidationError } from "@/common/errors/validation-error"
 
 type SchemaTarget = "body" | "query" | "params"
 

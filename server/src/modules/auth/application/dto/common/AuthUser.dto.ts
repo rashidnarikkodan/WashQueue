@@ -1,4 +1,4 @@
-import { RoleType } from "@/shared/constants/role.constants"
+import { RoleType } from "@/common/constants/role.constants"
 
 export interface AuthUser {
     id: string

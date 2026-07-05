@@ -1,4 +1,4 @@
-import { ROLE } from "@/shared/constants/role.constants"
+import { ROLE } from "@/common/constants/role.constants"
 import z from "zod"
 import { GetUsersQuery } from "../../application/dto/get-users.dto"
 

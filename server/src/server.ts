@@ -1,9 +1,9 @@
 import "dotenv/config"
 import app from "./app"
 import env from "./configs/env.config"
-import connectDB from "./shared/infrastructure/database/mongodb/connection"
+import connectDB from "./infrastructure/database/mongodb/connection"
 import logger from "./configs/logger.config"
-import redis from "./shared/infrastructure/cache/redis.client"
+import redis from "./infrastructure/cache/redis.client"
 
 async function startServer() {
   try {

@@ -24,7 +24,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-  if (!user) return null;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,6 +34,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (!user) return null;
 
   const getRoleLabel = () => {
     switch (currentRole) {

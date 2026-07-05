@@ -1,8 +1,8 @@
-import { AppError } from "@/shared/errors/app-error"
+import { AppError } from "@/common/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ROLE, RoleType } from "@/shared/constants/role.constants"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { ROLE, RoleType } from "@/common/constants/role.constants"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { AuthUser } from "../dto"
 import { ISetupAccountUseCase } from "../interfaces"
 

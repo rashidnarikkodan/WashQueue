@@ -2,7 +2,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { User } from "../../domain/entities/User"
 import { UpdateUserInput } from "../dto/update-user.dto"
 import { IUpdateUserUseCase } from "../interfaces/user-usecases.interfaces"
-import { ICacheService } from "@/shared/application/interfaces/cache-service.interface"
+import { ICacheService } from "@/core/application/cache.interface"
 
 const BLOCKED_USER_TTL_SECONDS = 30 * 24 * 60 * 60 // 30 days
 

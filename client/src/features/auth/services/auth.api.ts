@@ -73,9 +73,6 @@ export const authApi = {
     "Account setup failed"
   ),
 
-  /**
-   * Fetch current session user
-   */
   me: asyncHandle(
     async (): Promise<AuthUser> => {
       const response = await api.get(
@@ -88,9 +85,6 @@ export const authApi = {
     "Failed to fetch user session"
   ),
 
-  /**
-   * Logout current user
-   */
   logout: asyncHandle(
     async (): Promise<void> => {
       await api.post(
@@ -102,9 +96,6 @@ export const authApi = {
     "Logout failed"
   ),
 
-  /**
-   * Send forgot password OTP
-   */
   forgotPassword: asyncHandle(
     async (email: string): Promise<void> => {
       await api.post(

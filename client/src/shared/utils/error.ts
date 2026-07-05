@@ -13,7 +13,7 @@ export interface ErrorResponseLike {
   };
 }
 
-export const getErrorMessage = (error: unknown, fallback = "Something went wrong"): string => {
+export const getErrorMessage = (error: unknown, fallback = "Server Error"): string => {
   if (error instanceof Error) {
     return error.message;
   }

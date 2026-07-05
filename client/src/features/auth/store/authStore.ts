@@ -20,13 +20,13 @@ interface AuthStore {
   resetPassword: (email: string, code: string, newPassword: string) => Promise<boolean>;
 }
 
-const getInitialState = () => {
+const getInitialState = ():{user:AuthUser,isAuthenticated:boolean} => {
   try {
     const storedUser = localStorage.getItem("wq_user");
     const storedAuth = localStorage.getItem("wq_auth");
     if (storedUser && storedAuth === "true") {
       return {
-        user: JSON.parse(storedUser) as AuthUser,
+        user: JSON.parse(storedUser),
         isAuthenticated: true,
       };
     }
@@ -44,7 +44,7 @@ const initialState = getInitialState();
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: initialState.user,
   isAuthenticated: initialState.isAuthenticated,
-  isLoading: false,
+  isLoading: true,
   tempUser: null,
 
   login: async (email, password) => {
@@ -167,18 +167,22 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   logout: async () => {
-    await authApi.logout();
-
-    set({
-      user: null,
-      isAuthenticated: false,
-    });
-    localStorage.removeItem("wq_user");
-    localStorage.removeItem("wq_auth");
-    localStorage.removeItem("wq_token");
-    localStorage.removeItem("wq_temp_email");
-    localStorage.removeItem("wq_reset_email");
-    toast.info("Logged out successfully.");
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore network errors — always clear local state
+    } finally {
+      set({
+        user: null,
+        isAuthenticated: false,
+      });
+      localStorage.removeItem("wq_user");
+      localStorage.removeItem("wq_auth");
+      localStorage.removeItem("wq_token");
+      localStorage.removeItem("wq_temp_email");
+      localStorage.removeItem("wq_reset_email");
+      toast.info("Logged out successfully.");
+    }
   },
 
   forgotPassword: async (email) => {

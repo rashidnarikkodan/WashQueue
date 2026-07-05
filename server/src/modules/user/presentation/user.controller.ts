@@ -5,11 +5,11 @@ import {
     IUpdateUserUseCase
 } from "../application/interfaces/user-usecases.interfaces";
 import { usersQuerySchema } from "./schema/get-users.schema";
-import success from "@/shared/utils/success";
-import { HTTP_STATUS } from "@/shared/constants/http.constants";
-import { NotFoundError } from "@/shared/errors/not-found-error";
-import { SUCCESS_MESSAGES } from "@/shared/constants/app.constants";
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants";
+import success from "@/common/utils/success";
+import { HTTP_STATUS } from "@/common/constants/http.constants";
+import { NotFoundError } from "@/common/errors/not-found-error";
+import { SUCCESS_MESSAGES } from "@/common/constants/app.constants";
+import { ERROR_MESSAGES } from "@/common/constants/error.constants";
 
 export class UserController {
     constructor(

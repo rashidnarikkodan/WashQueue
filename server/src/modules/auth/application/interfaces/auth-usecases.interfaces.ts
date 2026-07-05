@@ -4,7 +4,7 @@ import { VerifyOtpInput } from "../dto/verify-otp.dto"
 import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { ResetPasswordInput } from "../dto/reset-password.dto"
 import { AuthOutput, AuthUser } from "../dto/common/AuthUser.dto"
-import { RoleType } from "@/shared/constants/role.constants"
+import { RoleType } from "@/common/constants/role.constants"
 
 export interface ILoginUseCase {
   execute(data: LoginInput): Promise<AuthOutput>
