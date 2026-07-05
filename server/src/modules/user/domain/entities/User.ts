@@ -2,7 +2,7 @@ import { RoleType } from "@/shared/constants/role.constants"
 import { AuthProvider, AUTH_PROVIDER } from "@/shared/constants/authProvider"
 
 export interface UserProps {
-    id?: string
+    id?: string | undefined
     name?: string
     email: string
     phone?: string
@@ -20,7 +20,7 @@ export interface UserProps {
 }
 
 export class User implements UserProps {
-    readonly id: string
+    readonly id: string | undefined
     readonly name?: string
     readonly email: string
     readonly phone?: string
@@ -37,7 +37,7 @@ export class User implements UserProps {
     readonly updatedAt?: Date
 
     constructor(props: UserProps) {
-        this.id = props.id ?? ""
+        this.id = props.id
         this.name = props.name
         this.email = props.email
         this.phone = props.phone

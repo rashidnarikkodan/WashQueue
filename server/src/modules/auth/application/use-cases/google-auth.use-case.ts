@@ -116,13 +116,13 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
     // Save refresh token and update last login timestamp atomically
-    await this.userRepository.recordLoginSuccess(user.id, hashedRefreshToken, new Date())
+    await this.userRepository.recordLoginSuccess(user.id!, hashedRefreshToken, new Date())
 
     logger.info(`Google auth: User=${user.email}, isNewUser=${isNewUser}`)
 
     return {
       user: {
-        id: user.id,
+        id: user.id!,
         name: user.name,
         email: user.email,
         role: user.role,

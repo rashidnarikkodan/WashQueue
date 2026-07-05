@@ -19,21 +19,18 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
-    // Call descriptive updateRole method
-    await this.userRepository.updateRole(userId, role)
-
-    // Fetch the updated user since we need to return it
-    const updatedUser = await this.userRepository.findById(userId)
+    // Update role and get the updated user in one round-trip
+    const updatedUser = await this.userRepository.update(userId, { role })
     if (!updatedUser) {
       throw new AppError(ERROR_MESSAGES.ROLE_UPDATE_FAILED, HTTP_STATUS.INTERNAL_SERVER_ERROR)
     }
 
-    return  {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        isVerified: updatedUser.isVerified,
+    return {
+      id: updatedUser.id ?? userId,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      isVerified: updatedUser.isVerified,
     }
   }
 }

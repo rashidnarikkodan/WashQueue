@@ -2,11 +2,14 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { User } from "../../domain/entities/User"
 import { UpdateUserInput } from "../dto/update-user.dto"
 import { IUpdateUserUseCase } from "../interfaces/user-usecases.interfaces"
-import redis from "@/shared/infrastructure/cache/redis.client"
+import { ICacheService } from "@/shared/application/interfaces/cache-service.interface"
+
+const BLOCKED_USER_TTL_SECONDS = 30 * 24 * 60 * 60 // 30 days
 
 export class UpdateUserUseCase implements IUpdateUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly cacheService: ICacheService,
   ) { }
 
   async execute(id: string, updates: UpdateUserInput): Promise<User | null> {
@@ -16,9 +19,9 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
       const key = `blocked:${id}`
       if (updates.isBlocked) {
         // Blacklist user session. Set TTL to 30 days.
-        await redis.set(key, "true", "EX", 30 * 24 * 60 * 60)
+        await this.cacheService.set(key, "true", BLOCKED_USER_TTL_SECONDS)
       } else {
-        await redis.del(key)
+        await this.cacheService.del(key)
       }
     }
 

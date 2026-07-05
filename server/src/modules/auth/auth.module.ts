@@ -1,5 +1,5 @@
-import { UserRepository } from "../user/infrastructure/repository/user.repository"
-import { MailService } from "@/shared/infrastructure/mail/mail.service"
+import { userRepository } from "../user/user.module"
+import { MailService } from "./infrastructure/services/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
 import { Argon2HashService } from "./infrastructure/services/hash.service"
@@ -20,7 +20,6 @@ import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
 // infrastructures
-const userRepository = new UserRepository()
 const mailService = new MailService()
 const otpService = new OtpService()
 const tokenService = new TokenService()

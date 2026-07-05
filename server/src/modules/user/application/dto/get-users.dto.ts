@@ -1,18 +1,32 @@
-import { User } from "../../domain/entities/User"
 import { PaginationMeta } from "@/shared/types/pagination"
+import { RoleType } from "@/shared/constants/role.constants"
+
+export interface UserSummaryDto {
+  id: string
+  name?: string
+  email: string
+  role: RoleType
+  isVerified: boolean
+  isBlocked: boolean
+  avatar?: string
+  lastLoginAt?: Date
+  walletBalance?: number
+  createdAt?: Date
+  updatedAt?: Date
+}
 
 export interface GetUsersQuery {
   page: number
   limit: number
   search?: string
-  role?: "customer" | "provider" | "manager" | "admin"
+  role?: RoleType
   isBlocked?: boolean
   sortBy: "createdAt" | "name" | "email"
   sortOrder: "asc" | "desc"
 }
 
 export interface GetUsersResponse {
-  users: User[]
+  users: UserSummaryDto[]
   pagination: PaginationMeta
   stats?: {
     total: number

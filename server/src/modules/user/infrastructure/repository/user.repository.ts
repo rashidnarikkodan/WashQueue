@@ -1,11 +1,10 @@
 import { User as UserModel, IUser } from "../model/user.model"
 import { User } from "../../domain/entities/User"
-import { UserMapper } from "../../application/mappers/user.mapper"
+import { UserMapper } from "../mappers/user.mapper"
 import { IUserRepository } from "../../domain/repositories/user.repository"
-import { GetUsersQuery } from "../../application/dto/get-users.dto"
+import { GetUsersQuery, GetUsersResponse } from "../../application/dto/get-users.dto"
 import { buildPaginationMeta, getPagination } from "@/shared/utils/pagination"
-import { PaginationMeta } from "@/shared/types/pagination"
-import { RoleType } from "@/shared/constants/role.constants"
+import { RoleType, ROLE } from "@/shared/constants/role.constants"
 import { BaseRepository } from "@/shared/infrastructure/database/repository/base.repository"
 
 export class UserRepository extends BaseRepository<User, IUser> implements IUserRepository {
@@ -89,16 +88,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
 
 
 
-  async getAllUsers(query: GetUsersQuery): Promise<{
-    users: User[]
-    pagination: PaginationMeta
-    stats?: {
-      total: number
-      active: number
-      blocked: number
-      providers: number
-    }
-  }> {
+  async getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse> {
     const {
       page,
       limit,
@@ -150,7 +140,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       UserModel.countDocuments({}).exec(),
       UserModel.countDocuments({ isBlocked: false }).exec(),
       UserModel.countDocuments({ isBlocked: true }).exec(),
-      UserModel.countDocuments({ role: "provider" }).exec(),
+      UserModel.countDocuments({ role: ROLE.PROVIDER }).exec(),
     ])
 
     const paginationMetaData = buildPaginationMeta({
@@ -159,7 +149,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       limit,
     })
 
-    const domainUsers = users.map((user) => UserMapper.toDomain(user))
+    const domainUsers = users.map((user) => UserMapper.toUserSummaryDto(this.mapper.toDomain(user)))
 
     return {
       users: domainUsers,

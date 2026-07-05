@@ -13,9 +13,13 @@ export const ERROR_MESSAGES = {
   TOKEN_EXPIRED: "Token expired",
   INVALID_TOKEN: "Invalid token",
   INVALID_OR_EXPIRED_OTP: "Invalid or expired OTP",
+  INVALID_OR_EXPIRED_CODE: "Invalid or expired verification code",
   USER_NOT_FOUND: "User not found",
   USER_ALREADY_EXISTS: "User already exists",
   ACCOUNT_NOT_VERIFIED: "Account is not verified",
+  NO_ACCOUNT_WITH_EMAIL: "No account found with this email address",
+  GOOGLE_ACCOUNT_PASSWORD_RESET: "This account is registered via Google. Please log in using Google.",
+  SOCIAL_ACCOUNT_PASSWORD_RESET: "Social login accounts cannot reset passwords",
   GOOGLE_TOKEN_REQUIRED: "Google token is required",
   GOOGLE_CONFIG_ERROR: "Google authentication client is not configured on the server",
   INVALID_GOOGLE_TOKEN_PAYLOAD: "Invalid Google token payload",
@@ -28,3 +32,4 @@ export const ERROR_MESSAGES = {
   INVALID_OR_EXPIRED_REFRESH_TOKEN: "Invalid or expired refresh token",
   USER_ID_REQUIRED: "User ID is required",
 } as const
+

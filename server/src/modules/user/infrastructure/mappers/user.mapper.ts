@@ -1,6 +1,7 @@
-import { IUser } from "../../infrastructure/model/user.model"
+import { IUser } from "../model/user.model"
 import { User } from "../../domain/entities/User"
-import { IMapper } from "@/shared/infrastructure/database/repository/base.repository"
+import { IMapper } from "@/shared/domain/repository/base.repository"
+import { UserSummaryDto } from "../../application/dto/get-users.dto"
 
 export class UserMapper implements IMapper<User, IUser> {
   static toDomain(mongooseDoc: IUser): User {
@@ -47,5 +48,21 @@ export class UserMapper implements IMapper<User, IUser> {
 
   toPersistence(entity: Partial<User>): Partial<IUser> {
     return UserMapper.toPersistence(entity)
+  }
+
+  static toUserSummaryDto(user: User): UserSummaryDto {
+    return {
+      id: user.id ?? "",
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      isBlocked: user.isBlocked,
+      avatar: user.avatar,
+      lastLoginAt: user.lastLoginAt,
+      walletBalance: user.walletBalance,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }
   }
 }

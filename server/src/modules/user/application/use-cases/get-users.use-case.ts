@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../domain/repositories/user.repository"
-import { GetUsersQuery, GetUsersResponse } from "../dto/get-users.dto"
-import { IGetUsersUseCase } from "../interfaces/user-usecases.interfaces"
+import { GetUsersQuery, GetUsersResponse } from "../dto"
+import { IGetUsersUseCase } from "../interfaces"
 
 export class GetUsersUseCase implements IGetUsersUseCase {
   constructor(

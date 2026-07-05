@@ -51,7 +51,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       const hashedNewRefreshToken = await this.hashService.hash(newRefreshToken)
 
       // Save hashed refresh token to user session atomically
-      await this.userRepository.updateRefreshToken(user.id, hashedNewRefreshToken)
+      await this.userRepository.updateRefreshToken(user.id!, hashedNewRefreshToken)
 
       return {
         accessToken: newAccessToken,

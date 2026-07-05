@@ -35,11 +35,11 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
     // Verify user and save session atomically
-    await this.userRepository.verifyUserAndSaveSession(user.id, hashedRefreshToken)
+    await this.userRepository.verifyUserAndSaveSession(user.id!, hashedRefreshToken)
 
     return {
       user: {
-        id: user.id,
+        id: user.id!,
         name: user.name,
         email: user.email,
         role: user.role,

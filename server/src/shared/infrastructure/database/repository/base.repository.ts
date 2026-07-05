@@ -1,12 +1,7 @@
 import { Model, Document } from "mongoose"
-import { IBaseRepository } from "@/shared/domain/repository/base.repository"
+import { HasId, IBaseRepository, IMapper } from "@/shared/domain/repository/base.repository"
 
-export interface IMapper<TDomain, TPersist> {
-  toDomain(raw: TPersist): TDomain
-  toPersistence(entity: Partial<TDomain>): Partial<TPersist>
-}
-
-export abstract class BaseRepository<TDomain, TPersist extends Document> implements IBaseRepository<TDomain> {
+export abstract class BaseRepository<TDomain extends HasId, TPersist extends Document> implements IBaseRepository<TDomain> {
   constructor(
     protected readonly model: Model<TPersist>,
     protected readonly mapper: IMapper<TDomain, TPersist>
@@ -19,7 +14,7 @@ export abstract class BaseRepository<TDomain, TPersist extends Document> impleme
 
   async save(entity: TDomain): Promise<TDomain> {
     const persistenceData = this.mapper.toPersistence(entity)
-    const entityId = (entity as any).id
+    const entityId = entity.id
     if (entityId && typeof entityId === "string" && entityId.trim() !== "") {
       const updatedDoc = await this.model.findByIdAndUpdate(
         entityId,

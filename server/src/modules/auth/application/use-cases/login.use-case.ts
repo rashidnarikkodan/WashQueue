@@ -62,11 +62,11 @@ export class LoginUseCase implements ILoginUseCase {
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
     // Save refresh token and update last login timestamp atomically
-    await this.userRepository.recordLoginSuccess(user.id, hashedRefreshToken, new Date())
+    await this.userRepository.recordLoginSuccess(user.id!, hashedRefreshToken, new Date())
 
     return {
       user: {
-        id: user.id,
+        id: user.id!,
         name: user.name,
         email: user.email,
         role: user.role,

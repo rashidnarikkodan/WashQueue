@@ -103,7 +103,7 @@ export class AuthController {
       return
     }
     const result = await this.getMeUseCase.execute(userId)
-    success(res, result.user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
+    success(res, result, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
   }
 
   logout = async (req: AuthenticatedRequest, res: Response) => {

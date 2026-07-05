@@ -1,23 +1,21 @@
-import { LoginInput, LoginResponse } from "../dto/login.dto"
-import { SignupInput, SignupResponse } from "../dto/signup.dto"
-import { VerifyOtpInput, VerifyOtpResponse } from "../dto/verify-otp.dto"
-import { SetupAccountResponse } from "../dto/setup-account.dto"
-import { GoogleAuthResponse } from "../dto/google-auth.dto"
-import { GetMeResponse } from "../dto/get-me.dto"
+import { LoginInput } from "../dto/login.dto"
+import { SignupInput } from "../dto/signup.dto"
+import { VerifyOtpInput } from "../dto/verify-otp.dto"
 import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { ResetPasswordInput } from "../dto/reset-password.dto"
+import { AuthOutput, AuthUser } from "../dto/common/AuthUser.dto"
 import { RoleType } from "@/shared/constants/role.constants"
 
 export interface ILoginUseCase {
-  execute(data: LoginInput): Promise<LoginResponse>
+  execute(data: LoginInput): Promise<AuthOutput>
 }
 
 export interface ISignupUseCase {
-  execute(data: SignupInput): Promise<SignupResponse>
+  execute(data: SignupInput): Promise<null>
 }
 
 export interface IVerifyOtpUseCase {
-  execute(data: VerifyOtpInput): Promise<VerifyOtpResponse>
+  execute(data: VerifyOtpInput): Promise<AuthOutput>
 }
 
 export interface IRefreshTokenUseCase {
@@ -32,15 +30,15 @@ export interface ILogoutUseCase {
 }
 
 export interface ISetupAccountUseCase {
-  execute(userId: string, role: RoleType): Promise<SetupAccountResponse>
+  execute(userId: string, role: RoleType): Promise<AuthUser>
 }
 
 export interface IGoogleAuthUseCase {
-  execute(token: string): Promise<GoogleAuthResponse>
+  execute(token: string): Promise<AuthOutput>
 }
 
 export interface IGetMeUseCase {
-  execute(userId: string): Promise<GetMeResponse>
+  execute(userId: string): Promise<AuthUser>
 }
 
 export interface IForgotPasswordUseCase {

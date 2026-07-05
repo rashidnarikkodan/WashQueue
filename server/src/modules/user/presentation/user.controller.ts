@@ -13,21 +13,21 @@ import { ERROR_MESSAGES } from "@/shared/constants/error.constants";
 
 export class UserController {
     constructor(
-        private readonly GetUsersUseCase: IGetUsersUseCase,
-        private readonly GetUserUseCase: IGetUserUseCase,
-        private readonly UpdateUserUseCase: IUpdateUserUseCase,
+        private readonly getUsersUseCase: IGetUsersUseCase,
+        private readonly getUserUseCase: IGetUserUseCase,
+        private readonly updateUserUseCase: IUpdateUserUseCase,
     ) { }
 
     getUsers = async (req: Request, res: Response) => {
         const query = usersQuerySchema.parse(req.query);
-        const data = await this.GetUsersUseCase.execute(query);
+        const data = await this.getUsersUseCase.execute(query);
         success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.USERS_RETRIEVED_SUCCESS);
     }
 
     getUser = async (req: Request, res: Response) => {
         const { id } = req.params;
         if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED);
-        const user = await this.GetUserUseCase.execute(id);
+        const user = await this.getUserUseCase.execute(id);
         if (!user) {
             throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
         }
@@ -37,7 +37,7 @@ export class UserController {
     updateUser = async (req: Request, res: Response) => {
         const { id } = req.params;
         if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED);
-        const user = await this.UpdateUserUseCase.execute(id, req.body);
+        const user = await this.updateUserUseCase.execute(id, req.body);
         if (!user) {
             throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
         }
