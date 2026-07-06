@@ -8,9 +8,9 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   MONGODB_URI: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
-  ACCESS_TOKEN_EXPIRES_IN: z.coerce.number().default(900), // 15 mins in seconds
+  ACCESS_TOKEN_EXPIRES_IN: z.coerce.number(), // 15 mins in seconds
   REFRESH_TOKEN_SECRET: z.string(),
-  REFRESH_TOKEN_EXPIRES_IN: z.coerce.number().default(604800), // 7 days in seconds
+  REFRESH_TOKEN_EXPIRES_IN: z.coerce.number(), // 7 days in seconds
   REDIS_HOST: z.string().default("120.0.0.1"),
   REDIS_PORT: z.coerce.number().default(6379),
   SMTP_HOST: z.string().optional(),
