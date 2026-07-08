@@ -233,7 +233,7 @@ export default function OTPPage() {
 
             <button
               onClick={() => navigate("/setup-account")}
-              className="w-full bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 cursor-pointer text-sm"
+              className="w-full bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 cursor-pointer text-sm"
             >
               Continue to Role Setup
             </button>

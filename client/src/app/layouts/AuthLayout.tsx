@@ -15,10 +15,10 @@ export default function AuthLayout() {
 
   const getLogoColor = () => {
     if (location.pathname === "/login") {
-      return "text-white";
+      return "text-foreground";
     }
     if (location.pathname === "/signup") {
-      return "text-white md:text-primary";
+      return "text-foreground md:text-primary";
     }
     return "text-primary";
   };

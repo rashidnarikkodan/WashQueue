@@ -154,7 +154,7 @@ export default function Header({ role }: { role?: string }) {
           ) : (
             <button
               onClick={() => navigate(APP_ROUTES.AUTH.LOGIN)}
-              className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
+              className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-foreground font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
             >
               Login
             </button>

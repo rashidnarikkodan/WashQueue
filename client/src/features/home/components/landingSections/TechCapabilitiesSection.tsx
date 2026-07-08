@@ -2,7 +2,7 @@ import { Cpu, Layers } from "lucide-react";
 
 export default function TechCapabilitiesSection() {
   return (
-    <section className="py-24 border-b border-border bg-slate-950/10">
+    <section className="py-24 border-b border-border bg-background/10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         <div className="p-8 md:p-12 rounded-[2.5rem] border border-border bg-gradient-to-br from-slate-900 to-slate-950 shadow-2xl relative overflow-hidden">
@@ -48,28 +48,28 @@ export default function TechCapabilitiesSection() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4 sm:gap-6">
               
-              <div className="p-6 rounded-2xl border border-border bg-slate-950/40 hover:-translate-y-1 transition-transform duration-300">
+              <div className="p-6 rounded-2xl border border-border bg-background/40 hover:-translate-y-1 transition-transform duration-300">
                 <span className="text-3xl sm:text-4xl font-extrabold text-primary block">42ms</span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mt-2">
                   UPDATE LATENCY
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl border border-border bg-slate-950/40 hover:-translate-y-1 transition-transform duration-300">
+              <div className="p-6 rounded-2xl border border-border bg-background/40 hover:-translate-y-1 transition-transform duration-300">
                 <span className="text-3xl sm:text-4xl font-extrabold text-primary block">12k+</span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mt-2">
                   ACTIVE NODES
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl border border-border bg-slate-950/40 hover:-translate-y-1 transition-transform duration-300">
+              <div className="p-6 rounded-2xl border border-border bg-background/40 hover:-translate-y-1 transition-transform duration-300">
                 <span className="text-3xl sm:text-4xl font-extrabold text-primary block">99.9%</span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mt-2">
                   UPTIME SLA
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl border border-border bg-slate-950/40 hover:-translate-y-1 transition-transform duration-300">
+              <div className="p-6 rounded-2xl border border-border bg-background/40 hover:-translate-y-1 transition-transform duration-300">
                 <span className="text-3xl sm:text-4xl font-extrabold text-primary block">Zero</span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mt-2">
                   MANUAL ERRORS

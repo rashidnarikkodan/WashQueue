@@ -2,7 +2,7 @@ import { TrendingUp, CheckCircle2 } from "lucide-react";
 
 export default function ProductPreviewSection() {
   return (
-    <section className="py-24 border-b border-border bg-slate-950/20">
+    <section className="py-24 border-b border-border bg-background/20">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         
         {/* Column 1: UI Mockup Panel */}
@@ -22,7 +22,7 @@ export default function ProductPreviewSection() {
           </div>
           
           {/* Station Card UI */}
-          <div className="p-5 rounded-2xl bg-slate-950/40 border border-border/50 mb-4 space-y-4">
+          <div className="p-5 rounded-2xl bg-background/40 border border-border/50 mb-4 space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="font-bold text-foreground text-sm sm:text-base">South Bay Detailing</h4>
               <span className="font-bold text-primary text-sm sm:text-base">$38.00</span>
@@ -35,8 +35,8 @@ export default function ProductPreviewSection() {
                 <div className="flex gap-1">
                   <span className="w-1.5 h-6 rounded-sm bg-primary" />
                   <span className="w-1.5 h-6 rounded-sm bg-primary" />
-                  <span className="w-1.5 h-6 rounded-sm bg-slate-800" />
-                  <span className="w-1.5 h-6 rounded-sm bg-slate-800" />
+                  <span className="w-1.5 h-6 rounded-sm bg-muted" />
+                  <span className="w-1.5 h-6 rounded-sm bg-muted" />
                 </div>
               </div>
               {/* Wait time */}
@@ -48,14 +48,14 @@ export default function ProductPreviewSection() {
           </div>
           
           {/* Queue Status UI */}
-          <div className="p-5 rounded-2xl bg-slate-950/40 border border-border/50 space-y-3">
+          <div className="p-5 rounded-2xl bg-background/40 border border-border/50 space-y-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-full bg-primary/10 text-primary">
                 <TrendingUp className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-foreground truncate">Tesla Model 3 • Deep Polish</p>
-                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5 relative">
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-1.5 relative">
                   <div className="h-full bg-emerald-400 rounded-full" style={{ width: '65%' }} />
                 </div>
               </div>

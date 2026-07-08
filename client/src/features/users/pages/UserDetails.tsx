@@ -135,7 +135,7 @@ const UserDetails = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
         <div className="w-12 h-12 border-4 border-[#ADC6FF]/20 border-t-[#ADC6FF] rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-semibold">Loading user details...</p>
+        <p className="text-muted-foreground text-sm font-semibold">Loading user details...</p>
       </div>
     );
   }
@@ -147,8 +147,8 @@ const UserDetails = () => {
           <AlertTriangle className="w-6 h-6" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-bold text-white">Retrieval Failed</h2>
-          <p className="text-slate-400 text-sm">{errorMsg || "Unable to display details for this user."}</p>
+          <h2 className="text-xl font-bold text-foreground">Retrieval Failed</h2>
+          <p className="text-muted-foreground text-sm">{errorMsg || "Unable to display details for this user."}</p>
         </div>
       </div>
     );
@@ -258,7 +258,7 @@ const UserDetails = () => {
 
         <button
           onClick={() => navigate("/admin/users")}
-          className="group flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+          className="group flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           <span>Back to Users List</span>
@@ -266,7 +266,7 @@ const UserDetails = () => {
       </div>
 
       {/* 1. Header Profile Banner Card */}
-      <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
+      <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
         {/* Decorative subtle background gradients */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
@@ -278,7 +278,7 @@ const UserDetails = () => {
           
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">{user.name || "N/A"}</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">{user.name || "N/A"}</h1>
               
               {/* Active/Blocked Status dot tag */}
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
@@ -292,14 +292,14 @@ const UserDetails = () => {
             </div>
 
             {/* Email & Phone */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-slate-400 text-sm">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-muted-foreground text-sm">
               <span className="flex items-center gap-1.5">
-                <Mail size={14} className="text-slate-500" />
+                <Mail size={14} className="text-muted-foreground" />
                 {user.email}
               </span>
               {user.phone && (
                 <span className="flex items-center gap-1.5">
-                  <Phone size={14} className="text-slate-500" />
+                  <Phone size={14} className="text-muted-foreground" />
                   {user.phone}
                 </span>
               )}
@@ -307,8 +307,8 @@ const UserDetails = () => {
 
             {/* Badges for Authentication & Role */}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1e293b] text-slate-300 border border-slate-800">
-                <Shield size={11} className="text-slate-400" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1e293b] text-muted-foreground border border-border">
+                <Shield size={11} className="text-muted-foreground" />
                 {user.authProvider === "GOOGLE" ? "GOOGLE Google Auth" : "LOCAL Password Auth"}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#ADC6FF]/10 text-[#ADC6FF] border border-[#ADC6FF]/20">
@@ -326,7 +326,7 @@ const UserDetails = () => {
         </div>
 
         {/* Right side buttons & relative time meta */}
-        <div className="flex flex-col sm:flex-row xl:flex-col items-start sm:items-center xl:items-end gap-4 w-full xl:w-auto pt-4 xl:pt-0 border-t border-slate-800/40 xl:border-t-0 shrink-0">
+        <div className="flex flex-col sm:flex-row xl:flex-col items-start sm:items-center xl:items-end gap-4 w-full xl:w-auto pt-4 xl:pt-0 border-t border-border/40 xl:border-t-0 shrink-0">
           <div className="flex flex-wrap items-center gap-2">
             {/* Send Notification focus/trigger */}
             <button 
@@ -337,7 +337,7 @@ const UserDetails = () => {
                   toast.info("Scrolled to Quick Notification form.");
                 }
               }}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 font-semibold text-xs transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-border hover:bg-muted text-muted-foreground font-semibold text-xs transition-all cursor-pointer"
             >
               <Send size={13} />
               <span>Send Notification</span>
@@ -350,7 +350,7 @@ const UserDetails = () => {
               className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                 user.isBlocked
                   ? "border-emerald-500/20 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500 hover:text-slate-950"
-                  : "border-rose-500/20 text-rose-400 bg-rose-500/5 hover:bg-rose-500 hover:text-white"
+                  : "border-rose-500/20 text-rose-400 bg-rose-500/5 hover:bg-rose-500 hover:text-foreground"
               }`}
             >
               {isSuspending ? (
@@ -370,8 +370,8 @@ const UserDetails = () => {
           </div>
 
           {/* Joined & Active dates info */}
-          <div className="text-slate-400 text-[11px] font-bold tracking-wider text-left sm:text-right xl:text-right space-y-0.5">
-            <p>JOINED: <span className="text-white">{formatJoinedDate(user.createdAt)}</span></p>
+          <div className="text-muted-foreground text-[11px] font-bold tracking-wider text-left sm:text-right xl:text-right space-y-0.5">
+            <p>JOINED: <span className="text-foreground">{formatJoinedDate(user.createdAt)}</span></p>
             <p>LAST ACTIVE: <span className="text-emerald-400">{getRelativeTime(user.lastLoginAt || user.updatedAt)}</span></p>
           </div>
         </div>
@@ -384,29 +384,29 @@ const UserDetails = () => {
         <div className="xl:col-span-8 space-y-6">
           
           {/* Card: Personal Information */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
+          <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
 
 
             <div className="flex items-center gap-2 mb-6">
               <UserIcon size={18} className="text-[#ADC6FF]" />
-              <h2 className="text-base font-black uppercase text-white tracking-widest">Personal Information</h2>
+              <h2 className="text-base font-black uppercase text-foreground tracking-widest">Personal Information</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8 text-sm">
               <div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Full Legal Name</p>
-                <p className="font-semibold text-slate-200">{legalName || user.name || "N/A"}</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Full Legal Name</p>
+                <p className="font-semibold text-foreground">{legalName || user.name || "N/A"}</p>
               </div>
 
               <div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Auth Provider ID</p>
-                <p className="font-mono text-xs text-slate-300">{user.authProvider === "GOOGLE" ? `google-oauth2|${user.id}` : `local-hash|${user.id}`}</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Auth Provider ID</p>
+                <p className="font-mono text-xs text-muted-foreground">{user.authProvider === "GOOGLE" ? `google-oauth2|${user.id}` : `local-hash|${user.id}`}</p>
               </div>
 
               <div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Primary Email</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Primary Email</p>
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-slate-200">{user.email}</p>
+                  <p className="font-semibold text-foreground">{user.email}</p>
                   {user.isVerified && (
                     <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       <CheckCircle size={9} />
@@ -417,51 +417,51 @@ const UserDetails = () => {
               </div>
 
               <div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Phone Number</p>
-                <p className="font-semibold text-slate-200">{user.phone || "Not Registered"}</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Phone Number</p>
+                <p className="font-semibold text-foreground">{user.phone || "Not Registered"}</p>
               </div>
 
               <div className="md:col-span-2">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Registered Address</p>
-                <p className="text-slate-300 leading-relaxed flex items-start gap-1.5">
-                  <MapPin size={14} className="text-slate-500 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Registered Address</p>
+                <p className="text-muted-foreground leading-relaxed flex items-start gap-1.5">
+                  <MapPin size={14} className="text-muted-foreground shrink-0 mt-0.5" />
                   <span>{address || "Not Registered"}</span>
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-slate-800/40">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Biography</p>
+            <div className="mt-5 pt-4 border-t border-border/40">
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Biography</p>
               <p className="text-xs text-slate-450 leading-relaxed italic">{bio || "No biography registered."}</p>
             </div>
           </div>
 
           {/* Booking Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Bookings</p>
-              <p className="text-2xl font-black text-white">{bookings.length}</p> 
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Total Bookings</p>
+              <p className="text-2xl font-black text-foreground">{bookings.length}</p> 
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Completed</p>
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Completed</p>
               <p className="text-2xl font-black text-emerald-400">{bookings.filter(b => b.status === "COMPLETED").length}</p>
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Cancelled</p>
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Cancelled</p>
               <p className="text-2xl font-black text-rose-400">{bookings.filter(b => b.status === "CANCELLED").length}</p>
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Pending</p>
-              <p className="text-2xl font-black text-slate-300">{bookings.filter(b => b.status === "PENDING").length}</p>
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Pending</p>
+              <p className="text-2xl font-black text-muted-foreground">{bookings.filter(b => b.status === "PENDING").length}</p>
             </div>
           </div>
 
           {/* Card: Recent Booking History */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
+          <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-[#ADC6FF]" />
-                <h2 className="text-base font-black uppercase text-white tracking-widest">Recent Booking History</h2>
+                <h2 className="text-base font-black uppercase text-foreground tracking-widest">Recent Booking History</h2>
               </div>
               
               {/* Dropdown status selector */}
@@ -472,7 +472,7 @@ const UserDetails = () => {
                     setBookingStatusFilter(e.target.value);
                     setBookingPage(1);
                   }}
-                  className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-xs font-semibold text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="ALL">All Status</option>
                   <option value="COMPLETED">Completed</option>
@@ -485,7 +485,7 @@ const UserDetails = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-150">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  <tr className="border-b border-border text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                     <th className="pb-3">Booking ID</th>
                     <th className="pb-3">Station</th>
                     <th className="pb-3">Vehicle</th>
@@ -497,7 +497,7 @@ const UserDetails = () => {
                 <tbody className="divide-y divide-slate-800/50 text-xs">
                   {displayedBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-6 text-center text-slate-500 font-medium">
+                      <td colSpan={6} className="py-6 text-center text-muted-foreground font-medium">
                         No bookings found matching filter.
                       </td>
                     </tr>
@@ -505,17 +505,17 @@ const UserDetails = () => {
                     displayedBookings.map((b) => (
                       <tr key={b.id} className="hover:bg-slate-850/10">
                         <td className="py-3.5 font-bold text-[#ADC6FF]">{b.id}</td>
-                        <td className="py-3.5 font-semibold text-slate-200">{b.stationName}</td>
-                        <td className="py-3.5 text-slate-300">{b.vehicle}</td>
-                        <td className="py-3.5 text-slate-400">{b.date}</td>
-                        <td className="py-3.5 font-black text-slate-200">${b.amount.toFixed(2)}</td>
+                        <td className="py-3.5 font-semibold text-foreground">{b.stationName}</td>
+                        <td className="py-3.5 text-muted-foreground">{b.vehicle}</td>
+                        <td className="py-3.5 text-muted-foreground">{b.date}</td>
+                        <td className="py-3.5 font-black text-foreground">${b.amount.toFixed(2)}</td>
                         <td className="py-3.5 text-right">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold border text-[9px] ${
                             b.status === "COMPLETED"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : b.status === "CANCELLED"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                              : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                              : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
                           }`}>
                             {b.status}
                           </span>
@@ -529,13 +529,13 @@ const UserDetails = () => {
 
             {/* Booking Pagination Controls */}
             {filteredBookings.length > 0 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-slate-800/40 text-xs text-slate-400">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-border/40 text-xs text-muted-foreground">
                 <p>Showing {filteredBookings.length === 0 ? 0 : (bookingPage - 1) * bookingsPerPage + 1}-{Math.min(filteredBookings.length, bookingPage * bookingsPerPage)} of {filteredBookings.length} entries</p>
                 <div className="flex items-center gap-1.5">
                   <button
                     disabled={bookingPage === 1}
                     onClick={() => setBookingPage(prev => Math.max(1, prev - 1))}
-                    className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
+                    className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
                   >
                     &lt;
                   </button>
@@ -546,7 +546,7 @@ const UserDetails = () => {
                       className={`w-7 h-7 rounded-lg font-bold border transition-all cursor-pointer ${
                         bookingPage === i + 1
                           ? "bg-[#ADC6FF] text-[#020617] border-[#ADC6FF]"
-                          : "border-slate-800 text-slate-400 hover:bg-slate-800"
+                          : "border-border text-muted-foreground hover:bg-muted"
                       }`}
                     >
                       {i + 1}
@@ -555,7 +555,7 @@ const UserDetails = () => {
                   <button
                     disabled={bookingPage === totalBookingPages}
                     onClick={() => setBookingPage(prev => Math.min(totalBookingPages, prev + 1))}
-                    className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
+                    className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-50 disabled:hover:bg-transparent transition-all cursor-pointer"
                   >
                     &gt;
                   </button>
@@ -565,31 +565,31 @@ const UserDetails = () => {
           </div>
 
           {/* Card: Registered Vehicles */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
+          <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Car size={16} className="text-[#ADC6FF]" />
-                <h2 className="text-base font-black uppercase text-white tracking-widest">Registered Vehicles</h2>
+                <h2 className="text-base font-black uppercase text-foreground tracking-widest">Registered Vehicles</h2>
               </div>
 
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               {vehicles.length === 0 ? (
-                <div className="sm:col-span-2 py-6 text-center text-slate-500 text-xs font-semibold">
+                <div className="sm:col-span-2 py-6 text-center text-muted-foreground text-xs font-semibold">
                   No vehicles registered yet.
                 </div>
               ) : (
                 vehicles.map((v) => (
-                  <div key={v.id} className="flex items-center gap-4 bg-[#1b253b]/40 border border-slate-800/40 p-4 rounded-2xl hover:border-slate-700/60 transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-[#ADC6FF] border border-slate-800/80">
+                  <div key={v.id} className="flex items-center gap-4 bg-[#1b253b]/40 border border-border/40 p-4 rounded-2xl hover:border-border/60 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-[#ADC6FF] border border-border">
                       <Car size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-extrabold text-sm text-slate-100 truncate">{v.name}</h4>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">PLATE: <span className="font-mono text-slate-300 font-medium">{v.plate}</span></p>
+                      <h4 className="font-extrabold text-sm text-foreground truncate">{v.name}</h4>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">PLATE: <span className="font-mono text-muted-foreground font-medium">{v.plate}</span></p>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-medium">{v.addedDate}</span>
+                    <span className="text-[10px] text-muted-foreground font-medium">{v.addedDate}</span>
                   </div>
                 ))
               )}
@@ -598,15 +598,15 @@ const UserDetails = () => {
 
           {/* Conditional Card: Provider Profile Overview */}
           {(user.role === ROLE.PROVIDER || user.role === ROLE.MANAGER) && (
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6">
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6">
               
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Building size={16} className="text-[#ADC6FF]" />
-                    <h2 className="text-base font-black uppercase text-white tracking-widest">Provider Profile</h2>
+                    <h2 className="text-base font-black uppercase text-foreground tracking-widest">Provider Profile</h2>
                   </div>
-                  <p className="text-slate-500 text-xs font-medium">Enterprise Partner Account Overview</p>
+                  <p className="text-muted-foreground text-xs font-medium">Enterprise Partner Account Overview</p>
                 </div>
 
                 <button 
@@ -633,40 +633,40 @@ const UserDetails = () => {
                 {/* Details side */}
                 <div className="md:col-span-5 space-y-5">
                   <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Company Name</p>
-                    <p className="font-extrabold text-sm text-slate-100">{providerProfile.companyName || "Not Configured"}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Company Name</p>
+                    <p className="font-extrabold text-sm text-foreground">{providerProfile.companyName || "Not Configured"}</p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Business Email</p>
-                    <p className="font-semibold text-xs text-slate-200 underline cursor-pointer">{providerProfile.businessEmail || "Not Configured"}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Business Email</p>
+                    <p className="font-semibold text-xs text-foreground underline cursor-pointer">{providerProfile.businessEmail || "Not Configured"}</p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">WhatsApp</p>
-                    <p className="font-semibold text-xs text-slate-200">{providerProfile.whatsapp || "Not Configured"}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">WhatsApp</p>
+                    <p className="font-semibold text-xs text-foreground">{providerProfile.whatsapp || "Not Configured"}</p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">KYC Status</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">KYC Status</p>
                     {providerProfile.kycStatus ? (
-                      <div className="flex items-center gap-2.5 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/40">
+                      <div className="flex items-center gap-2.5 bg-slate-900/60 p-3 rounded-2xl border border-border/40">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
                           <CheckCircle size={14} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold text-slate-200 truncate underline cursor-pointer">{providerProfile.kycStatus}</p>
+                          <p className="text-[11px] font-bold text-foreground truncate underline cursor-pointer">{providerProfile.kycStatus}</p>
                           <p className="text-[9px] text-emerald-400 font-bold tracking-wider uppercase mt-0.5">Verified by Compliance</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2.5 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/40">
-                        <div className="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/40 flex items-center justify-center shrink-0">
+                      <div className="flex items-center gap-2.5 bg-slate-900/60 p-3 rounded-2xl border border-border/40">
+                        <div className="w-8 h-8 rounded-lg bg-muted text-muted-foreground border border-border/40 flex items-center justify-center shrink-0">
                           <X size={14} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold text-slate-400 truncate">No document uploaded</p>
-                          <p className="text-[9px] text-slate-500 font-bold tracking-wider uppercase mt-0.5">Verification Required</p>
+                          <p className="text-[11px] font-bold text-muted-foreground truncate">No document uploaded</p>
+                          <p className="text-[9px] text-muted-foreground font-bold tracking-wider uppercase mt-0.5">Verification Required</p>
                         </div>
                       </div>
                     )}
@@ -675,12 +675,12 @@ const UserDetails = () => {
 
                 {/* Manage stations side */}
                 <div className="md:col-span-7 space-y-3.5">
-                  <h4 className="text-[10px] text-slate-500 font-black tracking-widest uppercase">Manage Stations</h4>
+                  <h4 className="text-[10px] text-muted-foreground font-black tracking-widest uppercase">Manage Stations</h4>
                   
-                  <div className="overflow-x-auto border border-slate-800/40 rounded-2xl bg-slate-950/20">
+                  <div className="overflow-x-auto border border-border/40 rounded-2xl bg-background/20">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-slate-800/60 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
+                        <tr className="border-b border-border text-[9px] text-muted-foreground font-bold uppercase tracking-wider">
                           <th className="p-3">Station Name</th>
                           <th className="p-3">Location</th>
                           <th className="p-3">Status</th>
@@ -690,27 +690,27 @@ const UserDetails = () => {
                       <tbody className="divide-y divide-slate-800/30">
                         {providerProfile.stations.length === 0 ? (
                           <tr>
-                            <td colSpan={4} className="p-6 text-center text-slate-500 font-medium">
+                            <td colSpan={4} className="p-6 text-center text-muted-foreground font-medium">
                               No stations registered under this account.
                             </td>
                           </tr>
                         ) : (
                           providerProfile.stations.map((s, idx) => (
                             <tr key={idx} className="hover:bg-slate-850/10">
-                              <td className="p-3 font-extrabold text-slate-100">{s.name}</td>
-                              <td className="p-3 text-slate-400">{s.location}</td>
+                              <td className="p-3 font-extrabold text-foreground">{s.name}</td>
+                              <td className="p-3 text-muted-foreground">{s.location}</td>
                               <td className="p-3">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold border text-[9px] ${
                                   s.status === "ONLINE"
                                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                                     : s.status === "MAINTENANCE"
                                     ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                    : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                                    : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
                                 }`}>
                                   {s.status}
                                 </span>
                               </td>
-                              <td className="p-3 text-right font-black text-slate-200">{s.sessions.toLocaleString()}</td>
+                              <td className="p-3 text-right font-black text-foreground">{s.sessions.toLocaleString()}</td>
                             </tr>
                           ))
                         )}
@@ -721,14 +721,14 @@ const UserDetails = () => {
               </div>
 
               {/* Stats Footer inside Card */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800/40">
-                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Earnings</p>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/40">
+                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-border/40">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Total Earnings</p>
                   <p className="text-2xl font-black text-emerald-400">${providerProfile.totalEarnings.toLocaleString()}</p>
                 </div>
-                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Active Stations</p>
-                  <p className="text-2xl font-black text-white">{providerProfile.activeStations}</p>
+                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-border/40">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Active Stations</p>
+                  <p className="text-2xl font-black text-foreground">{providerProfile.activeStations}</p>
                 </div>
               </div>
             </div>
@@ -739,19 +739,19 @@ const UserDetails = () => {
         <div className="xl:col-span-4 space-y-6">
           
           {/* Card: Quick Notification Form */}
-          <div id="quick-notification-form" className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5">
+          <div id="quick-notification-form" className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5">
             <div className="flex items-center gap-2">
               <Send size={16} className="text-[#ADC6FF]" />
-              <h2 className="text-base font-black uppercase text-white tracking-widest">Quick Notification</h2>
+              <h2 className="text-base font-black uppercase text-foreground tracking-widest">Quick Notification</h2>
             </div>
 
             <form onSubmit={handleSendNotification} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Notification Type</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Notification Type</label>
                 <select
                   value={notification.type}
                   onChange={(e) => setNotification(prev => ({ ...prev, type: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-200"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground"
                 >
                   <option value="Account Alert">Account Alert</option>
                   <option value="Promotional">Promotional Offer</option>
@@ -761,24 +761,24 @@ const UserDetails = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Subject</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Subject</label>
                 <input
                   type="text"
                   placeholder="Enter message subject..."
                   value={notification.subject}
                   onChange={(e) => setNotification(prev => ({ ...prev, subject: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-100 placeholder:text-slate-600"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-slate-600"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Message Content</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Message Content</label>
                 <textarea
                   rows={4}
                   placeholder="Type your message here..."
                   value={notification.content}
                   onChange={(e) => setNotification(prev => ({ ...prev, content: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-slate-100 placeholder:text-slate-600 resize-none"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-slate-600 resize-none"
                 />
               </div>
 
@@ -794,10 +794,10 @@ const UserDetails = () => {
 
           {/* Card: User Loyalty Tier */}
             <FeatureLock message="Loyalty Tier">
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 h-full relative overflow-hidden">
+            <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 h-full relative overflow-hidden">
                 <div className="flex items-center gap-2">
                   <Award size={16} className="text-[#ADC6FF]" />
-                  <h2 className="text-base font-black uppercase text-white tracking-widest">User Loyalty Tier</h2>
+                  <h2 className="text-base font-black uppercase text-foreground tracking-widest">User Loyalty Tier</h2>
                 </div>
 
                 <div className="flex flex-col items-center text-center space-y-3.5 py-4">
@@ -806,15 +806,15 @@ const UserDetails = () => {
                     <Award size={28} className="stroke-[1.5]" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-lg font-black text-white">Bronze Tier</h3>
-                    <p className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Initial Member Status</p>
+                    <h3 className="text-lg font-black text-foreground">Bronze Tier</h3>
+                    <p className="text-[10px] text-muted-foreground font-bold tracking-wider uppercase">Initial Member Status</p>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-2 border-t border-slate-800/40">
+                <div className="space-y-3 pt-2 border-t border-border/40">
                   <div className="flex justify-between items-end text-xs">
-                    <span className="text-slate-400 font-medium">Lifeline Spend</span>
-                    <span className="font-black text-slate-100 text-sm">$0.00</span>
+                    <span className="text-muted-foreground font-medium">Lifeline Spend</span>
+                    <span className="font-black text-foreground text-sm">$0.00</span>
                   </div>
 
                   {/* Progress gauge bar */}
@@ -825,7 +825,7 @@ const UserDetails = () => {
                     />
                   </div>
 
-                  <p className="text-[10px] text-slate-400 font-semibold text-center italic mt-1.5">
+                  <p className="text-[10px] text-muted-foreground font-semibold text-center italic mt-1.5">
                     No loyalty progress accumulated.
                   </p>
                 </div>
@@ -841,79 +841,79 @@ const UserDetails = () => {
 
       {/* Modal: Edit Provider Profile */}
       {isEditProviderOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111726] border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111726] border border-border rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-200">
             <button 
               onClick={() => setIsEditProviderOpen(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white transition-all cursor-pointer"
+              className="absolute top-6 right-6 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
             >
               <X size={18} />
             </button>
 
-            <h3 className="text-base font-black text-white uppercase tracking-widest">Edit Provider Profile</h3>
+            <h3 className="text-base font-black text-foreground uppercase tracking-widest">Edit Provider Profile</h3>
 
             <form onSubmit={handleEditProviderSubmit} className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Company Name</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Company Name</label>
                 <input
                   type="text"
                   required
                   value={providerForm.companyName}
                   onChange={(e) => setProviderForm(prev => ({ ...prev, companyName: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Business Email</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Business Email</label>
                 <input
                   type="email"
                   required
                   value={providerForm.businessEmail}
                   onChange={(e) => setProviderForm(prev => ({ ...prev, businessEmail: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">WhatsApp Phone</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">WhatsApp Phone</label>
                 <input
                   type="text"
                   required
                   value={providerForm.whatsapp}
                   onChange={(e) => setProviderForm(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">KYC File Attachment</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">KYC File Attachment</label>
                 <input
                   type="text"
                   required
                   value={providerForm.kycStatus}
                   onChange={(e) => setProviderForm(prev => ({ ...prev, kycStatus: e.target.value }))}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Earnings ($)</label>
+                  <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Total Earnings ($)</label>
                   <input
                     type="number"
                     value={providerForm.totalEarnings}
                     onChange={(e) => setProviderForm(prev => ({ ...prev, totalEarnings: Number(e.target.value) }))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active Stations</label>
+                  <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Active Stations</label>
                   <input
                     type="number"
                     value={providerForm.activeStations}
                     onChange={(e) => setProviderForm(prev => ({ ...prev, activeStations: Number(e.target.value) }))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                   />
                 </div>
               </div>
@@ -922,7 +922,7 @@ const UserDetails = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditProviderOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-900 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-900 text-muted-foreground font-bold hover:text-foreground transition-all cursor-pointer"
                 >
                   Cancel
                 </button>

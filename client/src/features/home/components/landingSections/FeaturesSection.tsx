@@ -89,14 +89,14 @@ export default function FeaturesSection() {
               </div>
               
               {/* Visual slot availability badges */}
-              <div className="flex flex-col gap-3 p-4 rounded-2xl bg-slate-950/20 border border-border/60">
-                <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-primary/20 bg-slate-950/40">
+              <div className="flex flex-col gap-3 p-4 rounded-2xl bg-background/20 border border-border/60">
+                <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-primary/20 bg-background/40">
                   <span className="text-xs font-semibold text-foreground">Bay 1</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">
                     Available
                   </span>
                 </div>
-                <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-emerald-500/10 bg-slate-950/40">
+                <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-emerald-500/10 bg-background/40">
                   <span className="text-xs font-semibold text-foreground">Bay 2</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">
                     Reserved

@@ -1,6 +1,6 @@
 export default function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-24 border-b border-border bg-slate-950/5">
+    <section id="how-it-works" className="py-24 border-b border-border bg-background/5">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Section Headers */}

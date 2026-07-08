@@ -165,24 +165,24 @@ export default function SignupForm() {
         />
 
         {password.length > 0 && (
-          <div className="text-[11px] space-y-1.5 p-3.5 bg-slate-950/30 rounded-2xl border border-slate-800/40 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
-            <p className="font-bold text-slate-400 mb-1">Password Requirements:</p>
+          <div className="text-[11px] space-y-1.5 p-3.5 bg-background/30 rounded-2xl border border-border/40 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
+            <p className="font-bold text-muted-foreground mb-1">Password Requirements:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${password.length >= 8 ? "bg-emerald-400" : "bg-slate-600"}`} />
-                <span className={`transition-colors duration-300 ${password.length >= 8 ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>At least 8 characters</span>
+                <span className={`transition-colors duration-300 ${password.length >= 8 ? "text-emerald-400 font-semibold" : "text-muted-foreground"}`}>At least 8 characters</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/[A-Z]/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
-                <span className={`transition-colors duration-300 ${/[A-Z]/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One capital letter</span>
+                <span className={`transition-colors duration-300 ${/[A-Z]/.test(password) ? "text-emerald-400 font-semibold" : "text-muted-foreground"}`}>One capital letter</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/\d/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
-                <span className={`transition-colors duration-300 ${/\d/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One number</span>
+                <span className={`transition-colors duration-300 ${/\d/.test(password) ? "text-emerald-400 font-semibold" : "text-muted-foreground"}`}>One number</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${/[@$!%*?&#]/.test(password) ? "bg-emerald-400" : "bg-slate-600"}`} />
-                <span className={`transition-colors duration-300 ${/[@$!%*?&#]/.test(password) ? "text-emerald-400 font-semibold" : "text-slate-500"}`}>One special char (@, $, !, %, etc.)</span>
+                <span className={`transition-colors duration-300 ${/[@$!%*?&#]/.test(password) ? "text-emerald-400 font-semibold" : "text-muted-foreground"}`}>One special char (@, $, !, %, etc.)</span>
               </div>
             </div>
           </div>

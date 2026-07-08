@@ -110,8 +110,8 @@ const UserTable = ({
                         onClick={() => onToggleStatus(user.id)}
                         title={!user.isBlocked ? "Block User" : "Activate User"}
                         className={`p-2 rounded-lg border transition-all ${!user.isBlocked
-                            ? "border-rose-500/20 text-rose-500 bg-rose-500/5 hover:bg-rose-500 hover:text-white"
-                            : "border-emerald-500/20 text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white"
+                            ? "border-rose-500/20 text-rose-500 bg-rose-500/5 hover:bg-rose-500 hover:text-foreground"
+                            : "border-emerald-500/20 text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-foreground"
                           }`}
                       >
                         {!user.isBlocked ? <Ban size={15} /> : <Check size={15} />}

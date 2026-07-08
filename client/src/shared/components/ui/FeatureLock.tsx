@@ -22,15 +22,15 @@ export default function FeatureLock({
       </div>
 
       {/* Lock overlay glass container (with backdrop-blur to blur the component underneath) */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-slate-950/45 backdrop-blur-[6px] rounded-3xl border border-transparent">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-background/45 backdrop-blur-[6px] rounded-3xl border border-transparent">
         <div className="flex flex-col items-center text-center space-y-2.5">
           {/* Glowing Circle Lock Badge */}
-          <div className="w-11 h-11 rounded-full bg-slate-900 border border-slate-800/80 flex items-center justify-center text-slate-300 shadow-xl shadow-black/80 scale-100 transition-all duration-300">
+          <div className="w-11 h-11 rounded-full bg-slate-900 border border-border flex items-center justify-center text-muted-foreground shadow-xl shadow-black/80 scale-100 transition-all duration-300">
             <Lock size={15} className="stroke-[2.5] text-[#ADC6FF]" />
           </div>
           <div className="space-y-0.5">
             <p className="text-[10px] font-black uppercase tracking-widest text-[#ADC6FF]">{message}</p>
-            <p className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">Future Release</p>
+            <p className="text-[9px] font-bold text-muted-foreground tracking-wider uppercase">Future Release</p>
           </div>
         </div>
       </div>
