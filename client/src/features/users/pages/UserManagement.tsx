@@ -25,7 +25,7 @@ const UserManagement = () => {
     total: 0,
     active: 0,
     blocked: 0,
-    providers: 0
+    owners: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -34,7 +34,7 @@ const UserManagement = () => {
   const searchQuery = searchParams.get("q") || "";
   const roleFilter = searchParams.get("role") || "all";
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL;
-  const activeTab = (searchParams.get("tab") as "all" | "customer" | "provider") || "all";
+  const activeTab = (searchParams.get("tab") as "all" | "customer" | "owner") || "all";
   const highCancellation = searchParams.get("cancellation") === "true";
   const fraudFlag = searchParams.get("fraud") === "true";
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -103,7 +103,7 @@ const UserManagement = () => {
   const setSearchQuery = (q: string) => updateParams({ q });
   const setRoleFilter = (role: string) => updateParams({ role });
   const setStatusFilter = (status: string) => updateParams({ status });
-  const setActiveTab = (tab: "all" | "customer" | "provider") => updateParams({ tab });
+  const setActiveTab = (tab: "all" | "customer" | "owner") => updateParams({ tab });
   const setHighCancellation = (cancellation: boolean) => updateParams({ cancellation });
   const setFraudFlag = (fraud: boolean) => updateParams({ fraud });
   const setCurrentPage = (page: number) => updateParams({ page });
@@ -155,7 +155,7 @@ const UserManagement = () => {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">User Management</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage users, providers, and administration accounts.
+            Manage users, owners, and administration accounts.
           </p>
         </div>
         <button
@@ -174,7 +174,7 @@ const UserManagement = () => {
         totalUsers={stats.total}
         activeUsers={stats.active}
         blockedUsers={stats.blocked}
-        providersCount={stats.providers}
+        ownersCount={stats.owners}
       />
 
       {/* Tabs and Filters panel */}

@@ -4,14 +4,14 @@ interface UserStatsProps {
   totalUsers: number;
   activeUsers: number;
   blockedUsers: number;
-  providersCount: number;
+  ownersCount: number;
 }
 
 const UserStats = ({
   totalUsers,
   activeUsers,
   blockedUsers,
-  providersCount
+  ownersCount
 }: UserStatsProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -37,8 +37,8 @@ const UserStats = ({
 
       <div className="flex items-center justify-between p-5 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm">
         <div className="space-y-1">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Providers</span>
-          <p className="text-3xl font-bold text-amber-500">{providersCount}</p>
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Owners</span>
+          <p className="text-3xl font-bold text-amber-500">{ownersCount}</p>
         </div>
         <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
           <ShieldCheck size={22} />

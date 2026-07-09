@@ -6,6 +6,8 @@ import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 
 import { User } from "@/modules/user/domain/entities/User"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 
 import { IGoogleAuthUseCase, IHashService, ITokenService } from "../interfaces"
 import { AuthOutput } from "../dto"
@@ -21,6 +23,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
 
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
   ) {
@@ -115,8 +118,9 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     // Secure the refresh token by hashing it
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
-    // Save refresh token and update last login timestamp atomically
-    await this.userRepository.recordLoginSuccess(user.id!, hashedRefreshToken, new Date())
+    // Save refresh token and update last login timestamp
+    await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
+    await this.userRepository.update(user.id!, { lastLoginAt: new Date() })
 
     logger.info(`Google auth: User=${user.email}, isNewUser=${isNewUser}`)
 

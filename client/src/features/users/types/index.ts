@@ -32,7 +32,7 @@ export interface GetUsersResponse {
     total: number;
     active: number;
     blocked: number;
-    providers: number;
+    owners: number;
   };
 }
 
@@ -52,20 +52,20 @@ export interface Booking {
   status: "COMPLETED" | "CANCELLED" | "PENDING";
 }
 
-export interface ProviderStation {
+export interface OwnerStation {
   name: string;
   location: string;
   status: "ONLINE" | "OFFLINE" | "MAINTENANCE";
   sessions: number;
 }
 
-export interface ProviderProfile {
+export interface OwnerProfile {
   companyName: string;
   businessEmail: string;
   whatsapp: string;
   kycStatus: string;
   kycVerified: boolean;
-  stations: ProviderStation[];
+  stations: OwnerStation[];
   totalEarnings: number;
   activeStations: number;
 }

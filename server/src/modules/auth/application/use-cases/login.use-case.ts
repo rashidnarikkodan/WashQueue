@@ -4,6 +4,8 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 
 import { IHashService, ILoginUseCase, ITokenService } from "../interfaces"
@@ -13,6 +15,7 @@ import { AuthOutput, LoginInput } from "../dto"
 export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
   ) { }
@@ -61,8 +64,9 @@ export class LoginUseCase implements ILoginUseCase {
     // Hash refresh token for secure persistence
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
-    // Save refresh token and update last login timestamp atomically
-    await this.userRepository.recordLoginSuccess(user.id!, hashedRefreshToken, new Date())
+    // Save refresh token and update last login timestamp
+    await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
+    await this.userRepository.update(user.id!, { lastLoginAt: new Date() })
 
     return {
       user: {

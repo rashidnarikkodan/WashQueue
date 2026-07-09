@@ -9,8 +9,8 @@ interface FilterCardProps {
   setRoleFilter: (r: string) => void;
   statusFilter: string;
   setStatusFilter: (s: string) => void;
-  activeTab: "all" | "customer" | "provider";
-  setActiveTab: (tab: "all" | "customer" | "provider") => void;
+  activeTab: "all" | "customer" | "owner";
+  setActiveTab: (tab: "all" | "customer" | "owner") => void;
   highCancellation: boolean;
   setHighCancellation: (val: boolean) => void;
   fraudFlag: boolean;
@@ -32,7 +32,7 @@ const FilterCard = ({
   setFraudFlag
 }: FilterCardProps) => {
 
-  const handleTabChange = (tab: "all" | "customer" | "provider") => {
+  const handleTabChange = (tab: "all" | "customer" | "owner") => {
     setActiveTab(tab);
     if (tab === "all") {
       setRoleFilter("all");
@@ -66,14 +66,14 @@ const FilterCard = ({
           Customers
         </button>
         <button
-          onClick={() => handleTabChange("provider")}
+          onClick={() => handleTabChange("owner")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
-            activeTab === "provider"
+            activeTab === "owner"
               ? "border-[#ADC6FF] text-[#ADC6FF]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          Providers
+          Owners
         </button>
       </div>
 
@@ -106,8 +106,8 @@ const FilterCard = ({
             onChange={(e) => {
               const val = e.target.value;
               setRoleFilter(val);
-              if (val === "customer" || val === "provider") {
-                setActiveTab(val as "customer" | "provider");
+              if (val === "customer" || val === "owner") {
+                setActiveTab(val as "customer" | "owner");
               } else if (val === "all") {
                 setActiveTab("all");
               }
@@ -117,7 +117,7 @@ const FilterCard = ({
             <option value="all">All Roles</option>
             <option value={ROLE.ADMIN}>Admin</option>
             <option value={ROLE.MANAGER}>Manager</option>
-            <option value={ROLE.PROVIDER}>Provider</option>
+            <option value={ROLE.OWNER}>Owner</option>
             <option value={ROLE.CUSTOMER}>Customer</option>
           </select>
         </div>

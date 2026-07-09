@@ -7,16 +7,16 @@ import { useState } from "react";
 export default function SetupAccountPage() {
   const navigate = useNavigate();
   const { setupAccount, isLoading } = useAuthStore();
-  const [selectedRole, setSelectedRole] = useState<typeof ROLE.CUSTOMER | typeof ROLE.PROVIDER | null>(null);
+  const [selectedRole, setSelectedRole] = useState<typeof ROLE.CUSTOMER | typeof ROLE.OWNER | null>(null);
 
-  const handleSelectRole = async (role: typeof ROLE.CUSTOMER | typeof ROLE.PROVIDER) => {
+  const handleSelectRole = async (role: typeof ROLE.CUSTOMER | typeof ROLE.OWNER) => {
     setSelectedRole(role);
     const success = await setupAccount(role);
     if (success) {
       if (role === ROLE.CUSTOMER) {
         navigate("/");
       } else {
-        navigate("/provider/onboarding");
+        navigate("/owner/onboarding");
       }
     }
   };
@@ -89,7 +89,7 @@ export default function SetupAccountPage() {
                 </button>
               </div>
 
-              {/* Role 2: Provider Card */}
+              {/* Role 2: Owner Card */}
               <div className="flex flex-col justify-between p-8 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] group">
                 <div className="space-y-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
@@ -104,17 +104,17 @@ export default function SetupAccountPage() {
                 </div>
 
                 <button
-                  onClick={() => handleSelectRole(ROLE.PROVIDER)}
+                  onClick={() => handleSelectRole(ROLE.OWNER)}
                   disabled={isLoading}
                   className="w-full border border-primary hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed text-primary font-bold py-3 px-4 rounded-xl transition-all duration-200 mt-6 text-sm cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {isLoading && selectedRole === ROLE.PROVIDER ? (
+                  {isLoading && selectedRole === ROLE.OWNER ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Setting Up...
                     </>
                   ) : (
-                    "Start Provider Setup"
+                    "Start Owner Setup"
                   )}
                 </button>
               </div>
@@ -146,22 +146,22 @@ export default function SetupAccountPage() {
                 <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
               </button>
 
-              {/* Option 2: Provider */}
+              {/* Option 2: Owner */}
               <button
-                onClick={() => handleSelectRole(ROLE.PROVIDER)}
+                onClick={() => handleSelectRole(ROLE.OWNER)}
                 disabled={isLoading}
                 className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
-                    {isLoading && selectedRole === ROLE.PROVIDER ? (
+                    {isLoading && selectedRole === ROLE.OWNER ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
                       <Wrench className="h-5 w-5" />
                     )}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">List Wash Station (Provider)</h3>
+                    <h3 className="text-sm font-bold text-foreground">List Wash Station (Owner)</h3>
                     <p className="text-xs text-muted-foreground">
                       Manage bookings, queues, and dashboard.
                     </p>

@@ -10,7 +10,7 @@ export const usersQuerySchema: z.ZodType<GetUsersQuery> = z.object({
   search: z.string().trim().optional(),
 
   role: z
-    .enum([ROLE.CUSTOMER, ROLE.PROVIDER, ROLE.MANAGER, ROLE.ADMIN])
+    .enum([ROLE.CUSTOMER, ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN])
     .optional(),
 
   isBlocked: z

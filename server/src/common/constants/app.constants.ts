@@ -13,4 +13,7 @@ export const SUCCESS_MESSAGES = {
   LOGOUT_SUCCESS: "Logout successful",
   PASSWORD_RESET_OTP_SENT: "Password reset OTP sent to your email",
   PASSWORD_RESET_SUCCESS: "Password reset successful",
+  OWNER_CREATED_SUCCESS: "Owner profile created successfully",
+  OWNER_RETRIEVED_SUCCESS: "Owner profile retrieved successfully",
+  OWNER_UPDATED_SUCCESS: "Owner profile updated successfully",
 } as const

@@ -3,7 +3,7 @@ import { SignupInput } from "../dto/signup.dto"
 import { VerifyOtpInput } from "../dto/verify-otp.dto"
 import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { ResetPasswordInput } from "../dto/reset-password.dto"
-import { AuthOutput, AuthUser } from "../dto/common/AuthUser.dto"
+import { AuthOutput, AuthUser } from "../dto/common/auth-user.dto"
 import { RoleType } from "@/common/constants/role.constants"
 
 export interface ILoginUseCase {

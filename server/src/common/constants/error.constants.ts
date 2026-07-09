@@ -31,5 +31,7 @@ export const ERROR_MESSAGES = {
   REFRESH_TOKEN_REQUIRED: "Refresh token is required",
   INVALID_OR_EXPIRED_REFRESH_TOKEN: "Invalid or expired refresh token",
   USER_ID_REQUIRED: "User ID is required",
+  OWNER_ALREADY_EXISTS: "Owner profile already exists for this user",
+  OWNER_NOT_FOUND: "Owner profile not found",
 } as const
 

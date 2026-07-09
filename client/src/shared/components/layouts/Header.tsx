@@ -15,7 +15,7 @@ export default function Header({ role }: { role?: string }) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
-  const currentRole = (role?.toLowerCase() as "admin" | "manager" | "provider" | "customer") || "customer";
+  const currentRole = (role?.toLowerCase() as "admin" | "manager" | "owner" | "customer") || "customer";
 
   const isCustomer = currentRole === "customer";
 
@@ -33,7 +33,7 @@ export default function Header({ role }: { role?: string }) {
   const navLinks = {
     admin: [],
     manager: [],
-    provider: [],
+    owner: [],
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
@@ -52,8 +52,8 @@ export default function Header({ role }: { role?: string }) {
       label: "Manager",
       className: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
     },
-    provider: {
-      label: "Provider",
+    owner: {
+      label: "Owner",
       className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
     },
     customer: null,

@@ -9,7 +9,7 @@ export default function AuthLayout() {
   if (isAuthenticated && user && !["/verify-email", "/setup-account"].includes(location.pathname)) {
     if (user.role === ROLE.ADMIN) return <Navigate to="/admin/dashboard" replace />;
     if (user.role === ROLE.MANAGER) return <Navigate to="/manager/dashboard" replace />;
-    if (user.role === ROLE.PROVIDER) return <Navigate to="/provider/dashboard" replace />;
+    if (user.role === ROLE.OWNER) return <Navigate to="/owner/dashboard" replace />;
     return <Navigate to="/" replace />;
   }
 

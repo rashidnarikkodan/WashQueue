@@ -10,7 +10,7 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
   async execute(userId: string, role: RoleType): Promise<AuthUser> {
-    if (role !== ROLE.CUSTOMER && role !== ROLE.PROVIDER) {
+    if (role !== ROLE.CUSTOMER && role !== ROLE.OWNER) {
       throw new AppError(ERROR_MESSAGES.INVALID_ROLE, HTTP_STATUS.BAD_REQUEST)
     }
 

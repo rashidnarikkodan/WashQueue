@@ -32,6 +32,6 @@ export interface GetUsersResponse {
     total: number
     active: number
     blocked: number
-    providers: number
+    owners: number
   }
 }

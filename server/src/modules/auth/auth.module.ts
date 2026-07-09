@@ -4,6 +4,9 @@ import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
 import { Argon2HashService } from "./infrastructure/services/hash.service"
 
+import { OtpRedisRepository } from "./infrastructure/repository/otp.redis.repository"
+import { RefreshTokenMongoRepository } from "./infrastructure/repository/refresh-token.mongo.repository"
+
 import { SignupUseCase } from "./application/use-cases/signup.use-case"
 import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"
 import { LoginUseCase } from "./application/use-cases/login.use-case"
@@ -19,22 +22,25 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
-// infrastructures
+// infrastructures/repositories
+const otpRepository = new OtpRedisRepository()
+const refreshTokenRepository = new RefreshTokenMongoRepository()
+
 const mailService = new MailService()
-const otpService = new OtpService()
+const otpService = new OtpService(otpRepository)
 const tokenService = new TokenService()
 const hashService = new Argon2HashService()
 
-const signupUseCase = new SignupUseCase(userRepository, otpService, mailService, hashService)
-const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpService, tokenService, hashService)
-const loginUseCase = new LoginUseCase(userRepository, tokenService, hashService)
-const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService, hashService)
-const logoutUseCase = new LogoutUseCase(userRepository)
+const signupUseCase = new SignupUseCase(userRepository, otpRepository, otpService, mailService, hashService)
+const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, refreshTokenRepository, otpService, tokenService, hashService)
+const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
 const setupAccountUseCase = new SetupAccountUseCase(userRepository)
-const googleAuthUseCase = new GoogleAuthUseCase(userRepository, tokenService, hashService)
+const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const getMeUseCase = new GetMeUseCase(userRepository)
-const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpService, mailService)
-const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpService, hashService)
+const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
+const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, otpService, hashService)
 
 const authController = new AuthController(
   loginUseCase,

@@ -1,6 +1,8 @@
 import { AppError } from "@/common/errors/app-error"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
@@ -10,6 +12,7 @@ import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
   ) { }
@@ -31,12 +34,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
       }
 
-      // Verify incoming refresh token against hashed refresh token stored in DB
-      if (!user.refreshToken) {
+      // Verify incoming refresh token against hashed refresh token stored in DB using repository and entity
+      const activeToken = await this.refreshTokenRepository.findByUserId(user.id!)
+      if (!activeToken) {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
 
-      const isTokenValid = await this.hashService.verify(user.refreshToken, refreshToken)
+      const isTokenValid = await activeToken.verify(refreshToken, this.hashService)
       if (!isTokenValid) {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
@@ -50,8 +54,8 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       // Hash the new refresh token for safe storage
       const hashedNewRefreshToken = await this.hashService.hash(newRefreshToken)
 
-      // Save hashed refresh token to user session atomically
-      await this.userRepository.updateRefreshToken(user.id!, hashedNewRefreshToken)
+      // Save hashed refresh token
+      await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedNewRefreshToken))
 
       return {
         accessToken: newAccessToken,

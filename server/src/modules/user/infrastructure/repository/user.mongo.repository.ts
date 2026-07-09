@@ -127,7 +127,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     // pagination
     const { skip } = getPagination({ page, limit })
 
-    const [users, total, totalAll, active, blocked, providers] = await Promise.all([
+    const [users, total, totalAll, active, blocked, owners] = await Promise.all([
       UserModel.find(filter)
         .sort(sort)
         .skip(skip)
@@ -140,7 +140,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       UserModel.countDocuments({}).exec(),
       UserModel.countDocuments({ isBlocked: false }).exec(),
       UserModel.countDocuments({ isBlocked: true }).exec(),
-      UserModel.countDocuments({ role: ROLE.PROVIDER }).exec(),
+      UserModel.countDocuments({ role: ROLE.OWNER }).exec(),
     ])
 
     const paginationMetaData = buildPaginationMeta({
@@ -158,7 +158,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
         total: totalAll,
         active,
         blocked,
-        providers,
+        owners,
       }
     }
   }

@@ -1,11 +1,10 @@
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { ILogoutUseCase } from "../interfaces"
 
 export class LogoutUseCase implements ILogoutUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
 
   async execute(userId: string): Promise<void> {
-    // Replace generic update with descriptive method
-    await this.userRepository.clearRefreshToken(userId)
+    await this.refreshTokenRepository.clear(userId)
   }
 }
