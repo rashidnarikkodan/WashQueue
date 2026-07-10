@@ -1,5 +1,6 @@
 import { PaginationMeta } from "@/shared/types/pagination";
 import { User } from "../entities/User"
+import { RoleType } from "@/shared/constants/role.constants";
 
 interface UsersQuery{
     page: number;
@@ -7,7 +8,7 @@ interface UsersQuery{
     sortBy: "createdAt" | "name" | "email";
     sortOrder: "asc" | "desc";
     search?: string | undefined;
-    role?: "customer" | "admin" | "provider" | "manager" | undefined;
+    role?: RoleType | undefined;
     isBlocked?: boolean | undefined;
 }
 export interface IUserRepository {
@@ -22,7 +23,7 @@ export interface IUserRepository {
       total: number
       active: number
       blocked: number
-      providers: number
+      owners: number
     }
   }>
 }

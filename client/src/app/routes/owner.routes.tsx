@@ -1,9 +1,9 @@
-import ProviderLayout from "../layouts/ProviderLayout";
+import OwnerLayout from "../layouts/OwnerLayout";
 import { APP_ROUTES } from "../../shared/constants/route.const";
 
-export const providerRoutes = {
-  path: APP_ROUTES.PROVIDER.ROOT,
-  element: <ProviderLayout />,
+export const ownerRoutes = {
+  path: APP_ROUTES.OWNER.ROOT,
+  element: <OwnerLayout />,
   children: [
     {
       path: "dashboard",
@@ -43,7 +43,7 @@ export const providerRoutes = {
     },
     {
       path: "onboarding",
-      element: <>Provider Onboarding</>,
+      element: <>Owner Onboarding</>,
     },
   ],
 };

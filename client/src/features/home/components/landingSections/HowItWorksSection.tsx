@@ -27,7 +27,7 @@ export default function HowItWorksSection() {
               </div>
               <h3 className="font-bold text-foreground text-base">Search</h3>
               <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
-                Locate nearest premium providers via Geo-Search.
+                Locate nearest premium owners via Geo-Search.
               </p>
             </div>
 

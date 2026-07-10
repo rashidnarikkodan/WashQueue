@@ -15,7 +15,7 @@ export default function Header({ role }: { role?: string }) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
-  const currentRole = (role?.toLowerCase() as "admin" | "manager" | "provider" | "customer") || "customer";
+  const currentRole = (role?.toLowerCase() as "admin" | "manager" | "owner" | "customer") || "customer";
 
   const isCustomer = currentRole === "customer";
 
@@ -33,7 +33,7 @@ export default function Header({ role }: { role?: string }) {
   const navLinks = {
     admin: [],
     manager: [],
-    provider: [],
+    owner: [],
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
@@ -52,8 +52,8 @@ export default function Header({ role }: { role?: string }) {
       label: "Manager",
       className: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
     },
-    provider: {
-      label: "Provider",
+    owner: {
+      label: "Owner",
       className: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
     },
     customer: null,
@@ -154,7 +154,7 @@ export default function Header({ role }: { role?: string }) {
           ) : (
             <button
               onClick={() => navigate(APP_ROUTES.AUTH.LOGIN)}
-              className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-[#60A5FA] to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
+              className="flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md text-xs"
             >
               Login
             </button>

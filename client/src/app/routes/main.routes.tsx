@@ -18,8 +18,8 @@ const RootPathResolver = () => {
       return <Navigate to={APP_ROUTES.ADMIN.DASHBOARD} replace />;
     case ROLE.MANAGER:
       return <Navigate to={APP_ROUTES.MANAGER.DASHBOARD} replace />;
-    case ROLE.PROVIDER:
-      return <Navigate to={APP_ROUTES.PROVIDER.DASHBOARD} replace />;
+    case ROLE.OWNER:
+      return <Navigate to={APP_ROUTES.OWNER.DASHBOARD} replace />;
     default:
       return <Home />;
   }

@@ -35,8 +35,8 @@ export default function SignupForm() {
             navigate("/admin")
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
-          } else if (role === ROLE.PROVIDER) {
-            navigate("/provider")
+          } else if (role === ROLE.OWNER) {
+            navigate("/owner")
           } else {
             navigate("/")
           }

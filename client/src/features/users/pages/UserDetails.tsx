@@ -43,20 +43,20 @@ interface Booking {
   status: "COMPLETED" | "CANCELLED" | "PENDING";
 }
 
-interface ProviderStation {
+interface OwnerStation {
   name: string;
   location: string;
   status: "ONLINE" | "OFFLINE" | "MAINTENANCE";
   sessions: number;
 }
 
-interface ProviderProfile {
+interface OwnerProfile {
   companyName: string;
   businessEmail: string;
   whatsapp: string;
   kycStatus: string;
   kycVerified: boolean;
-  stations: ProviderStation[];
+  stations: OwnerStation[];
   totalEarnings: number;
   activeStations: number;
 }
@@ -78,12 +78,12 @@ const UserDetails = () => {
   const [legalName, setLegalName] = useState("");
   
   // Modals visibility state
-  const [isEditProviderOpen, setIsEditProviderOpen] = useState(false);
+  const [isEditOwnerOpen, setIsEditOwnerOpen] = useState(false);
 
   // Simulated details state
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [providerProfile, setProviderProfile] = useState<ProviderProfile>({
+  const [ownerProfile, setOwnerProfile] = useState<OwnerProfile>({
     companyName: "",
     businessEmail: "",
     whatsapp: "",
@@ -99,8 +99,8 @@ const UserDetails = () => {
   const [bookingPage, setBookingPage] = useState<number>(1);
   const bookingsPerPage = 3;
 
-  // Edit Provider Form state
-  const [providerForm, setProviderForm] = useState({
+  // Edit Owner Form state
+  const [ownerForm, setOwnerForm] = useState({
     companyName: "",
     businessEmail: "",
     whatsapp: "",
@@ -133,8 +133,8 @@ const UserDetails = () => {
         setVehicles([]);
         setBookings([]);
 
-        // Initialize provider forms as empty
-        setProviderProfile({
+        // Initialize owner forms as empty
+        setOwnerProfile({
           companyName: "",
           businessEmail: "",
           whatsapp: "",
@@ -145,7 +145,7 @@ const UserDetails = () => {
           activeStations: 0
         });
 
-        setProviderForm({
+        setOwnerForm({
           companyName: "",
           businessEmail: "",
           whatsapp: "",
@@ -253,20 +253,20 @@ const UserDetails = () => {
 
 
 
-  // Edit Provider Handler
-  const handleEditProviderSubmit = (e: React.FormEvent) => {
+  // Edit Owner Handler
+  const handleEditOwnerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setProviderProfile(prev => ({
+    setOwnerProfile(prev => ({
       ...prev,
-      companyName: providerForm.companyName,
-      businessEmail: providerForm.businessEmail,
-      whatsapp: providerForm.whatsapp,
-      kycStatus: providerForm.kycStatus,
-      totalEarnings: Number(providerForm.totalEarnings),
-      activeStations: Number(providerForm.activeStations)
+      companyName: ownerForm.companyName,
+      businessEmail: ownerForm.businessEmail,
+      whatsapp: ownerForm.whatsapp,
+      kycStatus: ownerForm.kycStatus,
+      totalEarnings: Number(ownerForm.totalEarnings),
+      activeStations: Number(ownerForm.activeStations)
     }));
-    setIsEditProviderOpen(false);
-    toast.success("Provider profile details updated.");
+    setIsEditOwnerOpen(false);
+    toast.success("Owner profile details updated.");
   };
 
   // Bookings pagination & filter helpers
@@ -350,8 +350,8 @@ const UserDetails = () => {
                   ? "System Administrator" 
                   : user.role === ROLE.MANAGER 
                   ? "Manager" 
-                  : user.role === ROLE.PROVIDER 
-                  ? "Service Provider" 
+                  : user.role === ROLE.OWNER 
+                  ? "Service Owner" 
                   : "Customer"}
               </span>
             </div>
@@ -629,66 +629,66 @@ const UserDetails = () => {
             </div>
           </div>
 
-          {/* Conditional Card: Provider Profile Overview */}
-          {(user.role === ROLE.PROVIDER || user.role === ROLE.MANAGER) && (
+          {/* Conditional Card: Owner Profile Overview */}
+          {(user.role === ROLE.OWNER || user.role === ROLE.MANAGER) && (
             <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6">
-              
+              {/* Card Header */}
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Building size={16} className="text-[#ADC6FF]" />
-                    <h2 className="text-base font-black uppercase text-white tracking-widest">Provider Profile</h2>
+                    <h2 className="text-base font-black uppercase text-white tracking-widest">Owner Profile</h2>
                   </div>
                   <p className="text-slate-500 text-xs font-medium">Enterprise Partner Account Overview</p>
                 </div>
 
                 <button 
                   onClick={() => {
-                    setProviderForm({
-                      companyName: providerProfile.companyName,
-                      businessEmail: providerProfile.businessEmail,
-                      whatsapp: providerProfile.whatsapp,
-                      kycStatus: providerProfile.kycStatus,
-                      totalEarnings: providerProfile.totalEarnings,
-                      activeStations: providerProfile.activeStations
+                    setOwnerForm({
+                      companyName: ownerProfile.companyName,
+                      businessEmail: ownerProfile.businessEmail,
+                      whatsapp: ownerProfile.whatsapp,
+                      kycStatus: ownerProfile.kycStatus,
+                      totalEarnings: ownerProfile.totalEarnings,
+                      activeStations: ownerProfile.activeStations
                     });
-                    setIsEditProviderOpen(true);
+                    setIsEditOwnerOpen(true);
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ADC6FF] text-[#020617] hover:bg-[#9cb6f0] font-black text-xs transition-all cursor-pointer shadow-md shadow-[#ADC6FF]/10"
                 >
                   <Edit2 size={13} />
-                  <span>Edit Provider Details</span>
+                  <span>Edit Owner Details</span>
                 </button>
               </div>
 
-              {/* Sub components inside Provider Card */}
+              {/* Sub components inside Owner Card */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-2">
                 {/* Details side */}
                 <div className="md:col-span-5 space-y-5">
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Company Name</p>
-                    <p className="font-extrabold text-sm text-slate-100">{providerProfile.companyName || "Not Configured"}</p>
+                    <p className="font-extrabold text-sm text-slate-100">{ownerProfile.companyName || "Not Configured"}</p>
                   </div>
 
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Business Email</p>
-                    <p className="font-semibold text-xs text-slate-200 underline cursor-pointer">{providerProfile.businessEmail || "Not Configured"}</p>
+                    <p className="font-semibold text-xs text-slate-200 underline cursor-pointer">{ownerProfile.businessEmail || "Not Configured"}</p>
                   </div>
 
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">WhatsApp</p>
-                    <p className="font-semibold text-xs text-slate-200">{providerProfile.whatsapp || "Not Configured"}</p>
+                    <p className="font-semibold text-xs text-slate-200">{ownerProfile.whatsapp || "Not Configured"}</p>
                   </div>
 
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">KYC Status</p>
-                    {providerProfile.kycStatus ? (
+                    {ownerProfile.kycStatus ? (
                       <div className="flex items-center gap-2.5 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/40">
                         <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
                           <CheckCircle size={14} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-bold text-slate-200 truncate underline cursor-pointer">{providerProfile.kycStatus}</p>
+                          <p className="text-[11px] font-bold text-slate-200 truncate underline cursor-pointer">{ownerProfile.kycStatus}</p>
                           <p className="text-[9px] text-emerald-400 font-bold tracking-wider uppercase mt-0.5">Verified by Compliance</p>
                         </div>
                       </div>
@@ -721,14 +721,14 @@ const UserDetails = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/30">
-                        {providerProfile.stations.length === 0 ? (
+                        {ownerProfile.stations.length === 0 ? (
                           <tr>
                             <td colSpan={4} className="p-6 text-center text-slate-500 font-medium">
                               No stations registered under this account.
                             </td>
                           </tr>
                         ) : (
-                          providerProfile.stations.map((s, idx) => (
+                          ownerProfile.stations.map((s, idx) => (
                             <tr key={idx} className="hover:bg-slate-850/10">
                               <td className="p-3 font-extrabold text-slate-100">{s.name}</td>
                               <td className="p-3 text-slate-400">{s.location}</td>
@@ -757,11 +757,11 @@ const UserDetails = () => {
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800/40">
                 <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Earnings</p>
-                  <p className="text-2xl font-black text-emerald-400">${providerProfile.totalEarnings.toLocaleString()}</p>
+                  <p className="text-2xl font-black text-emerald-400">${ownerProfile.totalEarnings.toLocaleString()}</p>
                 </div>
                 <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Active Stations</p>
-                  <p className="text-2xl font-black text-white">{providerProfile.activeStations}</p>
+                  <p className="text-2xl font-black text-white">{ownerProfile.activeStations}</p>
                 </div>
               </div>
             </div>
@@ -872,27 +872,27 @@ const UserDetails = () => {
 
 
 
-      {/* Modal: Edit Provider Profile */}
-      {isEditProviderOpen && (
+      {/* Modal: Edit Owner Profile */}
+      {isEditOwnerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#111726] border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-200">
             <button 
-              onClick={() => setIsEditProviderOpen(false)}
+              onClick={() => setIsEditOwnerOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-white transition-all cursor-pointer"
             >
               <X size={18} />
             </button>
 
-            <h3 className="text-base font-black text-white uppercase tracking-widest">Edit Provider Profile</h3>
+            <h3 className="text-base font-black text-white uppercase tracking-widest">Edit Owner Profile</h3>
 
-            <form onSubmit={handleEditProviderSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleEditOwnerSubmit} className="space-y-4 text-xs">
               <div className="space-y-1.5">
                 <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Company Name</label>
                 <input
                   type="text"
                   required
-                  value={providerForm.companyName}
-                  onChange={(e) => setProviderForm(prev => ({ ...prev, companyName: e.target.value }))}
+                  value={ownerForm.companyName}
+                  onChange={(e) => setOwnerForm(prev => ({ ...prev, companyName: e.target.value }))}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -902,8 +902,8 @@ const UserDetails = () => {
                 <input
                   type="email"
                   required
-                  value={providerForm.businessEmail}
-                  onChange={(e) => setProviderForm(prev => ({ ...prev, businessEmail: e.target.value }))}
+                  value={ownerForm.businessEmail}
+                  onChange={(e) => setOwnerForm(prev => ({ ...prev, businessEmail: e.target.value }))}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -913,8 +913,8 @@ const UserDetails = () => {
                 <input
                   type="text"
                   required
-                  value={providerForm.whatsapp}
-                  onChange={(e) => setProviderForm(prev => ({ ...prev, whatsapp: e.target.value }))}
+                  value={ownerForm.whatsapp}
+                  onChange={(e) => setOwnerForm(prev => ({ ...prev, whatsapp: e.target.value }))}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -924,8 +924,8 @@ const UserDetails = () => {
                 <input
                   type="text"
                   required
-                  value={providerForm.kycStatus}
-                  onChange={(e) => setProviderForm(prev => ({ ...prev, kycStatus: e.target.value }))}
+                  value={ownerForm.kycStatus}
+                  onChange={(e) => setOwnerForm(prev => ({ ...prev, kycStatus: e.target.value }))}
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                 />
               </div>
@@ -935,8 +935,8 @@ const UserDetails = () => {
                   <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Earnings ($)</label>
                   <input
                     type="number"
-                    value={providerForm.totalEarnings}
-                    onChange={(e) => setProviderForm(prev => ({ ...prev, totalEarnings: Number(e.target.value) }))}
+                    value={ownerForm.totalEarnings}
+                    onChange={(e) => setOwnerForm(prev => ({ ...prev, totalEarnings: Number(e.target.value) }))}
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                   />
                 </div>
@@ -944,8 +944,8 @@ const UserDetails = () => {
                   <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active Stations</label>
                   <input
                     type="number"
-                    value={providerForm.activeStations}
-                    onChange={(e) => setProviderForm(prev => ({ ...prev, activeStations: Number(e.target.value) }))}
+                    value={ownerForm.activeStations}
+                    onChange={(e) => setOwnerForm(prev => ({ ...prev, activeStations: Number(e.target.value) }))}
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
                   />
                 </div>
@@ -954,7 +954,7 @@ const UserDetails = () => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsEditProviderOpen(false)}
+                  onClick={() => setIsEditOwnerOpen(false)}
                   className="px-4 py-2.5 rounded-xl border border-slate-850 hover:bg-slate-900 text-slate-400 font-bold hover:text-white transition-all cursor-pointer"
                 >
                   Cancel

@@ -20,8 +20,8 @@ export const adminRoutes = {
       element: <UserDetails />,
     },
     {
-      path: "providers",
-      element: <>Provider Verification</>,
+      path: "owners",
+      element: <>Owner Verification</>,
     },
     {
       path: "stations",

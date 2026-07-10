@@ -34,8 +34,8 @@ export default function LoginForm() {
             navigate("/admin")
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
-          } else if (role === ROLE.PROVIDER) {
-            navigate("/provider")
+          } else if (role === ROLE.OWNER) {
+            navigate("/owner")
           } else {
             navigate("/")
           }
@@ -77,8 +77,8 @@ export default function LoginForm() {
         navigate("/admin")
       } else if (role === ROLE.MANAGER) {
         navigate("/manager")
-      } else if (role === ROLE.PROVIDER) {
-        navigate("/provider")
+      } else if (role === ROLE.OWNER) {
+        navigate("/owner")
       } else {
         navigate("/")
       }

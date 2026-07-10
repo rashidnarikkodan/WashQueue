@@ -16,7 +16,7 @@ import {
 import { useAuthStore } from "../../../../features/auth/store/authStore";
 
 interface ProfileDropdownProps {
-  currentRole: "admin" | "manager" | "provider" | "customer";
+  currentRole: "admin" | "manager" | "owner" | "customer";
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
@@ -42,8 +42,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         return "System Admin";
       case "manager":
         return "Station Manager";
-      case "provider":
-        return "Verified Provider";
+      case "owner":
+        return "Verified Owner";
       case "customer":
         return "Verified User";
       default:
@@ -63,14 +63,14 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
           title: "Walk-in Queue",
           desc: "Add new walk-in wash"
         };
-      case "provider":
+      case "owner":
         return {
           title: "Manage Station Bays",
           desc: "List and activate bays"
         };
       default:
         return {
-          title: "Become a Provider",
+          title: "Become an Owner",
           desc: "List your service and earn"
         };
     }
@@ -171,11 +171,11 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               </div>
             </div>
 
-            {/* Provider Section CTA */}
+            {/* Owner Section CTA */}
             <div
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "customer" ? "/provider/onboarding" : `/${currentRole}/dashboard`);
+                navigate(currentRole === "customer" ? "/owner/onboarding" : `/${currentRole}/dashboard`);
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
             >

@@ -5,6 +5,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { GetUsersQuery } from "../../application/schema/get-users.schema"
 import { buildPaginationMeta, getPagination } from "@/shared/utils/pagination"
 import { PaginationMeta } from "@/shared/types/pagination"
+import { ROLE } from "@/shared/constants/role.constants"
 
 export class MongooseUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
@@ -38,7 +39,7 @@ export class MongooseUserRepository implements IUserRepository {
       total: number
       active: number
       blocked: number
-      providers: number
+      owners: number
     }
   }> {
     const {
@@ -79,7 +80,7 @@ export class MongooseUserRepository implements IUserRepository {
     // pagination
     const { skip } = getPagination({page,limit})
 
-    const [users, total, totalAll, active, blocked, providers] = await Promise.all([
+    const [users, total, totalAll, active, blocked, owners] = await Promise.all([
       UserModel.find(filter)
         .sort(sort)
         .skip(skip)
@@ -92,7 +93,7 @@ export class MongooseUserRepository implements IUserRepository {
       UserModel.countDocuments({}).exec(),
       UserModel.countDocuments({ isBlocked: false }).exec(),
       UserModel.countDocuments({ isBlocked: true }).exec(),
-      UserModel.countDocuments({ role: "provider" }).exec(),
+      UserModel.countDocuments({ role: ROLE.OWNER }).exec(),
     ])
 
     const paginationMetaData = buildPaginationMeta({
@@ -110,7 +111,7 @@ export class MongooseUserRepository implements IUserRepository {
         total: totalAll,
         active,
         blocked,
-        providers,
+        owners,
       }
     }
   }

@@ -35,8 +35,8 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: Users,
   },
   {
-    name: "Provider Verification",
-    path: "/admin/providers",
+    name: "Owner Verification",
+    path: "/admin/owners",
     icon: ShieldCheck,
   },
   {
@@ -87,50 +87,50 @@ export const adminSideBarItems: SidebarItem[] = [
 ];
 
 
-export const providerSideBarItems: SidebarItem[] = [
+export const ownerSideBarItems: SidebarItem[] = [
   {
     name: "Dashboard",
-    path: "/provider/dashboard",
+    path: "/owner/dashboard",
     icon: LayoutDashboard,
   },
   {
     name: "Queue Management",
-    path: "/provider/queues",
+    path: "/owner/queues",
     icon: Hourglass,
   },
   {
     name: "Bookings",
-    path: "/provider/bookings",
+    path: "/owner/bookings",
     icon: Calendar,
   },
   {
     name: "My Stations",
-    path: "/provider/stations",
+    path: "/owner/stations",
     icon: Fuel,
   },
   {
     name: "Financial Records",
-    path: "/provider/financial-records",
+    path: "/owner/financial-records",
     icon: CreditCard,
   },
   {
     name: "Analytics",
-    path: "/provider/analytics",
+    path: "/owner/analytics",
     icon: BarChart3,
   },
   {
     name: "Customer Feedback",
-    path: "/provider/feedback",
+    path: "/owner/feedback",
     icon: MessageSquareMore,
   },
   {
     name: "Notifications",
-    path: "/provider/notifications",
+    path: "/owner/notifications",
     icon: Bell,
   },
   {
     name: "Team & Managers",
-    path: "/provider/team",
+    path: "/owner/team",
     icon: Users,
   },
 ];

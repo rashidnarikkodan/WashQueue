@@ -6,7 +6,7 @@ import WalletLoyaltySection from "../components/homeSections/WalletLoyaltySectio
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 transition-colors duration-300 pt-28 pb-16">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Welcome Section */}

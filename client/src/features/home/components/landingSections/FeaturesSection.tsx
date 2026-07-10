@@ -84,7 +84,7 @@ export default function FeaturesSection() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground">Instant Slot Booking</h3>
                 <p className="text-sm text-muted-foreground">
-                  Lock in your time slot with a single tap. Our system manages the provider's workflow to prioritize your arrival.
+                  Lock in your time slot with a single tap. Our system manages the owner's workflow to prioritize your arrival.
                 </p>
               </div>
               

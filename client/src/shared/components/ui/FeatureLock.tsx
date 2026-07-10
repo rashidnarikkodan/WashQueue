@@ -26,10 +26,10 @@ export default function FeatureLock({
         <div className="flex flex-col items-center text-center space-y-2.5">
           {/* Glowing Circle Lock Badge */}
           <div className="w-11 h-11 rounded-full bg-slate-900 border border-slate-800/80 flex items-center justify-center text-slate-300 shadow-xl shadow-black/80 scale-100 transition-all duration-300">
-            <Lock size={15} className="stroke-[2.5] text-[#ADC6FF]" />
+            <Lock size={15} className="stroke-[2.5] text-primary" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#ADC6FF]">{message}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-primary">{message}</p>
             <p className="text-[9px] font-bold text-slate-500 tracking-wider uppercase">Future Release</p>
           </div>
         </div>
