@@ -167,7 +167,7 @@ const UserDetails = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="w-12 h-12 border-4 border-[#ADC6FF]/20 border-t-[#ADC6FF] rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-[var(--primary)] rounded-full animate-spin" />
         <p className="text-slate-400 text-sm font-semibold">Loading user details...</p>
       </div>
     );
@@ -280,7 +280,7 @@ const UserDetails = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl xl:max-w-[1400px] mx-auto px-4 sm:px-6 pb-12 text-[#f8fafc]">
+    <div className="space-y-6 max-w-7xl xl:max-w-[1400px] mx-auto px-4 sm:px-6 pb-12 text-foreground">
       {/* Breadcrumbs Row & Back Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Breadcrumbs items={[
@@ -299,13 +299,13 @@ const UserDetails = () => {
       </div>
 
       {/* 1. Header Profile Banner Card */}
-      <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
+      <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
         {/* Decorative subtle background gradients */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center w-full xl:w-auto">
           {/* Large Initials Avatar */}
-          <div className="w-20 h-20 rounded-full bg-[#1b253b] text-[#ADC6FF] border border-[#ADC6FF]/20 font-extrabold flex items-center justify-center text-3xl shadow-inner shrink-0">
+          <div className="w-20 h-20 rounded-full bg-muted text-primary border border-primary/20 font-extrabold flex items-center justify-center text-3xl shadow-inner shrink-0">
             {getInitials(user.name)}
           </div>
           
@@ -340,12 +340,12 @@ const UserDetails = () => {
 
             {/* Badges for Authentication & Role */}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1e293b] text-slate-300 border border-slate-800">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-800">
                 <Shield size={11} className="text-slate-400" />
                 {user.authProvider === "GOOGLE" ? "GOOGLE Google Auth" : "LOCAL Password Auth"}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#ADC6FF]/10 text-[#ADC6FF] border border-[#ADC6FF]/20">
-                <UserIcon size={11} className="text-[#ADC6FF]" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-primary/10 text-primary border border-primary/20">
+                <UserIcon size={11} className="text-primary" />
                 {user.role === ROLE.ADMIN 
                   ? "System Administrator" 
                   : user.role === ROLE.MANAGER 
@@ -417,11 +417,11 @@ const UserDetails = () => {
         <div className="xl:col-span-8 space-y-6">
           
           {/* Card: Personal Information */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
+          <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
 
 
             <div className="flex items-center gap-2 mb-6">
-              <UserIcon size={18} className="text-[#ADC6FF]" />
+              <UserIcon size={18} className="text-primary" />
               <h2 className="text-base font-black uppercase text-white tracking-widest">Personal Information</h2>
             </div>
 
@@ -471,29 +471,29 @@ const UserDetails = () => {
 
           {/* Booking Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Bookings</p>
               <p className="text-2xl font-black text-white">{bookings.length}</p> 
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Completed</p>
               <p className="text-2xl font-black text-emerald-400">{bookings.filter(b => b.status === "COMPLETED").length}</p>
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Cancelled</p>
               <p className="text-2xl font-black text-rose-400">{bookings.filter(b => b.status === "CANCELLED").length}</p>
             </div>
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Pending</p>
               <p className="text-2xl font-black text-slate-300">{bookings.filter(b => b.status === "PENDING").length}</p>
             </div>
           </div>
 
           {/* Card: Recent Booking History */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
+          <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Clock size={16} className="text-[#ADC6FF]" />
+                <Clock size={16} className="text-primary" />
                 <h2 className="text-base font-black uppercase text-white tracking-widest">Recent Booking History</h2>
               </div>
               
@@ -537,7 +537,7 @@ const UserDetails = () => {
                   ) : (
                     displayedBookings.map((b) => (
                       <tr key={b.id} className="hover:bg-slate-850/10">
-                        <td className="py-3.5 font-bold text-[#ADC6FF]">{b.id}</td>
+                        <td className="py-3.5 font-bold text-primary">{b.id}</td>
                         <td className="py-3.5 font-semibold text-slate-200">{b.stationName}</td>
                         <td className="py-3.5 text-slate-300">{b.vehicle}</td>
                         <td className="py-3.5 text-slate-400">{b.date}</td>
@@ -578,7 +578,7 @@ const UserDetails = () => {
                       onClick={() => setBookingPage(i + 1)}
                       className={`w-7 h-7 rounded-lg font-bold border transition-all cursor-pointer ${
                         bookingPage === i + 1
-                          ? "bg-[#ADC6FF] text-[#020617] border-[#ADC6FF]"
+                          ? "bg-primary text-primary-foreground border-[var(--primary)]"
                           : "border-slate-800 text-slate-400 hover:bg-slate-800"
                       }`}
                     >
@@ -598,10 +598,10 @@ const UserDetails = () => {
           </div>
 
           {/* Card: Registered Vehicles */}
-          <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
+          <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Car size={16} className="text-[#ADC6FF]" />
+                <Car size={16} className="text-primary" />
                 <h2 className="text-base font-black uppercase text-white tracking-widest">Registered Vehicles</h2>
               </div>
 
@@ -614,8 +614,8 @@ const UserDetails = () => {
                 </div>
               ) : (
                 vehicles.map((v) => (
-                  <div key={v.id} className="flex items-center gap-4 bg-[#1b253b]/40 border border-slate-800/40 p-4 rounded-2xl hover:border-slate-700/60 transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-[#ADC6FF] border border-slate-800/80">
+                  <div key={v.id} className="flex items-center gap-4 bg-muted/40 border border-slate-800/40 p-4 rounded-2xl hover:border-slate-700/60 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-primary border border-slate-800/80">
                       <Car size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -631,12 +631,12 @@ const UserDetails = () => {
 
           {/* Conditional Card: Owner Profile Overview */}
           {(user.role === ROLE.OWNER || user.role === ROLE.MANAGER) && (
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6">
               {/* Card Header */}
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Building size={16} className="text-[#ADC6FF]" />
+                    <Building size={16} className="text-primary" />
                     <h2 className="text-base font-black uppercase text-white tracking-widest">Owner Profile</h2>
                   </div>
                   <p className="text-slate-500 text-xs font-medium">Enterprise Partner Account Overview</p>
@@ -654,7 +654,7 @@ const UserDetails = () => {
                     });
                     setIsEditOwnerOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ADC6FF] text-[#020617] hover:bg-[#9cb6f0] font-black text-xs transition-all cursor-pointer shadow-md shadow-[#ADC6FF]/10"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs transition-all cursor-pointer shadow-md shadow-primary/10"
                 >
                   <Edit2 size={13} />
                   <span>Edit Owner Details</span>
@@ -755,11 +755,11 @@ const UserDetails = () => {
 
               {/* Stats Footer inside Card */}
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800/40">
-                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
+                <div className="bg-muted/30 p-4.5 rounded-2xl border border-slate-800/40">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Earnings</p>
                   <p className="text-2xl font-black text-emerald-400">${ownerProfile.totalEarnings.toLocaleString()}</p>
                 </div>
-                <div className="bg-[#1b253b]/30 p-4.5 rounded-2xl border border-slate-800/40">
+                <div className="bg-muted/30 p-4.5 rounded-2xl border border-slate-800/40">
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Active Stations</p>
                   <p className="text-2xl font-black text-white">{ownerProfile.activeStations}</p>
                 </div>
@@ -772,9 +772,9 @@ const UserDetails = () => {
         <div className="xl:col-span-4 space-y-6">
           
           {/* Card: Quick Notification Form */}
-          <div id="quick-notification-form" className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5">
+          <div id="quick-notification-form" className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5">
             <div className="flex items-center gap-2">
-              <Send size={16} className="text-[#ADC6FF]" />
+              <Send size={16} className="text-primary" />
               <h2 className="text-base font-black uppercase text-white tracking-widest">Quick Notification</h2>
             </div>
 
@@ -817,7 +817,7 @@ const UserDetails = () => {
 
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#ADC6FF] text-[#020617] hover:bg-[#9cb6f0] font-black text-xs transition-all shadow-md shadow-[#ADC6FF]/10 cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs transition-all shadow-md shadow-primary/10 cursor-pointer"
               >
                 <Send size={13} />
                 <span>Send Message</span>
@@ -827,15 +827,15 @@ const UserDetails = () => {
 
           {/* Card: User Loyalty Tier */}
             <FeatureLock message="Loyalty Tier">
-            <div className="border border-slate-800/80 bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 h-full relative overflow-hidden">
+            <div className="border border-slate-800/80 bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 h-full relative overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <Award size={16} className="text-[#ADC6FF]" />
+                  <Award size={16} className="text-primary" />
                   <h2 className="text-base font-black uppercase text-white tracking-widest">User Loyalty Tier</h2>
                 </div>
 
                 <div className="flex flex-col items-center text-center space-y-3.5 py-4">
                   {/* Badge Circle container */}
-                  <div className="w-16 h-16 rounded-full bg-[#1b253b] text-[#ADC6FF] border border-[#ADC6FF]/35 flex items-center justify-center shadow-lg shadow-[#ADC6FF]/5">
+                  <div className="w-16 h-16 rounded-full bg-muted text-primary border border-primary/35 flex items-center justify-center shadow-lg shadow-primary/5">
                     <Award size={28} className="stroke-[1.5]" />
                   </div>
                   <div className="space-y-1">
@@ -853,7 +853,7 @@ const UserDetails = () => {
                   {/* Progress gauge bar */}
                   <div className="w-full bg-slate-900 rounded-full h-2">
                     <div 
-                      className="bg-[#ADC6FF] h-2 rounded-full shadow-[0_0_10px_rgba(173,198,255,0.6)] transition-all duration-500" 
+                      className="bg-primary h-2 rounded-full shadow-primary/60 transition-all duration-500" 
                       style={{ width: "0%" }}
                     />
                   </div>
@@ -875,7 +875,7 @@ const UserDetails = () => {
       {/* Modal: Edit Owner Profile */}
       {isEditOwnerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111726] border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-200">
+          <div className="bg-card border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative space-y-4 animate-in zoom-in-95 duration-200">
             <button 
               onClick={() => setIsEditOwnerOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-white transition-all cursor-pointer"
@@ -961,7 +961,7 @@ const UserDetails = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 bg-[#ADC6FF] text-[#020617] font-black px-5 py-2.5 rounded-xl hover:bg-[#9cb6f0] transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 bg-primary text-primary-foreground font-black px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all cursor-pointer"
                 >
                   <Save size={13} />
                   <span>Update Profile</span>

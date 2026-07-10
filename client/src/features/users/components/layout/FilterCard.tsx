@@ -42,14 +42,14 @@ const FilterCard = ({
   };
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-[#151b2d]/50 backdrop-blur-md overflow-hidden flex flex-col gap-4 p-1 shadow-md">
+    <div className="rounded-2xl border border-border/40 bg-card/50 backdrop-blur-md overflow-hidden flex flex-col gap-4 p-1 shadow-md">
       {/* Tabs list */}
       <div className="border-b border-border/30 w-full flex gap-6 px-5 pt-3">
         <button
           onClick={() => handleTabChange("all")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
             activeTab === "all"
-              ? "border-[#ADC6FF] text-[#ADC6FF]"
+              ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -59,7 +59,7 @@ const FilterCard = ({
           onClick={() => handleTabChange("customer")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
             activeTab === "customer"
-              ? "border-[#ADC6FF] text-[#ADC6FF]"
+              ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -69,7 +69,7 @@ const FilterCard = ({
           onClick={() => handleTabChange("owner")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
             activeTab === "owner"
-              ? "border-[#ADC6FF] text-[#ADC6FF]"
+              ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -91,7 +91,7 @@ const FilterCard = ({
               placeholder="Name, email, or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#2E3447] border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/75"
+              className="w-full bg-muted border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/75"
             />
           </div>
         </div>
@@ -112,7 +112,7 @@ const FilterCard = ({
                 setActiveTab("all");
               }
             }}
-            className="w-full bg-[#2E3447] border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+            className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
           >
             <option value="all">All Roles</option>
             <option value={ROLE.ADMIN}>Admin</option>
@@ -130,7 +130,7 @@ const FilterCard = ({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-[#2E3447] border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+            className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
           >
             <option value={FILTER_STATUS.ALL}>Any Status</option>
             <option value={FILTER_STATUS.ACTIVE}>Active</option>
@@ -146,13 +146,13 @@ const FilterCard = ({
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
-              highCancellation ? "bg-primary/25 border border-primary/30" : "bg-[#2E3447]"
+              highCancellation ? "bg-primary/25 border border-primary/30" : "bg-muted"
             }`}>
               <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                highCancellation ? "translate-x-4 bg-[#ADC6FF]" : "bg-[#8C909F]"
+                highCancellation ? "translate-x-4 bg-primary" : "bg-muted-foreground"
               }`} />
             </div>
-            <span className="text-sm font-medium text-[#C2C6D6] group-hover:text-foreground transition-colors">
+            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
               High Cancellation
             </span>
           </div>
@@ -163,13 +163,13 @@ const FilterCard = ({
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
-              fraudFlag ? "bg-rose-500/25 border border-rose-500/30" : "bg-[#2E3447]"
+              fraudFlag ? "bg-rose-500/25 border border-rose-500/30" : "bg-muted"
             }`}>
               <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                fraudFlag ? "translate-x-4 bg-[#FFB4AB]" : "bg-[#8C909F]"
+                fraudFlag ? "translate-x-4 bg-rose-400" : "bg-muted-foreground"
               }`} />
             </div>
-            <span className="text-sm font-medium text-[#C2C6D6] group-hover:text-foreground transition-colors">
+            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
               Fraud Flag
             </span>
           </div>

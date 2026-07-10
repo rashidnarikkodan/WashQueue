@@ -10,11 +10,6 @@ import { authApi } from "./features/auth/services/auth.api";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 function App() {
-
-  useAuthStore.subscribe((state) => {
-  console.log("Auth State Changed:", state)
-})
-
   useEffect(() => {
     authApi.me()
       .then((user) => {

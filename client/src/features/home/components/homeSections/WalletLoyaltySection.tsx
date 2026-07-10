@@ -13,7 +13,7 @@ export default function WalletLoyaltySection() {
   return (
     <FeatureLock>
       {/* Wallet & Loyalty Rewards Support Grid */}
-      <section className="bg-[#23293C] border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-2xl animate-in fade-in duration-500 text-left">
+      <section className="bg-card border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-2xl animate-in fade-in duration-500 text-left">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
           
           {/* Balance panel */}
@@ -62,7 +62,7 @@ export default function WalletLoyaltySection() {
               {/* Custom Gradient Progress Bar */}
               <div className="h-3.5 bg-slate-800 rounded-full overflow-hidden relative border border-slate-900">
                 <div 
-                  className="h-full bg-gradient-to-r from-emerald-400 to-[#ADC6FF]"
+                  className="h-full bg-gradient-to-r from-emerald-400 to-primary"
                   style={{ width: `${data.wallet.tierProgress}%` }}
                 />
               </div>
@@ -87,7 +87,7 @@ export default function WalletLoyaltySection() {
             <div className="space-y-3 flex-grow flex flex-col justify-center">
               <a 
                 href="/help" 
-                className="flex justify-between items-center p-3 rounded-2xl bg-[#191F31]/50 border border-slate-800/50 hover:bg-[#191F31] transition-colors"
+                className="flex justify-between items-center p-3 rounded-2xl bg-card/50 border border-slate-800/50 hover:bg-card transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <HelpCircle size={16} className="text-slate-400" />
@@ -98,7 +98,7 @@ export default function WalletLoyaltySection() {
 
               <a 
                 href="/chat" 
-                className="flex justify-between items-center p-3 rounded-2xl bg-[#191F31]/50 border border-slate-800/50 hover:bg-[#191F31] transition-colors"
+                className="flex justify-between items-center p-3 rounded-2xl bg-card/50 border border-slate-800/50 hover:bg-card transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <MessageSquare size={16} className="text-slate-400" />

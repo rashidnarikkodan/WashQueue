@@ -18,7 +18,7 @@ export default function GarageSection() {
           const isOverdue = vehicle.status === "overdue";
           
           return (
-            <div key={vehicle.id} className="bg-[#070D1F] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-slate-700/80 transition-all duration-300">
+            <div key={vehicle.id} className="bg-card border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-slate-700/80 transition-all duration-300">
               {/* Image and status badge */}
               <div className="h-56 relative overflow-hidden">
                 <img 
@@ -26,7 +26,7 @@ export default function GarageSection() {
                   alt={`${vehicle.brand} ${vehicle.model}`} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070D1F] to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-60" />
                 
                 <span className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md ${
                   isOverdue 

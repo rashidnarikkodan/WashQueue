@@ -158,9 +158,9 @@ const UserManagement = () => {
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 bg-[#3E495D] hover:bg-[#3E495D]/85 text-[#BCC7DE] font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer"
+          className="flex items-center gap-2 bg-muted hover:opacity-90 text-muted-foreground font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer"
         >
-          <svg className="w-3.5 h-3.5 fill-[#BCC7DE]" viewBox="0 0 10 10">
+          <svg className="w-3.5 h-3.5 fill-muted-foreground" viewBox="0 0 10 10">
             <path d="M4.74448 2.38526L7.62842 5.33429L6.80237 6.17096L5.30272 4.63746L5.24967 9.39133L4.08308 9.37832L4.13613 4.62444L2.60263 6.12409L1.79545 5.2692L4.74448 2.38526ZM8.2703 0.091126C8.59112 0.094706 8.86448 0.211999 9.09039 0.443006C9.31629 0.674013 9.42746 0.949924 9.42388 1.27074L9.40435 3.02063L8.23776 3.00761L8.25728 1.25772L1.25772 1.17961L1.23819 2.9295L0.071599 2.91649L0.091126 1.16659C0.094706 0.84578 0.211999 0.572419 0.443006 0.34651C0.674013 0.120602 0.949924 0.00943805 1.27074 0.013018L8.2703 0.091126Z" />
           </svg>
           <span>Export</span>
