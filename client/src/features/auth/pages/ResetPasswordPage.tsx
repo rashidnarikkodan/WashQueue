@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import type { KeyboardEvent, ClipboardEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, KeyRound } from "lucide-react";
+import { ArrowLeft, KeyRound } from "lucide-react";
+import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import FormInput from "../../../shared/components/ui/FormInput";
 import { toast } from "sonner";
@@ -222,7 +223,7 @@ export default function ResetPasswordPage() {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loading size="sm" />
                     Resetting Password...
                   </>
                 ) : (

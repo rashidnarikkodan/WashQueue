@@ -11,7 +11,7 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
 
   async execute(userId: string, role: RoleType) {
 
-    if (role !== ROLE.CUSTOMER && role !== ROLE.PROVIDER) {
+    if (role !== ROLE.CUSTOMER && role !== ROLE.OWNER) {
       throw new AppError(ERROR_MESSAGES.INVALID_ROLE, HTTP_STATUS.BAD_REQUEST)
     }
 

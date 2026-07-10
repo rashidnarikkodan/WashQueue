@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { MapPin, ChevronDown, Navigation, Loader2, Check, Search } from "lucide-react";
+import { MapPin, ChevronDown, Navigation, Check, Search } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import Loading from "../Loading";
 
 interface LocationSelectorProps {
   className?: string;
@@ -174,7 +175,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
             />
             <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-muted-foreground" />
             {isSearching && (
-              <Loader2 className="absolute right-3 top-3 h-3.5 w-3.5 animate-spin text-primary" />
+              <Loading size="sm" className="absolute right-3 top-3" />
             )}
           </div>
 
@@ -188,8 +189,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
               </span>
               {isSearching && searchResults.length === 0 ? (
                 <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-                  Searching...
+                  <Loading size="sm" text="Searching..." className="flex-row! gap-2 text-muted-foreground" />
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="text-center p-4 text-xs text-muted-foreground">
@@ -231,7 +231,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
               >
                 <div className="flex items-center gap-2">
                   {isLocating ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <Loading size="sm" />
                   ) : (
                     <Navigation className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                   )}

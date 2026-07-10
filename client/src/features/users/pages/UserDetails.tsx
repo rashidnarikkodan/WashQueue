@@ -25,6 +25,7 @@ import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
 import { usersApi, type User } from "../service/users.api";
 import { toast } from "sonner";
 import FeatureLock from "../../../shared/components/ui/FeatureLock";
+import Loading from "../../../shared/components/ui/Loading";
 
 // Simulated additional interfaces
 interface Vehicle {
@@ -166,10 +167,7 @@ const UserDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-[var(--primary)] rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-semibold">Loading user details...</p>
-      </div>
+      <Loading size="lg" text="Loading user details..." className="min-h-[50vh] space-y-4" />
     );
   }
 
@@ -387,7 +385,7 @@ const UserDetails = () => {
               }`}
             >
               {isSuspending ? (
-                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <Loading size="sm" />
               ) : user.isBlocked ? (
                 <>
                   <UserCheck size={14} />

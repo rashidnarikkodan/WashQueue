@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
+import Loading from "@/shared/components/ui/Loading";
 import UserStats from "../components/ui/UserStats";
 import UserTable from "../components/layout/UserTable";
 import FilterCard from "../components/layout/FilterCard";
@@ -200,10 +201,7 @@ const UserManagement = () => {
 
       {/* User Table layout */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-muted-foreground text-sm font-semibold">Fetching user directory...</span>
-        </div>
+        <Loading size="lg" text="Fetching user directory..." className="py-20 gap-3" />
       ) : (
         <UserTable 
           users={users}

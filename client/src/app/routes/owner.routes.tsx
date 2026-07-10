@@ -1,10 +1,15 @@
 import OwnerLayout from "../layouts/OwnerLayout";
 import { APP_ROUTES } from "../../shared/constants/route.const";
+import OwnerOnboarding from "@/features/owner/pages/OwnerOnboarding";
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
   element: <OwnerLayout />,
   children: [
+    {
+      path: "onboarding",
+      element: <OwnerOnboarding />,
+    },
     {
       path: "dashboard",
       element: <>Dashboard</>,
@@ -40,10 +45,6 @@ export const ownerRoutes = {
     {
       path: "team",
       element: <>Team & Managers</>,
-    },
-    {
-      path: "onboarding",
-      element: <>Owner Onboarding</>,
     },
   ],
 };

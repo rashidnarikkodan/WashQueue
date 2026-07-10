@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Car, Wrench, Loader2, Check, ChevronRight } from "lucide-react";
+import { Car, Wrench, Check, ChevronRight } from "lucide-react";
+import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import { ROLE } from "../../../shared/constants/role.const";
 import { useState } from "react";
@@ -80,7 +81,7 @@ export default function SetupAccountPage() {
                 >
                   {isLoading && selectedRole === ROLE.CUSTOMER ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loading size="sm" />
                       Setting Up...
                     </>
                   ) : (
@@ -110,7 +111,7 @@ export default function SetupAccountPage() {
                 >
                   {isLoading && selectedRole === ROLE.OWNER ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loading size="sm" />
                       Setting Up...
                     </>
                   ) : (
@@ -131,7 +132,7 @@ export default function SetupAccountPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                     {isLoading && selectedRole === ROLE.CUSTOMER ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loading size="sm" />
                     ) : (
                       <Car className="h-5 w-5" />
                     )}
@@ -155,7 +156,7 @@ export default function SetupAccountPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                     {isLoading && selectedRole === ROLE.OWNER ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loading size="sm" />
                     ) : (
                       <Wrench className="h-5 w-5" />
                     )}

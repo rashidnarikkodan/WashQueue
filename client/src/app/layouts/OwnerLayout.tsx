@@ -1,4 +1,4 @@
-import { Outlet, Navigate, useLocation } from "react-router-dom"
+import { Outlet, Navigate, useLocation, Link } from "react-router-dom"
 import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
 import { ownerSideBarItems } from "../../shared/config/sidebar.config"
@@ -19,6 +19,25 @@ const OwnerLayout = () => {
 
   if (!isAuthenticated || !user || user.role !== ROLE.OWNER && location.pathname !== '/owner/onboarding') {
     return <Navigate to="/login" replace />;
+  }
+
+  const isOnboarding = location.pathname === '/owner/onboarding';
+
+  if (isOnboarding) {
+    return (
+    <div className="flex flex-col min-h-screen bg-background">
+      <header className='absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-3 pl-6'>
+        <Link to="/" className="flex items-center gap-2 group">
+          <span className={`text-xl font-bold italic tracking-tight transition-colors duration-300 text-primary`}>
+            WashQueue
+          </span>
+        </Link>
+      </header>
+      <main className="flex-1 w-full flex items-center justify-center">
+        <Outlet />
+      </main>
+    </div>
+    );
   }
 
   return (

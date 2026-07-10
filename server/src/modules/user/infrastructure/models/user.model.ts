@@ -30,7 +30,7 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: [ROLE.CUSTOMER, ROLE.PROVIDER, ROLE.ADMIN, ROLE.MANAGER],
+        enum: [ROLE.CUSTOMER, ROLE.OWNER, ROLE.ADMIN, ROLE.MANAGER],
         default: ROLE.CUSTOMER,
     },
     phone: { type: String, trim: true },
