@@ -28,14 +28,11 @@ export class LoginUseCase implements ILoginUseCase {
 
     // If no user, or it's a social account that shouldn't use local password login
     if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL) {
-      // Execute dummy verify to prevent timing attacks
       await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (user.isBlocked) {
-      // Don't run password check here to save CPU (preventing DoS)
-      // Though it might reveal blocked status, it's accepted for mitigating CPU DoS
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
@@ -44,7 +41,6 @@ export class LoginUseCase implements ILoginUseCase {
     }
 
     if (!user.password) {
-      // Unlikely since we check AUTH_PROVIDER.LOCAL, but a safety check
       await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
