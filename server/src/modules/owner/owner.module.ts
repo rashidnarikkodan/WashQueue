@@ -9,9 +9,11 @@ import { GetOnboardingStatusUseCase } from "./application/use-cases/get-onboardi
 import { SubmitOnboardingUseCase } from "./application/use-cases/submit-onboarding.use-case"
 import { OwnerController } from "./presentation/owner.controller"
 import { createOwnerRouter } from "./presentation/owner.routes"
+import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 
 // infrastructures/repositories
 export const ownerRepository = new OwnerMongoRepository()
+const cloudinaryService = new CloudinaryService()
 
 // use cases
 const createOwnerUseCase = new CreateOwnerUseCase(ownerRepository, userRepository)
@@ -28,7 +30,8 @@ const ownerController = new OwnerController(
   submitOnboardingUseCase,
   createOwnerUseCase,
   getOwnerUseCase,
-  updateOwnerUseCase
+  updateOwnerUseCase,
+  cloudinaryService
 )
 
 const ownerRouter = createOwnerRouter(ownerController)

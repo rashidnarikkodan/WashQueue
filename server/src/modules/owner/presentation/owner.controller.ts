@@ -16,6 +16,7 @@ import {
   IUpdateOwnerUseCase,
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
+import { IMediaStorage } from "@/core/application/media.interface"
 
 export class OwnerController {
   constructor(
@@ -24,7 +25,8 @@ export class OwnerController {
     private readonly submitOnboardingUseCase: ISubmitOnboardingUseCase,
     private readonly createOwnerUseCase: ICreateOwnerUseCase,
     private readonly getOwnerUseCase: IGetOwnerUseCase,
-    private readonly updateOwnerUseCase: IUpdateOwnerUseCase
+    private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
+    private readonly mediaStorage: IMediaStorage
   ) {}
 
   /** GET /api/owner/onboarding/status */
@@ -74,9 +76,11 @@ export class OwnerController {
 
     // Extract file URLs from uploaded files
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
-    const getFileUrl = (fieldname: string): string | undefined => {
+    const uploadFile = async (fieldname: string): Promise<string | undefined> => {
       const file = files?.[fieldname]?.[0]
-      return file ? `/uploads/onboarding/${file.filename}` : undefined
+      if (!file) return undefined
+      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      return uploaded.url
     }
 
     const details: Record<string, string | undefined> = {
@@ -95,10 +99,10 @@ export class OwnerController {
     }
 
     // Only set file URLs if files were uploaded (avoid wiping existing values)
-    const idProofUrl = getFileUrl("idProofFile")
-    const businessLicenseUrl = getFileUrl("businessLicenseFile")
-    const gstCertificateUrl = getFileUrl("gstCertificateFile")
-    const bankProofUrl = getFileUrl("bankProofFile")
+    const idProofUrl = await uploadFile("idProofFile")
+    const businessLicenseUrl = await uploadFile("businessLicenseFile")
+    const gstCertificateUrl = await uploadFile("gstCertificateFile")
+    const bankProofUrl = await uploadFile("bankProofFile")
 
     if (idProofUrl) details.idProofUrl = idProofUrl
     if (businessLicenseUrl) details.businessLicenseUrl = businessLicenseUrl

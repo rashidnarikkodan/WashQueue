@@ -3,7 +3,7 @@ import { OwnerController } from "./owner.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
-import { onboardingUpload } from "@/infrastructure/storage/multer.middleware"
+import { onboardingUpload } from "@/infrastructure/multer/multer.middleware"
 import { saveOnboardingStepSchema } from "./schema/save-onboarding-step.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
