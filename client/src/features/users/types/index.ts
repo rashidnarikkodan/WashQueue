@@ -14,7 +14,7 @@ export interface User {
   authProvider?: string;
   lastLoginAt?: string;
   onboardingStep?: number;
-  onboardingDetails?: Record<string, unknown>;
+  onboardingDetails?: Record<string, string | number | boolean | undefined | null>;
 }
 
 export interface GetUsersFilters {

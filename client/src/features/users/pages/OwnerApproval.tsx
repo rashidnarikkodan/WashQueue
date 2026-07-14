@@ -79,8 +79,8 @@ const OwnerApproval = () => {
 
       setOwners(processed);
       setPaginationMeta(response.pagination);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to retrieve owner applications");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to retrieve owner applications");
     } finally {
       setIsLoading(false);
     }

@@ -37,7 +37,7 @@ interface OnboardingFormProps {
 
 // Helper to build FormData from text/boolean fields + optional file
 function buildFormData(
-  fields: Record<string, any>,
+  fields: Record<string, string | number | boolean | null | undefined>,
   files?: Record<string, File | null>
 ): FormData {
   const fd = new FormData();

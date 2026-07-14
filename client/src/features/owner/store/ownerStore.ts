@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { ownerApi, type OnboardingDetails } from "../services/owner.api";
 import { useAuthStore } from "../../auth/store/authStore";
+import { getErrorMessage } from "../../../shared/utils/error";
 
 interface OwnerStore {
   isLoading: boolean;
@@ -59,8 +60,8 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
       });
       await useAuthStore.getState().refreshUser();
       setStep(nextStep);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save progress. Please try again.");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to save progress. Please try again."));
       set({ isLoading: false });
     }
   },
@@ -73,8 +74,8 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
       await useAuthStore.getState().refreshUser();
       set({ isLoading: false, isSubmitted: true });
       return true;
-    } catch (error: any) {
-      toast.error(error.message || "Failed to submit application.");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to submit application."));
       set({ isLoading: false });
       return false;
     }
