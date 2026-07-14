@@ -21,6 +21,7 @@ export interface GetUsersQuery {
   search?: string
   role?: RoleType
   isBlocked?: boolean
+  isVerified?: boolean
   sortBy: "createdAt" | "name" | "email"
   sortOrder: "asc" | "desc"
 }

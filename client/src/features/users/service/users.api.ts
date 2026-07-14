@@ -17,7 +17,7 @@ interface UserApiPayload {
   authProvider?: string;
   lastLoginAt?: string;
   onboardingStep?: number;
-  onboardingDetails?: Record<string, any>;
+  onboardingDetails?: Record<string, unknown>;
 }
 
 interface UsersApiResponse {

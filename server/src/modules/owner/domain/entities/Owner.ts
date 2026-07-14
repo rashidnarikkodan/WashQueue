@@ -7,6 +7,7 @@ export interface OwnerProps {
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
+  phone?: string
   hasStation?: boolean
   hasMobileService?: boolean
   mobileActive?: boolean
@@ -38,6 +39,7 @@ export class Owner implements OwnerProps {
   readonly gstNumber?: string
   readonly whatsapp?: string
   readonly businessEmail?: string
+  readonly phone?: string
   readonly hasStation?: boolean
   readonly hasMobileService?: boolean
   readonly mobileActive?: boolean
@@ -68,6 +70,7 @@ export class Owner implements OwnerProps {
     this.gstNumber = props.gstNumber
     this.whatsapp = props.whatsapp
     this.businessEmail = props.businessEmail
+    this.phone = props.phone
     this.hasStation = props.hasStation
     this.hasMobileService = props.hasMobileService
     this.mobileActive = props.mobileActive ?? false

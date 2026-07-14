@@ -8,6 +8,7 @@ export interface IOwner extends Document {
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
+  phone?: string
   hasStation?: boolean
   hasMobileService?: boolean
   mobileActive?: boolean
@@ -61,6 +62,10 @@ const ownerSchema = new Schema<IOwner>(
     businessEmail: {
       type: String,
       lowercase: true,
+      trim: true,
+    },
+    phone: {
+      type: String,
       trim: true,
     },
     hasStation: {

@@ -13,6 +13,8 @@ export interface User {
   updatedAt: string;
   authProvider?: string;
   lastLoginAt?: string;
+  onboardingStep?: number;
+  onboardingDetails?: Record<string, unknown>;
 }
 
 export interface GetUsersFilters {

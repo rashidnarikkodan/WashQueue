@@ -1,8 +1,8 @@
-import { User as UserModel } from "@/modules/user/infrastructure/models/user.model"
-import { AppError } from "@/shared/errors/app-error"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { TokenService } from "@/modules/auth/infrastructure/services/token.service"
+import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { ITokenService } from "@/modules/auth/application/interfaces"
 import {
   ISaveOnboardingStepUseCase,
   IOwnerOnboardingDetails,
@@ -13,7 +13,7 @@ import { Owner } from "../../domain/entities/Owner"
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService
   ) {}
 
   async execute(
@@ -36,25 +36,16 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     let owner = await this.ownerRepository.findByUserId(userId)
     if (!owner) {
       owner = new Owner({
-        id: userId,
-        email: userDoc.email,
+        userId,
         phone: userDoc.phone,
-        role: "owner",
         onboardingStep: 1,
         isVerified: false,
       })
     }
 
     const updatedOwner = new Owner({
-      id: userId,
-      name: userDoc.name,
-      email: userDoc.email,
-      phone: userDoc.phone,
-      role: "owner",
-      isBlocked: userDoc.isBlocked,
-      createdAt: userDoc.createdAt,
-      updatedAt: userDoc.updatedAt,
-      
+      userId,
+      phone: details.phone !== undefined ? details.phone : owner.phone,
       onboardingStep: step,
       legalFullName: details.fullName !== undefined ? details.fullName : owner.legalFullName,
       businessName: details.businessName !== undefined ? details.businessName : owner.businessName,
@@ -106,7 +97,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     let tokens: { accessToken: string; refreshToken: string } | undefined
 
     if (userDoc.role !== "owner") {
-      const userUpdateFields: any = {
+      const userUpdateFields: { role: string; refreshToken?: string } = {
         role: "owner"
       }
 

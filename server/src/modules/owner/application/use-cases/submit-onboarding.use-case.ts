@@ -1,8 +1,8 @@
-import { User as UserModel } from "@/modules/user/infrastructure/models/user.model"
-import { AppError } from "@/shared/errors/app-error"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { TokenService } from "@/modules/auth/infrastructure/services/token.service"
+import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { ITokenService } from "@/modules/auth/application/interfaces"
 import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
@@ -10,7 +10,7 @@ import { Owner } from "../../domain/entities/Owner"
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService
   ) {}
 
   async execute(userId: string): Promise<{
@@ -26,24 +26,15 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     let owner = await this.ownerRepository.findByUserId(userId)
     if (!owner) {
       owner = new Owner({
-        id: userId,
-        email: userDoc.email,
+        userId,
         phone: userDoc.phone,
-        role: "owner",
         onboardingStep: 4,
         isVerified: false,
       })
     } else {
       owner = new Owner({
-        id: userId,
-        name: userDoc.name,
-        email: userDoc.email,
-        phone: userDoc.phone,
-        role: "owner",
-        isBlocked: userDoc.isBlocked,
-        createdAt: userDoc.createdAt,
-        updatedAt: userDoc.updatedAt,
-        
+        userId,
+        phone: owner.phone,
         onboardingStep: 4,
         legalFullName: owner.legalFullName,
         businessName: owner.businessName,
