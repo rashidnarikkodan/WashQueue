@@ -3,14 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
-import Loading from "@/shared/components/ui/Loading";
 import UserStats from "../components/ui/UserStats";
-import UserTable from "../components/layout/UserTable";
-import FilterCard from "../components/layout/FilterCard";
 import { usersApi } from "../service/users.api";
 import type { User } from "../types";
 import type { PaginationMeta } from "@/shared/components/ui/Pagination";
 import OnboardingDetailsSummary from "../components/ui/OnboardingDetailsSummary";
+import { DataTable } from "@/shared/components/data-table";
+import { getOwnerColumns } from "../table/columns";
+import { ownerApprovalTabs } from "../table/tabs";
 
 const OwnerApproval = () => {
   const [owners, setOwners] = useState<User[]>([]);
@@ -22,23 +22,20 @@ const OwnerApproval = () => {
     limit: 10,
     totalPages: 0,
     hasNextPage: false,
-    hasPrevPage: false
+    hasPrevPage: false,
   });
-  const [stats, setStats] = useState({
-    total: 0,
-    approved: 0,
-    pending: 0
-  });
+  const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Read URL Search Parameters
+  // ─── URL-driven state ───────────────────────────────────────────────────────
   const searchQuery = searchParams.get("q") || "";
-  const activeTab = (searchParams.get("tab") as "all" | "customer" | "owner") || "customer";
+  const activeTab =
+    (searchParams.get("tab") as "all" | "customer" | "owner") || "customer";
   const currentPage = Number(searchParams.get("page")) || 1;
   const limit = 10;
 
-  // Fetch owners when parameters change
+  // ─── Data fetching ──────────────────────────────────────────────────────────
   const fetchOwners = useCallback(async () => {
     setIsLoading(true);
     setErrorMsg(null);
@@ -47,40 +44,42 @@ const OwnerApproval = () => {
         page: currentPage,
         limit,
         role: "owner",
-        search: searchQuery || undefined
+        search: searchQuery || undefined,
       });
 
-      // Fetch all owners to calculate correct totals for stats panels
       const allOwnersResponse = await usersApi.getUsers({
         page: 1,
         limit: 100,
-        role: "owner"
+        role: "owner",
       });
 
       const totalCount = allOwnersResponse.users.length;
-      const approvedCount = allOwnersResponse.users.filter(u => u.isVerified).length;
-      const pendingCount = allOwnersResponse.users.filter(u => u.onboardingStep === 4 && !u.isVerified).length;
+      const approvedCount = allOwnersResponse.users.filter(
+        (u) => u.isVerified
+      ).length;
+      const pendingCount = allOwnersResponse.users.filter(
+        (u) => u.onboardingStep === 4 && !u.isVerified
+      ).length;
 
-      setStats({
-        total: totalCount,
-        approved: approvedCount,
-        pending: pendingCount
-      });
+      setStats({ total: totalCount, approved: approvedCount, pending: pendingCount });
 
-      // Filter owners for the current page
       let processed = response.users;
       if (activeTab === "customer") {
-        // Pending Verification
-        processed = processed.filter(u => u.onboardingStep === 4 && !u.isVerified);
+        processed = processed.filter(
+          (u) => u.onboardingStep === 4 && !u.isVerified
+        );
       } else if (activeTab === "owner") {
-        // Approved
-        processed = processed.filter(u => u.isVerified);
+        processed = processed.filter((u) => u.isVerified);
       }
 
       setOwners(processed);
       setPaginationMeta(response.pagination);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "Failed to retrieve owner applications");
+      setErrorMsg(
+        err instanceof Error
+          ? err.message
+          : "Failed to retrieve owner applications"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,10 +89,11 @@ const OwnerApproval = () => {
     fetchOwners();
   }, [fetchOwners]);
 
-  // Helper to update URL params
-  const updateParams = (newParams: Record<string, string | null | number | boolean>) => {
+  // ─── URL param helpers ──────────────────────────────────────────────────────
+  const updateParams = (
+    newParams: Record<string, string | null | number | boolean>
+  ) => {
     const params = new URLSearchParams(searchParams);
-    
     Object.entries(newParams).forEach(([key, val]) => {
       if (val === null || val === "" || val === false) {
         params.delete(key);
@@ -101,64 +101,74 @@ const OwnerApproval = () => {
         params.set(key, String(val));
       }
     });
-
-    // Reset pagination to page 1 unless page itself was modified
-    if (!newParams.hasOwnProperty("page")) {
+    if (!Object.prototype.hasOwnProperty.call(newParams, "page")) {
       params.delete("page");
     }
-
     setSearchParams(params, { replace: true });
   };
 
-  // State wrapper setters
   const setSearchQuery = (q: string) => updateParams({ q });
-  const setActiveTab = (tab: "all" | "customer" | "owner") => updateParams({ tab });
+  const setActiveTab = (tab: string) => updateParams({ tab });
   const setCurrentPage = (page: number) => updateParams({ page });
 
+  // ─── Actions ────────────────────────────────────────────────────────────────
   const handleApprove = async (id: string) => {
     try {
       await usersApi.updateUser(id, { isVerified: true });
       toast.success("Owner approved and activated successfully!");
       if (selectedOwner?.id === id) {
-        setSelectedOwner((prev: User | null) => prev ? { ...prev, isVerified: true } : null);
+        setSelectedOwner((prev: User | null) =>
+          prev ? { ...prev, isVerified: true } : null
+        );
       }
       fetchOwners();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to approve owner");
+      toast.error(
+        e instanceof Error ? e.message : "Failed to approve owner"
+      );
     }
   };
 
   const handleReject = async (id: string) => {
     try {
-      // Rejects by resetting onboarding back to step 1
       await usersApi.updateUser(id, { isVerified: false, onboardingStep: 1 });
       toast.info("Owner application rejected and details reset.");
-      if (selectedOwner?.id === id) {
-        setSelectedOwner(null);
-      }
+      if (selectedOwner?.id === id) setSelectedOwner(null);
       fetchOwners();
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to reject owner");
+      toast.error(
+        e instanceof Error ? e.message : "Failed to reject owner"
+      );
     }
   };
+
+  // ─── Table configuration ────────────────────────────────────────────────────
+  const columns = getOwnerColumns((owner) => setSelectedOwner(owner));
 
   return (
     <div className="space-y-6 text-left animate-in fade-in duration-300">
       {/* Breadcrumbs */}
-      <Breadcrumbs items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Owner Verification" }]} />
+      <Breadcrumbs
+        items={[
+          { label: "Admin", path: "/admin/dashboard" },
+          { label: "Owner Verification" },
+        ]}
+      />
 
-      {/* Header section */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Owner Verification</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Owner Verification
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Review onboarding documents and approve station owner applications.
           </p>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <UserStats 
+      {/* Stats */}
+      <UserStats
         totalUsers={stats.total}
         activeUsers={stats.approved}
         blockedUsers={stats.pending}
@@ -166,29 +176,28 @@ const OwnerApproval = () => {
         isOwnerApproval={true}
       />
 
-      {/* Tabs and Filters panel */}
-      <FilterCard 
+      {/* DataTable */}
+      <DataTable<User>
+        columns={columns}
+        data={owners}
+        rowKey={(u) => u.id}
+        // Toolbar
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        onSearchChange={setSearchQuery}
+        searchLabel="Search Owners"
+        searchPlaceholder="Name or email..."
+        tabs={ownerApprovalTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isOwnerApproval={true}
+        onTabChange={setActiveTab}
+        // State
+        isLoading={isLoading}
+        loadingText="Fetching owner applications..."
+        errorMsg={errorMsg}
+        emptyMessage="No owner applications found."
+        // Pagination
+        pagination={paginationMeta}
+        onPageChange={setCurrentPage}
       />
-
-      {/* Error state */}
-      {/* Table layout */}
-      {isLoading ? (
-        <Loading size="lg" text="Fetching owner applications..." className="py-20 gap-3" />
-      ) : (
-        <UserTable 
-          users={owners}
-          paginationMeta={paginationMeta}
-          onPageChange={setCurrentPage}
-          isOwnerApproval={true}
-          onViewApplication={(owner) => setSelectedOwner(owner)}
-          errorMsg={errorMsg}
-        />
-      )}
 
       {/* Slide-over Application Details Panel */}
       {selectedOwner && (
@@ -201,8 +210,12 @@ const OwnerApproval = () => {
             {/* Header */}
             <div className="p-6 border-b border-border/40 flex items-center justify-between">
               <div className="space-y-1">
-                <h2 className="text-xl font-black text-slate-100 tracking-tight">Onboarding Application</h2>
-                <p className="text-xs text-slate-500 font-semibold">Review details and verification documents</p>
+                <h2 className="text-xl font-black text-slate-100 tracking-tight">
+                  Onboarding Application
+                </h2>
+                <p className="text-xs text-slate-500 font-semibold">
+                  Review details and verification documents
+                </p>
               </div>
               <button
                 onClick={() => setSelectedOwner(null)}
@@ -222,7 +235,6 @@ const OwnerApproval = () => {
 
             {/* Action Bar */}
             <div className="p-6 border-t border-border/40 flex items-center gap-4 bg-muted/10">
-              {/* Approve Button */}
               {!selectedOwner.isVerified ? (
                 <>
                   <button
@@ -243,7 +255,7 @@ const OwnerApproval = () => {
               ) : (
                 <div className="w-full py-3 border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 rounded-xl text-center text-xs font-black uppercase tracking-wider select-none flex items-center justify-center gap-1.5">
                   <ShieldCheck size={16} />
-                  Verified & Active
+                  Verified &amp; Active
                 </div>
               )}
             </div>
