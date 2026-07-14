@@ -2,13 +2,14 @@ import { v2 as cloudinary } from "cloudinary"
 import { IMediaStorage, UploadedFile } from "@/core/application/media.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import env from "@/configs/env.config"
 
 export class CloudinaryService implements IMediaStorage {
   constructor() {
     cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: env.CLOUDINARY_CLOUD_NAME,
+      api_key: env.CLOUDINARY_API_KEY,
+      api_secret: env.CLOUDINARY_API_SECRET,
     })
   }
 

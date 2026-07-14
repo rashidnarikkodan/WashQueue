@@ -10,7 +10,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       userId: mongooseDoc.userId.toString(),
       legalFullName: mongooseDoc.legalFullName,
       businessName: mongooseDoc.businessName,
-      businessType: mongooseDoc.businessType,
       gstNumber: mongooseDoc.gstNumber,
       whatsapp: mongooseDoc.whatsapp,
       businessEmail: mongooseDoc.businessEmail,
@@ -44,9 +43,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.businessName !== undefined) {
       raw.businessName = domainEntity.businessName
-    }
-    if (domainEntity.businessType !== undefined) {
-      raw.businessType = domainEntity.businessType as "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD"
     }
     if (domainEntity.gstNumber !== undefined) {
       raw.gstNumber = domainEntity.gstNumber

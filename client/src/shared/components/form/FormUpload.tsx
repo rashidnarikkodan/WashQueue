@@ -1,6 +1,15 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Upload, FileText, X } from "lucide-react";
+
+const resolveUrl = (url?: string): string => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+};
 
 interface FormUploadProps {
   label: string;
@@ -29,6 +38,21 @@ export default function FormUpload({
   existingUrl,
 }: FormUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setLocalPreview(null);
+      return;
+    }
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setLocalPreview(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    }
+  }, [file]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -47,6 +71,9 @@ export default function FormUpload({
       fileInputRef.current.value = "";
     }
   };
+
+  const isPdf = existingUrl?.toLowerCase().endsWith(".pdf");
+  const showExistingImage = existingUrl && !isPdf;
 
   if (variant === "row") {
     const hasExisting = !file && !!existingUrl;
@@ -98,6 +125,35 @@ export default function FormUpload({
             </span>
           )}
         </div>
+
+        {/* Live preview for row layout */}
+        {(localPreview || (existingUrl && showExistingImage)) && (
+          <div className="mt-3 border border-slate-850 bg-slate-950/20 rounded-2xl p-4 flex items-center justify-center min-h-[150px] max-h-[220px] overflow-hidden animate-in fade-in duration-300">
+            <img
+              src={localPreview || resolveUrl(existingUrl)}
+              alt="Upload Preview"
+              className="max-w-full max-h-[180px] rounded-lg object-contain border border-slate-800"
+            />
+          </div>
+        )}
+
+        {/* Document details preview block if PDF */}
+        {((file && !file.type.startsWith("image/")) || (existingUrl && isPdf)) && (
+          <div className="mt-3 border border-slate-850 bg-slate-950/20 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
+            <div className="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center shrink-0">
+              <FileText size={20} />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-xs font-bold text-white truncate">
+                {file ? file.name : "KYC Document.pdf"}
+              </p>
+              <p className="text-[10px] text-slate-500 font-semibold">
+                {file ? `${(file.size / (1024 * 1024)).toFixed(2)} MB` : "PDF Document"}
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <span className="text-[11px] text-red-400 font-medium pl-1 text-left">
             {error}
@@ -143,12 +199,20 @@ export default function FormUpload({
         </div>
 
         {/* Preview Column */}
-        <div className="border border-slate-850 bg-slate-950/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-4 min-h-[220px]">
+        <div className="border border-slate-850 bg-slate-950/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] overflow-hidden">
           {file ? (
-            <div className="space-y-3 animate-in zoom-in duration-300">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center justify-center mx-auto">
-                <FileText size={24} />
-              </div>
+            <div className="space-y-3 animate-in zoom-in duration-300 w-full flex flex-col items-center">
+              {localPreview ? (
+                <img
+                  src={localPreview}
+                  alt="Upload Preview"
+                  className="max-w-full max-h-[140px] rounded-lg object-contain border border-slate-800"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center justify-center mx-auto">
+                  <FileText size={24} />
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="text-sm font-bold text-white max-w-[200px] truncate">{file.name}</p>
                 <p className="text-[11px] text-slate-500 font-semibold font-mono">
@@ -162,6 +226,15 @@ export default function FormUpload({
               >
                 <X size={14} /> Remove file
               </button>
+            </div>
+          ) : (existingUrl && showExistingImage) ? (
+            <div className="space-y-3 animate-in zoom-in duration-300 w-full flex flex-col items-center">
+              <img
+                src={resolveUrl(existingUrl)}
+                alt="Upload Preview"
+                className="max-w-full max-h-[140px] rounded-lg object-contain border border-slate-800"
+              />
+              <p className="text-[11px] text-slate-500 font-semibold">Previously Uploaded</p>
             </div>
           ) : existingUrl ? (
             <div className="space-y-3 animate-in zoom-in duration-300">

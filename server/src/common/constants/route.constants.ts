@@ -7,7 +7,6 @@ export const API_ROUTES = {
     VERIFY_OTP: "/verify-otp",
     GOOGLE: "/google",
     REFRESH_TOKEN: "/refresh-token",
-    SETUP_ACCOUNT: "/setup-account",
     ME: "/me",
     LOGOUT: "/logout",
     FORGOT_PASSWORD: "/forgot-password",

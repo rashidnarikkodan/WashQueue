@@ -12,7 +12,6 @@ import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"
 import { LoginUseCase } from "./application/use-cases/login.use-case"
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.use-case"
 import { LogoutUseCase } from "./application/use-cases/logout.use-case"
-import { SetupAccountUseCase } from "./application/use-cases/setup-account.use-case"
 import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "./application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case"
@@ -39,7 +38,6 @@ const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, ref
 const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
-const setupAccountUseCase = new SetupAccountUseCase(userRepository, ownerRepository, tokenService)
 const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
@@ -51,7 +49,6 @@ const authController = new AuthController(
   verifyOtpUseCase,
   refreshTokenUseCase,
   logoutUseCase,
-  setupAccountUseCase,
   googleAuthUseCase,
   getMeUseCase,
   forgotPasswordUseCase,

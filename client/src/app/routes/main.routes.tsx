@@ -3,7 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import Landing from "../../features/home/pages/Landing";
 import Home from "../../features/home/pages/Home";
 import { useAuthStore } from "../../features/auth/store/authStore";
-import { ROLE } from "../../shared/constants/role.const";
+import { ROLE, VIEW_MODE } from "../../shared/constants/role.const";
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
 
 const RootPathResolver = () => {
@@ -23,7 +23,7 @@ const RootPathResolver = () => {
     case ROLE.MANAGER:
       return <Navigate to={APP_ROUTES.MANAGER.DASHBOARD} replace />;
     case ROLE.OWNER:
-      if (activeViewMode === "customer") {
+      if (activeViewMode === VIEW_MODE.CUSTOMER || !user.onboardingStep || user.onboardingStep < 4) {
         return <Home />;
       }
       return <Navigate to={APP_ROUTES.OWNER.DASHBOARD} replace />;

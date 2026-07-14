@@ -176,12 +176,6 @@ const OwnerApproval = () => {
       />
 
       {/* Error state */}
-      {errorMsg && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl text-sm font-semibold">
-          {errorMsg}
-        </div>
-      )}
-
       {/* Table layout */}
       {isLoading ? (
         <Loading size="lg" text="Fetching owner applications..." className="py-20 gap-3" />
@@ -192,6 +186,7 @@ const OwnerApproval = () => {
           onPageChange={setCurrentPage}
           isOwnerApproval={true}
           onViewApplication={(owner) => setSelectedOwner(owner)}
+          errorMsg={errorMsg}
         />
       )}
 

@@ -35,7 +35,7 @@ const UserManagement = () => {
   const searchQuery = searchParams.get("q") || "";
   const roleFilter = searchParams.get("role") || "all";
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL;
-  const activeTab = (searchParams.get("tab") as "all" | "customer" | "owner") || "all";
+  const activeTab = (roleFilter === "customer" || roleFilter === "owner") ? roleFilter : "all";
   const highCancellation = searchParams.get("cancellation") === "true";
   const fraudFlag = searchParams.get("fraud") === "true";
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -104,7 +104,7 @@ const UserManagement = () => {
   const setSearchQuery = (q: string) => updateParams({ q });
   const setRoleFilter = (role: string) => updateParams({ role });
   const setStatusFilter = (status: string) => updateParams({ status });
-  const setActiveTab = (tab: "all" | "customer" | "owner") => updateParams({ tab });
+  const setActiveTab = () => {};
   const setHighCancellation = (cancellation: boolean) => updateParams({ cancellation });
   const setFraudFlag = (fraud: boolean) => updateParams({ fraud });
   const setCurrentPage = (page: number) => updateParams({ page });
@@ -194,13 +194,6 @@ const UserManagement = () => {
         setFraudFlag={setFraudFlag}
       />
 
-      {/* Error state */}
-      {errorMsg && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl text-sm font-semibold">
-          {errorMsg}
-        </div>
-      )}
-
       {/* User Table layout */}
       {isLoading ? (
         <Loading size="lg" text="Fetching user directory..." className="py-20 gap-3" />
@@ -210,6 +203,7 @@ const UserManagement = () => {
           onToggleStatus={handleToggleStatus}
           paginationMeta={paginationMeta}
           onPageChange={setCurrentPage}
+          errorMsg={errorMsg}
         />
       )}
     </div>

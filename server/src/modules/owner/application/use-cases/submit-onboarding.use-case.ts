@@ -33,12 +33,12 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     } else {
       owner = new Owner({
+        id: owner.id,
         userId,
         phone: owner.phone,
         onboardingStep: 4,
         legalFullName: owner.legalFullName,
         businessName: owner.businessName,
-        businessType: owner.businessType,
         gstNumber: owner.gstNumber,
         whatsapp: owner.whatsapp,
         businessEmail: owner.businessEmail,

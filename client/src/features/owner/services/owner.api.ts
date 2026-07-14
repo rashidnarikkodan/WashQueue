@@ -5,7 +5,6 @@ export interface OnboardingDetails {
   phone?: string;
   whatsapp?: string;
   businessName?: string;
-  businessType?: string;
   gstNumber?: string;
   idProofType?: string;
   idProofUrl?: string;
@@ -17,9 +16,6 @@ export interface OnboardingDetails {
   ifscCode?: string;
   accountType?: string;
   bankProofUrl?: string;
-  hasStation?: boolean;
-  hasMobileService?: boolean;
-  mobileActive?: boolean;
 }
 
 export interface OnboardingStatus {

@@ -41,12 +41,6 @@ export const createAuthRouter = (authController: AuthController): Router => {
     asyncHandler(authController.refreshToken)
   )
 
-  router.post(
-    API_ROUTES.AUTH.SETUP_ACCOUNT,
-    authenticate,
-    asyncHandler(authController.setupAccount)
-  )
-
   router.get(
     API_ROUTES.AUTH.ME,
     authenticate,

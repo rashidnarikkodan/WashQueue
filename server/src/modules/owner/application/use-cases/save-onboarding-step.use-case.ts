@@ -44,12 +44,12 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     }
 
     const updatedOwner = new Owner({
+      id: owner.id,
       userId,
       phone: details.phone !== undefined ? details.phone : owner.phone,
       onboardingStep: step,
       legalFullName: details.fullName !== undefined ? details.fullName : owner.legalFullName,
       businessName: details.businessName !== undefined ? details.businessName : owner.businessName,
-      businessType: details.businessType !== undefined ? details.businessType : owner.businessType,
       gstNumber: details.gstNumber !== undefined ? details.gstNumber : owner.gstNumber,
       whatsapp: details.whatsapp !== undefined ? details.whatsapp : owner.whatsapp,
       businessEmail: details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
@@ -74,7 +74,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       phone: userDoc.phone,
       whatsapp: savedOwner.whatsapp,
       businessName: savedOwner.businessName,
-      businessType: savedOwner.businessType,
       gstNumber: savedOwner.gstNumber,
       idProofType: savedOwner.idProofType,
       idProofUrl: savedOwner.idProofUrl,

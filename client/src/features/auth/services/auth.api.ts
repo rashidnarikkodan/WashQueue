@@ -1,6 +1,5 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
-import type { RoleType } from "@/shared/constants/role.const"
 
 import type { ApiResponse } from "@/shared/types/ApiResponse"
 
@@ -52,19 +51,6 @@ export const authApi = {
       return unwrap(response.data)
     },
     "OTP verification failed"
-  ),
-
-  setupAccount: asyncHandle(
-    async (role: RoleType): Promise<AuthUser> => {
-      const response = await api.post(
-        API_ROUTES.AUTH.SETUP_ACCOUNT,
-        { role },
-        { skipToast: true }
-      )
-
-      return unwrap(response.data)
-    },
-    "Account setup failed"
   ),
 
   me: asyncHandle(

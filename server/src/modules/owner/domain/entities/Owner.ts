@@ -3,7 +3,6 @@ export interface OwnerProps {
   userId: string
   legalFullName?: string
   businessName?: string
-  businessType?: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD" | string
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
@@ -32,7 +31,6 @@ export class Owner implements OwnerProps {
   readonly userId: string
   readonly legalFullName?: string
   readonly businessName?: string
-  readonly businessType?: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD" | string
   readonly gstNumber?: string
   readonly whatsapp?: string
   readonly businessEmail?: string
@@ -63,7 +61,6 @@ export class Owner implements OwnerProps {
     this.userId = props.userId
     this.legalFullName = props.legalFullName
     this.businessName = props.businessName
-    this.businessType = props.businessType
     this.gstNumber = props.gstNumber
     this.whatsapp = props.whatsapp
     this.businessEmail = props.businessEmail

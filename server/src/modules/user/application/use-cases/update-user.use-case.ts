@@ -35,6 +35,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
       const owner = await this.ownerRepository.findByUserId(id)
       if (owner) {
         const updatedOwner = new Owner({
+          id: owner.id,
           userId: id,
           phone: updates.phone !== undefined ? updates.phone : owner.phone,
           onboardingStep: updates.onboardingStep !== undefined ? updates.onboardingStep : owner.onboardingStep,
@@ -42,7 +43,6 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
           verifiedAt: updates.isVerified ? new Date() : owner.verifiedAt,
           legalFullName: owner.legalFullName,
           businessName: owner.businessName,
-          businessType: owner.businessType,
           gstNumber: owner.gstNumber,
           whatsapp: owner.whatsapp,
           businessEmail: owner.businessEmail,

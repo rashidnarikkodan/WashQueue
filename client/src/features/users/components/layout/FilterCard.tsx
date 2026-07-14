@@ -35,13 +35,10 @@ const FilterCard = ({
 }: FilterCardProps) => {
 
   const handleTabChange = (tab: "all" | "customer" | "owner") => {
-    setActiveTab(tab);
-    if (!isOwnerApproval && setRoleFilter) {
-      if (tab === "all") {
-        setRoleFilter("all");
-      } else {
-        setRoleFilter(tab);
-      }
+    if (isOwnerApproval) {
+      setActiveTab(tab);
+    } else if (setRoleFilter) {
+      setRoleFilter(tab);
     }
   };
 
@@ -112,11 +109,6 @@ const FilterCard = ({
                 onChange={(e) => {
                   const val = e.target.value;
                   if (setRoleFilter) setRoleFilter(val);
-                  if (val === "customer" || val === "owner") {
-                    setActiveTab(val as "customer" | "owner");
-                  } else if (val === "all") {
-                    setActiveTab("all");
-                  }
                 }}
                 className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
               >

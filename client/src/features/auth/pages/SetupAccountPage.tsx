@@ -1,24 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { Car, Wrench, Check, ChevronRight, Loader2 } from "lucide-react";
-import Loading from "../../../shared/components/ui/Loading";
+import { Car, Wrench, Check, ChevronRight } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
-import { ROLE } from "../../../shared/constants/role.const";
-import { useState } from "react";
+import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const";
 
 export default function SetupAccountPage() {
   const navigate = useNavigate();
-  const { setupAccount, isLoading } = useAuthStore();
-  const [selectedRole, setSelectedRole] = useState<typeof ROLE.CUSTOMER | typeof ROLE.OWNER | null>(null);
+  const { setActiveViewMode } = useAuthStore();
 
-  const handleSelectRole = async (role: typeof ROLE.CUSTOMER | typeof ROLE.OWNER) => {
-    setSelectedRole(role);
-    const success = await setupAccount(role);
-    if (success) {
-      if (role === ROLE.CUSTOMER) {
-        navigate("/");
-      } else {
-        navigate("/owner/onboarding");
-      }
+  const handleSelectRole = (role: typeof ROLE.CUSTOMER | typeof ROLE.OWNER) => {
+    if (role === ROLE.CUSTOMER) {
+      setActiveViewMode(VIEW_MODE.CUSTOMER);
+      navigate("/");
+    } else {
+      setActiveViewMode(VIEW_MODE.OWNER);
+      navigate("/owner/onboarding");
     }
   };
 
@@ -76,17 +71,9 @@ export default function SetupAccountPage() {
 
                 <button
                   onClick={() => handleSelectRole(ROLE.CUSTOMER)}
-                  disabled={isLoading}
-                  className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3 px-4 rounded-xl transition-all duration-200 mt-6 text-sm cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-4 rounded-xl transition-all duration-200 mt-6 text-sm cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {isLoading && selectedRole === ROLE.CUSTOMER ? (
-                    <>
-                      <Loading size="sm" />
-                      Setting Up...
-                    </>
-                  ) : (
-                    "Continue as customer"
-                  )}
+                  Continue as customer
                 </button>
               </div>
 
@@ -106,17 +93,9 @@ export default function SetupAccountPage() {
 
                 <button
                   onClick={() => handleSelectRole(ROLE.OWNER)}
-                  disabled={isLoading}
-                  className="w-full border border-primary hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed text-primary font-bold py-3 px-4 rounded-xl transition-all duration-200 mt-6 text-sm cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full border border-primary hover:bg-primary/10 text-primary font-bold py-3 px-4 rounded-xl transition-all duration-200 mt-6 text-sm cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {isLoading && selectedRole === ROLE.OWNER ? (
-                    <>
-                      <Loading size="sm" />
-                      Setting Up...
-                    </>
-                  ) : (
-                    "Start Owner Setup"
-                  )}
+                  Start Owner Setup
                 </button>
               </div>
             </div>
@@ -126,16 +105,11 @@ export default function SetupAccountPage() {
               {/* Option 1: Customer */}
               <button
                 onClick={() => handleSelectRole(ROLE.CUSTOMER)}
-                disabled={isLoading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
-                    {isLoading && selectedRole === ROLE.CUSTOMER ? (
-                      <Loading size="sm" />
-                    ) : (
-                      <Car className="h-5 w-5" />
-                    )}
+                    <Car className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-foreground">Book Washes (Customer)</h3>
@@ -150,16 +124,11 @@ export default function SetupAccountPage() {
               {/* Option 2: Owner */}
               <button
                 onClick={() => handleSelectRole(ROLE.OWNER)}
-                disabled={isLoading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
-                    {isLoading && selectedRole === ROLE.OWNER ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Wrench className="h-5 w-5" />
-                    )}
+                    <Wrench className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-foreground">List Wash Station (Owner)</h3>

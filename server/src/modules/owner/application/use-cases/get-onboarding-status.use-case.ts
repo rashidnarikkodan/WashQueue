@@ -29,7 +29,6 @@ export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
       phone: owner.phone,
       whatsapp: owner.whatsapp,
       businessName: owner.businessName,
-      businessType: owner.businessType,
       gstNumber: owner.gstNumber,
       idProofType: owner.idProofType,
       idProofUrl: owner.idProofUrl,

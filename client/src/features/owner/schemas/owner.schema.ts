@@ -13,15 +13,10 @@ export const step1Schema = z.object({
     .optional()
     .or(z.literal("")),
   businessName: z.string().trim().min(2, "Business name must be at least 2 characters"),
-  businessType: z.enum(["INDIVIDUAL", "SOLE_PROP", "PARTNERSHIP", "PVT_LTD"], {
-    message: "Please select a business type",
-  }),
   gstNumber: z.string().trim().optional().or(z.literal("")),
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "Please select an ID proof type",
   }),
-  hasStation: z.boolean().optional(),
-  hasMobileService: z.boolean().optional(),
 });
 
 export const step2Schema = z.object({

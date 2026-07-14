@@ -29,7 +29,6 @@ export class GetUserUseCase implements IGetUserUseCase {
           fullName: owner.legalFullName,
           whatsapp: owner.whatsapp,
           businessName: owner.businessName,
-          businessType: owner.businessType,
           gstNumber: owner.gstNumber,
           idProofType: owner.idProofType,
           idProofUrl: owner.idProofUrl,
@@ -41,9 +40,6 @@ export class GetUserUseCase implements IGetUserUseCase {
           ifscCode: owner.ifscCode,
           accountType: owner.accountType,
           bankProofUrl: owner.bankProofUrl,
-          hasStation: owner.hasStation,
-          hasMobileService: owner.hasMobileService,
-          mobileActive: owner.mobileActive,
         }
       }
     }

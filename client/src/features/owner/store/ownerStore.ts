@@ -43,6 +43,8 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
         isSubmitted: status.isSubmitted,
         isFetchingStatus: false,
       });
+      // Sync authStore user profile to update onboardingStep & prevent redirect loops
+      await useAuthStore.getState().refreshUser();
     } catch {
       // Silently fail — user may simply not have started onboarding yet
       set({ isFetchingStatus: false });

@@ -4,14 +4,10 @@ export interface IOwner extends Document {
   userId: Types.ObjectId
   legalFullName?: string
   businessName?: string
-  businessType?: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD"
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
   phone?: string
-  hasStation?: boolean
-  hasMobileService?: boolean
-  mobileActive?: boolean
   isVerified?: boolean
   verifiedAt?: Date
   createdAt: Date
@@ -47,10 +43,6 @@ const ownerSchema = new Schema<IOwner>(
       type: String,
       trim: true,
     },
-    businessType: {
-      type: String,
-      enum: ["INDIVIDUAL", "SOLE_PROP", "PARTNERSHIP", "PVT_LTD"],
-    },
     gstNumber: {
       type: String,
       trim: true,
@@ -67,18 +59,6 @@ const ownerSchema = new Schema<IOwner>(
     phone: {
       type: String,
       trim: true,
-    },
-    hasStation: {
-      type: Boolean,
-      default: false,
-    },
-    hasMobileService: {
-      type: Boolean,
-      default: false,
-    },
-    mobileActive: {
-      type: Boolean,
-      default: false,
     },
     isVerified: {
       type: Boolean,

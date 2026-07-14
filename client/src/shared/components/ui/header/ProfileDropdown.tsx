@@ -14,7 +14,7 @@ import {
   UserPlus
 } from "lucide-react";
 import { useAuthStore } from "../../../../features/auth/store/authStore";
-
+import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const";
 
 interface ProfileDropdownProps {
   currentRole: "admin" | "manager" | "owner" | "customer";
@@ -40,13 +40,13 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
   const getRoleLabel = () => {
     switch (currentRole) {
-      case "admin":
+      case ROLE.ADMIN:
         return "System Admin";
-      case "manager":
+      case ROLE.MANAGER:
         return "Station Manager";
-      case "owner":
+      case ROLE.OWNER:
         return "Verified Owner";
-      case "customer":
+      case ROLE.CUSTOMER:
         return "Verified User";
       default:
         return "User Access";
@@ -54,28 +54,31 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   };
 
   const getCtaContent = () => {
-    if (user.role === "owner" && currentRole === "customer") {
-      return {
-        title: "Owner Dashboard",
-        desc: "Manage station operations & bays"
-      };
+    if (user.role === ROLE.OWNER) {
+      if (currentRole === VIEW_MODE.CUSTOMER) {
+        return {
+          title: "Switch to Owner",
+          desc: "Manage station operations & bays"
+        };
+      }
+      if (currentRole === VIEW_MODE.OWNER) {
+        return {
+          title: "Switch to Customer",
+          desc: "Browse stations & book a wash"
+        };
+      }
     }
 
     switch (currentRole) {
-      case "admin":
+      case ROLE.ADMIN:
         return {
           title: "System Analytics",
           desc: "Monitor platform performance"
         };
-      case "manager":
+      case ROLE.MANAGER:
         return {
           title: "Walk-in Queue",
           desc: "Add new walk-in wash"
-        };
-      case "owner":
-        return {
-          title: "Manage Station Bays",
-          desc: "List and activate bays"
         };
       default:
         return {
@@ -184,11 +187,16 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <div
               onClick={() => {
                 setIsOpen(false);
-                if (user.role === "owner" && currentRole === "customer") {
-                  setActiveViewMode("owner");
-                  navigate("/owner/dashboard");
+                if (user.role === ROLE.OWNER) {
+                  if (currentRole === VIEW_MODE.CUSTOMER) {
+                    setActiveViewMode(VIEW_MODE.OWNER);
+                    navigate("/owner/dashboard");
+                  } else {
+                    setActiveViewMode(VIEW_MODE.CUSTOMER);
+                    navigate("/");
+                  }
                 } else {
-                  navigate(currentRole === "customer" ? "/owner/onboarding" : `/${currentRole}/dashboard`);
+                  navigate(currentRole === VIEW_MODE.CUSTOMER ? "/owner/onboarding" : `/${currentRole}/dashboard`);
                 }
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"

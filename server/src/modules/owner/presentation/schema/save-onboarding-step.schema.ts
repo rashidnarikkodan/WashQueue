@@ -25,9 +25,6 @@ const step1Schema = z.object({
     .string({ message: "Business name is required" })
     .trim()
     .min(2, "Business name must be at least 2 characters"),
-  businessType: z.enum(["single", "enterprise", "detailer"], {
-    message: "Business type is required",
-  }),
   gstNumber: z.string().trim().optional().or(z.literal("")),
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "ID proof type is required",

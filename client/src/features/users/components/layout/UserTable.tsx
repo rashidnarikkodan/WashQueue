@@ -11,6 +11,7 @@ interface UserTableProps {
   onToggleStatus?: (id: string) => void;
   isOwnerApproval?: boolean;
   onViewApplication?: (owner: User) => void;
+  errorMsg?: string | null;
 }
 
 const UserTable = ({
@@ -20,6 +21,7 @@ const UserTable = ({
   onToggleStatus,
   isOwnerApproval = false,
   onViewApplication,
+  errorMsg,
 }: UserTableProps) => {
   // Get Initials for Avatar
   const getInitials = (name: string) => {
@@ -195,7 +197,11 @@ const UserTable = ({
             ) : (
               <tr>
                 <td colSpan={5} className="py-12 px-6 text-center text-muted-foreground font-medium">
-                  No users found matching the query.
+                  {errorMsg ? (
+                    <span className="text-rose-400 font-semibold">{errorMsg}</span>
+                  ) : (
+                    "No users found matching the query."
+                  )}
                 </td>
               </tr>
             )}

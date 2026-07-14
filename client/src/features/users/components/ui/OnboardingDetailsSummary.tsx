@@ -103,12 +103,6 @@ const OnboardingDetailsSummary = ({
             </span>
             <span className="text-slate-200 font-bold">{details.businessName || "Not Provided"}</span>
           </div>
-          <div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
-              Business Type
-            </span>
-            <span className="text-slate-200 font-bold capitalize">{details.businessType || "Not Provided"}</span>
-          </div>
           {details.gstNumber && (
             <div>
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">

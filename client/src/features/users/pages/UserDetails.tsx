@@ -23,6 +23,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ROLE } from "../../../shared/constants/role.const";
 import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
 import { usersApi } from "../service/users.api";
+import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal";
 import type { User } from "../types";
 import { toast } from "sonner";
 import FeatureLock from "../../../shared/components/ui/FeatureLock";
@@ -74,6 +75,7 @@ const UserDetails = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [isSuspending, setIsSuspending] = useState(false);
+  const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
 
   // Editable local variables (for fields not stored in server)
   const address = "";
@@ -224,7 +226,13 @@ const UserDetails = () => {
   };
 
   // Suspend/Activate Handler
-  const handleToggleBlockStatus = async () => {
+  const handleToggleBlockStatus = () => {
+    setIsBlockConfirmOpen(true);
+  };
+
+  const executeToggleBlockStatus = async () => {
+    setIsBlockConfirmOpen(false);
+    if (!user) return;
     setIsSuspending(true);
     try {
       const updatedBlocked = !user.isBlocked;
@@ -975,6 +983,20 @@ const UserDetails = () => {
         </div>
       )}
 
+      <ConfirmationModal
+        isOpen={isBlockConfirmOpen}
+        onClose={() => setIsBlockConfirmOpen(false)}
+        onConfirm={executeToggleBlockStatus}
+        title={user?.isBlocked ? "Activate User Account?" : "Suspend User Account?"}
+        message={
+          user?.isBlocked
+            ? `Are you sure you want to activate the account for ${user.name || user.email}? They will be allowed to log in and use all service functions.`
+            : `Are you sure you want to suspend the account for ${user.name || user.email}? They will be immediately logged out and blocked from accessing the application.`
+        }
+        confirmText={user?.isBlocked ? "Activate Account" : "Suspend Account"}
+        cancelText="Cancel"
+        confirmVariant={user?.isBlocked ? "success" : "danger"}
+      />
     </div>
   );
 };
