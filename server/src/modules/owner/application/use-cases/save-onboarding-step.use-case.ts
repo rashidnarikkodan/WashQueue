@@ -53,9 +53,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       gstNumber: details.gstNumber !== undefined ? details.gstNumber : owner.gstNumber,
       whatsapp: details.whatsapp !== undefined ? details.whatsapp : owner.whatsapp,
       businessEmail: details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
-      hasStation: details.hasStation !== undefined ? details.hasStation : owner.hasStation,
-      hasMobileService: details.hasMobileService !== undefined ? details.hasMobileService : owner.hasMobileService,
-      mobileActive: details.mobileActive !== undefined ? details.mobileActive : owner.mobileActive,
       isVerified: owner.isVerified,
       verifiedAt: owner.verifiedAt,
       idProofType: details.idProofType !== undefined ? details.idProofType : owner.idProofType,
@@ -89,9 +86,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       ifscCode: savedOwner.ifscCode,
       accountType: savedOwner.accountType,
       bankProofUrl: savedOwner.bankProofUrl,
-      hasStation: savedOwner.hasStation,
-      hasMobileService: savedOwner.hasMobileService,
-      mobileActive: savedOwner.mobileActive,
     }
 
     let tokens: { accessToken: string; refreshToken: string } | undefined

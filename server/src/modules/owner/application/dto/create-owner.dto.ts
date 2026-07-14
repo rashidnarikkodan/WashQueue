@@ -6,7 +6,4 @@ export interface CreateOwnerInput {
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
-  hasStation: boolean
-  hasMobileService: boolean
-  mobileActive?: boolean
 }

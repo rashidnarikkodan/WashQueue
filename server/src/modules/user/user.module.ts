@@ -15,7 +15,7 @@ const cacheService = new RedisCacheService()
 // use cases
 const getUsersUseCase = new GetUsersUseCase(userRepository)
 const getUserUseCase = new GetUserUseCase(userRepository, ownerRepository)
-const updateUserUseCase = new UpdateUserUseCase(userRepository, cacheService)
+const updateUserUseCase = new UpdateUserUseCase(userRepository, cacheService, ownerRepository)
 
 // presentation
 const userController = new UserController(

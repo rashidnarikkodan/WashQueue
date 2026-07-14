@@ -41,9 +41,6 @@ export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
       ifscCode: owner.ifscCode,
       accountType: owner.accountType,
       bankProofUrl: owner.bankProofUrl,
-      hasStation: owner.hasStation,
-      hasMobileService: owner.hasMobileService,
-      mobileActive: owner.mobileActive,
     }
 
     return {

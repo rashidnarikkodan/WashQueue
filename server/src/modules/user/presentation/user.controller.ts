@@ -5,6 +5,7 @@ import {
     IUpdateUserUseCase
 } from "../application/interfaces/user-usecases.interfaces";
 import { usersQuerySchema } from "./schema/get-users.schema";
+import { updateUserBodySchema } from "./schema/update-user.schema";
 import success from "@/common/utils/success";
 import { HTTP_STATUS } from "@/common/constants/http.constants";
 import { NotFoundError } from "@/common/errors/not-found-error";
@@ -37,7 +38,8 @@ export class UserController {
     updateUser = async (req: Request, res: Response) => {
         const { id } = req.params;
         if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED);
-        const user = await this.updateUserUseCase.execute(id, req.body);
+        const parsedBody = updateUserBodySchema.parse(req.body);
+        const user = await this.updateUserUseCase.execute(id, parsedBody);
         if (!user) {
             throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
         }

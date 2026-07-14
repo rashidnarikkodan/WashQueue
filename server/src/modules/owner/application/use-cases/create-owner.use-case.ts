@@ -35,9 +35,6 @@ export class CreateOwnerUseCase implements ICreateOwnerUseCase {
       gstNumber: input.gstNumber,
       whatsapp: input.whatsapp,
       businessEmail: input.businessEmail,
-      hasStation: input.hasStation,
-      hasMobileService: input.hasMobileService,
-      mobileActive: input.mobileActive ?? false,
       isVerified: false,
     })
 

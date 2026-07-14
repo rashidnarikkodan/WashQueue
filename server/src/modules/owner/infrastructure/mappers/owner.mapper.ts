@@ -15,9 +15,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       whatsapp: mongooseDoc.whatsapp,
       businessEmail: mongooseDoc.businessEmail,
       phone: mongooseDoc.phone,
-      hasStation: mongooseDoc.hasStation,
-      hasMobileService: mongooseDoc.hasMobileService,
-      mobileActive: mongooseDoc.mobileActive,
       isVerified: mongooseDoc.isVerified,
       verifiedAt: mongooseDoc.verifiedAt,
       createdAt: mongooseDoc.createdAt,
@@ -62,15 +59,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.phone !== undefined) {
       raw.phone = domainEntity.phone
-    }
-    if (domainEntity.hasStation !== undefined) {
-      raw.hasStation = domainEntity.hasStation
-    }
-    if (domainEntity.hasMobileService !== undefined) {
-      raw.hasMobileService = domainEntity.hasMobileService
-    }
-    if (domainEntity.mobileActive !== undefined) {
-      raw.mobileActive = domainEntity.mobileActive
     }
     if (domainEntity.isVerified !== undefined) {
       raw.isVerified = domainEntity.isVerified

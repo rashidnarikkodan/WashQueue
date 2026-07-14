@@ -4,7 +4,7 @@ import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { onboardingUpload } from "@/infrastructure/storage/multer.middleware"
-import { saveOnboardingStepSchema } from "../application/schema/save-onboarding-step.schema"
+import { saveOnboardingStepSchema } from "./schema/save-onboarding-step.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createOwnerRouter = (ownerController: OwnerController): Router => {

@@ -16,9 +16,6 @@ export interface IOwnerOnboardingDetails {
   accountType?: string
   bankProofUrl?: string
   businessEmail?: string
-  hasStation?: boolean
-  hasMobileService?: boolean
-  mobileActive?: boolean
 }
 
 export interface ISaveOnboardingStepUseCase {

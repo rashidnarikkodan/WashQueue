@@ -8,9 +8,6 @@ export interface OwnerProps {
   whatsapp?: string
   businessEmail?: string
   phone?: string
-  hasStation?: boolean
-  hasMobileService?: boolean
-  mobileActive?: boolean
   isVerified?: boolean
   verifiedAt?: Date
   createdAt?: Date
@@ -71,9 +68,6 @@ export class Owner implements OwnerProps {
     this.whatsapp = props.whatsapp
     this.businessEmail = props.businessEmail
     this.phone = props.phone
-    this.hasStation = props.hasStation
-    this.hasMobileService = props.hasMobileService
-    this.mobileActive = props.mobileActive ?? false
     this.isVerified = props.isVerified ?? false
     this.verifiedAt = props.verifiedAt
     this.createdAt = props.createdAt
