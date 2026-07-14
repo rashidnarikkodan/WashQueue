@@ -5,7 +5,7 @@ export default function HeroSection() {
   const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32 lg:pb-36 border-b border-border bg-slate-950/20">
+    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32 lg:pb-36 border-b border-border bg-background/20">
       {/* Glow Effects */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-10 right-1/4 w-80 h-80 rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
@@ -74,7 +74,7 @@ export default function HeroSection() {
                 </div>
                 
                 {/* Custom progress slider */}
-                <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
                   <div className="h-full bg-primary rounded-full" style={{ width: '45%' }} />
                 </div>
                 

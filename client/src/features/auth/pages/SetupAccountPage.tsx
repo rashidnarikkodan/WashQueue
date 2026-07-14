@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Car, Wrench, Check, ChevronRight } from "lucide-react";
+import { Car, Wrench, Check, ChevronRight, Loader2 } from "lucide-react";
 import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import { ROLE } from "../../../shared/constants/role.const";
@@ -61,7 +61,7 @@ export default function SetupAccountPage() {
             {/* Desktop Role Selection Grid - Cards (visible on sm and up) */}
             <div className="hidden sm:grid grid-cols-2 gap-6 pt-2">
               {/* Role 1: Customer Card */}
-              <div className="flex flex-col justify-between p-8 rounded-2xl border border-border/80 bg-slate-950/20 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] group">
+              <div className="flex flex-col justify-between p-8 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] group">
                 <div className="space-y-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                     <Car className="h-6 w-6" />
@@ -91,7 +91,7 @@ export default function SetupAccountPage() {
               </div>
 
               {/* Role 2: Owner Card */}
-              <div className="flex flex-col justify-between p-8 rounded-2xl border border-border/80 bg-slate-950/20 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] group">
+              <div className="flex flex-col justify-between p-8 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] group">
                 <div className="space-y-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                     <Wrench className="h-6 w-6" />
@@ -127,7 +127,7 @@ export default function SetupAccountPage() {
               <button
                 onClick={() => handleSelectRole(ROLE.CUSTOMER)}
                 disabled={isLoading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-slate-950/20 hover:border-primary/50 hover:bg-slate-950/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
@@ -151,12 +151,12 @@ export default function SetupAccountPage() {
               <button
                 onClick={() => handleSelectRole(ROLE.OWNER)}
                 disabled={isLoading}
-                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-slate-950/20 hover:border-primary/50 hover:bg-slate-950/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/20 hover:border-primary/50 hover:bg-background/40 transition-all duration-300 group text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-300">
                     {isLoading && selectedRole === ROLE.OWNER ? (
-                      <Loading size="sm" />
+                      <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
                       <Wrench className="h-5 w-5" />
                     )}

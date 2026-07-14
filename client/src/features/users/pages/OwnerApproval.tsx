@@ -7,7 +7,8 @@ import Loading from "@/shared/components/ui/Loading";
 import UserStats from "../components/ui/UserStats";
 import UserTable from "../components/layout/UserTable";
 import FilterCard from "../components/layout/FilterCard";
-import { usersApi, type User } from "../service/users.api";
+import { usersApi } from "../service/users.api";
+import type { User } from "../types";
 import type { PaginationMeta } from "@/shared/components/ui/Pagination";
 import OnboardingDetailsSummary from "../components/ui/OnboardingDetailsSummary";
 
@@ -119,11 +120,11 @@ const OwnerApproval = () => {
       await usersApi.updateUser(id, { isVerified: true });
       toast.success("Owner approved and activated successfully!");
       if (selectedOwner?.id === id) {
-        setSelectedOwner(prev => prev ? { ...prev, isVerified: true } : null);
+        setSelectedOwner((prev: User | null) => prev ? { ...prev, isVerified: true } : null);
       }
       fetchOwners();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to approve owner");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to approve owner");
     }
   };
 
@@ -136,8 +137,8 @@ const OwnerApproval = () => {
         setSelectedOwner(null);
       }
       fetchOwners();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to reject owner");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to reject owner");
     }
   };
 

@@ -1,37 +1,45 @@
-import argon2 from "argon2"
-import { AppError } from "@/shared/errors/app-error"
+import { AppError } from "@/common/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ResetPasswordInput } from "../schema/reset-password.schema"
-import { OtpService } from "../../infrastructure/services/otp.service"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-
-import { IResetPasswordUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IOtpRepository } from "../../domain/repositories/otp.repository"
+import { Otp } from "../../domain/entities/otp.entity"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { AUTH_PROVIDER } from "@/common/constants/authProvider"
+import { IHashService, IOtpService, IResetPasswordUseCase } from "../interfaces"
+import { ResetPasswordInput } from "../dto"
 
 export class ResetPasswordUseCase implements IResetPasswordUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly otpService: OtpService
+    private readonly otpRepository: IOtpRepository,
+    private readonly otpService: IOtpService,
+    private readonly hashService: IHashService
   ) { }
 
   async execute(data: ResetPasswordInput): Promise<void> {
-    // Verify OTP code
-    const isOtpValid = await this.otpService.verifyOtp(data.email, data.code)
-    if (!isOtpValid) {
-      throw new AppError("Invalid or expired verification code", HTTP_STATUS.BAD_REQUEST)
+    // Verify OTP code using the repository and entity
+    const otp = await this.otpRepository.findByEmail(data.email)
+    if (!otp || !otp.verify(data.code)) {
+      throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_CODE, HTTP_STATUS.BAD_REQUEST)
     }
+
+    // Delete OTP after successful verification
+    await this.otpRepository.delete(data.email)
 
     const user = await this.userRepository.findByEmail(data.email)
     if (!user) {
-      throw new AppError("User not found", HTTP_STATUS.NOT_FOUND)
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
-    // Hash the new password with Argon2
-    const hashedPassword = await argon2.hash(data.password)
+    // Security Check: Google OAuth users do not use passwords and should not reset passwords
+    if (user.authProvider !== AUTH_PROVIDER.LOCAL) {
+      throw new AppError(ERROR_MESSAGES.SOCIAL_ACCOUNT_PASSWORD_RESET, HTTP_STATUS.BAD_REQUEST)
+    }
 
-    // Update the password in database
-    await this.userRepository.update(user.id, {
-      password: hashedPassword,
-      isVerified: true // If they reset password via email OTP, their email is verified
-    })
+    // Hash the new password using the abstracted hash service
+    const hashedPassword = await this.hashService.hash(data.password)
+
+    // Update the password in database using descriptive method
+    await this.userRepository.resetPassword(user.id!, hashedPassword)
   }
 }

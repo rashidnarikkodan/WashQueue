@@ -73,7 +73,7 @@ const FilterCard = ({
           onClick={() => handleTabChange("owner")}
           className={`pb-3.5 text-sm font-semibold border-b-2 transition-all cursor-pointer relative ${
             activeTab === "owner"
-              ? "border-primary text-primary"
+              ? "border-[#ADC6FF] text-[#ADC6FF]"
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -95,7 +95,7 @@ const FilterCard = ({
               placeholder={isOwnerApproval ? "Name or email..." : "Name, email, or phone..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-muted border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/75"
+              className="w-full bg-muted border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/75"
             />
           </div>
         </div>
@@ -118,7 +118,7 @@ const FilterCard = ({
                     setActiveTab("all");
                   }
                 }}
-                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
               >
                 <option value="all">All Roles</option>
                 <option value={ROLE.ADMIN}>Admin</option>
@@ -136,7 +136,7 @@ const FilterCard = ({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter && setStatusFilter(e.target.value)}
-                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
               >
                 <option value={FILTER_STATUS.ALL}>Any Status</option>
                 <option value={FILTER_STATUS.ACTIVE}>Active</option>
@@ -155,7 +155,7 @@ const FilterCard = ({
                   highCancellation ? "bg-primary/25 border border-primary/30" : "bg-muted"
                 }`}>
                   <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                    highCancellation ? "translate-x-4 bg-primary" : "bg-muted-foreground"
+                    highCancellation ? "translate-x-4 bg-[#ADC6FF]" : "bg-[#8C909F]"
                   }`} />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
@@ -172,7 +172,7 @@ const FilterCard = ({
                   fraudFlag ? "bg-rose-500/25 border border-rose-500/30" : "bg-muted"
                 }`}>
                   <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                    fraudFlag ? "translate-x-4 bg-rose-400" : "bg-muted-foreground"
+                    fraudFlag ? "translate-x-4 bg-[#FFB4AB]" : "bg-[#8C909F]"
                   }`} />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">

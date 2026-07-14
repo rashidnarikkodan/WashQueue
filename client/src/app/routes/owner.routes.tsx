@@ -1,5 +1,5 @@
 import OwnerLayout from "../layouts/OwnerLayout";
-import { APP_ROUTES } from "../../shared/constants/route.const";
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
 import OwnerOnboarding from "@/features/owner/pages/OwnerOnboarding";
 import OwnerDashboard from "@/features/owner/pages/OwnerDashboard";
 
@@ -47,5 +47,6 @@ export const ownerRoutes = {
       path: "team",
       element: <>Team & Managers</>,
     },
+
   ],
 };

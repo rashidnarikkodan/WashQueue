@@ -8,10 +8,10 @@ export default function WelcomeSection() {
 
   return (
     <div className="space-y-2 mb-12 animate-in fade-in slide-in-from-top-4 duration-500 text-left">
-      <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
+      <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight leading-none">
         {getGreeting()}, <span className="text-primary">{user?.name || data.user.name}</span>
       </h1>
-      <p className="text-base md:text-lg text-slate-400 font-medium">
+      <p className="text-base md:text-lg text-muted-foreground font-medium">
         Ready for a fresh wash today?
       </p>
     </div>

@@ -1,17 +1,8 @@
 import { authApi } from "../services/auth.api"
+import { getErrorMessage } from "../../../shared/utils/error"
+import type { SignupState } from "../types"
 
-export interface SignupState {
-  success: boolean
-  message?: string
-  errors?: {
-    name?: string[]
-    email?: string[]
-    password?: string[]
-    confirmPassword?: string[]
-  }
-  email?: string
-  name?: string
-}
+export type { SignupState } from "../types"
 
 export async function signupAction(
   _prevState: SignupState,
@@ -84,12 +75,10 @@ export async function signupAction(
       email,
       name,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      message:
-        error.message ||
-        "Registration failed. Please try again.",
+      message: getErrorMessage(error, "Registration failed. Please try again."),
       email,
       name,
     }

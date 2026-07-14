@@ -1,10 +1,10 @@
 import { Router } from "express"
 import { UserController } from "./user.controller";
-import asyncHandler from "@/shared/utils/async-handler";
-import { authenticate } from "@/shared/middleware/authenticate";
-import { authorize } from "@/shared/middleware/authorize";
-import { ROLE } from "@/shared/constants/role.constants";
-import { API_ROUTES } from "@/shared/constants/route.constants";
+import asyncHandler from "@/common/utils/async-handler";
+import { authenticate } from "@/infrastructure/http/middleware/authenticate";
+import { authorize } from "@/infrastructure/http/middleware/authorize";
+import { ROLE } from "@/common/constants/role.constants";
+import { API_ROUTES } from "@/common/constants/route.constants";
 
 export const createUsersRouter = (userController: UserController): Router => {
     const router = Router();

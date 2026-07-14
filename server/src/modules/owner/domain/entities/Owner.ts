@@ -1,34 +1,26 @@
-import { User, UserProps } from "../../../user/domain/entities/User"
-
-export interface OwnerProps extends UserProps {
-  onboardingStep?: number
-  
-  // Business Info
+export interface OwnerProps {
+  id?: string
+  userId: string
   legalFullName?: string
   businessName?: string
-  businessType?: string
+  businessType?: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD" | string
   gstNumber?: string
-
-  // Contact
   whatsapp?: string
   businessEmail?: string
-
-  // Capabilities
   hasStation?: boolean
   hasMobileService?: boolean
   mobileActive?: boolean
-
-  // Verification Status
   isVerified?: boolean
   verifiedAt?: Date
+  createdAt?: Date
+  updatedAt?: Date
 
-  // Documents KYC
+  // onboarding fields
+  onboardingStep?: number
   idProofType?: string
   idProofUrl?: string
   businessLicenseUrl?: string
   gstCertificateUrl?: string
-
-  // Payout Details
   accountHolderName?: string
   bankName?: string
   accountNumber?: string
@@ -37,35 +29,29 @@ export interface OwnerProps extends UserProps {
   bankProofUrl?: string
 }
 
-export class Owner extends User {
-  readonly onboardingStep: number
-  
-  // Business Info
+export class Owner implements OwnerProps {
+  readonly id?: string
+  readonly userId: string
   readonly legalFullName?: string
   readonly businessName?: string
-  readonly businessType?: string
+  readonly businessType?: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD" | string
   readonly gstNumber?: string
-
-  // Contact
   readonly whatsapp?: string
   readonly businessEmail?: string
-
-  // Capabilities
-  readonly hasStation: boolean
-  readonly hasMobileService: boolean
-  readonly mobileActive: boolean
-
-  // Verification Status
-  readonly isVerified: boolean
+  readonly hasStation?: boolean
+  readonly hasMobileService?: boolean
+  readonly mobileActive?: boolean
+  readonly isVerified?: boolean
   readonly verifiedAt?: Date
+  readonly createdAt?: Date
+  readonly updatedAt?: Date
 
-  // Documents KYC
+  // onboarding fields
+  readonly onboardingStep?: number
   readonly idProofType?: string
   readonly idProofUrl?: string
   readonly businessLicenseUrl?: string
   readonly gstCertificateUrl?: string
-
-  // Payout Details
   readonly accountHolderName?: string
   readonly bankName?: string
   readonly accountNumber?: string
@@ -74,75 +60,32 @@ export class Owner extends User {
   readonly bankProofUrl?: string
 
   constructor(props: OwnerProps) {
-    super(props)
-    this.onboardingStep = props.onboardingStep ?? 1
-    
+    this.id = props.id
+    this.userId = props.userId
     this.legalFullName = props.legalFullName
     this.businessName = props.businessName
     this.businessType = props.businessType
     this.gstNumber = props.gstNumber
-
     this.whatsapp = props.whatsapp
     this.businessEmail = props.businessEmail
-
-    this.hasStation = props.hasStation ?? false
-    this.hasMobileService = props.hasMobileService ?? false
+    this.hasStation = props.hasStation
+    this.hasMobileService = props.hasMobileService
     this.mobileActive = props.mobileActive ?? false
-
     this.isVerified = props.isVerified ?? false
     this.verifiedAt = props.verifiedAt
+    this.createdAt = props.createdAt
+    this.updatedAt = props.updatedAt
 
+    this.onboardingStep = props.onboardingStep ?? 1
     this.idProofType = props.idProofType
     this.idProofUrl = props.idProofUrl
     this.businessLicenseUrl = props.businessLicenseUrl
     this.gstCertificateUrl = props.gstCertificateUrl
-
     this.accountHolderName = props.accountHolderName
     this.bankName = props.bankName
     this.accountNumber = props.accountNumber
     this.ifscCode = props.ifscCode
     this.accountType = props.accountType
     this.bankProofUrl = props.bankProofUrl
-  }
-
-  toJSON() {
-    return {
-      id: this.id,
-      name: this.name,
-      email: this.email,
-      phone: this.phone,
-      role: this.role,
-      refreshToken: this.refreshToken,
-      lastLoginAt: this.lastLoginAt,
-      walletBalance: this.walletBalance,
-      avatar: this.avatar,
-      authProvider: this.authProvider,
-      isBlocked: this.isBlocked,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      isVerified: this.isVerified,
-      onboardingStep: this.onboardingStep,
-      onboardingDetails: {
-        fullName: this.legalFullName,
-        phone: this.phone,
-        whatsapp: this.whatsapp,
-        businessName: this.businessName,
-        businessType: this.businessType,
-        gstNumber: this.gstNumber,
-        idProofType: this.idProofType,
-        idProofUrl: this.idProofUrl,
-        businessLicenseUrl: this.businessLicenseUrl,
-        gstCertificateUrl: this.gstCertificateUrl,
-        accountHolderName: this.accountHolderName,
-        bankName: this.bankName,
-        accountNumber: this.accountNumber,
-        ifscCode: this.ifscCode,
-        accountType: this.accountType,
-        bankProofUrl: this.bankProofUrl,
-        hasStation: this.hasStation,
-        hasMobileService: this.hasMobileService,
-        mobileActive: this.mobileActive,
-      }
-    }
   }
 }

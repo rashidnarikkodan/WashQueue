@@ -1,54 +1,58 @@
 import { api } from "@/shared/config/axios";
-import type { RoleType } from "@/shared/constants/role.const";
-import type { PaginationMeta } from "@/shared/components/ui/Pagination";
-import { API_ROUTES } from "@/shared/constants/route.const";
+import { API_ROUTES } from "@/shared/constants/api.const";
+import { handleApiError } from "@/shared/utils/handleApiError";
+import type { GetUsersFilters, GetUsersResponse, User } from "../types";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: RoleType;
+interface UserApiPayload {
+  id?: string;
+  _id?: string;
+  name?: string;
+  email?: string;
+  role?: User["role"];
   phone?: string;
-  isBlocked: boolean;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isBlocked?: boolean;
+  isVerified?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   authProvider?: string;
   lastLoginAt?: string;
   onboardingStep?: number;
   onboardingDetails?: Record<string, any>;
 }
 
-export interface GetUsersFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  role?: string;
-  isBlocked?: boolean;
-  sortBy?: "createdAt" | "name" | "email";
-  sortOrder?: "asc" | "desc";
-}
-
-export interface GetUsersResponse {
-  users: User[];
-  pagination: PaginationMeta;
-  stats?: {
-    total: number;
-    active: number;
-    blocked: number;
-    owners: number;
+interface UsersApiResponse {
+  data?: {
+    users?: UserApiPayload[];
+    pagination?: GetUsersResponse["pagination"];
+    stats?: GetUsersResponse["stats"];
   };
 }
+
+const toUser = (u?: UserApiPayload): User => ({
+  id: u?.id ?? u?._id ?? "",
+  name: u?.name ?? "",
+  email: u?.email ?? "",
+  role: u?.role ?? "customer",
+  phone: u?.phone,
+  isBlocked: u?.isBlocked ?? false,
+  isVerified: u?.isVerified ?? false,
+  createdAt: u?.createdAt ?? "",
+  updatedAt: u?.updatedAt ?? "",
+  authProvider: u?.authProvider,
+  lastLoginAt: u?.lastLoginAt,
+  onboardingStep: u?.onboardingStep,
+  onboardingDetails: u?.onboardingDetails,
+});
 
 export const usersApi = {
   getUsers: async (filters: GetUsersFilters): Promise<GetUsersResponse> => {
     try {
-      const params: Record<string, any> = {};
+      const params: Record<string, boolean|string|number> = {};
       
       if (filters.page) params.page = filters.page;
       if (filters.limit) params.limit = filters.limit;
       if (filters.search) params.search = filters.search;
-      if (filters.role && filters.role !== "ALL") params.role = filters.role;
+      if (filters.role && filters.role !== "all") params.role = filters.role;
       
       if (typeof filters.isBlocked === "boolean") {
         params.isBlocked = filters.isBlocked ? "true" : "false";
@@ -58,84 +62,39 @@ export const usersApi = {
       if (filters.sortOrder) params.sortOrder = filters.sortOrder;
 
       const response = await api.get(API_ROUTES.USERS.ROOT, { params });
-      const resJson = response.data;
+      const resJson = response.data as UsersApiResponse;
 
       return {
-        users: (resJson.data.users || []).map((u: any) => ({
-          id: u.id || u._id,
-          name: u.name || "",
-          email: u.email,
-          role: u.role,
-          phone: u.phone,
-          isBlocked: u.isBlocked,
-          isVerified: u.isVerified,
-          createdAt: u.createdAt,
-          updatedAt: u.updatedAt,
-          authProvider: u.authProvider,
-          lastLoginAt: u.lastLoginAt,
-          onboardingStep: u.onboardingStep,
-          onboardingDetails: u.onboardingDetails
-        })),
-        pagination: resJson.data.pagination,
-        stats: resJson.data.stats
+        users: (resJson.data?.users ?? []).map((u) => toUser(u)),
+        pagination: resJson.data?.pagination ?? { total: 0, page: 1, limit: 5, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        stats: resJson.data?.stats
       };
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to retrieve users";
-      throw new Error(message);
+    } catch (error: unknown) {
+      handleApiError(error,"Failed to retrieve users")
     }
   },
 
   getUser: async (id: string): Promise<User> => {
     try {
       const response = await api.get(API_ROUTES.USERS.BY_ID(id));
-      const resJson = response.data;
-      const u = resJson.data;
+      const resJson = response.data as UsersApiResponse;
+      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
 
-      return {
-        id: u.id || u._id,
-        name: u.name || "",
-        email: u.email,
-        role: u.role,
-        phone: u.phone,
-        isBlocked: u.isBlocked,
-        isVerified: u.isVerified,
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt,
-        authProvider: u.authProvider,
-        lastLoginAt: u.lastLoginAt,
-        onboardingStep: u.onboardingStep,
-        onboardingDetails: u.onboardingDetails
-      };
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to retrieve user details";
-      throw new Error(message);
+      return toUser(u);
+    } catch (error: unknown) {
+      handleApiError(error,"Failed to retrieve user details")
     }
   },
 
   updateUser: async (id: string, updates: Partial<User>): Promise<User> => {
     try {
       const response = await api.patch(API_ROUTES.USERS.BY_ID(id), updates, { skipToast: true });
-      const resJson = response.data;
-      const u = resJson.data;
+      const resJson = response.data as UsersApiResponse;
+      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
 
-      return {
-        id: u.id || u._id,
-        name: u.name || "",
-        email: u.email,
-        role: u.role,
-        phone: u.phone,
-        isBlocked: u.isBlocked,
-        isVerified: u.isVerified,
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt,
-        authProvider: u.authProvider,
-        lastLoginAt: u.lastLoginAt,
-        onboardingStep: u.onboardingStep,
-        onboardingDetails: u.onboardingDetails
-      };
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to update user";
-      throw new Error(message);
+      return toUser(u);
+    } catch (error: unknown) {
+      handleApiError(error,"Failed to update user")
     }
   },
 };

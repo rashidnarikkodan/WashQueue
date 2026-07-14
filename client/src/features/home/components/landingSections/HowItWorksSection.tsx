@@ -1,6 +1,6 @@
 export default function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-24 border-b border-border bg-slate-950/5">
+    <section id="how-it-works" className="py-24 border-b border-border bg-background/5">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Section Headers */}
@@ -27,7 +27,7 @@ export default function HowItWorksSection() {
               </div>
               <h3 className="font-bold text-foreground text-base">Search</h3>
               <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
-                Locate nearest premium owners via Geo-Search.
+                Locate nearest premium stations via Geo-Search.
               </p>
             </div>
 

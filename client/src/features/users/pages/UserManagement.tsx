@@ -5,9 +5,11 @@ import Loading from "@/shared/components/ui/Loading";
 import UserStats from "../components/ui/UserStats";
 import UserTable from "../components/layout/UserTable";
 import FilterCard from "../components/layout/FilterCard";
-import { usersApi, type User } from "../service/users.api";
+import { usersApi } from "../service/users.api";
 import { FILTER_STATUS } from "@/shared/constants/status.const";
-import type { PaginationMeta } from "@/shared/components/ui/Pagination";
+import type { PaginationMeta } from "@/shared/types";
+import { getErrorMessage } from "@/shared/utils/error";
+import type { User } from "../types";
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -67,8 +69,8 @@ const UserManagement = () => {
       if (response.stats) {
         setStats(response.stats);
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to retrieve users");
+    } catch (err: unknown) {
+      setErrorMsg(getErrorMessage(err, "Failed to retrieve users"));
     } finally {
       setIsLoading(false);
     }
@@ -116,8 +118,8 @@ const UserManagement = () => {
       const newBlockedState = !targetUser.isBlocked;
       await usersApi.updateUser(id, { isBlocked: newBlockedState });
       fetchUsers();
-    } catch (err: any) {
-      alert(err.message || "Failed to update block status");
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, "Failed to update block status"));
     }
   };
 

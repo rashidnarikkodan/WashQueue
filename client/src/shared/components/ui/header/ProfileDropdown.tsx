@@ -14,10 +14,10 @@ import {
   UserPlus
 } from "lucide-react";
 import { useAuthStore } from "../../../../features/auth/store/authStore";
-import type { RoleType } from "@/shared/constants/role.const";
+
 
 interface ProfileDropdownProps {
-  currentRole: RoleType;
+  currentRole: "admin" | "manager" | "owner" | "customer";
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
@@ -25,7 +25,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, logout, setActiveViewMode } = useAuthStore();
-  if (!user) return null;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,6 +35,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (!user) return null;
 
   const getRoleLabel = () => {
     switch (currentRole) {

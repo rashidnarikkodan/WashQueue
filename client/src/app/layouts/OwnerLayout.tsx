@@ -58,7 +58,6 @@ const OwnerLayout = () => {
     </div>
     );
   }
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header role={ROLE.OWNER} />

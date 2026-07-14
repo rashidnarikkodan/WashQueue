@@ -1,14 +1,10 @@
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-
-import { ILogoutUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { ILogoutUseCase } from "../interfaces"
 
 export class LogoutUseCase implements ILogoutUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
 
   async execute(userId: string): Promise<void> {
-    await this.userRepository.update(userId, {
-      refreshToken: "",
-    })
+    await this.refreshTokenRepository.clear(userId)
   }
 }
-

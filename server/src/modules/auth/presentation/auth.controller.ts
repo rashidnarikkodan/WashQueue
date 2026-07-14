@@ -11,12 +11,12 @@ import {
   IForgotPasswordUseCase,
   IResetPasswordUseCase
 } from "../application/interfaces/auth-usecases.interfaces"
-import success from "@/shared/utils/success"
-import { AuthenticatedRequest } from "@/shared/middleware/authenticate"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { setAuthCookies, clearAuthCookies } from "@/shared/utils/cookies"
-import { SUCCESS_MESSAGES } from "@/shared/constants/app.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import success from "@/common/utils/success"
+import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { setAuthCookies, clearAuthCookies } from "@/common/utils/cookies"
+import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 export class AuthController {
   constructor(
@@ -104,7 +104,7 @@ export class AuthController {
       return
     }
     const result = await this.getMeUseCase.execute(userId)
-    success(res, result.user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
+    success(res, result, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
   }
 
   logout = async (req: AuthenticatedRequest, res: Response) => {

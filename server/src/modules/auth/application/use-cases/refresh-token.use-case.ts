@@ -1,16 +1,20 @@
-import { AppError } from "@/shared/errors/app-error"
-import { UnauthorizedError } from "@/shared/errors/unauthorized-error"
+import { AppError } from "@/common/errors/app-error"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../../infrastructure/services/token.service"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { RefreshToken } from "../../domain/entities/refresh-token.entity"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces"
 
-import { IRefreshTokenUseCase } from "../interfaces/auth-usecases.interfaces"
 
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly tokenService: TokenService
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
+    private readonly tokenService: ITokenService,
+    private readonly hashService: IHashService
   ) { }
 
   async execute(refreshToken: string) {
@@ -30,28 +34,35 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
       }
 
-      if (user.refreshToken !== refreshToken) {
+      // Verify incoming refresh token against hashed refresh token stored in DB using repository and entity
+      const activeToken = await this.refreshTokenRepository.findByUserId(user.id!)
+      if (!activeToken) {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
 
-      const tokenPayload = {
-        userId: user.id,
-        role: user.role,
-        email: user.email,
+      const isTokenValid = await activeToken.verify(refreshToken, this.hashService)
+      if (!isTokenValid) {
+        throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
+
+      // Map payload and generate tokens
+      const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
       const newAccessToken = this.tokenService.generateAccessToken(tokenPayload)
       const newRefreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-      await this.userRepository.update(user.id, {
-        refreshToken: newRefreshToken,
-      })
+      // Hash the new refresh token for safe storage
+      const hashedNewRefreshToken = await this.hashService.hash(newRefreshToken)
+
+      // Save hashed refresh token
+      await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedNewRefreshToken))
 
       return {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof AppError) throw error
       throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
     }
   }

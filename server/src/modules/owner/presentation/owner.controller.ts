@@ -1,20 +1,30 @@
 import { Response } from "express"
-import { AuthenticatedRequest } from "@/shared/middleware/authenticate"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import success from "@/shared/utils/success"
-import { setAuthCookies } from "@/shared/utils/cookies"
+import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import success from "@/common/utils/success"
+import { setAuthCookies } from "@/common/utils/cookies"
+import { NotFoundError } from "@/common/errors/not-found-error"
+import { AppError } from "@/common/errors/app-error"
 import {
   ISaveOnboardingStepUseCase,
   IGetOnboardingStatusUseCase,
   ISubmitOnboardingUseCase,
+  ICreateOwnerUseCase,
+  IGetOwnerUseCase,
+  IUpdateOwnerUseCase,
 } from "../application/interfaces/owner-usecases.interfaces"
+import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
 
 export class OwnerController {
   constructor(
     private readonly saveOnboardingStepUseCase: ISaveOnboardingStepUseCase,
     private readonly getOnboardingStatusUseCase: IGetOnboardingStatusUseCase,
-    private readonly submitOnboardingUseCase: ISubmitOnboardingUseCase
+    private readonly submitOnboardingUseCase: ISubmitOnboardingUseCase,
+    private readonly createOwnerUseCase: ICreateOwnerUseCase,
+    private readonly getOwnerUseCase: IGetOwnerUseCase,
+    private readonly updateOwnerUseCase: IUpdateOwnerUseCase
   ) {}
 
   /** GET /api/owner/onboarding/status */
@@ -126,5 +136,50 @@ export class OwnerController {
     // omit tokens from response body for security/cleanliness
     const { tokens, ...rest } = result
     success(res, rest, HTTP_STATUS.OK, result.message)
+  }
+
+  createOwner = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const validatedBody = createOwnerSchema.parse(req.body)
+    const data = await this.createOwnerUseCase.execute({
+      ...validatedBody,
+      userId,
+    })
+
+    success(res, data, HTTP_STATUS.CREATED, SUCCESS_MESSAGES.OWNER_CREATED_SUCCESS)
+  }
+
+  getOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const data = await this.getOwnerUseCase.execute(userId)
+    if (!data) {
+      throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)
+    }
+
+    success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_RETRIEVED_SUCCESS)
+  }
+
+  updateOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const validatedBody = updateOwnerSchema.parse(req.body)
+    const data = await this.updateOwnerUseCase.execute(userId, validatedBody)
+
+    if (!data) {
+      throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)
+    }
+
+    success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS)
   }
 }

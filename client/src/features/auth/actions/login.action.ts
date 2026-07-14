@@ -1,15 +1,8 @@
+import { getErrorMessage } from "@/shared/utils/error"
 import { authApi } from "../services/auth.api"
+import type { LoginState } from "../types"
 
-export interface LoginState {
-  success: boolean
-  message?: string
-  errors?: {
-    email?: string[]
-    password?: string[]
-  }
-  user?: any
-  email?: string
-}
+export type { LoginState } from "../types"
 
 export async function loginAction(
   _prevState: LoginState,
@@ -51,11 +44,10 @@ export async function loginAction(
       message: "Login successful",
       user,
     }
-  } catch (error: any) {
-    console.log(error)
+  } catch (error: unknown) {
     return {
       success: false,
-      message: error.message || "Failed to login",
+      message: getErrorMessage(error,'Failed to Login'),
       email,
     }
   }

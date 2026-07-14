@@ -1,11 +1,10 @@
-import { AppError } from "@/shared/errors/app-error"
+import { AppError } from "@/common/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ROLE, RoleType } from "@/shared/constants/role.constants"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { TokenService } from "../../infrastructure/services/token.service"
-
-import { ISetupAccountUseCase } from "../interfaces/auth-usecases.interfaces"
+import { ROLE, RoleType } from "@/common/constants/role.constants"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { AuthOutput } from "../dto"
+import { ISetupAccountUseCase, ITokenService } from "../interfaces"
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { Owner } from "@/modules/owner/domain/entities/Owner"
@@ -14,11 +13,10 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService
   ) {}
 
-  async execute(userId: string, role: RoleType) {
-
+  async execute(userId: string, role: RoleType): Promise<AuthOutput> {
     if (role !== ROLE.CUSTOMER && role !== ROLE.OWNER) {
       throw new AppError(ERROR_MESSAGES.INVALID_ROLE, HTTP_STATUS.BAD_REQUEST)
     }
@@ -30,7 +28,7 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
 
     // Generate JWT access & refresh tokens with the new role
     const tokenPayload = {
-      userId: user.id,
+      userId: user.id!,
       role,
       email: user.email,
     }
@@ -40,9 +38,7 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
 
     if (role === ROLE.OWNER) {
       const owner = new Owner({
-        id: user.id,
-        email: user.email,
-        role: "owner",
+        userId: user.id!,
         onboardingStep: 1,
         isVerified: false,
       })
@@ -53,17 +49,16 @@ export class SetupAccountUseCase implements ISetupAccountUseCase {
       role,
       refreshToken,
     })
-
     if (!updatedUser) {
       throw new AppError(ERROR_MESSAGES.ROLE_UPDATE_FAILED, HTTP_STATUS.INTERNAL_SERVER_ERROR)
     }
 
     return {
       user: {
-        id: updatedUser.id,
+        id: updatedUser.id!,
         name: updatedUser.name,
         email: updatedUser.email,
-        role, // Return client-compatible role representation
+        role: updatedUser.role,
         isVerified: false,
         onboardingStep: role === ROLE.OWNER ? 1 : undefined,
       },

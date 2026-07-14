@@ -2,20 +2,12 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { authApi } from "../services/auth.api";
 import type { RoleType } from "../../../shared/constants/role.const";
+import { getErrorMessage } from "../../../shared/utils/error";
+import type { AuthUser } from "../types";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: RoleType;
-  isNewUser?: boolean;
-  walletBalance?: number;
-  isVerified?: boolean;
-  onboardingStep?: number;
-}
 
 interface AuthStore {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   tempUser: { name: string; email: string } | null;
@@ -32,14 +24,14 @@ interface AuthStore {
   refreshUser: () => Promise<void>;
 }
 
-const getInitialState = () => {
+const getInitialState = (): { user: AuthUser | null; isAuthenticated: boolean; activeViewMode: "owner" | "customer" } => {
   try {
     const storedUser = localStorage.getItem("wq_user");
     const storedAuth = localStorage.getItem("wq_auth");
     const storedViewMode = localStorage.getItem("wq_view_mode") || "owner";
     if (storedUser && storedAuth === "true") {
       return {
-        user: JSON.parse(storedUser) as User,
+        user: JSON.parse(storedUser),
         isAuthenticated: true,
         activeViewMode: storedViewMode as "owner" | "customer",
       };
@@ -50,7 +42,7 @@ const getInitialState = () => {
   return {
     user: null,
     isAuthenticated: false,
-    activeViewMode: "customer" as const,
+    activeViewMode: "customer",
   };
 };
 
@@ -59,7 +51,7 @@ const initialState = getInitialState();
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: initialState.user,
   isAuthenticated: initialState.isAuthenticated,
-  isLoading: false,
+  isLoading: true,
   tempUser: null,
   activeViewMode: initialState.activeViewMode,
 
@@ -83,10 +75,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${user.name}!`);
       return true;
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Login failed"));
       set({ isLoading: false });
-      return false
+      return false;
     }
   },
 
@@ -106,10 +98,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_auth", "true");
       toast.success(`Welcome back, ${loggedInUser.name}!`);
       return true;
-    } catch (e: any) {
-      toast.error(e.message)
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Google sign-in failed"));
       set({ isLoading: false });
-      return false
+      return false;
     }
   },
 
@@ -125,8 +117,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_temp_email", email);
       toast.success("Verification OTP code sent successfully!");
       return true;
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Registration failed"));
       set({ isLoading: false });
       return false;
     }
@@ -158,8 +150,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
       set({ isLoading: false });
       return false;
-    } catch (e: any) {
-      toast.error(e.message || "OTP verification failed");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "OTP verification failed"));
       set({ isLoading: false });
       return false;
     }
@@ -179,28 +171,32 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       localStorage.setItem("wq_user", JSON.stringify(finalUser));
       localStorage.setItem("wq_auth", "true");
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Account setup failed");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Account setup failed"));
       set({ isLoading: false });
       return false;
     }
   },
 
-  logout: () => {
-    authApi.logout();
-
-    set({
-      user: null,
-      isAuthenticated: false,
-      activeViewMode: "customer",
-    });
-    localStorage.removeItem("wq_user");
-    localStorage.removeItem("wq_auth");
-    localStorage.removeItem("wq_token");
-    localStorage.removeItem("wq_temp_email");
-    localStorage.removeItem("wq_reset_email");
-    localStorage.removeItem("wq_view_mode");
-    toast.info("Logged out successfully.");
+  logout: async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore network errors — always clear local state
+    } finally {
+      set({
+        user: null,
+        isAuthenticated: false,
+        activeViewMode: "customer",
+      });
+      localStorage.removeItem("wq_user");
+      localStorage.removeItem("wq_auth");
+      localStorage.removeItem("wq_token");
+      localStorage.removeItem("wq_temp_email");
+      localStorage.removeItem("wq_reset_email");
+      localStorage.removeItem("wq_view_mode");
+      toast.info("Logged out successfully.");
+    }
   },
 
   forgotPassword: async (email) => {
@@ -210,8 +206,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ isLoading: false });
       localStorage.setItem("wq_reset_email", email);
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Failed to send verification code");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Failed to send verification code"));
       set({ isLoading: false });
       return false;
     }
@@ -224,8 +220,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ isLoading: false });
       localStorage.removeItem("wq_reset_email");
       return true;
-    } catch (e: any) {
-      toast.error(e.message || "Failed to reset password");
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Failed to reset password"));
       set({ isLoading: false });
       return false;
     }

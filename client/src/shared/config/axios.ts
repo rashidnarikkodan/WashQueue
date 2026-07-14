@@ -1,7 +1,7 @@
 import axios from "axios"
 import { toast } from "sonner"
 import { useAuthStore } from "../../features/auth/store/authStore"
-import { API_ROUTES } from "../constants/route.const"
+import { API_ROUTES } from "../constants/api.const";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
@@ -23,9 +23,9 @@ export const api = axios.create({
 })
 
 let isRefreshing = false;
-let failedQueue: any[] = [];
+let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }> = [];
 
-const processQueue = (error: any) => {
+const processQueue = (error: unknown) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -51,9 +51,17 @@ api.interceptors.response.use(
 // Interceptor 2: Silent Token Refresh (Authentication Recovery)
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    (error: unknown) => {
+        if (!axios.isAxiosError(error)) {
+            return Promise.reject(error);
+        }
+
         const status = error.response?.status;
         const originalRequest = error.config;
+
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
 
         // Handle Session Expiry (Try silent refresh on 401, unless it's the refresh token or login request itself)
         if (status === 401 && !originalRequest._retry) {
@@ -121,9 +129,13 @@ api.interceptors.response.use(
 // Interceptor 3: Error Toast Handling
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    (error: unknown) => {
+        if (!axios.isAxiosError(error)) {
+            return Promise.reject(error);
+        }
+
         const status = error.response?.status;
-        const message = error.response?.data?.message || "Something went wrong";
+        const message = error.response?.data?.message || "Server Error";
         const skipToast = error.config?.skipToast;
 
         // Only display error toast if it wasn't a standard 401 that is being retried

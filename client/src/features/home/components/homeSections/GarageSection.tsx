@@ -8,8 +8,8 @@ export default function GarageSection() {
     <section className="mb-12 space-y-6 text-left">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-black text-white">Digital Garage</h2>
-          <p className="text-sm text-slate-400 font-medium">Manage your registered premium vehicles</p>
+          <h2 className="text-xl md:text-2xl font-black text-foreground">Digital Garage</h2>
+          <p className="text-sm text-muted-foreground font-medium">Manage your registered premium vehicles</p>
         </div>
       </div>
 
@@ -18,7 +18,7 @@ export default function GarageSection() {
           const isOverdue = vehicle.status === "overdue";
           
           return (
-            <div key={vehicle.id} className="bg-card border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-slate-700/80 transition-all duration-300">
+            <div key={vehicle.id} className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-border/80 transition-all duration-300">
               {/* Image and status badge */}
               <div className="h-56 relative overflow-hidden">
                 <img 
@@ -50,12 +50,12 @@ export default function GarageSection() {
                   {/* Brand & Plate */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-extrabold text-white">{vehicle.brand} {vehicle.model}</h3>
-                      <p className="text-xs text-slate-500 font-mono mt-0.5 tracking-wider">{vehicle.plate}</p>
+                      <h3 className="text-xl font-extrabold text-foreground">{vehicle.brand} {vehicle.model}</h3>
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5 tracking-wider">{vehicle.plate}</p>
                     </div>
                     <div className="flex gap-2">
                       {vehicle.typeBadges.map((badge, bIdx) => (
-                        <span key={bIdx} className="bg-slate-800/80 text-slate-300 text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
+                        <span key={bIdx} className="bg-muted/80 text-muted-foreground text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
                           {badge}
                         </span>
                       ))}
@@ -63,31 +63,31 @@ export default function GarageSection() {
                   </div>
 
                   {/* Technical Specs Details Grid */}
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-slate-800/60 pt-4">
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-border pt-4">
                     <div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Model Year</span>
-                      <span className="text-sm font-bold text-slate-200">{vehicle.modelYear}</span>
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Model Year</span>
+                      <span className="text-sm font-bold text-foreground">{vehicle.modelYear}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Last Wash</span>
-                      <span className="text-sm font-bold text-slate-200">{vehicle.lastWash}</span>
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Last Wash</span>
+                      <span className="text-sm font-bold text-foreground">{vehicle.lastWash}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Next Wash</span>
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Next Wash</span>
                       <span className={`text-sm font-bold ${isOverdue ? "text-rose-400" : "text-emerald-400"}`}>
                         {vehicle.nextWash}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Usage</span>
-                      <span className="text-sm font-bold text-slate-200">{vehicle.usage}</span>
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Usage</span>
+                      <span className="text-sm font-bold text-foreground">{vehicle.usage}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Quick Buttons */}
                 <div className="flex gap-3 pt-6">
-                  <button className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-extrabold text-xs tracking-wider transition-all cursor-pointer">
+                  <button className="flex-1 py-3 px-4 rounded-xl bg-muted hover:bg-muted text-muted-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer">
                     View Details
                   </button>
                   <button className="flex-1 py-3 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md shadow-primary/10">
@@ -100,17 +100,17 @@ export default function GarageSection() {
         })}
 
         {/* Quick Actions Add Card */}
-        <div className="border-2 border-dashed border-slate-800/80 hover:border-primary/40 rounded-3xl p-6 flex flex-col justify-center items-center text-center gap-4 transition-all duration-300 min-h-[480px]">
-          <div className="w-16 h-16 rounded-full bg-slate-800/40 flex items-center justify-center border border-slate-800 text-slate-400">
+        <div className="border-2 border-dashed border-border hover:border-primary/40 rounded-3xl p-6 flex flex-col justify-center items-center text-center gap-4 transition-all duration-300 min-h-[480px]">
+          <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center border border-border text-muted-foreground">
             <Plus size={24} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">Add New Vehicle</h3>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed font-medium">
+            <h3 className="text-base font-bold text-foreground">Add New Vehicle</h3>
+            <p className="text-xs text-muted-foreground max-w-xs leading-relaxed font-medium">
               Register new premium cars or SUVs into your digital garage for customized wait alerts and detailing quotes.
             </p>
           </div>
-          <button className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-300 font-extrabold text-xs tracking-wider transition-all cursor-pointer">
+          <button className="px-5 py-2.5 rounded-xl bg-muted hover:bg-muted text-muted-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer">
             Register Vehicle
           </button>
         </div>

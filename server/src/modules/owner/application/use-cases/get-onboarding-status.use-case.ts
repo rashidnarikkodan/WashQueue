@@ -1,6 +1,6 @@
-import { AppError } from "@/shared/errors/app-error"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import {
   IGetOnboardingStatusUseCase,
   IOwnerOnboardingDetails,
@@ -47,7 +47,7 @@ export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
     }
 
     return {
-      step: owner.onboardingStep,
+      step: owner.onboardingStep ?? 1,
       details,
       isSubmitted: owner.onboardingStep === 4,
     }

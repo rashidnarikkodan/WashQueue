@@ -1,48 +1,41 @@
-import argon2 from "argon2"
-import { AppError } from "@/shared/errors/app-error"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { TokenService } from "../../infrastructure/services/token.service"
-import { LoginInput } from "../schema/login.schema"
-import { HTTP_STATUS } from "@/shared/constants/http.constants"
-import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-import { ILoginUseCase } from "../interfaces/auth-usecases.interfaces"
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
-export interface LoginResponse {
-  user: {
-    id: string
-    name?: string
-    email: string
-    role: string
-    isVerified: boolean
-  }
-  tokens: {
-    accessToken: string
-    refreshToken: string
-  }
-}
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
+import { RefreshToken } from "../../domain/entities/refresh-token.entity"
+import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+
+import { IHashService, ILoginUseCase, ITokenService } from "../interfaces"
+import { AuthOutput, LoginInput } from "../dto"
+
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly tokenService: TokenService
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
+    private readonly tokenService: ITokenService,
+    private readonly hashService: IHashService
   ) { }
 
-  async execute(data: LoginInput): Promise<LoginResponse> {
+  async execute(data: LoginInput): Promise<AuthOutput> {
     const user = await this.userRepository.findByEmail(data.email)
-    if (!user) {
-      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
-    }
+    
+    // Dummy hash check to prevent user enumeration
+    const DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$dummy$dummy"
 
-    if (!user.password) {
-      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
-    }
-
-    const isPasswordValid = await argon2.verify(user.password, data.password)
-    if (!isPasswordValid) {
+    // If no user, or it's a social account that shouldn't use local password login
+    if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL) {
+      // Execute dummy verify to prevent timing attacks
+      await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (user.isBlocked) {
+      // Don't run password check here to save CPU (preventing DoS)
+      // Though it might reveal blocked status, it's accepted for mitigating CPU DoS
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
@@ -50,25 +43,34 @@ export class LoginUseCase implements ILoginUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
     }
 
-    // Generate JWT access & refresh tokens
-    const tokenPayload = {
-      userId: user.id,
-      role: user.role,
-      email: user.email,
+    if (!user.password) {
+      // Unlikely since we check AUTH_PROVIDER.LOCAL, but a safety check
+      await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
+
+    const isPasswordValid = await this.hashService.verify(user.password, data.password)
+    
+    if (!isPasswordValid) {
+      throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Generate JWT access & refresh tokens
+    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
+    // Hash refresh token for secure persistence
+    const hashedRefreshToken = await this.hashService.hash(refreshToken)
+
     // Save refresh token and update last login timestamp
-    await this.userRepository.update(user.id, {
-      refreshToken,
-      lastLoginAt: new Date(),
-    })
+    await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
+    await this.userRepository.update(user.id!, { lastLoginAt: new Date() })
 
     return {
       user: {
-        id: user.id,
+        id: user.id!,
         name: user.name,
         email: user.email,
         role: user.role,

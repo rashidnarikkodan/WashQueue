@@ -9,22 +9,15 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
-        {/* Welcome Section */}
         <WelcomeSection />
 
-        {/* Core Layout: Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
-          {/* Left Column: Active Booking Panel (8 Cols) */}
           <ActiveBookingSection />
-          
-          {/* Right Column: Queue Intelligence & Weather Panel (4 Cols) */}
           <SidebarWidgetsSection />
         </div>
 
-        {/* Digital Garage Section */}
         <GarageSection />
 
-        {/* Wallet & Loyalty Rewards Support Grid */}
         <WalletLoyaltySection />
 
       </div>
