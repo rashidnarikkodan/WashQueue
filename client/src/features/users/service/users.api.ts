@@ -15,6 +15,8 @@ export interface User {
   updatedAt: string;
   authProvider?: string;
   lastLoginAt?: string;
+  onboardingStep?: number;
+  onboardingDetails?: Record<string, any>;
 }
 
 export interface GetUsersFilters {
@@ -70,7 +72,9 @@ export const usersApi = {
           createdAt: u.createdAt,
           updatedAt: u.updatedAt,
           authProvider: u.authProvider,
-          lastLoginAt: u.lastLoginAt
+          lastLoginAt: u.lastLoginAt,
+          onboardingStep: u.onboardingStep,
+          onboardingDetails: u.onboardingDetails
         })),
         pagination: resJson.data.pagination,
         stats: resJson.data.stats
@@ -98,7 +102,9 @@ export const usersApi = {
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         authProvider: u.authProvider,
-        lastLoginAt: u.lastLoginAt
+        lastLoginAt: u.lastLoginAt,
+        onboardingStep: u.onboardingStep,
+        onboardingDetails: u.onboardingDetails
       };
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to retrieve user details";
@@ -123,7 +129,9 @@ export const usersApi = {
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         authProvider: u.authProvider,
-        lastLoginAt: u.lastLoginAt
+        lastLoginAt: u.lastLoginAt,
+        onboardingStep: u.onboardingStep,
+        onboardingDetails: u.onboardingDetails
       };
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to update user";

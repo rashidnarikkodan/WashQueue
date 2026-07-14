@@ -1,22 +1,61 @@
 import { api } from "../../../shared/config/axios";
 
+export interface OnboardingDetails {
+  fullName?: string;
+  phone?: string;
+  whatsapp?: string;
+  businessName?: string;
+  businessType?: string;
+  gstNumber?: string;
+  idProofType?: string;
+  idProofUrl?: string;
+  businessLicenseUrl?: string;
+  gstCertificateUrl?: string;
+  accountHolderName?: string;
+  bankName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  accountType?: string;
+  bankProofUrl?: string;
+  hasStation?: boolean;
+  hasMobileService?: boolean;
+  mobileActive?: boolean;
+}
+
+export interface OnboardingStatus {
+  step: number;
+  details: OnboardingDetails;
+  isSubmitted: boolean;
+}
+
 export const ownerApi = {
+  /** Fetch the owner's current onboarding progress */
+  getOnboardingStatus: async (): Promise<OnboardingStatus> => {
+    const response = await api.get("/owner/onboarding/status", {
+      skipToast: true,
+    });
+    return response.data.data;
+  },
+
   /**
-   * Submit onboarding details to the server (multipart form data)
+   * Save progress for a specific step (multipart to handle file uploads)
    */
-  submitOnboarding: async (formData: FormData): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post("/owner/onboarding", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        skipToast: true,
-      });
-      return response.data;
-    } catch (error: any) {
-      console.error("Owner Onboarding API failed:", error);
-      const message = error.response?.data?.message || error.message || "Failed to submit onboarding details";
-      throw new Error(message);
-    }
+  saveOnboardingStep: async (step: number, formData: FormData): Promise<OnboardingStatus> => {
+    formData.append("step", String(step));
+    const response = await api.post("/owner/onboarding/step", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      skipToast: true,
+    });
+    return response.data.data;
+  },
+
+  /** Finalize and submit the onboarding application */
+  submitOnboarding: async (): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post(
+      "/owner/onboarding/submit",
+      {},
+      { skipToast: true }
+    );
+    return response.data.data;
   },
 };

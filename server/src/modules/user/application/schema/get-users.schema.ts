@@ -17,6 +17,11 @@ export const usersQuerySchema = z.object({
     .transform((value) => value === "true")
     .optional(),
 
+  isVerified: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
+
   sortBy: z
     .enum(["createdAt", "name", "email"])
     .default("createdAt"),

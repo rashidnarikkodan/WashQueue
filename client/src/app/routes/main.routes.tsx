@@ -7,7 +7,7 @@ import { ROLE } from "../../shared/constants/role.const";
 import { APP_ROUTES } from "../../shared/constants/route.const";
 
 const RootPathResolver = () => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, activeViewMode } = useAuthStore();
 
   if (!isAuthenticated || !user) {
     return <Landing />;
@@ -19,6 +19,9 @@ const RootPathResolver = () => {
     case ROLE.MANAGER:
       return <Navigate to={APP_ROUTES.MANAGER.DASHBOARD} replace />;
     case ROLE.OWNER:
+      if (activeViewMode === "customer") {
+        return <Home />;
+      }
       return <Navigate to={APP_ROUTES.OWNER.DASHBOARD} replace />;
     default:
       return <Home />;

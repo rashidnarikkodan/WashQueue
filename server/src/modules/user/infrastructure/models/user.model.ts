@@ -14,7 +14,6 @@ export interface IUser extends Document {
     avatar?: string
     authProvider: AuthProvider
     isBlocked: boolean
-    isVerified: boolean
     createdAt: Date
     updatedAt: Date
 }
@@ -45,7 +44,6 @@ const userSchema = new Schema<IUser>({
         default: AUTH_PROVIDER.LOCAL,
     },
     isBlocked: { type: Boolean, default: false },
-    isVerified: { type: Boolean, default: false }
 }, {
     timestamps: true,
 })

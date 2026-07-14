@@ -16,7 +16,9 @@ export const authApi = {
         id: resJson.data.id || resJson.data._id,
         name: resJson.data.name,
         email: resJson.data.email,
-        role: resJson.data.role
+        role: resJson.data.role,
+        isVerified: resJson.data.isVerified,
+        onboardingStep: resJson.data.onboardingStep,
       }
     } catch (error: any) {
       console.log(error)
@@ -38,7 +40,9 @@ export const authApi = {
         name: resJson.data.name,
         email: resJson.data.email,
         role: resJson.data.role,
-        isNewUser: resJson.data.isNewUser
+        isNewUser: resJson.data.isNewUser,
+        isVerified: resJson.data.isVerified,
+        onboardingStep: resJson.data.onboardingStep,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Google Sign-In failed"
@@ -80,7 +84,9 @@ export const authApi = {
         id: resJson.data.id || resJson.data._id,
         name: resJson.data.name,
         email: resJson.data.email,
-        role: resJson.data.role
+        role: resJson.data.role,
+        isVerified: resJson.data.isVerified,
+        onboardingStep: resJson.data.onboardingStep,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "OTP verification failed"
@@ -101,7 +107,9 @@ export const authApi = {
         id: userData.id || userData._id,
         name: userData.name,
         email: userData.email,
-        role: userData.role
+        role: userData.role,
+        isVerified: userData.isVerified,
+        onboardingStep: userData.onboardingStep,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Account setup failed"
@@ -118,7 +126,9 @@ export const authApi = {
         id: resJson.data.id || resJson.data._id,
         name: resJson.data.name,
         email: resJson.data.email,
-        role: resJson.data.role
+        role: resJson.data.role,
+        isVerified: resJson.data.isVerified,
+        onboardingStep: resJson.data.onboardingStep,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Failed to fetch user session"

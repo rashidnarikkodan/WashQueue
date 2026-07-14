@@ -9,14 +9,15 @@ import { ROLE } from "@/shared/constants/role.constants"
 
 export class MongooseUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
-    const userDoc = await UserModel.findById(id).exec()
-    return userDoc ? UserMapper.toDomain(userDoc) : null
+    const userDoc = await UserModel.findById(id).lean().exec()
+    if (!userDoc) return null
+    return UserMapper.toDomain(userDoc as any)
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    // Normalise email search (lowercase)
-    const userDoc = await UserModel.findOne({ email: email.toLowerCase() }).exec()
-    return userDoc ? UserMapper.toDomain(userDoc) : null
+    const userDoc = await UserModel.findOne({ email: email.toLowerCase() }).lean().exec()
+    if (!userDoc) return null
+    return UserMapper.toDomain(userDoc as any)
   }
 
   async create(user: User): Promise<User> {
@@ -28,8 +29,9 @@ export class MongooseUserRepository implements IUserRepository {
 
   async update(id: string, user: Partial<User>): Promise<User | null> {
     const persistenceData = UserMapper.toPersistence(user)
-    const updatedDoc = await UserModel.findByIdAndUpdate(id, persistenceData, { new: true }).exec()
-    return updatedDoc ? UserMapper.toDomain(updatedDoc) : null
+    const updatedDoc = await UserModel.findByIdAndUpdate(id, persistenceData, { new: true }).lean().exec()
+    if (!updatedDoc) return null
+    return UserMapper.toDomain(updatedDoc as any)
   }
 
   async getAllUsers(query: GetUsersQuery): Promise<{
@@ -48,6 +50,7 @@ export class MongooseUserRepository implements IUserRepository {
       search,
       role,
       isBlocked,
+      isVerified,
       sortBy,
       sortOrder,
     } = query
@@ -70,6 +73,14 @@ export class MongooseUserRepository implements IUserRepository {
     // blocked filter
     if (typeof isBlocked === "boolean") {
       filter.isBlocked = isBlocked
+    }
+
+    // verified filter (query provider_profiles collection and query User matching userIds)
+    if (typeof isVerified === "boolean") {
+      const { ProviderProfile } = await import("@/modules/owner/infrastructure/models/owner.model")
+      const ownersList = await ProviderProfile.find({ isVerified }).select("userId").lean().exec()
+      const ownerUserIds = ownersList.map((o) => o.userId)
+      filter._id = { $in: ownerUserIds }
     }
 
     // sorting
@@ -102,7 +113,7 @@ export class MongooseUserRepository implements IUserRepository {
         limit,
       })
 
-    const domainUsers = users.map((user) => UserMapper.toDomain(user))
+    const domainUsers = users.map((user) => UserMapper.toDomain(user as any))
 
     return {
       users: domainUsers,

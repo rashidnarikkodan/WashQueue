@@ -2,11 +2,14 @@ import { AppError } from "@/shared/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { HTTP_STATUS } from "@/shared/constants/http.constants"
 import { ERROR_MESSAGES } from "@/shared/constants/error.constants"
-
 import { IGetMeUseCase } from "../interfaces/auth-usecases.interfaces"
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 
 export class GetMeUseCase implements IGetMeUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly ownerRepository: IOwnerRepository,
+  ) {}
 
   async execute(userId: string) {
     const user = await this.userRepository.findById(userId)
@@ -18,6 +21,17 @@ export class GetMeUseCase implements IGetMeUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
+    let isVerified = false
+    let onboardingStep = 1
+
+    if (user.role === "owner") {
+      const owner = await this.ownerRepository.findByUserId(userId)
+      if (owner) {
+        isVerified = owner.isVerified
+        onboardingStep = owner.onboardingStep
+      }
+    }
+
     return {
       user: {
         id: user.id,
@@ -27,7 +41,8 @@ export class GetMeUseCase implements IGetMeUseCase {
         role: user.role,
         avatar: user.avatar,
         walletBalance: user.walletBalance,
-        isVerified: user.isVerified,
+        isVerified,
+        onboardingStep,
       },
     }
   }

@@ -19,4 +19,10 @@ export const API_ROUTES = {
     GET_BY_ID: "/:id",
     UPDATE: "/:id",
   },
+  OWNER: {
+    ROOT: "/api/owner",
+    ONBOARDING_STATUS: "/onboarding/status",
+    ONBOARDING_STEP: "/onboarding/step",
+    ONBOARDING_SUBMIT: "/onboarding/submit",
+  },
 } as const

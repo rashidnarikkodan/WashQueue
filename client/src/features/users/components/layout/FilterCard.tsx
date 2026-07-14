@@ -5,39 +5,43 @@ import { FILTER_STATUS } from "../../../../shared/constants/status.const";
 interface FilterCardProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  roleFilter: string;
-  setRoleFilter: (r: string) => void;
-  statusFilter: string;
-  setStatusFilter: (s: string) => void;
+  roleFilter?: string;
+  setRoleFilter?: (r: string) => void;
+  statusFilter?: string;
+  setStatusFilter?: (s: string) => void;
   activeTab: "all" | "customer" | "owner";
   setActiveTab: (tab: "all" | "customer" | "owner") => void;
-  highCancellation: boolean;
-  setHighCancellation: (val: boolean) => void;
-  fraudFlag: boolean;
-  setFraudFlag: (val: boolean) => void;
+  highCancellation?: boolean;
+  setHighCancellation?: (val: boolean) => void;
+  fraudFlag?: boolean;
+  setFraudFlag?: (val: boolean) => void;
+  isOwnerApproval?: boolean;
 }
 
 const FilterCard = ({
   searchQuery,
   setSearchQuery,
-  roleFilter,
+  roleFilter = "all",
   setRoleFilter,
-  statusFilter,
+  statusFilter = "all",
   setStatusFilter,
   activeTab,
   setActiveTab,
-  highCancellation,
+  highCancellation = false,
   setHighCancellation,
-  fraudFlag,
-  setFraudFlag
+  fraudFlag = false,
+  setFraudFlag,
+  isOwnerApproval = false,
 }: FilterCardProps) => {
 
   const handleTabChange = (tab: "all" | "customer" | "owner") => {
     setActiveTab(tab);
-    if (tab === "all") {
-      setRoleFilter("all");
-    } else {
-      setRoleFilter(tab);
+    if (!isOwnerApproval && setRoleFilter) {
+      if (tab === "all") {
+        setRoleFilter("all");
+      } else {
+        setRoleFilter(tab);
+      }
     }
   };
 
@@ -53,7 +57,7 @@ const FilterCard = ({
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          All Users
+          {isOwnerApproval ? "All Owners" : "All Users"}
         </button>
         <button
           onClick={() => handleTabChange("customer")}
@@ -63,7 +67,7 @@ const FilterCard = ({
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          Customers
+          {isOwnerApproval ? "Pending Verification" : "Customers"}
         </button>
         <button
           onClick={() => handleTabChange("owner")}
@@ -73,22 +77,22 @@ const FilterCard = ({
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          Owners
+          {isOwnerApproval ? "Approved Owners" : "Owners"}
         </button>
       </div>
 
       {/* Grid Filters section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 px-5 pb-5 pt-2 items-end">
         {/* Search Users Input */}
-        <div className="md:col-span-2 space-y-2">
+        <div className={`${isOwnerApproval ? "md:col-span-6" : "md:col-span-2"} space-y-2 w-full text-left`}>
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-            Search Users
+            {isOwnerApproval ? "Search Owners" : "Search Users"}
           </span>
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input
               type="text"
-              placeholder="Name, email, or phone..."
+              placeholder={isOwnerApproval ? "Name or email..." : "Name, email, or phone..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-muted border border-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground/75"
@@ -96,84 +100,88 @@ const FilterCard = ({
           </div>
         </div>
 
-        {/* Role Select Dropdown */}
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-            sort By
-          </span>
-          <select
-            value={roleFilter}
-            onChange={(e) => {
-              const val = e.target.value;
-              setRoleFilter(val);
-              if (val === "customer" || val === "owner") {
-                setActiveTab(val as "customer" | "owner");
-              } else if (val === "all") {
-                setActiveTab("all");
-              }
-            }}
-            className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
-          >
-            <option value="all">All Roles</option>
-            <option value={ROLE.ADMIN}>Admin</option>
-            <option value={ROLE.MANAGER}>Manager</option>
-            <option value={ROLE.OWNER}>Owner</option>
-            <option value={ROLE.CUSTOMER}>Customer</option>
-          </select>
-        </div>
-
-        {/* Status Select Dropdown */}
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-            Status
-          </span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
-          >
-            <option value={FILTER_STATUS.ALL}>Any Status</option>
-            <option value={FILTER_STATUS.ACTIVE}>Active</option>
-            <option value={FILTER_STATUS.BLOCKED}>Blocked</option>
-          </select>
-        </div>
-
-        {/* Toggles switches Container */}
-        <div className="md:col-span-2 flex flex-row items-center gap-5 pb-1 select-none">
-          {/* High Cancellation Toggle Switch */}
-          <div 
-            onClick={() => setHighCancellation(!highCancellation)}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
-              highCancellation ? "bg-primary/25 border border-primary/30" : "bg-muted"
-            }`}>
-              <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                highCancellation ? "translate-x-4 bg-primary" : "bg-muted-foreground"
-              }`} />
+        {!isOwnerApproval && (
+          <>
+            {/* Role Select Dropdown */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                sort By
+              </span>
+              <select
+                value={roleFilter}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (setRoleFilter) setRoleFilter(val);
+                  if (val === "customer" || val === "owner") {
+                    setActiveTab(val as "customer" | "owner");
+                  } else if (val === "all") {
+                    setActiveTab("all");
+                  }
+                }}
+                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+              >
+                <option value="all">All Roles</option>
+                <option value={ROLE.ADMIN}>Admin</option>
+                <option value={ROLE.MANAGER}>Manager</option>
+                <option value={ROLE.OWNER}>Owner</option>
+                <option value={ROLE.CUSTOMER}>Customer</option>
+              </select>
             </div>
-            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-              High Cancellation
-            </span>
-          </div>
 
-          {/* Fraud Flag Toggle Switch */}
-          <div 
-            onClick={() => setFraudFlag(!fraudFlag)}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
-              fraudFlag ? "bg-rose-500/25 border border-rose-500/30" : "bg-muted"
-            }`}>
-              <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
-                fraudFlag ? "translate-x-4 bg-rose-400" : "bg-muted-foreground"
-              }`} />
+            {/* Status Select Dropdown */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                Status
+              </span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter && setStatusFilter(e.target.value)}
+                className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
+              >
+                <option value={FILTER_STATUS.ALL}>Any Status</option>
+                <option value={FILTER_STATUS.ACTIVE}>Active</option>
+                <option value={FILTER_STATUS.BLOCKED}>Blocked</option>
+              </select>
             </div>
-            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-              Fraud Flag
-            </span>
-          </div>
-        </div>
+
+            {/* Toggles switches Container */}
+            <div className="md:col-span-2 flex flex-row items-center gap-5 pb-1 select-none">
+              {/* High Cancellation Toggle Switch */}
+              <div 
+                onClick={() => setHighCancellation && setHighCancellation(!highCancellation)}
+                className="flex items-center gap-3 cursor-pointer group"
+              >
+                <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
+                  highCancellation ? "bg-primary/25 border border-primary/30" : "bg-muted"
+                }`}>
+                  <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
+                    highCancellation ? "translate-x-4 bg-primary" : "bg-muted-foreground"
+                  }`} />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  High Cancellation
+                </span>
+              </div>
+
+              {/* Fraud Flag Toggle Switch */}
+              <div 
+                onClick={() => setFraudFlag && setFraudFlag(!fraudFlag)}
+                className="flex items-center gap-3 cursor-pointer group"
+              >
+                <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-200 flex items-center ${
+                  fraudFlag ? "bg-rose-500/25 border border-rose-500/30" : "bg-muted"
+                }`}>
+                  <div className={`w-4 h-4 rounded-full shadow transition-transform duration-200 ${
+                    fraudFlag ? "translate-x-4 bg-rose-400" : "bg-muted-foreground"
+                  }`} />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  Fraud Flag
+                </span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

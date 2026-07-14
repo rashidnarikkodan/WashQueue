@@ -14,16 +14,17 @@ import {
   UserPlus
 } from "lucide-react";
 import { useAuthStore } from "../../../../features/auth/store/authStore";
+import type { RoleType } from "@/shared/constants/role.const";
 
 interface ProfileDropdownProps {
-  currentRole: "admin" | "manager" | "owner" | "customer";
+  currentRole: RoleType;
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, setActiveViewMode } = useAuthStore();
   if (!user) return null;
 
   useEffect(() => {
@@ -52,6 +53,13 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   };
 
   const getCtaContent = () => {
+    if (user.role === "owner" && currentRole === "customer") {
+      return {
+        title: "Owner Dashboard",
+        desc: "Manage station operations & bays"
+      };
+    }
+
     switch (currentRole) {
       case "admin":
         return {
@@ -175,7 +183,12 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <div
               onClick={() => {
                 setIsOpen(false);
-                navigate(currentRole === "customer" ? "/owner/onboarding" : `/${currentRole}/dashboard`);
+                if (user.role === "owner" && currentRole === "customer") {
+                  setActiveViewMode("owner");
+                  navigate("/owner/dashboard");
+                } else {
+                  navigate(currentRole === "customer" ? "/owner/onboarding" : `/${currentRole}/dashboard`);
+                }
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
             >

@@ -39,7 +39,7 @@ export class SignupUseCase implements ISignupUseCase {
       authProvider: AUTH_PROVIDER.LOCAL,
     })
 
-    const user = await this.userRepository.create(newUser)
+    const user = await this.userRepository.create(newUser as any)
 
     // Generate numeric OTP
     const otp = await this.otpService.generateOtp(user.email)

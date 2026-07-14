@@ -93,7 +93,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         role: ROLE.CUSTOMER,
         isVerified: true,
       })
-      user = await this.userRepository.create(newUser)
+      user = await this.userRepository.create(newUser as any)
       isNewUser = true
     }
 

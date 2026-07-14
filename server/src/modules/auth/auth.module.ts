@@ -18,8 +18,11 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
+import { MongooseOwnerRepository } from "../owner/infrastructure/repositories/mongoose-owner.repository"
+
 // infrastructures
 const userRepository = new MongooseUserRepository()
+const ownerRepository = new MongooseOwnerRepository()
 const mailService = new MailService()
 const otpService = new OtpService()
 const tokenService = new TokenService()
@@ -29,9 +32,9 @@ const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpService, tokenS
 const loginUseCase = new LoginUseCase(userRepository, tokenService)
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
 const logoutUseCase = new LogoutUseCase(userRepository)
-const setupAccountUseCase = new SetupAccountUseCase(userRepository)
+const setupAccountUseCase = new SetupAccountUseCase(userRepository, ownerRepository, tokenService)
 const googleAuthUseCase = new GoogleAuthUseCase(userRepository, tokenService)
-const getMeUseCase = new GetMeUseCase(userRepository)
+const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpService, mailService)
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpService)
 

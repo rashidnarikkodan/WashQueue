@@ -1,19 +1,47 @@
 import { z } from "zod";
 
-export const ownerOnboardingSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  whatsapp: z.string().optional(),
-  businessName: z.string().min(2, "Business name must be at least 2 characters"),
-  businessType: z.enum(["single", "enterprise", "detailer"]),
-  gstNumber: z.string().optional(),
-  idProofType: z.enum(["aadhar", "pan", "passport", "dl"]),
-  
-  // Bank Details
-  accountHolderName: z.string().min(2, "Account holder name must be at least 2 characters"),
-  bankName: z.string().min(1, "Please select a bank"),
-  accountNumber: z.string().min(8, "Account number must be at least 8 digits"),
-  ifscCode: z.string().min(11, "IFSC code must be 11 characters"),
+export const step1Schema = z.object({
+  fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+  whatsapp: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "WhatsApp number must be exactly 10 digits")
+    .optional()
+    .or(z.literal("")),
+  businessName: z.string().trim().min(2, "Business name must be at least 2 characters"),
+  businessType: z.enum(["INDIVIDUAL", "SOLE_PROP", "PARTNERSHIP", "PVT_LTD"], {
+    message: "Please select a business type",
+  }),
+  gstNumber: z.string().trim().optional().or(z.literal("")),
+  idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
+    message: "Please select an ID proof type",
+  }),
+  hasStation: z.boolean().optional(),
+  hasMobileService: z.boolean().optional(),
 });
 
-export type OwnerOnboardingInput = z.infer<typeof ownerOnboardingSchema>;
+export const step2Schema = z.object({
+  accountHolderName: z
+    .string()
+    .trim()
+    .min(2, "Account holder name must be at least 2 characters"),
+  bankName: z.string().trim().min(1, "Please select a bank"),
+  accountNumber: z
+    .string()
+    .trim()
+    .regex(/^\d{8,18}$/, "Account number must be 8–18 digits"),
+  ifscCode: z
+    .string()
+    .trim()
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format (e.g. HDFC0001234)"),
+  accountType: z.enum(["Savings Account", "Current Account"], {
+    message: "Please select account type",
+  }),
+});
+
+export type Step1Input = z.infer<typeof step1Schema>;
+export type Step2Input = z.infer<typeof step2Schema>;

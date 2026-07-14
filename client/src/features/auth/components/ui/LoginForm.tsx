@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import { useGoogleLogin } from "@react-oauth/google"
 import { AlertCircle } from "lucide-react"
 
-import FormInput from "../../../../shared/components/ui/FormInput"
+import FormInput from "../../../../shared/components/form/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { loginAction, type LoginState } from "../../actions/login.action"
@@ -168,7 +168,7 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <Submit text="Login" pendingText="Logging..."/>
+        <Submit text="Login" pendingText="Logging..." />
       </form>
     </div>
   )

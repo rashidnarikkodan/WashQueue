@@ -89,6 +89,7 @@ export class AuthController {
       return
     }
     const result = await this.setupAccountUseCase.execute(userId, role)
+    setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken)
     success(res, result, HTTP_STATUS.OK, SUCCESS_MESSAGES.ACCOUNT_SETUP_SUCCESS)
   }
 

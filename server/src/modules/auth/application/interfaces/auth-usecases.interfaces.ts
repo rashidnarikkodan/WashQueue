@@ -56,6 +56,10 @@ export interface ISetupAccountUseCase {
       role: RoleType
       isVerified: boolean
     }
+    tokens: {
+      accessToken: string
+      refreshToken: string
+    }
   }>
 }
 
@@ -87,6 +91,7 @@ export interface IGetMeUseCase {
       avatar?: string
       walletBalance: number
       isVerified: boolean
+      onboardingStep: number
     }
   }>
 }

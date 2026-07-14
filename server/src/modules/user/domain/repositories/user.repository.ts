@@ -15,7 +15,7 @@ export interface IUserRepository {
   findById(id: string): Promise<User | null>
   findByEmail(email: string): Promise<User | null>
   create(user: User): Promise<User>
-  update(id: string, user: Partial<User>): Promise<User | null>
+  update(id: string, user: Partial<User> & Record<string, any>): Promise<User | null>
   getAllUsers(query:UsersQuery): Promise<{
     users: User[]
     pagination: PaginationMeta

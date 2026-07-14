@@ -1,6 +1,7 @@
 import AdminLayout from "../layouts/AdminLayout";
 import UserManagement from "../../features/users/pages/UserManagement";
 import UserDetails from "../../features/users/pages/UserDetails";
+import OwnerApproval from "../../features/users/pages/OwnerApproval";
 import { APP_ROUTES } from "../../shared/constants/route.const";
 
 export const adminRoutes = {
@@ -21,7 +22,7 @@ export const adminRoutes = {
     },
     {
       path: "owners",
-      element: <>Owner Verification</>,
+      element: <OwnerApproval />,
     },
     {
       path: "stations",

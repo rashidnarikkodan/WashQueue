@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import FormInput from "../../../shared/components/ui/FormInput";
+import FormInput from "../../../shared/components/form/FormInput";
 import Loading from "../../../shared/components/ui/Loading";
 import { useAuthFormStore } from "../store/authFormStore";
 import { useAuthStore } from "../store/authStore";
