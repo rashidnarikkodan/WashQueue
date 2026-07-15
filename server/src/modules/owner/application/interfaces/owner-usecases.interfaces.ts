@@ -15,6 +15,7 @@ export interface IOwnerOnboardingDetails {
   ifscCode?: string
   bankProofUrl?: string
   businessEmail?: string
+  rejectionReason?: string
 }
 
 export interface ISaveOnboardingStepUseCase {

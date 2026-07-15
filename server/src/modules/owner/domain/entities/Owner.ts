@@ -23,6 +23,7 @@ export interface OwnerProps {
   accountNumber?: string
   ifscCode?: string
   bankProofUrl?: string
+  rejectionReason?: string
 }
 
 export class Owner implements OwnerProps {
@@ -53,6 +54,7 @@ export class Owner implements OwnerProps {
   readonly accountNumber?: string
   readonly ifscCode?: string
   readonly bankProofUrl?: string
+  readonly rejectionReason?: string
 
   constructor(props: OwnerProps) {
     this.id = props.id
@@ -78,5 +80,6 @@ export class Owner implements OwnerProps {
     this.accountNumber = props.accountNumber
     this.ifscCode = props.ifscCode
     this.bankProofUrl = props.bankProofUrl
+    this.rejectionReason = props.rejectionReason
   }
 }

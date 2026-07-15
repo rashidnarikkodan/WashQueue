@@ -8,6 +8,8 @@ import { Owner } from "@/modules/owner/domain/entities/Owner"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
+import { IMailService } from "@/modules/auth/application/interfaces/mail-service.interface"
+
 const BLOCKED_USER_TTL_SECONDS = 30 * 24 * 60 * 60 // 30 days
 
 export class UpdateUserUseCase implements IUpdateUserUseCase {
@@ -15,6 +17,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
     private readonly userRepository: IUserRepository,
     private readonly cacheService: ICacheService,
     private readonly ownerRepository: IOwnerRepository,
+    private readonly mailService: IMailService,
   ) { }
 
   async execute(id: string, updates: UpdateUserInput): Promise<User | null> {
@@ -47,6 +50,23 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
     if (user.role === "owner") {
       const owner = await this.ownerRepository.findByUserId(id)
       if (owner) {
+        // Send email notifications on verification status changes
+        const wasVerified = owner.isVerified === true
+        const isVerifiedNow = updates.isVerified === true
+
+        // 1. Approval email trigger
+        if (!wasVerified && isVerifiedNow) {
+          await this.mailService.sendOwnerApprovalEmail(user.email, owner.legalFullName || user.name || "Owner")
+        }
+
+        // 2. Rejection email trigger: Transition from in-review (step 4) back to step 1 with isVerified = false
+        const wasInReview = owner.onboardingStep === 4
+        const isRejectedNow = updates.onboardingStep === 1 && updates.isVerified === false
+        if (wasInReview && isRejectedNow) {
+          const reason = updates.rejectionReason || "Please review your verification documents and business information and resubmit."
+          await this.mailService.sendOwnerRejectionEmail(user.email, owner.legalFullName || user.name || "Owner", reason)
+        }
+
         const updatedOwner = new Owner({
           id: owner.id,
           userId: id,
@@ -68,6 +88,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
           accountNumber: owner.accountNumber,
           ifscCode: owner.ifscCode,
           bankProofUrl: owner.bankProofUrl,
+          rejectionReason: updates.isVerified ? "" : (updates.rejectionReason !== undefined ? updates.rejectionReason : owner.rejectionReason),
         })
         await this.ownerRepository.save(updatedOwner)
       }

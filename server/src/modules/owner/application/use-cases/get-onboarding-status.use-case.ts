@@ -39,6 +39,7 @@ export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
       accountNumber: owner.accountNumber,
       ifscCode: owner.ifscCode,
       bankProofUrl: owner.bankProofUrl,
+      rejectionReason: owner.rejectionReason,
     }
 
     return {

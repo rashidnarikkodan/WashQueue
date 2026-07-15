@@ -32,6 +32,7 @@ interface UserApiPayload {
   bankName?: string;
   bankProofUrl?: string;
   ifscCode?: string;
+  rejectionReason?: string;
 }
 
 interface UsersApiResponse {
@@ -55,6 +56,7 @@ const toUser = (u?: UserApiPayload): User => ({
   authProvider: u?.authProvider,
   lastLoginAt: u?.lastLoginAt,
   onboardingStep: u?.onboardingStep,
+  rejectionReason: u?.rejectionReason,
   // Merge: use explicit onboardingDetails if present, otherwise build it from
   // the flat onboarding fields the server sometimes returns at the root level.
   onboardingDetails: u?.onboardingDetails ?? (
@@ -73,6 +75,7 @@ const toUser = (u?: UserApiPayload): User => ({
       bankName: u?.bankName,
       bankProofUrl: u?.bankProofUrl,
       ifscCode: u?.ifscCode,
+      rejectionReason: u?.rejectionReason,
     } : undefined
   ),
 });

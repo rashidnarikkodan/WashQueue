@@ -29,6 +29,7 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       accountNumber: mongooseDoc.accountNumber,
       ifscCode: mongooseDoc.ifscCode,
       bankProofUrl: mongooseDoc.bankProofUrl,
+      rejectionReason: mongooseDoc.rejectionReason,
     })
   }
 
@@ -90,6 +91,9 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.bankProofUrl !== undefined) {
       raw.bankProofUrl = domainEntity.bankProofUrl
+    }
+    if (domainEntity.rejectionReason !== undefined) {
+      raw.rejectionReason = domainEntity.rejectionReason
     }
     return raw
   }

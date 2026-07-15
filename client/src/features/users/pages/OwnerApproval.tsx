@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
 import UserStats from "../components/ui/UserStats";
@@ -27,6 +27,9 @@ const OwnerApproval = () => {
   const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [rejectingOwnerId, setRejectingOwnerId] = useState<string | null>(null);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState("");
 
   // ─── URL-driven state ───────────────────────────────────────────────────────
   const searchQuery = searchParams.get("q") || "";
@@ -129,11 +132,13 @@ const OwnerApproval = () => {
     }
   };
 
-  const handleReject = async (id: string) => {
+  const handleReject = async (id: string, reason: string) => {
     try {
-      await usersApi.updateUser(id, { isVerified: false, onboardingStep: 1 });
+      await usersApi.updateUser(id, { isVerified: false, onboardingStep: 1, rejectionReason: reason });
       toast.info("Owner application rejected and details reset.");
       if (selectedOwner?.id === id) setSelectedOwner(null);
+      setRejectingOwnerId(null);
+      setRejectionReasonInput("");
       fetchOwners();
     } catch (e: unknown) {
       toast.error(
@@ -245,7 +250,10 @@ const OwnerApproval = () => {
                     Approve Application
                   </button>
                   <button
-                    onClick={() => handleReject(selectedOwner.id)}
+                    onClick={() => {
+                      setRejectingOwnerId(selectedOwner.id);
+                      setRejectionReasonInput("");
+                    }}
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-red-500/30 hover:border-red-500 bg-red-500/5 hover:bg-red-500/10 text-red-400 hover:text-red-500 font-bold text-xs tracking-wider uppercase transition-all cursor-pointer"
                   >
                     <XCircle size={14} />
@@ -258,6 +266,57 @@ const OwnerApproval = () => {
                   Verified &amp; Active
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Rejection Reason Modal */}
+      {rejectingOwnerId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-card border border-border/80 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+                <AlertTriangle size={18} />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-100 uppercase tracking-wider">
+                  Reject Application
+                </h3>
+                <p className="text-[11px] text-slate-500 font-semibold">
+                  Specify feedback for the car wash partner
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                  Reason for Rejection
+                </label>
+                <textarea
+                  value={rejectionReasonInput}
+                  onChange={(e) => setRejectionReasonInput(e.target.value)}
+                  placeholder="e.g. Identity document is blurry, or IFSC code does not match Federal Bank branch name. Please update..."
+                  className="w-full h-32 bg-muted/90 text-foreground border border-border/80 rounded-xl p-4 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => setRejectingOwnerId(null)}
+                  className="flex-1 py-3 border border-slate-800 hover:bg-slate-900/60 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={!rejectionReasonInput.trim()}
+                  onClick={() => handleReject(rejectingOwnerId, rejectionReasonInput.trim())}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-slate-950 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  Reject &amp; Send Email
+                </button>
+              </div>
             </div>
           </div>
         </div>

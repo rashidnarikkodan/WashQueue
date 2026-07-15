@@ -15,6 +15,7 @@ export interface User {
   lastLoginAt?: string;
   onboardingStep?: number;
   onboardingDetails?: Record<string, string | number | boolean | undefined | null>;
+  rejectionReason?: string;
 }
 
 export interface GetUsersFilters {

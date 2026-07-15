@@ -15,6 +15,7 @@ export interface OnboardingDetails {
   accountNumber?: string;
   ifscCode?: string;
   bankProofUrl?: string;
+  rejectionReason?: string;
 }
 
 export interface OnboardingStatus {

@@ -188,6 +188,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
               accountNumber: ownerDoc.accountNumber,
               ifscCode: ownerDoc.ifscCode,
               bankProofUrl: ownerDoc.bankProofUrl,
+              rejectionReason: ownerDoc.rejectionReason,
             }
           }
         }
