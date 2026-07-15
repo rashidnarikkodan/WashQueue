@@ -14,7 +14,6 @@ export interface OnboardingDetails {
   bankName?: string;
   accountNumber?: string;
   ifscCode?: string;
-  accountType?: string;
   bankProofUrl?: string;
 }
 
@@ -30,6 +29,7 @@ export const ownerApi = {
     const response = await api.get("/owner/onboarding/status", {
       skipToast: true,
     });
+    console.log(response.data.data)
     return response.data.data;
   },
 

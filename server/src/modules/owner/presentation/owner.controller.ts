@@ -70,7 +70,6 @@ export class OwnerController {
       bankName,
       accountNumber,
       ifscCode,
-      accountType,
     } = req.body
 
     // Extract file URLs from uploaded files
@@ -93,7 +92,6 @@ export class OwnerController {
       bankName,
       accountNumber,
       ifscCode,
-      accountType,
     }
 
     // Only set file URLs if files were uploaded (avoid wiping existing values)

@@ -63,7 +63,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       bankName: details.bankName !== undefined ? details.bankName : owner.bankName,
       accountNumber: details.accountNumber !== undefined ? details.accountNumber : owner.accountNumber,
       ifscCode: details.ifscCode !== undefined ? details.ifscCode : owner.ifscCode,
-      accountType: details.accountType !== undefined ? details.accountType : owner.accountType,
       bankProofUrl: details.bankProofUrl !== undefined ? details.bankProofUrl : owner.bankProofUrl,
     })
 
@@ -83,7 +82,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       bankName: savedOwner.bankName,
       accountNumber: savedOwner.accountNumber,
       ifscCode: savedOwner.ifscCode,
-      accountType: savedOwner.accountType,
       bankProofUrl: savedOwner.bankProofUrl,
     }
 

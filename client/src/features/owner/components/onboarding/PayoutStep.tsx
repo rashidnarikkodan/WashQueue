@@ -1,5 +1,4 @@
 import { ChevronRight, ArrowLeft, ShieldCheck, HelpCircle, User, CreditCard, Landmark } from "lucide-react";
-import Loading from "../../../../shared/components/ui/Loading";
 import FormInput from "../../../../shared/components/form/FormInput";
 import FormSelect from "../../../../shared/components/form/FormSelect";
 import FormUpload from "../../../../shared/components/form/FormUpload";
@@ -11,7 +10,6 @@ interface PayoutStepProps {
     bankName: string;
     accountNumber: string;
     ifscCode: string;
-    accountType: string;
   };
   fieldErrors: Record<string, string>;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -122,20 +120,6 @@ export default function PayoutStep({
               <HelpCircle size={10} /> Used to identify your bank branch securely.
             </span>
           </div>
-
-          <div className="md:col-span-2">
-            <FormSelect
-              label="Account Type"
-              name="accountType"
-              value={formData.accountType}
-              onChange={onChange}
-              options={[
-                { value: "Savings Account", label: "Savings Account" },
-                { value: "Current Account", label: "Current Account" },
-              ]}
-              error={fieldErrors.accountType}
-            />
-          </div>
         </div>
       </div>
 
@@ -193,12 +177,11 @@ export default function PayoutStep({
           disabled={isLoading}
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-lg shadow-primary/10 disabled:opacity-50"
         >
-          {isLoading ? <Loading size="sm" /> : (
-            <>
-              <span>Save &amp; Continue</span>
-              <ChevronRight size={14} />
-            </>
+           {isLoading && (
+            <div className="h-3.5 w-3.5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin shrink-0" />
           )}
+          <span>{isLoading ? "Saving..." : "Save & Continue"}</span>
+          {!isLoading && <ChevronRight size={14} />}
         </button>
       </div>
     </div>

@@ -67,7 +67,6 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
           bankName: owner.bankName,
           accountNumber: owner.accountNumber,
           ifscCode: owner.ifscCode,
-          accountType: owner.accountType,
           bankProofUrl: owner.bankProofUrl,
         })
         await this.ownerRepository.save(updatedOwner)

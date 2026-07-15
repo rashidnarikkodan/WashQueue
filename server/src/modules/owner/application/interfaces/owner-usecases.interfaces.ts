@@ -13,7 +13,6 @@ export interface IOwnerOnboardingDetails {
   bankName?: string
   accountNumber?: string
   ifscCode?: string
-  accountType?: string
   bankProofUrl?: string
   businessEmail?: string
 }

@@ -29,7 +29,6 @@ interface UserApiPayload {
   gstCertificateUrl?: string;
   accountHolderName?: string;
   accountNumber?: string;
-  accountType?: string;
   bankName?: string;
   bankProofUrl?: string;
   ifscCode?: string;
@@ -71,7 +70,6 @@ const toUser = (u?: UserApiPayload): User => ({
       gstCertificateUrl: u?.gstCertificateUrl,
       accountHolderName: u?.accountHolderName,
       accountNumber: u?.accountNumber,
-      accountType: u?.accountType,
       bankName: u?.bankName,
       bankProofUrl: u?.bankProofUrl,
       ifscCode: u?.ifscCode,

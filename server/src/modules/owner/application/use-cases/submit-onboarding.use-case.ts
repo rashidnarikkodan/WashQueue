@@ -52,7 +52,6 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
         bankName: owner.bankName,
         accountNumber: owner.accountNumber,
         ifscCode: owner.ifscCode,
-        accountType: owner.accountType,
         bankProofUrl: owner.bankProofUrl,
       })
     }

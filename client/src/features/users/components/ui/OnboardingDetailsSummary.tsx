@@ -14,7 +14,6 @@ interface OnboardingDetailsSummaryProps {
     bankName?: string;
     accountNumber?: string;
     ifscCode?: string;
-    accountType?: string;
     bankProofUrl?: string;
     businessLicenseUrl?: string;
     gstCertificateUrl?: string;
@@ -218,12 +217,6 @@ const OnboardingDetailsSummary = ({
               IFSC Code
             </span>
             <span className="text-slate-200 font-bold uppercase font-mono">{details.ifscCode || "Not Provided"}</span>
-          </div>
-          <div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
-              Account Type
-            </span>
-            <span className="text-slate-200 font-bold">{details.accountType || "Not Provided"}</span>
           </div>
         </div>
 

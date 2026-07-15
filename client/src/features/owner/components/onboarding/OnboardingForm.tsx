@@ -73,7 +73,6 @@ export default function OnboardingForm({
     bankName: savedDetails.bankName ?? "",
     accountNumber: savedDetails.accountNumber ?? "",
     ifscCode: savedDetails.ifscCode ?? "",
-    accountType: savedDetails.accountType ?? "Savings Account",
   });
 
   // Keep formData in sync with savedDetails when it is loaded/updated
@@ -89,7 +88,6 @@ export default function OnboardingForm({
       bankName: savedDetails.bankName ?? "",
       accountNumber: savedDetails.accountNumber ?? "",
       ifscCode: savedDetails.ifscCode ?? "",
-      accountType: savedDetails.accountType ?? "Savings Account",
     });
   }, [savedDetails]);
 
@@ -192,7 +190,6 @@ export default function OnboardingForm({
       bankName: formData.bankName,
       accountNumber: formData.accountNumber,
       ifscCode: formData.ifscCode,
-      accountType: formData.accountType,
     });
 
     const errors: Record<string, string> = {};
@@ -222,7 +219,6 @@ export default function OnboardingForm({
         bankName: formData.bankName,
         accountNumber: formData.accountNumber,
         ifscCode: formData.ifscCode,
-        accountType: formData.accountType,
       },
       { bankProofFile }
     );

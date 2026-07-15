@@ -38,7 +38,6 @@ export class GetUserUseCase implements IGetUserUseCase {
           bankName: owner.bankName,
           accountNumber: owner.accountNumber,
           ifscCode: owner.ifscCode,
-          accountType: owner.accountType,
           bankProofUrl: owner.bankProofUrl,
         }
       }

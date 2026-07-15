@@ -23,7 +23,6 @@ export interface IOwner extends Document {
   bankName?: string
   accountNumber?: string
   ifscCode?: string
-  accountType?: string
   bankProofUrl?: string
 }
 
@@ -80,7 +79,6 @@ const ownerSchema = new Schema<IOwner>(
     bankName: { type: String },
     accountNumber: { type: String },
     ifscCode: { type: String },
-    accountType: { type: String },
     bankProofUrl: { type: String },
   },
   {

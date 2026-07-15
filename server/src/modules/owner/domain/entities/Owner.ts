@@ -22,7 +22,6 @@ export interface OwnerProps {
   bankName?: string
   accountNumber?: string
   ifscCode?: string
-  accountType?: string
   bankProofUrl?: string
 }
 
@@ -53,7 +52,6 @@ export class Owner implements OwnerProps {
   readonly bankName?: string
   readonly accountNumber?: string
   readonly ifscCode?: string
-  readonly accountType?: string
   readonly bankProofUrl?: string
 
   constructor(props: OwnerProps) {
@@ -79,7 +77,6 @@ export class Owner implements OwnerProps {
     this.bankName = props.bankName
     this.accountNumber = props.accountNumber
     this.ifscCode = props.ifscCode
-    this.accountType = props.accountType
     this.bankProofUrl = props.bankProofUrl
   }
 }

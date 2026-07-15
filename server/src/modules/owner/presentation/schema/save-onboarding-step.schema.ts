@@ -49,9 +49,6 @@ const step2Schema = z.object({
     .string({ message: "IFSC code is required" })
     .trim()
     .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format (e.g. HDFC0001234)"),
-  accountType: z.enum(["Savings Account", "Current Account"], {
-    message: "Account type is required",
-  }),
 })
 
 /** Discriminated union — automatically picks the right schema based on the `step` field */
