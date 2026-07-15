@@ -4,7 +4,6 @@ import { VerifyOtpInput } from "../dto/verify-otp.dto"
 import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { ResetPasswordInput } from "../dto/reset-password.dto"
 import { AuthOutput, AuthUser } from "../dto/common/auth-user.dto"
-import { RoleType } from "@/common/constants/role.constants"
 
 export interface ILoginUseCase {
   execute(data: LoginInput): Promise<AuthOutput>
@@ -27,10 +26,6 @@ export interface IRefreshTokenUseCase {
 
 export interface ILogoutUseCase {
   execute(userId: string): Promise<void>
-}
-
-export interface ISetupAccountUseCase {
-  execute(userId: string, role: RoleType): Promise<AuthUser>
 }
 
 export interface IGoogleAuthUseCase {

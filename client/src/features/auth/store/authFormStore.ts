@@ -10,21 +10,21 @@ export const useAuthFormStore = create<AuthFormStore>((set, get) => ({
   forgotEmail: "",
   errors: {},
 
-  setField: (field, value) => set({ [field]: value }),
+  setField: (field: "name" | "email" | "password" | "confirmPassword" | "forgotEmail", value: string) => set({ [field]: value }),
 
-  setOtpDigit: (index, value) => set((state) => {
+  setOtpDigit: (index: number, value: string) => set((state: AuthFormStore) => {
     const nextDigits = [...state.otpDigits];
     nextDigits[index] = value;
     return { otpDigits: nextDigits };
   }),
 
-  setOtpDigits: (digits) => set({ otpDigits: digits }),
+  setOtpDigits: (digits: string[]) => set({ otpDigits: digits }),
 
-  setError: (field, message) => set((state) => ({
+  setError: (field: keyof FormErrors, message: string) => set((state: AuthFormStore) => ({
     errors: { ...state.errors, [field]: message }
   })),
 
-  clearError: (field) => set((state) => {
+  clearError: (field: keyof FormErrors) => set((state: AuthFormStore) => {
     const nextErrors = { ...state.errors };
     delete nextErrors[field];
     return { errors: nextErrors };

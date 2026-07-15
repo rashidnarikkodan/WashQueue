@@ -12,7 +12,6 @@ import { VerifyOtpUseCase } from "./application/use-cases/verify-otp.use-case"
 import { LoginUseCase } from "./application/use-cases/login.use-case"
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.use-case"
 import { LogoutUseCase } from "./application/use-cases/logout.use-case"
-import { SetupAccountUseCase } from "./application/use-cases/setup-account.use-case"
 import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "./application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case"
@@ -22,9 +21,12 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
+import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
+
 // infrastructures/repositories
 const otpRepository = new OtpRedisRepository()
 const refreshTokenRepository = new RefreshTokenMongoRepository()
+const ownerRepository = new OwnerMongoRepository()
 
 const mailService = new MailService()
 const otpService = new OtpService(otpRepository)
@@ -36,9 +38,8 @@ const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, ref
 const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
-const setupAccountUseCase = new SetupAccountUseCase(userRepository)
 const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
-const getMeUseCase = new GetMeUseCase(userRepository)
+const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, otpService, hashService)
 
@@ -48,7 +49,6 @@ const authController = new AuthController(
   verifyOtpUseCase,
   refreshTokenUseCase,
   logoutUseCase,
-  setupAccountUseCase,
   googleAuthUseCase,
   getMeUseCase,
   forgotPasswordUseCase,

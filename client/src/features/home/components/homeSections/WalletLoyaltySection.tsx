@@ -62,7 +62,7 @@ export default function WalletLoyaltySection() {
               {/* Custom Gradient Progress Bar */}
               <div className="h-3.5 bg-muted rounded-full overflow-hidden relative border border-slate-900">
                 <div 
-                  className="h-full bg-gradient-to-r from-emerald-400 to-[#ADC6FF]"
+                  className="h-full bg-gradient-to-r from-emerald-400 to-primary"
                   style={{ width: `${data.wallet.tierProgress}%` }}
                 />
               </div>

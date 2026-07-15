@@ -18,7 +18,6 @@ export class UserMapper implements IMapper<User, IUser> {
       avatar: mongooseDoc.avatar,
       authProvider: mongooseDoc.authProvider,
       isBlocked: mongooseDoc.isBlocked,
-      isVerified: mongooseDoc.isVerified,
       createdAt: mongooseDoc.createdAt,
       updatedAt: mongooseDoc.updatedAt,
     })
@@ -37,7 +36,6 @@ export class UserMapper implements IMapper<User, IUser> {
       avatar: domainEntity.avatar,
       authProvider: domainEntity.authProvider,
       isBlocked: domainEntity.isBlocked,
-      isVerified: domainEntity.isVerified,
     }
     return raw
   }

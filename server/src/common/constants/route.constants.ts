@@ -7,7 +7,6 @@ export const API_ROUTES = {
     VERIFY_OTP: "/verify-otp",
     GOOGLE: "/google",
     REFRESH_TOKEN: "/refresh-token",
-    SETUP_ACCOUNT: "/setup-account",
     ME: "/me",
     LOGOUT: "/logout",
     FORGOT_PASSWORD: "/forgot-password",
@@ -20,9 +19,12 @@ export const API_ROUTES = {
     UPDATE: "/:id",
   },
   OWNER: {
-    ROOT: "/api/owners",
+    ROOT: "/api/owner",
     CREATE: "/",
     GET_PROFILE: "/me",
     UPDATE_PROFILE: "/me",
+    ONBOARDING_STATUS: "/onboarding/status",
+    ONBOARDING_STEP: "/onboarding/step",
+    ONBOARDING_SUBMIT: "/onboarding/submit",
   },
 } as const

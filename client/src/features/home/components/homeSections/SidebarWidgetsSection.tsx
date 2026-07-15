@@ -48,7 +48,7 @@ export default function SidebarWidgetsSection() {
         </div>
         
         <div className="space-y-2">
-          <p className="text-xs font-black text-[#ADC6FF] uppercase tracking-widest">
+          <p className="text-xs font-black text-primary uppercase tracking-widest">
             {data.weatherInsights.alertTitle}
           </p>
           <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-medium">

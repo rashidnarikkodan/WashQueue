@@ -19,7 +19,10 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().default("no-reply@washqueue.com"),
   GOOGLE_CLIENT_ID: z.string().optional(),
-  CLIENT_URL: z.string()
+  CLIENT_URL: z.string(),
+  CLOUDINARY_CLOUD_NAME: z.string(),
+  CLOUDINARY_API_KEY: z.string(),
+  CLOUDINARY_API_SECRET: z.string()
 })
 const env = envSchema.parse(process.env)
 

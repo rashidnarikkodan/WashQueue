@@ -16,6 +16,23 @@ interface UserApiPayload {
   updatedAt?: string;
   authProvider?: string;
   lastLoginAt?: string;
+  onboardingStep?: number;
+  onboardingDetails?: Record<string, string | number | boolean | undefined | null>;
+  // Onboarding fields returned flat by the server (merged from the OnboardingDetails document)
+  legalFullName?: string;
+  businessName?: string;
+  gstNumber?: string;
+  whatsapp?: string;
+  idProofType?: string;
+  idProofUrl?: string;
+  businessLicenseUrl?: string;
+  gstCertificateUrl?: string;
+  accountHolderName?: string;
+  accountNumber?: string;
+  bankName?: string;
+  bankProofUrl?: string;
+  ifscCode?: string;
+  rejectionReason?: string;
 }
 
 interface UsersApiResponse {
@@ -38,6 +55,29 @@ const toUser = (u?: UserApiPayload): User => ({
   updatedAt: u?.updatedAt ?? "",
   authProvider: u?.authProvider,
   lastLoginAt: u?.lastLoginAt,
+  onboardingStep: u?.onboardingStep,
+  rejectionReason: u?.rejectionReason,
+  // Merge: use explicit onboardingDetails if present, otherwise build it from
+  // the flat onboarding fields the server sometimes returns at the root level.
+  onboardingDetails: u?.onboardingDetails ?? (
+    (u?.legalFullName || u?.businessName || u?.idProofUrl) ? {
+      fullName: u?.legalFullName,
+      businessName: u?.businessName,
+      gstNumber: u?.gstNumber,
+      phone: u?.phone,
+      whatsapp: u?.whatsapp,
+      idProofType: u?.idProofType,
+      idProofUrl: u?.idProofUrl,
+      businessLicenseUrl: u?.businessLicenseUrl,
+      gstCertificateUrl: u?.gstCertificateUrl,
+      accountHolderName: u?.accountHolderName,
+      accountNumber: u?.accountNumber,
+      bankName: u?.bankName,
+      bankProofUrl: u?.bankProofUrl,
+      ifscCode: u?.ifscCode,
+      rejectionReason: u?.rejectionReason,
+    } : undefined
+  ),
 });
 
 export const usersApi = {
@@ -73,8 +113,8 @@ export const usersApi = {
   getUser: async (id: string): Promise<User> => {
     try {
       const response = await api.get(API_ROUTES.USERS.BY_ID(id));
-      const resJson = response.data as UsersApiResponse;
-      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
+      const resData = response.data as { data?: UserApiPayload };
+      const u = resData.data;
 
       return toUser(u);
     } catch (error: unknown) {
@@ -85,8 +125,8 @@ export const usersApi = {
   updateUser: async (id: string, updates: Partial<User>): Promise<User> => {
     try {
       const response = await api.patch(API_ROUTES.USERS.BY_ID(id), updates, { skipToast: true });
-      const resJson = response.data as UsersApiResponse;
-      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
+      const resData = response.data as { data?: UserApiPayload };
+      const u = resData.data;
 
       return toUser(u);
     } catch (error: unknown) {

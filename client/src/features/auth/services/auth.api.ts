@@ -1,6 +1,5 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
-import type { RoleType } from "@/shared/constants/role.const"
 
 import type { ApiResponse } from "@/shared/types/ApiResponse"
 
@@ -13,7 +12,6 @@ const unwrap = <T>(response: ApiResponse<T>): T => {
 }
 
 export const authApi = {
-
   login: asyncHandle(
     async (email: string, password: string): Promise<AuthUser> => {
       const response = await api.post(API_ROUTES.AUTH.LOGIN, { email, password }, { skipToast: true })
@@ -22,7 +20,6 @@ export const authApi = {
     "Failed to login"
   ),
 
-
   loginWithGoogle: asyncHandle(
     async (token: string): Promise<AuthUser> => {
       const response = await api.post(API_ROUTES.AUTH.GOOGLE, { token }, { skipToast: true })
@@ -30,7 +27,6 @@ export const authApi = {
     },
     "Google Sign-In failed"
   ),
-
 
   signup: asyncHandle(
     async (name: string, email: string, password: string): Promise<void> => {
@@ -55,22 +51,6 @@ export const authApi = {
       return unwrap(response.data)
     },
     "OTP verification failed"
-  ),
-
-  /**
-   * Setup account role
-   */
-  setupAccount: asyncHandle(
-    async (role: RoleType): Promise<AuthUser> => {
-      const response = await api.post(
-        API_ROUTES.AUTH.SETUP_ACCOUNT,
-        { role },
-        { skipToast: true }
-      )
-
-      return unwrap(response.data)
-    },
-    "Account setup failed"
   ),
 
   me: asyncHandle(
@@ -110,9 +90,6 @@ export const authApi = {
     "Failed to send reset code"
   ),
 
-  /**
-   * Reset password
-   */
   resetPassword: asyncHandle(
     async (
       email: string,

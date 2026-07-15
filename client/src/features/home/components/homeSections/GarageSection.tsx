@@ -26,7 +26,7 @@ export default function GarageSection() {
                   alt={`${vehicle.brand} ${vehicle.model}`} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070D1F] to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-60" />
                 
                 <span className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md ${
                   isOverdue 

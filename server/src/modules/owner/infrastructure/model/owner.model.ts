@@ -2,19 +2,29 @@ import { Schema, model, Document, Types } from "mongoose"
 
 export interface IOwner extends Document {
   userId: Types.ObjectId
-  legalFullName: string
-  businessName: string
-  businessType: "INDIVIDUAL" | "SOLE_PROP" | "PARTNERSHIP" | "PVT_LTD"
+  legalFullName?: string
+  businessName?: string
   gstNumber?: string
   whatsapp?: string
   businessEmail?: string
-  hasStation: boolean
-  hasMobileService: boolean
-  mobileActive: boolean
-  isVerified: boolean
+  phone?: string
+  isVerified?: boolean
   verifiedAt?: Date
   createdAt: Date
   updatedAt: Date
+
+  // onboarding fields
+  onboardingStep: number
+  idProofType?: string
+  idProofUrl?: string
+  businessLicenseUrl?: string
+  gstCertificateUrl?: string
+  accountHolderName?: string
+  bankName?: string
+  accountNumber?: string
+  ifscCode?: string
+  bankProofUrl?: string
+  rejectionReason?: string
 }
 
 const ownerSchema = new Schema<IOwner>(
@@ -27,18 +37,11 @@ const ownerSchema = new Schema<IOwner>(
     },
     legalFullName: {
       type: String,
-      required: true,
       trim: true,
     },
     businessName: {
       type: String,
-      required: true,
       trim: true,
-    },
-    businessType: {
-      type: String,
-      enum: ["INDIVIDUAL", "SOLE_PROP", "PARTNERSHIP", "PVT_LTD"],
-      required: true,
     },
     gstNumber: {
       type: String,
@@ -53,29 +56,32 @@ const ownerSchema = new Schema<IOwner>(
       lowercase: true,
       trim: true,
     },
-    hasStation: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    hasMobileService: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    mobileActive: {
-      type: Boolean,
-      required: true,
-      default: false,
+    phone: {
+      type: String,
+      trim: true,
     },
     isVerified: {
       type: Boolean,
-      required: true,
       default: false,
     },
     verifiedAt: {
       type: Date,
     },
+    onboardingStep: {
+      type: Number,
+      required: true,
+      default: 1,
+    },
+    idProofType: { type: String },
+    idProofUrl: { type: String },
+    businessLicenseUrl: { type: String },
+    gstCertificateUrl: { type: String },
+    accountHolderName: { type: String },
+    bankName: { type: String },
+    accountNumber: { type: String },
+    ifscCode: { type: String },
+    bankProofUrl: { type: String },
+    rejectionReason: { type: String },
   },
   {
     timestamps: true,

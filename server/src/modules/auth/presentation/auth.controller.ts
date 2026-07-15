@@ -5,7 +5,6 @@ import {
   IVerifyOtpUseCase,
   IRefreshTokenUseCase,
   ILogoutUseCase,
-  ISetupAccountUseCase,
   IGoogleAuthUseCase,
   IGetMeUseCase,
   IForgotPasswordUseCase,
@@ -25,7 +24,6 @@ export class AuthController {
     private readonly verifyOtpUseCase: IVerifyOtpUseCase,
     private readonly refreshTokenUseCase: IRefreshTokenUseCase,
     private readonly logoutUseCase: ILogoutUseCase,
-    private readonly setupAccountUseCase: ISetupAccountUseCase,
     private readonly googleAuthUseCase: IGoogleAuthUseCase,
     private readonly getMeUseCase: IGetMeUseCase,
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
@@ -75,21 +73,6 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(token)
     setAuthCookies(res, accessToken, newRefreshToken)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.TOKEN_REFRESH_SUCCESS)
-  }
-
-  setupAccount = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    const { role } = req.body
-    if (!userId) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGES.UNAUTHORIZED,
-        data: null,
-      })
-      return
-    }
-    const result = await this.setupAccountUseCase.execute(userId, role)
-    success(res, result, HTTP_STATUS.OK, SUCCESS_MESSAGES.ACCOUNT_SETUP_SUCCESS)
   }
 
   me = async (req: AuthenticatedRequest, res: Response) => {

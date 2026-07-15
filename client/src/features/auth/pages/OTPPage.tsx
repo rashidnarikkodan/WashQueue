@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import type { KeyboardEvent, ClipboardEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Check, Loader2, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
+import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
@@ -160,7 +161,7 @@ export default function OTPPage() {
             {/* OTP Digits inputs */}
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="flex justify-center gap-2.5 md:gap-4">
-                {otpDigits.map((digit, i) => (
+                {otpDigits.map((digit: string, i: number) => (
                   <input
                     key={i}
                     ref={(el) => { inputRefs.current[i] = el; }}
@@ -187,7 +188,7 @@ export default function OTPPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loading size="sm" />
                       Verifying...
                     </>
                   ) : (

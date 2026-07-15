@@ -77,6 +77,12 @@ api.interceptors.response.use(
                     user: null,
                     isAuthenticated: false,
                 });
+
+                const msg = error.response?.data?.message;
+                if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
+                    toast.error(msg, { id: "suspension-toast" });
+                }
+
                 return Promise.reject(error);
             }
 
@@ -113,6 +119,11 @@ api.interceptors.response.use(
                             user: null,
                             isAuthenticated: false,
                         });
+
+                        const msg = err.response?.data?.message;
+                        if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
+                            toast.error(msg, { id: "suspension-toast" });
+                        }
                         
                         reject(err);
                     })

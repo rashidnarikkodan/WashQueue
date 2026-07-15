@@ -8,6 +8,9 @@ export interface AuthUser {
     avatar?: string
     isNewUser?: boolean
     isVerified: boolean
+    phone?: string
+    walletBalance?: number
+    onboardingStep?: number
 }
 
 export interface AuthTokens {

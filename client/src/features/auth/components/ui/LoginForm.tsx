@@ -4,12 +4,12 @@ import { toast } from "sonner"
 import { useGoogleLogin } from "@react-oauth/google"
 import { AlertCircle } from "lucide-react"
 
-import FormInput from "../../../../shared/components/ui/FormInput"
+import FormInput from "../../../../shared/components/form/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { loginAction, type LoginState } from "../../actions/login.action"
 import { useAuthStore } from "../../store/authStore"
-import { ROLE } from "../../../../shared/constants/role.const"
+import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
 
 const initialState: LoginState = {
   success: false,
@@ -35,7 +35,8 @@ export default function LoginForm() {
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
           } else if (role === ROLE.OWNER) {
-            navigate("/owner")
+            const activeViewMode = useAuthStore.getState().activeViewMode
+            navigate(activeViewMode === VIEW_MODE.CUSTOMER ? "/" : "/owner")
           } else {
             navigate("/")
           }
@@ -78,7 +79,8 @@ export default function LoginForm() {
       } else if (role === ROLE.MANAGER) {
         navigate("/manager")
       } else if (role === ROLE.OWNER) {
-        navigate("/owner")
+        const activeViewMode = useAuthStore.getState().activeViewMode
+        navigate(activeViewMode === VIEW_MODE.CUSTOMER ? "/" : "/owner")
       } else {
         navigate("/")
       }
@@ -168,7 +170,7 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <Submit text="Login" pendingText="Logging..."/>
+        <Submit text="Login" pendingText="Logging..." />
       </form>
     </div>
   )

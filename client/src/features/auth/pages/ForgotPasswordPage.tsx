@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import FormInput from "../../../shared/components/ui/FormInput";
+import FormInput from "../../../shared/components/form/FormInput";
+import Loading from "../../../shared/components/ui/Loading";
 import { useAuthFormStore } from "../store/authFormStore";
 import { useAuthStore } from "../store/authStore";
 import { toast } from "sonner";
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loading size="sm" />
                   Sending OTP...
                 </>
               ) : (

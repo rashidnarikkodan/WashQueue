@@ -138,7 +138,6 @@ export default function Header({ role }: { role?: string }) {
               <Heart className="h-4.5 w-4.5" />
             </Link>
           )}
-
           {/* Theme Toggle */}
           <ThemeToggle />
 

@@ -29,7 +29,7 @@ export default function ActiveBookingSection() {
           </p>
         </div>
         
-        <button className="flex items-center gap-2.5 px-6 py-4.5 rounded-2xl bg-[#ADC6FF] text-[#002E6A] font-extrabold text-sm hover:opacity-90 hover:scale-[1.02] transition-all shadow-lg shadow-[#ADC6FF]/10 cursor-pointer self-start shrink-0">
+        <button className="flex items-center gap-2.5 px-6 py-4.5 rounded-2xl bg-primary text-primary-foreground font-extrabold text-sm hover:opacity-90 hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 cursor-pointer self-start shrink-0">
           <span>Track Booking</span>
           <ArrowRight className="h-4.5 w-4.5 stroke-[2.5]" />
         </button>
@@ -50,7 +50,7 @@ export default function ActiveBookingSection() {
               <div key={idx} className="flex flex-col items-center gap-3 text-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-card shadow-md transition-all duration-300 ${
                   isCompleted 
-                    ? "bg-[#ADC6FF] text-[#002E6A]" 
+                    ? "bg-primary text-primary-foreground" 
                     : isCurrent 
                       ? "bg-[#ADC6FF] text-[#002E6A] scale-110 ring-4 ring-[#ADC6FF]/20" 
                       : "bg-muted text-muted-foreground"

@@ -3,4 +3,7 @@ export interface UpdateUserInput {
   name?: string
   email?: string
   phone?: string
+  isVerified?: boolean
+  onboardingStep?: number
+  rejectionReason?: string
 }

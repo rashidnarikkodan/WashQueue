@@ -15,5 +15,7 @@ export interface UserProfileDto {
         isVerified?: boolean
         createdAt?: Date
         updatedAt?: Date
+        onboardingStep?: number
+        onboardingDetails?: Record<string, unknown>
 }
 

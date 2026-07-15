@@ -4,12 +4,12 @@ import { toast } from "sonner"
 import { useGoogleLogin } from "@react-oauth/google"
 import { AlertCircle } from "lucide-react"
 
-import FormInput from "../../../../shared/components/ui/FormInput"
+import FormInput from "../../../../shared/components/form/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { signupAction, type SignupState } from "../../actions/signup.action"
 import { useAuthStore } from "../../store/authStore"
-import { ROLE } from "../../../../shared/constants/role.const"
+import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
 
 const initialState: SignupState = {
   success: false,
@@ -36,7 +36,8 @@ export default function SignupForm() {
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
           } else if (role === ROLE.OWNER) {
-            navigate("/owner")
+            const activeViewMode = useAuthStore.getState().activeViewMode
+            navigate(activeViewMode === VIEW_MODE.CUSTOMER ? "/" : "/owner")
           } else {
             navigate("/")
           }
@@ -155,7 +156,7 @@ export default function SignupForm() {
             const hasCapital = /[A-Z]/.test(val)
             const hasNumber = /\d/.test(val)
             const hasSpecial = /[@$!%*?&#]/.test(val)
-            
+
             if ((hasMinLength && hasCapital && hasNumber && hasSpecial) || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, password: "" }))
             }
@@ -204,7 +205,7 @@ export default function SignupForm() {
           required
         />
 
-        <Submit text="Signup" pendingText="Signing Up..."/>
+        <Submit text="Signup" pendingText="Signing Up..." />
       </form>
     </div>
   )
