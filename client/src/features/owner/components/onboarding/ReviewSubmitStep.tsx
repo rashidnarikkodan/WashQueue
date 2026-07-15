@@ -1,9 +1,11 @@
 import { ArrowLeft, Send, Check, ShieldCheck } from "lucide-react";
 import Loading from "../../../../shared/components/ui/Loading";
 import OnboardingDetailsSummary from "../../../users/components/ui/OnboardingDetailsSummary";
+import type { OnboardingDetails } from "../../services/owner.api";
 
 interface ReviewSubmitStepProps {
   formData: Record<string, any>;
+  savedDetails: OnboardingDetails;
   userEmail?: string;
   idProofFile: File | null;
   bankProofFile: File | null;
@@ -16,6 +18,7 @@ interface ReviewSubmitStepProps {
 
 export default function ReviewSubmitStep({
   formData,
+  savedDetails,
   userEmail,
   idProofFile,
   bankProofFile,
@@ -25,6 +28,9 @@ export default function ReviewSubmitStep({
   onBack,
   isLoading,
 }: ReviewSubmitStepProps) {
+  // Merge savedDetails and active formData so previously uploaded files show correctly
+  const mergedDetails = { ...savedDetails, ...formData };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Header */}
@@ -59,7 +65,7 @@ export default function ReviewSubmitStep({
 
       {/* Details Overview Box */}
       <OnboardingDetailsSummary
-        details={formData}
+        details={mergedDetails}
         email={userEmail}
         idProofFile={idProofFile}
         bankProofFile={bankProofFile}

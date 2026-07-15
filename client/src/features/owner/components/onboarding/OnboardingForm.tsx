@@ -270,6 +270,7 @@ export default function OnboardingForm({
       {activeStep === 3 && (
         <ReviewSubmitStep
           formData={formData}
+          savedDetails={savedDetails}
           userEmail={user?.email}
           idProofFile={idProofFile}
           bankProofFile={bankProofFile}
