@@ -18,6 +18,7 @@ import RegisteredVehiclesCard from "../components/ui/RegisteredVehiclesCard";
 import LoyaltyTierCard from "../components/ui/LoyaltyTierCard";
 import QuickNotificationCard from "../components/ui/QuickNotificationCard";
 import OwnerProfileOverviewCard from "../components/ui/OwnerProfileOverviewCard";
+import FeatureLock from "@/shared/components/ui/FeatureLock";
 
 // Mock generators based on userId
 const getMockBookings = (userId: string): Booking[] => {
@@ -236,7 +237,9 @@ const UserDetails = () => {
         <div className="xl:col-span-4 space-y-6">
           <QuickNotificationCard userEmail={user.email} userName={user.name || "User"} />
 
-          <LoyaltyTierCard />
+          <FeatureLock message="Loyalty Tier" >
+            <LoyaltyTierCard />
+          </FeatureLock>
         </div>
       </div>
 

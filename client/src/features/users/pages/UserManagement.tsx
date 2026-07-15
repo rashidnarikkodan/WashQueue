@@ -213,12 +213,11 @@ const UserManagement = () => {
         ownersCount={stats.owners}
       />
 
-      {/* DataTable — owns toolbar + table + pagination */}
+      {/* DataTable :owns toolbar, table, pagination */}
       <DataTable<User>
         columns={columns}
         data={users}
         rowKey={(u) => u.id}
-        // Toolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchLabel="Search Users"
@@ -228,12 +227,10 @@ const UserManagement = () => {
         onTabChange={(tab) => setRoleFilter(tab)}
         selectFilters={selectFilters}
         toggleFilters={toggleFilters}
-        // State
         isLoading={isLoading}
         loadingText="Fetching user directory..."
         errorMsg={errorMsg}
         emptyMessage="No users found matching the query."
-        // Pagination
         pagination={paginationMeta}
         onPageChange={setCurrentPage}
       />

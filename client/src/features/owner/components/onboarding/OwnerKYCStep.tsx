@@ -1,6 +1,5 @@
 import { ChevronRight } from "lucide-react";
 import { User, Building2, ShieldCheck, FileText } from "lucide-react";
-import Loading from "../../../../shared/components/ui/Loading";
 import FormInput from "../../../../shared/components/form/FormInput";
 import FormSelect from "../../../../shared/components/form/FormSelect";
 import FormUpload from "../../../../shared/components/form/FormUpload";
@@ -244,14 +243,13 @@ export default function OwnerKYCStep({
           type="button"
           onClick={onContinue}
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-lg shadow-primary/10 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 min-w-[160px] px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-lg shadow-primary/10 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isLoading ? <Loading size="sm" /> : (
-            <>
-              <span>Save &amp; Continue</span>
-              <ChevronRight size={14} />
-            </>
+          {isLoading && (
+            <div className="h-3.5 w-3.5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin shrink-0" />
           )}
+          <span>{isLoading ? "Saving..." : "Save & Continue"}</span>
+          {!isLoading && <ChevronRight size={14} />}
         </button>
       </div>
     </div>

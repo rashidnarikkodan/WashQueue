@@ -1,9 +1,7 @@
 import { Award } from "lucide-react";
-import FeatureLock from "../../../../shared/components/ui/FeatureLock";
 
 export default function LoyaltyTierCard() {
   return (
-    <FeatureLock message="Loyalty Tier">
       <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 h-full relative overflow-hidden text-left">
         <div className="flex items-center gap-2">
           <Award size={16} className="text-[#ADC6FF]" />
@@ -42,6 +40,5 @@ export default function LoyaltyTierCard() {
           </p>
         </div>
       </div>
-    </FeatureLock>
   );
 }

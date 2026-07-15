@@ -140,12 +140,6 @@ export function getUserColumns(
   ];
 }
 
-// ─── Owner Approval Columns ───────────────────────────────────────────────────
-
-/**
- * Column definitions for the OwnerApproval page.
- * @param onViewApplication - Called when admin clicks "View Application".
- */
 export function getOwnerColumns(
   onViewApplication: (owner: User) => void
 ): Column<User>[] {
@@ -182,8 +176,8 @@ export function getOwnerColumns(
       id: "onboardingStep",
       header: "Onboarding Step",
       cell: (user) => (
-        <span className="bg-slate-900 text-slate-400 border border-border/40 px-2 py-0.5 rounded-md text-[11px] font-bold">
-          Step {user.onboardingStep ?? 1} of 3
+        <span className="bg- text-slate-400 border border-border/40 px-3 py-1.5 rounded-lg text-[11px] font-bold">
+          Step {user.onboardingStep == 4 ? 3 :user.onboardingStep ?? 1} of 3
         </span>
       ),
     },
