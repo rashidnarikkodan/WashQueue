@@ -19,9 +19,9 @@ const cloudinaryService = new CloudinaryService()
 const createOwnerUseCase = new CreateOwnerUseCase(ownerRepository, userRepository)
 const getOwnerUseCase = new GetOwnerUseCase(ownerRepository)
 const updateOwnerUseCase = new UpdateOwnerUseCase(ownerRepository)
-const saveOnboardingStepUseCase = new SaveOnboardingStepUseCase(ownerRepository, tokenService)
+const saveOnboardingStepUseCase = new SaveOnboardingStepUseCase(ownerRepository, tokenService, userRepository)
 const getOnboardingStatusUseCase = new GetOnboardingStatusUseCase(ownerRepository)
-const submitOnboardingUseCase = new SubmitOnboardingUseCase(ownerRepository, tokenService)
+const submitOnboardingUseCase = new SubmitOnboardingUseCase(ownerRepository, tokenService, userRepository)
 
 // presentation
 const ownerController = new OwnerController(

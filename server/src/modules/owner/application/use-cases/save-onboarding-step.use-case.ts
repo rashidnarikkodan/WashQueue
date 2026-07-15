@@ -1,19 +1,22 @@
-import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ITokenService } from "@/modules/auth/application/interfaces"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { RoleType } from "@/common/constants/role.constants"
 import {
   ISaveOnboardingStepUseCase,
   IOwnerOnboardingDetails,
 } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
+import { User } from "@/modules/user/domain/entities/User"
 
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: ITokenService
+    private readonly tokenService: ITokenService,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async execute(
@@ -27,7 +30,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     tokens?: { accessToken: string; refreshToken: string }
   }> {
     // Fetch existing onboarding details to merge (preserve previous step data)
-    const userDoc = await UserModel.findById(userId).exec()
+    const userDoc = await this.userRepository.findById(userId)
 
     if (!userDoc) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
@@ -88,27 +91,23 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     let tokens: { accessToken: string; refreshToken: string } | undefined
 
     if (userDoc.role !== "owner") {
-      const userUpdateFields: { role: string; refreshToken?: string } = {
-        role: "owner"
-      }
-
       const tokenPayload = {
-        userId: userDoc.id,
-        role: "owner",
+        userId: userDoc.id || userId,
+        role: "owner" as RoleType,
         email: userDoc.email,
       }
 
       const accessToken = this.tokenService.generateAccessToken(tokenPayload)
       const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-      userUpdateFields.refreshToken = refreshToken
+      const userUpdateFields: Partial<User> = {
+        role: "owner" as RoleType,
+        refreshToken: refreshToken,
+      }
+
       tokens = { accessToken, refreshToken }
 
-      await UserModel.findByIdAndUpdate(
-        userId,
-        { $set: userUpdateFields },
-        { new: true }
-      ).exec()
+      await this.userRepository.update(userId, userUpdateFields)
     }
 
     return {

@@ -1,8 +1,8 @@
-import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ITokenService } from "@/modules/auth/application/interfaces"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
@@ -10,7 +10,8 @@ import { Owner } from "../../domain/entities/Owner"
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: ITokenService
+    private readonly tokenService: ITokenService,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   async execute(userId: string): Promise<{
@@ -18,7 +19,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     message: string
     tokens: { accessToken: string; refreshToken: string }
   }> {
-    const userDoc = await UserModel.findById(userId).exec()
+    const userDoc = await this.userRepository.findById(userId)
     if (!userDoc) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
@@ -60,7 +61,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
 
     // Mark step=4 to flag submission pending admin review
     const tokenPayload = {
-      userId: userDoc.id,
+      userId: userDoc.id || userId,
       role: userDoc.role,
       email: userDoc.email,
     }
@@ -68,15 +69,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    await UserModel.findByIdAndUpdate(
-      userId,
-      {
-        $set: {
-          refreshToken,
-        },
-      },
-      { new: true }
-    ).exec()
+    await this.userRepository.update(userId, { refreshToken })
 
     return {
       success: true,
