@@ -2,7 +2,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { User } from "../../domain/entities/User"
 import { UpdateUserInput } from "../dto/update-user.dto"
 import { IUpdateUserUseCase } from "../interfaces/user-usecases.interfaces"
-import { ICacheService } from "@/core/application/cache.interface"
+import { ICacheService } from "@/core/application/interfaces/cache.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { Owner } from "@/modules/owner/domain/entities/Owner"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
@@ -47,7 +47,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
       }
     }
 
-    if (user.role === "owner") {
+    if (user.role === ROLE.OWNER) {
       const owner = await this.ownerRepository.findByUserId(id)
       if (owner) {
         // Send email notifications on verification status changes

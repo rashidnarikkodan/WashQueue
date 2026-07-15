@@ -3,7 +3,7 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ITokenService } from "@/modules/auth/application/interfaces"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { RoleType } from "@/common/constants/role.constants"
+import { ROLE, RoleType } from "@/common/constants/role.constants"
 import {
   ISaveOnboardingStepUseCase,
   IOwnerOnboardingDetails,
@@ -90,10 +90,10 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
 
     let tokens: { accessToken: string; refreshToken: string } | undefined
 
-    if (userDoc.role !== "owner") {
+    if (userDoc.role !== ROLE.OWNER) {
       const tokenPayload = {
         userId: userDoc.id || userId,
-        role: "owner" as RoleType,
+        role: ROLE.OWNER,
         email: userDoc.email,
       }
 
@@ -101,7 +101,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
       const userUpdateFields: Partial<User> = {
-        role: "owner" as RoleType,
+        role: ROLE.OWNER,
         refreshToken: refreshToken,
       }
 

@@ -18,8 +18,6 @@ export const createOwnerRouter = (ownerController: OwnerController): Router => {
     asyncHandler(ownerController.getOnboardingStatus)
   )
 
-  // Multer MUST run before validateRequest — it parses the multipart body first,
-  // then Zod validates the resulting req.body text fields.
   router.post(
     API_ROUTES.OWNER.ONBOARDING_STEP,
     onboardingUpload,

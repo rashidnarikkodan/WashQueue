@@ -2,6 +2,7 @@ import { IUserRepository } from "../../domain/repositories/user.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { UserProfileDto } from "../dto"
 import { IGetUserUseCase } from "../interfaces"
+import { ROLE } from "@/common/constants/role.constants"
 
 export class GetUserUseCase implements IGetUserUseCase {
   constructor(
@@ -20,7 +21,7 @@ export class GetUserUseCase implements IGetUserUseCase {
     let onboardingStep: number | undefined
     let onboardingDetails: Record<string, unknown> | undefined
 
-    if (user.role === "owner") {
+    if (user.role === ROLE.OWNER) {
       const owner = await this.ownerRepository.findByUserId(user.id!)
       if (owner) {
         isVerified = owner.isVerified ?? false

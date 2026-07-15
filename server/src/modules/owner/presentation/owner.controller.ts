@@ -16,7 +16,7 @@ import {
   IUpdateOwnerUseCase,
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
-import { IMediaStorage } from "@/core/application/media.interface"
+import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 
 export class OwnerController {
   constructor(
@@ -27,7 +27,7 @@ export class OwnerController {
     private readonly getOwnerUseCase: IGetOwnerUseCase,
     private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
     private readonly mediaStorage: IMediaStorage
-  ) {}
+  ) { }
 
   /** GET /api/owner/onboarding/status */
   getOnboardingStatus = async (req: AuthenticatedRequest, res: Response) => {
@@ -132,7 +132,7 @@ export class OwnerController {
 
     const result = await this.submitOnboardingUseCase.execute(userId)
     setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken)
-    
+
     // omit tokens from response body for security/cleanliness
     const { tokens, ...rest } = result
     success(res, rest, HTTP_STATUS.OK, result.message)

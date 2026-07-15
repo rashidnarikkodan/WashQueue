@@ -6,6 +6,7 @@ import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repo
 
 import { AuthUser } from "../dto"
 import { IGetMeUseCase } from "../interfaces"
+import { ROLE } from "@/common/constants/role.constants"
 
 export class GetMeUseCase implements IGetMeUseCase {
   constructor(
@@ -26,7 +27,7 @@ export class GetMeUseCase implements IGetMeUseCase {
     let isVerified = false
     let onboardingStep = 1
 
-    if (user.role === "owner") {
+    if (user.role === ROLE.OWNER) {
       const owner = await this.ownerRepository.findByUserId(userId)
       if (owner) {
         isVerified = owner.isVerified ?? false
