@@ -3,7 +3,7 @@ import type { PaginationMeta } from "@/shared/components/ui/Pagination";
 
 export type { PaginationMeta };
 
-// ─── Column Definition ────────────────────────────────────────────────────────
+// ─── Column ──────────────────────────────────────────────────────────────────
 
 export interface Column<T> {
   id: string;
@@ -15,18 +15,16 @@ export interface Column<T> {
   align?: "left" | "center" | "right";
 }
 
-// ─── Tab ─────────────────────────────────────────────────────────────────────
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 export interface TabConfig {
-  /** Unique identifier matched against `activeTab` prop */
   id: string;
   label: string;
-  /** Tailwind classes for border + text when this tab is active.
-   *  Defaults to "border-primary text-primary" */
+  /** Tailwind border + text classes when active. Defaults to "border-primary text-primary" */
   activeColor?: string;
 }
 
-// ─── Filters ──────────────────────────────────────────────────────────────────
+// ─── Filters ─────────────────────────────────────────────────────────────────
 
 export interface SelectFilterOption {
   label: string;
