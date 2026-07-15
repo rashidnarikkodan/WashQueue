@@ -113,8 +113,8 @@ export const usersApi = {
   getUser: async (id: string): Promise<User> => {
     try {
       const response = await api.get(API_ROUTES.USERS.BY_ID(id));
-      const resJson = response.data as UsersApiResponse;
-      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
+      const resData = response.data as { data?: UserApiPayload };
+      const u = resData.data;
 
       return toUser(u);
     } catch (error: unknown) {
@@ -125,8 +125,8 @@ export const usersApi = {
   updateUser: async (id: string, updates: Partial<User>): Promise<User> => {
     try {
       const response = await api.patch(API_ROUTES.USERS.BY_ID(id), updates, { skipToast: true });
-      const resJson = response.data as UsersApiResponse;
-      const u = resJson.data ? (resJson.data as { users?: UserApiPayload[] }).users?.[0] : undefined;
+      const resData = response.data as { data?: UserApiPayload };
+      const u = resData.data;
 
       return toUser(u);
     } catch (error: unknown) {
