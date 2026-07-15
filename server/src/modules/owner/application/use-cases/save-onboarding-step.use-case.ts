@@ -71,7 +71,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
 
     const mergedDetails: IOwnerOnboardingDetails = {
       fullName: savedOwner.legalFullName,
-      phone: userDoc.phone,
+      phone: savedOwner.phone,
       whatsapp: savedOwner.whatsapp,
       businessName: savedOwner.businessName,
       gstNumber: savedOwner.gstNumber,
