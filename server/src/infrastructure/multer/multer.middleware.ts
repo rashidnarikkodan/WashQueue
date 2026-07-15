@@ -20,13 +20,15 @@ const fileFilter = (
   }
 }
 
-export const onboardingUpload = multer({
+const upload  = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10 MB
   },
-}).fields([
+})
+
+export const onboardingUpload = upload.fields([
   { name: "idProofFile", maxCount: 1 },
   { name: "businessLicenseFile", maxCount: 1 },
   { name: "gstCertificateFile", maxCount: 1 },

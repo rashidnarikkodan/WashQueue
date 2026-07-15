@@ -1,5 +1,5 @@
 import redis from "./redis.client"
-import { ICacheService } from "@/core/application/cache.interface"
+import { ICacheService } from "@/core/application/interfaces/cache.interface"
 
 export class RedisCacheService implements ICacheService {
   async set(key: string, value: string, ttlSeconds: number): Promise<void> {

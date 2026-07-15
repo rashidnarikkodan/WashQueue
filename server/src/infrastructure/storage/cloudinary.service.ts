@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary"
-import { IMediaStorage, UploadedFile } from "@/core/application/media.interface"
+import { IMediaStorage, UploadedFile } from "@/core/application/interfaces/media.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import env from "@/configs/env.config"
