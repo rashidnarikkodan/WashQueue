@@ -14,20 +14,22 @@ export interface ErrorResponseLike {
 }
 
 export const getErrorMessage = (error: unknown, fallback = "Server Error"): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
   if (typeof error === "object" && error !== null) {
     const maybeError = error as Partial<ErrorResponseLike>;
 
-    if (typeof maybeError.message === "string" && maybeError.message.trim()) {
-      return maybeError.message;
-    }
-
+    // 1. Check server response custom message first
     if (typeof maybeError.response?.data?.message === "string" && maybeError.response.data.message.trim()) {
       return maybeError.response.data.message;
     }
+
+    // 2. Check standard Error.message
+    if (typeof maybeError.message === "string" && maybeError.message.trim()) {
+      return maybeError.message;
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
   }
 
   return fallback;
