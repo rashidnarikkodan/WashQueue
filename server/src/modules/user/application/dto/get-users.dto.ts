@@ -13,6 +13,8 @@ export interface UserSummaryDto {
   walletBalance?: number
   createdAt?: Date
   updatedAt?: Date
+  onboardingStep?: number
+  onboardingDetails?: Record<string, unknown>
 }
 
 export interface GetUsersQuery {

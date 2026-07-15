@@ -160,6 +160,40 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
 
     const domainUsers = users.map((user) => UserMapper.toUserSummaryDto(this.mapper.toDomain(user)))
 
+    // Resolve owner onboarding details & verification status for users with OWNER role
+    const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
+    const ownerUserIds = domainUsers.filter((u) => u.role === ROLE.OWNER).map((u) => u.id)
+    if (ownerUserIds.length > 0) {
+      const ownersList = await OwnerModel.find({ userId: { $in: ownerUserIds } }).lean().exec()
+      const ownersMap = new Map(ownersList.map((o) => [o.userId.toString(), o]))
+      
+      domainUsers.forEach((u) => {
+        if (u.role === ROLE.OWNER) {
+          const ownerDoc = ownersMap.get(u.id)
+          u.isVerified = ownerDoc ? (ownerDoc.isVerified ?? false) : false
+          u.onboardingStep = ownerDoc ? (ownerDoc.onboardingStep ?? 1) : 1
+          if (ownerDoc) {
+            u.onboardingDetails = {
+              fullName: ownerDoc.legalFullName,
+              businessName: ownerDoc.businessName,
+              phone: ownerDoc.phone,
+              whatsapp: ownerDoc.whatsapp,
+              gstNumber: ownerDoc.gstNumber,
+              idProofType: ownerDoc.idProofType,
+              idProofUrl: ownerDoc.idProofUrl,
+              businessLicenseUrl: ownerDoc.businessLicenseUrl,
+              gstCertificateUrl: ownerDoc.gstCertificateUrl,
+              accountHolderName: ownerDoc.accountHolderName,
+              bankName: ownerDoc.bankName,
+              accountNumber: ownerDoc.accountNumber,
+              ifscCode: ownerDoc.ifscCode,
+              bankProofUrl: ownerDoc.bankProofUrl,
+            }
+          }
+        }
+      })
+    }
+
     return {
       users: domainUsers,
       pagination: paginationMetaData,
