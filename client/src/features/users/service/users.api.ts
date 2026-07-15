@@ -18,6 +18,21 @@ interface UserApiPayload {
   lastLoginAt?: string;
   onboardingStep?: number;
   onboardingDetails?: Record<string, string | number | boolean | undefined | null>;
+  // Onboarding fields returned flat by the server (merged from the OnboardingDetails document)
+  legalFullName?: string;
+  businessName?: string;
+  gstNumber?: string;
+  whatsapp?: string;
+  idProofType?: string;
+  idProofUrl?: string;
+  businessLicenseUrl?: string;
+  gstCertificateUrl?: string;
+  accountHolderName?: string;
+  accountNumber?: string;
+  accountType?: string;
+  bankName?: string;
+  bankProofUrl?: string;
+  ifscCode?: string;
 }
 
 interface UsersApiResponse {
@@ -41,7 +56,27 @@ const toUser = (u?: UserApiPayload): User => ({
   authProvider: u?.authProvider,
   lastLoginAt: u?.lastLoginAt,
   onboardingStep: u?.onboardingStep,
-  onboardingDetails: u?.onboardingDetails,
+  // Merge: use explicit onboardingDetails if present, otherwise build it from
+  // the flat onboarding fields the server sometimes returns at the root level.
+  onboardingDetails: u?.onboardingDetails ?? (
+    (u?.legalFullName || u?.businessName || u?.idProofUrl) ? {
+      fullName: u?.legalFullName,
+      businessName: u?.businessName,
+      gstNumber: u?.gstNumber,
+      phone: u?.phone,
+      whatsapp: u?.whatsapp,
+      idProofType: u?.idProofType,
+      idProofUrl: u?.idProofUrl,
+      businessLicenseUrl: u?.businessLicenseUrl,
+      gstCertificateUrl: u?.gstCertificateUrl,
+      accountHolderName: u?.accountHolderName,
+      accountNumber: u?.accountNumber,
+      accountType: u?.accountType,
+      bankName: u?.bankName,
+      bankProofUrl: u?.bankProofUrl,
+      ifscCode: u?.ifscCode,
+    } : undefined
+  ),
 });
 
 export const usersApi = {

@@ -38,6 +38,8 @@ const OnboardingDetailsSummary = ({
 }: OnboardingDetailsSummaryProps) => {
   const getApiUrl = (path?: string) => {
     if (!path) return "";
+    // Already an absolute URL (e.g. Cloudinary) — return as-is
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
     const base = import.meta.env.VITE_API_URL || "http://localhost:3000";
     return `${base}${path}`;
   };
