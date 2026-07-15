@@ -4,10 +4,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ROLE } from "../../../shared/constants/role.const";
 import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
 import { usersApi } from "../service/users.api";
-import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal";
 import type { User, Booking, Vehicle, OwnerStation } from "../types";
+import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal";
 import { toast } from "sonner";
 import { getErrorMessage } from "../../../shared/utils/error";
+import Loading from "../../../shared/components/ui/Loading";
 
 // Import sub-components
 import UserDetailsHeader from "../components/ui/UserDetailsHeader";
@@ -132,9 +133,8 @@ const UserDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="w-12 h-12 border-4 border-[#ADC6FF]/20 border-t-[#ADC6FF] rounded-full animate-spin" />
-        <p className="text-muted-foreground text-sm font-semibold">Loading user details...</p>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loading size="lg" text="Loading user details..." />
       </div>
     );
   }
