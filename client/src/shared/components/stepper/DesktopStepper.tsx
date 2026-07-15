@@ -1,13 +1,7 @@
 import { Check } from "lucide-react";
 import type { StepperRenderProps } from "./types";
 
-/**
- * DesktopStepper — pure presentation.
- *
- * Renders the vertical sidebar stepper for `lg` and above viewports.
- * The optional `heading`, `description`, and `footerNote` props allow
- * any feature to inject its own text without coupling to this component.
- */
+
 export default function DesktopStepper({
   steps,
   heading,

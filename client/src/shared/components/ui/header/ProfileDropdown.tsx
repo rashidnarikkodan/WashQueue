@@ -190,7 +190,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 if (user.role === ROLE.OWNER) {
                   if (currentRole === VIEW_MODE.CUSTOMER) {
                     setActiveViewMode(VIEW_MODE.OWNER);
-                    navigate("/owner/dashboard");
+                    navigate("/owner");
                   } else {
                     setActiveViewMode(VIEW_MODE.CUSTOMER);
                     navigate("/");

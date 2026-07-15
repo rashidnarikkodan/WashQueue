@@ -15,7 +15,7 @@ export default function MobileStepper({
   className = "",
 }: StepperRenderProps) {
   return (
-    <div className={`w-full max-w-2xl px-4 sm:px-0 mb-2 ${className}`}>
+    <div className={`w-full max-w-2xl px-4 pt-6 sm:px-0 mb-2 ${className}`}>
       <div className="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 space-y-3">
         {/* Header info */}
         <div className="flex items-center justify-between text-[11px] font-bold">
