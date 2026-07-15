@@ -59,7 +59,10 @@ function DataTable<T>({
       {isLoading ? (
         <Loading size="lg" text={loadingText} className="py-20 gap-3" />
       ) : (
-        <div className="border border-border/80 bg-card/60 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden">
+        <div
+          key={activeTab ?? "__default__"}
+          className="border border-border/80 bg-card/60 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+        >
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
               <TableHeader columns={columns} />
