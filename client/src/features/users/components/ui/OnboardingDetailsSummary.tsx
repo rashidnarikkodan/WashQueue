@@ -26,21 +26,61 @@ interface OnboardingDetailsSummaryProps {
   onEditStep?: (step: number) => void;
 }
 
+const getApiUrl = (path?: string) => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const base = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  return `${base}${path}`;
+};
+
 const OnboardingDetailsSummary = ({
   details,
   email,
-  idProofFile,
-  bankProofFile,
-  businessLicenseFile,
-  gstCertificateFile,
+  idProofFile = null,
+  bankProofFile = null,
+  businessLicenseFile = null,
+  gstCertificateFile = null,
   onEditStep,
 }: OnboardingDetailsSummaryProps) => {
-  const getApiUrl = (path?: string) => {
-    if (!path) return "";
-    // Already an absolute URL (e.g. Cloudinary) — return as-is
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    const base = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    return `${base}${path}`;
+  const renderDocumentPreview = (
+    label: string,
+    file: File | null,
+    url?: string
+  ) => {
+    const previewUrl = file ? URL.createObjectURL(file) : url ? getApiUrl(url) : null;
+    const fileName = file ? file.name : url ? "Attached Document" : null;
+
+    if (!previewUrl) {
+      return (
+        <div className="p-3.5 bg-red-500/5 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold text-center">
+          Missing Document
+        </div>
+      );
+    }
+
+    return (
+      <a
+        href={previewUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-between p-3 border border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all cursor-pointer"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-900 border border-border/80 text-slate-400 flex items-center justify-center shrink-0">
+            <FileText size={16} />
+          </div>
+          <div className="text-left min-w-0">
+            <span className="text-xs font-bold text-slate-200 block truncate">
+              {label}
+            </span>
+            <span className="text-[10px] text-slate-500 font-semibold truncate block max-w-[180px]">
+              {fileName}
+            </span>
+          </div>
+        </div>
+        <ChevronRight size={14} className="text-slate-500" />
+      </a>
+    );
   };
 
   return (
@@ -133,40 +173,7 @@ const OnboardingDetailsSummary = ({
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
               Uploaded Document
             </span>
-            {onEditStep ? (
-              <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-850 rounded-xl justify-between">
-                <span className="font-bold text-slate-300 truncate max-w-[150px]">
-                  {idProofFile ? idProofFile.name : details.idProofUrl ? "Previously uploaded" : "None"}
-                </span>
-                <span className={`${(idProofFile || details.idProofUrl) ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"} border px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase`}>
-                  {(idProofFile || details.idProofUrl) ? "Attached" : "Missing"}
-                </span>
-              </div>
-            ) : details.idProofUrl ? (
-              <a
-                href={getApiUrl(details.idProofUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 border border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 border border-border/80 text-slate-400 flex items-center justify-center shrink-0">
-                    <FileText size={16} />
-                  </div>
-                  <div className="text-left min-w-0">
-                    <span className="text-xs font-bold text-slate-200 block truncate">
-                      ID Proof
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-semibold">Click to preview document</span>
-                  </div>
-                </div>
-                <ChevronRight size={14} className="text-slate-500" />
-              </a>
-            ) : (
-              <div className="p-3.5 bg-red-500/5 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold text-center">
-                Missing Document
-              </div>
-            )}
+            {renderDocumentPreview("ID Proof", idProofFile, details.idProofUrl)}
           </div>
         </div>
       </div>
@@ -239,40 +246,7 @@ const OnboardingDetailsSummary = ({
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
               Uploaded Proof
             </span>
-            {onEditStep ? (
-              <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-850 rounded-xl justify-between">
-                <span className="font-bold text-slate-300 truncate max-w-[150px]">
-                  {bankProofFile ? bankProofFile.name : details.bankProofUrl ? "Previously uploaded" : "None"}
-                </span>
-                <span className={`${(bankProofFile || details.bankProofUrl) ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"} border px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase`}>
-                  {(bankProofFile || details.bankProofUrl) ? "Attached" : "Missing"}
-                </span>
-              </div>
-            ) : details.bankProofUrl ? (
-              <a
-                href={getApiUrl(details.bankProofUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 border border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 border border-border/80 text-slate-400 flex items-center justify-center shrink-0">
-                    <FileText size={16} />
-                  </div>
-                  <div className="text-left min-w-0">
-                    <span className="text-xs font-bold text-slate-200 block truncate">
-                      Bank Proof
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-semibold">Click to preview document</span>
-                  </div>
-                </div>
-                <ChevronRight size={14} className="text-slate-500" />
-              </a>
-            ) : (
-              <div className="p-3.5 bg-red-500/5 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold text-center">
-                Missing Document
-              </div>
-            )}
+            {renderDocumentPreview("Bank Proof", bankProofFile, details.bankProofUrl)}
           </div>
         </div>
       </div>
@@ -307,36 +281,7 @@ const OnboardingDetailsSummary = ({
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">
                   Business License
                 </span>
-                {onEditStep ? (
-                  <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-850 rounded-xl justify-between">
-                    <span className="font-bold text-slate-350 truncate max-w-[150px]">
-                      {businessLicenseFile ? businessLicenseFile.name : "Attached"}
-                    </span>
-                    <span className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 border px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
-                      Attached
-                    </span>
-                  </div>
-                ) : details.businessLicenseUrl ? (
-                  <a
-                    href={getApiUrl(details.businessLicenseUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 border border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-border/80 text-slate-400 flex items-center justify-center shrink-0">
-                        <FileText size={16} />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <span className="text-xs font-bold text-slate-200 block truncate">
-                          Business License
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-semibold">Click to preview document</span>
-                      </div>
-                    </div>
-                    <ChevronRight size={14} className="text-slate-500" />
-                  </a>
-                ) : null}
+                {renderDocumentPreview("Business License", businessLicenseFile, details.businessLicenseUrl)}
               </div>
             )}
 
@@ -346,36 +291,7 @@ const OnboardingDetailsSummary = ({
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">
                   GST Certificate
                 </span>
-                {onEditStep ? (
-                  <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-850 rounded-xl justify-between">
-                    <span className="font-bold text-slate-350 truncate max-w-[150px]">
-                      {gstCertificateFile ? gstCertificateFile.name : "Attached"}
-                    </span>
-                    <span className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 border px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
-                      Attached
-                    </span>
-                  </div>
-                ) : details.gstCertificateUrl ? (
-                  <a
-                    href={getApiUrl(details.gstCertificateUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 border border-border/80 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-border/80 text-slate-400 flex items-center justify-center shrink-0">
-                        <FileText size={16} />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <span className="text-xs font-bold text-slate-200 block truncate">
-                          GST Certificate
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-semibold">Click to preview document</span>
-                      </div>
-                    </div>
-                    <ChevronRight size={14} className="text-slate-500" />
-                  </a>
-                ) : null}
+                {renderDocumentPreview("GST Certificate", gstCertificateFile, details.gstCertificateUrl)}
               </div>
             )}
           </div>
