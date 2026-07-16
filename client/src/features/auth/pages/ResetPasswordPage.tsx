@@ -1,5 +1,4 @@
-import { useRef, useState, useEffect } from "react";
-import type { KeyboardEvent, ClipboardEvent } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, KeyRound } from "lucide-react";
 import Loading from "../../../shared/components/ui/Loading";
@@ -10,6 +9,8 @@ import FormInput from "../../../shared/components/form/FormInput";
 import { toast } from "sonner";
 import PasswordStrength from "@/shared/components/ui/PasswordStrength";
 import { isStrongPassword } from "@/shared/utils/validation";
+import OtpInput from "../../../shared/components/ui/OtpInput";
+import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -21,12 +22,9 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Resend OTP states
-  const [timerCount, setTimerCount] = useState(60);
-  const [isResendActive, setIsResendActive] = useState(false);
+  // Resend OTP states & timer hook
+  const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(60);
   const [isResending, setIsResending] = useState(false);
-
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Get email from localStorage where it was saved during forgot password request
   useEffect(() => {
@@ -39,63 +37,6 @@ export default function ResetPasswordPage() {
     setEmail(savedEmail);
   }, [navigate]);
 
-  // Countdown timer for Resend OTP button
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (timerCount > 0) {
-      interval = setInterval(() => {
-        setTimerCount((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setIsResendActive(true);
-    }
-    return () => clearInterval(interval);
-  }, [timerCount]);
-
-  const handleDigitChange = (index: number, val: string) => {
-    const lastChar = val.slice(-1);
-    if (/^[0-9]$/.test(lastChar) || lastChar === "") {
-      const nextDigits = [...otpDigits];
-      nextDigits[index] = lastChar;
-      setOtpDigits(nextDigits);
-
-      if (lastChar !== "" && index < 5) {
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
-  };
-
-  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace") {
-      if (otpDigits[index] === "" && index > 0) {
-        const nextDigits = [...otpDigits];
-        nextDigits[index - 1] = "";
-        setOtpDigits(nextDigits);
-        inputRefs.current[index - 1]?.focus();
-        e.preventDefault();
-      }
-    } else if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-      e.preventDefault();
-    } else if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-      e.preventDefault();
-    }
-  };
-
-  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").trim();
-    if (/^\d{6}$/.test(pasteData)) {
-      const newDigits = pasteData.split("");
-      setOtpDigits(newDigits);
-      inputRefs.current[5]?.focus();
-      toast.success("Code pasted successfully!");
-    } else {
-      toast.error("Please paste a valid 6-digit code");
-    }
-  };
-
   const handleResend = async () => {
     if (!email) {
       toast.error("Email address not found.");
@@ -104,19 +45,12 @@ export default function ResetPasswordPage() {
     setIsResending(true);
     try {
       await authApi.forgotPassword(email);
-      setTimerCount(60);
-      setIsResendActive(false);
+      resetTimer(60);
     } catch (e: unknown) {
       toast.error(getErrorMessage(e, "Failed to resend verification code."));
     } finally {
       setIsResending(false);
     }
-  };
-
-  const formatTimer = (sec: number) => {
-    const min = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${min.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
   const validateForm = () => {
@@ -201,24 +135,7 @@ export default function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-start gap-2.5 md:gap-3">
-                  {otpDigits.map((digit, i) => (
-                    <input
-                      key={i}
-                      ref={(el) => { inputRefs.current[i] = el; }}
-                      type="text"
-                      value={digit}
-                      onChange={(e) => handleDigitChange(i, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(i, e)}
-                      onPaste={handlePaste}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      className="w-12 h-12 sm:w-14 sm:h-14 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-muted/20 border border-border rounded-xl text-center font-extrabold text-foreground text-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                      autoFocus={i === 0}
-                      disabled={isLoading}
-                    />
-                  ))}
-                </div>
+                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isLoading} />
 
                 {errors.code && (
                   <p className="text-xs text-destructive mt-1">{errors.code}</p>
@@ -229,7 +146,7 @@ export default function ResetPasswordPage() {
               <div className="text-left mt-4 min-h-[24px]">
                 {!isResendActive ? (
                   <p className="text-xs text-muted-foreground">
-                    Didn't receive the code? Resend in <strong className="text-foreground">{formatTimer(timerCount)}</strong>
+                    Didn't receive the code? Resend in <strong className="text-foreground">{formatTimer}</strong>
                   </p>
                 ) : (
                   <div className="flex items-center gap-2">

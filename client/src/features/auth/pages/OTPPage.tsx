@@ -1,38 +1,25 @@
-import { useRef, useEffect, useState } from "react";
-import type { KeyboardEvent, ClipboardEvent } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, ArrowLeft } from "lucide-react";
 import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import { useAuthFormStore } from "../store/authFormStore";
 import { toast } from "sonner";
+import OtpInput from "../../../shared/components/ui/OtpInput";
+import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer";
 
 export default function OTPPage() {
   const navigate = useNavigate();
   const { verifyOTP, isLoading } = useAuthStore();
-  const { otpDigits, setOtpDigit, setOtpDigits, resetForm } = useAuthFormStore();
+  const { otpDigits, setOtpDigits, resetForm } = useAuthFormStore();
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const isVerifyingRef = useRef(false);
 
-  // Resend code countdown timer
-  const [timerCount, setTimerCount] = useState(25);
-  const [isResendActive, setIsResendActive] = useState(false);
+  // Resend code countdown timer hook (starts at 25 seconds)
+  const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(25);
 
   // Success Verification Modal
   const [isVerified, setIsVerified] = useState(false);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (timerCount > 0) {
-      interval = setInterval(() => {
-        setTimerCount((prev) => prev - 1);
-      }, 1000);
-    } else {
-      setIsResendActive(true);
-    }
-    return () => clearInterval(interval);
-  }, [timerCount]);
 
   useEffect(() => {
     return () => {
@@ -60,54 +47,9 @@ export default function OTPPage() {
     }
   }, [otpDigits, verifyOTP, isVerified, navigate]);
 
-  const handleDigitChange = (index: number, val: string) => {
-    // Take the last character entered to allow overwriting of values smoothly
-    const lastChar = val.slice(-1);
-    if (/^[0-9]$/.test(lastChar) || lastChar === "") {
-      setOtpDigit(index, lastChar);
-
-      // Move focus forward if value entered
-      if (lastChar !== "" && index < 5) {
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
-  };
-
-  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace") {
-      if (otpDigits[index] === "" && index > 0) {
-        // Current input is already empty, move focus to previous and clear it
-        setOtpDigit(index - 1, "");
-        inputRefs.current[index - 1]?.focus();
-        e.preventDefault();
-      }
-    } else if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-      e.preventDefault();
-    } else if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-      e.preventDefault();
-    }
-  };
-
-  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").trim();
-    if (/^\d{6}$/.test(pasteData)) {
-      const newDigits = pasteData.split("");
-      setOtpDigits(newDigits);
-      // Focus the last input box
-      inputRefs.current[5]?.focus();
-      toast.success("Verification code pasted successfully!");
-    } else {
-      toast.error("Please paste a valid 6-digit verification code");
-    }
-  };
-
   const handleResend = () => {
     if (isResendActive) {
-      setTimerCount(59);
-      setIsResendActive(false);
+      resetTimer(59);
       toast.success("A new verification code has been sent!");
     }
   };
@@ -127,12 +69,6 @@ export default function OTPPage() {
         isVerifyingRef.current = false;
       }
     }
-  };
-
-  const formatTimer = (sec: number) => {
-    const min = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${min.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -160,23 +96,8 @@ export default function OTPPage() {
 
             {/* OTP Digits inputs */}
             <form onSubmit={handleVerify} className="space-y-8">
-              <div className="flex justify-center gap-2.5 md:gap-4">
-                {otpDigits.map((digit: string, i: number) => (
-                  <input
-                    key={i}
-                    ref={(el) => { inputRefs.current[i] = el; }}
-                    type="text"
-                    value={digit}
-                    onChange={(e) => handleDigitChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
-                    onPaste={handlePaste}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    className="w-12 h-12 md:w-16 md:h-16 bg-muted/50 border border-border rounded-xl text-center font-extrabold text-foreground text-lg md:text-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                    autoFocus={i === 0}
-                    disabled={isLoading}
-                  />
-                ))}
+              <div className="flex justify-center">
+                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isLoading} />
               </div>
 
               {/* Submit Verification */}
@@ -200,7 +121,7 @@ export default function OTPPage() {
                 <div className="text-center space-y-1">
                   {!isResendActive ? (
                     <span className="text-xs text-muted-foreground block">
-                      Resend available in {formatTimer(timerCount)}
+                      Resend available in {formatTimer}
                     </span>
                   ) : (
                     <button
