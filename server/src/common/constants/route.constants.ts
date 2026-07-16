@@ -28,4 +28,11 @@ export const API_ROUTES = {
     ONBOARDING_STEP: "/onboarding/step",
     ONBOARDING_SUBMIT: "/onboarding/submit",
   },
+  VEHICLE_CATALOG: {
+    ROOT: "/api/vehicle-catalog",
+    CATEGORIES: "/categories",
+    CATEGORY_BY_ID: "/categories/:id",
+    CLASSES: "/classes",
+    CLASS_BY_ID: "/classes/:id",
+  },
 } as const

@@ -1,0 +1,66 @@
+import { ICreateClassUseCase } from "../interfaces/vehicle-class-usecases.interface"
+import { CreateClassInput, ClassResponseDto } from "../dtos/class.dto"
+import { IVehicleClassRepository } from "../../domain/repositories/vehicle-class.repsoitory"
+import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-category.repsoitory"
+import { VehicleClass } from "../../domain/entities/VehicleClass"
+import { NotFoundError } from "@/common/errors/not-found-error"
+import { ConflictError } from "@/common/errors/conflict-error"
+import { Types } from "mongoose"
+
+export class CreateClassUseCase implements ICreateClassUseCase {
+  constructor(
+    private readonly classRepository: IVehicleClassRepository,
+    private readonly categoryRepository: IVehicleCategoryRepository
+  ) {}
+
+  async execute(input: CreateClassInput): Promise<ClassResponseDto> {
+    // 1. Verify category exists
+    const category = await this.categoryRepository.findById(input.categoryId)
+    if (!category) {
+      throw new NotFoundError("Vehicle category not found")
+    }
+
+    const slug = input.slug || this.slugify(input.name)
+
+    // 2. Verify class name is unique
+    const existingByName = await this.classRepository.findByName(input.name)
+    if (existingByName) {
+      throw new ConflictError(`Vehicle class with name "${input.name}" already exists`)
+    }
+
+    // 3. Verify class slug is unique
+    const existingBySlug = await this.classRepository.findBySlug(slug)
+    if (existingBySlug) {
+      throw new ConflictError(`Vehicle class with slug "${slug}" already exists`)
+    }
+
+    const id = new Types.ObjectId().toHexString()
+    const vehicleClass = new VehicleClass({
+      id,
+      categoryId: input.categoryId,
+      name: input.name,
+      slug,
+      order: input.order ?? 0,
+    })
+
+    const savedClass = await this.classRepository.save(vehicleClass)
+
+    return {
+      id: savedClass.id,
+      categoryId: savedClass.categoryId,
+      name: savedClass.name,
+      slug: savedClass.slug,
+      order: savedClass.order,
+    }
+  }
+
+  private slugify(text: string): string {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/\-\-+/g, "-")
+  }
+}
