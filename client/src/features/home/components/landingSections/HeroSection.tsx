@@ -33,7 +33,7 @@ export default function HeroSection() {
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-2">
             <button 
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/signup")}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-extrabold text-sm hover:bg-primary/95 transition-all shadow-lg shadow-primary/10 hover:shadow-primary/20 cursor-pointer w-full sm:w-auto"
             >
               <span>Get Started</span>
