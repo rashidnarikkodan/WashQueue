@@ -1,7 +1,7 @@
 // src/app/routes/manager.routes.tsx
 
-import ManagerLayout from "../layouts/ManagerLayout";
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
+import ManagerLayout from "../layouts/ManagerLayout"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -20,4 +20,4 @@ export const managerRoutes = {
       element: <div>Walk In Management</div>,
     },
   ],
-};
+}

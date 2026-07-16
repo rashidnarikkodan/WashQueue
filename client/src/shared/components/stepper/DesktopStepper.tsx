@@ -1,6 +1,5 @@
-import { Check } from "lucide-react";
-import type { StepperRenderProps } from "./types";
-
+import { Check } from "lucide-react"
+import type { StepperRenderProps } from "./types"
 
 export default function DesktopStepper({
   steps,
@@ -34,8 +33,8 @@ export default function DesktopStepper({
       {/* Step list */}
       <div className="flex-1 flex flex-col justify-center space-y-6 max-w-xs">
         {steps.map((step) => {
-          const isActive = step.status === "active";
-          const isCompleted = step.status === "completed";
+          const isActive = step.status === "active"
+          const isCompleted = step.status === "completed"
 
           return (
             <div
@@ -50,26 +49,18 @@ export default function DesktopStepper({
                   isCompleted
                     ? "bg-emerald-500 border-emerald-500 text-slate-950 shadow-md shadow-emerald-500/10"
                     : isActive
-                    ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "border-slate-700 bg-transparent text-slate-500"
+                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "border-slate-700 bg-transparent text-slate-500"
                 }`}
               >
-                {isCompleted ? (
-                  <Check size={16} strokeWidth={3} />
-                ) : (
-                  <span>{step.id}</span>
-                )}
+                {isCompleted ? <Check size={16} strokeWidth={3} /> : <span>{step.id}</span>}
               </div>
 
               {/* Step label */}
               <div className="flex flex-col">
                 <span
                   className={`text-sm font-bold transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : isCompleted
-                      ? "text-emerald-400"
-                      : "text-slate-500"
+                    isActive ? "text-white" : isCompleted ? "text-emerald-400" : "text-slate-500"
                   }`}
                 >
                   {step.title}
@@ -81,7 +72,7 @@ export default function DesktopStepper({
                 )}
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -92,5 +83,5 @@ export default function DesktopStepper({
         </div>
       )}
     </div>
-  );
+  )
 }

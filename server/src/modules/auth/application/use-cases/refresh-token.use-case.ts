@@ -8,14 +8,13 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces"
 
-
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
-  ) { }
+  ) {}
 
   async execute(refreshToken: string) {
     if (!refreshToken) {

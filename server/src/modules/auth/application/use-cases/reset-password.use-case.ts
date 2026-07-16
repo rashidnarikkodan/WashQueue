@@ -11,7 +11,7 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IOtpRepository,
     private readonly hashService: IHashService
-  ) { }
+  ) {}
 
   async execute(data: ResetPasswordInput): Promise<void> {
     // Verify OTP code using the repository and entity

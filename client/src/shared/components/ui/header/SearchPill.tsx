@@ -1,30 +1,30 @@
-import { useEffect, useRef } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useRef } from "react"
+import { Search } from "lucide-react"
 
 interface SearchPillProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 export default function SearchPill({ onClose }: SearchPillProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        onClose();
+        onClose()
       }
-    };
-    
+    }
+
     // Slight delay to ensure trigger button clicks do not immediately close the overlay
     const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 10);
+      document.addEventListener("mousedown", handleClickOutside)
+    }, 10)
 
     return () => {
-      clearTimeout(timer);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
+      clearTimeout(timer)
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [onClose])
 
   return (
     <div
@@ -41,5 +41,5 @@ export default function SearchPill({ onClose }: SearchPillProps) {
         <Search className="h-4.5 w-4.5" />
       </button>
     </div>
-  );
+  )
 }

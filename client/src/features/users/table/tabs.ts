@@ -1,4 +1,4 @@
-import type { TabConfig } from "@/shared/components/data-table";
+import type { TabConfig } from "@/shared/components/data-table"
 
 /** Tabs for UserManagement page */
 export const userTabs: TabConfig[] = [
@@ -9,7 +9,7 @@ export const userTabs: TabConfig[] = [
     label: "Owners",
     activeColor: "border-[#ADC6FF] text-[#ADC6FF]",
   },
-];
+]
 
 /** Tabs for OwnerApproval page */
 export const ownerApprovalTabs: TabConfig[] = [
@@ -20,4 +20,4 @@ export const ownerApprovalTabs: TabConfig[] = [
     label: "Approved Owners",
     activeColor: "border-[#ADC6FF] text-[#ADC6FF]",
   },
-];
+]

@@ -11,7 +11,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: IUserRepository
   ) {}
 
   async execute(userId: string): Promise<{

@@ -7,7 +7,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
 
   async execute(): Promise<CategoryResponseDto[]> {
     const categories = await this.categoryRepository.findAll()
-    return categories.map(category => ({
+    return categories.map((category) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,

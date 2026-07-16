@@ -19,7 +19,9 @@ export class DeleteCategoryUseCase implements IDeleteCategoryUseCase {
     // Integrity check: prevent deletion if classes reference this category
     const linkedClasses = await this.classRepository.findAll({ categoryId: id })
     if (linkedClasses.length > 0) {
-      throw new BadRequestError("Cannot delete vehicle category because it has active vehicle classes associated with it")
+      throw new BadRequestError(
+        "Cannot delete vehicle category because it has active vehicle classes associated with it"
+      )
     }
 
     await this.categoryRepository.delete(id)

@@ -1,25 +1,25 @@
-import { useState } from "react";
-import { Clock } from "lucide-react";
-import type { Booking } from "../../types";
+import { useState } from "react"
+import { Clock } from "lucide-react"
+import type { Booking } from "../../types"
 
 interface BookingHistoryCardProps {
-  bookings: Booking[];
+  bookings: Booking[]
 }
 
 export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps) {
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const bookingsPerPage = 3;
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const bookingsPerPage = 3
 
   const filteredBookings = bookings.filter((b) =>
     statusFilter === "ALL" ? true : b.status === statusFilter
-  );
+  )
 
-  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / bookingsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / bookingsPerPage))
   const displayedBookings = filteredBookings.slice(
     (currentPage - 1) * bookingsPerPage,
     currentPage * bookingsPerPage
-  );
+  )
 
   return (
     <div className="space-y-6">
@@ -71,8 +71,8 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
             <select
               value={statusFilter}
               onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
+                setStatusFilter(e.target.value)
+                setCurrentPage(1)
               }}
               className="bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-xs font-semibold text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -117,8 +117,8 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
                           b.status === "COMPLETED"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : b.status === "CANCELLED"
-                            ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                            : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                              : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
                         }`}
                       >
                         {b.status}
@@ -171,5 +171,5 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
         )}
       </div>
     </div>
-  );
+  )
 }

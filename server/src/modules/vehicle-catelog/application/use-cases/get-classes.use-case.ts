@@ -7,7 +7,7 @@ export class GetClassesUseCase implements IGetClassesUseCase {
 
   async execute(filter?: { categoryId?: string }): Promise<ClassResponseDto[]> {
     const classes = await this.classRepository.findAll(filter)
-    return classes.map(vehicleClass => ({
+    return classes.map((vehicleClass) => ({
       id: vehicleClass.id,
       categoryId: vehicleClass.categoryId,
       name: vehicleClass.name,

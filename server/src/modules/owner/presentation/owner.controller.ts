@@ -27,7 +27,7 @@ export class OwnerController {
     private readonly getOwnerUseCase: IGetOwnerUseCase,
     private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
     private readonly mediaStorage: IMediaStorage
-  ) { }
+  ) {}
 
   /** GET /api/owner/onboarding/status */
   getOnboardingStatus = async (req: AuthenticatedRequest, res: Response) => {

@@ -1,31 +1,31 @@
-import { ChevronRight } from "lucide-react";
-import { User, Building2, ShieldCheck, FileText } from "lucide-react";
-import FormInput from "../../../../shared/components/form/FormInput";
-import FormSelect from "../../../../shared/components/form/FormSelect";
-import FormUpload from "../../../../shared/components/form/FormUpload";
-import type { OnboardingDetails } from "../../services/owner.api";
+import { ChevronRight } from "lucide-react"
+import { User, Building2, ShieldCheck, FileText } from "lucide-react"
+import FormInput from "../../../../shared/components/form/FormInput"
+import FormSelect from "../../../../shared/components/form/FormSelect"
+import FormUpload from "../../../../shared/components/form/FormUpload"
+import type { OnboardingDetails } from "../../services/owner.api"
 
 interface OwnerKYCStepProps {
   formData: {
-    fullName: string;
-    phone: string;
-    whatsapp: string;
-    businessName: string;
-    gstNumber: string;
-    idProofType: string;
-  };
-  fieldErrors: Record<string, string>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  idProofFile: File | null;
-  onIdProofChange: (file: File | null) => void;
-  businessLicenseFile: File | null;
-  onBusinessLicenseChange: (file: File | null) => void;
-  gstCertificateFile: File | null;
-  onGstCertificateChange: (file: File | null) => void;
-  savedDetails: OnboardingDetails;
-  onCancel: () => void;
-  onContinue: () => void;
-  isLoading: boolean;
+    fullName: string
+    phone: string
+    whatsapp: string
+    businessName: string
+    gstNumber: string
+    idProofType: string
+  }
+  fieldErrors: Record<string, string>
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  idProofFile: File | null
+  onIdProofChange: (file: File | null) => void
+  businessLicenseFile: File | null
+  onBusinessLicenseChange: (file: File | null) => void
+  gstCertificateFile: File | null
+  onGstCertificateChange: (file: File | null) => void
+  savedDetails: OnboardingDetails
+  onCancel: () => void
+  onContinue: () => void
+  isLoading: boolean
 }
 
 export default function OwnerKYCStep({
@@ -253,5 +253,5 @@ export default function OwnerKYCStep({
         </button>
       </div>
     </div>
-  );
+  )
 }

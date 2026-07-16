@@ -1,14 +1,14 @@
-import { MapPin, CheckCircle, User as UserIcon } from "lucide-react";
-import type { User } from "../../types";
+import { MapPin, CheckCircle, User as UserIcon } from "lucide-react"
+import type { User } from "../../types"
 
 interface PersonalInformationCardProps {
-  user: User;
+  user: User
 }
 
 export default function PersonalInformationCard({ user }: PersonalInformationCardProps) {
   // If owner, check onboardingDetails for fullName and phone.
-  const fullName = user.onboardingDetails?.fullName as string || user.name || "N/A";
-  const phone = user.onboardingDetails?.phone as string || user.phone || "Not Registered";
+  const fullName = (user.onboardingDetails?.fullName as string) || user.name || "N/A"
+  const phone = (user.onboardingDetails?.phone as string) || user.phone || "Not Registered"
 
   return (
     <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
@@ -76,5 +76,5 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
         <p className="text-xs text-slate-450 leading-relaxed italic">No biography registered.</p>
       </div>
     </div>
-  );
+  )
 }

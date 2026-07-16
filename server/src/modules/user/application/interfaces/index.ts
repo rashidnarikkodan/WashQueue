@@ -1,3 +1,5 @@
 export type {
-    IGetUserUseCase,IGetUsersUseCase,IUpdateUserUseCase
- } from './user-usecases.interfaces'
+  IGetUserUseCase,
+  IGetUsersUseCase,
+  IUpdateUserUseCase,
+} from "./user-usecases.interfaces"

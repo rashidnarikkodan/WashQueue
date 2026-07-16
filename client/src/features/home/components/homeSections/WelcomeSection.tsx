@@ -1,10 +1,10 @@
-import { useAuthStore } from "@/features/auth/store/authStore";
-import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock";
-import { getGreeting } from "@/shared/utils/greeting";
+import { useAuthStore } from "@/features/auth/store/authStore"
+import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock"
+import { getGreeting } from "@/shared/utils/greeting"
 
 export default function WelcomeSection() {
-  const { user } = useAuthStore();
-  const data = MOCK_DASHBOARD_DATA;
+  const { user } = useAuthStore()
+  const data = MOCK_DASHBOARD_DATA
 
   return (
     <div className="space-y-2 mb-12 animate-in fade-in slide-in-from-top-4 duration-500 text-left">
@@ -15,5 +15,5 @@ export default function WelcomeSection() {
         Ready for a fresh wash today?
       </p>
     </div>
-  );
+  )
 }

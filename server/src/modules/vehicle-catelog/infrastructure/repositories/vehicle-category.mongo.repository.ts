@@ -4,14 +4,17 @@ import { VehicleCategoryMapper } from "../mappers/vehicle-category.mapper"
 import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-category.repsoitory"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 
-export class VehicleCategoryMongoRepository extends BaseRepository<VehicleCategory, IVehicleCategory> implements IVehicleCategoryRepository {
+export class VehicleCategoryMongoRepository
+  extends BaseRepository<VehicleCategory, IVehicleCategory>
+  implements IVehicleCategoryRepository
+{
   constructor() {
     super(VehicleCategoryModel, new VehicleCategoryMapper())
   }
 
   async findAll(): Promise<VehicleCategory[]> {
     const docs = await this.model.find().sort({ order: 1, name: 1 }).exec()
-    return docs.map(doc => this.mapper.toDomain(doc))
+    return docs.map((doc) => this.mapper.toDomain(doc))
   }
 
   async findBySlug(slug: string): Promise<VehicleCategory | null> {

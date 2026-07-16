@@ -12,7 +12,11 @@ export interface AuthenticatedRequest extends Request {
   }
 }
 
-export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     let token: string | undefined
 

@@ -19,7 +19,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(loggerMiddleware)
 
-
 // Serve uploaded files
 app.use("/uploads", express.static(path.resolve("uploads")))
 

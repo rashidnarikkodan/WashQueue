@@ -19,4 +19,8 @@ const categorySchema = new Schema<IVehicleCategory>(
   }
 )
 
-export const VehicleCategoryModel = model<IVehicleCategory>("VehicleCategory", categorySchema, "categories")
+export const VehicleCategoryModel = model<IVehicleCategory>(
+  "VehicleCategory",
+  categorySchema,
+  "categories"
+)

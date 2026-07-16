@@ -1,85 +1,85 @@
-import type React from "react";
-import type { PaginationMeta } from "@/shared/components/ui/Pagination";
+import type React from "react"
+import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 
-export type { PaginationMeta };
+export type { PaginationMeta }
 
 // ─── Column ──────────────────────────────────────────────────────────────────
 
 export interface Column<T> {
-  id: string;
-  header: string;
-  accessor?: keyof T;
-  cell?: (row: T) => React.ReactNode;
-  sortable?: boolean;
-  width?: string;
-  align?: "left" | "center" | "right";
+  id: string
+  header: string
+  accessor?: keyof T
+  cell?: (row: T) => React.ReactNode
+  sortable?: boolean
+  width?: string
+  align?: "left" | "center" | "right"
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 export interface TabConfig {
-  id: string;
-  label: string;
+  id: string
+  label: string
   /** Tailwind border + text classes when active. Defaults to "border-primary text-primary" */
-  activeColor?: string;
+  activeColor?: string
 }
 
 // ─── Filters ─────────────────────────────────────────────────────────────────
 
 export interface SelectFilterOption {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 export interface SelectFilter {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: SelectFilterOption[];
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: SelectFilterOption[]
 }
 
 export interface ToggleFilter {
-  id: string;
-  label: string;
-  value: boolean;
-  onChange: (val: boolean) => void;
+  id: string
+  label: string
+  value: boolean
+  onChange: (val: boolean) => void
   /** Tailwind classes applied to the track when ON. Defaults to "bg-primary/25 border border-primary/30" */
-  activeColor?: string;
+  activeColor?: string
   /** Tailwind color class for the thumb when ON. Defaults to "bg-[#ADC6FF]" */
-  thumbActiveColor?: string;
+  thumbActiveColor?: string
 }
 
 // ─── DataTable Props ──────────────────────────────────────────────────────────
 
 export interface DataTableProps<T> {
   // Data
-  columns: Column<T>[];
-  data: T[];
-  rowKey: (row: T) => string;
+  columns: Column<T>[]
+  data: T[]
+  rowKey: (row: T) => string
 
   // Toolbar — search
-  searchQuery?: string;
-  onSearchChange?: (q: string) => void;
-  searchPlaceholder?: string;
-  searchLabel?: string;
+  searchQuery?: string
+  onSearchChange?: (q: string) => void
+  searchPlaceholder?: string
+  searchLabel?: string
 
   // Toolbar — tabs
-  tabs?: TabConfig[];
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
+  tabs?: TabConfig[]
+  activeTab?: string
+  onTabChange?: (tab: string) => void
 
   // Toolbar — filters
-  selectFilters?: SelectFilter[];
-  toggleFilters?: ToggleFilter[];
+  selectFilters?: SelectFilter[]
+  toggleFilters?: ToggleFilter[]
 
   // State
-  isLoading?: boolean;
-  loadingText?: string;
-  errorMsg?: string | null;
-  emptyMessage?: string;
+  isLoading?: boolean
+  loadingText?: string
+  errorMsg?: string | null
+  emptyMessage?: string
 
   // Pagination
-  pagination?: PaginationMeta;
-  onPageChange?: (page: number) => void;
+  pagination?: PaginationMeta
+  onPageChange?: (page: number) => void
 }

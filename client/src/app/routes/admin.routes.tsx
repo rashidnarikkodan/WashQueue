@@ -1,8 +1,8 @@
-import AdminLayout from "../layouts/AdminLayout";
-import UserManagement from "../../features/users/pages/UserManagement";
-import UserDetails from "../../features/users/pages/UserDetails";
-import OwnerApproval from "../../features/users/pages/OwnerApproval";
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
+import AdminLayout from "../layouts/AdminLayout"
+import UserManagement from "../../features/users/pages/UserManagement"
+import UserDetails from "../../features/users/pages/UserDetails"
+import OwnerApproval from "../../features/users/pages/OwnerApproval"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -61,4 +61,4 @@ export const adminRoutes = {
       element: <>System Settings</>,
     },
   ],
-};
+}

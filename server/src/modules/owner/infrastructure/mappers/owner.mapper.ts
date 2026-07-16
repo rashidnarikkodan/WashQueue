@@ -18,7 +18,7 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       verifiedAt: mongooseDoc.verifiedAt,
       createdAt: mongooseDoc.createdAt,
       updatedAt: mongooseDoc.updatedAt,
-      
+
       onboardingStep: mongooseDoc.onboardingStep,
       idProofType: mongooseDoc.idProofType,
       idProofUrl: mongooseDoc.idProofUrl,

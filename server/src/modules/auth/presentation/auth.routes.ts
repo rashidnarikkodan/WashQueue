@@ -16,43 +16,29 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   router.post(
     API_ROUTES.AUTH.SIGNUP,
-    validateRequest(signupSchema, 'body'),
+    validateRequest(signupSchema, "body"),
     asyncHandler(authController.signup)
   )
 
   router.post(
     API_ROUTES.AUTH.LOGIN,
-    validateRequest(loginSchema, 'body'),
+    validateRequest(loginSchema, "body"),
     asyncHandler(authController.login)
   )
 
   router.post(
     API_ROUTES.AUTH.VERIFY_OTP,
-    validateRequest(verifyOtpSchema, 'body'),
+    validateRequest(verifyOtpSchema, "body"),
     asyncHandler(authController.verifyOtp)
   )
 
-  router.post(
-    API_ROUTES.AUTH.GOOGLE,
-    asyncHandler(authController.googleAuth)
-  )
+  router.post(API_ROUTES.AUTH.GOOGLE, asyncHandler(authController.googleAuth))
 
-  router.post(
-    API_ROUTES.AUTH.REFRESH_TOKEN,
-    asyncHandler(authController.refreshToken)
-  )
+  router.post(API_ROUTES.AUTH.REFRESH_TOKEN, asyncHandler(authController.refreshToken))
 
-  router.get(
-    API_ROUTES.AUTH.ME,
-    authenticate,
-    asyncHandler(authController.me)
-  )
+  router.get(API_ROUTES.AUTH.ME, authenticate, asyncHandler(authController.me))
 
-  router.post(
-    API_ROUTES.AUTH.LOGOUT,
-    authenticate,
-    asyncHandler(authController.logout)
-  )
+  router.post(API_ROUTES.AUTH.LOGOUT, authenticate, asyncHandler(authController.logout))
 
   router.post(
     API_ROUTES.AUTH.FORGOT_PASSWORD,
@@ -74,5 +60,3 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   return router
 }
-
-

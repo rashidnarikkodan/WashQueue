@@ -1,13 +1,13 @@
-import { Mail, Phone, Shield, User as UserIcon, Send, UserCheck, UserX } from "lucide-react";
-import Loading from "../../../../shared/components/ui/Loading";
-import { ROLE } from "../../../../shared/constants/role.const";
-import type { User } from "../../types";
+import { Mail, Phone, Shield, User as UserIcon, Send, UserCheck, UserX } from "lucide-react"
+import Loading from "../../../../shared/components/ui/Loading"
+import { ROLE } from "../../../../shared/constants/role.const"
+import type { User } from "../../types"
 
 interface UserDetailsHeaderProps {
-  user: User;
-  isSuspending: boolean;
-  onToggleBlock: () => void;
-  onScrollToNotification: () => void;
+  user: User
+  isSuspending: boolean
+  onToggleBlock: () => void
+  onScrollToNotification: () => void
 }
 
 export default function UserDetailsHeader({
@@ -17,38 +17,38 @@ export default function UserDetailsHeader({
   onScrollToNotification,
 }: UserDetailsHeaderProps) {
   const getInitials = (name: string) => {
-    if (!name) return "US";
+    if (!name) return "US"
     return name
       .split(" ")
       .map((n) => n[0])
       .slice(0, 2)
       .join("")
-      .toUpperCase();
-  };
+      .toUpperCase()
+  }
 
   const getRelativeTime = (dateStr?: string | Date) => {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    const diffMs = new Date().getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (!dateStr) return "N/A"
+    const date = new Date(dateStr)
+    const diffMs = new Date().getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / (1000 * 60))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
 
-    if (diffMins < 1) return "Just active";
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  };
+    if (diffMins < 1) return "Just active"
+    if (diffMins < 60) return `${diffMins} minutes ago`
+    if (diffHours < 24) return `${diffHours} hours ago`
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+  }
 
   const formatJoinedDate = (dateStr?: string | Date) => {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return "N/A"
     return new Date(dateStr)
       .toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
-      .toUpperCase();
-  };
+      .toUpperCase()
+  }
 
   return (
     <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
@@ -75,7 +75,9 @@ export default function UserDetailsHeader({
                   : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${user.isBlocked ? "bg-rose-400" : "bg-emerald-400"}`} />
+              <span
+                className={`w-2 h-2 rounded-full ${user.isBlocked ? "bg-rose-400" : "bg-emerald-400"}`}
+              />
               {user.isBlocked ? "BLOCKED" : "ACTIVE"}
             </span>
           </div>
@@ -105,10 +107,10 @@ export default function UserDetailsHeader({
               {user.role === ROLE.ADMIN
                 ? "System Administrator"
                 : user.role === ROLE.MANAGER
-                ? "Manager"
-                : user.role === ROLE.OWNER
-                ? "Business Owner"
-                : "Customer"}
+                  ? "Manager"
+                  : user.role === ROLE.OWNER
+                    ? "Business Owner"
+                    : "Customer"}
             </span>
           </div>
         </div>
@@ -166,5 +168,5 @@ export default function UserDetailsHeader({
         </div>
       </div>
     </div>
-  );
+  )
 }

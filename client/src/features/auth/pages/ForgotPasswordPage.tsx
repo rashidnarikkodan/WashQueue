@@ -1,45 +1,39 @@
-import { useNavigate } from "react-router-dom";
-import FormInput from "../../../shared/components/form/FormInput";
-import Loading from "../../../shared/components/ui/Loading";
-import { useAuthFormStore } from "../store/authFormStore";
-import { useAuthStore } from "../store/authStore";
-import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"
+import FormInput from "../../../shared/components/form/FormInput"
+import Loading from "../../../shared/components/ui/Loading"
+import { useAuthFormStore } from "../store/authFormStore"
+import { useAuthStore } from "../store/authStore"
+import { toast } from "sonner"
+import { useState, useEffect } from "react"
 
 export default function ForgotPasswordPage() {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { forgotPassword } = useAuthStore();
-  const {
-    forgotEmail,
-    errors,
-    setField,
-    validateForgotPassword,
-    resetForm,
-    clearError
-  } = useAuthFormStore();
+  const { forgotPassword } = useAuthStore()
+  const { forgotEmail, errors, setField, validateForgotPassword, resetForm, clearError } =
+    useAuthFormStore()
 
   // Reset form inputs and errors when component unmounts
   useEffect(() => {
     return () => {
-      resetForm();
-    };
-  }, [resetForm]);
+      resetForm()
+    }
+  }, [resetForm])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForgotPassword()) return;
+    e.preventDefault()
+    if (!validateForgotPassword()) return
 
-    setIsLoading(true);
-    const success = await forgotPassword(forgotEmail);
-    setIsLoading(false);
+    setIsLoading(true)
+    const success = await forgotPassword(forgotEmail)
+    setIsLoading(false)
 
     if (success) {
-      toast.success("Verification OTP code sent successfully!");
-      navigate("/reset-password");
+      toast.success("Verification OTP code sent successfully!")
+      navigate("/reset-password")
     }
-  };
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full">
@@ -68,8 +62,8 @@ export default function ForgotPasswordPage() {
               placeholder="e.g. rashid@example.com"
               value={forgotEmail}
               onChange={(e) => {
-                setField("forgotEmail", e.target.value);
-                clearError("forgotEmail");
+                setField("forgotEmail", e.target.value)
+                clearError("forgotEmail")
               }}
               error={errors.forgotEmail}
               autoComplete="username"
@@ -94,5 +88,5 @@ export default function ForgotPasswordPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

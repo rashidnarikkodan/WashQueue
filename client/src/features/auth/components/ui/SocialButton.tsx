@@ -1,6 +1,6 @@
 interface SocialButtonProps {
-  onClick?: () => void;
-  label: string;
+  onClick?: () => void
+  label: string
 }
 
 export default function SocialButton({ onClick, label }: SocialButtonProps) {
@@ -31,5 +31,5 @@ export default function SocialButton({ onClick, label }: SocialButtonProps) {
       </svg>
       {label}
     </button>
-  );
+  )
 }

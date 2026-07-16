@@ -1,21 +1,21 @@
-import { useState } from "react";
-import type { ChangeEvent, ReactNode } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react"
+import type { ChangeEvent, ReactNode } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
 interface FormInputProps {
-  label: string;
-  type: string;
-  placeholder: string;
-  name?: string;
-  value?: string;
-  defaultValue?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  error?: string;
-  autoComplete?: string;
-  required?: boolean;
-  id?: string;
-  prefix?: ReactNode;
-  leftIcon?: ReactNode;
+  label: string
+  type: string
+  placeholder: string
+  name?: string
+  value?: string
+  defaultValue?: string
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  error?: string
+  autoComplete?: string
+  required?: boolean
+  id?: string
+  prefix?: ReactNode
+  leftIcon?: ReactNode
 }
 
 export default function FormInput({
@@ -31,16 +31,19 @@ export default function FormInput({
   required,
   id,
   prefix,
-  leftIcon
+  leftIcon,
 }: FormInputProps) {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
-  const isPassword = type === "password";
-  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
+  const isPassword = type === "password"
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type
 
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
-      <label htmlFor={id} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left">
+      <label
+        htmlFor={id}
+        className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left"
+      >
         {label}
       </label>
       <div className="relative flex items-center">
@@ -67,7 +70,9 @@ export default function FormInput({
           className={`w-full bg-muted/90 text-foreground border rounded-xl pr-11 py-3 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all duration-200 ${
             prefix ? "pl-24" : leftIcon ? "pl-11" : "pl-4"
           } ${
-            error ? "border-red-500/80 focus:ring-red-500/20 focus:border-red-500" : "border-border/80 hover:border-border"
+            error
+              ? "border-red-500/80 focus:ring-red-500/20 focus:border-red-500"
+              : "border-border/80 hover:border-border"
           }`}
         />
         {isPassword && (
@@ -87,5 +92,5 @@ export default function FormInput({
         </span>
       )}
     </div>
-  );
+  )
 }

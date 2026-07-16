@@ -1,71 +1,73 @@
-import { useRef, useEffect } from "react";
-import type { KeyboardEvent, ClipboardEvent } from "react";
-import { toast } from "sonner";
+import { useRef, useEffect } from "react"
+import type { KeyboardEvent, ClipboardEvent } from "react"
+import { toast } from "sonner"
 
 interface OtpInputProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-  disabled?: boolean;
+  value: string[]
+  onChange: (value: string[]) => void
+  disabled?: boolean
 }
 
 export default function OtpInput({ value, onChange, disabled = false }: OtpInputProps) {
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   // Focus the first input on mount
   useEffect(() => {
-    inputRefs.current[0]?.focus();
-  }, []);
+    inputRefs.current[0]?.focus()
+  }, [])
 
   const handleDigitChange = (index: number, val: string) => {
-    const lastChar = val.slice(-1);
+    const lastChar = val.slice(-1)
     if (/^[0-9]$/.test(lastChar) || lastChar === "") {
-      const nextDigits = [...value];
-      nextDigits[index] = lastChar;
-      onChange(nextDigits);
+      const nextDigits = [...value]
+      nextDigits[index] = lastChar
+      onChange(nextDigits)
 
       if (lastChar !== "" && index < 5) {
-        inputRefs.current[index + 1]?.focus();
+        inputRefs.current[index + 1]?.focus()
       }
     }
-  };
+  }
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace") {
       if (value[index] === "" && index > 0) {
-        const nextDigits = [...value];
-        nextDigits[index - 1] = "";
-        onChange(nextDigits);
-        inputRefs.current[index - 1]?.focus();
-        e.preventDefault();
+        const nextDigits = [...value]
+        nextDigits[index - 1] = ""
+        onChange(nextDigits)
+        inputRefs.current[index - 1]?.focus()
+        e.preventDefault()
       }
     } else if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-      e.preventDefault();
+      inputRefs.current[index - 1]?.focus()
+      e.preventDefault()
     } else if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-      e.preventDefault();
+      inputRefs.current[index + 1]?.focus()
+      e.preventDefault()
     }
-  };
+  }
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").trim();
+    e.preventDefault()
+    const pasteData = e.clipboardData.getData("text").trim()
     if (/^\d{6}$/.test(pasteData)) {
-      const newDigits = pasteData.split("");
-      onChange(newDigits);
-      inputRefs.current[5]?.focus();
-      toast.success("Code pasted successfully!");
+      const newDigits = pasteData.split("")
+      onChange(newDigits)
+      inputRefs.current[5]?.focus()
+      toast.success("Code pasted successfully!")
     } else {
-      toast.error("Please paste a valid 6-digit code");
+      toast.error("Please paste a valid 6-digit code")
     }
-  };
+  }
 
   return (
     <div className="flex justify-start gap-2.5 md:gap-3">
       {value.map((digit, i) => (
         <input
           key={i}
-          ref={(el) => { inputRefs.current[i] = el; }}
+          ref={(el) => {
+            inputRefs.current[i] = el
+          }}
           type="text"
           value={digit}
           onChange={(e) => handleDigitChange(i, e.target.value)}
@@ -79,5 +81,5 @@ export default function OtpInput({ value, onChange, disabled = false }: OtpInput
         />
       ))}
     </div>
-  );
+  )
 }

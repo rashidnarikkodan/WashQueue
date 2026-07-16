@@ -1,8 +1,8 @@
-import { TrendingUp, Gauge, Thermometer } from "lucide-react";
-import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock";
+import { TrendingUp, Gauge, Thermometer } from "lucide-react"
+import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock"
 
 export default function SidebarWidgetsSection() {
-  const data = MOCK_DASHBOARD_DATA;
+  const data = MOCK_DASHBOARD_DATA
 
   return (
     <div className="lg:col-span-4 space-y-6 animate-in slide-in-from-right duration-500 text-left">
@@ -11,7 +11,7 @@ export default function SidebarWidgetsSection() {
         <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest">
           Queue Intelligence
         </h3>
-        
+
         <div className="space-y-4">
           <div className="flex items-center gap-4 bg-card p-3.5 rounded-2xl border border-border/30">
             <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center text-primary border border-border shadow-md">
@@ -19,7 +19,9 @@ export default function SidebarWidgetsSection() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-semibold">Average Wait</p>
-              <p className="text-base font-black text-foreground">{data.queueIntelligence.averageWait}</p>
+              <p className="text-base font-black text-foreground">
+                {data.queueIntelligence.averageWait}
+              </p>
             </div>
           </div>
 
@@ -29,7 +31,9 @@ export default function SidebarWidgetsSection() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-semibold">Wash Speed</p>
-              <p className="text-base font-black text-foreground">{data.queueIntelligence.washSpeed}</p>
+              <p className="text-base font-black text-foreground">
+                {data.queueIntelligence.washSpeed}
+              </p>
             </div>
           </div>
         </div>
@@ -44,9 +48,11 @@ export default function SidebarWidgetsSection() {
             </div>
             <h4 className="text-sm font-bold text-foreground">Weather Insights</h4>
           </div>
-          <span className="text-lg font-black text-foreground">{data.weatherInsights.temperature}</span>
+          <span className="text-lg font-black text-foreground">
+            {data.weatherInsights.temperature}
+          </span>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-xs font-black text-primary uppercase tracking-widest">
             {data.weatherInsights.alertTitle}
@@ -57,5 +63,5 @@ export default function SidebarWidgetsSection() {
         </div>
       </div>
     </div>
-  );
+  )
 }

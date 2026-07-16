@@ -67,7 +67,7 @@ export async function signupAction(
     }
 
     // API call
-    await authApi.signup(name,email,password)
+    await authApi.signup(name, email, password)
 
     return {
       success: true,

@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { useAuthStore } from "../../../../features/auth/store/authStore";
-import type { OnboardingDetails } from "../../services/owner.api";
-import { step1Schema, step2Schema } from "../../schemas/owner.schema";
-import OwnerKYCStep from "./OwnerKYCStep";
-import PayoutStep from "./PayoutStep";
-import ReviewSubmitStep from "./ReviewSubmitStep";
+import { useState, useEffect } from "react"
+import { useAuthStore } from "../../../../features/auth/store/authStore"
+import type { OnboardingDetails } from "../../services/owner.api"
+import { step1Schema, step2Schema } from "../../schemas/owner.schema"
+import OwnerKYCStep from "./OwnerKYCStep"
+import PayoutStep from "./PayoutStep"
+import ReviewSubmitStep from "./ReviewSubmitStep"
 
 interface OnboardingFormProps {
-  step: number;
-  savedDetails: OnboardingDetails;
+  step: number
+  savedDetails: OnboardingDetails
   onSaveStep: (
     currentStep: number,
     formData: FormData,
     nextStep: number,
     setStep: (s: number) => void
-  ) => Promise<void>;
-  onSubmit: () => void;
-  onCancel: () => void;
-  isLoading?: boolean;
+  ) => Promise<void>
+  onSubmit: () => void
+  onCancel: () => void
+  isLoading?: boolean
 }
 
 // Helper to build FormData from text/boolean fields + optional file
@@ -25,22 +25,22 @@ function buildFormData(
   fields: Record<string, string | number | boolean | null | undefined>,
   files?: Record<string, File | null>
 ): FormData {
-  const fd = new FormData();
+  const fd = new FormData()
   for (const [key, val] of Object.entries(fields)) {
     if (val !== undefined && val !== null) {
       if (typeof val === "boolean") {
-        fd.append(key, val ? "true" : "false");
+        fd.append(key, val ? "true" : "false")
       } else {
-        fd.append(key, String(val));
+        fd.append(key, String(val))
       }
     }
   }
   if (files) {
     for (const [key, file] of Object.entries(files)) {
-      if (file) fd.append(key, file);
+      if (file) fd.append(key, file)
     }
   }
-  return fd;
+  return fd
 }
 
 export default function OnboardingForm({
@@ -51,16 +51,16 @@ export default function OnboardingForm({
   onCancel,
   isLoading = false,
 }: OnboardingFormProps) {
-  const { user } = useAuthStore();
+  const { user } = useAuthStore()
 
   // Internal step state controlled by the form (mirrors store.onboardingStep for setStep calls)
-  const [localStep, setLocalStep] = useState(step);
+  const [localStep, setLocalStep] = useState(step)
 
   // Keep localStep in sync with prop changes (e.g., after fetchOnboardingStatus resolves)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocalStep(step);
-  }, [step]);
+    setLocalStep(step)
+  }, [step])
 
   // Form State — pre-fill from server draft
   const [formData, setFormData] = useState({
@@ -74,7 +74,7 @@ export default function OnboardingForm({
     bankName: savedDetails.bankName ?? "",
     accountNumber: savedDetails.accountNumber ?? "",
     ifscCode: savedDetails.ifscCode ?? "",
-  });
+  })
 
   // Keep formData in sync with savedDetails when it is loaded/updated
   useEffect(() => {
@@ -90,50 +90,50 @@ export default function OnboardingForm({
       bankName: savedDetails.bankName ?? "",
       accountNumber: savedDetails.accountNumber ?? "",
       ifscCode: savedDetails.ifscCode ?? "",
-    });
-  }, [savedDetails]);
+    })
+  }, [savedDetails])
 
   // Files State
-  const [idProofFile, setIdProofFile] = useState<File | null>(null);
-  const [businessLicenseFile, setBusinessLicenseFile] = useState<File | null>(null);
-  const [gstCertificateFile, setGstCertificateFile] = useState<File | null>(null);
-  const [bankProofFile, setBankProofFile] = useState<File | null>(null);
+  const [idProofFile, setIdProofFile] = useState<File | null>(null)
+  const [businessLicenseFile, setBusinessLicenseFile] = useState<File | null>(null)
+  const [gstCertificateFile, setGstCertificateFile] = useState<File | null>(null)
+  const [bankProofFile, setBankProofFile] = useState<File | null>(null)
 
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next[name];
-        return next;
-      });
+        const next = { ...prev }
+        delete next[name]
+        return next
+      })
     }
-  };
+  }
 
   const handleIdProofChange = (file: File | null) => {
-    setIdProofFile(file);
+    setIdProofFile(file)
     if (fieldErrors.idProofFile) {
       setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next.idProofFile;
-        return next;
-      });
+        const next = { ...prev }
+        delete next.idProofFile
+        return next
+      })
     }
-  };
+  }
 
   const handleBankProofChange = (file: File | null) => {
-    setBankProofFile(file);
+    setBankProofFile(file)
     if (fieldErrors.bankProofFile) {
       setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next.bankProofFile;
-        return next;
-      });
+        const next = { ...prev }
+        delete next.bankProofFile
+        return next
+      })
     }
-  };
+  }
 
   // Step 1 → 2: save owner & KYC details
   const handleContinueToStep2 = () => {
@@ -144,28 +144,28 @@ export default function OnboardingForm({
       businessName: formData.businessName,
       idProofType: formData.idProofType,
       gstNumber: formData.gstNumber,
-    });
+    })
 
-    const errors: Record<string, string> = {};
+    const errors: Record<string, string> = {}
     if (!validationResult.success) {
       validationResult.error.issues.forEach((err) => {
-        const path = err.path[0];
+        const path = err.path[0]
         if (path !== undefined) {
-          errors[String(path)] = err.message;
+          errors[String(path)] = err.message
         }
-      });
+      })
     }
 
     if (!idProofFile && !savedDetails.idProofUrl) {
-      errors.idProofFile = "Identity verification document is required";
+      errors.idProofFile = "Identity verification document is required"
     }
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
+      setFieldErrors(errors)
+      return
     }
 
-    setFieldErrors({});
+    setFieldErrors({})
 
     const fd = buildFormData(
       {
@@ -181,9 +181,9 @@ export default function OnboardingForm({
         businessLicenseFile,
         gstCertificateFile,
       }
-    );
-    onSaveStep(1, fd, 2, setLocalStep);
-  };
+    )
+    onSaveStep(1, fd, 2, setLocalStep)
+  }
 
   // Step 2 → 3: save payout/bank details
   const handleContinueToStep3 = () => {
@@ -192,28 +192,28 @@ export default function OnboardingForm({
       bankName: formData.bankName,
       accountNumber: formData.accountNumber,
       ifscCode: formData.ifscCode,
-    });
+    })
 
-    const errors: Record<string, string> = {};
+    const errors: Record<string, string> = {}
     if (!validationResult.success) {
       validationResult.error.issues.forEach((err) => {
-        const path = err.path[0];
+        const path = err.path[0]
         if (path !== undefined) {
-          errors[String(path)] = err.message;
+          errors[String(path)] = err.message
         }
-      });
+      })
     }
 
     if (!bankProofFile && !savedDetails.bankProofUrl) {
-      errors.bankProofFile = "Bank verification proof document is required";
+      errors.bankProofFile = "Bank verification proof document is required"
     }
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
+      setFieldErrors(errors)
+      return
     }
 
-    setFieldErrors({});
+    setFieldErrors({})
 
     const fd = buildFormData(
       {
@@ -223,17 +223,17 @@ export default function OnboardingForm({
         ifscCode: formData.ifscCode,
       },
       { bankProofFile }
-    );
-    onSaveStep(2, fd, 3, setLocalStep);
-  };
+    )
+    onSaveStep(2, fd, 3, setLocalStep)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit();
-  };
+    e.preventDefault()
+    onSubmit()
+  }
 
   // Display the localStep (keeps UI in sync with save-step transitions)
-  const activeStep = localStep;
+  const activeStep = localStep
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 text-left">
@@ -284,5 +284,5 @@ export default function OnboardingForm({
         />
       )}
     </form>
-  );
+  )
 }

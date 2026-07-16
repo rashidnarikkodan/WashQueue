@@ -1,21 +1,21 @@
-import { HelpCircle, ChevronRight, MessageSquare } from "lucide-react";
-import { useAuthStore } from "@/features/auth/store/authStore";
-import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock";
-import FeatureLock from "@/shared/components/ui/FeatureLock";
+import { HelpCircle, ChevronRight, MessageSquare } from "lucide-react"
+import { useAuthStore } from "@/features/auth/store/authStore"
+import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock"
+import FeatureLock from "@/shared/components/ui/FeatureLock"
 
 export default function WalletLoyaltySection() {
-  const { user } = useAuthStore();
-  const data = MOCK_DASHBOARD_DATA;
+  const { user } = useAuthStore()
+  const data = MOCK_DASHBOARD_DATA
 
   // Use either the real user wallet balance or mock
-  const walletBalance = user?.walletBalance !== undefined ? `$${user.walletBalance.toFixed(2)}` : data.wallet.balance;
+  const walletBalance =
+    user?.walletBalance !== undefined ? `$${user.walletBalance.toFixed(2)}` : data.wallet.balance
 
   return (
     <FeatureLock>
       {/* Wallet & Loyalty Rewards Support Grid */}
       <section className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-2xl animate-in fade-in duration-500 text-left">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
-          
           {/* Balance panel */}
           <div className="md:col-span-4 flex flex-col justify-between space-y-6">
             <div className="space-y-1">
@@ -26,7 +26,7 @@ export default function WalletLoyaltySection() {
                 {walletBalance}
               </span>
             </div>
-            
+
             <div className="flex gap-4">
               <button className="flex-1 py-3 px-5 rounded-2xl bg-white hover:bg-slate-100 text-primary-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer shadow-md">
                 Add Funds
@@ -58,16 +58,16 @@ export default function WalletLoyaltySection() {
                   {data.wallet.tierProgress}% to Platinum
                 </span>
               </div>
-              
+
               {/* Custom Gradient Progress Bar */}
               <div className="h-3.5 bg-muted rounded-full overflow-hidden relative border border-slate-900">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-emerald-400 to-primary"
                   style={{ width: `${data.wallet.tierProgress}%` }}
                 />
               </div>
             </div>
-            
+
             <p className="text-xs md:text-sm text-muted-foreground font-semibold leading-relaxed">
               {data.wallet.rewardDetails}
             </p>
@@ -83,10 +83,10 @@ export default function WalletLoyaltySection() {
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
               Quick Support
             </span>
-            
+
             <div className="space-y-3 flex-grow flex flex-col justify-center">
-              <a 
-                href="/help" 
+              <a
+                href="/help"
                 className="flex justify-between items-center p-3 rounded-2xl bg-card/50 border border-border/50 hover:bg-card transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -96,8 +96,8 @@ export default function WalletLoyaltySection() {
                 <ChevronRight size={14} className="text-muted-foreground" />
               </a>
 
-              <a 
-                href="/chat" 
+              <a
+                href="/chat"
                 className="flex justify-between items-center p-3 rounded-2xl bg-card/50 border border-border/50 hover:bg-card transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -108,9 +108,8 @@ export default function WalletLoyaltySection() {
               </a>
             </div>
           </div>
-
         </div>
       </section>
     </FeatureLock>
-  );
+  )
 }

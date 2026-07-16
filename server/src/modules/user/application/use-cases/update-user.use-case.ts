@@ -17,8 +17,8 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
     private readonly userRepository: IUserRepository,
     private readonly cacheService: ICacheService,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly mailService: IMailService,
-  ) { }
+    private readonly mailService: IMailService
+  ) {}
 
   async execute(id: string, updates: UpdateUserInput): Promise<User | null> {
     const user = await this.userRepository.findById(id)
@@ -56,22 +56,32 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
 
         // 1. Approval email trigger
         if (!wasVerified && isVerifiedNow) {
-          await this.mailService.sendOwnerApprovalEmail(user.email, owner.legalFullName || user.name || "Owner")
+          await this.mailService.sendOwnerApprovalEmail(
+            user.email,
+            owner.legalFullName || user.name || "Owner"
+          )
         }
 
         // 2. Rejection email trigger: Transition from in-review (step 4) back to step 1 with isVerified = false
         const wasInReview = owner.onboardingStep === 4
         const isRejectedNow = updates.onboardingStep === 1 && updates.isVerified === false
         if (wasInReview && isRejectedNow) {
-          const reason = updates.rejectionReason || "Please review your verification documents and business information and resubmit."
-          await this.mailService.sendOwnerRejectionEmail(user.email, owner.legalFullName || user.name || "Owner", reason)
+          const reason =
+            updates.rejectionReason ||
+            "Please review your verification documents and business information and resubmit."
+          await this.mailService.sendOwnerRejectionEmail(
+            user.email,
+            owner.legalFullName || user.name || "Owner",
+            reason
+          )
         }
 
         const updatedOwner = new Owner({
           id: owner.id,
           userId: id,
           phone: updates.phone !== undefined ? updates.phone : owner.phone,
-          onboardingStep: updates.onboardingStep !== undefined ? updates.onboardingStep : owner.onboardingStep,
+          onboardingStep:
+            updates.onboardingStep !== undefined ? updates.onboardingStep : owner.onboardingStep,
           isVerified: updates.isVerified !== undefined ? updates.isVerified : owner.isVerified,
           verifiedAt: updates.isVerified ? new Date() : owner.verifiedAt,
           legalFullName: owner.legalFullName,
@@ -88,7 +98,11 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
           accountNumber: owner.accountNumber,
           ifscCode: owner.ifscCode,
           bankProofUrl: owner.bankProofUrl,
-          rejectionReason: updates.isVerified ? "" : (updates.rejectionReason !== undefined ? updates.rejectionReason : owner.rejectionReason),
+          rejectionReason: updates.isVerified
+            ? ""
+            : updates.rejectionReason !== undefined
+              ? updates.rejectionReason
+              : owner.rejectionReason,
         })
         await this.ownerRepository.save(updatedOwner)
       }

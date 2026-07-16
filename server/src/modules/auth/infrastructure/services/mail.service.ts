@@ -8,7 +8,7 @@ export class MailService implements IMailService {
   private transporter: nodemailer.Transporter | null = null
 
   constructor() {
-   this.transporter = transporter
+    this.transporter = transporter
   }
 
   async sendVerificationEmail(email: string, otp: string): Promise<void> {
@@ -125,7 +125,9 @@ export class MailService implements IMailService {
       })
       logger.info(`Owner rejection email sent to ${email}`)
     } else {
-      logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Rejected | Reason: ${reason}`)
+      logger.info(
+        `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Rejected | Reason: ${reason}`
+      )
     }
   }
 }

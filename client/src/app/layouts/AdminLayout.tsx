@@ -7,20 +7,18 @@ import { ROLE } from "../../shared/constants/role.const"
 import Loading from "../../shared/components/ui/Loading"
 
 const AdminLayout = () => {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore()
 
   if (isLoading) {
-    return (
-      <Loading fullScreen text="Loading Administrator Dashboard..." />
-    );
+    return <Loading fullScreen text="Loading Administrator Dashboard..." />
   }
 
   if (!isAuthenticated || !user || user.role !== ROLE.ADMIN) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (user && !user.isVerified) {
-    return <Navigate to="/verify-email" replace />;
+    return <Navigate to="/verify-email" replace />
   }
 
   return (

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Wrench,
   LogOut,
@@ -11,61 +11,61 @@ import {
   Headphones,
   HelpCircle,
   AlertTriangle,
-  UserPlus
-} from "lucide-react";
-import { useAuthStore } from "../../../../features/auth/store/authStore";
-import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const";
+  UserPlus,
+} from "lucide-react"
+import { useAuthStore } from "../../../../features/auth/store/authStore"
+import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
 
 interface ProfileDropdownProps {
-  currentRole: "admin" | "manager" | "owner" | "customer";
+  currentRole: "admin" | "manager" | "owner" | "customer"
 }
 
 export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { user, logout, setActiveViewMode } = useAuthStore();
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const { user, logout, setActiveViewMode } = useAuthStore()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  if (!user) return null;
+  if (!user) return null
 
   const getRoleLabel = () => {
     switch (currentRole) {
       case ROLE.ADMIN:
-        return "System Admin";
+        return "System Admin"
       case ROLE.MANAGER:
-        return "Station Manager";
+        return "Station Manager"
       case ROLE.OWNER:
-        return "Verified Owner";
+        return "Verified Owner"
       case ROLE.CUSTOMER:
-        return "Verified User";
+        return "Verified User"
       default:
-        return "User Access";
+        return "User Access"
     }
-  };
+  }
 
   const getCtaContent = () => {
     if (user.role === ROLE.OWNER) {
       if (currentRole === VIEW_MODE.CUSTOMER) {
         return {
           title: "Switch to Owner",
-          desc: "Manage station operations & bays"
-        };
+          desc: "Manage station operations & bays",
+        }
       }
       if (currentRole === VIEW_MODE.OWNER) {
         return {
           title: "Switch to Customer",
-          desc: "Browse stations & book a wash"
-        };
+          desc: "Browse stations & book a wash",
+        }
       }
     }
 
@@ -73,24 +73,31 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       case ROLE.ADMIN:
         return {
           title: "System Analytics",
-          desc: "Monitor platform performance"
-        };
+          desc: "Monitor platform performance",
+        }
       case ROLE.MANAGER:
         return {
           title: "Walk-in Queue",
-          desc: "Add new walk-in wash"
-        };
+          desc: "Add new walk-in wash",
+        }
       default:
         return {
           title: "Become an Owner",
-          desc: "List your service and earn"
-        };
+          desc: "List your service and earn",
+        }
     }
-  };
+  }
 
-  const cta = getCtaContent();
+  const cta = getCtaContent()
 
-  const initials = user.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) : "U";
+  const initials = user.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    : "U"
 
   return (
     <div className="relative" ref={containerRef}>
@@ -105,7 +112,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       {/* Profile Panel */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-96 max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-
           {/* Header Section */}
           <div className="flex p-6 pb-4 justify-between items-start border-b border-border/40">
             <div className="flex items-center gap-4">
@@ -129,8 +135,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
             <button
               onClick={() => {
-                setIsOpen(false);
-                navigate(currentRole === "customer" ? "/settings" : `/${currentRole}/settings`);
+                setIsOpen(false)
+                navigate(currentRole === "customer" ? "/settings" : `/${currentRole}/settings`)
               }}
               className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all cursor-pointer"
               title="Profile Settings"
@@ -141,14 +147,13 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
           {/* Scrollable Body Content */}
           <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[400px]">
-
             {/* Quick Actions (My Bookings & Wallet Cards) */}
             <div className="space-y-2">
               {/* My Bookings Card */}
               <div
                 onClick={() => {
-                  setIsOpen(false);
-                  navigate(currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`);
+                  setIsOpen(false)
+                  navigate(currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`)
                 }}
                 className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group"
               >
@@ -158,7 +163,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-foreground">My Bookings</span>
-                    <span className="text-[11px] text-muted-foreground">Track current and previous</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Track current and previous
+                    </span>
                   </div>
                 </div>
 
@@ -175,7 +182,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-foreground">Wallet</span>
-                    <span className="text-[11px] text-muted-foreground">Refunds, balance, and transactions</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Refunds, balance, and transactions
+                    </span>
                   </div>
                 </div>
 
@@ -186,17 +195,21 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             {/* Owner Section CTA */}
             <div
               onClick={() => {
-                setIsOpen(false);
+                setIsOpen(false)
                 if (user.role === ROLE.OWNER) {
                   if (currentRole === VIEW_MODE.CUSTOMER) {
-                    setActiveViewMode(VIEW_MODE.OWNER);
-                    navigate("/owner");
+                    setActiveViewMode(VIEW_MODE.OWNER)
+                    navigate("/owner")
                   } else {
-                    setActiveViewMode(VIEW_MODE.CUSTOMER);
-                    navigate("/");
+                    setActiveViewMode(VIEW_MODE.CUSTOMER)
+                    navigate("/")
                   }
                 } else {
-                  navigate(currentRole === VIEW_MODE.CUSTOMER ? "/owner/onboarding" : `/${currentRole}/dashboard`);
+                  navigate(
+                    currentRole === VIEW_MODE.CUSTOMER
+                      ? "/owner/onboarding"
+                      : `/${currentRole}/dashboard`
+                  )
                 }
               }}
               className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/20 hover:from-primary/20 transition-all cursor-pointer group relative overflow-hidden"
@@ -236,7 +249,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 Invite Friends
               </button>
             </div>
-
           </div>
 
           {/* Footer Section */}
@@ -244,9 +256,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             {/* Logout Button */}
             <button
               onClick={() => {
-                setIsOpen(false);
-                logout();
-                navigate("/login");
+                setIsOpen(false)
+                logout()
+                navigate("/login")
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 border border-red-500/30 hover:border-red-500 bg-red-500/5 hover:bg-red-500/10 text-xs font-bold text-red-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
             >
@@ -254,9 +266,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               <LogOut className="h-3.5 w-3.5" />
             </button>
           </div>
-
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -1,35 +1,34 @@
-import { RouterProvider } from "react-router-dom";
-import { router } from "./app/routes";
-import ThemeProvider from "./shared/providers/ThemeProvider";
-import { Toaster } from "sonner";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { useAuthStore } from "./features/auth/store/authStore";
-import { useEffect } from "react";
-import { authApi } from "./features/auth/services/auth.api";
+import { RouterProvider } from "react-router-dom"
+import { router } from "./app/routes"
+import ThemeProvider from "./shared/providers/ThemeProvider"
+import { Toaster } from "sonner"
+import { GoogleOAuthProvider } from "@react-oauth/google"
+import { useAuthStore } from "./features/auth/store/authStore"
+import { useEffect } from "react"
+import { authApi } from "./features/auth/services/auth.api"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 function App() {
-  
   useEffect(() => {
-    authApi.me()
+    authApi
+      .me()
       .then((user) => {
-        useAuthStore.setState({ user, isAuthenticated: true, isLoading: false });
+        useAuthStore.setState({ user, isAuthenticated: true, isLoading: false })
       })
       .catch(() => {
-        useAuthStore.setState({ isLoading: false });
-      });
-  }, []);
+        useAuthStore.setState({ isLoading: false })
+      })
+  }, [])
 
-  return (    
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-      <Toaster position="top-right" richColors />
-    </ThemeProvider>
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" richColors />
+      </ThemeProvider>
     </GoogleOAuthProvider>
-    
   )
 }
 
-export default App;
+export default App

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react"
 import {
   Bell,
   Check,
@@ -9,20 +9,20 @@ import {
   Droplets,
   Activity,
   Shield,
-  Sparkles
-} from "lucide-react";
+  Sparkles,
+} from "lucide-react"
 
 interface NotificationItem {
-  id: number;
-  type: "completed" | "progress" | "security" | "promo";
-  category: "bookings" | "system";
-  title: string;
-  time: string;
-  description: string;
-  descriptionHighlight?: string;
-  location?: string;
-  unread: boolean;
-  image?: string;
+  id: number
+  type: "completed" | "progress" | "security" | "promo"
+  category: "bookings" | "system"
+  title: string
+  time: string
+  description: string
+  descriptionHighlight?: string
+  location?: string
+  unread: boolean
+  image?: string
 }
 
 const initialNotifications: NotificationItem[] = [
@@ -35,7 +35,7 @@ const initialNotifications: NotificationItem[] = [
     description: "Your BMW 6i washing is completed at Car city. Ready for pickup!",
     descriptionHighlight: "BMW 6i",
     location: "Car city",
-    unread: true
+    unread: true,
   },
   {
     id: 2,
@@ -43,9 +43,10 @@ const initialNotifications: NotificationItem[] = [
     category: "bookings",
     title: "Washing in Progress",
     time: "11 MINS AGO",
-    description: "Tesla Model S is currently being deep cleaned at Downtown Station. Estimated finish in 15m.",
+    description:
+      "Tesla Model S is currently being deep cleaned at Downtown Station. Estimated finish in 15m.",
     descriptionHighlight: "Tesla Model S",
-    unread: false
+    unread: false,
   },
   {
     id: 3,
@@ -53,8 +54,9 @@ const initialNotifications: NotificationItem[] = [
     category: "system",
     title: "New Login Detected",
     time: "1 HOUR AGO",
-    description: "A new login was detected from a Chrome browser on a MacOS device. If this wasn't you, secure your account.",
-    unread: false
+    description:
+      "A new login was detected from a Chrome browser on a MacOS device. If this wasn't you, secure your account.",
+    unread: false,
   },
   {
     id: 4,
@@ -62,86 +64,88 @@ const initialNotifications: NotificationItem[] = [
     category: "system",
     title: "Weekend Special",
     time: "5 HOURS AGO",
-    description: "Enjoy premium detailing with our weekend special discount. Valid at all locations through Sunday.",
-    image: "https://api.builder.io/api/v1/image/assets/TEMP/9f84e90fb3377eab02eca78a4ec1145f3571a424?width=856",
-    unread: false
-  }
-];
+    description:
+      "Enjoy premium detailing with our weekend special discount. Valid at all locations through Sunday.",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/9f84e90fb3377eab02eca78a4ec1145f3571a424?width=856",
+    unread: false,
+  },
+]
 
 export default function NotificationDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" | "unread" | "bookings" | "system">("all");
-  
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState<"all" | "unread" | "bookings" | "system">("all")
+
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   // Filter & Search Logic
   const filteredNotifications = notifications.filter((n) => {
     // Tab Filter
-    if (activeTab === "unread" && !n.unread) return false;
-    if (activeTab === "bookings" && n.category !== "bookings") return false;
-    if (activeTab === "system" && n.category !== "system") return false;
+    if (activeTab === "unread" && !n.unread) return false
+    if (activeTab === "bookings" && n.category !== "bookings") return false
+    if (activeTab === "system" && n.category !== "system") return false
 
     // Search query
     if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      const matchTitle = n.title.toLowerCase().includes(query);
-      const matchDesc = n.description.toLowerCase().includes(query);
-      return matchTitle || matchDesc;
+      const query = searchQuery.toLowerCase()
+      const matchTitle = n.title.toLowerCase().includes(query)
+      const matchDesc = n.description.toLowerCase().includes(query)
+      return matchTitle || matchDesc
     }
 
-    return true;
-  });
+    return true
+  })
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const unreadCount = notifications.filter((n) => n.unread).length
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  };
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
+  }
 
   const handleClearAll = () => {
-    setNotifications([]);
-  };
+    setNotifications([])
+  }
 
   const renderIcon = (item: NotificationItem) => {
     switch (item.type) {
       case "completed":
-        return <Droplets className="h-5 w-5 text-primary" />;
+        return <Droplets className="h-5 w-5 text-primary" />
       case "progress":
-        return <Activity className="h-5 w-5 text-emerald-500" />;
+        return <Activity className="h-5 w-5 text-emerald-500" />
       case "security":
-        return <Shield className="h-5 w-5 text-red-400" />;
+        return <Shield className="h-5 w-5 text-red-400" />
       case "promo":
-        return <Sparkles className="h-5 w-5 text-primary" />;
+        return <Sparkles className="h-5 w-5 text-primary" />
       default:
-        return <Bell className="h-5 w-5 text-muted-foreground" />;
+        return <Bell className="h-5 w-5 text-muted-foreground" />
     }
-  };
+  }
 
   const getIconBackground = (item: NotificationItem) => {
     switch (item.type) {
       case "completed":
       case "promo":
-        return "bg-primary/10";
+        return "bg-primary/10"
       case "progress":
-        return "bg-emerald-500/10";
+        return "bg-emerald-500/10"
       case "security":
-        return "bg-red-500/10";
+        return "bg-red-500/10"
       default:
-        return "bg-muted";
+        return "bg-muted"
     }
-  };
+  }
 
   return (
     <div className="relative" ref={containerRef}>
@@ -163,7 +167,6 @@ export default function NotificationDropdown() {
       {/* Notifications Panel */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-[450px] md:w-[500px] max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-          
           {/* Header Section */}
           <div className="flex flex-col p-6 pb-4 gap-4 border-b border-border/40">
             <div className="flex items-center justify-between">
@@ -173,7 +176,7 @@ export default function NotificationDropdown() {
                 </div>
                 <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 {unreadCount > 0 && (
                   <button
@@ -205,7 +208,10 @@ export default function NotificationDropdown() {
                 className="bg-transparent border-none outline-none text-sm text-foreground placeholder-muted-foreground w-full"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="text-muted-foreground hover:text-foreground">
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
                   <X className="h-4 w-4" />
                 </button>
               )}
@@ -242,7 +248,9 @@ export default function NotificationDropdown() {
                   <div className="flex items-start gap-4">
                     {/* Icon container */}
                     <div className="relative">
-                      <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${getIconBackground(n)}`}>
+                      <div
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl ${getIconBackground(n)}`}
+                      >
                         {renderIcon(n)}
                       </div>
                       {n.unread && (
@@ -262,7 +270,9 @@ export default function NotificationDropdown() {
                             </span>
                           )}
                         </div>
-                        <span className="text-[9px] font-bold tracking-wider text-muted-foreground uppercase">{n.time}</span>
+                        <span className="text-[9px] font-bold tracking-wider text-muted-foreground uppercase">
+                          {n.time}
+                        </span>
                       </div>
 
                       {/* Styled Description */}
@@ -270,7 +280,9 @@ export default function NotificationDropdown() {
                         {n.descriptionHighlight ? (
                           <>
                             {n.description.split(n.descriptionHighlight)[0]}
-                            <span className="font-semibold text-primary">{n.descriptionHighlight}</span>
+                            <span className="font-semibold text-primary">
+                              {n.descriptionHighlight}
+                            </span>
                             {n.description.split(n.descriptionHighlight)[1]}
                           </>
                         ) : (
@@ -317,16 +329,13 @@ export default function NotificationDropdown() {
               <Trash2 className="h-4 w-4" />
               Clear All
             </button>
-            <button
-              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
-            >
+            <button className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
               <Settings className="h-4 w-4" />
               Notification Settings
             </button>
           </div>
-
         </div>
       )}
     </div>
-  );
+  )
 }

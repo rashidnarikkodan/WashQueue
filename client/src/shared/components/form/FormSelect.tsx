@@ -1,20 +1,20 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"
 
 interface Option {
-  value: string;
-  label: string;
+  value: string
+  label: string
 }
 
 interface FormSelectProps {
-  label: string;
-  name?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: Option[];
-  placeholder?: string;
-  error?: string;
-  id?: string;
-  leftIcon?: ReactNode;
+  label: string
+  name?: string
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  options: Option[]
+  placeholder?: string
+  error?: string
+  id?: string
+  leftIcon?: ReactNode
 }
 
 export default function FormSelect({
@@ -30,7 +30,10 @@ export default function FormSelect({
 }: FormSelectProps) {
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
-      <label htmlFor={id} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left">
+      <label
+        htmlFor={id}
+        className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left"
+      >
         {label}
       </label>
       <div className="relative flex items-center">
@@ -47,7 +50,9 @@ export default function FormSelect({
           className={`w-full bg-muted border rounded-xl pr-10 py-3 text-sm text-foreground outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/85 font-semibold cursor-pointer ${
             leftIcon ? "pl-11" : "pl-3.5"
           } ${
-            error ? "border-red-500/80 focus:ring-red-500/20" : "border-border/80 hover:border-border"
+            error
+              ? "border-red-500/80 focus:ring-red-500/20"
+              : "border-border/80 hover:border-border"
           }`}
         >
           {placeholder && (
@@ -68,5 +73,5 @@ export default function FormSelect({
         </span>
       )}
     </div>
-  );
+  )
 }

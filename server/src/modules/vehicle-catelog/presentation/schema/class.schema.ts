@@ -21,10 +21,7 @@ export const createClassSchema = z.object({
 })
 
 export const updateClassSchema = z.object({
-  categoryId: z
-    .string()
-    .regex(objectIdRegex, "Invalid Category ID format")
-    .optional(),
+  categoryId: z.string().regex(objectIdRegex, "Invalid Category ID format").optional(),
   name: z
     .string()
     .trim()
@@ -41,8 +38,5 @@ export const updateClassSchema = z.object({
 })
 
 export const getClassesQuerySchema = z.object({
-  categoryId: z
-    .string()
-    .regex(objectIdRegex, "Invalid Category ID format")
-    .optional(),
+  categoryId: z.string().regex(objectIdRegex, "Invalid Category ID format").optional(),
 })

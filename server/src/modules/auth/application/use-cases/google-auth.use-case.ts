@@ -17,7 +17,6 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ROLE } from "@/common/constants/role.constants"
 import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
-
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
 
@@ -30,7 +29,9 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     if (env.GOOGLE_CLIENT_ID) {
       this.client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
     } else {
-      logger.warn("GOOGLE_CLIENT_ID not provided. GoogleAuthUseCase running in development/fallback mode.")
+      logger.warn(
+        "GOOGLE_CLIENT_ID not provided. GoogleAuthUseCase running in development/fallback mode."
+      )
     }
   }
 
@@ -72,12 +73,16 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       // Treat as Google Access Token and fetch user profile via UserInfo API
       try {
         const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         })
         if (!response.ok) {
           throw new AppError(ERROR_MESSAGES.GOOGLE_PROFILE_FETCH_FAILED, HTTP_STATUS.UNAUTHORIZED)
         }
-        const payload = await response.json() as { email: string; name?: string; picture?: string }
+        const payload = (await response.json()) as {
+          email: string
+          name?: string
+          picture?: string
+        }
         if (!payload || !payload.email) {
           throw new AppError(ERROR_MESSAGES.INVALID_GOOGLE_ACCESS_TOKEN, HTTP_STATUS.BAD_REQUEST)
         }

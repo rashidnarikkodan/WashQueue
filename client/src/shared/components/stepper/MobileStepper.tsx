@@ -1,4 +1,4 @@
-import type { StepperRenderProps } from "./types";
+import type { StepperRenderProps } from "./types"
 
 /**
  * MobileStepper — pure presentation.
@@ -42,5 +42,5 @@ export default function MobileStepper({
         </div>
       </div>
     </div>
-  );
+  )
 }

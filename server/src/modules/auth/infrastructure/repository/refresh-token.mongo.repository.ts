@@ -4,10 +4,7 @@ import { User as UserModel } from "@/modules/user/infrastructure/model/user.mode
 
 export class RefreshTokenMongoRepository implements IRefreshTokenRepository {
   async save(userId: string, token: RefreshToken): Promise<void> {
-    await UserModel.updateOne(
-      { _id: userId },
-      { $set: { refreshToken: token.token } }
-    ).exec()
+    await UserModel.updateOne({ _id: userId }, { $set: { refreshToken: token.token } }).exec()
   }
 
   async findByUserId(userId: string): Promise<RefreshToken | null> {
@@ -19,9 +16,6 @@ export class RefreshTokenMongoRepository implements IRefreshTokenRepository {
   }
 
   async clear(userId: string): Promise<void> {
-    await UserModel.updateOne(
-      { _id: userId },
-      { $set: { refreshToken: "" } }
-    ).exec()
+    await UserModel.updateOne({ _id: userId }, { $set: { refreshToken: "" } }).exec()
   }
 }

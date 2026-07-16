@@ -1,29 +1,27 @@
-import { useNavigate } from "react-router-dom";
-import { Car, Wrench, Check, ChevronRight } from "lucide-react";
-import { useAuthStore } from "../store/authStore";
-import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const";
+import { useNavigate } from "react-router-dom"
+import { Car, Wrench, Check, ChevronRight } from "lucide-react"
+import { useAuthStore } from "../store/authStore"
+import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
 
 export default function SetupAccountPage() {
-  const navigate = useNavigate();
-  const { setActiveViewMode } = useAuthStore();
+  const navigate = useNavigate()
+  const { setActiveViewMode } = useAuthStore()
 
   const handleSelectRole = (role: typeof ROLE.CUSTOMER | typeof ROLE.OWNER) => {
     if (role === ROLE.CUSTOMER) {
-      setActiveViewMode(VIEW_MODE.CUSTOMER);
-      navigate("/");
+      setActiveViewMode(VIEW_MODE.CUSTOMER)
+      navigate("/")
     } else {
-      setActiveViewMode(VIEW_MODE.OWNER);
-      navigate("/owner/onboarding");
+      setActiveViewMode(VIEW_MODE.OWNER)
+      navigate("/owner/onboarding")
     }
-  };
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-6 sm:p-8 md:p-12 relative overflow-hidden w-full transition-colors duration-300">
-
       {/* Main Selection Area - Two-Column Split Layout */}
       <main className="flex-grow flex items-center justify-center z-10 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 lg:gap-24 items-center w-full">
-
           {/* Left Column: Email Verified Card */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center text-center space-y-6 py-6 lg:py-12 animate-in slide-in-from-left duration-500">
             {/* Animated Checkmark Circle */}
@@ -43,7 +41,6 @@ export default function SetupAccountPage() {
 
           {/* Right Column: Setup Container Panel */}
           <div className="lg:col-span-7 bg-card/60 backdrop-blur-md border border-border/80 rounded-3xl p-6 sm:p-12 shadow-2xl space-y-6 sm:space-y-8 animate-in slide-in-from-right duration-500">
-
             <div className="space-y-1 sm:space-y-2 text-center lg:text-left">
               <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 Set Up Your Account
@@ -145,12 +142,9 @@ export default function SetupAccountPage() {
             <p className="text-center text-xs text-muted-foreground font-medium pt-2">
               You can switch roles later from your profile settings.
             </p>
-
           </div>
-
         </div>
       </main>
-
     </div>
-  );
+  )
 }

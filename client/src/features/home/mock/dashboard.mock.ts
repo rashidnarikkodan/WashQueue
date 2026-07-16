@@ -1,9 +1,15 @@
-import type { ActiveBooking, GarageVehicle, QueueIntelligence, WalletInfo, WeatherInsights } from "../types";
+import type {
+  ActiveBooking,
+  GarageVehicle,
+  QueueIntelligence,
+  WalletInfo,
+  WeatherInsights,
+} from "../types"
 
 export const MOCK_DASHBOARD_DATA = {
   user: {
     name: "Alex",
-    greeting: "Good Morning"
+    greeting: "Good Morning",
   },
   activeBooking: {
     id: "#WQ-9982",
@@ -17,17 +23,18 @@ export const MOCK_DASHBOARD_DATA = {
       { label: "Queued", status: "current" },
       { label: "Washing", status: "upcoming" },
       { label: "Drying", status: "upcoming" },
-      { label: "Ready", status: "upcoming" }
-    ]
+      { label: "Ready", status: "upcoming" },
+    ],
   } as ActiveBooking,
   queueIntelligence: {
     averageWait: "18.5m",
-    washSpeed: "12.2 min"
+    washSpeed: "12.2 min",
   } as QueueIntelligence,
   weatherInsights: {
     temperature: "78°F",
     alertTitle: "High Demand Alert",
-    alertDetails: "Clear skies expected for 3 days. Demand projected to increase by 40% this afternoon."
+    alertDetails:
+      "Clear skies expected for 3 days. Demand projected to increase by 40% this afternoon.",
   } as WeatherInsights,
   garage: [
     {
@@ -35,7 +42,8 @@ export const MOCK_DASHBOARD_DATA = {
       brand: "Honda",
       model: "City",
       plate: "MH 01 AB 1234",
-      image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80",
+      image:
+        "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80",
       status: "good",
       statusText: "Good Condition",
       isPrimary: true,
@@ -43,14 +51,15 @@ export const MOCK_DASHBOARD_DATA = {
       modelYear: "2023",
       lastWash: "Oct 12, 2023",
       nextWash: "In 14 Days",
-      usage: "Daily"
+      usage: "Daily",
     },
     {
       id: "v2",
       brand: "Porsche",
       model: "911 GT3 RS",
       plate: "DL 03 CC 9876",
-      image: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=600&q=80",
+      image:
+        "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=600&q=80",
       status: "overdue",
       statusText: "Overdue",
       isPrimary: false,
@@ -58,18 +67,18 @@ export const MOCK_DASHBOARD_DATA = {
       modelYear: "2024",
       lastWash: "Sept 05, 2023",
       nextWash: "Overdue by 5 Days",
-      usage: "Weekend"
-    }
+      usage: "Weekend",
+    },
   ] as GarageVehicle[],
   wallet: {
     balance: "$240.50",
     loyaltyPoints: "12,450 WQ",
     tierProgress: 85,
     pointsToNextTier: "2,550 points",
-    rewardDetails: "You're 2,550 points away from a complimentary 'Ceramic Glaze' service."
+    rewardDetails: "You're 2,550 points away from a complimentary 'Ceramic Glaze' service.",
   } as WalletInfo,
   supportLinks: [
     { label: "Help Center", path: "/help" },
-    { label: "Live Agent", path: "/chat" }
-  ]
-};
+    { label: "Live Agent", path: "/chat" },
+  ],
+}

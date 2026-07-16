@@ -1,16 +1,16 @@
-import type { SelectFilter, ToggleFilter } from "@/shared/components/data-table";
-import { ROLE } from "@/shared/constants/role.const";
-import { FILTER_STATUS } from "@/shared/constants/status.const";
+import type { SelectFilter, ToggleFilter } from "@/shared/components/data-table"
+import { ROLE } from "@/shared/constants/role.const"
+import { FILTER_STATUS } from "@/shared/constants/status.const"
 
 interface BuildUserFiltersOptions {
-  roleFilter: string;
-  setRoleFilter: (role: string) => void;
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
-  highCancellation: boolean;
-  setHighCancellation: (val: boolean) => void;
-  fraudFlag: boolean;
-  setFraudFlag: (val: boolean) => void;
+  roleFilter: string
+  setRoleFilter: (role: string) => void
+  statusFilter: string
+  setStatusFilter: (status: string) => void
+  highCancellation: boolean
+  setHighCancellation: (val: boolean) => void
+  fraudFlag: boolean
+  setFraudFlag: (val: boolean) => void
 }
 
 export function buildUserFilters({
@@ -23,8 +23,8 @@ export function buildUserFilters({
   fraudFlag,
   setFraudFlag,
 }: BuildUserFiltersOptions): {
-  selectFilters: SelectFilter[];
-  toggleFilters: ToggleFilter[];
+  selectFilters: SelectFilter[]
+  toggleFilters: ToggleFilter[]
 } {
   const selectFilters: SelectFilter[] = [
     {
@@ -51,7 +51,7 @@ export function buildUserFilters({
         { label: "Blocked", value: FILTER_STATUS.BLOCKED },
       ],
     },
-  ];
+  ]
 
   const toggleFilters: ToggleFilter[] = [
     {
@@ -70,7 +70,7 @@ export function buildUserFilters({
       activeColor: "bg-rose-500/25 border border-rose-500/30",
       thumbActiveColor: "bg-[#FFB4AB]",
     },
-  ];
+  ]
 
-  return { selectFilters, toggleFilters };
+  return { selectFilters, toggleFilters }
 }

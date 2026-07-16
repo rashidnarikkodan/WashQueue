@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { Search as SearchIcon } from "lucide-react";
-import { useDebounce } from "@/shared/hooks/useDebounce";
+import { useState, useEffect } from "react"
+import { Search as SearchIcon } from "lucide-react"
+import { useDebounce } from "@/shared/hooks/useDebounce"
 
 interface SearchProps {
-  value: string;
-  onChange: (q: string) => void;
-  placeholder?: string;
-  label?: string;
-  className?: string;
-  debounceDelay?: number;
+  value: string
+  onChange: (q: string) => void
+  placeholder?: string
+  label?: string
+  className?: string
+  debounceDelay?: number
 }
 
 const Search = ({
@@ -19,24 +19,24 @@ const Search = ({
   className = "",
   debounceDelay = 400,
 }: SearchProps) => {
-  const [localValue, setLocalValue] = useState(value);
-  const debouncedValue = useDebounce(localValue, debounceDelay);
+  const [localValue, setLocalValue] = useState(value)
+  const debouncedValue = useDebounce(localValue, debounceDelay)
 
   // Fire parent's onChange only when debounced value settles
   useEffect(() => {
     if (debouncedValue !== value) {
-      onChange(debouncedValue);
+      onChange(debouncedValue)
     }
-  }, [debouncedValue, onChange, value]);
+  }, [debouncedValue, onChange, value])
 
   // Sync local state if parent resets the query externally (e.g. clear button)
   useEffect(() => {
     if (value !== localValue) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalValue(value);
+      setLocalValue(value)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value])
 
   return (
     <div className={`space-y-2 w-full text-left ${className}`}>
@@ -57,7 +57,7 @@ const Search = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Search;
+export default Search

@@ -37,10 +37,7 @@ const step2Schema = z.object({
     .string({ message: "Account holder name is required" })
     .trim()
     .min(2, "Account holder name must be at least 2 characters"),
-  bankName: z
-    .string({ message: "Please select a bank" })
-    .trim()
-    .min(1, "Please select a bank"),
+  bankName: z.string({ message: "Please select a bank" }).trim().min(1, "Please select a bank"),
   accountNumber: z
     .string({ message: "Account number is required" })
     .trim()

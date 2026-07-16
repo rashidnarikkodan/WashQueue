@@ -17,7 +17,11 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     const userDoc = await this.model.findOne({ email: email.toLowerCase() }).exec()
     return userDoc ? this.mapper.toDomain(userDoc) : null
   }
-  async recordLoginSuccess(userId: string, hashedRefreshToken: string, timestamp: Date): Promise<void> {
+  async recordLoginSuccess(
+    userId: string,
+    hashedRefreshToken: string,
+    timestamp: Date
+  ): Promise<void> {
     await UserModel.updateOne(
       { _id: userId },
       {
@@ -86,19 +90,8 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     ).exec()
   }
 
-
-
   async getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse> {
-    const {
-      page,
-      limit,
-      search,
-      role,
-      isBlocked,
-      isVerified,
-      sortBy,
-      sortOrder,
-    } = query
+    const { page, limit, search, role, isBlocked, isVerified, sortBy, sortOrder } = query
 
     const filter: Record<string, unknown> = {}
 
@@ -137,13 +130,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     const { skip } = getPagination({ page, limit })
 
     const [users, total, totalAll, active, blocked, owners] = await Promise.all([
-      UserModel.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .select("-password")
-        .lean()
-        .exec(),
+      UserModel.find(filter).sort(sort).skip(skip).limit(limit).select("-password").lean().exec(),
 
       UserModel.countDocuments(filter).exec(),
       UserModel.countDocuments({}).exec(),
@@ -164,9 +151,11 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
     const ownerUserIds = domainUsers.filter((u) => u.role === ROLE.OWNER).map((u) => u.id)
     if (ownerUserIds.length > 0) {
-      const ownersList = await OwnerModel.find({ userId: { $in: ownerUserIds } }).lean().exec()
+      const ownersList = await OwnerModel.find({ userId: { $in: ownerUserIds } })
+        .lean()
+        .exec()
       const ownersMap = new Map(ownersList.map((o) => [o.userId.toString(), o]))
-      
+
       domainUsers.forEach((u) => {
         if (u.role === ROLE.OWNER) {
           const ownerDoc = ownersMap.get(u.id)
@@ -203,8 +192,7 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
         active,
         blocked,
         owners,
-      }
+      },
     }
   }
-
 }

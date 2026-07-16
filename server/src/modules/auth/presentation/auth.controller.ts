@@ -9,7 +9,7 @@ import {
   IGetMeUseCase,
   IForgotPasswordUseCase,
   IResetPasswordUseCase,
-  IResendOtpUseCase
+  IResendOtpUseCase,
 } from "../application/interfaces/auth-usecases.interfaces"
 import success from "@/common/utils/success"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
@@ -30,7 +30,7 @@ export class AuthController {
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
     private readonly resetPasswordUseCase: IResetPasswordUseCase,
     private readonly resendOtpUseCase: IResendOtpUseCase
-  ) { }
+  ) {}
 
   login = async (req: Request, res: Response) => {
     const { user, tokens } = await this.loginUseCase.execute(req.body)
@@ -72,7 +72,8 @@ export class AuthController {
       return
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await this.refreshTokenUseCase.execute(token)
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.refreshTokenUseCase.execute(token)
     setAuthCookies(res, accessToken, newRefreshToken)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.TOKEN_REFRESH_SUCCESS)
   }

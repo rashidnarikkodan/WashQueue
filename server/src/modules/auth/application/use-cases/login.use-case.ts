@@ -10,9 +10,14 @@ import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { Otp } from "../../domain/entities/otp.entity"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
 
-import { IHashService, ILoginUseCase, ITokenService, IMailService, IOtpService } from "../interfaces"
+import {
+  IHashService,
+  ILoginUseCase,
+  ITokenService,
+  IMailService,
+  IOtpService,
+} from "../interfaces"
 import { AuthOutput, LoginInput } from "../dto"
-
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
@@ -23,11 +28,11 @@ export class LoginUseCase implements ILoginUseCase {
     private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
     private readonly mailService: IMailService
-  ) { }
+  ) {}
 
   async execute(data: LoginInput): Promise<AuthOutput> {
     const user = await this.userRepository.findByEmail(data.email)
-    
+
     // Dummy hash check to prevent user enumeration (timing attack)
     const DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$dummy$dummy"
 
@@ -47,7 +52,7 @@ export class LoginUseCase implements ILoginUseCase {
     }
 
     const isPasswordValid = await this.hashService.verify(user.password, data.password)
-    
+
     if (!isPasswordValid) {
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }

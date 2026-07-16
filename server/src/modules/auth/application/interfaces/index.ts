@@ -13,5 +13,5 @@ export type {
   IResetPasswordUseCase,
   ISignupUseCase,
   IVerifyOtpUseCase,
-  IResendOtpUseCase
+  IResendOtpUseCase,
 } from "./auth-usecases.interfaces"

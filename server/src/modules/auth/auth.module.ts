@@ -34,16 +34,57 @@ const otpService = new OtpService(otpRepository)
 const tokenService = new TokenService()
 const hashService = new Argon2HashService()
 
-const signupUseCase = new SignupUseCase(userRepository, otpRepository, otpService, mailService, hashService)
-const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, refreshTokenRepository, otpService, tokenService, hashService)
-const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService, otpRepository, otpService, mailService)
-const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const signupUseCase = new SignupUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService,
+  hashService
+)
+const verifyOtpUseCase = new VerifyOtpUseCase(
+  userRepository,
+  otpRepository,
+  refreshTokenRepository,
+  otpService,
+  tokenService,
+  hashService
+)
+const loginUseCase = new LoginUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService,
+  otpRepository,
+  otpService,
+  mailService
+)
+const refreshTokenUseCase = new RefreshTokenUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService
+)
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
-const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const googleAuthUseCase = new GoogleAuthUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService
+)
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
-const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
+const forgotPasswordUseCase = new ForgotPasswordUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService
+)
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, hashService)
-const resendOtpUseCase = new ResendOtpUseCase(userRepository, otpRepository, otpService, mailService)
+const resendOtpUseCase = new ResendOtpUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService
+)
 
 const authController = new AuthController(
   loginUseCase,
@@ -75,5 +116,3 @@ export {
   authRouter,
 }
 export default authRouter
-
-

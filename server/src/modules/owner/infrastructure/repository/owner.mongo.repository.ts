@@ -5,7 +5,10 @@ import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 import { Types } from "mongoose"
 
-export class OwnerMongoRepository extends BaseRepository<Owner, IOwner> implements IOwnerRepository {
+export class OwnerMongoRepository
+  extends BaseRepository<Owner, IOwner>
+  implements IOwnerRepository
+{
   constructor() {
     super(OwnerModel, new OwnerMapper())
   }

@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ROLE } from "../../../shared/constants/role.const";
-import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs";
-import { usersApi } from "../service/users.api";
-import type { User, Booking, Vehicle, OwnerStation } from "../types";
-import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal";
-import { toast } from "sonner";
-import { getErrorMessage } from "../../../shared/utils/error";
-import Loading from "../../../shared/components/ui/Loading";
+import { useState, useEffect } from "react"
+import { ArrowLeft, AlertTriangle } from "lucide-react"
+import { useParams, useNavigate } from "react-router-dom"
+import { ROLE } from "../../../shared/constants/role.const"
+import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs"
+import { usersApi } from "../service/users.api"
+import type { User, Booking, Vehicle, OwnerStation } from "../types"
+import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal"
+import { toast } from "sonner"
+import { getErrorMessage } from "../../../shared/utils/error"
+import Loading from "../../../shared/components/ui/Loading"
 
 // Import sub-components
-import UserDetailsHeader from "../components/ui/UserDetailsHeader";
-import PersonalInformationCard from "../components/ui/PersonalInformationCard";
-import BookingHistoryCard from "../components/ui/BookingHistoryCard";
-import RegisteredVehiclesCard from "../components/ui/RegisteredVehiclesCard";
-import LoyaltyTierCard from "../components/ui/LoyaltyTierCard";
-import QuickNotificationCard from "../components/ui/QuickNotificationCard";
-import OwnerProfileOverviewCard from "../components/ui/OwnerProfileOverviewCard";
-import FeatureLock from "@/shared/components/ui/FeatureLock";
+import UserDetailsHeader from "../components/ui/UserDetailsHeader"
+import PersonalInformationCard from "../components/ui/PersonalInformationCard"
+import BookingHistoryCard from "../components/ui/BookingHistoryCard"
+import RegisteredVehiclesCard from "../components/ui/RegisteredVehiclesCard"
+import LoyaltyTierCard from "../components/ui/LoyaltyTierCard"
+import QuickNotificationCard from "../components/ui/QuickNotificationCard"
+import OwnerProfileOverviewCard from "../components/ui/OwnerProfileOverviewCard"
+import FeatureLock from "@/shared/components/ui/FeatureLock"
 
 // Mock generators based on userId
 const getMockBookings = (userId: string): Booking[] => {
@@ -47,8 +47,8 @@ const getMockBookings = (userId: string): Booking[] => {
       amount: 40.0,
       status: "CANCELLED",
     },
-  ];
-};
+  ]
+}
 
 const getMockVehicles = (userId: string): Vehicle[] => {
   return [
@@ -64,8 +64,8 @@ const getMockVehicles = (userId: string): Vehicle[] => {
       plate: "KA-01-AB-9999",
       addedDate: "2026-07-05",
     },
-  ];
-};
+  ]
+}
 
 const getMockStations = (): OwnerStation[] => {
   return [
@@ -87,57 +87,57 @@ const getMockStations = (): OwnerStation[] => {
       status: "MAINTENANCE",
       sessions: 35,
     },
-  ];
-};
+  ]
+}
 
 const UserDetails = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
 
   // Core API State
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // Block/Activation Action State
-  const [isSuspending, setIsSuspending] = useState(false);
-  const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false)
+  const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false)
 
   // Dynamic Data Lists (populated using mock generators based on fetched user)
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [ownerStations, setOwnerStations] = useState<OwnerStation[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [ownerStations, setOwnerStations] = useState<OwnerStation[]>([])
 
   // Fetch actual user from server on mount
   useEffect(() => {
     const fetchUser = async () => {
-      if (!id) return;
-      setIsLoading(true);
-      setErrorMsg(null);
+      if (!id) return
+      setIsLoading(true)
+      setErrorMsg(null)
       try {
-        const fetched = await usersApi.getUser(id);
-        setUser(fetched);
+        const fetched = await usersApi.getUser(id)
+        setUser(fetched)
 
         // Populate lists dynamically so user details don't show empty fallbacks
-        setVehicles(getMockVehicles(fetched.id));
-        setBookings(getMockBookings(fetched.id));
-        setOwnerStations(getMockStations());
+        setVehicles(getMockVehicles(fetched.id))
+        setBookings(getMockBookings(fetched.id))
+        setOwnerStations(getMockStations())
       } catch (err: unknown) {
-        setErrorMsg(getErrorMessage(err, "Failed to load user details"));
+        setErrorMsg(getErrorMessage(err, "Failed to load user details"))
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchUser();
-  }, [id]);
+    fetchUser()
+  }, [id])
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loading size="lg" text="Loading user details..." />
       </div>
-    );
+    )
   }
 
   if (errorMsg || !user) {
@@ -153,40 +153,40 @@ const UserDetails = () => {
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   const handleToggleBlockStatus = () => {
-    setIsBlockConfirmOpen(true);
-  };
+    setIsBlockConfirmOpen(true)
+  }
 
   const executeToggleBlockStatus = async () => {
-    setIsBlockConfirmOpen(false);
-    if (!user) return;
-    setIsSuspending(true);
+    setIsBlockConfirmOpen(false)
+    if (!user) return
+    setIsSuspending(true)
     try {
-      const updatedBlocked = !user.isBlocked;
-      const updatedUser = await usersApi.updateUser(user.id, { isBlocked: updatedBlocked });
-      setUser(updatedUser);
+      const updatedBlocked = !user.isBlocked
+      const updatedUser = await usersApi.updateUser(user.id, { isBlocked: updatedBlocked })
+      setUser(updatedUser)
       toast.success(
         updatedBlocked
           ? `User ${user.name || user.email} suspended successfully!`
           : `User ${user.name || user.email} activated successfully!`
-      );
+      )
     } catch (err: unknown) {
-      toast.error(getErrorMessage(err, "Failed to update block status."));
+      toast.error(getErrorMessage(err, "Failed to update block status."))
     } finally {
-      setIsSuspending(false);
+      setIsSuspending(false)
     }
-  };
+  }
 
   const handleScrollToNotification = () => {
-    const element = document.getElementById("quick-notification-form");
+    const element = document.getElementById("quick-notification-form")
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      toast.info("Scrolled to Quick Notification form.");
+      element.scrollIntoView({ behavior: "smooth" })
+      toast.info("Scrolled to Quick Notification form.")
     }
-  };
+  }
 
   return (
     <div className="space-y-6 max-w-7xl xl:max-w-350 mx-auto px-4 sm:px-6 pb-12 text-[#f8fafc]">
@@ -237,7 +237,7 @@ const UserDetails = () => {
         <div className="xl:col-span-4 space-y-6">
           <QuickNotificationCard userEmail={user.email} userName={user.name || "User"} />
 
-          <FeatureLock message="Loyalty Tier" >
+          <FeatureLock message="Loyalty Tier">
             <LoyaltyTierCard />
           </FeatureLock>
         </div>
@@ -259,7 +259,7 @@ const UserDetails = () => {
         confirmVariant={user.isBlocked ? "success" : "danger"}
       />
     </div>
-  );
-};
+  )
+}
 
-export default UserDetails;
+export default UserDetails

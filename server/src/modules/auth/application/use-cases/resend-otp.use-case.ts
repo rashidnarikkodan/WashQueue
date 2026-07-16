@@ -12,11 +12,11 @@ export class ResendOtpUseCase implements IResendOtpUseCase {
     private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
     private readonly mailService: IMailService
-  ) { }
+  ) {}
 
   async execute(data: { email: string }): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
-    
+
     if (!user) {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }

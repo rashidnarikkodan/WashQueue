@@ -1,12 +1,11 @@
 // Sidebar.tsx
 
-import { NavLink } from "react-router-dom";
-import type { SidebarItem } from "../../config/sidebar.config";
-
+import { NavLink } from "react-router-dom"
+import type { SidebarItem } from "../../config/sidebar.config"
 
 type Props = {
-  items: SidebarItem[];
-};
+  items: SidebarItem[]
+}
 
 const Sidebar = ({ items }: Props) => {
   return (
@@ -41,7 +40,7 @@ const Sidebar = ({ items }: Props) => {
     >
       <nav className="flex flex-col gap-1.5 [@media(max-height:800px)]:gap-1 overflow-y-auto max-h-full scrollbar-none">
         {items.map((item) => {
-          const Icon = item.icon;
+          const Icon = item.icon
 
           return (
             <NavLink
@@ -62,9 +61,10 @@ const Sidebar = ({ items }: Props) => {
                 duration-200
                 border
 
-                ${isActive
-                  ? "bg-primary/10 text-primary border-primary/20"
-                  : "text-muted-foreground border-transparent hover:bg-muted/40 hover:text-foreground"
+                ${
+                  isActive
+                    ? "bg-primary/10 text-primary border-primary/20"
+                    : "text-muted-foreground border-transparent hover:bg-muted/40 hover:text-foreground"
                 }
               `
               }
@@ -91,11 +91,11 @@ const Sidebar = ({ items }: Props) => {
                 {item.name}
               </span>
             </NavLink>
-          );
+          )
         })}
       </nav>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

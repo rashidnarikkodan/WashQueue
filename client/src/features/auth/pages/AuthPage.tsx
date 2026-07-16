@@ -1,19 +1,18 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import LoginForm from "../components/ui/LoginForm";
-import SignupForm from "../components/ui/SignupForm";
+import { useNavigate, useLocation } from "react-router-dom"
+import LoginForm from "../components/ui/LoginForm"
+import SignupForm from "../components/ui/SignupForm"
 
 export default function AuthPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
 
   // Detect whether we are in sign-up mode based on pathname
-  const isSignup = location.pathname.startsWith("/signup");
+  const isSignup = location.pathname.startsWith("/signup")
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground">
       {/* 1. DESKTOP VIEW WITH DOUBLE SLIDING ANIMATION */}
       <div className="relative w-full min-h-screen bg-background overflow-hidden hidden md:flex items-stretch">
-        
         {/* Left Column (Hosts Signup Form) */}
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
           <div
@@ -43,9 +42,7 @@ export default function AuthPage() {
         {/* Absolutely Positioned Sliding Blue Card */}
         <div
           className={`absolute top-0 bottom-0 left-0 w-1/2 h-full bg-primary text-primary-foreground shadow-2xl z-20 transition-all duration-700 ease-in-out flex flex-col justify-center items-center p-8 md:p-16 overflow-hidden ${
-            isSignup
-              ? "translate-x-full rounded-l-[100px]"
-              : "translate-x-0 rounded-r-[100px]"
+            isSignup ? "translate-x-full rounded-l-[100px]" : "translate-x-0 rounded-r-[100px]"
           }`}
         >
           {/* Centered Switch Panel */}
@@ -86,9 +83,7 @@ export default function AuthPage() {
                   : "opacity-0 scale-95 pointer-events-none"
               }`}
             >
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                Welcome Back
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Welcome Back</h1>
               <p className="text-sm md:text-base opacity-90 max-w-xs leading-relaxed">
                 Book nearby vehicle washes without waiting in line.
               </p>
@@ -116,13 +111,14 @@ export default function AuthPage() {
           {/* Background Decor Glow */}
           <div className="absolute right-[-50px] top-[-50px] h-[200px] w-[200px] rounded-full bg-white/10 filter blur-2xl"></div>
 
-
           {/* Message Area */}
           <div className="relative h-40 text-center w-full z-10">
             {/* Login Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
-                isSignup ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 pointer-events-auto"
+                isSignup
+                  ? "opacity-0 scale-95 pointer-events-none"
+                  : "opacity-100 scale-100 pointer-events-auto"
               }`}
             >
               <h1 className="text-2xl font-extrabold tracking-tight">Welcome Back</h1>
@@ -134,7 +130,9 @@ export default function AuthPage() {
             {/* Signup Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
-                isSignup ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                isSignup
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none"
               }`}
             >
               <h1 className="text-2xl font-extrabold tracking-tight">Welcome to WashQueue</h1>
@@ -206,5 +204,5 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -11,7 +11,6 @@ import { Otp } from "../../domain/entities/otp.entity"
 import { SignupInput } from "../dto"
 import { IHashService, IMailService, IOtpService, ISignupUseCase } from "../interfaces"
 
-
 export class SignupUseCase implements ISignupUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
@@ -19,7 +18,7 @@ export class SignupUseCase implements ISignupUseCase {
     private readonly otpService: IOtpService,
     private readonly mailService: IMailService,
     private readonly hashService: IHashService
-  ) { }
+  ) {}
 
   async execute(data: SignupInput): Promise<null> {
     // Check if user already exists

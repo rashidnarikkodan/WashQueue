@@ -1,33 +1,35 @@
-import { Link, Outlet, Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../features/auth/store/authStore';
-import { ROLE } from '../../shared/constants/role.const';
+import { Link, Outlet, Navigate, useLocation } from "react-router-dom"
+import { useAuthStore } from "../../features/auth/store/authStore"
+import { ROLE } from "../../shared/constants/role.const"
 
 export default function AuthLayout() {
-  const { isAuthenticated, user } = useAuthStore();
-  const location = useLocation();
+  const { isAuthenticated, user } = useAuthStore()
+  const location = useLocation()
 
   if (isAuthenticated && user && !["/verify-email", "/setup-account"].includes(location.pathname)) {
-    if (user.role === ROLE.ADMIN) return <Navigate to="/admin/dashboard" replace />;
-    if (user.role === ROLE.MANAGER) return <Navigate to="/manager/dashboard" replace />;
-    if (user.role === ROLE.OWNER) return <Navigate to="/owner/dashboard" replace />;
-    return <Navigate to="/" replace />;
+    if (user.role === ROLE.ADMIN) return <Navigate to="/admin/dashboard" replace />
+    if (user.role === ROLE.MANAGER) return <Navigate to="/manager/dashboard" replace />
+    if (user.role === ROLE.OWNER) return <Navigate to="/owner/dashboard" replace />
+    return <Navigate to="/" replace />
   }
 
   const getLogoColor = () => {
     if (location.pathname === "/login") {
-      return "text-foreground";
+      return "text-foreground"
     }
     if (location.pathname === "/signup") {
-      return "text-foreground md:text-primary";
+      return "text-foreground md:text-primary"
     }
-    return "text-primary";
-  };
+    return "text-primary"
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className='absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-6'>
+      <header className="absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-6">
         <Link to="/" className="flex items-center gap-2 group">
-          <span className={`text-xl font-bold italic tracking-tight transition-colors duration-300 ${getLogoColor()}`}>
+          <span
+            className={`text-xl font-bold italic tracking-tight transition-colors duration-300 ${getLogoColor()}`}
+          >
             WashQueue
           </span>
         </Link>
@@ -36,5 +38,5 @@ export default function AuthLayout() {
         <Outlet />
       </main>
     </div>
-  );
+  )
 }

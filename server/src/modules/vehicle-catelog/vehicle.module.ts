@@ -22,7 +22,10 @@ const createCategoryUseCase = new CreateCategoryUseCase(vehicleCategoryRepositor
 const getCategoryUseCase = new GetCategoryUseCase(vehicleCategoryRepository)
 const getCategoriesUseCase = new GetCategoriesUseCase(vehicleCategoryRepository)
 const updateCategoryUseCase = new UpdateCategoryUseCase(vehicleCategoryRepository)
-const deleteCategoryUseCase = new DeleteCategoryUseCase(vehicleCategoryRepository, vehicleClassRepository)
+const deleteCategoryUseCase = new DeleteCategoryUseCase(
+  vehicleCategoryRepository,
+  vehicleClassRepository
+)
 
 const createClassUseCase = new CreateClassUseCase(vehicleClassRepository, vehicleCategoryRepository)
 const getClassUseCase = new GetClassUseCase(vehicleClassRepository)

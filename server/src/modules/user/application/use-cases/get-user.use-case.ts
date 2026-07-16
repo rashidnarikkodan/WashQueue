@@ -7,8 +7,8 @@ import { ROLE } from "@/common/constants/role.constants"
 export class GetUserUseCase implements IGetUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly ownerRepository: IOwnerRepository,
-  ) { }
+    private readonly ownerRepository: IOwnerRepository
+  ) {}
 
   async execute(id: string): Promise<UserProfileDto | null> {
     const user = await this.userRepository.findById(id)
@@ -59,7 +59,7 @@ export class GetUserUseCase implements IGetUserUseCase {
       isVerified,
       onboardingStep,
       onboardingDetails,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     }
   }
 }

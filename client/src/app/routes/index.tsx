@@ -1,14 +1,14 @@
 // src/app/routes/index.tsx
 
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom"
 
-import { authRoutes } from "./auth.routes";
-import { mainRoutes } from "./main.routes";
-import { ownerRoutes } from "./owner.routes";
-import { managerRoutes } from "./manager.routes";
-import { adminRoutes } from "./admin.routes";
-import ErrorBoundary from "../../shared/pages/ErrorBoundary";
-import NotFoundPage from "../../shared/pages/NotFoundPage";
+import { authRoutes } from "./auth.routes"
+import { mainRoutes } from "./main.routes"
+import { ownerRoutes } from "./owner.routes"
+import { managerRoutes } from "./manager.routes"
+import { adminRoutes } from "./admin.routes"
+import ErrorBoundary from "../../shared/pages/ErrorBoundary"
+import NotFoundPage from "../../shared/pages/NotFoundPage"
 
 export const router = createBrowserRouter([
   {
@@ -32,8 +32,8 @@ export const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
   },
   {
-    path: '*',
+    path: "*",
     element: <NotFoundPage />,
     errorElement: <ErrorBoundary />,
-  }
-]);
+  },
+])

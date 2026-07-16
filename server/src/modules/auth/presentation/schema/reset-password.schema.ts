@@ -1,5 +1,5 @@
-import z from "zod";
-import { ResetPasswordInput } from "../../application/dto/reset-password.dto";
+import z from "zod"
+import { ResetPasswordInput } from "../../application/dto/reset-password.dto"
 
 export const resetPasswordSchema: z.ZodType<ResetPasswordInput> = z.object({
   email: z
@@ -30,4 +30,4 @@ export const resetPasswordSchema: z.ZodType<ResetPasswordInput> = z.object({
     .regex(/[!@#$%^&*()_\-+=[{\]};:'",<.>/?\\|`~]/, {
       message: "Password must contain at least one special character",
     }),
-});
+})

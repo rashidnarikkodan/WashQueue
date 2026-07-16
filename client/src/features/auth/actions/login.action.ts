@@ -4,10 +4,7 @@ import type { LoginState } from "../types"
 
 export type { LoginState } from "../types"
 
-export async function loginAction(
-  _prevState: LoginState,
-  formData: FormData
-): Promise<LoginState> {
+export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   let email = ""
   try {
     email = formData.get("email")?.toString().trim() || ""
@@ -47,7 +44,7 @@ export async function loginAction(
   } catch (error: unknown) {
     return {
       success: false,
-      message: getErrorMessage(error,'Failed to Login'),
+      message: getErrorMessage(error, "Failed to Login"),
       email,
     }
   }

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod"
 
 export const step1Schema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
@@ -17,13 +17,10 @@ export const step1Schema = z.object({
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "Please select an ID proof type",
   }),
-});
+})
 
 export const step2Schema = z.object({
-  accountHolderName: z
-    .string()
-    .trim()
-    .min(2, "Account holder name must be at least 2 characters"),
+  accountHolderName: z.string().trim().min(2, "Account holder name must be at least 2 characters"),
   bankName: z.string().trim().min(1, "Please select a bank"),
   accountNumber: z
     .string()
@@ -33,7 +30,7 @@ export const step2Schema = z.object({
     .string()
     .trim()
     .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format (e.g. HDFC0001234)"),
-});
+})
 
-export type Step1Input = z.infer<typeof step1Schema>;
-export type Step2Input = z.infer<typeof step2Schema>;
+export type Step1Input = z.infer<typeof step1Schema>
+export type Step2Input = z.infer<typeof step2Schema>

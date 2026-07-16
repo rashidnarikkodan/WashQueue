@@ -1,10 +1,10 @@
-import { Building, Shield } from "lucide-react";
-import OnboardingDetailsSummary from "./OnboardingDetailsSummary";
-import type { User, OwnerStation } from "../../types";
+import { Building, Shield } from "lucide-react"
+import OnboardingDetailsSummary from "./OnboardingDetailsSummary"
+import type { User, OwnerStation } from "../../types"
 
 interface OwnerProfileOverviewCardProps {
-  user: User;
-  stations: OwnerStation[];
+  user: User
+  stations: OwnerStation[]
 }
 
 export default function OwnerProfileOverviewCard({
@@ -35,10 +35,7 @@ export default function OwnerProfileOverviewCard({
             </h3>
           </div>
 
-          <OnboardingDetailsSummary
-            details={user.onboardingDetails || {}}
-            email={user.email}
-          />
+          <OnboardingDetailsSummary details={user.onboardingDetails || {}} email={user.email} />
         </div>
 
         {/* Manage stations side */}
@@ -75,8 +72,8 @@ export default function OwnerProfileOverviewCard({
                             s.status === "ONLINE"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : s.status === "MAINTENANCE"
-                              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
+                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
                           }`}
                         >
                           {s.status}
@@ -94,5 +91,5 @@ export default function OwnerProfileOverviewCard({
         </div>
       </div>
     </div>
-  );
+  )
 }

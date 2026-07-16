@@ -1,43 +1,43 @@
-import { useEffect, useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Check, ArrowLeft } from "lucide-react";
-import Loading from "../../../shared/components/ui/Loading";
-import { useAuthStore } from "../store/authStore";
-import { useAuthFormStore } from "../store/authFormStore";
-import { toast } from "sonner";
-import OtpInput from "../../../shared/components/ui/OtpInput";
-import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer";
+import { useEffect, useState, useRef } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { Check, ArrowLeft } from "lucide-react"
+import Loading from "../../../shared/components/ui/Loading"
+import { useAuthStore } from "../store/authStore"
+import { useAuthFormStore } from "../store/authFormStore"
+import { toast } from "sonner"
+import OtpInput from "../../../shared/components/ui/OtpInput"
+import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer"
 
 export default function OTPPage() {
-  const navigate = useNavigate();
-  const { verifyOTP, resendOTP, user } = useAuthStore();
-  const { otpDigits, setOtpDigits, resetForm } = useAuthFormStore();
+  const navigate = useNavigate()
+  const { verifyOTP, resendOTP, user } = useAuthStore()
+  const { otpDigits, setOtpDigits, resetForm } = useAuthFormStore()
 
-  const tempUser = useAuthStore((state) => state.tempUser);
-  const email = tempUser?.email || localStorage.getItem("wq_temp_email") || user?.email;
+  const tempUser = useAuthStore((state) => state.tempUser)
+  const email = tempUser?.email || localStorage.getItem("wq_temp_email") || user?.email
 
-  const isVerifyingRef = useRef(false);
-  const lastVerifiedCodeRef = useRef("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isResending, setIsResending] = useState(false);
+  const isVerifyingRef = useRef(false)
+  const lastVerifiedCodeRef = useRef("")
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
 
   // Resend code countdown timer hook (starts at 25 seconds)
-  const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(25);
+  const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(25)
 
   // Success Verification Modal
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
     return () => {
-      resetForm();
-    };
-  }, [resetForm]);
+      resetForm()
+    }
+  }, [resetForm])
 
   // Reactive verification: Auto-submits when all 6 digits are entered
   useEffect(() => {
-    const code = otpDigits.join("");
+    const code = otpDigits.join("")
     if (code.length < 6) {
-      lastVerifiedCodeRef.current = "";
+      lastVerifiedCodeRef.current = ""
     }
     if (
       code.length === 6 &&
@@ -45,59 +45,59 @@ export default function OTPPage() {
       !isVerified &&
       !isVerifyingRef.current
     ) {
-      lastVerifiedCodeRef.current = code;
-      isVerifyingRef.current = true;
-      setIsVerifying(true);
+      lastVerifiedCodeRef.current = code
+      isVerifyingRef.current = true
+      setIsVerifying(true)
       const triggerVerify = async () => {
         try {
-          const success = await verifyOTP(code);
+          const success = await verifyOTP(code)
           if (success) {
-            setIsVerified(true);
-            navigate("/setup-account");
+            setIsVerified(true)
+            navigate("/setup-account")
           }
         } finally {
-          isVerifyingRef.current = false;
-          setIsVerifying(false);
+          isVerifyingRef.current = false
+          setIsVerifying(false)
         }
-      };
-      triggerVerify();
+      }
+      triggerVerify()
     }
-  }, [otpDigits, verifyOTP, isVerified, navigate]);
+  }, [otpDigits, verifyOTP, isVerified, navigate])
 
   const handleResend = async () => {
     if (!email) {
-      toast.error("Email address not found.");
-      return;
+      toast.error("Email address not found.")
+      return
     }
-    setIsResending(true);
+    setIsResending(true)
     try {
-      const success = await resendOTP(email);
+      const success = await resendOTP(email)
       if (success) {
-        resetTimer(25);
+        resetTimer(25)
       }
     } finally {
-      setIsResending(false);
+      setIsResending(false)
     }
-  };
+  }
 
   const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = otpDigits.join("");
+    e.preventDefault()
+    const code = otpDigits.join("")
     if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
-      isVerifyingRef.current = true;
-      setIsVerifying(true);
+      isVerifyingRef.current = true
+      setIsVerifying(true)
       try {
-        const success = await verifyOTP(code);
+        const success = await verifyOTP(code)
         if (success) {
-          setIsVerified(true);
-          navigate("/setup-account");
+          setIsVerified(true)
+          navigate("/setup-account")
         }
       } finally {
-        isVerifyingRef.current = false;
-        setIsVerifying(false);
+        isVerifyingRef.current = false
+        setIsVerifying(false)
       }
     }
-  };
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full transition-colors duration-300">
@@ -118,7 +118,8 @@ export default function OTPPage() {
                 Confirm Email
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-                Enter the 6-digit verification code sent to <strong className="text-foreground">{email || "your registered email"}</strong>.
+                Enter the 6-digit verification code sent to{" "}
+                <strong className="text-foreground">{email || "your registered email"}</strong>.
               </p>
             </div>
 
@@ -180,7 +181,9 @@ export default function OTPPage() {
               <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
                 Email Verified
               </h2>
-              <p className="text-sm text-muted-foreground">Your account setup is ready for role assignment.</p>
+              <p className="text-sm text-muted-foreground">
+                Your account setup is ready for role assignment.
+              </p>
             </div>
 
             <button
@@ -193,5 +196,5 @@ export default function OTPPage() {
         )}
       </main>
     </div>
-  );
+  )
 }

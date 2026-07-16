@@ -1,7 +1,10 @@
 import { Model, Document } from "mongoose"
 import { HasId, IBaseRepository, IMapper } from "@/core/domain/repository.interface"
 
-export abstract class BaseRepository<TDomain extends HasId, TPersist extends Document> implements IBaseRepository<TDomain> {
+export abstract class BaseRepository<
+  TDomain extends HasId,
+  TPersist extends Document,
+> implements IBaseRepository<TDomain> {
   constructor(
     protected readonly model: Model<TPersist>,
     protected readonly mapper: IMapper<TDomain, TPersist>
@@ -16,11 +19,9 @@ export abstract class BaseRepository<TDomain extends HasId, TPersist extends Doc
     const persistenceData = this.mapper.toPersistence(entity)
     const entityId = entity.id
     if (entityId && typeof entityId === "string" && entityId.trim() !== "") {
-      const updatedDoc = await this.model.findByIdAndUpdate(
-        entityId,
-        { $set: persistenceData },
-        { new: true }
-      ).exec()
+      const updatedDoc = await this.model
+        .findByIdAndUpdate(entityId, { $set: persistenceData }, { new: true })
+        .exec()
       if (updatedDoc) {
         return this.mapper.toDomain(updatedDoc)
       }
@@ -37,11 +38,9 @@ export abstract class BaseRepository<TDomain extends HasId, TPersist extends Doc
 
   async update(id: string, updates: Partial<TDomain>): Promise<TDomain | null> {
     const persistenceData = this.mapper.toPersistence(updates)
-    const updatedDoc = await this.model.findByIdAndUpdate(
-      id,
-      { $set: persistenceData },
-      { new: true }
-    ).exec()
+    const updatedDoc = await this.model
+      .findByIdAndUpdate(id, { $set: persistenceData }, { new: true })
+      .exec()
     return updatedDoc ? this.mapper.toDomain(updatedDoc) : null
   }
 }

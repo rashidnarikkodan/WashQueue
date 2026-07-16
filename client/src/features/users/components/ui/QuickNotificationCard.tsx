@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Send } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from "react"
+import { Send } from "lucide-react"
+import { toast } from "sonner"
 
 interface QuickNotificationCardProps {
-  userEmail: string;
-  userName: string;
+  userEmail: string
+  userName: string
 }
 
 export default function QuickNotificationCard({ userEmail, userName }: QuickNotificationCardProps) {
@@ -12,17 +12,17 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
     type: "Account Alert",
     subject: "",
     content: "",
-  });
+  })
 
   const handleSendNotification = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!notification.subject || !notification.content) {
-      toast.warning("Please fill in both subject and message content.");
-      return;
+      toast.warning("Please fill in both subject and message content.")
+      return
     }
-    toast.success(`Notification of type "${notification.type}" sent to ${userName || userEmail}!`);
-    setNotification((prev) => ({ ...prev, subject: "", content: "" }));
-  };
+    toast.success(`Notification of type "${notification.type}" sent to ${userName || userEmail}!`)
+    setNotification((prev) => ({ ...prev, subject: "", content: "" }))
+  }
 
   return (
     <div
@@ -88,5 +88,5 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
         </button>
       </form>
     </div>
-  );
+  )
 }

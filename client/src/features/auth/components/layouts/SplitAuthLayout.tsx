@@ -1,14 +1,14 @@
-import type { ReactNode } from "react";
-import { Droplets } from "lucide-react";
+import type { ReactNode } from "react"
+import { Droplets } from "lucide-react"
 
 interface SplitAuthLayoutProps {
-  side: "left" | "right";
-  title: string;
-  description: string;
-  promptText: string;
-  buttonText: string;
-  onRedirectClick: () => void;
-  children: ReactNode;
+  side: "left" | "right"
+  title: string
+  description: string
+  promptText: string
+  buttonText: string
+  onRedirectClick: () => void
+  children: ReactNode
 }
 
 export default function SplitAuthLayout({
@@ -18,9 +18,9 @@ export default function SplitAuthLayout({
   promptText,
   buttonText,
   onRedirectClick,
-  children
+  children,
 }: SplitAuthLayoutProps) {
-  const isBlueOnLeft = side === "left";
+  const isBlueOnLeft = side === "left"
 
   const brandingPanel = (
     <div
@@ -32,7 +32,7 @@ export default function SplitAuthLayout({
     >
       {/* Background Decor Glow */}
       <div className="absolute right-[-50px] top-[-50px] h-[300px] w-[300px] rounded-full bg-primary-foreground/10 filter blur-3xl"></div>
-      
+
       {/* Brand Header */}
       <div className="flex items-center gap-2 z-10">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
@@ -46,9 +46,7 @@ export default function SplitAuthLayout({
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
           {title}
         </h1>
-        <p className="text-base md:text-lg opacity-90 font-light">
-          {description}
-        </p>
+        <p className="text-base md:text-lg opacity-90 font-light">{description}</p>
       </div>
 
       {/* Bottom Switch Redirect */}
@@ -62,7 +60,7 @@ export default function SplitAuthLayout({
         </button>
       </div>
     </div>
-  );
+  )
 
   const formPanel = (
     <div
@@ -74,7 +72,7 @@ export default function SplitAuthLayout({
         {children}
       </div>
     </div>
-  );
+  )
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 w-full min-h-screen bg-background overflow-x-hidden">
@@ -90,5 +88,5 @@ export default function SplitAuthLayout({
         </>
       )}
     </div>
-  );
+  )
 }

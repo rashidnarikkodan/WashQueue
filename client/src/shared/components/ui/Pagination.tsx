@@ -1,45 +1,41 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface PaginationMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
 }
 
 interface PaginationProps {
-  meta: PaginationMeta;
-  onPageChange: (page: number) => void;
+  meta: PaginationMeta
+  onPageChange: (page: number) => void
 }
 
 const Pagination = ({ meta, onPageChange }: PaginationProps) => {
-  const { total, page, limit, totalPages, hasNextPage, hasPrevPage } = meta;
+  const { total, page, limit, totalPages, hasNextPage, hasPrevPage } = meta
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) return null
 
-  const startEntry = (page - 1) * limit + 1;
-  const endEntry = Math.min(page * limit, total);
+  const startEntry = (page - 1) * limit + 1
+  const endEntry = Math.min(page * limit, total)
 
   // Helper to generate page number buttons with ellipses
   const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const delta = 1; // page window size
+    const pages: (number | string)[] = []
+    const delta = 1 // page window size
 
     for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= page - delta && i <= page + delta)
-      ) {
-        pages.push(i);
+      if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
+        pages.push(i)
       } else if (pages[pages.length - 1] !== "...") {
-        pages.push("...");
+        pages.push("...")
       }
     }
-    return pages;
-  };
+    return pages
+  }
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 px-6 border-t border-border bg-card/20 select-none">
@@ -73,11 +69,11 @@ const Pagination = ({ meta, onPageChange }: PaginationProps) => {
                 >
                   ...
                 </span>
-              );
+              )
             }
 
-            const pageNum = p as number;
-            const isCurrent = pageNum === page;
+            const pageNum = p as number
+            const isCurrent = pageNum === page
 
             return (
               <button
@@ -91,7 +87,7 @@ const Pagination = ({ meta, onPageChange }: PaginationProps) => {
               >
                 {pageNum}
               </button>
-            );
+            )
           })}
         </div>
 
@@ -106,7 +102,7 @@ const Pagination = ({ meta, onPageChange }: PaginationProps) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Pagination;
+export default Pagination

@@ -1,9 +1,9 @@
-import HeroSection from "../components/landingSections/HeroSection";
-import FeaturesSection from "../components/landingSections/FeaturesSection";
-import HowItWorksSection from "../components/landingSections/HowItWorksSection";
-import ProductPreviewSection from "../components/landingSections/ProductPreviewSection";
-import TechCapabilitiesSection from "../components/landingSections/TechCapabilitiesSection";
-import CTASection from "../components/landingSections/CTASection";
+import HeroSection from "../components/landingSections/HeroSection"
+import FeaturesSection from "../components/landingSections/FeaturesSection"
+import HowItWorksSection from "../components/landingSections/HowItWorksSection"
+import ProductPreviewSection from "../components/landingSections/ProductPreviewSection"
+import TechCapabilitiesSection from "../components/landingSections/TechCapabilitiesSection"
+import CTASection from "../components/landingSections/CTASection"
 
 export default function Landing() {
   return (
@@ -15,5 +15,5 @@ export default function Landing() {
       <TechCapabilitiesSection />
       <CTASection />
     </div>
-  );
+  )
 }

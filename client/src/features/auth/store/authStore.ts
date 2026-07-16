@@ -1,53 +1,56 @@
-import { create } from "zustand";
-import { toast } from "sonner";
-import { authApi } from "../services/auth.api";
-import type { ViewModeType } from "../../../shared/constants/role.const";
-import { VIEW_MODE } from "../../../shared/constants/role.const";
-import { getErrorMessage } from "../../../shared/utils/error";
-import type { AuthUser } from "../types";
-
+import { create } from "zustand"
+import { toast } from "sonner"
+import { authApi } from "../services/auth.api"
+import type { ViewModeType } from "../../../shared/constants/role.const"
+import { VIEW_MODE } from "../../../shared/constants/role.const"
+import { getErrorMessage } from "../../../shared/utils/error"
+import type { AuthUser } from "../types"
 
 interface AuthStore {
-  user: AuthUser | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  tempUser: { name: string; email: string } | null;
-  activeViewMode: ViewModeType;
-  setActiveViewMode: (mode: ViewModeType) => void;
-  login: (email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: (token: string) => Promise<boolean>;
-  signup: (name: string, email: string, password: string) => Promise<boolean>;
-  verifyOTP: (code: string) => Promise<boolean>;
-  logout: () => void;
-  forgotPassword: (email: string) => Promise<boolean>;
-  resetPassword: (email: string, code: string, newPassword: string) => Promise<boolean>;
-  resendOTP: (email: string) => Promise<boolean>;
-  refreshUser: () => Promise<void>;
+  user: AuthUser | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  tempUser: { name: string; email: string } | null
+  activeViewMode: ViewModeType
+  setActiveViewMode: (mode: ViewModeType) => void
+  login: (email: string, password: string) => Promise<boolean>
+  loginWithGoogle: (token: string) => Promise<boolean>
+  signup: (name: string, email: string, password: string) => Promise<boolean>
+  verifyOTP: (code: string) => Promise<boolean>
+  logout: () => void
+  forgotPassword: (email: string) => Promise<boolean>
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<boolean>
+  resendOTP: (email: string) => Promise<boolean>
+  refreshUser: () => Promise<void>
 }
 
-const getInitialState = (): { user: AuthUser | null; isAuthenticated: boolean; activeViewMode: ViewModeType } => {
+const getInitialState = (): {
+  user: AuthUser | null
+  isAuthenticated: boolean
+  activeViewMode: ViewModeType
+} => {
   try {
-    const storedUser = localStorage.getItem("wq_user");
-    const storedAuth = localStorage.getItem("wq_auth");
-    const storedViewMode = localStorage.getItem("wq_view_mode") || VIEW_MODE.OWNER;
+    const storedUser = localStorage.getItem("wq_user")
+    const storedAuth = localStorage.getItem("wq_auth")
+    const storedViewMode = localStorage.getItem("wq_view_mode") || VIEW_MODE.OWNER
     if (storedUser && storedAuth === "true") {
       return {
         user: JSON.parse(storedUser),
         isAuthenticated: true,
         activeViewMode: storedViewMode as ViewModeType,
-      };
+      }
     }
   } catch (e) {
-    console.error("Failed to load stored auth state:", e);
+    console.error("Failed to load stored auth state:", e)
   }
   return {
     user: null,
     isAuthenticated: false,
     activeViewMode: VIEW_MODE.CUSTOMER,
-  };
-};
+  }
+}
 
-const initialState = getInitialState();
+const initialState = getInitialState()
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: initialState.user,
@@ -57,110 +60,110 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   activeViewMode: initialState.activeViewMode,
 
   setActiveViewMode: (mode) => {
-    set({ activeViewMode: mode });
-    localStorage.setItem("wq_view_mode", mode);
+    set({ activeViewMode: mode })
+    localStorage.setItem("wq_view_mode", mode)
   },
 
   login: async (email, password) => {
-    set({ isLoading: true });
+    set({ isLoading: true })
 
     try {
-      const user = await authApi.login(email, password);
+      const user = await authApi.login(email, password)
 
       set({
         user,
         isAuthenticated: true,
         isLoading: false,
-      });
-      localStorage.setItem("wq_user", JSON.stringify(user));
-      localStorage.setItem("wq_auth", "true");
-      toast.success(`Welcome back, ${user.name}!`);
-      return true;
+      })
+      localStorage.setItem("wq_user", JSON.stringify(user))
+      localStorage.setItem("wq_auth", "true")
+      toast.success(`Welcome back, ${user.name}!`)
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Login failed"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "Login failed"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   loginWithGoogle: async (token) => {
-    set({ isLoading: true });
+    set({ isLoading: true })
 
     try {
-      const loggedInUser = await authApi.loginWithGoogle(token);
+      const loggedInUser = await authApi.loginWithGoogle(token)
 
       set({
         user: loggedInUser,
         isAuthenticated: true,
         isLoading: false,
-      });
+      })
 
-      localStorage.setItem("wq_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("wq_auth", "true");
-      toast.success(`Welcome back, ${loggedInUser.name}!`);
-      return true;
+      localStorage.setItem("wq_user", JSON.stringify(loggedInUser))
+      localStorage.setItem("wq_auth", "true")
+      toast.success(`Welcome back, ${loggedInUser.name}!`)
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Google sign-in failed"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "Google sign-in failed"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   signup: async (name, email, password) => {
-    set({ isLoading: true });
+    set({ isLoading: true })
 
     try {
-      await authApi.signup(name, email, password);
+      await authApi.signup(name, email, password)
       set({
         tempUser: { name, email },
         isLoading: false,
-      });
-      localStorage.setItem("wq_temp_email", email);
-      toast.success("Verification OTP code sent successfully!");
-      return true;
+      })
+      localStorage.setItem("wq_temp_email", email)
+      toast.success("Verification OTP code sent successfully!")
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Registration failed"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "Registration failed"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   verifyOTP: async (code) => {
-    set({ isLoading: true });
-    const tempUser = get().tempUser;
-    const email = tempUser?.email || localStorage.getItem("wq_temp_email") || get().user?.email;
+    set({ isLoading: true })
+    const tempUser = get().tempUser
+    const email = tempUser?.email || localStorage.getItem("wq_temp_email") || get().user?.email
     if (!email) {
-      toast.error("Verification email context not found. Please signup again.");
-      set({ isLoading: false });
-      return false;
+      toast.error("Verification email context not found. Please signup again.")
+      set({ isLoading: false })
+      return false
     }
 
     try {
-      const user = await authApi.verifyOTP(email, code);
+      const user = await authApi.verifyOTP(email, code)
       if (user) {
         set({
           user,
           isAuthenticated: true,
           isLoading: false,
           tempUser: null,
-        });
-        localStorage.setItem("wq_user", JSON.stringify(user));
-        localStorage.setItem("wq_auth", "true");
-        localStorage.removeItem("wq_temp_email");
-        return true;
+        })
+        localStorage.setItem("wq_user", JSON.stringify(user))
+        localStorage.setItem("wq_auth", "true")
+        localStorage.removeItem("wq_temp_email")
+        return true
       }
-      set({ isLoading: false });
-      return false;
+      set({ isLoading: false })
+      return false
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "OTP verification failed"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "OTP verification failed"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   logout: async () => {
     try {
-      await authApi.logout();
+      await authApi.logout()
     } catch {
       // ignore network errors — always clear local state
     } finally {
@@ -168,63 +171,63 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         user: null,
         isAuthenticated: false,
         activeViewMode: VIEW_MODE.CUSTOMER,
-      });
-      localStorage.removeItem("wq_user");
-      localStorage.removeItem("wq_auth");
-      localStorage.removeItem("wq_token");
-      localStorage.removeItem("wq_temp_email");
-      localStorage.removeItem("wq_reset_email");
-      localStorage.removeItem("wq_view_mode");
-      toast.info("Logged out successfully.");
+      })
+      localStorage.removeItem("wq_user")
+      localStorage.removeItem("wq_auth")
+      localStorage.removeItem("wq_token")
+      localStorage.removeItem("wq_temp_email")
+      localStorage.removeItem("wq_reset_email")
+      localStorage.removeItem("wq_view_mode")
+      toast.info("Logged out successfully.")
     }
   },
 
   forgotPassword: async (email) => {
-    set({ isLoading: true });
+    set({ isLoading: true })
     try {
-      await authApi.forgotPassword(email);
-      set({ isLoading: false });
-      localStorage.setItem("wq_reset_email", email);
-      return true;
+      await authApi.forgotPassword(email)
+      set({ isLoading: false })
+      localStorage.setItem("wq_reset_email", email)
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Failed to send verification code"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "Failed to send verification code"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   resetPassword: async (email, code, newPassword) => {
-    set({ isLoading: true });
+    set({ isLoading: true })
     try {
-      await authApi.resetPassword(email, code, newPassword);
-      set({ isLoading: false });
-      localStorage.removeItem("wq_reset_email");
-      return true;
+      await authApi.resetPassword(email, code, newPassword)
+      set({ isLoading: false })
+      localStorage.removeItem("wq_reset_email")
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Failed to reset password"));
-      set({ isLoading: false });
-      return false;
+      toast.error(getErrorMessage(e, "Failed to reset password"))
+      set({ isLoading: false })
+      return false
     }
   },
 
   resendOTP: async (email) => {
     try {
-      await authApi.resendOTP(email);
-      return true;
+      await authApi.resendOTP(email)
+      return true
     } catch (e: unknown) {
-      toast.error(getErrorMessage(e, "Failed to resend verification code"));
-      return false;
+      toast.error(getErrorMessage(e, "Failed to resend verification code"))
+      return false
     }
   },
 
   refreshUser: async () => {
     try {
-      const user = await authApi.me();
-      set({ user, isAuthenticated: true });
-      localStorage.setItem("wq_user", JSON.stringify(user));
-      localStorage.setItem("wq_auth", "true");
+      const user = await authApi.me()
+      set({ user, isAuthenticated: true })
+      localStorage.setItem("wq_user", JSON.stringify(user))
+      localStorage.setItem("wq_auth", "true")
     } catch (e) {
-      console.error("Failed to refresh user session:", e);
+      console.error("Failed to refresh user session:", e)
     }
   },
-}));
+}))

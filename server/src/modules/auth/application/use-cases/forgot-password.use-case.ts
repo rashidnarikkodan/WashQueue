@@ -13,11 +13,11 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
     private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
     private readonly mailService: IMailService
-  ) { }
+  ) {}
 
   async execute(data: ForgotPasswordInput): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
-    
+
     if (!user) {
       throw new AppError(ERROR_MESSAGES.NO_ACCOUNT_WITH_EMAIL, HTTP_STATUS.NOT_FOUND)
     }

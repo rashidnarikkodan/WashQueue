@@ -4,4 +4,4 @@ export const passwordRules = {
   uppercase: (v: string) => /[A-Z]/.test(v),
   number: (v: string) => /\d/.test(v),
   special: (v: string) => /[@$!%*?&#]/.test(v),
-};
+}

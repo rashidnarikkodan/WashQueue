@@ -16,7 +16,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: IUserRepository
   ) {}
 
   async execute(
@@ -55,16 +55,27 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       businessName: details.businessName !== undefined ? details.businessName : owner.businessName,
       gstNumber: details.gstNumber !== undefined ? details.gstNumber : owner.gstNumber,
       whatsapp: details.whatsapp !== undefined ? details.whatsapp : owner.whatsapp,
-      businessEmail: details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
+      businessEmail:
+        details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
       isVerified: owner.isVerified,
       verifiedAt: owner.verifiedAt,
       idProofType: details.idProofType !== undefined ? details.idProofType : owner.idProofType,
       idProofUrl: details.idProofUrl !== undefined ? details.idProofUrl : owner.idProofUrl,
-      businessLicenseUrl: details.businessLicenseUrl !== undefined ? details.businessLicenseUrl : owner.businessLicenseUrl,
-      gstCertificateUrl: details.gstCertificateUrl !== undefined ? details.gstCertificateUrl : owner.gstCertificateUrl,
-      accountHolderName: details.accountHolderName !== undefined ? details.accountHolderName : owner.accountHolderName,
+      businessLicenseUrl:
+        details.businessLicenseUrl !== undefined
+          ? details.businessLicenseUrl
+          : owner.businessLicenseUrl,
+      gstCertificateUrl:
+        details.gstCertificateUrl !== undefined
+          ? details.gstCertificateUrl
+          : owner.gstCertificateUrl,
+      accountHolderName:
+        details.accountHolderName !== undefined
+          ? details.accountHolderName
+          : owner.accountHolderName,
       bankName: details.bankName !== undefined ? details.bankName : owner.bankName,
-      accountNumber: details.accountNumber !== undefined ? details.accountNumber : owner.accountNumber,
+      accountNumber:
+        details.accountNumber !== undefined ? details.accountNumber : owner.accountNumber,
       ifscCode: details.ifscCode !== undefined ? details.ifscCode : owner.ifscCode,
       bankProofUrl: details.bankProofUrl !== undefined ? details.bankProofUrl : owner.bankProofUrl,
     })

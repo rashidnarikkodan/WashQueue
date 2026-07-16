@@ -1,7 +1,7 @@
-import type { Column } from "./types";
+import type { Column } from "./types"
 
 interface TableHeaderProps<T> {
-  columns: Column<T>[];
+  columns: Column<T>[]
 }
 
 function TableHeader<T>({ columns }: TableHeaderProps<T>) {
@@ -12,11 +12,7 @@ function TableHeader<T>({ columns }: TableHeaderProps<T>) {
           <th
             key={col.id}
             className={`py-4 px-6 ${
-              col.align === "right"
-                ? "text-right"
-                : col.align === "center"
-                ? "text-center"
-                : ""
+              col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""
             }`}
             style={col.width ? { width: col.width } : undefined}
           >
@@ -25,7 +21,7 @@ function TableHeader<T>({ columns }: TableHeaderProps<T>) {
         ))}
       </tr>
     </thead>
-  );
+  )
 }
 
-export default TableHeader;
+export default TableHeader

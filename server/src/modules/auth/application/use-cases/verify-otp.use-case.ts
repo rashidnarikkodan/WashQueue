@@ -17,7 +17,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly otpService: IOtpService,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
-  ) { }
+  ) {}
 
   async execute(data: VerifyOtpInput): Promise<AuthOutput> {
     const otp = await this.otpRepository.findByEmail(data.email)

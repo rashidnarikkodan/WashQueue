@@ -5,20 +5,18 @@ import { useAuthStore } from "../../features/auth/store/authStore"
 import Loading from "../../shared/components/ui/Loading"
 
 const ManagerLayout = () => {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore()
 
   if (isLoading) {
-    return (
-      <Loading fullScreen text="Loading Manager Dashboard..." />
-    );
+    return <Loading fullScreen text="Loading Manager Dashboard..." />
   }
 
   if (!isAuthenticated || !user || user.role !== ROLE.MANAGER) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (user && !user.isVerified) {
-    return <Navigate to="/verify-email" replace />;
+    return <Navigate to="/verify-email" replace />
   }
 
   return (

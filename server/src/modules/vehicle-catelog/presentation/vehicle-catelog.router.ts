@@ -9,7 +9,9 @@ import { validateRequest } from "@/infrastructure/http/middleware/validation.mid
 import { createCategorySchema, updateCategorySchema } from "./schema/category.schema"
 import { createClassSchema, updateClassSchema } from "./schema/class.schema"
 
-export const createVehicleCatelogRouter = (vehicleCatelogController: VehicleCatelogController): Router => {
+export const createVehicleCatelogRouter = (
+  vehicleCatelogController: VehicleCatelogController
+): Router => {
   const router = Router()
 
   // --- Category Routes ---
@@ -47,10 +49,7 @@ export const createVehicleCatelogRouter = (vehicleCatelogController: VehicleCate
 
   // --- Class Routes ---
   // Public
-  router.get(
-    API_ROUTES.VEHICLE_CATALOG.CLASSES,
-    asyncHandler(vehicleCatelogController.getClasses)
-  )
+  router.get(API_ROUTES.VEHICLE_CATALOG.CLASSES, asyncHandler(vehicleCatelogController.getClasses))
   router.get(
     API_ROUTES.VEHICLE_CATALOG.CLASS_BY_ID,
     asyncHandler(vehicleCatelogController.getClass)

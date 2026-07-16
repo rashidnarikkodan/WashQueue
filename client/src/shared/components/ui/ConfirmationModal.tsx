@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, AlertCircle, CheckCircle, Info, Loader2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react"
+import { AlertTriangle, AlertCircle, CheckCircle, Info, Loader2, X } from "lucide-react"
 
 interface ConfirmationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void | Promise<void>;
-  title?: string;
-  message?: string;
-  confirmText?: string;
-  cancelText?: string;
-  confirmVariant?: "primary" | "danger" | "warning" | "success";
-  isLoading?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void | Promise<void>
+  title?: string
+  message?: string
+  confirmText?: string
+  cancelText?: string
+  confirmVariant?: "primary" | "danger" | "warning" | "success"
+  isLoading?: boolean
 }
 
 export default function ConfirmationModal({
@@ -24,89 +24,89 @@ export default function ConfirmationModal({
   confirmVariant = "primary",
   isLoading = false,
 }: ConfirmationModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Sync native dialog state with isOpen prop
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    const dialog = dialogRef.current
+    if (!dialog) return
 
     if (isOpen) {
       if (!dialog.open) {
-        dialog.showModal();
+        dialog.showModal()
         // Prevent background scrolling
-        document.body.style.overflow = "hidden";
+        document.body.style.overflow = "hidden"
       }
     } else {
       if (dialog.open) {
-        dialog.close();
-        document.body.style.overflow = "";
+        dialog.close()
+        document.body.style.overflow = ""
       }
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Clean up overflow styling on unmount
   useEffect(() => {
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
+      document.body.style.overflow = ""
+    }
+  }, [])
 
   const handleCancel = () => {
-    if (isLoading || isSubmitting) return;
-    onClose();
-  };
+    if (isLoading || isSubmitting) return
+    onClose()
+  }
 
   const handleConfirm = async () => {
-    if (isLoading || isSubmitting) return;
-    setIsSubmitting(true);
+    if (isLoading || isSubmitting) return
+    setIsSubmitting(true)
     try {
-      await onConfirm();
+      await onConfirm()
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   // Close when native ESC is pressed
   const handleCancelClick = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    handleCancel();
-  };
+    e.preventDefault()
+    handleCancel()
+  }
 
   // Icon based on variant
   const getIcon = () => {
-    const iconSize = 22;
+    const iconSize = 22
     switch (confirmVariant) {
       case "danger":
-        return <AlertTriangle size={iconSize} className="text-red-400" />;
+        return <AlertTriangle size={iconSize} className="text-red-400" />
       case "warning":
-        return <AlertCircle size={iconSize} className="text-amber-500" />;
+        return <AlertCircle size={iconSize} className="text-amber-500" />
       case "success":
-        return <CheckCircle size={iconSize} className="text-emerald-400" />;
+        return <CheckCircle size={iconSize} className="text-emerald-400" />
       default:
-        return <Info size={iconSize} className="text-blue-400" />;
+        return <Info size={iconSize} className="text-blue-400" />
     }
-  };
+  }
 
   // Button styles based on variant
   const getConfirmButtonClasses = () => {
     const base =
-      "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md select-none shrink-0";
+      "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md select-none shrink-0"
     if (isLoading || isSubmitting) {
-      return `${base} bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700`;
+      return `${base} bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700`
     }
     switch (confirmVariant) {
       case "danger":
-        return `${base} bg-red-600 hover:bg-red-500 text-white hover:shadow-red-950/20 border border-red-500/20`;
+        return `${base} bg-red-600 hover:bg-red-500 text-white hover:shadow-red-950/20 border border-red-500/20`
       case "warning":
-        return `${base} bg-amber-500 hover:bg-amber-400 text-slate-950 hover:shadow-amber-500/20 border border-amber-400/20`;
+        return `${base} bg-amber-500 hover:bg-amber-400 text-slate-950 hover:shadow-amber-500/20 border border-amber-400/20`
       case "success":
-        return `${base} bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-emerald-950/20 border border-emerald-500/20`;
+        return `${base} bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-emerald-950/20 border border-emerald-500/20`
       default:
-        return `${base} bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 text-foreground hover:shadow-primary/20 border border-primary/20`;
+        return `${base} bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 text-foreground hover:shadow-primary/20 border border-primary/20`
     }
-  };
+  }
 
   return (
     <dialog
@@ -117,18 +117,20 @@ export default function ConfirmationModal({
       <div className="flex flex-col p-6 space-y-4">
         {/* Header Grid */}
         <div className="flex items-start gap-4">
-          <div className={`p-2.5 rounded-xl border shrink-0 ${
-            confirmVariant === "danger"
-              ? "bg-red-500/10 border-red-500/20"
-              : confirmVariant === "warning"
-              ? "bg-amber-500/10 border-amber-500/20"
-              : confirmVariant === "success"
-              ? "bg-emerald-500/10 border-emerald-500/20"
-              : "bg-blue-500/10 border-blue-500/20"
-          }`}>
+          <div
+            className={`p-2.5 rounded-xl border shrink-0 ${
+              confirmVariant === "danger"
+                ? "bg-red-500/10 border-red-500/20"
+                : confirmVariant === "warning"
+                  ? "bg-amber-500/10 border-amber-500/20"
+                  : confirmVariant === "success"
+                    ? "bg-emerald-500/10 border-emerald-500/20"
+                    : "bg-blue-500/10 border-blue-500/20"
+            }`}
+          >
             {getIcon()}
           </div>
-          
+
           <div className="space-y-1.5 grow min-w-0 text-left">
             <h3 className="text-lg font-bold text-slate-100 leading-snug">{title}</h3>
             <p className="text-xs text-slate-400 font-medium leading-relaxed">{message}</p>
@@ -170,5 +172,5 @@ export default function ConfirmationModal({
         </div>
       </div>
     </dialog>
-  );
+  )
 }

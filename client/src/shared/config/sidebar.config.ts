@@ -13,15 +13,15 @@ import {
   Settings,
   Calendar,
   CreditCard,
-} from "lucide-react";
+} from "lucide-react"
 
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react"
 
 export type SidebarItem = {
-  name: string;
-  path: string;
-  icon: LucideIcon;
-};
+  name: string
+  path: string
+  icon: LucideIcon
+}
 
 export const adminSideBarItems: SidebarItem[] = [
   {
@@ -84,8 +84,7 @@ export const adminSideBarItems: SidebarItem[] = [
     path: "/admin/settings",
     icon: Settings,
   },
-];
-
+]
 
 export const ownerSideBarItems: SidebarItem[] = [
   {
@@ -133,4 +132,4 @@ export const ownerSideBarItems: SidebarItem[] = [
     path: "/owner/team",
     icon: Users,
   },
-];
+]

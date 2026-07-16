@@ -4,7 +4,10 @@ import { VehicleClassMapper } from "../mappers/vehicle-class.mapper"
 import { IVehicleClassRepository } from "../../domain/repositories/vehicle-class.repsoitory"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 
-export class VehicleClassMongoRepository extends BaseRepository<VehicleClass, IVehicleClass> implements IVehicleClassRepository {
+export class VehicleClassMongoRepository
+  extends BaseRepository<VehicleClass, IVehicleClass>
+  implements IVehicleClassRepository
+{
   constructor() {
     super(VehicleClassModel, new VehicleClassMapper())
   }
@@ -15,7 +18,7 @@ export class VehicleClassMongoRepository extends BaseRepository<VehicleClass, IV
       query.categoryId = filter.categoryId
     }
     const docs = await this.model.find(query).sort({ order: 1, name: 1 }).exec()
-    return docs.map(doc => this.mapper.toDomain(doc))
+    return docs.map((doc) => this.mapper.toDomain(doc))
   }
 
   async findBySlug(slug: string): Promise<VehicleClass | null> {

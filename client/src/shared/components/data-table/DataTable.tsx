@@ -1,9 +1,9 @@
-import type { DataTableProps } from "./types";
-import TableHeader from "./TableHeader";
-import TableBody from "./TableBody";
-import Toolbar from "./Toolbar";
-import Pagination from "@/shared/components/ui/Pagination";
-import Loading from "@/shared/components/ui/Loading";
+import type { DataTableProps } from "./types"
+import TableHeader from "./TableHeader"
+import TableBody from "./TableBody"
+import Toolbar from "./Toolbar"
+import Pagination from "@/shared/components/ui/Pagination"
+import Loading from "@/shared/components/ui/Loading"
 
 function DataTable<T>({
   columns,
@@ -30,14 +30,10 @@ function DataTable<T>({
 }: DataTableProps<T>) {
   // Search takes full width only when no side-by-side select/toggle filters exist
   const hasFilters =
-    (selectFilters && selectFilters.length > 0) ||
-    (toggleFilters && toggleFilters.length > 0);
-  const searchColSpan = hasFilters ? "md:col-span-2" : "md:col-span-6";
+    (selectFilters && selectFilters.length > 0) || (toggleFilters && toggleFilters.length > 0)
+  const searchColSpan = hasFilters ? "md:col-span-2" : "md:col-span-6"
 
-  const hasToolbar =
-    onSearchChange ||
-    (tabs && tabs.length > 0) ||
-    hasFilters;
+  const hasToolbar = onSearchChange || (tabs && tabs.length > 0) || hasFilters
 
   return (
     <div className="space-y-4">
@@ -81,7 +77,7 @@ function DataTable<T>({
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default DataTable;
+export default DataTable

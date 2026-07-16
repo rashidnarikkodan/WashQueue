@@ -11,8 +11,8 @@ import { ROLE } from "@/common/constants/role.constants"
 export class GetMeUseCase implements IGetMeUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly ownerRepository: IOwnerRepository,
-  ) { }
+    private readonly ownerRepository: IOwnerRepository
+  ) {}
 
   async execute(userId: string): Promise<AuthUser> {
     const user = await this.userRepository.findById(userId)

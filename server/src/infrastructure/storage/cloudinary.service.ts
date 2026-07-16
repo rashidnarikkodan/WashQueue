@@ -23,10 +23,20 @@ export class CloudinaryService implements IMediaStorage {
         },
         (error, result) => {
           if (error) {
-            return reject(new AppError(`Cloudinary upload failed: ${error.message}`, HTTP_STATUS.INTERNAL_SERVER_ERROR))
+            return reject(
+              new AppError(
+                `Cloudinary upload failed: ${error.message}`,
+                HTTP_STATUS.INTERNAL_SERVER_ERROR
+              )
+            )
           }
           if (!result) {
-            return reject(new AppError("Cloudinary upload returned empty result", HTTP_STATUS.INTERNAL_SERVER_ERROR))
+            return reject(
+              new AppError(
+                "Cloudinary upload returned empty result",
+                HTTP_STATUS.INTERNAL_SERVER_ERROR
+              )
+            )
           }
           resolve({
             url: result.secure_url,
