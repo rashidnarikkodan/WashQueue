@@ -73,12 +73,8 @@ export class LoginUseCase implements ILoginUseCase {
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
     // Save refresh session in DB
-    const newSession = new RefreshToken({
-      userId: user.id!,
-      token: await this.hashService.hash(refreshToken),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    })
-    await this.refreshTokenRepository.save(newSession)
+    const hashedRefreshToken = await this.hashService.hash(refreshToken)
+    await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
 
     return {
       user: {
