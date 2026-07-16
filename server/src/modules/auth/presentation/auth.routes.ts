@@ -8,6 +8,7 @@ import { signupSchema } from "./schema/signup.schema"
 import { verifyOtpSchema } from "./schema/verify-otp.schema"
 import { forgotPasswordSchema } from "./schema/forgot-password.schema"
 import { resetPasswordSchema } from "./schema/reset-password.schema"
+import { resendOtpSchema } from "./schema/resend-otp.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createAuthRouter = (authController: AuthController): Router => {
@@ -63,6 +64,12 @@ export const createAuthRouter = (authController: AuthController): Router => {
     API_ROUTES.AUTH.RESET_PASSWORD,
     validateRequest(resetPasswordSchema),
     asyncHandler(authController.resetPassword)
+  )
+
+  router.post(
+    API_ROUTES.AUTH.RESEND_OTP,
+    validateRequest(resendOtpSchema, "body"),
+    asyncHandler(authController.resendOtp)
   )
 
   return router

@@ -16,6 +16,7 @@ import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "./application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case"
 import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case"
+import { ResendOtpUseCase } from "./application/use-cases/resend-otp.use-case"
 
 // router and controller
 import { AuthController } from "./presentation/auth.controller"
@@ -42,6 +43,7 @@ const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepo
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, hashService)
+const resendOtpUseCase = new ResendOtpUseCase(userRepository, otpRepository, otpService, mailService)
 
 const authController = new AuthController(
   loginUseCase,
@@ -52,7 +54,8 @@ const authController = new AuthController(
   googleAuthUseCase,
   getMeUseCase,
   forgotPasswordUseCase,
-  resetPasswordUseCase
+  resetPasswordUseCase,
+  resendOtpUseCase
 )
 
 const authRouter = createAuthRouter(authController)

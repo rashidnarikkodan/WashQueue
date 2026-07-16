@@ -8,7 +8,8 @@ import {
   IGoogleAuthUseCase,
   IGetMeUseCase,
   IForgotPasswordUseCase,
-  IResetPasswordUseCase
+  IResetPasswordUseCase,
+  IResendOtpUseCase
 } from "../application/interfaces/auth-usecases.interfaces"
 import success from "@/common/utils/success"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
@@ -27,7 +28,8 @@ export class AuthController {
     private readonly googleAuthUseCase: IGoogleAuthUseCase,
     private readonly getMeUseCase: IGetMeUseCase,
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
-    private readonly resetPasswordUseCase: IResetPasswordUseCase
+    private readonly resetPasswordUseCase: IResetPasswordUseCase,
+    private readonly resendOtpUseCase: IResendOtpUseCase
   ) { }
 
   login = async (req: Request, res: Response) => {
@@ -106,5 +108,10 @@ export class AuthController {
   resetPassword = async (req: Request, res: Response) => {
     await this.resetPasswordUseCase.execute(req.body)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.PASSWORD_RESET_SUCCESS)
+  }
+
+  resendOtp = async (req: Request, res: Response) => {
+    await this.resendOtpUseCase.execute(req.body)
+    success(res, null, HTTP_STATUS.OK, "Verification code resent successfully")
   }
 }

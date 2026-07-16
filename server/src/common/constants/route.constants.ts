@@ -11,6 +11,7 @@ export const API_ROUTES = {
     LOGOUT: "/logout",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
+    RESEND_OTP: "/resend-otp",
   },
   USERS: {
     ROOT: "/api/users",

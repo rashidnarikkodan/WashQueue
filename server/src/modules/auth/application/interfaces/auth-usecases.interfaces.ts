@@ -43,3 +43,7 @@ export interface IForgotPasswordUseCase {
 export interface IResetPasswordUseCase {
   execute(data: ResetPasswordInput): Promise<void>
 }
+
+export interface IResendOtpUseCase {
+  execute(data: { email: string }): Promise<void>
+}
