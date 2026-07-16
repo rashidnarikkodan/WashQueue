@@ -17,6 +17,7 @@ export default function OTPPage() {
   const email = tempUser?.email || localStorage.getItem("wq_temp_email") || user?.email;
 
   const isVerifyingRef = useRef(false);
+  const lastVerifiedCodeRef = useRef("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -35,7 +36,16 @@ export default function OTPPage() {
   // Reactive verification: Auto-submits when all 6 digits are entered
   useEffect(() => {
     const code = otpDigits.join("");
-    if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
+    if (code.length < 6) {
+      lastVerifiedCodeRef.current = "";
+    }
+    if (
+      code.length === 6 &&
+      code !== lastVerifiedCodeRef.current &&
+      !isVerified &&
+      !isVerifyingRef.current
+    ) {
+      lastVerifiedCodeRef.current = code;
       isVerifyingRef.current = true;
       setIsVerifying(true);
       const triggerVerify = async () => {
