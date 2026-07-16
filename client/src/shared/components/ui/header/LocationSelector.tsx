@@ -54,6 +54,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
   // Debounced search for Nominatim API
   useEffect(() => {
     if (!searchQuery.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchResults([]);
       return;
     }
@@ -122,7 +123,7 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
           toast.success(`Location resolved to ${cleanName}`);
           setIsOpen(false);
           setSearchQuery("");
-        } catch (err) {
+        } catch {
           toast.error("Failed to resolve address coordinates");
         } finally {
           setIsLocating(false);

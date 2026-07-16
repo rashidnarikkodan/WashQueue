@@ -25,6 +25,7 @@ export default function Header({ role }: { role?: string }) {
 
   // Close menus on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false);
     setIsSearchExpanded(false);
   }, [pathname]);

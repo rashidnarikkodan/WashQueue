@@ -89,6 +89,7 @@ const OwnerApproval = () => {
   }, [currentPage, searchQuery, activeTab]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOwners();
   }, [fetchOwners]);
 

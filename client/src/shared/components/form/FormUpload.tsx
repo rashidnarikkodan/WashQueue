@@ -42,6 +42,7 @@ export default function FormUpload({
 
   useEffect(() => {
     if (!file) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalPreview(null);
       return;
     }

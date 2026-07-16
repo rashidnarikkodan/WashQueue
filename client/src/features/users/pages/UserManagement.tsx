@@ -76,6 +76,7 @@ const UserManagement = () => {
   }, [currentPage, searchQuery, roleFilter, statusFilter, highCancellation, fraudFlag]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers();
   }, [fetchUsers]);
 

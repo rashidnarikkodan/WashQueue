@@ -67,7 +67,7 @@ const getMockVehicles = (userId: string): Vehicle[] => {
   ];
 };
 
-const getMockStations = (_userId: string): OwnerStation[] => {
+const getMockStations = (): OwnerStation[] => {
   return [
     {
       name: "Express Shine Auto Wash",
@@ -121,7 +121,7 @@ const UserDetails = () => {
         // Populate lists dynamically so user details don't show empty fallbacks
         setVehicles(getMockVehicles(fetched.id));
         setBookings(getMockBookings(fetched.id));
-        setOwnerStations(getMockStations(fetched.id));
+        setOwnerStations(getMockStations());
       } catch (err: unknown) {
         setErrorMsg(getErrorMessage(err, "Failed to load user details"));
       } finally {

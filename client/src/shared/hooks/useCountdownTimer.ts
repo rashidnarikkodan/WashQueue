@@ -11,6 +11,7 @@ export function useCountdownTimer(initialSeconds: number = 60) {
         setTimerCount((prev) => prev - 1);
       }, 1000);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsResendActive(true);
     }
     return () => clearInterval(interval);

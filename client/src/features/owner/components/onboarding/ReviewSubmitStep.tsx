@@ -4,7 +4,7 @@ import OnboardingDetailsSummary from "../../../users/components/ui/OnboardingDet
 import type { OnboardingDetails } from "../../services/owner.api";
 
 interface ReviewSubmitStepProps {
-  formData: Record<string, any>;
+  formData: Record<string, unknown>;
   savedDetails: OnboardingDetails;
   userEmail?: string;
   idProofFile: File | null;

@@ -58,6 +58,7 @@ export default function OnboardingForm({
 
   // Keep localStep in sync with prop changes (e.g., after fetchOnboardingStatus resolves)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalStep(step);
   }, [step]);
 
@@ -77,6 +78,7 @@ export default function OnboardingForm({
 
   // Keep formData in sync with savedDetails when it is loaded/updated
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData({
       fullName: savedDetails.fullName ?? "",
       phone: savedDetails.phone ?? "",

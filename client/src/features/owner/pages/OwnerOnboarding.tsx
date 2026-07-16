@@ -30,7 +30,7 @@ export default function OwnerOnboarding() {
   // On mount: load server-side draft to resume where user left off
   useEffect(() => {
     fetchOnboardingStatus();
-  }, []);
+  }, [fetchOnboardingStatus]);
 
   // If already submitted, redirect away
   useEffect(() => {

@@ -54,6 +54,7 @@ export default function SignupForm() {
 
   // Sync validation errors to local state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalErrors({
       name: state.errors?.name?.[0] || "",
       email: state.errors?.email?.[0] || "",

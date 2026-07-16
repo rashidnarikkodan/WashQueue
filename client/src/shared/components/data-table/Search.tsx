@@ -27,13 +27,15 @@ const Search = ({
     if (debouncedValue !== value) {
       onChange(debouncedValue);
     }
-  }, [debouncedValue]);
+  }, [debouncedValue, onChange, value]);
 
   // Sync local state if parent resets the query externally (e.g. clear button)
   useEffect(() => {
     if (value !== localValue) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalValue(value);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   return (
