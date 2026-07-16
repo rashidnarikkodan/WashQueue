@@ -1,15 +1,10 @@
+import { passwordRules } from "@/shared/utils/passwordRules";
+
 type Props = {
   password: string;
 };
 
 export default function PasswordStrength({ password }: Props) {
-  const rules = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /\d/.test(password),
-    special: /[@$!%*?&#]/.test(password),
-  };
 
   if (!password.length) return null;
 
@@ -20,11 +15,11 @@ export default function PasswordStrength({ password }: Props) {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <Rule ok={rules.length}>At least 8 characters</Rule>
-        <Rule ok={rules.uppercase}>One uppercase letter</Rule>
-        <Rule ok={rules.lowercase}>One lowercase letter</Rule>
-        <Rule ok={rules.number}>One number</Rule>
-        <Rule ok={rules.special}>One special character</Rule>
+        <Rule ok={passwordRules.minLength(password)}>At least 8 characters</Rule>
+        <Rule ok={passwordRules.uppercase(password)}>One uppercase letter</Rule>
+        <Rule ok={passwordRules.lowercase(password)}>One lowercase letter</Rule>
+        <Rule ok={passwordRules.number(password)}>One number</Rule>
+        <Rule ok={passwordRules.special(password)}>One special character</Rule>
       </div>
     </div>
   );
