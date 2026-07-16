@@ -6,6 +6,7 @@ import Loading from "../../../shared/components/ui/Loading";
 import { useAuthStore } from "../store/authStore";
 import FormInput from "../../../shared/components/form/FormInput";
 import { toast } from "sonner";
+import PasswordStrength from "@/shared/components/ui/PasswordStrength";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -193,6 +194,8 @@ export default function ResetPasswordPage() {
                 error={errors.password}
                 required
               />
+              <PasswordStrength password={password} />
+              
 
               <FormInput
                 id="confirm-password"
