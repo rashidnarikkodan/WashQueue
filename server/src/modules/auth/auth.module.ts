@@ -36,7 +36,7 @@ const hashService = new Argon2HashService()
 
 const signupUseCase = new SignupUseCase(userRepository, otpRepository, otpService, mailService, hashService)
 const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, refreshTokenRepository, otpService, tokenService, hashService)
-const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService, otpRepository, otpService, mailService)
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
 const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)

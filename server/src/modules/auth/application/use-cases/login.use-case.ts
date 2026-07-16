@@ -7,8 +7,10 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { Otp } from "../../domain/entities/otp.entity"
+import { IOtpRepository } from "../../domain/repositories/otp.repository"
 
-import { IHashService, ILoginUseCase, ITokenService } from "../interfaces"
+import { IHashService, ILoginUseCase, ITokenService, IMailService, IOtpService } from "../interfaces"
 import { AuthOutput, LoginInput } from "../dto"
 
 
@@ -17,7 +19,10 @@ export class LoginUseCase implements ILoginUseCase {
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
-    private readonly hashService: IHashService
+    private readonly hashService: IHashService,
+    private readonly otpRepository: IOtpRepository,
+    private readonly otpService: IOtpService,
+    private readonly mailService: IMailService
   ) { }
 
   async execute(data: LoginInput): Promise<AuthOutput> {
@@ -27,18 +32,13 @@ export class LoginUseCase implements ILoginUseCase {
     const DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$dummy$dummy"
 
     // If no user, or it's a social account that shouldn't use local password login
-    // exception - user do forgot password and reset even a social user
-    if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL && !user.password) {
+    if (!user || (user.authProvider !== AUTH_PROVIDER.LOCAL && !user.password)) {
       await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
     if (user.isBlocked) {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
-    }
-
-    if (!user.isVerified) {
-      throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
     }
 
     if (!user.password) {
@@ -52,18 +52,33 @@ export class LoginUseCase implements ILoginUseCase {
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
+    if (!user.isVerified) {
+      // Generate numeric OTP on login attempt for unverified user
+      const code = await this.otpService.generateOtp(user.email)
+
+      // Save OTP to repository using domain entity
+      const otp = new Otp({ email: user.email, code })
+      await this.otpRepository.save(otp)
+
+      // Send verification email
+      await this.mailService.sendVerificationEmail(user.email, code)
+
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED, HTTP_STATUS.UNAUTHORIZED)
+    }
+
     // Generate JWT access & refresh tokens
     const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Hash refresh token for secure persistence
-    const hashedRefreshToken = await this.hashService.hash(refreshToken)
-
-    // Save refresh token and update last login timestamp
-    await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
-    await this.userRepository.update(user.id!, { lastLoginAt: new Date() })
+    // Save refresh session in DB
+    const newSession = new RefreshToken({
+      userId: user.id!,
+      token: await this.hashService.hash(refreshToken),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    })
+    await this.refreshTokenRepository.save(newSession)
 
     return {
       user: {
@@ -71,6 +86,9 @@ export class LoginUseCase implements ILoginUseCase {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar: user.avatar,
+        phone: user.phone,
+        walletBalance: user.walletBalance,
         isVerified: user.isVerified,
       },
       tokens: {
