@@ -23,11 +23,12 @@ export class LoginUseCase implements ILoginUseCase {
   async execute(data: LoginInput): Promise<AuthOutput> {
     const user = await this.userRepository.findByEmail(data.email)
     
-    // Dummy hash check to prevent user enumeration
+    // Dummy hash check to prevent user enumeration (timing attack)
     const DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$dummy$dummy"
 
     // If no user, or it's a social account that shouldn't use local password login
-    if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL) {
+    // exception - user do forgot password and reset even a social user
+    if (!user || user.authProvider !== AUTH_PROVIDER.LOCAL && !user.password) {
       await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }

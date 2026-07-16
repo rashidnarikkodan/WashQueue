@@ -6,7 +6,6 @@ import { ForgotPasswordInput } from "../dto"
 import { IForgotPasswordUseCase, IMailService, IOtpService } from "../interfaces"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
-import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   constructor(
@@ -19,17 +18,8 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   async execute(data: ForgotPasswordInput): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
     
-    // Trade-off: Throwing NOT_FOUND error reveals account existence to an attacker (User Enumeration).
-    // However, it is kept here to provide a clear, UX-friendly message to users so they know they entered the wrong email.
     if (!user) {
       throw new AppError(ERROR_MESSAGES.NO_ACCOUNT_WITH_EMAIL, HTTP_STATUS.NOT_FOUND)
-    }
-
-    if (user.authProvider === AUTH_PROVIDER.GOOGLE) {
-      throw new AppError(
-        ERROR_MESSAGES.GOOGLE_ACCOUNT_PASSWORD_RESET,
-        HTTP_STATUS.BAD_REQUEST
-      )
     }
 
     // Generate numeric OTP

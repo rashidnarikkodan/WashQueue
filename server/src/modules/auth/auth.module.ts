@@ -41,7 +41,7 @@ const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
 const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
-const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, otpService, hashService)
+const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, hashService)
 
 const authController = new AuthController(
   loginUseCase,
