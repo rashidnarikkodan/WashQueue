@@ -27,7 +27,7 @@ export const resetPasswordSchema: z.ZodType<ResetPasswordInput> = z.object({
     .regex(/\d/, {
       message: "Password must contain at least one number",
     })
-    .regex(/[!@#$%^&*()_\-+=\[{\]};:'",<.>/?\\|`~]/, {
+    .regex(/[!@#$%^&*()_\-+=[{\]};:'",<.>/?\\|`~]/, {
       message: "Password must contain at least one special character",
     }),
 });

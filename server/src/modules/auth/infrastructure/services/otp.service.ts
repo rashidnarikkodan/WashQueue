@@ -1,11 +1,10 @@
 import { IOtpService } from "../../application/interfaces/otp-service.interface"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
-import { Otp } from "../../domain/entities/otp.entity"
 
 export class OtpService implements IOtpService {
   constructor(private readonly otpRepository: IOtpRepository) {}
 
-  async generateOtp(email: string): Promise<string> {
+  async generateOtp(_email: string): Promise<string> {
     return Math.floor(100000 + Math.random() * 900000).toString()
   }
 

@@ -114,7 +114,8 @@ export class OwnerController {
     if (result.tokens) {
       setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken)
     }
-    const { tokens, ...rest } = result
+    const rest = { ...result }
+    delete (rest as Record<string, unknown>).tokens
     success(res, rest, HTTP_STATUS.OK, "Onboarding step saved successfully")
   }
 
@@ -134,7 +135,8 @@ export class OwnerController {
     setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken)
 
     // omit tokens from response body for security/cleanliness
-    const { tokens, ...rest } = result
+    const rest = { ...result }
+    delete (rest as Record<string, unknown>).tokens
     success(res, rest, HTTP_STATUS.OK, result.message)
   }
 

@@ -3,7 +3,7 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ITokenService } from "@/modules/auth/application/interfaces"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ROLE, RoleType } from "@/common/constants/role.constants"
+import { ROLE } from "@/common/constants/role.constants"
 import {
   ISaveOnboardingStepUseCase,
   IOwnerOnboardingDetails,

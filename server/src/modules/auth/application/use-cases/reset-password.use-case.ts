@@ -3,8 +3,7 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
-import { AUTH_PROVIDER } from "@/common/constants/authProvider"
-import { IHashService, IOtpService, IResetPasswordUseCase } from "../interfaces"
+import { IHashService, IResetPasswordUseCase } from "../interfaces"
 import { ResetPasswordInput } from "../dto"
 
 export class ResetPasswordUseCase implements IResetPasswordUseCase {
