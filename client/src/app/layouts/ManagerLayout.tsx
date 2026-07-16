@@ -17,6 +17,10 @@ const ManagerLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
+  if (user && !user.isVerified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header role={ROLE.MANAGER} />

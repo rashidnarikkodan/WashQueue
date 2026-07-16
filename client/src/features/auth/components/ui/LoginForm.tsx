@@ -55,6 +55,7 @@ export default function LoginForm() {
 
   // Sync validation errors to local state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalErrors({
       email: state.errors?.email?.[0] || "",
       password: state.errors?.password?.[0] || ""
@@ -84,6 +85,12 @@ export default function LoginForm() {
       } else {
         navigate("/")
       }
+    } else if (state.message === "Account is not verified") {
+      if (state.email) {
+        localStorage.setItem("wq_temp_email", state.email);
+      }
+      toast.warning("Your account is not verified. Redirecting to verification...");
+      navigate("/verify-email");
     }
 
     // Error is handled via inline message box inside form

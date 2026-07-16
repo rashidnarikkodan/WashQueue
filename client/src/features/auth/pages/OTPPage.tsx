@@ -10,10 +10,15 @@ import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer";
 
 export default function OTPPage() {
   const navigate = useNavigate();
-  const { verifyOTP, isLoading } = useAuthStore();
+  const { verifyOTP, resendOTP, user } = useAuthStore();
   const { otpDigits, setOtpDigits, resetForm } = useAuthFormStore();
 
+  const tempUser = useAuthStore((state) => state.tempUser);
+  const email = tempUser?.email || localStorage.getItem("wq_temp_email") || user?.email;
+
   const isVerifyingRef = useRef(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   // Resend code countdown timer hook (starts at 25 seconds)
   const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(25);
@@ -32,6 +37,7 @@ export default function OTPPage() {
     const code = otpDigits.join("");
     if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
       isVerifyingRef.current = true;
+      setIsVerifying(true);
       const triggerVerify = async () => {
         try {
           const success = await verifyOTP(code);
@@ -41,16 +47,26 @@ export default function OTPPage() {
           }
         } finally {
           isVerifyingRef.current = false;
+          setIsVerifying(false);
         }
       };
       triggerVerify();
     }
   }, [otpDigits, verifyOTP, isVerified, navigate]);
 
-  const handleResend = () => {
-    if (isResendActive) {
-      resetTimer(59);
-      toast.success("A new verification code has been sent!");
+  const handleResend = async () => {
+    if (!email) {
+      toast.error("Email address not found.");
+      return;
+    }
+    setIsResending(true);
+    try {
+      const success = await resendOTP(email);
+      if (success) {
+        resetTimer(25);
+      }
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -59,6 +75,7 @@ export default function OTPPage() {
     const code = otpDigits.join("");
     if (code.length === 6 && !isVerified && !isVerifyingRef.current) {
       isVerifyingRef.current = true;
+      setIsVerifying(true);
       try {
         const success = await verifyOTP(code);
         if (success) {
@@ -67,6 +84,7 @@ export default function OTPPage() {
         }
       } finally {
         isVerifyingRef.current = false;
+        setIsVerifying(false);
       }
     }
   };
@@ -90,24 +108,24 @@ export default function OTPPage() {
                 Confirm Email
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-                Enter the 6-digit verification code sent to your registered email.
+                Enter the 6-digit verification code sent to <strong className="text-foreground">{email || "your registered email"}</strong>.
               </p>
             </div>
 
             {/* OTP Digits inputs */}
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="flex justify-center">
-                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isLoading} />
+                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isVerifying} />
               </div>
 
               {/* Submit Verification */}
               <div className="space-y-4 max-w-sm mx-auto">
                 <button
                   type="submit"
-                  disabled={otpDigits.join("").length < 6 || isLoading}
+                  disabled={otpDigits.join("").length < 6 || isVerifying}
                   className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-primary/10 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
-                  {isLoading ? (
+                  {isVerifying ? (
                     <>
                       <Loading size="sm" />
                       Verifying...
@@ -127,8 +145,10 @@ export default function OTPPage() {
                     <button
                       type="button"
                       onClick={handleResend}
-                      className="text-xs font-bold text-primary hover:text-primary/90 transition-colors cursor-pointer"
+                      disabled={isResending}
+                      className="text-xs font-bold text-primary hover:text-primary/90 transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5 justify-center mx-auto"
                     >
+                      {isResending && <Loading size="sm" />}
                       Resend Code
                     </button>
                   )}

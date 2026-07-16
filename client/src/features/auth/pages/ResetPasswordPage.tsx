@@ -14,7 +14,8 @@ import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
-  const { resetPassword, isLoading } = useAuthStore();
+  const { resetPassword } = useAuthStore();
+  const [isResetting, setIsResetting] = useState(false);
 
   const [email, setEmail] = useState("");
   const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
@@ -34,6 +35,7 @@ export default function ResetPasswordPage() {
       navigate("/forgot-password");
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEmail(savedEmail);
   }, [navigate]);
 
@@ -88,10 +90,15 @@ export default function ResetPasswordPage() {
     if (!validateForm()) return;
 
     const code = otpDigits.join("");
-    const success = await resetPassword(email, code, password);
-    if (success) {
-      navigate('/login');
-      toast.success("Password reset successfully!");
+    setIsResetting(true);
+    try {
+      const success = await resetPassword(email, code, password);
+      if (success) {
+        navigate('/login');
+        toast.success("Password reset successfully!");
+      }
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -135,7 +142,7 @@ export default function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isLoading} />
+                <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isResetting} />
 
                 {errors.code && (
                   <p className="text-xs text-destructive mt-1">{errors.code}</p>
@@ -221,10 +228,10 @@ export default function ResetPasswordPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isResetting}
                 className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-primary/10 cursor-pointer text-sm flex items-center justify-center gap-2"
               >
-                {isLoading ? (
+                {isResetting ? (
                   <>
                     <Loading size="sm" />
                     Resetting Password...

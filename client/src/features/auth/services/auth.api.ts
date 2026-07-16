@@ -107,5 +107,19 @@ export const authApi = {
       )
     },
     "Failed to reset password"
+  ),
+
+  resendOTP: asyncHandle(
+    async (email: string): Promise<void> => {
+      await api.post(
+        API_ROUTES.AUTH.RESEND_OTP,
+        { email },
+        {
+          skipToast: true,
+          successToast: "A new verification code has been sent!"
+        }
+      )
+    },
+    "Failed to resend verification code"
   )
 }

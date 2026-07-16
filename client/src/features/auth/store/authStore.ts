@@ -21,6 +21,7 @@ interface AuthStore {
   logout: () => void;
   forgotPassword: (email: string) => Promise<boolean>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<boolean>;
+  resendOTP: (email: string) => Promise<boolean>;
   refreshUser: () => Promise<void>;
 }
 
@@ -127,7 +128,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   verifyOTP: async (code) => {
     set({ isLoading: true });
     const tempUser = get().tempUser;
-    const email = tempUser?.email || localStorage.getItem("wq_temp_email");
+    const email = tempUser?.email || localStorage.getItem("wq_temp_email") || get().user?.email;
     if (!email) {
       toast.error("Verification email context not found. Please signup again.");
       set({ isLoading: false });
@@ -202,6 +203,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     } catch (e: unknown) {
       toast.error(getErrorMessage(e, "Failed to reset password"));
       set({ isLoading: false });
+      return false;
+    }
+  },
+
+  resendOTP: async (email) => {
+    try {
+      await authApi.resendOTP(email);
+      return true;
+    } catch (e: unknown) {
+      toast.error(getErrorMessage(e, "Failed to resend verification code"));
       return false;
     }
   },

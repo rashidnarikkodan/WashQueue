@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Landing from "../../features/home/pages/Landing";
@@ -15,6 +16,10 @@ const RootPathResolver = () => {
 
   if (!isAuthenticated || !user) {
     return <Landing />;
+  }
+
+  if (user && !user.isVerified) {
+    return <Navigate to={APP_ROUTES.AUTH.VERIFY_EMAIL} replace />;
   }
 
   switch (user.role) {
