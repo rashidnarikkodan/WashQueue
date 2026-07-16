@@ -49,7 +49,7 @@ export class User implements UserProps {
         this.avatar = props.avatar
         this.authProvider = props.authProvider ?? AUTH_PROVIDER.LOCAL
         this.isBlocked = props.isBlocked ?? false
-        this.isVerified = props.isVerified ?? true
+        this.isVerified = props.isVerified ?? false
         this.createdAt = props.createdAt
         this.updatedAt = props.updatedAt
     }
