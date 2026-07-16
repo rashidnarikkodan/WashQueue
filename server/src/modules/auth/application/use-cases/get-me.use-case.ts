@@ -24,7 +24,7 @@ export class GetMeUseCase implements IGetMeUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
-    let isVerified = false
+    let isVerified = user.isVerified
     let onboardingStep = 1
 
     if (user.role === ROLE.OWNER) {
