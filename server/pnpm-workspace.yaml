@@ -1,0 +1,4 @@
+allowBuilds:
+  argon2: true
+  esbuild: false
+  node-base64: false
