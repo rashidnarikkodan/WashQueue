@@ -10,6 +10,7 @@ export interface UpdateClassInput {
   name?: string
   slug?: string
   order?: number
+  isActive?: boolean
 }
 
 export interface ClassResponseDto {
@@ -18,4 +19,5 @@ export interface ClassResponseDto {
   name: string
   slug: string
   order: number
+  isActive: boolean
 }

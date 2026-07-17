@@ -1,44 +1,55 @@
+import { slugify } from "@/common/utils/slugify";
+
 export interface VehicleClassProps {
-  id: string
-  categoryId: string
-  name: string
-  slug: string
-  order: number
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  order: number;
+  isActive: boolean;
 }
 
 export class VehicleClass {
-  constructor(private props: VehicleClassProps) {}
+  constructor(private readonly props: VehicleClassProps) {}
 
   get id(): string {
-    return this.props.id
+    return this.props.id;
   }
 
   get categoryId(): string {
-    return this.props.categoryId
+    return this.props.categoryId;
   }
 
   get name(): string {
-    return this.props.name
+    return this.props.name;
   }
 
   get slug(): string {
-    return this.props.slug
+    return this.props.slug;
   }
 
   get order(): number {
-    return this.props.order
+    return this.props.order;
   }
 
-  rename(name: string, slug: string): void {
-    this.props.name = name
-    this.props.slug = slug
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+
+  rename(name: string): void {
+    this.props.name = name;
+    this.props.slug = slugify(name);
   }
 
   changeCategory(categoryId: string): void {
-    this.props.categoryId = categoryId
+    this.props.categoryId = categoryId;
   }
 
   changeOrder(order: number): void {
-    this.props.order = order
+    this.props.order = order;
+  }
+
+  changeStatus(isActive: boolean): void {
+    this.props.isActive = isActive;
   }
 }

@@ -11,7 +11,7 @@ import { GetClassesUseCase } from "./application/use-cases/get-classes.use-case"
 import { UpdateClassUseCase } from "./application/use-cases/update-class.use-case"
 import { DeleteClassUseCase } from "./application/use-cases/delete-class.use-case"
 import { VehicleCatelogController } from "./presentation/vehicle-catelog.controller"
-import { createVehicleCatelogRouter } from "./presentation/vehicle-catelog.router"
+import { createVehicleCatelogRouter } from "./presentation/vehicle-catelog.routes"
 
 // Repositories
 export const vehicleCategoryRepository = new VehicleCategoryMongoRepository()

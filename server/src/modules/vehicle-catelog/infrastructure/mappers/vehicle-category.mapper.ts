@@ -9,6 +9,7 @@ export class VehicleCategoryMapper implements IMapper<VehicleCategory, IVehicleC
       name: raw.name,
       slug: raw.slug,
       order: raw.order,
+      isActive: raw.isActive
     })
   }
 
@@ -17,6 +18,7 @@ export class VehicleCategoryMapper implements IMapper<VehicleCategory, IVehicleC
     if (entity.name !== undefined) raw.name = entity.name
     if (entity.slug !== undefined) raw.slug = entity.slug
     if (entity.order !== undefined) raw.order = entity.order
+    if (entity.isActive !== undefined) raw.isActive = entity.isActive
     return raw
   }
 

@@ -6,6 +6,7 @@ import { VehicleClass } from "../../domain/entities/VehicleClass"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { Types } from "mongoose"
+import { slugify } from "@/common/utils/slugify"
 
 export class CreateClassUseCase implements ICreateClassUseCase {
   constructor(
@@ -20,7 +21,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       throw new NotFoundError("Vehicle category not found")
     }
 
-    const slug = input.slug || this.slugify(input.name)
+    const slug = input.slug || slugify(input.name)
 
     // 2. Verify class name is unique
     const existingByName = await this.classRepository.findByName(input.name)
@@ -40,6 +41,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       categoryId: input.categoryId,
       name: input.name,
       slug,
+      isActive:true,
       order: input.order ?? 0,
     })
 
@@ -51,16 +53,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       name: savedClass.name,
       slug: savedClass.slug,
       order: savedClass.order,
+      isActive: savedClass.isActive
     }
-  }
-
-  private slugify(text: string): string {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
   }
 }

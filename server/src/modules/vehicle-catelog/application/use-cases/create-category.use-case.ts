@@ -4,12 +4,13 @@ import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-ca
 import { VehicleCategory } from "../../domain/entities/VehicleCategory"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { Types } from "mongoose"
+import { slugify } from "@/common/utils/slugify"
 
 export class CreateCategoryUseCase implements ICreateCategoryUseCase {
   constructor(private readonly categoryRepository: IVehicleCategoryRepository) {}
 
   async execute(input: CreateCategoryInput): Promise<CategoryResponseDto> {
-    const slug = input.slug || this.slugify(input.name)
+    const slug = input.slug || slugify(input.name)
 
     // Check if category name already exists
     const existingName = await this.categoryRepository.findByName(input.name)
@@ -29,6 +30,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       name: input.name,
       slug,
       order: input.order ?? 0,
+      isActive: true
     })
 
     const savedCategory = await this.categoryRepository.save(category)
@@ -38,16 +40,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       name: savedCategory.name,
       slug: savedCategory.slug,
       order: savedCategory.order,
+      isActive: savedCategory.isActive
     }
-  }
-
-  private slugify(text: string): string {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
   }
 }

@@ -13,6 +13,7 @@ export class GetClassesUseCase implements IGetClassesUseCase {
       name: vehicleClass.name,
       slug: vehicleClass.slug,
       order: vehicleClass.order,
+      isActive: vehicleClass.isActive
     }))
   }
 }

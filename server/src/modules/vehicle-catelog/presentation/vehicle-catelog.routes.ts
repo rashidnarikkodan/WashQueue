@@ -33,7 +33,7 @@ export const createVehicleCatelogRouter = (
     validateRequest(createCategorySchema),
     asyncHandler(vehicleCatelogController.createCategory)
   )
-  router.put(
+  router.patch(
     API_ROUTES.VEHICLE_CATALOG.CATEGORY_BY_ID,
     authenticate,
     authorize(ROLE.ADMIN),

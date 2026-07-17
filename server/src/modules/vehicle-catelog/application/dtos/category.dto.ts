@@ -8,6 +8,7 @@ export interface UpdateCategoryInput {
   name?: string
   slug?: string
   order?: number
+  isActive?: boolean
 }
 
 export interface CategoryResponseDto {
@@ -15,4 +16,5 @@ export interface CategoryResponseDto {
   name: string
   slug: string
   order: number
+  isActive: boolean
 }
