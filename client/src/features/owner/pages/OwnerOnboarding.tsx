@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { AlertTriangle } from "lucide-react"
 import OnboardingForm from "../components/onboarding/OnboardingForm"
@@ -6,14 +6,14 @@ import { useAuthStore } from "../../auth/store/authStore"
 import { useOwnerStore } from "../store/ownerStore"
 import Loading from "../../../shared/components/ui/Loading"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
-import { VIEW_MODE } from "../../../shared/constants/role.const"
+import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
 import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal"
 import { ONBOARDING_STEPS } from "../stepper.config"
 import { Stepper } from "@/shared/components/stepper"
 
 export default function OwnerOnboarding() {
   const navigate = useNavigate()
-  const { setActiveViewMode } = useAuthStore()
+  const { user, setActiveViewMode } = useAuthStore()
   const {
     isLoading,
     isFetchingStatus,
@@ -29,8 +29,15 @@ export default function OwnerOnboarding() {
 
   // On mount: load server-side draft to resume where user left off
   useEffect(() => {
-    fetchOnboardingStatus()
-  }, [fetchOnboardingStatus])
+    const hasCompleted = user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4
+    if (!hasCompleted) {
+      fetchOnboardingStatus()
+    }
+    return () => {
+      // Reset fetching status so it starts as true next time the component mounts
+      useOwnerStore.setState({ isFetchingStatus: true })
+    }
+  }, [fetchOnboardingStatus, user])
 
   // If already submitted, redirect away
   useEffect(() => {
@@ -38,6 +45,11 @@ export default function OwnerOnboarding() {
       navigate(APP_ROUTES.OWNER.DASHBOARD)
     }
   }, [isSubmitted, navigate])
+
+  // Redirect owner users to dashboard immediately if they completed onboarding to prevent flashing
+  if (user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4) {
+    return <Navigate to={APP_ROUTES.OWNER.DASHBOARD} replace />
+  }
 
   const handleSubmit = async () => {
     const success = await submitOnboarding()

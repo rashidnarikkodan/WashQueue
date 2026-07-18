@@ -28,7 +28,7 @@ interface OwnerStore {
 
 export const useOwnerStore = create<OwnerStore>((set) => ({
   isLoading: false,
-  isFetchingStatus: false,
+  isFetchingStatus: true,
   onboardingStep: 1,
   onboardingDetails: {},
   isSubmitted: false,
@@ -37,14 +37,14 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
     set({ isFetchingStatus: true })
     try {
       const status = await ownerApi.getOnboardingStatus()
+      // Sync authStore user profile to update onboardingStep & prevent redirect loops
+      await useAuthStore.getState().refreshUser()
       set({
         onboardingStep: status.step,
         onboardingDetails: status.details,
         isSubmitted: status.isSubmitted,
         isFetchingStatus: false,
       })
-      // Sync authStore user profile to update onboardingStep & prevent redirect loops
-      await useAuthStore.getState().refreshUser()
     } catch {
       // Silently fail — user may simply not have started onboarding yet
       set({ isFetchingStatus: false })
