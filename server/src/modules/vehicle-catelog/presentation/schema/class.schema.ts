@@ -17,7 +17,9 @@ export const createClassSchema = z.object({
     .toLowerCase()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be url-friendly (alphanumeric and dashes)")
     .optional(),
+  description: z.string().trim().max(500, "Description is too long").optional(),
   order: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const updateClassSchema = z.object({
@@ -34,7 +36,9 @@ export const updateClassSchema = z.object({
     .toLowerCase()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be url-friendly (alphanumeric and dashes)")
     .optional(),
+  description: z.string().trim().max(500, "Description is too long").optional(),
   order: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
 })
 
 export const getClassesQuerySchema = z.object({

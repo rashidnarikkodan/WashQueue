@@ -91,6 +91,7 @@ export class LoginUseCase implements ILoginUseCase {
         phone: user.phone,
         walletBalance: user.walletBalance,
         isVerified: user.isVerified,
+        authProvider: user.authProvider,
       },
       tokens: {
         accessToken,

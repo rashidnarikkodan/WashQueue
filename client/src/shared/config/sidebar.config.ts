@@ -45,7 +45,7 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: Fuel,
   },
   {
-    name: "Vehicle Category Management",
+    name: "Catelog Management",
     path: "/admin/categories",
     icon: Shapes,
   },
@@ -85,6 +85,7 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: Settings,
   },
 ]
+
 
 export const ownerSideBarItems: SidebarItem[] = [
   {

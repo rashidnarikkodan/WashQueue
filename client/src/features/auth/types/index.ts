@@ -10,6 +10,7 @@ export interface AuthUser {
   isVerified: boolean
   onboardingStep?: number
   walletBalance?: number
+  authProvider?: string
 }
 
 export interface LoginState {

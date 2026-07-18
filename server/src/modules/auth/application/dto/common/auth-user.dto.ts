@@ -11,6 +11,7 @@ export interface AuthUser {
   phone?: string
   walletBalance?: number
   onboardingStep?: number
+  authProvider?: string
 }
 
 export interface AuthTokens {

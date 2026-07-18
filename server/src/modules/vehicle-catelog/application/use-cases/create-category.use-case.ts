@@ -29,6 +29,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       id,
       name: input.name,
       slug,
+      description: input.description,
       order: input.order ?? 0,
       isActive: true
     })
@@ -39,6 +40,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       id: savedCategory.id,
       name: savedCategory.name,
       slug: savedCategory.slug,
+      description: savedCategory.description,
       order: savedCategory.order,
       isActive: savedCategory.isActive
     }

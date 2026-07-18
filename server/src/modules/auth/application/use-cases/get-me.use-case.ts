@@ -45,6 +45,7 @@ export class GetMeUseCase implements IGetMeUseCase {
       walletBalance: user.walletBalance,
       isVerified,
       onboardingStep,
+      authProvider: user.authProvider,
     }
   }
 }

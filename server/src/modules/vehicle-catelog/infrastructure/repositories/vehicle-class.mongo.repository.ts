@@ -13,7 +13,7 @@ export class VehicleClassMongoRepository
   }
 
   async findAll(filter?: { categoryId?: string }): Promise<VehicleClass[]> {
-    const query: Record<string, any> = {}
+    const query: Record<string, string> = {}
     if (filter?.categoryId) {
       query.categoryId = filter.categoryId
     }

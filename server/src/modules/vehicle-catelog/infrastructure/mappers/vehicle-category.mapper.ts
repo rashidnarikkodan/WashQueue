@@ -8,6 +8,7 @@ export class VehicleCategoryMapper implements IMapper<VehicleCategory, IVehicleC
       id: raw._id.toString(),
       name: raw.name,
       slug: raw.slug,
+      description: raw.description,
       order: raw.order,
       isActive: raw.isActive
     })
@@ -17,6 +18,7 @@ export class VehicleCategoryMapper implements IMapper<VehicleCategory, IVehicleC
     const raw: Partial<IVehicleCategory> = {}
     if (entity.name !== undefined) raw.name = entity.name
     if (entity.slug !== undefined) raw.slug = entity.slug
+    if (entity.description !== undefined) raw.description = entity.description
     if (entity.order !== undefined) raw.order = entity.order
     if (entity.isActive !== undefined) raw.isActive = entity.isActive
     return raw

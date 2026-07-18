@@ -61,6 +61,13 @@ export class UpdateClassUseCase implements IUpdateClassUseCase {
     }
 
     if (
+      updates.description !== undefined &&
+      updates.description !== vehicleClass.description
+    ) {
+      vehicleClass.changeDescription(updates.description);
+    }
+
+    if (
       updates.order !== undefined &&
       updates.order !== vehicleClass.order
     ) {
@@ -81,6 +88,7 @@ export class UpdateClassUseCase implements IUpdateClassUseCase {
       categoryId: updated.categoryId,
       name: updated.name,
       slug: updated.slug,
+      description: updated.description,
       order: updated.order,
       isActive: updated.isActive,
     };

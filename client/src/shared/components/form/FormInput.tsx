@@ -7,12 +7,13 @@ interface FormInputProps {
   type: string
   placeholder: string
   name?: string
-  value?: string
+  value?: string | number
   defaultValue?: string
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   error?: string
   autoComplete?: string
   required?: boolean
+  disabled?: boolean
   id?: string
   prefix?: ReactNode
   leftIcon?: ReactNode
@@ -29,6 +30,7 @@ export default function FormInput({
   error,
   autoComplete,
   required,
+  disabled,
   id,
   prefix,
   leftIcon,
@@ -67,6 +69,7 @@ export default function FormInput({
           onChange={onChange}
           autoComplete={autoComplete}
           required={required}
+          disabled={disabled}
           className={`w-full bg-muted/90 text-foreground border rounded-xl pr-11 py-3 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all duration-200 ${
             prefix ? "pl-24" : leftIcon ? "pl-11" : "pl-4"
           } ${

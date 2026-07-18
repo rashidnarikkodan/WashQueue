@@ -16,6 +16,7 @@ export class GetCategoryUseCase implements IGetCategoryUseCase {
       id: category.id,
       name: category.name,
       slug: category.slug,
+      description: category.description,
       order: category.order,
       isActive: category.isActive
     }

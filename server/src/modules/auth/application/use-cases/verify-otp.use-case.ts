@@ -53,6 +53,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
         email: user.email,
         role: user.role,
         isVerified: true,
+        authProvider: user.authProvider,
       },
       tokens: {
         accessToken,

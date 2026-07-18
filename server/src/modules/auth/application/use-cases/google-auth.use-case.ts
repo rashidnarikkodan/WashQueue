@@ -137,6 +137,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         role: user.role,
         isVerified: user.isVerified,
         isNewUser,
+        authProvider: user.authProvider,
       },
       tokens: {
         accessToken,

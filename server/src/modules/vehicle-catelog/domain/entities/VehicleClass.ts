@@ -5,6 +5,7 @@ export interface VehicleClassProps {
   categoryId: string;
   name: string;
   slug: string;
+  description?: string;
   order: number;
   isActive: boolean;
 }
@@ -28,6 +29,10 @@ export class VehicleClass {
     return this.props.slug;
   }
 
+  get description(): string | undefined {
+    return this.props.description;
+  }
+
   get order(): number {
     return this.props.order;
   }
@@ -43,6 +48,10 @@ export class VehicleClass {
 
   changeCategory(categoryId: string): void {
     this.props.categoryId = categoryId;
+  }
+
+  changeDescription(description?: string): void {
+    this.props.description = description;
   }
 
   changeOrder(order: number): void {

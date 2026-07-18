@@ -41,6 +41,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       categoryId: input.categoryId,
       name: input.name,
       slug,
+      description: input.description,
       isActive:true,
       order: input.order ?? 0,
     })
@@ -52,6 +53,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       categoryId: savedClass.categoryId,
       name: savedClass.name,
       slug: savedClass.slug,
+      description: savedClass.description,
       order: savedClass.order,
       isActive: savedClass.isActive
     }

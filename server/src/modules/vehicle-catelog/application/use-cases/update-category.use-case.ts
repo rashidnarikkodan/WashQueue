@@ -48,6 +48,13 @@ export class UpdateCategoryUseCase implements IUpdateCategoryUseCase {
     }
 
     if (
+      updates.description !== undefined &&
+      updates.description !== category.description
+    ) {
+      category.changeDescription(updates.description);
+    }
+
+    if (
       updates.order !== undefined &&
       updates.order !== category.order
     ) {
@@ -67,6 +74,7 @@ export class UpdateCategoryUseCase implements IUpdateCategoryUseCase {
       id: updated.id,
       name: updated.name,
       slug: updated.slug,
+      description: updated.description,
       order: updated.order,
       isActive: updated.isActive,
     };

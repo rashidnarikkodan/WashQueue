@@ -10,6 +10,7 @@ export class VehicleClassMapper implements IMapper<VehicleClass, IVehicleClass> 
       categoryId: raw.categoryId.toString(),
       name: raw.name,
       slug: raw.slug,
+      description: raw.description,
       order: raw.order,
       isActive: raw.isActive
     })
@@ -18,9 +19,10 @@ export class VehicleClassMapper implements IMapper<VehicleClass, IVehicleClass> 
   static toPersistence(entity: Partial<VehicleClass>): Partial<IVehicleClass> {
     const raw: Partial<IVehicleClass> = {}
     if (entity.categoryId !== undefined)
-      raw.categoryId = new Types.ObjectId(entity.categoryId) as any
+      raw.categoryId = new Types.ObjectId(entity.categoryId) as unknown as Types.ObjectId
     if (entity.name !== undefined) raw.name = entity.name
     if (entity.slug !== undefined) raw.slug = entity.slug
+    if (entity.description !== undefined) raw.description = entity.description
     if (entity.order !== undefined) raw.order = entity.order
     if (entity.isActive !== undefined) raw.isActive = entity.isActive
     return raw

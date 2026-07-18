@@ -4,6 +4,7 @@ export interface IVehicleClass extends Document {
   categoryId: Types.ObjectId
   name: string
   slug: string
+  description?: string
   order: number
   isActive: boolean
   createdAt: Date
@@ -15,6 +16,7 @@ const classSchema = new Schema<IVehicleClass>(
     categoryId: { type: Schema.Types.ObjectId, ref: "VehicleCategory", required: true },
     name: { type: String, required: true, unique: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true },
+    description: { type: String, trim: true },
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true }
   },
