@@ -1,8 +1,11 @@
-import AdminLayout from "../layouts/AdminLayout"
-import UserManagement from "../../features/users/pages/UserManagement"
-import UserDetails from "../../features/users/pages/UserDetails"
-import OwnerApproval from "../../features/users/pages/OwnerApproval"
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+const AdminLayout = lazy(() => import("../layouts/AdminLayout"))
+const UserManagement = lazy(() => import("../../features/users/pages/UserManagement"))
+const UserDetails = lazy(() => import("../../features/users/pages/UserDetails"))
+const OwnerApproval = lazy(() => import("../../features/users/pages/OwnerApproval"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
+const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -30,7 +33,7 @@ export const adminRoutes = {
     },
     {
       path: "categories",
-      element: <>Vehicle Category Management</>,
+      element: <VehicleCatelog/>,
     },
     {
       path: "bookings",

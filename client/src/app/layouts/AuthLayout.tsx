@@ -1,6 +1,8 @@
+import { Suspense } from "react"
 import { Link, Outlet, Navigate, useLocation } from "react-router-dom"
 import { useAuthStore } from "../../features/auth/store/authStore"
 import { ROLE } from "../../shared/constants/role.const"
+import Loading from "../../shared/components/ui/Loading"
 
 export default function AuthLayout() {
   const { isAuthenticated, user } = useAuthStore()
@@ -35,7 +37,9 @@ export default function AuthLayout() {
         </Link>
       </header>
       <main className="flex-1 flex items-center justify-center">
-        <Outlet />
+        <Suspense fallback={<Loading text="Loading..." />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   )

@@ -1,9 +1,11 @@
-import AuthLayout from "../layouts/AuthLayout"
-import AuthPage from "../../features/auth/pages/AuthPage"
-import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage"
-import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage"
-import OTPPage from "../../features/auth/pages/OTPPage"
-import SetupAccountPage from "../../features/auth/pages/SetupAccountPage"
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+const AuthLayout = lazy(() => import("../layouts/AuthLayout"))
+const AuthPage = lazy(() => import("../../features/auth/pages/AuthPage"))
+const ForgotPasswordPage = lazy(() => import("../../features/auth/pages/ForgotPasswordPage"))
+const ResetPasswordPage = lazy(() => import("../../features/auth/pages/ResetPasswordPage"))
+const OTPPage = lazy(() => import("../../features/auth/pages/OTPPage"))
+const SetupAccountPage = lazy(() => import("../../features/auth/pages/SetupAccountPage"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 export const authRoutes = {

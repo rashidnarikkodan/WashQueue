@@ -1,6 +1,6 @@
-// src/app/routes/manager.routes.tsx
-
-import ManagerLayout from "../layouts/ManagerLayout"
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 export const managerRoutes = {

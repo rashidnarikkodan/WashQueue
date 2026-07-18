@@ -1,8 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
 import { Navigate } from "react-router-dom"
-import OwnerLayout from "../layouts/OwnerLayout"
+const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
-import OwnerOnboarding from "@/features/owner/pages/OwnerOnboarding"
-import OwnerDashboard from "@/features/owner/pages/OwnerDashboard"
+const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
+const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,

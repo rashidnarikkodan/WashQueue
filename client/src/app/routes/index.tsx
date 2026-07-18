@@ -1,5 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 // src/app/routes/index.tsx
 
+import { lazy, Suspense } from "react"
 import { createBrowserRouter } from "react-router-dom"
 
 import { authRoutes } from "./auth.routes"
@@ -8,7 +10,9 @@ import { ownerRoutes } from "./owner.routes"
 import { managerRoutes } from "./manager.routes"
 import { adminRoutes } from "./admin.routes"
 import ErrorBoundary from "../../shared/pages/ErrorBoundary"
-import NotFoundPage from "../../shared/pages/NotFoundPage"
+import Loading from "../../shared/components/ui/Loading"
+
+const NotFoundPage = lazy(() => import("../../shared/pages/NotFoundPage"))
 
 export const router = createBrowserRouter([
   {
@@ -33,7 +37,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <NotFoundPage />,
+    element: (
+      <Suspense fallback={<Loading fullScreen />}>
+        <NotFoundPage />
+      </Suspense>
+    ),
     errorElement: <ErrorBoundary />,
   },
 ])
