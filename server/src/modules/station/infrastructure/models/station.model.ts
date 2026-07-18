@@ -1,107 +1,113 @@
 import { Schema, model, Document, Types } from "mongoose"
 
+interface IGeoPoint {
+  type: "Point"
+  coordinates: [number, number] // [longitude, latitude]
+}
+
+interface IStationContact {
+  phone: string
+  email: string
+}
+
+interface IStationAddress {
+  street: string
+  city: string
+  state: string
+  country: string
+  pincode: string
+}
+
+interface IStationImage {
+  url: string
+  publicId: string
+  isPrimary: boolean
+}
+
+interface IOperatingHour {
+  day: string
+  open: string
+  close: string
+  isClosed: boolean
+}
+
+interface IHoliday {
+  date: Date
+  reason?: string
+}
+
+interface ISlotConfig {
+  bays: number
+  windowDurationMins: number
+  capacityPerWindow: number
+  walkInReservedSlots: number
+  maxAdvanceBookingDays: number
+  bufferBetweenWindowsMins: number
+  allowWalkIns: boolean
+}
+
 export interface IStation extends Document {
-  ownerId: Types.ObjectId
+  providerId: Types.ObjectId
+
   name: string
-  description?: string
-  contactPhone: string
-  contactEmail: string
+  description: string
 
-  location?: {
-    type: "Point"
-    coordinates: [number, number]
-  }
-  address?: string
-  pincode?: string
-  city?: string
-  state?: string
+  contact: IStationContact
 
-  images?: Array<{
-    url: string
-    publicId: string
-    isPrimary: boolean
-  }>
+  location: IGeoPoint
+  address: IStationAddress
 
-  bays?: number
-  avgServiceTime?: number
+  images: IStationImage[]
 
-  operatingHours?: Array<{
-    day: string
-    open: string
-    close: string
-    isClosed: boolean
-  }>
-  holidays?: Array<{
-    date: Date
-    reason: string
-  }>
-  amenities?: string[]
+  operatingHours: IOperatingHour[]
+  holidays: IHoliday[]
+
+  slotConfig: ISlotConfig
+
+  amenities: string[]
 
   rating: number
   reviewCount: number
 
-  verifiedAt?: Date | null
-  rejectionReason?: string | null
+  verifiedAt?: Date
+  rejectionReason?: string
 
   status: string
   isActive: boolean
+
   createdAt: Date
   updatedAt: Date
 }
 
 const stationSchema = new Schema<IStation>(
   {
-    ownerId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    providerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+
+    name: { type: String, required: true, trim: true },
+    description: { type: String, default: "", trim: true },
+
+    contact: {
+      phone: { type: String, default: "" },
+      email: { type: String, default: "", lowercase: true, trim: true },
     },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    contactPhone: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    contactEmail: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-    },
+
     location: {
       type: {
         type: String,
         enum: ["Point"],
         default: "Point",
       },
-      coordinates: {
-        type: [Number], // [longitude, latitude]
-      },
+      coordinates: { type: [Number], default: [0, 0] }, // [lng, lat]
     },
+
     address: {
-      type: String,
-      trim: true,
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      country: { type: String, default: "" },
+      pincode: { type: String, default: "" },
     },
-    pincode: {
-      type: String,
-      trim: true,
-    },
-    city: {
-      type: String,
-      trim: true,
-    },
-    state: {
-      type: String,
-      trim: true,
-    },
+
     images: [
       {
         url: { type: String, required: true },
@@ -109,66 +115,50 @@ const stationSchema = new Schema<IStation>(
         isPrimary: { type: Boolean, default: false },
       },
     ],
-    bays: {
-      type: Number,
-      min: 1,
-    },
-    avgServiceTime: {
-      type: Number,
-      min: 1,
-    },
+
     operatingHours: [
       {
-        day: {
-          type: String,
-          enum: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
-          required: true,
-        },
-        open: { type: String, required: true }, // HH:mm
-        close: { type: String, required: true }, // HH:mm
+        day: { type: String, required: true },
+        open: { type: String, required: true },
+        close: { type: String, required: true },
         isClosed: { type: Boolean, default: false },
       },
     ],
+
     holidays: [
       {
         date: { type: Date, required: true },
-        reason: { type: String, required: true },
+        reason: { type: String },
       },
     ],
-    amenities: [
-      {
-        type: String,
-      },
-    ],
-    rating: {
-      type: Number,
-      default: 0,
+
+    slotConfig: {
+      bays: { type: Number, default: 0 },
+      windowDurationMins: { type: Number, default: 0 },
+      capacityPerWindow: { type: Number, default: 0 },
+      walkInReservedSlots: { type: Number, default: 0 },
+      maxAdvanceBookingDays: { type: Number, default: 0 },
+      bufferBetweenWindowsMins: { type: Number, default: 0 },
+      allowWalkIns: { type: Boolean, default: false },
     },
-    reviewCount: {
-      type: Number,
-      default: 0,
-    },
-    verifiedAt: {
-      type: Date,
-      default: null,
-    },
-    rejectionReason: {
-      type: String,
-      default: null,
-    },
+
+    amenities: [{ type: String }],
+
+    rating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+
+    verifiedAt: { type: Date },
+    rejectionReason: { type: String },
+
     status: {
       type: String,
-      enum: ["DRAFT", "PENDING_REVIEW", "PENDING_APPROVAL", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"],
+      enum: ["DRAFT", "PENDING_REVIEW", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"],
       default: "DRAFT",
     },
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
+
+    isActive: { type: Boolean, default: false },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true, collection: "stations" }
 )
 
 stationSchema.index({ location: "2dsphere" })

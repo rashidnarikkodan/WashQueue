@@ -1,125 +1,137 @@
-import { IMapper } from "@/core/domain/repository.interface"
-import { Station } from "../../domain/entities/Station"
-import { IStation } from "../models/station.model"
 import { Types } from "mongoose"
+import { IMapper } from "@/core/domain/repository.interface"
+import {
+  Station,
+  StationProps,
+  StationStatus,
+  StationContact,
+  StationLocation,
+  StationAddress,
+  StationImage,
+  OperatingHour,
+  Holiday,
+  SlotConfiguration,
+} from "../../domain/entities/Station"
+import { IStation } from "../models/station.model"
 
 export class StationMapper implements IMapper<Station, IStation> {
   static toDomain(raw: IStation): Station {
-    return new Station({
+    const coords = raw.location?.coordinates ?? [0, 0]
+
+    const props: StationProps = {
       id: raw._id.toString(),
-      ownerId: raw.ownerId ? raw.ownerId.toString() : "",
+      providerId: raw.providerId ? raw.providerId.toString() : "",
+
       name: raw.name,
       description: raw.description ?? "",
-      contactPhone: raw.contactPhone,
-      contactEmail: raw.contactEmail,
-      location: raw.location ? {
-        type: "Point",
-        coordinates: [raw.location.coordinates[0], raw.location.coordinates[1]]
-      } : {
-        type: "Point",
-        coordinates: [0, 0]
+
+      contact: {
+        phone: raw.contact?.phone ?? "",
+        email: raw.contact?.email ?? "",
       },
-      address: raw.address ?? "",
-      pincode: raw.pincode ?? "",
-      city: raw.city ?? "",
-      state: raw.state ?? "",
+
+      location: {
+        longitude: coords[0],
+        latitude: coords[1],
+      },
+
+      address: {
+        street: raw.address?.street ?? "",
+        city: raw.address?.city ?? "",
+        state: raw.address?.state ?? "",
+        country: raw.address?.country ?? "",
+        pincode: raw.address?.pincode ?? "",
+      },
+
       images: (raw.images ?? []).map((img: any) => ({
         url: img.url,
         publicId: img.publicId,
-        isPrimary: img.isPrimary
+        isPrimary: img.isPrimary,
       })),
-      bays: raw.bays ?? 0,
-      avgServiceTime: raw.avgServiceTime ?? 0,
+
       operatingHours: (raw.operatingHours ?? []).map((oh: any) => ({
-        day: oh.day as any,
+        day: oh.day,
         open: oh.open,
         close: oh.close,
-        isClosed: oh.isClosed
+        isClosed: oh.isClosed,
       })),
+
       holidays: (raw.holidays ?? []).map((h: any) => ({
         date: h.date,
-        reason: h.reason
+        reason: h.reason,
       })),
+
+      slotConfig: {
+        bays: raw.slotConfig?.bays ?? 0,
+        windowDurationMins: raw.slotConfig?.windowDurationMins ?? 0,
+        capacityPerWindow: raw.slotConfig?.capacityPerWindow ?? 0,
+        walkInReservedSlots: raw.slotConfig?.walkInReservedSlots ?? 0,
+        maxAdvanceBookingDays: raw.slotConfig?.maxAdvanceBookingDays ?? 0,
+        bufferBetweenWindowsMins: raw.slotConfig?.bufferBetweenWindowsMins ?? 0,
+        allowWalkIns: raw.slotConfig?.allowWalkIns ?? false,
+      },
+
       amenities: raw.amenities ?? [],
+
       rating: raw.rating ?? 0,
       reviewCount: raw.reviewCount ?? 0,
-      verifiedAt: raw.verifiedAt ?? null,
-      rejectionReason: raw.rejectionReason ?? null,
-      status: (raw.status as any) ?? "DRAFT",
+
+      verifiedAt: raw.verifiedAt,
+      rejectionReason: raw.rejectionReason,
+
+      status: (raw.status as StationStatus) ?? StationStatus.DRAFT,
       isActive: raw.isActive ?? false,
-      createdAt: raw.createdAt
-    })
+
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
+    }
+
+    return new Station(props)
   }
 
   static toPersistence(entity: Partial<Station>): Partial<IStation> {
-    const raw: Partial<IStation> = {}
-    
-    if (entity.ownerId !== undefined) {
-      raw.ownerId = new Types.ObjectId(entity.ownerId)
+    // When called with a full Station instance from save(), use getProps()
+    if (typeof (entity as any).getProps === "function") {
+      const props = (entity as Station).getProps()
+      return StationMapper.propsToRaw(props)
     }
-    if (entity.name !== undefined) {
-      raw.name = entity.name
+
+    // Partial updates — not used in this module (we always save full entities)
+    return {}
+  }
+
+  private static propsToRaw(props: StationProps): Partial<IStation> {
+    const raw: Partial<IStation> = {
+      name: props.name,
+      description: props.description,
+      contact: props.contact,
+      location: {
+        type: "Point",
+        coordinates: [props.location.longitude, props.location.latitude],
+      },
+      address: props.address,
+      images: props.images,
+      operatingHours: props.operatingHours,
+      holidays: props.holidays,
+      slotConfig: props.slotConfig,
+      amenities: props.amenities,
+      rating: props.rating,
+      reviewCount: props.reviewCount,
+      status: props.status,
+      isActive: props.isActive,
+      updatedAt: props.updatedAt,
     }
-    if (entity.description !== undefined) {
-      raw.description = entity.description
+
+    if (props.providerId) {
+      raw.providerId = new Types.ObjectId(props.providerId)
     }
-    if (entity.contactPhone !== undefined) {
-      raw.contactPhone = entity.contactPhone
+    if (props.verifiedAt !== undefined) {
+      raw.verifiedAt = props.verifiedAt
     }
-    if (entity.contactEmail !== undefined) {
-      raw.contactEmail = entity.contactEmail
+    if (props.rejectionReason !== undefined) {
+      raw.rejectionReason = props.rejectionReason
     }
-    if (entity.location !== undefined) {
-      raw.location = entity.location
-    }
-    if (entity.address !== undefined) {
-      raw.address = entity.address
-    }
-    if (entity.pincode !== undefined) {
-      raw.pincode = entity.pincode
-    }
-    if (entity.city !== undefined) {
-      raw.city = entity.city
-    }
-    if (entity.state !== undefined) {
-      raw.state = entity.state
-    }
-    if (entity.images !== undefined) {
-      raw.images = entity.images
-    }
-    if (entity.bays !== undefined) {
-      raw.bays = entity.bays
-    }
-    if (entity.avgServiceTime !== undefined) {
-      raw.avgServiceTime = entity.avgServiceTime
-    }
-    if (entity.operatingHours !== undefined) {
-      raw.operatingHours = entity.operatingHours
-    }
-    if (entity.holidays !== undefined) {
-      raw.holidays = entity.holidays
-    }
-    if (entity.amenities !== undefined) {
-      raw.amenities = entity.amenities
-    }
-    if (entity.rating !== undefined) {
-      raw.rating = entity.rating
-    }
-    if (entity.reviewCount !== undefined) {
-      raw.reviewCount = entity.reviewCount
-    }
-    if (entity.verifiedAt !== undefined) {
-      raw.verifiedAt = entity.verifiedAt
-    }
-    if (entity.rejectionReason !== undefined) {
-      raw.rejectionReason = entity.rejectionReason
-    }
-    if (entity.status !== undefined) {
-      raw.status = entity.status
-    }
-    if (entity.isActive !== undefined) {
-      raw.isActive = entity.isActive
-    }
+
     return raw
   }
 

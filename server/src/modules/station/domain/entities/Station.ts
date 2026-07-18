@@ -1,42 +1,10 @@
-export interface StationProps {
-  id: string;
-  ownerId: string;
-
-  name: string;
-  description: string;
-
-  contactPhone: string;
-  contactEmail: string;
-
-  location: {
-    type: "Point";
-    coordinates: [number, number]; // [longitude, latitude]
-  };
-
-  address: string;
-  pincode: string;
-  city: string;
-  state: string;
-
-  images: StationImage[];
-
-  bays: number;
-  avgServiceTime: number;
-
-  operatingHours: OperatingHour[];
-  holidays: Holiday[];
-  amenities: string[];
-
-  rating: number;
-  reviewCount: number;
-
-  verifiedAt: Date | null;
-  rejectionReason: string | null;
-
-  status: StationStatus;
-  isActive: boolean;
-
-  createdAt: Date;
+export enum StationStatus {
+  DRAFT = "DRAFT",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
+  REJECTED = "REJECTED",
 }
 
 export interface StationImage {
@@ -45,132 +13,166 @@ export interface StationImage {
   isPrimary: boolean;
 }
 
+export interface StationContact {
+  phone: string;
+  email: string;
+}
+
+export interface StationLocation {
+  latitude: number;
+  longitude: number;
+}
+
+export interface StationAddress {
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  pincode: string;
+}
+
 export interface OperatingHour {
-  day: DayOfWeek;
-  open: string; // HH:mm
-  close: string; // HH:mm
+  day: string;
+  open: string;
+  close: string;
   isClosed: boolean;
 }
 
 export interface Holiday {
   date: Date;
-  reason: string;
+  reason?: string;
 }
 
-export type DayOfWeek =
-  | "MONDAY"
-  | "TUESDAY"
-  | "WEDNESDAY"
-  | "THURSDAY"
-  | "FRIDAY"
-  | "SATURDAY"
-  | "SUNDAY";
+export interface SlotConfiguration {
+  bays: number;
+  windowDurationMins: number;
+  capacityPerWindow: number;
+  walkInReservedSlots: number;
+  maxAdvanceBookingDays: number;
+  bufferBetweenWindowsMins: number;
+  allowWalkIns: boolean;
+}
 
-export type StationStatus =
-  | "DRAFT"
-  | "PENDING_REVIEW"
-  | "PENDING_APPROVAL"
-  | "ACTIVE"
-  | "INACTIVE"
-  | "SUSPENDED"
-  | "REJECTED";
+export interface StationProps {
+  id: string;
+  providerId: string;
+
+  name: string;
+  description: string;
+
+  contact: StationContact;
+
+  location: StationLocation;
+  address: StationAddress;
+
+  images: StationImage[];
+
+  operatingHours: OperatingHour[];
+  holidays: Holiday[];
+
+  slotConfig: SlotConfiguration;
+
+  amenities: string[];
+
+  rating: number;
+  reviewCount: number;
+
+  verifiedAt?: Date;
+  rejectionReason?: string;
+
+  status: StationStatus;
+  isActive: boolean;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class Station {
-  constructor(private readonly props: StationProps) {}
+  constructor(private props: StationProps) {}
 
   get id() {
     return this.props.id;
   }
 
-  get ownerId() {
-    return this.props.ownerId;
-  }
-
-  get name() {
-    return this.props.name;
-  }
-
-  get description() {
-    return this.props.description;
-  }
-
-  get contactPhone() {
-    return this.props.contactPhone;
-  }
-
-  get contactEmail() {
-    return this.props.contactEmail;
-  }
-
-  get location() {
-    return this.props.location;
-  }
-
-  get address() {
-    return this.props.address;
-  }
-
-  get pincode() {
-    return this.props.pincode;
-  }
-
-  get city() {
-    return this.props.city;
-  }
-
-  get state() {
-    return this.props.state;
-  }
-
-  get images() {
-    return this.props.images;
-  }
-
-  get bays() {
-    return this.props.bays;
-  }
-
-  get avgServiceTime() {
-    return this.props.avgServiceTime;
-  }
-
-  get operatingHours() {
-    return this.props.operatingHours;
-  }
-
-  get holidays() {
-    return this.props.holidays;
-  }
-
-  get amenities() {
-    return this.props.amenities;
-  }
-
-  get rating() {
-    return this.props.rating;
-  }
-
-  get reviewCount() {
-    return this.props.reviewCount;
-  }
-
-  get verifiedAt() {
-    return this.props.verifiedAt;
-  }
-
-  get rejectionReason() {
-    return this.props.rejectionReason;
+  get providerId() {
+    return this.props.providerId;
   }
 
   get status() {
     return this.props.status;
   }
 
-  get isActive() {
-    return this.props.isActive;
+  getProps(): StationProps {
+    return { ...this.props };
   }
 
-  get createdAt() {
-    return this.props.createdAt;
+  updateBasicInformation(data: {
+    name: string;
+    description: string;
+    contact: StationContact;
+    location: StationLocation;
+    address: StationAddress;
+    images: StationImage[];
+  }): void {
+    this.props.name = data.name;
+    this.props.description = data.description;
+    this.props.contact = data.contact;
+    this.props.location = data.location;
+    this.props.address = data.address;
+    this.props.images = data.images;
+
+    this.touch();
+  }
+
+  updateAvailability(data: {
+    operatingHours: OperatingHour[];
+    holidays: Holiday[];
+    slotConfig: SlotConfiguration;
+  }): void {
+    this.props.operatingHours = data.operatingHours;
+    this.props.holidays = data.holidays;
+    this.props.slotConfig = data.slotConfig;
+
+    this.touch();
+  }
+
+  updateAmenities(amenities: string[]): void {
+    this.props.amenities = amenities;
+    this.touch();
+  }
+
+  submit(): void {
+    if (this.props.status !== StationStatus.DRAFT) {
+      throw new Error("Only draft stations can be submitted.");
+    }
+
+    this.props.status = StationStatus.PENDING_REVIEW;
+    this.touch();
+  }
+
+  activate(): void {
+    this.props.status = StationStatus.ACTIVE;
+    this.props.isActive = true;
+    this.touch();
+  }
+
+  reject(reason: string): void {
+    this.props.status = StationStatus.REJECTED;
+    this.props.rejectionReason = reason;
+    this.touch();
+  }
+
+  suspend(reason?: string): void {
+    this.props.status = StationStatus.SUSPENDED;
+
+    if (reason) {
+      this.props.rejectionReason = reason;
+    }
+
+    this.touch();
+  }
+
+  private touch(): void {
+    this.props.updatedAt = new Date();
   }
 }

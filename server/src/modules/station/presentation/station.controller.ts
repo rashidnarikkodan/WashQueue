@@ -8,7 +8,7 @@ import {
   ICreateStationUseCase,
   IUpdateStationUseCase,
   IGetStationUseCase,
-  ISubmitStationUseCase
+  ISubmitStationUseCase,
 } from "../application/interfaces/station-usecases.interface"
 import { createStationSchema, patchStationSchema } from "./schema/station.schema"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
@@ -31,12 +31,12 @@ export class StationController {
     const validatedBody = createStationSchema.parse(req.body)
     const station = await this.createStationUseCase.execute({
       ...validatedBody,
-      ownerId: userId,
+      providerId: userId,
     })
 
     success(
       res,
-      { stationId: station.id, station },
+      { stationId: station.id, station: station.getProps() },
       HTTP_STATUS.CREATED,
       "Station draft created successfully"
     )
@@ -55,9 +55,9 @@ export class StationController {
     }
 
     const validatedBody = patchStationSchema.parse(req.body)
-    const station = await this.updateStationUseCase.execute(stationId, userId, validatedBody)
+    const result = await this.updateStationUseCase.execute(stationId, userId, validatedBody)
 
-    success(res, station, HTTP_STATUS.OK, "Station draft updated successfully")
+    success(res, result, HTTP_STATUS.OK, "Station draft updated successfully")
   }
 
   /** GET /api/stations/:stationId */
@@ -72,8 +72,8 @@ export class StationController {
       throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const station = await this.getStationUseCase.execute(stationId, userId)
-    success(res, station, HTTP_STATUS.OK, "Station draft retrieved successfully")
+    const result = await this.getStationUseCase.execute(stationId, userId)
+    success(res, result, HTTP_STATUS.OK, "Station draft retrieved successfully")
   }
 
   /** POST /api/stations/:stationId/submit */
@@ -89,6 +89,6 @@ export class StationController {
     }
 
     const station = await this.submitStationUseCase.execute(stationId, userId)
-    success(res, station, HTTP_STATUS.OK, "Station submitted successfully for approval")
+    success(res, station.getProps(), HTTP_STATUS.OK, "Station submitted successfully for review")
   }
 }

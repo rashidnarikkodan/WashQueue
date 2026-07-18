@@ -5,7 +5,7 @@ import { IGetStationsUseCase } from "../interfaces/station-usecases.interface"
 export class GetStationsUseCase implements IGetStationsUseCase {
   constructor(private readonly stationRepository: IStationRepository) {}
 
-  async execute(ownerId: string): Promise<Station[]> {
-    return this.stationRepository.findAll({ ownerId })
+  async execute(providerId: string): Promise<Station[]> {
+    return this.stationRepository.findByProviderId(providerId)
   }
 }
