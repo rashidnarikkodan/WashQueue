@@ -20,7 +20,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
 
   async execute(
     stationId: string,
-    providerId: string,
+    ownerId: string,
     updates: UpdateStationInput
   ): Promise<StationDetailResponseDto> {
     const station = await this.stationRepository.findById(stationId)
@@ -28,7 +28,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       throw new NotFoundError("Station not found")
     }
 
-    if (station.providerId !== providerId) {
+    if (station.ownerId !== ownerId) {
       throw new ForbiddenError("You are not authorized to update this station")
     }
 

@@ -31,7 +31,7 @@ export class StationController {
     const validatedBody = createStationSchema.parse(req.body)
     const station = await this.createStationUseCase.execute({
       ...validatedBody,
-      providerId: userId,
+      ownerId: userId,
     })
 
     success(

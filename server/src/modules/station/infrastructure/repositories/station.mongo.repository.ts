@@ -13,9 +13,9 @@ export class StationMongoRepository
     super(StationModel, new StationMapper())
   }
 
-  async findByProviderId(providerId: string): Promise<Station[]> {
+  async findByOwnerId(ownerId: string): Promise<Station[]> {
     const docs = await this.model
-      .find({ providerId: new Types.ObjectId(providerId) })
+      .find({ ownerId: new Types.ObjectId(ownerId) })
       .sort({ name: 1 })
       .exec()
     return docs.map((doc) => this.mapper.toDomain(doc))

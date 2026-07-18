@@ -1,7 +1,7 @@
 import { StationContact, StationLocation, StationAddress, StationImage } from "../../domain/entities/Station"
 
 export interface CreateStationInput {
-  providerId: string
+  ownerId: string
   name: string
   description?: string
   contact: StationContact

@@ -13,13 +13,13 @@ export class GetStationUseCase implements IGetStationUseCase {
     private readonly extraServiceRepository: IExtraServiceRepository
   ) {}
 
-  async execute(stationId: string, providerId: string): Promise<StationDetailResponseDto> {
+  async execute(stationId: string, ownerId: string): Promise<StationDetailResponseDto> {
     const station = await this.stationRepository.findById(stationId)
     if (!station) {
       throw new NotFoundError("Station not found")
     }
 
-    if (station.providerId !== providerId) {
+    if (station.ownerId !== ownerId) {
       throw new ForbiddenError("You are not authorized to view this station")
     }
 

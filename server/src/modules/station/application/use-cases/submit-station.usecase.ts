@@ -14,13 +14,13 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
     private readonly stationPricingRepository: IStationPricingRepository
   ) {}
 
-  async execute(stationId: string, providerId: string): Promise<Station> {
+  async execute(stationId: string, ownerId: string): Promise<Station> {
     const station = await this.stationRepository.findById(stationId)
     if (!station) {
       throw new NotFoundError("Station not found")
     }
 
-    if (station.providerId !== providerId) {
+    if (station.ownerId !== ownerId) {
       throw new ForbiddenError("You are not authorized to submit this station")
     }
 

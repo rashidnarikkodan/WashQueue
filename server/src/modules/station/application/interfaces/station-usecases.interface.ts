@@ -8,17 +8,17 @@ export interface ICreateStationUseCase {
 }
 
 export interface IUpdateStationUseCase {
-  execute(stationId: string, providerId: string, updates: UpdateStationInput): Promise<StationDetailResponseDto>
+  execute(stationId: string, ownerId: string, updates: UpdateStationInput): Promise<StationDetailResponseDto>
 }
 
 export interface IGetStationUseCase {
-  execute(stationId: string, providerId: string): Promise<StationDetailResponseDto>
+  execute(stationId: string, ownerId: string): Promise<StationDetailResponseDto>
 }
 
 export interface IGetStationsUseCase {
-  execute(providerId: string): Promise<Station[]>
+  execute(ownerId: string): Promise<Station[]>
 }
 
 export interface ISubmitStationUseCase {
-  execute(stationId: string, providerId: string): Promise<Station>
+  execute(stationId: string, ownerId: string): Promise<Station>
 }

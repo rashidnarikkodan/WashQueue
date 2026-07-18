@@ -16,7 +16,7 @@ export class CreateStationUseCase implements ICreateStationUseCase {
 
     const station = new Station({
       id: "",
-      providerId: input.providerId,
+      ownerId: input.ownerId,
       name: input.name,
       description: input.description ?? "",
       contact: {
