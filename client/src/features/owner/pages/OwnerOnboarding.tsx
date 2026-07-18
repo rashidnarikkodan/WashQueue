@@ -8,7 +8,7 @@ import Loading from "../../../shared/components/ui/Loading"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
 import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal"
-import { ONBOARDING_STEPS } from "../stepper.config"
+import { ONBOARDING_STEPS } from "../config/stepper.config"
 import { Stepper } from "@/shared/components/stepper"
 
 export default function OwnerOnboarding() {

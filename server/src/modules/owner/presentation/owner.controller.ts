@@ -17,6 +17,7 @@ import {
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 
 export class OwnerController {
   constructor(
@@ -122,14 +123,9 @@ export class OwnerController {
   /** POST /api/owner/onboarding/submit */
   submitOnboarding = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
-    if (!userId) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGES.UNAUTHORIZED,
-        data: null,
-      })
-      return
-    }
+    if (!userId){
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    } 
 
     const result = await this.submitOnboardingUseCase.execute(userId)
     setAuthCookies(res, result.tokens.accessToken, result.tokens.refreshToken)
