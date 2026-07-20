@@ -59,14 +59,12 @@ export default function VehicleCarousel({
 
   return (
     <div className="relative group/carousel w-full">
-      {/* Scrollable Container */}
       <div
         ref={containerRef}
         onScroll={checkScroll}
         className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 pt-2 scrollbar-none"
         style={{ scrollbarWidth: "none" }}
       >
-        {/* Vehicles */}
         {vehicles.map((vehicle) => (
           <div
             key={vehicle.id}
@@ -82,7 +80,6 @@ export default function VehicleCarousel({
           </div>
         ))}
 
-        {/* Quick Actions Add Card */}
         {onAddClick && (
           <div className="snap-start shrink-0 w-[290px] sm:w-[320px] md:w-[340px]">
             <button
@@ -106,7 +103,6 @@ export default function VehicleCarousel({
         )}
       </div>
 
-      {/* Navigation Arrows */}
       {showLeftArrow && (
         <button
           onClick={() => scroll("left")}

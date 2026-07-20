@@ -22,7 +22,6 @@ export default function AddVehicleModal({
   
   const { categories, classes, loadData } = useVehicleCatelogStore()
 
-  // Form Fields State
   const [nickname, setNickname] = useState("")
   const [brand, setBrand] = useState("")
   const [model, setModel] = useState("")
@@ -32,17 +31,14 @@ export default function AddVehicleModal({
   const [classId, setClassId] = useState("")
   const [isPrimary, setIsPrimary] = useState(false)
 
-  // Validation Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Fetch catalog data when open if not already loaded
   useEffect(() => {
     if (isOpen && (categories.length === 0 || classes.length === 0)) {
       loadData()
     }
   }, [isOpen, categories.length, classes.length, loadData])
 
-  // Native Dialog Sync
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -61,7 +57,6 @@ export default function AddVehicleModal({
     }
   }, [isOpen])
 
-  // Cleanup overflow styling
   useEffect(() => {
     return () => {
       document.body.style.overflow = ""
@@ -136,7 +131,6 @@ export default function AddVehicleModal({
     }
   }
 
-  // Backdrop Click Dismiss
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     const dialog = dialogRef.current
     if (e.target === dialog) {
@@ -148,7 +142,6 @@ export default function AddVehicleModal({
     .filter((c) => c.isActive)
     .map((c) => ({ value: c.id, label: c.name }))
 
-  // Filter classes belonging to chosen category
   const classOptions = classes
     .filter((cl) => cl.isActive && (!categoryId || cl.categoryId === categoryId))
     .map((cl) => ({ value: cl.id, label: cl.name }))
@@ -163,7 +156,6 @@ export default function AddVehicleModal({
       onClick={handleBackdropClick}
       className="bg-card border border-border/80 shadow-2xl rounded-3xl p-0 w-full max-w-lg overflow-hidden backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
-      {/* Title Header */}
       <div className="flex justify-between items-center px-6 py-5 border-b border-border/60">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -179,7 +171,6 @@ export default function AddVehicleModal({
         </button>
       </div>
 
-      {/* Body Form */}
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <FormInput
@@ -243,7 +234,7 @@ export default function AddVehicleModal({
             value={categoryId}
             onChange={(e) => {
               setCategoryId(e.target.value)
-              setClassId("") // Reset class selection if category changes
+              setClassId("")
             }}
             options={categoryOptions}
             error={errors.categoryId}
@@ -260,7 +251,6 @@ export default function AddVehicleModal({
           />
         </div>
 
-        {/* Primary Checkbox */}
         <div className="flex items-center gap-3 bg-muted/40 border border-border/60 p-4 rounded-2xl">
           <input
             id="isPrimaryCheckbox"
@@ -274,7 +264,6 @@ export default function AddVehicleModal({
           </label>
         </div>
 
-        {/* Actions Footer */}
         <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"

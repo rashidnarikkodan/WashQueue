@@ -20,7 +20,6 @@ export default function VehicleCard({
 }: VehicleCardProps) {
   const { categories, classes, loadData } = useVehicleCatelogStore()
 
-  // Make sure catalog data is loaded to resolve badges
   useEffect(() => {
     if (categories.length === 0 || classes.length === 0) {
       loadData()
@@ -32,10 +31,8 @@ export default function VehicleCard({
 
   return (
     <div className="bg-card border border-border rounded-3xl p-6 flex flex-col justify-between group hover:border-primary/30 transition-all duration-300 shadow-xl hover:shadow-2xl relative overflow-hidden min-h-[300px] w-full text-left">
-      {/* Decorative gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      {/* Header Info */}
       <div className="space-y-4 relative z-10">
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -79,7 +76,6 @@ export default function VehicleCard({
           </div>
         </div>
 
-        {/* Tech Specs Details Grid */}
         <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -129,7 +125,6 @@ export default function VehicleCard({
         </div>
       </div>
 
-      {/* Action Footer */}
       <div className="pt-6 relative z-10">
         <button
           onClick={() => onBookWash?.(vehicle)}

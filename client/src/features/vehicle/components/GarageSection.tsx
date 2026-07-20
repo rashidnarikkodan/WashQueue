@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
-import { useVehicleStore } from "@/features/vehicle/store/vehicleStore"
-import VehicleCarousel from "@/features/vehicle/components/VehicleCarousel"
-import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
-import type { Vehicle } from "@/features/vehicle/types"
+import { useVehicleStore } from "../store/vehicleStore"
+import VehicleCarousel from "./VehicleCarousel"
+import AddVehicleModal from "./AddVehicleModal"
+import type { Vehicle } from "../types"
 
 export default function GarageSection() {
   const {

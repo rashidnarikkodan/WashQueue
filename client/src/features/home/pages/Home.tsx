@@ -1,7 +1,7 @@
 import WelcomeSection from "../components/homeSections/WelcomeSection"
 import ActiveBookingSection from "../components/homeSections/ActiveBookingSection"
 import SidebarWidgetsSection from "../components/homeSections/SidebarWidgetsSection"
-import GarageSection from "../components/homeSections/GarageSection"
+import GarageSection from "@/features/vehicle/components/GarageSection"
 import WalletLoyaltySection from "../components/homeSections/WalletLoyaltySection"
 
 export default function Home() {
