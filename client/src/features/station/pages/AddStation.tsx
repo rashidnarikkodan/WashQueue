@@ -1,0 +1,365 @@
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import { Stepper } from "@/shared/components/stepper"
+import { ADD_STATION_STEPPER } from "../config/stepper.config"
+import { stationApi } from "../services/station.api"
+import { getErrorMessage } from "@/shared/utils/error"
+import type { CreateStationInput, ExtraServiceInput } from "../types"
+
+// Form Step Components
+import {
+  StationDetailsForm,
+  AvailabilityForm,
+  PricingConfigurationForm,
+  ExtraServicesForm,
+  ReviewSubmit,
+} from "../components/station-forms"
+
+import type { StationDetailsFormData, AvailabilityFormData } from "../schemas/station.schema"
+import type { PricingItem } from "../components/station-forms/PricingConfigurationForm"
+
+const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
+
+const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        let width = img.width
+        let height = img.height
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width)
+          width = maxWidth
+        }
+
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext("2d")
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height)
+          resolve(canvas.toDataURL("image/jpeg", quality))
+        } else {
+          resolve((event.target?.result as string) || "")
+        }
+      }
+      img.onerror = () => resolve((event.target?.result as string) || "")
+      img.src = (event.target?.result as string) || ""
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+export default function AddStation() {
+  const navigate = useNavigate()
+
+  // Orchestrator State
+  const [activeStep, setActiveStep] = useState<number>(1)
+  const [stationId, setStationId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Accumulated Form Data
+  const [stationDetails, setStationDetails] = useState<StationDetailsFormData | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [availability, setAvailability] = useState<
+    (AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }) | null
+  >(null)
+  const [pricing, setPricing] = useState<PricingItem[]>([])
+  const [extraServicesData, setExtraServicesData] = useState<{
+    amenities: string[]
+    extraServices: ExtraServiceInput[]
+  } | null>(null)
+
+  // Step 1: Submit Station Details
+  const handleStep1Submit = async (data: StationDetailsFormData, images: File[]) => {
+    setIsLoading(true)
+    setError(null)
+    setStationDetails(data)
+    setImageFiles(images)
+
+    const processedImages = await Promise.all(
+      images.map(async (file, idx) => {
+        const dataUrl = await compressImage(file)
+        return {
+          url: dataUrl,
+          publicId: `img_${Date.now()}_${idx}`,
+          isPrimary: idx === 0,
+        }
+      })
+    )
+
+    const payload: CreateStationInput = {
+      name: data.name,
+      description: data.description || "",
+      contact: {
+        phone: data.phone,
+        email: data.email,
+      },
+      location: {
+        latitude: data.latitude,
+        longitude: data.longitude,
+      },
+      address: {
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        pincode: data.pincode,
+      },
+      images: processedImages,
+    }
+
+    try {
+      if (!stationId) {
+        // First time creating station draft
+        const res = await stationApi.createStation(payload)
+        setStationId(res.stationId)
+      } else {
+        // Editing Step 1 after creation
+        await stationApi.updateStation(stationId, {
+          step: 1,
+          name: data.name,
+          description: data.description,
+          contact: { phone: data.phone, email: data.email },
+          location: { latitude: data.latitude, longitude: data.longitude },
+          address: {
+            street: data.street,
+            city: data.city,
+            state: data.state,
+            country: data.country,
+            pincode: data.pincode,
+          },
+          images: payload.images,
+        })
+      }
+      setActiveStep(2)
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to save station details.")
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Step 2: Submit Availability
+  const handleStep2Submit = async (
+    data: AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }
+  ) => {
+    if (!stationId) {
+      toast.error("Station ID missing. Please complete Step 1 first.")
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+    setAvailability(data)
+
+    try {
+      await stationApi.updateStation(stationId, {
+        step: 2,
+        operatingHours: data.operatingHours,
+        holidays: data.holidays || [],
+        slotConfig: {
+          bays: data.bays,
+          windowDurationMins: data.windowDurationMins,
+          capacityPerWindow: data.capacityPerWindow,
+          walkInReservedSlots: data.walkInReservedSlots,
+          maxAdvanceBookingDays: data.maxAdvanceBookingDays,
+          bufferBetweenWindowsMins: data.bufferBetweenWindowsMins,
+          allowWalkIns: data.allowWalkIns,
+        },
+      })
+      setActiveStep(3)
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to save availability settings.")
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Step 3: Submit Pricing
+  const handleStep3Submit = async (pricingList: PricingItem[]) => {
+    if (!stationId) {
+      toast.error("Station ID missing. Please complete Step 1 first.")
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+    setPricing(pricingList)
+
+    // Filter to only entries with a valid 24-character Mongo ObjectId for vehicleClassId
+    const validPricing = pricingList.filter((p) => OBJECT_ID_REGEX.test(p.vehicleClassId))
+
+    if (validPricing.length === 0) {
+      const msg = "Please configure pricing for at least one valid vehicle class."
+      setError(msg)
+      toast.error(msg)
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      await stationApi.updateStation(stationId, {
+        step: 3,
+        pricing: validPricing,
+      })
+      setActiveStep(4)
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to save pricing configuration.")
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Step 4: Submit Extra Services & Amenities
+  const handleStep4Submit = async (data: {
+    amenities: string[]
+    extraServices: ExtraServiceInput[]
+  }) => {
+    if (!stationId) {
+      toast.error("Station ID missing. Please complete Step 1 first.")
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+    setExtraServicesData(data)
+
+    // Clean and filter extra services to ensure valid ObjectId for vehicleClassId in pricing
+    const cleanedExtraServices = data.extraServices
+      .filter((s) => s.name.trim().length >= 2 && !s.isDeleted)
+      .map((s) => ({
+        ...s,
+        id: s.id && OBJECT_ID_REGEX.test(s.id) ? s.id : undefined,
+        pricing: s.pricing.filter((p) => OBJECT_ID_REGEX.test(p.vehicleClassId)),
+      }))
+      .filter((s) => s.pricing.length > 0)
+
+    try {
+      await stationApi.updateStation(stationId, {
+        step: 4,
+        amenities: data.amenities,
+        extraServices: cleanedExtraServices,
+      })
+      setActiveStep(5)
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to save extra services.")
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Step 5: Final Review & Submit
+  const handleFinalSubmit = async () => {
+    if (!stationId) {
+      toast.error("Station ID missing. Cannot submit.")
+      return
+    }
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      await stationApi.submitStation(stationId)
+      toast.success("Station submitted for review successfully!")
+      navigate("/owner/stations")
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to submit station for review.")
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCancel = () => {
+    navigate("/owner/stations")
+  }
+
+  return (
+    <div className="w-full max-w-[1650px] mx-auto flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-16 px-4 py-8 sm:px-8">
+      {/* Left Column: Form Step Tracking */}
+      <div className="w-full lg:w-auto lg:sticky lg:top-8 shrink-0">
+        <Stepper
+          steps={ADD_STATION_STEPPER}
+          currentStep={activeStep}
+          heading="Add Wash Station."
+          description="Setup station details, availability, pricing and services."
+          footerNote="Application will be reviewed before activation."
+        />
+      </div>
+
+      {/* Right Column: Main Form Card Container */}
+      <div className="grow max-w-6xl bg-transparent sm:bg-card border-0 sm:border border-slate-800/80 rounded-none sm:rounded-3xl p-4 sm:p-8 md:p-10 shadow-none sm:shadow-2xl relative z-10 w-full max-h-none sm:max-h-210 overflow-y-visible sm:overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800/60 scrollbar-track-transparent">
+        {error && (
+          <div className="mb-6 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl text-red-300 text-sm">
+            {error}
+          </div>
+        )}
+
+        {activeStep === 1 && (
+          <StationDetailsForm
+            initialValues={{
+              ...stationDetails,
+              images: imageFiles,
+            }}
+            onSubmit={handleStep1Submit}
+            onCancel={handleCancel}
+            isLoading={isLoading}
+          />
+        )}
+
+        {activeStep === 2 && (
+          <AvailabilityForm
+            initialValues={availability || undefined}
+            onSubmit={handleStep2Submit}
+            onBack={() => setActiveStep(1)}
+            isLoading={isLoading}
+          />
+        )}
+
+        {activeStep === 3 && (
+          <PricingConfigurationForm
+            initialValues={pricing}
+            onSubmit={handleStep3Submit}
+            onBack={() => setActiveStep(2)}
+            isLoading={isLoading}
+          />
+        )}
+
+        {activeStep === 4 && (
+          <ExtraServicesForm
+            initialValues={extraServicesData || undefined}
+            onSubmit={handleStep4Submit}
+            onBack={() => setActiveStep(3)}
+            isLoading={isLoading}
+          />
+        )}
+
+        {activeStep === 5 && (
+          <ReviewSubmit
+            stationDetails={stationDetails || undefined}
+            imageFiles={imageFiles}
+            availability={availability || undefined}
+            pricing={pricing}
+            extraServicesData={extraServicesData || undefined}
+            onEditStep={(stepNum) => setActiveStep(stepNum)}
+            onBack={() => setActiveStep(4)}
+            onSubmit={handleFinalSubmit}
+            isLoading={isLoading}
+            error={error}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
