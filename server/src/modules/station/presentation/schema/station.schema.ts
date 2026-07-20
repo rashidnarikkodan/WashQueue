@@ -1,30 +1,65 @@
 import { z } from "zod"
+import { StationStatus } from "../../domain/entities/Station"
 
-export const createStationSchema = z.object({
-  name: z.string({ message: "Station name is required" }).trim().min(2, "Station name must be at least 2 characters"),
-  description: z.string().trim().optional().or(z.literal("")),
-  contact: z.object({
-    phone: z.string({ message: "Contact phone is required" }).trim().regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-    email: z.string({ message: "Contact email is required" }).trim().email("Invalid email format"),
-  }),
-  location: z.object({
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
-  }),
-  address: z.object({
-    street: z.string({ message: "Street is required" }).trim().min(1, "Street cannot be empty"),
-    city: z.string({ message: "City is required" }).trim().min(1, "City cannot be empty"),
-    state: z.string({ message: "State is required" }).trim().min(1, "State cannot be empty"),
-    country: z.string({ message: "Country is required" }).trim().min(1, "Country cannot be empty"),
-    pincode: z.string({ message: "Pincode is required" }).trim().min(1, "Pincode cannot be empty"),
-  }),
-  images: z.array(z.object({
-    url: z.string().url("Invalid image URL"),
-    publicId: z.string().min(1, "Public ID is required"),
-    isPrimary: z.boolean().default(false),
-  })).min(1, "At least one image is required for step 1"),
+const imageSchema = z.object({
+  url: z.string().url("Invalid image URL"),
+  publicId: z.string().min(1, "Public ID is required"),
+  isPrimary: z.boolean().default(false),
 })
 
+const contactSchema = z.object({
+  phone: z
+    .string({ message: "Contact phone is required" })
+    .trim()
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+  email: z
+    .string({ message: "Contact email is required" })
+    .trim()
+    .email("Invalid email format"),
+})
+
+const locationSchema = z.object({
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+})
+
+const addressSchema = z.object({
+  street: z.string({ message: "Street is required" }).trim().min(1, "Street cannot be empty"),
+  city: z.string({ message: "City is required" }).trim().min(1, "City cannot be empty"),
+  state: z.string({ message: "State is required" }).trim().min(1, "State cannot be empty"),
+  country: z.string({ message: "Country is required" }).trim().min(1, "Country cannot be empty"),
+  pincode: z.string({ message: "Pincode is required" }).trim().min(1, "Pincode cannot be empty"),
+})
+
+export const createStationSchema = z.object({
+  name: z
+    .string({ message: "Station name is required" })
+    .trim()
+    .min(2, "Station name must be at least 2 characters"),
+  description: z.string().trim().optional().or(z.literal("")),
+  contact: contactSchema,
+  location: locationSchema,
+  address: addressSchema,
+  images: z.array(imageSchema).min(1, "At least one image is required"),
+})
+
+// Step 1 — basic info update (after initial creation)
+const step1Schema = z.object({
+  step: z.literal(1),
+  name: z
+    .string({ message: "Station name is required" })
+    .trim()
+    .min(2, "Station name must be at least 2 characters")
+    .optional(),
+  description: z.string().trim().optional().or(z.literal("")),
+  contact: contactSchema.optional(),
+  location: locationSchema.optional(),
+  address: addressSchema.optional(),
+  images: z.array(imageSchema).optional(),
+  status: z.nativeEnum(StationStatus).optional(),
+})
+
+// Step 2 — availability
 const operatingHourSchema = z.object({
   day: z.string().min(1, "Day is required"),
   open: z.string().regex(/^\d{2}:\d{2}$/, "Open time must be in HH:mm format"),
@@ -54,6 +89,7 @@ const step2Schema = z.object({
   slotConfig: slotConfigurationSchema,
 })
 
+// Step 3 — pricing
 const pricingEntrySchema = z.object({
   vehicleClassId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid vehicleClassId"),
   halfWashPrice: z.number().min(0, "Price must be positive"),
@@ -66,6 +102,7 @@ const step3Schema = z.object({
   pricing: z.array(pricingEntrySchema).min(1, "At least one pricing entry is required"),
 })
 
+// Step 4 — amenities & extra services
 const extraServicePricingSchema = z.object({
   vehicleClassId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid vehicleClassId"),
   price: z.number().min(0, "Price must be positive"),
@@ -86,4 +123,9 @@ const step4Schema = z.object({
   extraServices: z.array(extraServiceInputSchema).optional().default([]),
 })
 
-export const patchStationSchema = z.discriminatedUnion("step", [step2Schema, step3Schema, step4Schema])
+export const patchStationSchema = z.discriminatedUnion("step", [
+  step1Schema,
+  step2Schema,
+  step3Schema,
+  step4Schema,
+])

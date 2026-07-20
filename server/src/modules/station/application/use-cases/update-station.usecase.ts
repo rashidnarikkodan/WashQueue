@@ -3,24 +3,25 @@ import { AppError } from "@/common/errors/app-error"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { Station } from "../../domain/entities/Station"
-import { IStationRepository } from "../../domain/repositories/station.repsoitory"
+import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
 import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 
 export class UpdateStationUseCase implements IUpdateStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
+    private readonly ownerRepository: IOwnerRepository,
     private readonly stationPricingRepository: IStationPricingRepository,
     private readonly extraServiceRepository: IExtraServiceRepository
   ) {}
 
   async execute(
     stationId: string,
-    ownerId: string,
+    userId: string,
     updates: UpdateStationInput
   ): Promise<StationDetailResponseDto> {
     const station = await this.stationRepository.findById(stationId)
@@ -28,7 +29,9 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       throw new NotFoundError("Station not found")
     }
 
-    if (station.ownerId !== ownerId) {
+    const owner = await this.ownerRepository.findByUserId(userId)
+
+    if (station.ownerId !== owner?.id) {
       throw new ForbiddenError("You are not authorized to update this station")
     }
 
@@ -37,7 +40,24 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
 
     try {
       await session.withTransaction(async () => {
-        if (updates.step === 2) {
+        if (updates.step === 1) {
+          // Update basic station info if fields are provided
+          if (updates.name && updates.contact && updates.location && updates.address) {
+            const props = station.getProps()
+            station.updateBasicInformation({
+              name: updates.name,
+              description: updates.description ?? props.description,
+              contact: updates.contact,
+              location: updates.location,
+              address: updates.address,
+              images: updates.images ?? props.images,
+            })
+          }
+          if (updates.status) {
+            station.updateStatus(updates.status)
+          }
+          await this.stationRepository.save(station)
+        } else if (updates.step === 2) {
           // Update operatingHours, holidays, slotConfig
           station.updateAvailability({
             operatingHours: updates.operatingHours,
@@ -104,11 +124,12 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           }
         }
       })
-    } catch (error: any) {
-      throw new AppError(
-        error.message || "Failed to update station step",
-        HTTP_STATUS.INTERNAL_SERVER_ERROR
-      )
+    } catch (error: unknown) {
+      if (error instanceof AppError) {
+        throw error
+      }
+      const message = error instanceof Error ? error.message : "Failed to update station step"
+      throw new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
     } finally {
       await session.endSession()
     }

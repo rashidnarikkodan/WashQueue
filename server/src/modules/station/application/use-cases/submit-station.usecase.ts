@@ -4,23 +4,27 @@ import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ValidationError } from "@/common/errors/validation-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Station, StationStatus } from "../../domain/entities/Station"
-import { IStationRepository } from "../../domain/repositories/station.repsoitory"
+import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { ISubmitStationUseCase } from "../interfaces/station-usecases.interface"
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 
 export class SubmitStationUseCase implements ISubmitStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
+    private readonly ownerRepository: IOwnerRepository,
     private readonly stationPricingRepository: IStationPricingRepository
   ) {}
 
-  async execute(stationId: string, ownerId: string): Promise<Station> {
+  async execute(stationId: string, userId: string): Promise<Station> {
     const station = await this.stationRepository.findById(stationId)
     if (!station) {
       throw new NotFoundError("Station not found")
     }
 
-    if (station.ownerId !== ownerId) {
+    const owner = await this.ownerRepository.findByUserId(userId)
+
+    if (station.ownerId !== owner?.id) {
       throw new ForbiddenError("You are not authorized to submit this station")
     }
 

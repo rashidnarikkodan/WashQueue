@@ -1,22 +1,34 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Station, StationStatus } from "../../domain/entities/Station"
-import { IStationRepository } from "../../domain/repositories/station.repsoitory"
+import { IStationRepository } from "../../domain/repositories/station.repository"
 import { CreateStationInput } from "../dtos/create-station.dto"
 import { ICreateStationUseCase } from "../interfaces/station-usecases.interface"
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 export class CreateStationUseCase implements ICreateStationUseCase {
-  constructor(private readonly stationRepository: IStationRepository) {}
+  constructor(
+    private readonly stationRepository: IStationRepository,
+    private readonly ownerRepository: IOwnerRepository
+  ) {}
 
-  async execute(input: CreateStationInput): Promise<Station> {
+  async execute(userId: string, input: CreateStationInput): Promise<Station> {
     const existingStation = await this.stationRepository.findByName(input.name)
     if (existingStation) {
       throw new AppError("Station with this name already exists", HTTP_STATUS.CONFLICT)
     }
 
+    const owner = await this.ownerRepository.findByUserId(userId)
+
+    if(!owner?.id){
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
     const station = new Station({
       id: "",
-      ownerId: input.ownerId,
+      ownerId: owner?.id,
       name: input.name,
       description: input.description ?? "",
       contact: {

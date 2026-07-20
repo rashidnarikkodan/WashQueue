@@ -2,13 +2,14 @@ import { Station } from "../../domain/entities/Station"
 import { CreateStationInput } from "../dtos/create-station.dto"
 import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
+import { GetStationsQuery } from "../dtos/get-stations.dto"
 
 export interface ICreateStationUseCase {
-  execute(input: CreateStationInput): Promise<Station>
+  execute(userId:string, input: CreateStationInput): Promise<Station>
 }
 
 export interface IUpdateStationUseCase {
-  execute(stationId: string, ownerId: string, updates: UpdateStationInput): Promise<StationDetailResponseDto>
+  execute(stationId: string, userId: string, updates: UpdateStationInput): Promise<StationDetailResponseDto>
 }
 
 export interface IGetStationUseCase {
@@ -16,9 +17,13 @@ export interface IGetStationUseCase {
 }
 
 export interface IGetStationsUseCase {
-  execute(ownerId: string): Promise<Station[]>
+  execute(query: GetStationsQuery): Promise<Station[]>
 }
 
 export interface ISubmitStationUseCase {
-  execute(stationId: string, ownerId: string): Promise<Station>
+  execute(stationId: string, userId: string): Promise<Station>
+}
+
+export interface IDeleteStationUseCase {
+  execute(stationId: string, ownerId: string): Promise<void>
 }
