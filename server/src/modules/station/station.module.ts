@@ -9,6 +9,7 @@ import { StationController } from "./presentation/station.controller"
 import { createRouter } from "./presentation/station.routes"
 import { GetStationsUseCase } from "./application/use-cases/get-stations.usecase"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
+import { ReviewStationUseCase } from "./application/use-cases/review-station.usecase"
 
 // Instantiate repositories
 export const stationRepository = new StationMongoRepository()
@@ -38,6 +39,7 @@ const submitStationUseCase = new SubmitStationUseCase(
   ownerRepository,
   stationPricingRepository
 )
+const reviewStationUseCase = new ReviewStationUseCase(stationRepository)
 
 // Instantiate controller
 const stationController = new StationController(
@@ -45,7 +47,8 @@ const stationController = new StationController(
   updateStationUseCase,
   getStationUseCase,
   getStationsUseCase,
-  submitStationUseCase
+  submitStationUseCase,
+  reviewStationUseCase
 )
 
 // Create router

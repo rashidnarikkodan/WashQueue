@@ -10,6 +10,7 @@ import {
   IGetStationUseCase,
   IGetStationsUseCase,
   ISubmitStationUseCase,
+  IReviewStationUseCase,
 } from "../application/interfaces/station-usecases.interface"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 
@@ -19,7 +20,8 @@ export class StationController {
     private readonly updateStationUseCase: IUpdateStationUseCase,
     private readonly getStationUseCase: IGetStationUseCase,
     private readonly getStationsUseCase: IGetStationsUseCase,
-    private readonly submitStationUseCase: ISubmitStationUseCase
+    private readonly submitStationUseCase: ISubmitStationUseCase,
+    private readonly reviewStationUseCase: IReviewStationUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -89,5 +91,22 @@ export class StationController {
 
     const station = await this.submitStationUseCase.execute(stationId, userId)
     success(res, station.getProps(), HTTP_STATUS.OK, "Station submitted successfully for review")
+  }
+
+  review = async (req: AuthenticatedRequest, res: Response) => {
+    const { stationId } = req.params
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const { action, rejectionReason } = req.body
+    const station = await this.reviewStationUseCase.execute(stationId, action, rejectionReason)
+
+    success(
+      res,
+      station.getProps(),
+      HTTP_STATUS.OK,
+      `Station ${action === "APPROVE" ? "approved" : "rejected"} successfully`
+    )
   }
 }

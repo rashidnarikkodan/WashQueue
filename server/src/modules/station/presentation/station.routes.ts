@@ -15,6 +15,14 @@ export const createRouter = (stationController: StationController): Router => {
     asyncHandler(stationController.getStations)
   )
 
+  // Admin route to approve/reject station
+  router.patch(
+    "/:stationId/review",
+    authenticate,
+    authorize("admin"),
+    asyncHandler(stationController.review)
+  )
+
   // All routes below require authentication + owner authorization
   router.use(authenticate, authorize("owner"))
 
