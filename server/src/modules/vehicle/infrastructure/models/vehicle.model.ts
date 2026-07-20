@@ -4,7 +4,7 @@ export interface IVehicle extends Document {
   userId: Types.ObjectId
   nickname: string
   brand: string
-  model: any
+  vehicle_model: string
   year: number
   registrationNumber: string | null
   categoryId: Types.ObjectId
@@ -20,14 +20,14 @@ const vehicleSchema = new Schema<IVehicle>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     nickname: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true },
-    model: { type: String, required: true, trim: true },
+    vehicle_model: { type: String, required: true, trim: true },
     year: { type: Number, required: true },
     registrationNumber: { type: String, default: null, trim: true },
     categoryId: { type: Schema.Types.ObjectId, ref: "VehicleCategory", required: true },
     classId: { type: Schema.Types.ObjectId, ref: "VehicleClass", required: true },
     isPrimary: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-  } as any,
+  },
   {
     timestamps: true,
   }

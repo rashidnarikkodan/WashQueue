@@ -10,7 +10,7 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
       userId: raw.userId.toString(),
       nickname: raw.nickname,
       brand: raw.brand,
-      model: raw.model,
+      model: raw.vehicle_model,
       year: raw.year,
       registrationNumber: raw.registrationNumber,
       categoryId: raw.categoryId.toString(),
@@ -30,7 +30,7 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
       if (data.userId) persist.userId = new Types.ObjectId(data.userId)
       if (data.nickname !== undefined) persist.nickname = data.nickname
       if (data.brand !== undefined) persist.brand = data.brand
-      if (data.model !== undefined) persist.model = data.model
+      if (data.model !== undefined) persist.vehicle_model = data.model
       if (data.year !== undefined) persist.year = data.year
       if (data.registrationNumber !== undefined) persist.registrationNumber = data.registrationNumber
       if (data.categoryId) persist.categoryId = new Types.ObjectId(data.categoryId)
