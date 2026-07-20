@@ -30,3 +30,5 @@ export const onboardingUpload = upload.fields([
   { name: "gstCertificateFile", maxCount: 1 },
   { name: "bankProofFile", maxCount: 1 },
 ])
+
+export const stationUpload = upload.array("images", 10)
