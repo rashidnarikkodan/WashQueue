@@ -36,6 +36,18 @@ export default function AddVehicleModal({
   // Validation Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  const resetForm = () => {
+    setNickname("")
+    setBrand("")
+    setModel("")
+    setYear(new Date().getFullYear())
+    setRegistrationNumber("")
+    setCategoryId("")
+    setClassId("")
+    setIsPrimary(false)
+    setErrors({})
+  }
+
   // Fetch catalog data when open if not already loaded
   useEffect(() => {
     if (isOpen && (categories.length === 0 || classes.length === 0)) {
@@ -68,18 +80,6 @@ export default function AddVehicleModal({
       document.body.style.overflow = ""
     }
   }, [])
-
-  const resetForm = () => {
-    setNickname("")
-    setBrand("")
-    setModel("")
-    setYear(new Date().getFullYear())
-    setRegistrationNumber("")
-    setCategoryId("")
-    setClassId("")
-    setIsPrimary(false)
-    setErrors({})
-  }
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}

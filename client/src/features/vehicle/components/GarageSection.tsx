@@ -5,7 +5,7 @@ import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicle
 import AddVehicleModal from "./AddVehicleModal"
 
 export default function GarageSection() {
-  const { vehicles, isLoading, isActionLoading, loadVehicles, addVehicle } = useVehicleStore()
+  const { vehicles, isActionLoading, loadVehicles, addVehicle } = useVehicleStore()
   const { categories, classes, loadData } = useVehicleCatelogStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)

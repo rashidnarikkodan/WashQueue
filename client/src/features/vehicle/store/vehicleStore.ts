@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { toast } from "sonner"
 import type { Vehicle, CreateVehicleInput } from "../types"
 import { vehicleApi } from "../services/vehicle.api"
+import { getErrorMessage } from "@/shared/utils/error"
 
 interface VehicleStore {
   vehicles: Vehicle[]
@@ -25,8 +26,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
     try {
       const vehicles = await vehicleApi.getVehicles()
       set({ vehicles })
-    } catch (error: any) {
-      toast.error(error.message || "Failed to load vehicles")
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to load vehicles"))
     } finally {
       set({ isLoading: false })
     }
@@ -44,8 +45,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
       })
       toast.success("Vehicle registered successfully")
       return true
-    } catch (error: any) {
-      toast.error(error.message || "Failed to add vehicle")
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to add vehicle"))
       return false
     } finally {
       set({ isActionLoading: false })
@@ -61,8 +62,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
       }))
       toast.success("Vehicle updated successfully")
       return true
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update vehicle")
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to update vehicle"))
       return false
     } finally {
       set({ isActionLoading: false })
@@ -89,8 +90,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
 
       toast.success("Vehicle removed successfully")
       return true
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete vehicle")
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to delete vehicle"))
       return false
     } finally {
       set({ isActionLoading: false })
@@ -108,8 +109,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
       }))
       toast.success(`${updated.nickname} set as primary vehicle`)
       return true
-    } catch (error: any) {
-      toast.error(error.message || "Failed to set primary vehicle")
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to set primary vehicle"))
       return false
     } finally {
       set({ isActionLoading: false })
