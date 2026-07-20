@@ -1,11 +1,14 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { useVehicleStore } from "../store/vehicleStore"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import AddVehicleModal from "./AddVehicleModal"
 
 export default function GarageSection() {
-  const { vehicles, loadVehicles } = useVehicleStore()
+  const { vehicles, isLoading, isActionLoading, loadVehicles, addVehicle } = useVehicleStore()
   const { categories, classes, loadData } = useVehicleCatelogStore()
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     loadVehicles()
@@ -30,7 +33,6 @@ export default function GarageSection() {
           const categoryName = categories.find((c) => c.id === vehicle.categoryId)?.name || "Car"
           const className = classes.find((c) => c.id === vehicle.classId)?.name || "Sedan"
           
-          // Original fallback car images
           const image = categoryName.toLowerCase().includes("suv")
             ? "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"
             : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80"
@@ -143,11 +145,21 @@ export default function GarageSection() {
               and detailing quotes.
             </p>
           </div>
-          <button className="px-5 py-2.5 rounded-xl bg-muted hover:bg-muted text-muted-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-muted hover:bg-muted text-muted-foreground font-extrabold text-xs tracking-wider transition-all cursor-pointer"
+          >
             Register Vehicle
           </button>
         </div>
       </div>
+
+      <AddVehicleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={addVehicle}
+        isSubmitting={isActionLoading}
+      />
     </section>
   )
 }
