@@ -7,6 +7,8 @@ export enum StationStatus {
   REJECTED = "REJECTED",
 }
 
+export const STATION_STATUS = StationStatus
+
 export interface StationImage {
   url: string;
   publicId: string;
@@ -138,6 +140,12 @@ export class Station {
 
   updateAmenities(amenities: string[]): void {
     this.props.amenities = amenities;
+    this.touch();
+  }
+
+  updateStatus(status: StationStatus): void {
+    this.props.status = status;
+    this.props.isActive = status === StationStatus.ACTIVE;
     this.touch();
   }
 

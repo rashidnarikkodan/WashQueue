@@ -9,7 +9,7 @@ export class ExtraServiceMapper {
       stationId: raw.stationId.toString(),
       name: raw.name,
       description: raw.description ?? "",
-      pricing: (raw.pricing ?? []).map((p: any) => ({
+      pricing: (raw.pricing ?? []).map((p) => ({
         vehicleClassId: p.vehicleClassId.toString(),
         price: p.price,
       })),
@@ -21,8 +21,8 @@ export class ExtraServiceMapper {
   }
 
   static toPersistence(entity: Partial<ExtraService>): Partial<IExtraService> {
-    if (typeof (entity as any).getProps === "function") {
-      const props = (entity as ExtraService).getProps()
+    if (entity && typeof entity.getProps === "function") {
+      const props = entity.getProps()
       const raw: Partial<IExtraService> = {
         name: props.name,
         description: props.description,

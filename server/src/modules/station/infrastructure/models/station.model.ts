@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose"
+import { StationStatus } from "../../domain/entities/Station"
 
 interface IGeoPoint {
   type: "Point"
@@ -152,8 +153,8 @@ const stationSchema = new Schema<IStation>(
 
     status: {
       type: String,
-      enum: ["DRAFT", "PENDING_REVIEW", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"],
-      default: "DRAFT",
+      enum: Object.values(StationStatus),
+      default: StationStatus.DRAFT,
     },
 
     isActive: { type: Boolean, default: false },

@@ -4,13 +4,6 @@ import {
   Station,
   StationProps,
   StationStatus,
-  StationContact,
-  StationLocation,
-  StationAddress,
-  StationImage,
-  OperatingHour,
-  Holiday,
-  SlotConfiguration,
 } from "../../domain/entities/Station"
 import { IStation } from "../models/station.model"
 
@@ -43,20 +36,20 @@ export class StationMapper implements IMapper<Station, IStation> {
         pincode: raw.address?.pincode ?? "",
       },
 
-      images: (raw.images ?? []).map((img: any) => ({
+      images: (raw.images ?? []).map((img) => ({
         url: img.url,
         publicId: img.publicId,
         isPrimary: img.isPrimary,
       })),
 
-      operatingHours: (raw.operatingHours ?? []).map((oh: any) => ({
+      operatingHours: (raw.operatingHours ?? []).map((oh) => ({
         day: oh.day,
         open: oh.open,
         close: oh.close,
         isClosed: oh.isClosed,
       })),
 
-      holidays: (raw.holidays ?? []).map((h: any) => ({
+      holidays: (raw.holidays ?? []).map((h) => ({
         date: h.date,
         reason: h.reason,
       })),
@@ -91,8 +84,8 @@ export class StationMapper implements IMapper<Station, IStation> {
 
   static toPersistence(entity: Partial<Station>): Partial<IStation> {
     // When called with a full Station instance from save(), use getProps()
-    if (typeof (entity as any).getProps === "function") {
-      const props = (entity as Station).getProps()
+    if (entity && typeof entity.getProps === "function") {
+      const props = entity.getProps()
       return StationMapper.propsToRaw(props)
     }
 

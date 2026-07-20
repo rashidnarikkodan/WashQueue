@@ -1,7 +1,7 @@
 import { ClientSession, Types } from "mongoose"
 import { ExtraService, ExtraServiceProps } from "../../domain/entities/ExtraService"
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
-import { ExtraServiceModel } from "../models/extra-service.model"
+import { ExtraServiceModel, IExtraService } from "../models/extra-service.model"
 import { ExtraServiceMapper } from "../mappers/extra-service.mapper"
 
 export class ExtraServiceMongoRepository implements IExtraServiceRepository {
@@ -40,7 +40,7 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
     data: Partial<Pick<ExtraServiceProps, "name" | "description" | "pricing" | "isActive">>,
     session?: ClientSession
   ): Promise<ExtraService | null> {
-    const updateData: any = {}
+    const updateData: Partial<IExtraService> = {}
     if (data.name !== undefined) updateData.name = data.name
     if (data.description !== undefined) updateData.description = data.description
     if (data.isActive !== undefined) updateData.isActive = data.isActive
