@@ -17,6 +17,8 @@ interface FormInputProps {
   id?: string
   prefix?: ReactNode
   leftIcon?: ReactNode
+  onlyNumbers?: boolean
+  maxLength?: number
 }
 
 export default function FormInput({
@@ -34,11 +36,50 @@ export default function FormInput({
   id,
   prefix,
   leftIcon,
+  onlyNumbers,
+  maxLength,
 }: FormInputProps) {
   const [showPassword, setShowPassword] = useState(false)
 
   const isPassword = type === "password"
   const inputType = isPassword ? (showPassword ? "text" : "password") : type
+  const isNumericOnly = type === "tel" || onlyNumbers
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isNumericOnly) {
+      const isControlKey =
+        [
+          "Backspace",
+          "Delete",
+          "Tab",
+          "Escape",
+          "Enter",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "Home",
+          "End",
+        ].includes(e.key) ||
+        e.ctrlKey ||
+        e.metaKey
+
+      if (!isControlKey && !/^\d$/.test(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (isNumericOnly) {
+      const rawValue = e.target.value
+      const sanitized = rawValue.replace(/\D/g, "")
+      if (sanitized !== rawValue) {
+        e.target.value = sanitized
+      }
+    }
+    onChange?.(e)
+  }
 
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
@@ -66,10 +107,12 @@ export default function FormInput({
           placeholder={placeholder}
           value={value}
           defaultValue={defaultValue}
-          onChange={onChange}
+          onKeyDown={handleKeyDown}
+          onChange={handleChange}
           autoComplete={autoComplete}
           required={required}
           disabled={disabled}
+          maxLength={maxLength}
           className={`w-full bg-muted/90 text-foreground border rounded-xl pr-11 py-3 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all duration-200 ${
             prefix ? "pl-24" : leftIcon ? "pl-11" : "pl-4"
           } ${

@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react"
 
 interface FormSwitchProps {
-  label: string
+  label?: string
   checked: boolean
   onChange: (checked: boolean) => void
   disabled?: boolean
@@ -37,9 +37,11 @@ export default function FormSwitch({
             className="sr-only peer"
           />
           <div className="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:after:bg-foreground disabled:opacity-50"></div>
-          <span className="text-sm font-semibold text-slate-300">
-            {label}
-          </span>
+          {label && (
+            <span className="text-sm font-semibold text-slate-300">
+              {label}
+            </span>
+          )}
         </label>
       </div>
       {description && (

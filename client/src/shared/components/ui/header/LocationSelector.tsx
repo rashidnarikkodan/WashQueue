@@ -134,7 +134,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
             "wq_selected_coordinates",
             JSON.stringify({ lat: latitude, lon: longitude })
           )
-          toast.success(`Location resolved to ${cleanName}`)
           setIsOpen(false)
           setSearchQuery("")
         } catch {
