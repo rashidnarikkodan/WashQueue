@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { X, Loader2, Car } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSelect from "@/shared/components/form/FormSelect"
+import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 import type { CreateVehicleInput } from "../types"
 
@@ -259,18 +260,15 @@ export default function AddVehicleModal({
           />
         </div>
 
-        {/* Primary Checkbox */}
-        <div className="flex items-center gap-3 bg-muted/40 border border-border/60 p-4 rounded-2xl">
-          <input
-            id="isPrimaryCheckbox"
-            type="checkbox"
+        {/* Primary Switch */}
+        <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl">
+          <FormSwitch
+            label="Set as Primary Vehicle"
             checked={isPrimary}
-            onChange={(e) => setIsPrimary(e.target.checked)}
-            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 accent-primary"
+            onChange={setIsPrimary}
+            id="isPrimarySwitch"
+            description="Primary vehicle will be selected by default when booking washes."
           />
-          <label htmlFor="isPrimaryCheckbox" className="text-xs font-bold text-foreground cursor-pointer select-none">
-            Set as Primary Vehicle
-          </label>
         </div>
 
         {/* Actions Footer */}
