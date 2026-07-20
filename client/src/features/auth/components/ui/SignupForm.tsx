@@ -27,7 +27,6 @@ export default function SignupForm() {
       const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
         const user = useAuthStore.getState().user
-        console.log("Google signup response user:", user)
         if (user?.isNewUser) {
           navigate("/setup-account")
         } else {

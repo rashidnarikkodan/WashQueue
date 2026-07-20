@@ -11,6 +11,7 @@ export interface AuthUser {
   onboardingStep?: number
   walletBalance?: number
   authProvider?: string
+  ownerId?: string
 }
 
 export interface LoginState {

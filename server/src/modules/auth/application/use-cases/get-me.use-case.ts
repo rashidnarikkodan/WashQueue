@@ -26,13 +26,15 @@ export class GetMeUseCase implements IGetMeUseCase {
 
     let isVerified = user.isVerified
     let onboardingStep = 1
+    let ownerId: string | undefined = undefined
 
     if (user.role === ROLE.OWNER) {
-      const owner = await this.ownerRepository.findByUserId(userId)
-      if (owner) {
-        isVerified = owner.isVerified ?? false
-        onboardingStep = owner.onboardingStep ?? 1
-      }
+       const owner = await this.ownerRepository.findByUserId(userId)
+       if (owner) {
+         isVerified = owner.isVerified ?? false
+         onboardingStep = owner.onboardingStep ?? 1
+         ownerId = owner.id
+       }
     }
 
     return {
@@ -46,6 +48,7 @@ export class GetMeUseCase implements IGetMeUseCase {
       isVerified,
       onboardingStep,
       authProvider: user.authProvider,
+      ownerId,
     }
   }
 }
