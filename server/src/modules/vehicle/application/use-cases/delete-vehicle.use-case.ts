@@ -6,8 +6,8 @@ import { ForbiddenError } from "@/common/errors/forbidden-error"
 export class DeleteVehicleUseCase implements IDeleteVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
 
-  async execute(id: string, userId: string): Promise<void> {
-    const vehicle = await this.vehicleRepository.findById(id)
+  async execute(vehicleId: string, userId: string): Promise<void> {
+    const vehicle = await this.vehicleRepository.findById(vehicleId)
     if (!vehicle || !vehicle.data.isActive) {
       throw new NotFoundError("Vehicle not found")
     }

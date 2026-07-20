@@ -7,15 +7,15 @@ export interface ICreateVehicleUseCase {
 }
 
 export interface IUpdateVehicleUseCase {
-  execute(id: string, userId: string, dto: UpdateVehicleDto): Promise<VehicleResponseDto>
+  execute(vehicleId: string, userId: string, dto: UpdateVehicleDto): Promise<VehicleResponseDto>
 }
 
 export interface IDeleteVehicleUseCase {
-  execute(id: string, userId: string): Promise<void>
+  execute(vehicleId: string, userId: string): Promise<void>
 }
 
 export interface IGetVehicleUseCase {
-  execute(id: string, userId: string): Promise<VehicleResponseDto>
+  execute(vehicleId: string, userId: string): Promise<VehicleResponseDto>
 }
 
 export interface IGetVehiclesUseCase {
@@ -23,5 +23,5 @@ export interface IGetVehiclesUseCase {
 }
 
 export interface ISetPrimaryVehicleUseCase {
-  execute(id: string, userId: string): Promise<VehicleResponseDto>
+  execute(vehicleId: string, userId: string): Promise<VehicleResponseDto>
 }

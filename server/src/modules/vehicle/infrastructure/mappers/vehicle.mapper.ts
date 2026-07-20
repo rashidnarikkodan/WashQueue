@@ -23,7 +23,8 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
   }
 
   toPersistence(entity: Partial<Vehicle>): Partial<IVehicle> {
-    const data = entity.data
+    const isEntity = entity instanceof Vehicle || (entity && typeof (entity as any).data === "object")
+    const data = isEntity ? (entity as any).data : entity
     const persist: any = {}
 
     if (data) {

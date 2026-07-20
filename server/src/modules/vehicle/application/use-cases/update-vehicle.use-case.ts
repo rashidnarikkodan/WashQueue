@@ -8,8 +8,8 @@ import { ForbiddenError } from "@/common/errors/forbidden-error"
 export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
 
-  async execute(id: string, userId: string, dto: UpdateVehicleDto): Promise<VehicleResponseDto> {
-    const vehicle = await this.vehicleRepository.findById(id)
+  async execute(vehicleId: string, userId: string, dto: UpdateVehicleDto): Promise<VehicleResponseDto> {
+    const vehicle = await this.vehicleRepository.findById(vehicleId)
     if (!vehicle || !vehicle.data.isActive) {
       throw new NotFoundError("Vehicle not found")
     }
@@ -27,7 +27,7 @@ export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
     if (dto.categoryId !== undefined) updates.categoryId = dto.categoryId
     if (dto.classId !== undefined) updates.classId = dto.classId
 
-    const updatedVehicle = await this.vehicleRepository.update(id, updates)
+    const updatedVehicle = await this.vehicleRepository.update(vehicleId, updates)
     if (!updatedVehicle) {
       throw new NotFoundError("Vehicle not found")
     }

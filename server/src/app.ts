@@ -21,9 +21,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }))
 app.use(cookieParser())
 app.use(loggerMiddleware)
 
-// Serve uploaded files
-app.use("/uploads", express.static(path.resolve("uploads")))
-
 app.use(API_ROUTES.AUTH.ROOT, authRouter)
 app.use(API_ROUTES.USERS.ROOT, userRouter)
 app.use(API_ROUTES.OWNER.ROOT, ownerRouter)
