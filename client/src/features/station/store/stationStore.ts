@@ -24,6 +24,7 @@ interface StationStore {
   createStation: (input: CreateStationInput) => Promise<Station | null>
   updateStation: (id: string, input: UpdateStationInput) => Promise<StationDetail | null>
   submitStation: (id: string) => Promise<boolean>
+  reviewStation: (id: string, action: "APPROVE" | "REJECT", rejectionReason?: string) => Promise<boolean>
   clearError: () => void
   clearSelected: () => void
 }
@@ -112,6 +113,26 @@ export const useStationStore = create<StationStore>((set) => ({
       return true
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to submit station")
+      set({ error: msg, isSubmitting: false })
+      return false
+    }
+  },
+
+  reviewStation: async (id: string, action: "APPROVE" | "REJECT", rejectionReason?: string) => {
+    set({ isSubmitting: true, error: null })
+    try {
+      const updated = await stationApi.reviewStation(id, action, rejectionReason)
+      set((state) => ({
+        stations: state.stations.map((s) => (s.id === id ? updated : s)),
+        selectedStation: state.selectedStation && state.selectedStation.station.id === id
+          ? { ...state.selectedStation, station: updated }
+          : state.selectedStation,
+        isSubmitting: false,
+      }))
+      toast.success(`Station ${action === "APPROVE" ? "approved" : "rejected"} successfully!`)
+      return true
+    } catch (err) {
+      const msg = getErrorMessage(err, `Failed to ${action.toLowerCase()} station`)
       set({ error: msg, isSubmitting: false })
       return false
     }

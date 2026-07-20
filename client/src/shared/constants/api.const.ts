@@ -19,5 +19,6 @@ export const API_ROUTES = {
     ROOT: "/stations",
     BY_ID: (id: string) => `/stations/${id}`,
     SUBMIT: (id: string) => `/stations/${id}/submit`,
+    REVIEW: (id: string) => `/stations/${id}/review`,
   },
 } as const

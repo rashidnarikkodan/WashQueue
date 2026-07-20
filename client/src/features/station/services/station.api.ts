@@ -91,4 +91,23 @@ export const stationApi = {
       throw handleApiError(error, "Failed to submit station for review")
     }
   },
+
+  /**
+   * Review (approve or reject) a station.
+   */
+  reviewStation: async (
+    id: string,
+    action: "APPROVE" | "REJECT",
+    rejectionReason?: string
+  ): Promise<Station> => {
+    try {
+      const response = await api.patch<{ data: Station }>(API_ROUTES.STATIONS.REVIEW(id), {
+        action,
+        rejectionReason,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, `Failed to ${action.toLowerCase()} station`)
+    }
+  },
 }
