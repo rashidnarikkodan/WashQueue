@@ -6,6 +6,7 @@ const UserDetails = lazy(() => import("../../features/users/pages/UserDetails"))
 const OwnerApproval = lazy(() => import("../../features/users/pages/OwnerApproval"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
+const StationManagementAdmin = lazy(() => import("../../features/station/pages/StationManagementAdmin"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -29,7 +30,7 @@ export const adminRoutes = {
     },
     {
       path: "stations",
-      element: <>Station Management</>,
+      element: <StationManagementAdmin />,
     },
     {
       path: "categories",
