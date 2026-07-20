@@ -6,7 +6,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { useStationStore } from "../store/stationStore"
 import type { Station } from "../types"
 import { STATION_STATUS } from "../types"
-import { DataTable, Column, TabConfig } from "@/shared/components/data-table"
+import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
 
 // Tab definitions for filtering stations
 const stationAdminTabs: TabConfig[] = [
