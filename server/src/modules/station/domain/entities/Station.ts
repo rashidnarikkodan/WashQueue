@@ -161,12 +161,16 @@ export class Station {
   activate(): void {
     this.props.status = StationStatus.ACTIVE;
     this.props.isActive = true;
+    this.props.verifiedAt = new Date();
+    this.props.rejectionReason = undefined;
     this.touch();
   }
 
   reject(reason: string): void {
     this.props.status = StationStatus.REJECTED;
+    this.props.isActive = false;
     this.props.rejectionReason = reason;
+    this.props.verifiedAt = undefined;
     this.touch();
   }
 

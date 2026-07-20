@@ -27,3 +27,7 @@ export interface ISubmitStationUseCase {
 export interface IDeleteStationUseCase {
   execute(stationId: string, ownerId: string): Promise<void>
 }
+
+export interface IReviewStationUseCase {
+  execute(stationId: string, action: "APPROVE" | "REJECT", rejectionReason?: string): Promise<Station>
+}
