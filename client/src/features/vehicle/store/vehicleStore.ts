@@ -1,8 +1,8 @@
 import { create } from "zustand"
 import { toast } from "sonner"
 import type { Vehicle, CreateVehicleInput } from "../types"
-import { vehicleApi } from "../services/vehicle.api"
 import { getErrorMessage } from "@/shared/utils/error"
+import { vehicleApi } from "@/shared/apis"
 
 interface VehicleStore {
   vehicles: Vehicle[]

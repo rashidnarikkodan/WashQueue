@@ -1,8 +1,8 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import { ownerApi, type OnboardingDetails } from "../services/owner.api"
 import { useAuthStore } from "../../auth/store/authStore"
 import { getErrorMessage } from "../../../shared/utils/error"
+import { ownerApi, type OnboardingDetails } from "@/shared/apis/owner.api"
 
 interface OwnerStore {
   isLoading: boolean

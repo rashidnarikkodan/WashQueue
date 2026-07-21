@@ -1,7 +1,7 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
-import type { GetUsersFilters, GetUsersResponse, User } from "../types"
+import type { GetUsersResponse, GetUsersFilters, User } from "@/features/users/types"
 
 interface UserApiPayload {
   id?: string

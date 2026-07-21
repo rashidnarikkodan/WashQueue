@@ -2,10 +2,10 @@ import { useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
-import { useStationStore } from "../store/stationStore"
+import { useStationStore } from "../../store/stationStore"
 import { Plus } from "lucide-react"
 import { useAuthStore } from "@/features/auth/store/authStore"
-import { STATION_STATUS } from "../types"
+import { STATION_STATUS } from "../../types"
 
 const StationManagement = () => {
   const navigate = useNavigate()

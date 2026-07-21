@@ -7,7 +7,7 @@ import type {
   VehicleClass,
   CreateClassInput,
   UpdateClassInput,
-} from "../types"
+} from "@/features/vehicle-catelog/types"
 
 // Response wrappers matching backend's standard JSON format
 interface ApiResponse<T> {

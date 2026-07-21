@@ -1,4 +1,4 @@
-import { Response } from "express"
+import { Request, Response } from "express"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
@@ -55,14 +55,9 @@ export class StationController {
     success(res, result, HTTP_STATUS.OK, "Station updated successfully")
   }
 
-  getById = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
-    }
-
+  getById = async (req: Request, res: Response) => {
     const stationId = this.stationMapper.extractStationId(req)
-    const result = await this.getStationUseCase.execute(stationId, userId)
+    const result = await this.getStationUseCase.execute(stationId)
 
     success(res, result, HTTP_STATUS.OK, "Station retrieved successfully")
   }

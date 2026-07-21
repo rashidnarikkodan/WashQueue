@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { toast } from "sonner"
 import type { VehicleCategory, VehicleClass, CreateCategoryInput, UpdateCategoryInput, CreateClassInput, UpdateClassInput } from "../types"
-import { vehicleCatelogApi } from "../services/vehicleCatelog.api"
+import { vehicleCatelogApi } from "@/shared/apis"
 
 interface VehicleCatelogStore {
   categories: VehicleCategory[]

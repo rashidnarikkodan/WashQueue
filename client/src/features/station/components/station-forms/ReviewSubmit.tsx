@@ -2,11 +2,12 @@ import { Info, Clock, DollarSign, Sparkles, CheckCircle2, AlertCircle, Edit2 } f
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 import type { StationDetailsFormData, AvailabilityFormData } from "../../schemas/station.schema"
 import type { PricingItem } from "./PricingConfigurationForm"
-import type { ExtraServiceInput } from "../../types"
+import type { ExtraServiceInput, StationImage } from "../../types"
 
 interface ReviewSubmitProps {
   stationDetails?: Partial<StationDetailsFormData>
   imageFiles?: File[]
+  existingImages?: StationImage[]
   availability?: Partial<AvailabilityFormData> & { holidays?: { date: string; reason?: string }[] }
   pricing?: PricingItem[]
   extraServicesData?: {
@@ -23,6 +24,7 @@ interface ReviewSubmitProps {
 export default function ReviewSubmit({
   stationDetails,
   imageFiles = [],
+  existingImages = [],
   availability,
   pricing = [],
   extraServicesData,
@@ -35,6 +37,7 @@ export default function ReviewSubmit({
   const { classes } = useVehicleCatelogStore()
 
   const activeExtraServices = (extraServicesData?.extraServices || []).filter((s) => !s.isDeleted)
+  const totalPhotosCount = existingImages.length + imageFiles.length
 
   return (
     <div className="space-y-8 text-left">
@@ -77,27 +80,42 @@ export default function ReviewSubmit({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">STATION NAME</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              STATION NAME
+            </span>
             <span className="text-white text-sm font-bold">{stationDetails?.name || "—"}</span>
           </div>
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">CONTACT</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              CONTACT
+            </span>
             <span className="text-white font-medium">
               {stationDetails?.phone} | {stationDetails?.email}
             </span>
           </div>
           <div className="sm:col-span-2">
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">DESCRIPTION</span>
-            <span className="text-slate-300 font-normal">{stationDetails?.description || "No description provided."}</span>
+            <span className="block text-slate-400 font-semibold uppercase tracking-wider">
+              DESCRIPTION
+            </span>
+
+            <p className="mt-1 text-slate-300 font-normal break-words whitespace-pre-wrap">
+              {stationDetails?.description || "No description provided."}
+            </p>
           </div>
           <div className="sm:col-span-2">
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">ADDRESS</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              ADDRESS
+            </span>
             <span className="text-slate-300 font-medium">
-              {stationDetails?.street}, {stationDetails?.city}, {stationDetails?.district ? `${stationDetails.district}, ` : ""}{stationDetails?.state}, {stationDetails?.country} - {stationDetails?.pincode}
+              {stationDetails?.street}, {stationDetails?.city},{" "}
+              {stationDetails?.district ? `${stationDetails.district}, ` : ""}
+              {stationDetails?.state}, {stationDetails?.country} - {stationDetails?.pincode}
             </span>
           </div>
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">LOCATION GPS</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              LOCATION GPS
+            </span>
             <span className="text-[#ADC6FF] font-mono font-bold">
               {stationDetails?.latitude}° N, {stationDetails?.longitude}° W
             </span>
@@ -105,17 +123,35 @@ export default function ReviewSubmit({
         </div>
 
         {/* Media preview */}
-        {imageFiles.length > 0 && (
+        {totalPhotosCount > 0 && (
           <div className="pt-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">PHOTOS ({imageFiles.length})</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+              PHOTOS ({totalPhotosCount})
+            </span>
             <div className="flex flex-wrap gap-2">
+              {existingImages.map((img, idx) => (
+                <div key={`existing-${idx}`} className="relative group">
+                  <img
+                    src={img.url}
+                    alt={`Saved Station Photo ${idx + 1}`}
+                    className="w-16 h-16 object-cover rounded-lg border border-emerald-500/40"
+                  />
+                  <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-emerald-300 text-center py-0.5 rounded-b-lg">
+                    Saved
+                  </span>
+                </div>
+              ))}
               {imageFiles.map((file, idx) => (
-                <img
-                  key={idx}
-                  src={URL.createObjectURL(file)}
-                  alt={`Station ${idx + 1}`}
-                  className="w-16 h-16 object-cover rounded-lg border border-slate-800"
-                />
+                <div key={`new-${idx}`} className="relative group">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`New Station Photo ${idx + 1}`}
+                    className="w-16 h-16 object-cover rounded-lg border border-slate-800"
+                  />
+                  <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-blue-300 text-center py-0.5 rounded-b-lg">
+                    New
+                  </span>
+                </div>
               ))}
             </div>
           </div>
@@ -141,30 +177,51 @@ export default function ReviewSubmit({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">BAYS</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              BAYS
+            </span>
             <span className="text-white text-sm font-bold">{availability?.bays ?? 1}</span>
           </div>
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">DURATION</span>
-            <span className="text-white text-sm font-bold">{availability?.windowDurationMins ?? 30} mins</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              DURATION
+            </span>
+            <span className="text-white text-sm font-bold">
+              {availability?.windowDurationMins ?? 30} mins
+            </span>
           </div>
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">CAPACITY / WINDOW</span>
-            <span className="text-white text-sm font-bold">{availability?.capacityPerWindow ?? 1}</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              CAPACITY / WINDOW
+            </span>
+            <span className="text-white text-sm font-bold">
+              {availability?.capacityPerWindow ?? 1}
+            </span>
           </div>
           <div>
-            <span className="text-slate-400 font-semibold uppercase tracking-wider block">WALK-IN SLOTS</span>
-            <span className="text-white text-sm font-bold">{availability?.walkInReservedSlots ?? 0}</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider block">
+              WALK-IN SLOTS
+            </span>
+            <span className="text-white text-sm font-bold">
+              {availability?.walkInReservedSlots ?? 0}
+            </span>
           </div>
         </div>
 
         <div className="space-y-1 pt-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">OPERATING DAYS</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            OPERATING DAYS
+          </span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             {availability?.operatingHours?.map((oh) => (
-              <div key={oh.day} className="p-2 rounded-lg bg-slate-900/60 border border-slate-800/60 flex justify-between items-center">
+              <div
+                key={oh.day}
+                className="p-2 rounded-lg bg-slate-900/60 border border-slate-800/60 flex justify-between items-center"
+              >
                 <span className="font-semibold text-slate-300">{oh.day}</span>
-                <span className={oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"}>
+                <span
+                  className={oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"}
+                >
                   {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
                 </span>
               </div>
@@ -194,12 +251,19 @@ export default function ReviewSubmit({
           {pricing.map((item) => {
             const cls = classes.find((c) => c.id === item.vehicleClassId)
             return (
-              <div key={item.vehicleClassId} className="flex justify-between items-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs">
+              <div
+                key={item.vehicleClassId}
+                className="flex justify-between items-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs"
+              >
                 <span className="font-semibold text-white">{cls?.name || "Vehicle Class"}</span>
                 {item.isActive ? (
                   <div className="flex items-center gap-4 text-slate-300">
-                    <span>Half Wash: <strong className="text-white">₹{item.halfWashPrice}</strong></span>
-                    <span>Full Wash: <strong className="text-white">₹{item.fullWashPrice}</strong></span>
+                    <span>
+                      Half Wash: <strong className="text-white">₹{item.halfWashPrice}</strong>
+                    </span>
+                    <span>
+                      Full Wash: <strong className="text-white">₹{item.fullWashPrice}</strong>
+                    </span>
                   </div>
                 ) : (
                   <span className="text-slate-500 italic">Not Offered</span>
@@ -228,10 +292,15 @@ export default function ReviewSubmit({
         </div>
 
         <div className="space-y-3">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">AMENITIES</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            AMENITIES
+          </span>
           <div className="flex flex-wrap gap-2">
             {(extraServicesData?.amenities || []).map((amenity, idx) => (
-              <span key={idx} className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+              <span
+                key={idx}
+                className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold"
+              >
                 {amenity}
               </span>
             ))}
@@ -240,19 +309,29 @@ export default function ReviewSubmit({
 
         {activeExtraServices.length > 0 && (
           <div className="space-y-2 pt-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">EXTRA SERVICES</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              EXTRA SERVICES
+            </span>
             <div className="space-y-2">
               {activeExtraServices.map((service, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs space-y-1.5">
+                <div
+                  key={idx}
+                  className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs space-y-1.5"
+                >
                   <div className="font-bold text-white">{service.name}</div>
-                  {service.description && <div className="text-slate-400 text-[11px]">{service.description}</div>}
+                  {service.description && (
+                    <div className="text-slate-400 text-[11px]">{service.description}</div>
+                  )}
                   {service.pricing && service.pricing.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {service.pricing.map((p) => {
                         const cls = classes.find((c) => c.id === p.vehicleClassId)
                         if (!cls) return null
                         return (
-                          <span key={p.vehicleClassId} className="px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 text-[10px] text-slate-300">
+                          <span
+                            key={p.vehicleClassId}
+                            className="px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 text-[10px] text-slate-300"
+                          >
                             {cls.name}: <strong className="text-white">₹{p.price}</strong>
                           </span>
                         )

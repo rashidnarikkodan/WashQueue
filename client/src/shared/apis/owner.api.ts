@@ -1,4 +1,4 @@
-import { api } from "../../../shared/config/axios"
+import { api } from "../config/axios"
 
 export interface OnboardingDetails {
   fullName?: string

@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { AlertTriangle, Info } from "lucide-react"
 import { Stepper } from "@/shared/components/stepper"
-import { ADD_STATION_STEPPER } from "../config/stepper.config"
-import { stationApi } from "../services/station.api"
+import { ADD_STATION_STEPPER } from "../../config/stepper.config"
+import { stationApi } from "@/shared/apis/station.api"
 import { getErrorMessage } from "@/shared/utils/error"
-import { STATION_STATUS } from "../types"
-import type { CreateStationInput, ExtraServiceInput, StationImage } from "../types"
+import { STATION_STATUS } from "../../types"
+import type { CreateStationInput, ExtraServiceInput, StationImage } from "../../types"
 
 // Form Step Components
 import {
@@ -16,10 +16,10 @@ import {
   PricingConfigurationForm,
   ExtraServicesForm,
   ReviewSubmit,
-} from "../components/station-forms"
+} from "../../components/station-forms"
 
-import type { StationDetailsFormData, AvailabilityFormData } from "../schemas/station.schema"
-import type { PricingItem } from "../components/station-forms/PricingConfigurationForm"
+import type { StationDetailsFormData, AvailabilityFormData } from "../../schemas/station.schema"
+import type { PricingItem } from "../../components/station-forms/PricingConfigurationForm"
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
 
@@ -176,11 +176,17 @@ export default function AddStation() {
   }, [editStationId])
 
   // Step 1: Submit Station Details
-  const handleStep1Submit = async (data: StationDetailsFormData, images: File[]) => {
+  const handleStep1Submit = async (
+    data: StationDetailsFormData,
+    images: File[],
+    remainingExistingImages: StationImage[],
+    deletedPublicIds: string[]
+  ) => {
     setIsLoading(true)
     setError(null)
     setStationDetails(data)
     setImageFiles(images)
+    setExistingImages(remainingExistingImages)
 
     const newlyProcessedImages = await Promise.all(
       images.map(async (file, idx) => {
@@ -188,12 +194,12 @@ export default function AddStation() {
         return {
           url: dataUrl,
           publicId: `img_${Date.now()}_${idx}`,
-          isPrimary: existingImages.length === 0 && idx === 0,
+          isPrimary: remainingExistingImages.length === 0 && idx === 0,
         }
       })
     )
 
-    const combinedImages = [...existingImages, ...newlyProcessedImages]
+    const combinedImages = [...remainingExistingImages, ...newlyProcessedImages]
 
     const payload: CreateStationInput = {
       name: data.name,
@@ -236,7 +242,8 @@ export default function AddStation() {
             country: data.country,
             pincode: data.pincode,
           },
-          images: combinedImages.length > 0 ? combinedImages : undefined,
+          images: combinedImages,
+          deletedImagePublicIds: deletedPublicIds.length > 0 ? deletedPublicIds : undefined,
         })
       }
       setActiveStep(2)
@@ -437,6 +444,7 @@ export default function AddStation() {
             initialValues={{
               ...stationDetails,
               images: imageFiles,
+              existingImages: existingImages,
             }}
             onSubmit={handleStep1Submit}
             onCancel={handleCancel}
@@ -475,6 +483,7 @@ export default function AddStation() {
           <ReviewSubmit
             stationDetails={stationDetails || undefined}
             imageFiles={imageFiles}
+            existingImages={existingImages}
             availability={availability || undefined}
             pricing={pricing}
             extraServicesData={extraServicesData || undefined}

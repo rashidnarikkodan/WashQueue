@@ -56,6 +56,7 @@ const step1Schema = z.object({
   location: locationSchema.optional(),
   address: addressSchema.optional(),
   images: z.array(imageSchema).optional(),
+  deletedImagePublicIds: z.array(z.string()).optional(),
   status: z.nativeEnum(StationStatus).optional(),
 })
 

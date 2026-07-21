@@ -2,14 +2,21 @@ import { useState, useEffect } from "react"
 import { Info, MapPin, Building, Image as ImageIcon, Navigation, ArrowRight, Upload, X } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import { stationDetailsSchema, type StationDetailsFormData } from "../../schemas/station.schema"
+import type { StationImage } from "../../types"
 
 export interface StationDetailsFormValues extends StationDetailsFormData {
   images?: File[]
+  existingImages?: StationImage[]
 }
 
 interface StationDetailsFormProps {
   initialValues?: Partial<StationDetailsFormValues>
-  onSubmit: (data: StationDetailsFormData, imageFiles: File[]) => void
+  onSubmit: (
+    data: StationDetailsFormData,
+    newImageFiles: File[],
+    existingImages: StationImage[],
+    deletedImagePublicIds: string[]
+  ) => void
   onCancel: () => void
   isLoading?: boolean
 }
@@ -35,6 +42,14 @@ export default function StationDetailsForm({
     longitude: initialValues?.longitude ?? 0,
   })
 
+  const [imageFiles, setImageFiles] = useState<File[]>(initialValues?.images || [])
+  const [existingImages, setExistingImages] = useState<StationImage[]>(
+    initialValues?.existingImages || []
+  )
+  const [deletedImagePublicIds, setDeletedImagePublicIds] = useState<string[]>([])
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
+
   useEffect(() => {
     if (initialValues) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -53,12 +68,14 @@ export default function StationDetailsForm({
         latitude: initialValues.latitude ?? prev.latitude,
         longitude: initialValues.longitude ?? prev.longitude,
       }))
+      if (initialValues.existingImages) {
+        setExistingImages(initialValues.existingImages)
+      }
+      if (initialValues.images) {
+        setImageFiles(initialValues.images)
+      }
     }
   }, [initialValues])
-
-  const [imageFiles, setImageFiles] = useState<File[]>(initialValues?.images || [])
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isGettingLocation, setIsGettingLocation] = useState(false)
 
   const handleChange = (field: keyof StationDetailsFormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -105,7 +122,15 @@ export default function StationDetailsForm({
     }
   }
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveExistingImage = (index: number) => {
+    const target = existingImages[index]
+    if (target && target.publicId) {
+      setDeletedImagePublicIds((prev) => [...prev, target.publicId])
+    }
+    setExistingImages((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleRemoveNewImage = (index: number) => {
     setImageFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
@@ -124,7 +149,7 @@ export default function StationDetailsForm({
       })
     }
 
-    if (imageFiles.length === 0 && (!initialValues?.name && !initialValues?.phone)) {
+    if (existingImages.length === 0 && imageFiles.length === 0) {
       errMap.images = "At least one station photo is required."
     }
 
@@ -134,7 +159,7 @@ export default function StationDetailsForm({
     }
 
     setErrors({})
-    onSubmit(validation.data!, imageFiles)
+    onSubmit(validation.data!, imageFiles, existingImages, deletedImagePublicIds)
   }
 
   return (
@@ -321,14 +346,42 @@ export default function StationDetailsForm({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Saved / Existing Images */}
+          {existingImages.map((img, idx) => (
+            <div
+              key={`existing-${idx}-${img.publicId || img.url}`}
+              className="relative rounded-2xl border border-slate-800 bg-slate-950/40 p-2 flex flex-col items-center gap-2 h-44 overflow-hidden group"
+            >
+              <img
+                src={img.url}
+                alt={`Station saved media ${idx + 1}`}
+                className="w-full h-32 object-cover rounded-xl"
+              />
+              <div className="flex items-center justify-between w-full px-1">
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">
+                  Saved Image
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveExistingImage(idx)}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/80 hover:bg-red-500 text-white transition-all cursor-pointer shadow-md z-10"
+                title="Delete image"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+
+          {/* New Selected Image Files */}
           {imageFiles.map((file, idx) => (
             <div
-              key={idx}
+              key={`new-${idx}-${file.name}`}
               className="relative rounded-2xl border border-slate-800 bg-slate-950/40 p-2 flex flex-col items-center gap-2 h-44 overflow-hidden group"
             >
               <img
                 src={URL.createObjectURL(file)}
-                alt={`Station media ${idx + 1}`}
+                alt={`Station new media ${idx + 1}`}
                 className="w-full h-32 object-cover rounded-xl"
               />
               <span className="text-xs text-slate-300 truncate max-w-[90%] font-medium">
@@ -336,8 +389,9 @@ export default function StationDetailsForm({
               </span>
               <button
                 type="button"
-                onClick={() => handleRemoveImage(idx)}
-                className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/80 hover:bg-red-500 text-white transition-all cursor-pointer"
+                onClick={() => handleRemoveNewImage(idx)}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/80 hover:bg-red-500 text-white transition-all cursor-pointer shadow-md z-10"
+                title="Delete image"
               >
                 <X size={14} />
               </button>

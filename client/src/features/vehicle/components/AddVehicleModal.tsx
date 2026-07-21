@@ -4,7 +4,7 @@ import FormInput from "@/shared/components/form/FormInput"
 import FormSelect from "@/shared/components/form/FormSelect"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
-import { vehicleCatelogApi } from "@/features/vehicle-catelog/services/vehicleCatelog.api"
+import { vehicleCatelogApi } from "@/shared/apis/vehicleCatelog.api"
 import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import type { CreateVehicleInput } from "../types"
 
@@ -80,7 +80,7 @@ export default function AddVehicleModal({
   isSubmitting = false,
 }: AddVehicleModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
-  
+
   const { categories, loadData } = useVehicleCatelogStore()
 
   // Dynamically loaded classes for the selected category

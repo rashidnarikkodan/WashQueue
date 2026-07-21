@@ -7,6 +7,7 @@ const OwnerApproval = lazy(() => import("../../features/users/pages/OwnerApprova
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
 const StationManagementAdmin = lazy(() => import("../../features/station/pages/StationManagementAdmin"))
+const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -33,8 +34,12 @@ export const adminRoutes = {
       element: <StationManagementAdmin />,
     },
     {
+      path: "stations/:id",
+      element: <StationDetailsAdmin />,
+    },
+    {
       path: "categories",
-      element: <VehicleCatelog/>,
+      element: <VehicleCatelog />,
     },
     {
       path: "bookings",
@@ -46,7 +51,7 @@ export const adminRoutes = {
     },
     {
       path: "reviews",
-      element: <>Reviews & Ratings Moderation</>,
+      element: <>Reviews &amp; Ratings Moderation</>,
     },
     {
       path: "fraud",
@@ -58,7 +63,7 @@ export const adminRoutes = {
     },
     {
       path: "reports",
-      element: <>Reports & Analytics</>,
+      element: <>Reports &amp; Analytics</>,
     },
     {
       path: "settings",

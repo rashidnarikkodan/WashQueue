@@ -3,9 +3,9 @@ import type { ChangeEvent, ReactNode } from "react"
 import { Eye, EyeOff } from "lucide-react"
 
 interface FormInputProps {
-  label: string
+  label?: string
   type: string
-  placeholder: string
+  placeholder?: string
   name?: string
   value?: string | number
   defaultValue?: string
@@ -24,7 +24,7 @@ interface FormInputProps {
 export default function FormInput({
   label,
   type,
-  placeholder,
+  placeholder = "",
   name,
   value,
   defaultValue,
@@ -81,17 +81,24 @@ export default function FormInput({
     onChange?.(e)
   }
 
+  const prefixPadding =
+    typeof prefix === "string" && prefix.length <= 3
+      ? "pl-12"
+      : "pl-24"
+
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
-      <label
-        htmlFor={id}
-        className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={id}
+          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left"
+        >
+          {label}
+        </label>
+      )}
       <div className="relative flex items-center">
         {prefix && (
-          <div className="absolute left-0 top-0 bottom-0 flex items-center px-3.5 border-r border-border/80 bg-muted/50 text-muted-foreground text-xs font-bold rounded-l-xl select-none z-10">
+          <div className="absolute left-0 top-0 bottom-0 flex items-center px-3 border-r border-border/80 bg-muted/50 text-muted-foreground text-xs font-bold rounded-l-xl select-none z-10">
             {prefix}
           </div>
         )}
@@ -113,8 +120,8 @@ export default function FormInput({
           required={required}
           disabled={disabled}
           maxLength={maxLength}
-          className={`w-full bg-muted/90 text-foreground border rounded-xl pr-11 py-3 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all duration-200 ${
-            prefix ? "pl-24" : leftIcon ? "pl-11" : "pl-4"
+          className={`w-full bg-muted/90 text-foreground border rounded-xl pr-4 py-2.5 text-sm placeholder-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all duration-200 ${
+            prefix ? prefixPadding : leftIcon ? "pl-11" : "pl-4"
           } ${
             error
               ? "border-red-500/80 focus:ring-red-500/20 focus:border-red-500"
@@ -140,3 +147,4 @@ export default function FormInput({
     </div>
   )
 }
+

@@ -166,6 +166,7 @@ export interface UpdateBasicInfoInput {
     pincode: string
   }
   images?: StationImage[]
+  deletedImagePublicIds?: string[]
   status?: StationStatus
 }
 

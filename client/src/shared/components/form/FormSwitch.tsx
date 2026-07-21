@@ -8,6 +8,7 @@ interface FormSwitchProps {
   id?: string
   name?: string
   description?: string
+  className?: string
 }
 
 export default function FormSwitch({
@@ -18,13 +19,16 @@ export default function FormSwitch({
   id,
   name,
   description,
+  className = "",
 }: FormSwitchProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.checked)
   }
 
+  const widthClass = className.includes("w-") ? "" : "w-full"
+
   return (
-    <div className="flex flex-col gap-1.5 w-full">
+    <div className={`flex flex-col gap-1.5 ${widthClass} ${className}`}>
       <div className="flex items-center gap-3 select-none">
         <label className="inline-flex items-center gap-3 cursor-pointer select-none">
           <input

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import { authApi } from "../services/auth.api"
+import { authApi } from "../../../shared/apis/auth.api"
 import type { ViewModeType } from "../../../shared/constants/role.const"
 import { VIEW_MODE } from "../../../shared/constants/role.const"
 import { getErrorMessage } from "../../../shared/utils/error"

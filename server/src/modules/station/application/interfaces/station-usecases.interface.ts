@@ -5,7 +5,7 @@ import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { GetStationsQuery } from "../dtos/get-stations.dto"
 
 export interface ICreateStationUseCase {
-  execute(userId:string, input: CreateStationInput): Promise<Station>
+  execute(userId: string, input: CreateStationInput): Promise<Station>
 }
 
 export interface IUpdateStationUseCase {
@@ -13,7 +13,7 @@ export interface IUpdateStationUseCase {
 }
 
 export interface IGetStationUseCase {
-  execute(stationId: string, ownerId: string): Promise<StationDetailResponseDto>
+  execute(stationId: string): Promise<StationDetailResponseDto>
 }
 
 export interface IGetStationsUseCase {

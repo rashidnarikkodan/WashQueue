@@ -16,6 +16,7 @@ export const APP_ROUTES = {
     USER_DETAILS: (id: string | number) => `/admin/users/${id}`,
     OWNERS: "/admin/owners",
     STATIONS: "/admin/stations",
+    STATION_DETAILS: (id: string | number) => `/admin/stations/${id}`,
     CATEGORIES: "/admin/categories",
     BOOKINGS: "/admin/bookings",
     QUEUES: "/admin/queues",

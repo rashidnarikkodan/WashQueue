@@ -10,10 +10,15 @@ import { stationUpload } from "@/infrastructure/multer/multer.middleware"
 export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
-  // Public route — list stations (for discovery/search, no auth needed)
+  // Public routes — list stations & get station by ID (unrestricted access)
   router.get(
     "/",
     asyncHandler(stationController.getStations)
+  )
+
+  router.get(
+    "/:stationId",
+    asyncHandler(stationController.getById)
   )
 
   // Admin route to approve/reject station
@@ -24,13 +29,8 @@ export const createRouter = (stationController: StationController): Router => {
     asyncHandler(stationController.review)
   )
 
-  // All routes below require authentication
+  // Authenticated routes
   router.use(authenticate)
-
-  router.get(
-    "/:stationId",
-    asyncHandler(stationController.getById)
-  )
 
   router.post(
     "/",

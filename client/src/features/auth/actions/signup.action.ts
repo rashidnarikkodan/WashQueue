@@ -1,5 +1,5 @@
-import { authApi } from "../services/auth.api"
-import { getErrorMessage } from "../../../shared/utils/error"
+import { authApi } from "@/shared/apis/auth.api"
+import { getErrorMessage } from "@/shared/utils/error"
 import type { SignupState } from "../types"
 
 export type { SignupState } from "../types"

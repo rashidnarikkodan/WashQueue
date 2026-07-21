@@ -8,7 +8,7 @@ import type {
   Station,
   StationDetail,
   UpdateStationInput,
-} from "../types"
+} from '@/features/station/types'
 
 export const stationApi = {
   /**

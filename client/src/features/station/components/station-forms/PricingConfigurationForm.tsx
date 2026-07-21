@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { ArrowRight, Car, Bike, Truck } from "lucide-react"
+import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 
@@ -205,43 +206,42 @@ export default function PricingConfigurationForm({
 
                           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                             <span className="sm:hidden text-xs text-[#8C909F] font-semibold">HALF WASH:</span>
-                            <div className="flex items-center rounded-lg border border-blue-500/50 bg-[#1E293B] px-3 py-1.5 w-32">
-                              <span className="text-xs text-[#8C909F] mr-2">₹</span>
-                              <input
+                            <div className="w-36 sm:w-32">
+                              <FormInput
                                 type="number"
-                                min={0}
+                                placeholder="150"
+                                prefix="₹"
                                 disabled={!item.isActive}
                                 value={item.halfWashPrice}
                                 onChange={(e) =>
                                   handlePriceChange(cls.id, "halfWashPrice", parseFloat(e.target.value) || 0)
                                 }
-                                className="w-full bg-transparent text-right text-sm text-[#E5E5E5] font-semibold outline-none disabled:opacity-40"
                               />
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                             <span className="sm:hidden text-xs text-[#8C909F] font-semibold">FULL WASH:</span>
-                            <div className="flex items-center rounded-lg border border-blue-500/50 bg-[#1E293B] px-3 py-1.5 w-32">
-                              <span className="text-xs text-[#8C909F] mr-2">₹</span>
-                              <input
+                            <div className="w-36 sm:w-32">
+                              <FormInput
                                 type="number"
-                                min={0}
+                                placeholder="300"
+                                prefix="₹"
                                 disabled={!item.isActive}
                                 value={item.fullWashPrice}
                                 onChange={(e) =>
                                   handlePriceChange(cls.id, "fullWashPrice", parseFloat(e.target.value) || 0)
                                 }
-                                className="w-full bg-transparent text-right text-sm text-[#E5E5E5] font-semibold outline-none disabled:opacity-40"
                               />
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto">
+                          <div className="flex items-center justify-between sm:justify-end w-full">
                             <span className="sm:hidden text-xs text-[#8C909F] font-semibold">AVAILABLE:</span>
                             <FormSwitch
                               checked={item.isActive}
                               onChange={(checked) => handleClassToggle(cls.id, checked)}
+                              className="w-auto"
                             />
                           </div>
                         </div>

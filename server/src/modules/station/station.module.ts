@@ -33,13 +33,13 @@ const updateStationUseCase = new UpdateStationUseCase(
   stationRepository,
   ownerRepository,
   stationPricingRepository,
-  extraServiceRepository
+  extraServiceRepository,
+  cloudinaryService
 )
 const getStationUseCase = new GetStationUseCase(
   stationRepository,
   stationPricingRepository,
-  extraServiceRepository,
-  ownerRepository
+  extraServiceRepository
 )
 const getStationsUseCase = new GetStationsUseCase(stationRepository)
 const submitStationUseCase = new SubmitStationUseCase(

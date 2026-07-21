@@ -7,6 +7,7 @@ export interface UpdateBasicInfoInput {
   location?: StationLocation
   address?: StationAddress
   images?: StationImage[]
+  deletedImagePublicIds?: string[]
   status?: StationStatus
 }
 

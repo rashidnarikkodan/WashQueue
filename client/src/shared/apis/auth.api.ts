@@ -5,7 +5,7 @@ import type { ApiResponse } from "@/shared/types/ApiResponse"
 
 import { asyncHandle } from "@/shared/utils/asyncHandle"
 
-import type { AuthUser } from "../types"
+import type { AuthUser } from "../../features/auth/types"
 
 const unwrap = <T>(response: ApiResponse<T>): T => {
   return response.data

@@ -10,13 +10,15 @@ import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 
 export class UpdateStationUseCase implements IUpdateStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
     private readonly ownerRepository: IOwnerRepository,
     private readonly stationPricingRepository: IStationPricingRepository,
-    private readonly extraServiceRepository: IExtraServiceRepository
+    private readonly extraServiceRepository: IExtraServiceRepository,
+    private readonly mediaStorage?: IMediaStorage
   ) {}
 
   async execute(
@@ -41,6 +43,17 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     try {
       await session.withTransaction(async () => {
         if (updates.step === 1) {
+          // Delete removed images from media storage if specified
+          if (updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0 && this.mediaStorage) {
+            for (const pubId of updates.deletedImagePublicIds) {
+              try {
+                await this.mediaStorage.delete(pubId)
+              } catch (err) {
+                console.warn(`Failed to delete media asset ${pubId}:`, err)
+              }
+            }
+          }
+
           // Update basic station info if fields are provided
           if (updates.name && updates.contact && updates.location && updates.address) {
             const props = station.getProps()

@@ -1,7 +1,7 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
-import type { Vehicle, CreateVehicleInput } from "../types"
+import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 
 export const vehicleApi = {
   getVehicles: async (): Promise<Vehicle[]> => {

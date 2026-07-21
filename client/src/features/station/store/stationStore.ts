@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import { stationApi } from "../services/station.api"
+
 import type {
   Station,
   StationDetail,
@@ -9,6 +9,7 @@ import type {
   GetStationsQuery,
 } from "../types"
 import { getErrorMessage } from "@/shared/utils/error"
+import { stationApi } from "@/shared/apis"
 
 interface StationStore {
   // State

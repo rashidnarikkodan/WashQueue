@@ -5,7 +5,7 @@ import { Toaster } from "sonner"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 import { useAuthStore } from "./features/auth/store/authStore"
 import { useEffect } from "react"
-import { authApi } from "./features/auth/services/auth.api"
+import { authApi } from "./shared/apis/auth.api"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
