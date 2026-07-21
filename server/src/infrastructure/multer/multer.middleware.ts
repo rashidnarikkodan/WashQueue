@@ -32,3 +32,5 @@ export const onboardingUpload = upload.fields([
 ])
 
 export const stationUpload = upload.array("images", 10)
+
+export const vehicleUpload = upload.single("image")

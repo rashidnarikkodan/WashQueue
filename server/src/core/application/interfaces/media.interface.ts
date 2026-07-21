@@ -4,5 +4,11 @@ export interface UploadedFile {
 }
 
 export interface IMediaStorage {
-  upload(file: Buffer, filename?: string): Promise<UploadedFile>
+  upload(fileBuffer: Buffer, filename?: string): Promise<UploadedFile>
+  update(
+    publicId: string,
+    fileBuffer: Buffer,
+    filename?: string
+  ): Promise<UploadedFile>
+  delete(publicId: string): Promise<void>
 }

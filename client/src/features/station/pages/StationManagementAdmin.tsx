@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Mail, Phone, MapPin, Eye, Clock, Layers, Star } from "lucide-react"
+import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Mail, Phone, MapPin, Eye, Layers, Star } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { useStationStore } from "../store/stationStore"
 import type { Station } from "../types"

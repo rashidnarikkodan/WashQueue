@@ -38,4 +38,7 @@ export const API_ROUTES = {
   STATIONS: {
     ROOT: "/api/stations",
   },
+  VEHICLES: {
+    ROOT: "/api/vehicles",
+  },
 } as const

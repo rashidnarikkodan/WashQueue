@@ -7,6 +7,7 @@ interface Option {
 
 interface FormSelectProps {
   label: string
+  labelRight?: ReactNode
   name?: string
   value?: string
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
@@ -15,10 +16,13 @@ interface FormSelectProps {
   error?: string
   id?: string
   leftIcon?: ReactNode
+  disabled?: boolean
+  required?: boolean
 }
 
 export default function FormSelect({
   label,
+  labelRight,
   name,
   value,
   onChange,
@@ -27,15 +31,21 @@ export default function FormSelect({
   error,
   id,
   leftIcon,
+  disabled,
+  required,
 }: FormSelectProps) {
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
-      <label
-        htmlFor={id}
-        className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left"
-      >
-        {label}
-      </label>
+      <div className="flex items-center gap-1.5">
+        <label
+          htmlFor={id}
+          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left flex items-center gap-1"
+        >
+          <span>{label}</span>
+          {required && <span className="text-red-400">*</span>}
+        </label>
+        {labelRight}
+      </div>
       <div className="relative flex items-center">
         {leftIcon && (
           <div className="absolute left-3.5 text-muted-foreground z-10 flex items-center pointer-events-none">
@@ -47,7 +57,8 @@ export default function FormSelect({
           name={name}
           value={value}
           onChange={onChange}
-          className={`w-full bg-muted border rounded-xl pr-10 py-3 text-sm text-foreground outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/85 font-semibold cursor-pointer ${
+          disabled={disabled}
+          className={`w-full bg-muted border rounded-xl pr-10 py-3 text-sm text-foreground outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/85 font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
             leftIcon ? "pl-11" : "pl-3.5"
           } ${
             error
@@ -73,5 +84,5 @@ export default function FormSelect({
         </span>
       )}
     </div>
-  )
-}
+  )}
+
