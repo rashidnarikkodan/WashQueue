@@ -9,6 +9,7 @@ import { StationController } from "./presentation/station.controller"
 import { createRouter } from "./presentation/station.routes"
 import { GetStationsUseCase } from "./application/use-cases/get-stations.usecase"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
+import { StationRequestMapper } from "./presentation/mappers/station.mapper"
 import { ReviewStationUseCase } from "./application/use-cases/review-station.usecase"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 
@@ -18,6 +19,9 @@ export const ownerRepository = new OwnerMongoRepository()
 export const stationPricingRepository = new StationPricingMongoRepository()
 export const extraServiceRepository = new ExtraServiceMongoRepository()
 const cloudinaryService = new CloudinaryService()
+
+// Instantiate request mappers
+const stationRequestMapper = new StationRequestMapper()
 
 // Instantiate use cases
 const createStationUseCase = new CreateStationUseCase(stationRepository, ownerRepository)
@@ -33,9 +37,7 @@ const getStationUseCase = new GetStationUseCase(
   extraServiceRepository,
   ownerRepository
 )
-const getStationsUseCase = new GetStationsUseCase(
-  stationRepository,
-)
+const getStationsUseCase = new GetStationsUseCase(stationRepository)
 const submitStationUseCase = new SubmitStationUseCase(
   stationRepository,
   ownerRepository,
@@ -50,8 +52,9 @@ const stationController = new StationController(
   getStationUseCase,
   getStationsUseCase,
   submitStationUseCase,
+  stationRequestMapper,
   reviewStationUseCase,
-  cloudinaryService
+  cloudinaryService,
 )
 
 // Create router
