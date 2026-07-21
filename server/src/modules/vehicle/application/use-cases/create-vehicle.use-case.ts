@@ -28,6 +28,7 @@ export class CreateVehicleUseCase implements ICreateVehicleUseCase {
       classId: dto.classId,
       isPrimary: shouldBePrimary,
       isActive: true,
+      image: dto.image,
       createdAt: new Date(),
     })
 

@@ -10,6 +10,7 @@ export interface VehicleProps {
   classId: string
   isPrimary: boolean
   isActive: boolean
+  image?: { url: string; publicId: string }
   createdAt: Date
 }
 

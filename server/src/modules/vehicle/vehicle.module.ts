@@ -7,9 +7,11 @@ import { GetVehiclesUseCase } from "./application/use-cases/get-vehicles.use-cas
 import { SetPrimaryVehicleUseCase } from "./application/use-cases/set-primary-vehicle.use-case"
 import { VehicleController } from "./presentation/vehicle.controller"
 import { createVehicleRouter } from "./presentation/vehicle.routes"
+import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 
 // Instantiate repository
 export const vehicleRepository = new VehicleMongoRepository()
+const cloudinaryService = new CloudinaryService()
 
 // Instantiate use cases
 const createVehicleUseCase = new CreateVehicleUseCase(vehicleRepository)
@@ -26,7 +28,8 @@ const vehicleController = new VehicleController(
   deleteVehicleUseCase,
   getVehicleUseCase,
   getVehiclesUseCase,
-  setPrimaryVehicleUseCase
+  setPrimaryVehicleUseCase,
+  cloudinaryService
 )
 
 // Create router

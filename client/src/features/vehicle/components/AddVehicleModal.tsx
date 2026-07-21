@@ -1,10 +1,70 @@
 import { useEffect, useRef, useState } from "react"
-import { X, Loader2, Car } from "lucide-react"
+import { X, Loader2, Car, Info, ImagePlus, Trash2 } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSelect from "@/shared/components/form/FormSelect"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import { vehicleCatelogApi } from "@/features/vehicle-catelog/services/vehicleCatelog.api"
+import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import type { CreateVehicleInput } from "../types"
+
+// ─────────────────────────────────────────────
+// Inline helper: info badge with popover tooltip
+// ─────────────────────────────────────────────
+interface InfoBadgeProps {
+  description: string
+}
+function InfoBadge({ description }: InfoBadgeProps) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative inline-flex items-center">
+      <button
+        type="button"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onClick={() => setOpen((o) => !o)}
+        className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+        aria-label="More info"
+      >
+        <Info className="w-3.5 h-3.5" />
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-52 rounded-xl bg-popover border border-border shadow-xl p-3 text-[11px] text-muted-foreground leading-relaxed">
+          {description}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-border" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// Inline helper: selected item description chip
+// ─────────────────────────────────────────────
+interface DescriptionChipProps {
+  description?: string
+}
+function DescriptionChip({ description }: DescriptionChipProps) {
+  if (!description) return null
+  return (
+    <p className="text-[11px] text-muted-foreground mt-1.5 leading-snug border-l-2 border-primary/40 pl-2">
+      {description}
+    </p>
+  )
+}
+
 
 interface AddVehicleModalProps {
   isOpen: boolean
@@ -21,7 +81,11 @@ export default function AddVehicleModal({
 }: AddVehicleModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   
-  const { categories, classes, loadData } = useVehicleCatelogStore()
+  const { categories, loadData } = useVehicleCatelogStore()
+
+  // Dynamically loaded classes for the selected category
+  const [categoryClasses, setCategoryClasses] = useState<VehicleClass[]>([])
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
 
   // Form Fields State
   const [nickname, setNickname] = useState("")
@@ -32,6 +96,11 @@ export default function AddVehicleModal({
   const [categoryId, setCategoryId] = useState("")
   const [classId, setClassId] = useState("")
   const [isPrimary, setIsPrimary] = useState(false)
+
+  // Image upload state
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
 
   // Validation Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -46,14 +115,17 @@ export default function AddVehicleModal({
     setClassId("")
     setIsPrimary(false)
     setErrors({})
+    setCategoryClasses([])
+    setImageFile(null)
+    setImagePreview(null)
   }
 
-  // Fetch catalog data when open if not already loaded
+  // Fetch categories when modal opens (if not already loaded)
   useEffect(() => {
-    if (isOpen && (categories.length === 0 || classes.length === 0)) {
+    if (isOpen && categories.length === 0) {
       loadData()
     }
-  }, [isOpen, categories.length, classes.length, loadData])
+  }, [isOpen, categories.length, loadData])
 
   // Native Dialog Sync
   useEffect(() => {
@@ -130,6 +202,7 @@ export default function AddVehicleModal({
       categoryId,
       classId,
       isPrimary,
+      imageFile: imageFile ?? undefined,
     })
 
     if (success) {
@@ -145,13 +218,11 @@ export default function AddVehicleModal({
     }
   }
 
-  const categoryOptions = categories
-    .filter((c) => c.isActive)
-    .map((c) => ({ value: c.id, label: c.name }))
+  const activeCategories = categories.filter((c) => c.isActive)
+  const activeClasses = categoryClasses.filter((cl) => cl.isActive)
 
-  const classOptions = classes
-    .filter((cl) => cl.isActive && (!categoryId || cl.categoryId === categoryId))
-    .map((cl) => ({ value: cl.id, label: cl.name }))
+  const selectedCategory: VehicleCategory | undefined = activeCategories.find((c) => c.id === categoryId)
+  const selectedClass: VehicleClass | undefined = activeClasses.find((cl) => cl.id === classId)
 
   return (
     <dialog
@@ -161,7 +232,7 @@ export default function AddVehicleModal({
         onClose()
       }}
       onClick={handleBackdropClick}
-      className="bg-card border border-border/80 shadow-2xl rounded-3xl p-0 w-full max-w-lg overflow-hidden backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
+      className="fixed inset-0 m-auto bg-card border border-border/80 shadow-2xl rounded-3xl p-0 w-full max-w-lg overflow-hidden backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
       {/* Title Header */}
       <div className="flex justify-between items-center px-6 py-5 border-b border-border/60">
@@ -180,7 +251,84 @@ export default function AddVehicleModal({
       </div>
 
       {/* Body Form */}
-      <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleFormSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
+
+        {/* Landscape Image Upload Zone */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+              Vehicle Photo <span className="text-muted-foreground/50">(Optional)</span>
+            </span>
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={() => { setImageFile(null); setImagePreview(null) }}
+                className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3 h-3" /> Remove
+              </button>
+            )}
+          </div>
+
+          {imagePreview ? (
+            /* Preview panel */
+            <div
+              className="relative w-full h-36 rounded-2xl overflow-hidden border border-border cursor-pointer group"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <img
+                src={imagePreview}
+                alt="Vehicle preview"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs font-bold tracking-wider">Change Photo</span>
+              </div>
+            </div>
+          ) : (
+            /* Drop zone */
+            <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && imageInputRef.current?.click()}
+              onClick={() => imageInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault()
+                const file = e.dataTransfer.files?.[0]
+                if (file && file.type.startsWith("image/")) {
+                  setImageFile(file)
+                  setImagePreview(URL.createObjectURL(file))
+                }
+              }}
+              className="w-full h-36 rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/30 hover:bg-muted/60 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
+            >
+              <div className="p-3 rounded-xl bg-muted text-muted-foreground group-hover:text-primary transition-colors">
+                <ImagePlus className="w-5 h-5" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-bold text-foreground">Upload a landscape photo</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Click or drag & drop · JPG, PNG · Max 10MB</p>
+              </div>
+            </div>
+          )}
+
+          {/* Hidden file input */}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                setImageFile(file)
+                setImagePreview(URL.createObjectURL(file))
+              }
+            }}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <FormInput
             label="Nickname"
@@ -236,28 +384,82 @@ export default function AddVehicleModal({
           />
         </div>
 
+        {/* Category & Class with info badges */}
         <div className="grid grid-cols-2 gap-4">
-          <FormSelect
-            label="Category"
-            placeholder="Select Category"
-            value={categoryId}
-            onChange={(e) => {
-              setCategoryId(e.target.value)
-              setClassId("")
-            }}
-            options={categoryOptions}
-            error={errors.categoryId}
-          />
+          {/* Category */}
+          <div className="flex flex-col gap-1 w-full">
+            <FormSelect
+              label="Category"
+              required
+              value={categoryId}
+              options={activeCategories.map((c) => ({ value: c.id, label: c.name }))}
+              placeholder="Select Category"
+              error={errors.categoryId}
+              labelRight={
+                selectedCategory?.description ? (
+                  <InfoBadge description={selectedCategory.description} />
+                ) : activeCategories.length > 0 ? (
+                  <InfoBadge description="Vehicle categories group similar types of vehicles. Select a category to load matching classes." />
+                ) : null
+              }
+              onChange={(e) => {
+                const newCategoryId = e.target.value
+                setCategoryId(newCategoryId)
+                setClassId("")
+                if (!newCategoryId) {
+                  setCategoryClasses([])
+                  return
+                }
+                setIsLoadingClasses(true)
+                vehicleCatelogApi
+                  .getClasses({ categoryId: newCategoryId })
+                  .then((data) => {
+                    setCategoryClasses(data ?? [])
+                  })
+                  .catch((err) => {
+                    console.error("Failed to load classes", err)
+                    setCategoryClasses([])
+                  })
+                  .finally(() => {
+                    setIsLoadingClasses(false)
+                  })
+              }}
+            />
+            <DescriptionChip description={selectedCategory?.description} />
+          </div>
 
-          <FormSelect
-            label="Class"
-            placeholder="Select Class"
-            value={classId}
-            onChange={(e) => setClassId(e.target.value)}
-            options={classOptions}
-            error={errors.classId}
-            disabled={!categoryId}
-          />
+          {/* Class */}
+          <div className="flex flex-col gap-1 w-full relative">
+            <FormSelect
+              label="Class"
+              required
+              value={classId}
+              disabled={!categoryId || isLoadingClasses}
+              options={activeClasses.map((cl) => ({ value: cl.id, label: cl.name }))}
+              placeholder={
+                isLoadingClasses
+                  ? "Loading classes…"
+                  : categoryId
+                    ? "Select Class"
+                    : "Select Category first"
+              }
+              error={errors.classId}
+              labelRight={
+                selectedClass?.description ? (
+                  <InfoBadge description={selectedClass.description} />
+                ) : categoryId && activeClasses.length > 0 ? (
+                  <InfoBadge description="Classes refine the vehicle type within the selected category. e.g. Sedan, SUV, Hatchback." />
+                ) : null
+              }
+              onChange={(e) => setClassId(e.target.value)}
+            />
+            {isLoadingClasses && (
+              <div className="absolute right-3 top-[38px] pointer-events-none z-20">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
+            <DescriptionChip description={selectedClass?.description} />
+          </div>
         </div>
 
         {/* Primary Switch */}

@@ -32,7 +32,7 @@ export class StationController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    let body = req.body
+    const body = req.body
     if (typeof body.contact === "string") body.contact = JSON.parse(body.contact)
     if (typeof body.location === "string") body.location = JSON.parse(body.location)
     if (typeof body.address === "string") body.address = JSON.parse(body.address)
@@ -101,7 +101,7 @@ export class StationController {
       throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    let body = req.body
+    const body = req.body
     if (typeof body.step === "string") body.step = parseInt(body.step, 10)
     if (body.step === 1) {
       if (typeof body.contact === "string") body.contact = JSON.parse(body.contact)

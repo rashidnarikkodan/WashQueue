@@ -4,6 +4,7 @@ import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { createVehicleSchema, updateVehicleSchema } from "./schema/vehicle.schema"
+import { vehicleUpload } from "@/infrastructure/multer/multer.middleware"
 
 export const createVehicleRouter = (vehicleController: VehicleController): Router => {
   const router = Router()
@@ -13,6 +14,7 @@ export const createVehicleRouter = (vehicleController: VehicleController): Route
 
   router.post(
     "/",
+    vehicleUpload,
     validateRequest(createVehicleSchema),
     asyncHandler(vehicleController.create)
   )

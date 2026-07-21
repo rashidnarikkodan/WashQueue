@@ -13,6 +13,7 @@ import {
   IGetVehiclesUseCase,
   ISetPrimaryVehicleUseCase,
 } from "../application/interfaces/vehicle-usecases.interface"
+import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 
 export class VehicleController {
   constructor(
@@ -21,7 +22,8 @@ export class VehicleController {
     private readonly deleteVehicleUseCase: IDeleteVehicleUseCase,
     private readonly getVehicleUseCase: IGetVehicleUseCase,
     private readonly getVehiclesUseCase: IGetVehiclesUseCase,
-    private readonly setPrimaryVehicleUseCase: ISetPrimaryVehicleUseCase
+    private readonly setPrimaryVehicleUseCase: ISetPrimaryVehicleUseCase,
+    private readonly mediaStorage: IMediaStorage
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -30,7 +32,23 @@ export class VehicleController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const result = await this.createVehicleUseCase.execute(userId, req.body)
+    const body = { ...req.body }
+
+    if (body.year !== undefined) {
+      body.year = Number(body.year)
+    }
+    if (body.isPrimary !== undefined) {
+      body.isPrimary = body.isPrimary === "true" || body.isPrimary === true
+    }
+
+    // Upload vehicle image to Cloudinary if a file was provided
+    const file = req.file as Express.Multer.File | undefined
+    if (file) {
+      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      body.image = { url: uploaded.url, publicId: uploaded.publicId || "" }
+    }
+
+    const result = await this.createVehicleUseCase.execute(userId, body)
     success(res, result, HTTP_STATUS.CREATED, "Vehicle created successfully")
   }
 

@@ -7,4 +7,5 @@ export interface CreateVehicleDto {
   categoryId: string
   classId: string
   isPrimary?: boolean
+  image?: { url: string; publicId: string }
 }

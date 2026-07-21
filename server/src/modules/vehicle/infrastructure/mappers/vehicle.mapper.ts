@@ -17,15 +17,16 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
       classId: raw.classId.toString(),
       isPrimary: raw.isPrimary,
       isActive: raw.isActive,
+      image: raw.image,
       createdAt: raw.createdAt,
     }
     return new Vehicle(props)
   }
 
   toPersistence(entity: Partial<Vehicle>): Partial<IVehicle> {
-    const isEntity = entity instanceof Vehicle || (entity && typeof (entity as any).data === "object")
-    const data = isEntity ? (entity as any).data : entity
-    const persist: any = {}
+    const isEntity = entity instanceof Vehicle
+    const data = isEntity ? (entity as Vehicle).data : (entity as Partial<VehicleProps>)
+    const persist: Partial<IVehicle> = {}
 
     if (data) {
       if (data.userId) persist.userId = new Types.ObjectId(data.userId)
@@ -38,6 +39,7 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
       if (data.classId) persist.classId = new Types.ObjectId(data.classId)
       if (data.isPrimary !== undefined) persist.isPrimary = data.isPrimary
       if (data.isActive !== undefined) persist.isActive = data.isActive
+      if (data.image !== undefined) persist.image = data.image
     }
 
     return persist

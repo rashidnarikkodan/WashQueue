@@ -11,6 +11,7 @@ export interface IVehicle extends Document {
   classId: Types.ObjectId
   isPrimary: boolean
   isActive: boolean
+  image?: { url: string; publicId: string }
   createdAt: Date
   updatedAt: Date
 }
@@ -27,6 +28,10 @@ const vehicleSchema = new Schema<IVehicle>(
     classId: { type: Schema.Types.ObjectId, ref: "VehicleClass", required: true },
     isPrimary: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    image: {
+      url: { type: String },
+      publicId: { type: String },
+    },
   },
   {
     timestamps: true,

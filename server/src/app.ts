@@ -1,5 +1,4 @@
 import express from "express"
-import path from "path"
 import cookieParser from "cookie-parser"
 import corsConfig from "./configs/cors.config"
 import loggerMiddleware from "./infrastructure/http/middleware/logger.middleware"

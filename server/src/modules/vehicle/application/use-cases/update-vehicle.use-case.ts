@@ -5,6 +5,8 @@ import { IVehicleRepository } from "../../domain/repositories/vehicle.repository
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 
+import { VehicleProps } from "../../domain/entities/Vehicle"
+
 export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
 
@@ -18,7 +20,7 @@ export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
       throw new ForbiddenError("You are not authorized to update this vehicle")
     }
 
-    const updates: any = {}
+    const updates: Partial<VehicleProps> = {}
     if (dto.nickname !== undefined) updates.nickname = dto.nickname
     if (dto.brand !== undefined) updates.brand = dto.brand
     if (dto.model !== undefined) updates.model = dto.model
