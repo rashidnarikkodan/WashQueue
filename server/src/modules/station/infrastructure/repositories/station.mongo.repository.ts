@@ -195,7 +195,7 @@ export class StationMongoRepository
     return { $sort: { [sortField]: sortDirection } }
   }
 
-  private buildPagination(page: any = 1, limit: any = 10): PipelineStage[] {
+  private buildPagination(page: number | string = 1, limit: number | string = 10): PipelineStage[] {
     const p = Math.max(1, Number(page) || 1)
     const l = Math.max(1, Number(limit) || 10)
     const skip = (p - 1) * l

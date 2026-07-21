@@ -42,4 +42,22 @@ export class MediaUploadService {
     const uploaded = await this.uploadFile(file)
     return uploaded.url
   }
+
+  /**
+   * Uploads multiple Multer files and returns their URLs and public IDs.
+   * Throws AppError if any file upload fails.
+   */
+  async uploadMultipleFiles(
+    files: Express.Multer.File[] | undefined
+  ): Promise<{ url: string; publicId: string }[]> {
+    if (!files || files.length === 0) {
+      return []
+    }
+
+    const uploads = await Promise.all(files.map((file) => this.uploadFile(file)))
+    return uploads.map((u, idx) => ({
+      url: u.url,
+      publicId: u.publicId ?? `img-${Date.now()}-${idx}`,
+    }))
+  }
 }

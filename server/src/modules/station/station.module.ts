@@ -12,16 +12,20 @@ import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.m
 import { StationRequestMapper } from "./presentation/mappers/station.mapper"
 import { ReviewStationUseCase } from "./application/use-cases/review-station.usecase"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
+import { MediaUploadService } from "@/core/application/services/media-upload.service"
+import { StationStepParserFactory } from "./presentation/parsers/station-step.parser"
 
-// Instantiate repositories
+// Instantiate repositories & services
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
 export const stationPricingRepository = new StationPricingMongoRepository()
 export const extraServiceRepository = new ExtraServiceMongoRepository()
 const cloudinaryService = new CloudinaryService()
+const mediaUploadService = new MediaUploadService(cloudinaryService)
 
-// Instantiate request mappers
-const stationRequestMapper = new StationRequestMapper()
+// Instantiate step parser factory & request mapper
+const stationStepParserFactory = new StationStepParserFactory(mediaUploadService)
+const stationRequestMapper = new StationRequestMapper(mediaUploadService, stationStepParserFactory)
 
 // Instantiate use cases
 const createStationUseCase = new CreateStationUseCase(stationRepository, ownerRepository)
@@ -52,9 +56,8 @@ const stationController = new StationController(
   getStationUseCase,
   getStationsUseCase,
   submitStationUseCase,
-  stationRequestMapper,
   reviewStationUseCase,
-  cloudinaryService,
+  stationRequestMapper
 )
 
 // Create router
