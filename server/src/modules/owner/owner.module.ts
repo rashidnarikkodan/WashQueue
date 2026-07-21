@@ -10,12 +10,18 @@ import { SubmitOnboardingUseCase } from "./application/use-cases/submit-onboardi
 import { OwnerController } from "./presentation/owner.controller"
 import { createOwnerRouter } from "./presentation/owner.routes"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
+import { MediaUploadService } from "@/core/application/services/media-upload.service"
+import { OnboardingStepRequestMapper } from "./presentation/mappers/onboarding-step.mapper"
 
-// infrastructures/repositories
+// Infrastructures & Services
 export const ownerRepository = new OwnerMongoRepository()
 const cloudinaryService = new CloudinaryService()
+const mediaUploadService = new MediaUploadService(cloudinaryService)
 
-// use cases
+// Mappers
+const onboardingStepMapper = new OnboardingStepRequestMapper(mediaUploadService)
+
+// Use cases
 const createOwnerUseCase = new CreateOwnerUseCase(ownerRepository, userRepository)
 const getOwnerUseCase = new GetOwnerUseCase(ownerRepository)
 const updateOwnerUseCase = new UpdateOwnerUseCase(ownerRepository)
@@ -31,7 +37,7 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   userRepository
 )
 
-// presentation
+// Presentation
 const ownerController = new OwnerController(
   saveOnboardingStepUseCase,
   getOnboardingStatusUseCase,
@@ -39,7 +45,7 @@ const ownerController = new OwnerController(
   createOwnerUseCase,
   getOwnerUseCase,
   updateOwnerUseCase,
-  cloudinaryService
+  onboardingStepMapper
 )
 
 const ownerRouter = createOwnerRouter(ownerController)
