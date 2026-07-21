@@ -34,13 +34,6 @@ export class VehicleController {
 
     const body = { ...req.body }
 
-    if (body.year !== undefined) {
-      body.year = Number(body.year)
-    }
-    if (body.isPrimary !== undefined) {
-      body.isPrimary = body.isPrimary === "true" || body.isPrimary === true
-    }
-
     // Upload vehicle image to Cloudinary if a file was provided
     const file = req.file as Express.Multer.File | undefined
     if (file) {
@@ -63,7 +56,14 @@ export class VehicleController {
       throw new AppError("Vehicle ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const result = await this.updateVehicleUseCase.execute(id, userId, req.body)
+    const body = { ...req.body }
+    const file = req.file as Express.Multer.File | undefined
+    if (file) {
+      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      body.image = { url: uploaded.url, publicId: uploaded.publicId || "" }
+    }
+
+    const result = await this.updateVehicleUseCase.execute(id, userId, body)
     success(res, result, HTTP_STATUS.OK, "Vehicle updated successfully")
   }
 
