@@ -5,6 +5,7 @@ import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "../store/stationStore"
 import { Plus } from "lucide-react"
 import { useAuthStore } from "@/features/auth/store/authStore"
+import { STATION_STATUS } from "../types"
 
 const StationManagement = () => {
   const navigate = useNavigate()
@@ -25,12 +26,11 @@ const StationManagement = () => {
     loadStations()
   }, [loadStations])
 
-
   return (
     <div className="space-y-6 min-h-screen">
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Owner", path: "/owner/dashboard" }, { label: "Stations" }]} />
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -40,7 +40,7 @@ const StationManagement = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/owner/stations/new')}
+          onClick={() => navigate("/owner/stations/new")}
           className="flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer"
         >
           <Plus className="w-4 h-4" />
@@ -72,20 +72,38 @@ const StationManagement = () => {
             </div>
           ) : (
             stations.map((station) => (
-              <StationCard 
+              <StationCard
                 key={station.id}
                 id={station.id}
                 name={station.name}
-                image={station.images?.find(img => img.isPrimary)?.url || station.images[0]?.url || "https://placehold.co/400x200/1a2240/60a5fa?text=No+Image"}
-                address={`${station.address.street}, ${station.address.city}`}
+                image={
+                  station.images?.find((img) => img.isPrimary)?.url ||
+                  station.images[0]?.url ||
+                  "https://placehold.co/400x200/1a2240/60a5fa?text=No+Image"
+                }
+                address={`${station.address?.street || ""}, ${station.address?.city || ""}`}
                 status={station.status}
-                rating={station.rating}
-                reviewCount={station.reviewCount}
+                rating={station.rating || 0}
+                reviewCount={station.reviewCount || 0}
                 queueCount={0}
                 baysCount={station.slotConfig?.bays || 0}
-                operatingHours={station.operatingHours?.[0] ? `${station.operatingHours[0].open} - ${station.operatingHours[0].close}` : "Not Set"}
+                operatingHours={
+                  station.operatingHours?.[0]
+                    ? `${station.operatingHours[0].open} - ${station.operatingHours[0].close}`
+                    : "Not Set"
+                }
                 services={station.amenities || []}
-                onClick={() => navigate(`/owner/stations/${station.id}`)}
+                onPrimaryAction={() => {
+                  if (
+                    station.status === STATION_STATUS.DRAFT ||
+                    station.status === STATION_STATUS.REJECTED
+                  ) {
+                    navigate(`/owner/stations/new?editStationId=${station.id}`)
+                  } else {
+                    navigate(`/owner/stations/${station.id}`)
+                  }
+                }}
+                onSecondaryAction={() => navigate(`/owner/stations/${station.id}`)}
               />
             ))
           )}

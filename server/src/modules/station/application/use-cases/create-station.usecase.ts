@@ -5,7 +5,7 @@ import { IStationRepository } from "../../domain/repositories/station.repository
 import { CreateStationInput } from "../dtos/create-station.dto"
 import { ICreateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 export class CreateStationUseCase implements ICreateStationUseCase {
@@ -22,8 +22,8 @@ export class CreateStationUseCase implements ICreateStationUseCase {
 
     const owner = await this.ownerRepository.findByUserId(userId)
 
-    if(!owner?.id){
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    if (!owner?.id) {
+      throw new ForbiddenError(ERROR_MESSAGES.OWNER_NOT_FOUND)
     }
 
     const station = new Station({

@@ -1,11 +1,13 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
+import { AlertTriangle, Info } from "lucide-react"
 import { Stepper } from "@/shared/components/stepper"
 import { ADD_STATION_STEPPER } from "../config/stepper.config"
 import { stationApi } from "../services/station.api"
 import { getErrorMessage } from "@/shared/utils/error"
-import type { CreateStationInput, ExtraServiceInput } from "../types"
+import { STATION_STATUS } from "../types"
+import type { CreateStationInput, ExtraServiceInput, StationImage } from "../types"
 
 // Form Step Components
 import {
@@ -56,12 +58,19 @@ const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<stri
 
 export default function AddStation() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const editStationId = searchParams.get("editStationId")
 
   // Orchestrator State
   const [activeStep, setActiveStep] = useState<number>(1)
-  const [stationId, setStationId] = useState<string | null>(null)
+  const [stationId, setStationId] = useState<string | null>(editStationId)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Status & Rejection Tracking
+  const [stationStatus, setStationStatus] = useState<string | null>(null)
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null)
+  const [existingImages, setExistingImages] = useState<StationImage[]>([])
 
   // Accumulated Form Data
   const [stationDetails, setStationDetails] = useState<StationDetailsFormData | null>(null)
@@ -75,6 +84,97 @@ export default function AddStation() {
     extraServices: ExtraServiceInput[]
   } | null>(null)
 
+  // Load existing station data if editing/resuming draft or rejected station
+  useEffect(() => {
+    if (!editStationId) return
+
+    const loadDraftStation = async () => {
+      setIsLoading(true)
+      try {
+        const detail = await stationApi.getStationById(editStationId)
+        const s = detail.station
+        setStationId(s.id)
+        setStationStatus(s.status)
+        setRejectionReason(s.rejectionReason || null)
+        setExistingImages(s.images || [])
+
+        setStationDetails({
+          name: s.name,
+          phone: s.contact?.phone || "",
+          email: s.contact?.email || "",
+          description: s.description || "",
+          street: s.address?.street || "",
+          city: s.address?.city || "",
+          district: "",
+          state: s.address?.state || "",
+          country: s.address?.country || "India",
+          pincode: s.address?.pincode || "",
+          latitude: s.location?.latitude || 0,
+          longitude: s.location?.longitude || 0,
+        })
+
+        if (s.operatingHours && s.operatingHours.length > 0) {
+          setAvailability({
+            operatingHours: s.operatingHours,
+            holidays: s.holidays
+              ? s.holidays.map((h) => ({ date: String(h.date), reason: h.reason }))
+              : [],
+            ...(s.slotConfig || {
+              bays: 1,
+              windowDurationMins: 30,
+              capacityPerWindow: 1,
+              walkInReservedSlots: 0,
+              maxAdvanceBookingDays: 7,
+              bufferBetweenWindowsMins: 5,
+              allowWalkIns: true,
+            }),
+          })
+        }
+
+        if (detail.pricing && detail.pricing.length > 0) {
+          setPricing(
+            detail.pricing.map((p) => ({
+              vehicleClassId: p.vehicleClassId,
+              halfWashPrice: p.halfWashPrice,
+              fullWashPrice: p.fullWashPrice,
+              isActive: p.isActive,
+            }))
+          )
+        }
+
+        if (s.amenities || detail.extraServices) {
+          setExtraServicesData({
+            amenities: s.amenities || [],
+            extraServices: (detail.extraServices || []).map((es) => ({
+              id: es.id,
+              name: es.name,
+              description: es.description || "",
+              pricing: es.pricing || [],
+              isActive: es.isActive ?? true,
+            })),
+          })
+        }
+
+        // Set active step based on progress
+        if (s.name && s.operatingHours?.length && detail.pricing?.length) {
+          setActiveStep(4)
+        } else if (s.name && s.operatingHours?.length) {
+          setActiveStep(3)
+        } else if (s.name) {
+          setActiveStep(2)
+        }
+      } catch (err) {
+        const msg = getErrorMessage(err, "Failed to load station for editing.")
+        setError(msg)
+        toast.error(msg)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadDraftStation()
+  }, [editStationId])
+
   // Step 1: Submit Station Details
   const handleStep1Submit = async (data: StationDetailsFormData, images: File[]) => {
     setIsLoading(true)
@@ -82,16 +182,18 @@ export default function AddStation() {
     setStationDetails(data)
     setImageFiles(images)
 
-    const processedImages = await Promise.all(
+    const newlyProcessedImages = await Promise.all(
       images.map(async (file, idx) => {
         const dataUrl = await compressImage(file)
         return {
           url: dataUrl,
           publicId: `img_${Date.now()}_${idx}`,
-          isPrimary: idx === 0,
+          isPrimary: existingImages.length === 0 && idx === 0,
         }
       })
     )
+
+    const combinedImages = [...existingImages, ...newlyProcessedImages]
 
     const payload: CreateStationInput = {
       name: data.name,
@@ -111,7 +213,7 @@ export default function AddStation() {
         country: data.country,
         pincode: data.pincode,
       },
-      images: processedImages,
+      images: combinedImages,
     }
 
     try {
@@ -120,7 +222,7 @@ export default function AddStation() {
         const res = await stationApi.createStation(payload)
         setStationId(res.stationId)
       } else {
-        // Editing Step 1 after creation
+        // Updating existing draft or rejected station
         await stationApi.updateStation(stationId, {
           step: 1,
           name: data.name,
@@ -134,7 +236,7 @@ export default function AddStation() {
             country: data.country,
             pincode: data.pincode,
           },
-          images: payload.images,
+          images: combinedImages.length > 0 ? combinedImages : undefined,
         })
       }
       setActiveStep(2)
@@ -194,7 +296,6 @@ export default function AddStation() {
     setError(null)
     setPricing(pricingList)
 
-    // Filter to only entries with a valid 24-character Mongo ObjectId for vehicleClassId
     const validPricing = pricingList.filter((p) => OBJECT_ID_REGEX.test(p.vehicleClassId))
 
     if (validPricing.length === 0) {
@@ -233,7 +334,6 @@ export default function AddStation() {
     setError(null)
     setExtraServicesData(data)
 
-    // Clean and filter extra services to ensure valid ObjectId for vehicleClassId in pricing
     const cleanedExtraServices = data.extraServices
       .filter((s) => s.name.trim().length >= 2 && !s.isDeleted)
       .map((s) => ({
@@ -292,7 +392,7 @@ export default function AddStation() {
         <Stepper
           steps={ADD_STATION_STEPPER}
           currentStep={activeStep}
-          heading="Add Wash Station."
+          heading={stationStatus === STATION_STATUS.REJECTED ? "Retry Station Setup" : "Add Wash Station."}
           description="Setup station details, availability, pricing and services."
           footerNote="Application will be reviewed before activation."
         />
@@ -300,6 +400,32 @@ export default function AddStation() {
 
       {/* Right Column: Main Form Card Container */}
       <div className="grow max-w-6xl bg-transparent sm:bg-card border-0 sm:border border-slate-800/80 rounded-none sm:rounded-3xl p-4 sm:p-8 md:p-10 shadow-none sm:shadow-2xl relative z-10 w-full max-h-none sm:max-h-210 overflow-y-visible sm:overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800/60 scrollbar-track-transparent">
+        {/* Rejection Notice Banner */}
+        {stationStatus === STATION_STATUS.REJECTED && (
+          <div className="mb-6 p-4 border border-red-500/30 bg-red-500/10 rounded-2xl flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-extrabold text-red-300">Station Application Rejected</h4>
+              <p className="text-xs text-red-200/90 mt-1 leading-relaxed">
+                {rejectionReason || "Your previous station application was rejected. Please review and update the required information below, then click Submit in Step 5."}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Draft Notice Banner */}
+        {stationStatus === STATION_STATUS.DRAFT && (
+          <div className="mb-6 p-4 border border-blue-500/30 bg-blue-500/10 rounded-2xl flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-extrabold text-blue-300">Resuming Saved Draft</h4>
+              <p className="text-xs text-blue-200/90 mt-1 leading-relaxed">
+                You are continuing the setup for your drafted wash station. You can edit any step below.
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-6 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl text-red-300 text-sm">
             {error}

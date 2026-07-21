@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
+import { AlertTriangle, Info, RotateCcw, ArrowRight } from "lucide-react"
 import { useStationStore } from "../store/stationStore"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
@@ -24,6 +25,7 @@ import type { UpdateStationInput } from "../types"
 
 export default function StationDetail() {
   const { stationId } = useParams<{ stationId: string }>()
+  const navigate = useNavigate()
   const {
     selectedStation,
     isLoading,
@@ -93,6 +95,54 @@ export default function StationDetail() {
           { label: station.name },
         ]}
       />
+
+      {/* Rejection Alert Banner */}
+      {station.status === STATION_STATUS.REJECTED && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-red-500/20 text-red-400 rounded-xl shrink-0">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-red-300">Station Application Rejected</h3>
+              <p className="text-sm text-red-200/90 mt-1">
+                Reason: {station.rejectionReason || "Your station submission did not meet our verification criteria."}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/owner/stations/new?editStationId=${station.id}`)}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold text-xs uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-lg shadow-red-500/20"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Edit & Retry Application</span>
+          </button>
+        </div>
+      )}
+
+      {/* Draft Incomplete Alert Banner */}
+      {station.status === STATION_STATUS.DRAFT && (
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl shrink-0">
+              <Info className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-blue-300">Station Setup Incomplete</h3>
+              <p className="text-sm text-blue-200/90 mt-1">
+                This station configuration is saved in draft mode. Complete all setup steps to submit for admin approval.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(`/owner/stations/new?editStationId=${station.id}`)}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-xs uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>Continue Setup</span>
+          </button>
+        </div>
+      )}
 
       {/* Hero Overview Header */}
       <StationHeroHeader

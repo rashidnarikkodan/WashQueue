@@ -7,7 +7,6 @@ import { createStationSchema, patchStationSchema } from "./schema/station.schema
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { stationUpload } from "@/infrastructure/multer/multer.middleware"
 
-
 export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
@@ -16,12 +15,7 @@ export const createRouter = (stationController: StationController): Router => {
     "/",
     asyncHandler(stationController.getStations)
   )
-  
-  router.get(
-    "/:stationId",
-    asyncHandler(stationController.getById)
-  )
-  
+
   // Admin route to approve/reject station
   router.patch(
     "/:stationId/review",
@@ -30,9 +24,13 @@ export const createRouter = (stationController: StationController): Router => {
     asyncHandler(stationController.review)
   )
 
-  // All routes below require authentication + owner authorization
-  router.use(authenticate, authorize("owner"))
+  // All routes below require authentication
+  router.use(authenticate)
 
+  router.get(
+    "/:stationId",
+    asyncHandler(stationController.getById)
+  )
 
   router.post(
     "/",

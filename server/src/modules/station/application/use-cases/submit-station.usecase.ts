@@ -28,8 +28,8 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       throw new ForbiddenError("You are not authorized to submit this station")
     }
 
-    if (station.status !== StationStatus.DRAFT) {
-      throw new AppError("Only draft stations can be submitted for review", HTTP_STATUS.BAD_REQUEST)
+    if (station.status !== StationStatus.DRAFT && station.status !== StationStatus.REJECTED) {
+      throw new AppError("Only draft or rejected stations can be submitted for review", HTTP_STATUS.BAD_REQUEST)
     }
 
     const props = station.getProps()

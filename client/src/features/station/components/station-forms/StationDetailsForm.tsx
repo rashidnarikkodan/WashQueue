@@ -124,7 +124,7 @@ export default function StationDetailsForm({
       })
     }
 
-    if (imageFiles.length === 0) {
+    if (imageFiles.length === 0 && (!initialValues?.name && !initialValues?.phone)) {
       errMap.images = "At least one station photo is required."
     }
 

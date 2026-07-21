@@ -150,11 +150,12 @@ export class Station {
   }
 
   submit(): void {
-    if (this.props.status !== StationStatus.DRAFT) {
-      throw new Error("Only draft stations can be submitted.");
+    if (this.props.status !== StationStatus.DRAFT && this.props.status !== StationStatus.REJECTED) {
+      throw new Error("Only draft or rejected stations can be submitted.");
     }
 
     this.props.status = StationStatus.PENDING_REVIEW;
+    this.props.rejectionReason = undefined;
     this.touch();
   }
 

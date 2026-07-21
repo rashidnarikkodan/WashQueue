@@ -15,6 +15,8 @@ export interface StationCardProps {
   operatingHours: string
   services: string[]
   onClick?: () => void
+  onPrimaryAction?: () => void
+  onSecondaryAction?: () => void
 }
 
 const STATUS_CONFIG: Record<
@@ -69,11 +71,40 @@ const StationCard: React.FC<StationCardProps> = ({
   queueCount,
   baysCount,
   onClick,
+  onPrimaryAction,
+  onSecondaryAction,
 }) => {
   const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG["DRAFT"]
   const [imgError, setImgError] = useState(false)
 
   const hasValidImage = image && !image.includes("placehold") && image !== "No Image" && !imgError
+
+  const getActionButtonConfig = () => {
+    switch (status) {
+      case STATION_STATUS.REJECTED:
+        return {
+          label: "Edit & Retry Application",
+          className: "bg-red-500 hover:bg-red-400 text-white font-bold shadow-red-500/20",
+        }
+      case STATION_STATUS.DRAFT:
+        return {
+          label: "Continue Setup",
+          className: "bg-blue-500 hover:bg-blue-400 text-white font-bold shadow-blue-500/20",
+        }
+      case STATION_STATUS.PENDING_REVIEW:
+        return {
+          label: "Pending Admin Review",
+          className: "bg-amber-500/80 hover:bg-amber-500 text-slate-950 font-bold",
+        }
+      default:
+        return {
+          label: "Manage Station",
+          className: "bg-[#60A5FA] hover:bg-blue-400 text-[#002E6A] font-bold",
+        }
+    }
+  }
+
+  const actionBtn = getActionButtonConfig()
 
   return (
     <div className="flex flex-col rounded-3xl bg-[#191F31] shadow-2xl overflow-hidden relative w-full max-w-99 mx-auto sm:mx-0">
@@ -148,13 +179,16 @@ const StationCard: React.FC<StationCardProps> = ({
         {/* Actions */}
         <div className="flex flex-col gap-3 mt-auto">
           <button
-            onClick={onClick}
-            className="w-full py-3 bg-[#60A5FA] rounded-xl text-[#002E6A] text-sm font-bold text-center hover:bg-blue-400 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md cursor-pointer select-none"
+            onClick={onPrimaryAction || onClick}
+            className={`w-full py-3 rounded-xl text-sm text-center hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md cursor-pointer select-none ${actionBtn.className}`}
           >
-            Manage Station
+            {actionBtn.label}
           </button>
-          <button className="w-full py-3 bg-[#60A5FA]/30 rounded-xl text-[#AEB9D0] text-sm font-bold text-center hover:bg-[#60A5FA]/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer select-none">
-            View Orders
+          <button
+            onClick={onSecondaryAction || onClick}
+            className="w-full py-3 bg-[#60A5FA]/10 hover:bg-[#60A5FA]/20 rounded-xl text-[#AEB9D0] text-sm font-bold text-center hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer select-none"
+          >
+            View Details
           </button>
         </div>
       </div>
