@@ -6,7 +6,7 @@ interface Option {
 }
 
 interface FormSelectProps {
-  label: string
+  label?: string
   labelRight?: ReactNode
   name?: string
   value?: string
@@ -36,16 +36,20 @@ export default function FormSelect({
 }: FormSelectProps) {
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
-      <div className="flex items-center gap-1.5">
-        <label
-          htmlFor={id}
-          className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left flex items-center gap-1"
-        >
-          <span>{label}</span>
-          {required && <span className="text-red-400">*</span>}
-        </label>
-        {labelRight}
-      </div>
+      {(label || labelRight) && (
+        <div className="flex items-center gap-1.5">
+          {label && (
+            <label
+              htmlFor={id}
+              className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left flex items-center gap-1"
+            >
+              <span>{label}</span>
+              {required && <span className="text-red-400">*</span>}
+            </label>
+          )}
+          {labelRight}
+        </div>
+      )}
       <div className="relative flex items-center">
         {leftIcon && (
           <div className="absolute left-3.5 text-muted-foreground z-10 flex items-center pointer-events-none">

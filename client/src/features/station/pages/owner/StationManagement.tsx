@@ -98,7 +98,7 @@ const StationManagement = () => {
                     station.status === STATION_STATUS.DRAFT ||
                     station.status === STATION_STATUS.REJECTED
                   ) {
-                    navigate(`/owner/stations/new?editStationId=${station.id}`)
+                    navigate(`/owner/stations/${station.id}/edit`)
                   } else {
                     navigate(`/owner/stations/${station.id}`)
                   }

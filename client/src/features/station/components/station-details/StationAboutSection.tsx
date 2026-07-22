@@ -15,9 +15,8 @@ export function StationAboutSection({ stationName, description }: StationAboutSe
         <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
           About {stationName}
         </h2>
-        <p className="text-base text-slate-400 leading-relaxed max-w-3xl">
-          {description ||
-            `${stationName} provides top-tier vehicle cleaning precision using eco-friendly polymer technology. Our specialized technicians focus on high-end performance vehicles, ensuring every surface is treated with utmost care.`}
+        <p className="text-sm text-slate-400 leading-relaxed max-w-5xl break-words">
+          {description || "No description provided for this station."}
         </p>
       </div>
 

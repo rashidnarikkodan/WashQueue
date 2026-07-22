@@ -5,7 +5,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
 import { useStationStore } from "../store/stationStore"
 import { useAuthStore } from "@/features/auth/store/authStore"
-import { ROLE } from "@/shared/constants/role.const"
+import { ROLE, type RoleType } from "@/shared/constants/role.const"
 import { STATION_STATUS } from "../types"
 import { StationHeroGallery } from "../components/station-details/StationHeroGallery"
 import { StationAboutSection } from "../components/station-details/StationAboutSection"
@@ -20,10 +20,10 @@ import { StationSidebarCard } from "../components/station-details/StationSidebar
 // Modular Details Components
 
 interface CommonStationDetailProps {
-  role?: "user" | "admin" | "owner"
+  role?: RoleType
 }
 
-export function StationDetails({ role: propRole }: CommonStationDetailProps) {
+export function StationDetails({ role }: CommonStationDetailProps) {
   const params = useParams<{ id?: string; stationId?: string }>()
   const id = params.id || params.stationId
   const navigate = useNavigate()
@@ -33,10 +33,10 @@ export function StationDetails({ role: propRole }: CommonStationDetailProps) {
   const user = useAuthStore((state) => state.user)
 
   // Resolve role from props or auth store
-  let currentRole: "user" | "admin" | "owner" = propRole || "user"
-  if (!propRole && user) {
-    if (user.role === ROLE.ADMIN) currentRole = "admin"
-    else if (user.role === ROLE.OWNER) currentRole = "owner"
+  let currentRole = role
+  if (!role && user) {
+    if (user.role === ROLE.ADMIN) currentRole = ROLE.ADMIN
+    else if (user.role === ROLE.OWNER) currentRole = ROLE.OWNER
   }
 
   const [rejecting, setRejecting] = useState(false)
@@ -94,11 +94,11 @@ export function StationDetails({ role: propRole }: CommonStationDetailProps) {
   }
 
   const backPath =
-    currentRole === "admin"
+    currentRole === ROLE.ADMIN
       ? "/admin/stations"
-      : currentRole === "owner"
-      ? "/owner/stations"
-      : "/"
+      : currentRole === ROLE.OWNER
+        ? "/owner/stations"
+        : "/stations"
 
   return (
     <div className="space-y-8 text-left pb-32 animate-in fade-in duration-300">
@@ -142,9 +142,12 @@ export function StationDetails({ role: propRole }: CommonStationDetailProps) {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0" />
             <div>
-              <h3 className="text-base font-extrabold text-amber-300">Station Verification Pending</h3>
+              <h3 className="text-base font-extrabold text-amber-300">
+                Station Verification Pending
+              </h3>
               <p className="text-xs text-amber-200/90 mt-0.5">
-                Review operating hours, slot configs, pricing models, and amenities below before taking action.
+                Review operating hours, slot configs, pricing models, and amenities below before
+                taking action.
               </p>
             </div>
           </div>
@@ -171,7 +174,6 @@ export function StationDetails({ role: propRole }: CommonStationDetailProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column (70%) */}
         <div className="lg:col-span-8 space-y-12">
-          {/* Section 1: Hero Image Showcase */}
           <StationHeroGallery images={station.images} stationName={station.name} />
 
           <StationAboutSection stationName={station.name} description={station.description} />
@@ -180,17 +182,21 @@ export function StationDetails({ role: propRole }: CommonStationDetailProps) {
 
           <StationExtraServicesSection extraServices={extraServices} />
 
-          <StationLiveQueueSection />
+          {currentRole !== ROLE.ADMIN && <StationLiveQueueSection />}
 
-          <StationReviewsSection rating={station.rating} reviewCount={station.reviewCount} />
-
-          <StationQASection stationName={station.name} />
-
-          <StationLocationSection address={station.address} location={station.location} />
+          {currentRole === ROLE.CUSTOMER && (
+            <>
+              <StationReviewsSection rating={station.rating} reviewCount={station.reviewCount} />
+              <StationQASection stationName={station.name} />
+            </>
+          )}
+          {currentRole !== ROLE.ADMIN && (
+            <StationLocationSection address={station.address} location={station.location} />
+          )}
         </div>
 
         {/* Right Column (30%) - Sticky Sidebar */}
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 lg:sticky lg:top-24">
           <StationSidebarCard
             station={station}
             role={currentRole}

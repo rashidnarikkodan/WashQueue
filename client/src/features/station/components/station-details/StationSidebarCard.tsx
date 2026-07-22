@@ -2,10 +2,11 @@ import { Star, Zap, CheckCircle2, XCircle, Edit, Layers } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
+import { ROLE, type RoleType } from "@/shared/constants/role.const"
 
 interface StationSidebarCardProps {
   station: Station
-  role?: "user" | "admin" | "owner"
+  role?: RoleType
   onApprove?: () => void
   onReject?: () => void
   isSubmittingAction?: boolean
@@ -13,7 +14,7 @@ interface StationSidebarCardProps {
 
 export function StationSidebarCard({
   station,
-  role = "user",
+  role = "customer",
   onApprove,
   onReject,
   isSubmittingAction = false,
@@ -23,7 +24,7 @@ export function StationSidebarCard({
   const isPending = station.status === STATION_STATUS.PENDING_REVIEW
 
   return (
-    <div className="space-y-6 sticky top-8">
+    <div className="space-y-6 lg:sticky lg:top-24">
       {/* Main Station Summary Card */}
       <div className="p-8 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl space-y-6">
         {/* Title & Status */}
@@ -36,12 +37,14 @@ export function StationSidebarCard({
             <div className="flex items-center gap-3 text-xs font-bold">
               <div className="flex items-center gap-1 text-emerald-400">
                 <Star size={14} className="fill-emerald-400 text-emerald-400" />
-                <span className="font-extrabold text-sm">{station.rating || "4.5"}</span>
+                <span className="font-extrabold text-sm">{station.rating ? station.rating.toFixed(1) : "New"}</span>
               </div>
               <span className="text-slate-600">•</span>
               <div className="flex items-center gap-1.5 text-emerald-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="uppercase tracking-widest text-[10px] font-black">Open Now</span>
+                <span className="uppercase tracking-widest text-[10px] font-black">
+                  {station.isActive ? "Active" : "Inactive"}
+                </span>
               </div>
             </div>
           </div>
@@ -50,19 +53,23 @@ export function StationSidebarCard({
         {/* Metrics List */}
         <div className="space-y-3 pt-2">
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Average Wait</span>
-            <span className="text-lg font-black text-blue-400">12 Minutes</span>
+            <span className="text-sm font-semibold text-slate-400">Slot Window</span>
+            <span className="text-lg font-black text-blue-400">
+              {station.slotConfig?.windowDurationMins ? `${station.slotConfig.windowDurationMins} Mins` : "N/A"}
+            </span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Queue Depth</span>
-            <span className="text-lg font-black text-slate-100">6 Vehicles</span>
-          </div>
-
-          <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Service Slots</span>
+            <span className="text-sm font-semibold text-slate-400">Window Capacity</span>
             <span className="text-lg font-black text-slate-100">
-              {station.slotConfig?.bays || 2} Active
+              {station.slotConfig?.capacityPerWindow ? `${station.slotConfig.capacityPerWindow} Slots` : "N/A"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
+            <span className="text-sm font-semibold text-slate-400">Service Bays</span>
+            <span className="text-lg font-black text-slate-100">
+              {station.slotConfig?.bays ? `${station.slotConfig.bays} Bays` : "N/A"}
             </span>
           </div>
         </div>
@@ -70,7 +77,7 @@ export function StationSidebarCard({
         {/* ROLE-BASED ACTION CTA BUTTONS */}
         <div className="pt-2">
           {/* USER / CUSTOMER ROLE */}
-          {role === "user" && (
+          {role === ROLE.CUSTOMER && (
             <button
               onClick={() => navigate(`/bookings/new?stationId=${station.id}`)}
               className="w-full py-4 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-base uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2"
@@ -114,7 +121,7 @@ export function StationSidebarCard({
           {role === "owner" && (
             <div className="space-y-3">
               <button
-                onClick={() => navigate(`/owner/stations/new?editStationId=${station.id}`)}
+                onClick={() => navigate(`/owner/stations/${station.id}/edit`)}
                 className="w-full py-3.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
               >
                 <Edit size={16} />
@@ -137,21 +144,20 @@ export function StationSidebarCard({
             Hours of Operation
           </span>
 
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-400 font-semibold">Monday - Friday</span>
-              <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                06:00 AM - 11:00 PM
-              </span>
+          {station.operatingHours && station.operatingHours.length > 0 ? (
+            <div className="space-y-2 text-xs">
+              {station.operatingHours.map((oh) => (
+                <div key={oh.day} className="flex justify-between items-center">
+                  <span className="text-slate-400 font-semibold capitalize">{oh.day}</span>
+                  <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+                    {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
+                  </span>
+                </div>
+              ))}
             </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-slate-400 font-semibold">Saturday - Sunday</span>
-              <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                08:00 AM - 10:00 PM
-              </span>
-            </div>
-          </div>
+          ) : (
+            <p className="text-xs text-slate-500 italic">Not configured</p>
+          )}
         </div>
       </div>
 

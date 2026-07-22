@@ -1,108 +1,164 @@
-import { useState } from "react"
-import { ChevronDown, Car, Bike } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Car, Bike, Truck, Sparkles } from "lucide-react"
 import type { StationPricing } from "../../types"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import FormSelect from "@/shared/components/form/FormSelect"
 
 interface StationPricingSectionProps {
   pricing?: StationPricing[]
 }
 
 export function StationPricingSection({ pricing = [] }: StationPricingSectionProps) {
-  const [selectedCategory, setSelectedCategory] = useState("Car")
+  const { categories, classes, loadData } = useVehicleCatelogStore()
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all")
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const categoryOptions = [
+    { value: "all", label: "All Categories" },
+    ...categories.map((cat) => ({
+      value: cat.id,
+      label: cat.name,
+    })),
+  ]
+
+  const getCategoryIcon = (name: string) => {
+    const lower = name.toLowerCase()
+    if (lower.includes("two") || lower.includes("bike") || lower.includes("motorcycle"))
+      return <Bike size={18} className="text-blue-400" />
+    if (lower.includes("lorry") || lower.includes("truck") || lower.includes("bus"))
+      return <Truck size={18} className="text-blue-400" />
+    return <Car size={18} className="text-blue-400" />
+  }
+
+  const filteredCategories =
+    selectedCategoryId === "all"
+      ? categories
+      : categories.filter((cat) => cat.id === selectedCategoryId)
 
   return (
     <div className="space-y-6">
       {/* Header & Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-          Select Category &amp; Class
-        </h2>
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight">
+            Wash Services &amp; Pricing
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Standard half wash and full wash pricing for all supported vehicle classes.
+          </p>
+        </div>
 
-        {/* Category Dropdown Pill */}
-        <div className="relative inline-block">
-          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-300">
-            {selectedCategory === "Car" ? <Car size={16} className="text-blue-400" /> : <Bike size={16} className="text-blue-400" />}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-transparent border-none text-slate-200 focus:outline-none cursor-pointer font-bold pr-4 appearance-none"
-            >
-              <option value="Car" className="bg-slate-900 text-white">Car Catalog</option>
-              <option value="Bike" className="bg-slate-900 text-white">Bike Catalog</option>
-              <option value="Commercial" className="bg-slate-900 text-white">Commercial Vehicles</option>
-            </select>
-            <ChevronDown size={14} className="text-slate-400 pointer-events-none -ml-4" />
-          </div>
+        {/* Category Dropdown Pill using FormSelect */}
+        <div className="w-full sm:w-64">
+          <FormSelect
+            label=""
+            value={selectedCategoryId}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
+            options={categoryOptions}
+            leftIcon={<Sparkles size={16} className="text-[#ADC6FF]" />}
+          />
         </div>
       </div>
 
-      {/* Pricing Table Card */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-xl">
-        <div className="grid grid-cols-12 px-6 py-4 border-b border-slate-800 bg-slate-950/40 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-          <div className="col-span-6">Type / Vehicle Class</div>
-          <div className="col-span-3 text-right">Half Wash</div>
-          <div className="col-span-3 text-right">Full Wash</div>
-        </div>
+      {/* Pricing Cards Grouped by Category */}
+      <div className="space-y-6">
+        {filteredCategories.length > 0 ? (
+          filteredCategories.map((category) => {
+            const catClasses = classes.filter((c) => c.categoryId === category.id)
+            if (catClasses.length === 0) return null
 
-        <div className="divide-y divide-slate-800/60">
-          {pricing && pricing.length > 0 ? (
-            pricing.map((p, idx) => (
+            return (
               <div
-                key={idx}
-                className="grid grid-cols-12 px-6 py-5 items-center hover:bg-blue-500/[0.02] transition-colors"
+                key={category.id}
+                className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-xl"
               >
-                <div className="col-span-6 space-y-1">
-                  <h4 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                    {p.vehicleClassId}
-                  </h4>
-                  <p className="text-xs text-slate-400">
-                    High-pressure foam wash + Blow dry + Interior vacuum
-                  </p>
+                {/* Category Header Banner */}
+                <div className="px-6 py-3.5 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {getCategoryIcon(category.name)}
+                    <span className="text-sm font-extrabold text-white uppercase tracking-wider">
+                      {category.name}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800/60 px-2.5 py-1 rounded-full border border-slate-700/50">
+                    {catClasses.length} {catClasses.length === 1 ? "Class" : "Classes"}
+                  </span>
                 </div>
 
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">
-                  ₹{p.halfWashPrice}
+                {/* Table Column Headers */}
+                <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-800/80 bg-slate-950/20 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+                  <div className="col-span-6">Vehicle Class</div>
+                  <div className="col-span-3 text-right">Half Wash</div>
+                  <div className="col-span-3 text-right">Full Wash</div>
                 </div>
 
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">
-                  ₹{p.fullWashPrice}
-                </div>
-              </div>
-            ))
-          ) : (
-            // Default Demo Rows matching Figma spec if no API pricing configured
-            <>
-              <div className="grid grid-cols-12 px-6 py-5 items-center hover:bg-blue-500/[0.02] transition-colors">
-                <div className="col-span-6 space-y-1">
-                  <h4 className="text-base font-bold text-slate-100">Hatchback</h4>
-                  <p className="text-xs text-slate-400">High-pressure wash + Blow dry + Tire shine</p>
-                </div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹400.00</div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹500.00</div>
-              </div>
+                {/* Rows */}
+                <div className="divide-y divide-slate-800/60">
+                  {catClasses.map((cls) => {
+                    const priceItem = pricing.find((p) => p.vehicleClassId === cls.id)
+                    const isConfigured = !!priceItem
+                    const isActive = priceItem ? priceItem.isActive : false
 
-              <div className="grid grid-cols-12 px-6 py-5 items-center hover:bg-blue-500/[0.02] transition-colors">
-                <div className="col-span-6 space-y-1">
-                  <h4 className="text-base font-bold text-slate-100">Sedan</h4>
-                  <p className="text-xs text-slate-400">Deep vacuum + Leather conditioning + Steam sanitize</p>
-                </div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹450.00</div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹600.00</div>
-              </div>
+                    return (
+                      <div
+                        key={cls.id}
+                        className={`grid grid-cols-12 px-6 py-4.5 items-center transition-colors ${
+                          isConfigured && isActive ? "hover:bg-blue-500/[0.02]" : "opacity-50 bg-slate-950/40"
+                        }`}
+                      >
+                        <div className="col-span-6 space-y-1">
+                          <h4 className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2">
+                            <span>{cls.name}</span>
+                            {(!isConfigured || !isActive) && (
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-800 px-2 py-0.5 rounded">
+                                {!isConfigured ? "Not Configured" : "Not Offered"}
+                              </span>
+                            )}
+                          </h4>
+                          {cls.description && (
+                            <p className="text-xs text-slate-400 line-clamp-1">
+                              {cls.description}
+                            </p>
+                          )}
+                        </div>
 
-              <div className="grid grid-cols-12 px-6 py-5 items-center bg-blue-500/[0.05] hover:bg-blue-500/[0.08] transition-colors">
-                <div className="col-span-6 space-y-1">
-                  <h4 className="text-base font-bold text-white flex items-center gap-2">
-                    SUV <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md border border-blue-500/30">Popular</span>
-                  </h4>
-                  <p className="text-xs text-slate-400">Ceramic coating + Clay bar + Paint correction</p>
+                        <div className="col-span-3 text-right">
+                          {isConfigured && isActive ? (
+                            <span className="font-black text-lg sm:text-xl text-blue-400">
+                              ₹{priceItem.halfWashPrice}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-500 italic">—</span>
+                          )}
+                        </div>
+
+                        <div className="col-span-3 text-right">
+                          {isConfigured && isActive ? (
+                            <span className="font-black text-lg sm:text-xl text-blue-400">
+                              ₹{priceItem.fullWashPrice}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-500 italic">—</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹600.00</div>
-                <div className="col-span-3 text-right font-black text-xl text-blue-400">₹800.00</div>
               </div>
-            </>
-          )}
-        </div>
+            )
+          })
+        ) : (
+          /* Fallback when categories are loading or empty */
+          <div className="p-8 text-center text-slate-400 text-sm border border-slate-800 rounded-2xl bg-slate-900/60">
+            No vehicle pricing categories available.
+          </div>
+        )}
       </div>
     </div>
   )
 }
+

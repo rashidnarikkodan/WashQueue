@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom"
 const MainLayout = lazy(() => import("../layouts/MainLayout"))
 const Landing = lazy(() => import("../../features/home/pages/Landing"))
 const Home = lazy(() => import("../../features/home/pages/Home"))
-const StationDetailUser = lazy(() => import("../../features/station/pages/user/StationDetailUser"))
+const StationDetails = lazy(() => import("../../features/station/pages/StationDetails"))
 import { useAuthStore } from "../../features/auth/store/authStore"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
@@ -53,7 +53,7 @@ export const mainRoutes = {
     },
     {
       path: "stations/:id",
-      element: <StationDetailUser />,
+      element: <StationDetails />,
     },
     {
       path: "about",

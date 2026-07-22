@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { AlertTriangle, Info } from "lucide-react"
 import { Stepper } from "@/shared/components/stepper"
@@ -56,14 +56,16 @@ const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<stri
   })
 }
 
-export default function AddStation() {
+export default function AddEditStation() {
   const navigate = useNavigate()
+  const params = useParams<{ stationId?: string }>()
   const [searchParams] = useSearchParams()
-  const editStationId = searchParams.get("editStationId")
+  const targetStationId = params.stationId || searchParams.get("editStationId") || null
+  const isEditMode = Boolean(targetStationId)
 
   // Orchestrator State
   const [activeStep, setActiveStep] = useState<number>(1)
-  const [stationId, setStationId] = useState<string | null>(editStationId)
+  const [stationId, setStationId] = useState<string | null>(targetStationId)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -86,12 +88,12 @@ export default function AddStation() {
 
   // Load existing station data if editing/resuming draft or rejected station
   useEffect(() => {
-    if (!editStationId) return
+    if (!targetStationId) return
 
-    const loadDraftStation = async () => {
+    const loadStationData = async () => {
       setIsLoading(true)
       try {
-        const detail = await stationApi.getStationById(editStationId)
+        const detail = await stationApi.getStationById(targetStationId)
         const s = detail.station
         setStationId(s.id)
         setStationStatus(s.status)
@@ -172,8 +174,8 @@ export default function AddStation() {
       }
     }
 
-    loadDraftStation()
-  }, [editStationId])
+    loadStationData()
+  }, [targetStationId])
 
   // Step 1: Submit Station Details
   const handleStep1Submit = async (
@@ -228,7 +230,7 @@ export default function AddStation() {
         const res = await stationApi.createStation(payload)
         setStationId(res.stationId)
       } else {
-        // Updating existing draft or rejected station
+        // Updating existing draft or active station
         await stationApi.updateStation(stationId, {
           step: 1,
           name: data.name,
@@ -376,11 +378,20 @@ export default function AddStation() {
     setError(null)
 
     try {
-      await stationApi.submitStation(stationId)
-      toast.success("Station submitted for review successfully!")
+      if (stationStatus === STATION_STATUS.DRAFT || stationStatus === STATION_STATUS.REJECTED) {
+        await stationApi.submitStation(stationId)
+        toast.success("Station submitted for review successfully!")
+      } else {
+        // When editing an active or pending station, submit updates & trigger pending admin review
+        await stationApi.updateStation(stationId, {
+          step: 1,
+          status: STATION_STATUS.PENDING_REVIEW,
+        })
+        toast.success("Station updates submitted! Station is now pending admin review.")
+      }
       navigate("/owner/stations")
     } catch (err) {
-      const msg = getErrorMessage(err, "Failed to submit station for review.")
+      const msg = getErrorMessage(err, "Failed to submit station updates.")
       setError(msg)
       toast.error(msg)
     } finally {
@@ -392,6 +403,20 @@ export default function AddStation() {
     navigate("/owner/stations")
   }
 
+  const stepperHeading =
+    stationStatus === STATION_STATUS.REJECTED
+      ? "Retry Station Setup"
+      : isEditMode
+      ? "Edit Wash Station"
+      : "Add Wash Station"
+
+  const stepperDescription =
+    stationStatus === STATION_STATUS.REJECTED
+      ? "Review & update required details to resubmit your station."
+      : isEditMode
+      ? "Update station details, operating hours, pricing, and services."
+      : "Setup station details, availability, pricing and services."
+
   return (
     <div className="w-full max-w-[1650px] mx-auto flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-16 px-4 py-8 sm:px-8">
       {/* Left Column: Form Step Tracking */}
@@ -399,9 +424,9 @@ export default function AddStation() {
         <Stepper
           steps={ADD_STATION_STEPPER}
           currentStep={activeStep}
-          heading={stationStatus === STATION_STATUS.REJECTED ? "Retry Station Setup" : "Add Wash Station."}
-          description="Setup station details, availability, pricing and services."
-          footerNote="Application will be reviewed before activation."
+          heading={stepperHeading}
+          description={stepperDescription}
+          footerNote={isEditMode ? "Station updates will be sent for review." : "Application will be reviewed before activation."}
         />
       </div>
 
@@ -433,6 +458,19 @@ export default function AddStation() {
           </div>
         )}
 
+        {/* Active Station Edit Banner */}
+        {isEditMode && stationStatus === STATION_STATUS.ACTIVE && (
+          <div className="mb-6 p-4 border border-emerald-500/30 bg-emerald-500/10 rounded-2xl flex items-start gap-3">
+            <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-extrabold text-emerald-300">Editing Active Station</h4>
+              <p className="text-xs text-emerald-200/90 mt-1 leading-relaxed">
+                Updating your station will save your changes and resubmit your station for admin review.
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-6 p-4 border border-red-500/20 bg-red-500/10 rounded-2xl text-red-300 text-sm">
             {error}
@@ -457,6 +495,7 @@ export default function AddStation() {
             initialValues={availability || undefined}
             onSubmit={handleStep2Submit}
             onBack={() => setActiveStep(1)}
+            onCancel={handleCancel}
             isLoading={isLoading}
           />
         )}
@@ -466,6 +505,7 @@ export default function AddStation() {
             initialValues={pricing}
             onSubmit={handleStep3Submit}
             onBack={() => setActiveStep(2)}
+            onCancel={handleCancel}
             isLoading={isLoading}
           />
         )}
@@ -475,6 +515,7 @@ export default function AddStation() {
             initialValues={extraServicesData || undefined}
             onSubmit={handleStep4Submit}
             onBack={() => setActiveStep(3)}
+            onCancel={handleCancel}
             isLoading={isLoading}
           />
         )}
@@ -487,8 +528,10 @@ export default function AddStation() {
             availability={availability || undefined}
             pricing={pricing}
             extraServicesData={extraServicesData || undefined}
+            isEditMode={isEditMode}
             onEditStep={(stepNum) => setActiveStep(stepNum)}
             onBack={() => setActiveStep(4)}
+            onCancel={handleCancel}
             onSubmit={handleFinalSubmit}
             isLoading={isLoading}
             error={error}

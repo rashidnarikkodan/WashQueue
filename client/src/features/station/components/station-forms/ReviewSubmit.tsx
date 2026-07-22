@@ -14,8 +14,10 @@ interface ReviewSubmitProps {
     amenities?: string[]
     extraServices?: ExtraServiceInput[]
   }
+  isEditMode?: boolean
   onEditStep: (step: number) => void
   onBack: () => void
+  onCancel?: () => void
   onSubmit: () => void
   isLoading?: boolean
   error?: string | null
@@ -28,8 +30,10 @@ export default function ReviewSubmit({
   availability,
   pricing = [],
   extraServicesData,
+  isEditMode = false,
   onEditStep,
   onBack,
+  onCancel,
   onSubmit,
   isLoading = false,
   error,
@@ -47,10 +51,12 @@ export default function ReviewSubmit({
           STEP 5 OF 5
         </span>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-[#DCE1FB] tracking-tight">
-          Review & Submit
+          {isEditMode ? "Review & Save Updates" : "Review & Submit"}
         </h1>
         <p className="text-sm sm:text-base text-[#C2C6D6] opacity-80 font-normal">
-          Review all information before submitting your station for approval.
+          {isEditMode
+            ? "Review all information before saving updates to your station."
+            : "Review all information before submitting your station for approval."}
         </p>
       </div>
 
@@ -347,13 +353,24 @@ export default function ReviewSubmit({
 
       {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-6 py-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/50 text-sm font-bold transition-all cursor-pointer"
-        >
-          Back
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-6 py-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/50 text-sm font-bold transition-all cursor-pointer"
+          >
+            Back
+          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 text-sm font-bold transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
         <button
           type="button"
           onClick={onSubmit}
@@ -361,7 +378,15 @@ export default function ReviewSubmit({
           className="flex items-center gap-2 bg-[#ADC6FF] text-[#002E6A] hover:bg-blue-300 disabled:opacity-50 text-sm font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <CheckCircle2 size={16} />
-          <span>{isLoading ? "Submitting..." : "Submit Station"}</span>
+          <span>
+            {isLoading
+              ? isEditMode
+                ? "Saving Changes..."
+                : "Submitting..."
+              : isEditMode
+              ? "Save Station Updates"
+              : "Submit Station"}
+          </span>
         </button>
       </div>
     </div>

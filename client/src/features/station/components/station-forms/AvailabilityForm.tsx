@@ -9,6 +9,7 @@ interface AvailabilityFormProps {
   initialValues?: Partial<AvailabilityFormData> & { holidays?: { date: string; reason?: string }[] }
   onSubmit: (data: AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }) => void
   onBack: () => void
+  onCancel?: () => void
   isLoading?: boolean
 }
 
@@ -26,6 +27,7 @@ export default function AvailabilityForm({
   initialValues,
   onSubmit,
   onBack,
+  onCancel,
   isLoading = false,
 }: AvailabilityFormProps) {
   const [formData, setFormData] = useState<AvailabilityFormData>({
@@ -337,19 +339,30 @@ export default function AvailabilityForm({
 
       {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-6 py-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/50 text-sm font-bold transition-all cursor-pointer"
-        >
-          Back
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-6 py-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/50 text-sm font-bold transition-all cursor-pointer"
+          >
+            Back
+          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 text-sm font-bold transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
         <button
           type="submit"
           disabled={isLoading}
           className="flex items-center gap-2 bg-[#ADC6FF] text-[#002E6A] hover:bg-blue-300 disabled:opacity-50 text-sm font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
-          <span>{isLoading ? "Saving..." : "Continue"}</span>
+          <span>{isLoading ? "Saving..." : "Save & Continue"}</span>
           <ArrowRight size={16} />
         </button>
       </div>
