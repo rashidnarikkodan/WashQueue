@@ -61,11 +61,6 @@ export const createStationSchema = z.object({
   images: z.preprocess(preprocessJson, z.array(imageSchema).optional().default([])),
 })
 
-const stepPreprocessor = z.preprocess(
-  (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-  z.number()
-)
-
 // Step 1 — basic info update (after initial creation)
 const step1Schema = z.object({
   step: z.literal(1),

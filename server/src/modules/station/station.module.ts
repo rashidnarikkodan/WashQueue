@@ -24,17 +24,25 @@ const cloudinaryService = new CloudinaryService()
 const mediaUploadService = new MediaUploadService(cloudinaryService)
 
 // Instantiate step parser factory & request mapper
-const stationStepParserFactory = new StationStepParserFactory(mediaUploadService)
-const stationRequestMapper = new StationRequestMapper(mediaUploadService, stationStepParserFactory)
+const stationStepParserFactory = new StationStepParserFactory()
+const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
+
+import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
+import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
 
 // Instantiate use cases
-const createStationUseCase = new CreateStationUseCase(stationRepository, ownerRepository)
+const createStationUseCase = new CreateStationUseCase(
+  stationRepository,
+  ownerRepository,
+  mediaUploadService
+)
 const updateStationUseCase = new UpdateStationUseCase(
   stationRepository,
   ownerRepository,
   stationPricingRepository,
   extraServiceRepository,
-  cloudinaryService
+  cloudinaryService,
+  mediaUploadService
 )
 const getStationUseCase = new GetStationUseCase(
   stationRepository,
@@ -48,6 +56,15 @@ const submitStationUseCase = new SubmitStationUseCase(
   stationPricingRepository
 )
 const reviewStationUseCase = new ReviewStationUseCase(stationRepository)
+const deleteStationUseCase = new DeleteStationUseCase(
+  stationRepository,
+  stationPricingRepository,
+  extraServiceRepository
+)
+const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
+  stationRepository,
+  ownerRepository
+)
 
 // Instantiate controller
 const stationController = new StationController(
@@ -57,6 +74,9 @@ const stationController = new StationController(
   getStationsUseCase,
   submitStationUseCase,
   reviewStationUseCase,
+  deleteStationUseCase,
+  toggleActiveStationUseCase,
+  ownerRepository,
   stationRequestMapper
 )
 

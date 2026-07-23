@@ -8,12 +8,11 @@ import {
   UpsertPricingInput,
   UpdateAmenitiesInput,
 } from "../../application/dtos/update-station.dto"
-import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationImage } from "../../domain/entities/Station"
 
 export interface IStationStepParser<T> {
   supports(step: number): boolean
-  parse(req: AuthenticatedRequest): Promise<T>
+  parse(req: AuthenticatedRequest): Promise<T> | T
 }
 
 /** Utility function to parse JSON string fields safely */
@@ -32,13 +31,11 @@ export function safeJsonParse<T>(val: unknown, fallback: T): T {
 }
 
 export class StationStep1Parser implements IStationStepParser<{ step: 1 } & UpdateBasicInfoInput> {
-  constructor(private readonly mediaUploadService: MediaUploadService) {}
-
   supports(step: number): boolean {
     return step === 1
   }
 
-  async parse(req: AuthenticatedRequest): Promise<{ step: 1 } & UpdateBasicInfoInput> {
+  parse(req: AuthenticatedRequest): { step: 1 } & UpdateBasicInfoInput {
     const { name, description, status } = req.body
 
     const contact = safeJsonParse(req.body.contact, undefined)
@@ -46,7 +43,7 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
     const address = safeJsonParse(req.body.address, undefined)
     const deletedImagePublicIds = safeJsonParse(req.body.deletedImagePublicIds, undefined)
 
-    let images: StationImage[] = safeJsonParse(req.body.images, [])
+    const images: StationImage[] = safeJsonParse(req.body.images, [])
 
     // Process uploaded files if available
     const files = req.files
@@ -57,16 +54,6 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
       multerFiles = Object.values(files).flat()
     }
 
-    if (multerFiles.length > 0) {
-      const uploadedImages = await this.mediaUploadService.uploadMultipleFiles(multerFiles)
-      const newStationImages: StationImage[] = uploadedImages.map((img, index) => ({
-        url: img.url,
-        publicId: img.publicId,
-        isPrimary: images.length === 0 && index === 0,
-      }))
-      images = [...images, ...newStationImages]
-    }
-
     return {
       step: 1,
       name,
@@ -75,6 +62,7 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
       location,
       address,
       images: images.length > 0 ? images : undefined,
+      newFiles: multerFiles.length > 0 ? multerFiles : undefined,
       deletedImagePublicIds,
       status,
     }
@@ -88,7 +76,7 @@ export class StationStep2Parser
     return step === 2
   }
 
-  async parse(req: AuthenticatedRequest): Promise<{ step: 2 } & UpdateAvailabilityInput> {
+  parse(req: AuthenticatedRequest): { step: 2 } & UpdateAvailabilityInput {
     const operatingHours = safeJsonParse(req.body.operatingHours, [])
     const holidays = safeJsonParse(req.body.holidays, [])
     const slotConfig = safeJsonParse(req.body.slotConfig, req.body.slotConfig)
@@ -113,7 +101,7 @@ export class StationStep3Parser
     return step === 3
   }
 
-  async parse(req: AuthenticatedRequest): Promise<{ step: 3 } & UpsertPricingInput> {
+  parse(req: AuthenticatedRequest): { step: 3 } & UpsertPricingInput {
     const pricing = safeJsonParse(req.body.pricing, [])
 
     return {
@@ -130,7 +118,7 @@ export class StationStep4Parser
     return step === 4
   }
 
-  async parse(req: AuthenticatedRequest): Promise<{ step: 4 } & UpdateAmenitiesInput> {
+  parse(req: AuthenticatedRequest): { step: 4 } & UpdateAmenitiesInput {
     const amenities = safeJsonParse(req.body.amenities, [])
     const extraServices = safeJsonParse(req.body.extraServices, [])
 
@@ -145,9 +133,9 @@ export class StationStep4Parser
 export class StationStepParserFactory {
   private readonly parsers: IStationStepParser<UpdateStationInput>[]
 
-  constructor(mediaUploadService: MediaUploadService) {
+  constructor() {
     this.parsers = [
-      new StationStep1Parser(mediaUploadService),
+      new StationStep1Parser(),
       new StationStep2Parser(),
       new StationStep3Parser(),
       new StationStep4Parser(),

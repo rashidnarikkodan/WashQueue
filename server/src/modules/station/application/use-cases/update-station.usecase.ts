@@ -11,6 +11,8 @@ import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
+import { MediaUploadService } from "@/core/application/services/media-upload.service"
+import { StationImage } from "../../domain/entities/Station"
 
 const slugify = (text: string): string => {
   return text
@@ -18,8 +20,8 @@ const slugify = (text: string): string => {
     .toLowerCase()
     .trim()
     .replace(/[\s_-]+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
     .replace(/^-+|-+$/g, "")
 }
 
@@ -29,7 +31,8 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly stationPricingRepository: IStationPricingRepository,
     private readonly extraServiceRepository: IExtraServiceRepository,
-    private readonly mediaStorage?: IMediaStorage
+    private readonly mediaStorage?: IMediaStorage,
+    private readonly mediaUploadService?: MediaUploadService
   ) {}
 
   async execute(
@@ -65,6 +68,19 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             }
           }
 
+          // Process new file uploads if provided
+          const props = station.getProps()
+          let currentImages: StationImage[] = updates.images ?? props.images
+          if (updates.newFiles && updates.newFiles.length > 0 && this.mediaUploadService) {
+            const uploaded = await this.mediaUploadService.uploadMultipleFiles(updates.newFiles)
+            const newStationImages: StationImage[] = uploaded.map((img, idx) => ({
+              url: img.url,
+              publicId: img.publicId,
+              isPrimary: currentImages.length === 0 && idx === 0,
+            }))
+            currentImages = [...currentImages, ...newStationImages]
+          }
+
           // Update basic station info if any basic info field is provided
           if (
             updates.name ||
@@ -72,16 +88,16 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             updates.contact ||
             updates.location ||
             updates.address ||
-            updates.images
+            updates.images ||
+            updates.newFiles
           ) {
-            const props = station.getProps()
             station.updateBasicInformation({
               name: updates.name ?? props.name,
               description: updates.description ?? props.description,
               contact: updates.contact ?? props.contact,
               location: updates.location ?? props.location,
               address: updates.address ?? props.address,
-              images: updates.images ?? props.images,
+              images: currentImages,
             })
           }
           if (updates.status) {

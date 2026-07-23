@@ -6,5 +6,7 @@ export interface CreateStationInput {
   contact: StationContact
   location: StationLocation
   address: StationAddress
-  images: StationImage[]
+  images?: StationImage[]
+  newFiles?: Express.Multer.File[]
 }
+

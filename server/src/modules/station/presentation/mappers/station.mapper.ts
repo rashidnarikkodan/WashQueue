@@ -3,7 +3,6 @@ import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { CreateStationInput } from "../../application/dtos/create-station.dto"
 import { UpdateStationInput } from "../../application/dtos/update-station.dto"
-import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationStepParserFactory, safeJsonParse } from "../parsers/station-step.parser"
 import { StationImage } from "../../domain/entities/Station"
 
@@ -13,10 +12,7 @@ export interface ReviewStationRequestInput {
 }
 
 export class StationRequestMapper {
-  constructor(
-    private readonly mediaUploadService: MediaUploadService,
-    private readonly stepParserFactory: StationStepParserFactory
-  ) {}
+  constructor(private readonly stepParserFactory: StationStepParserFactory) {}
 
   /**
    * Safely extracts and validates stationId from route params.
@@ -46,13 +42,13 @@ export class StationRequestMapper {
   /**
    * Maps multipart/form-data or JSON request body + uploaded files to CreateStationInput DTO.
    */
-  async mapToCreateInput(req: AuthenticatedRequest): Promise<CreateStationInput> {
+  mapToCreateInput(req: AuthenticatedRequest): CreateStationInput {
     const { name, description } = req.body
 
     const contact = safeJsonParse(req.body.contact, req.body.contact)
     const location = safeJsonParse(req.body.location, req.body.location)
     const address = safeJsonParse(req.body.address, req.body.address)
-    let images: StationImage[] = safeJsonParse(req.body.images, [])
+    const images: StationImage[] = safeJsonParse(req.body.images, [])
 
     // Process uploaded file images
     const files = req.files
@@ -63,27 +59,14 @@ export class StationRequestMapper {
       multerFiles = Object.values(files).flat()
     }
 
-    if (multerFiles.length > 0) {
-      const uploadedImages = await this.mediaUploadService.uploadMultipleFiles(multerFiles)
-      const newImages: StationImage[] = uploadedImages.map((img, idx) => ({
-        url: img.url,
-        publicId: img.publicId,
-        isPrimary: images.length === 0 && idx === 0,
-      }))
-      images = [...images, ...newImages]
-    }
-
-    if (images.length === 0) {
-      throw new AppError("At least one image is required", HTTP_STATUS.BAD_REQUEST)
-    }
-
     return {
       name,
       description,
       contact,
       location,
       address,
-      images,
+      images: images.length > 0 ? images : undefined,
+      newFiles: multerFiles.length > 0 ? multerFiles : undefined,
     }
   }
 

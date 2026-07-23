@@ -21,16 +21,15 @@ export const createRouter = (stationController: StationController): Router => {
     asyncHandler(stationController.getById)
   )
 
-  // Admin route to approve/reject station
+  
+  // Authenticated routes
+  router.use(authenticate)
+
   router.patch(
     "/:stationId/review",
-    authenticate,
     authorize("admin"),
     asyncHandler(stationController.review)
   )
-
-  // Authenticated routes
-  router.use(authenticate)
 
   router.post(
     "/",
@@ -49,6 +48,16 @@ export const createRouter = (stationController: StationController): Router => {
   router.post(
     "/:stationId/submit",
     asyncHandler(stationController.submit)
+  )
+
+  router.patch(
+    "/:stationId/toggle-active",
+    asyncHandler(stationController.toggleActive)
+  )
+
+  router.delete(
+    "/:stationId",
+    asyncHandler(stationController.delete)
   )
 
   return router

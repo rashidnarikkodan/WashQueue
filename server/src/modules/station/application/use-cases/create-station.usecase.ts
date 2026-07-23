@@ -1,17 +1,19 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { Station, StationStatus } from "../../domain/entities/Station"
+import { Station, StationImage, StationStatus } from "../../domain/entities/Station"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { CreateStationInput } from "../dtos/create-station.dto"
 import { ICreateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { MediaUploadService } from "@/core/application/services/media-upload.service"
 
 export class CreateStationUseCase implements ICreateStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
-    private readonly ownerRepository: IOwnerRepository
+    private readonly ownerRepository: IOwnerRepository,
+    private readonly mediaUploadService?: MediaUploadService
   ) {}
 
   async execute(userId: string, input: CreateStationInput): Promise<Station> {
@@ -24,6 +26,22 @@ export class CreateStationUseCase implements ICreateStationUseCase {
 
     if (!owner?.id) {
       throw new ForbiddenError(ERROR_MESSAGES.OWNER_NOT_FOUND)
+    }
+
+    let images: StationImage[] = input.images ? [...input.images] : []
+
+    if (input.newFiles && input.newFiles.length > 0 && this.mediaUploadService) {
+      const uploadedImages = await this.mediaUploadService.uploadMultipleFiles(input.newFiles)
+      const newStationImages: StationImage[] = uploadedImages.map((img, idx) => ({
+        url: img.url,
+        publicId: img.publicId,
+        isPrimary: images.length === 0 && idx === 0,
+      }))
+      images = [...images, ...newStationImages]
+    }
+
+    if (images.length === 0) {
+      throw new AppError("At least one image is required", HTTP_STATUS.BAD_REQUEST)
     }
 
     const station = new Station({
@@ -46,7 +64,7 @@ export class CreateStationUseCase implements ICreateStationUseCase {
         country: input.address.country,
         pincode: input.address.pincode,
       },
-      images: input.images.map((img) => ({
+      images: images.map((img) => ({
         url: img.url,
         publicId: img.publicId,
         isPrimary: img.isPrimary ?? false,
