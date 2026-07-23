@@ -191,7 +191,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             </>
           )}
           {currentRole !== ROLE.ADMIN && (
-            <StationLocationSection address={station.address} location={station.location} />
+            <StationLocationSection address={station.address} location={station.location} stationName={station.name} />
           )}
         </div>
 

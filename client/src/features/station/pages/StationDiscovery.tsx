@@ -110,7 +110,7 @@ const StationDiscovery = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/60 pb-6">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Stations in Kozhikode
+            Find Wash Stations
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base mt-1.5 font-medium">
             {filteredStations.length} results • {filters.maxDistanceKm}km radius
@@ -246,7 +246,7 @@ const StationDiscovery = () => {
               </div>
               <h3 className="text-lg font-bold text-foreground">Interactive Map View</h3>
               <p className="text-xs text-muted-foreground">
-                Showing {filteredStations.length} stations around Kozhikode. Select a station pin to view queue status & book.
+                Showing {filteredStations.length} available stations. Select a station pin to view queue status & book.
               </p>
             </div>
           </div>

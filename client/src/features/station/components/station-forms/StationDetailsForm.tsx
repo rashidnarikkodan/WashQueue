@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Info, MapPin, Building, Image as ImageIcon, Navigation, ArrowRight, Upload, X } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
+import LocationPickerMap, { type LocationChangeData } from "@/shared/components/map/LocationPickerMap"
 import { stationDetailsSchema, type StationDetailsFormData } from "../../schemas/station.schema"
 import type { StationImage } from "../../types"
 
@@ -243,18 +244,30 @@ export default function StationDetailsForm({
           </button>
         </div>
 
-        {/* Map Placeholder Block */}
-        <div className="relative w-full h-48 sm:h-64 rounded-2xl border border-slate-800 bg-[#070D1F] overflow-hidden flex flex-col justify-center items-center p-4">
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
-          <div className="z-10 flex flex-col items-center gap-2 text-center">
-            <div className="w-10 h-10 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center animate-bounce">
-              <MapPin size={22} />
-            </div>
-            <p className="text-xs text-slate-300 font-semibold">
-              Location Pin: {formData.latitude}° N, {formData.longitude}° W
-            </p>
-          </div>
-        </div>
+        {/* Interactive MapLibre Location Picker */}
+        <LocationPickerMap
+          latitude={formData.latitude}
+          longitude={formData.longitude}
+          onChangeLocation={(locData: LocationChangeData) => {
+            setFormData((prev) => ({
+              ...prev,
+              latitude: locData.latitude,
+              longitude: locData.longitude,
+              street: locData.street || prev.street,
+              city: locData.city || prev.city,
+              district: locData.district || prev.district,
+              state: locData.state || prev.state,
+              pincode: locData.pincode || prev.pincode,
+              country: locData.country || prev.country,
+            }))
+            setErrors((prev) => {
+              const next = { ...prev }
+              delete next.latitude
+              delete next.longitude
+              return next
+            })
+          }}
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormInput
