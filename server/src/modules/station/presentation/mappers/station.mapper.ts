@@ -73,6 +73,10 @@ export class StationRequestMapper {
       images = [...images, ...newImages]
     }
 
+    if (images.length === 0) {
+      throw new AppError("At least one image is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
     return {
       name,
       description,

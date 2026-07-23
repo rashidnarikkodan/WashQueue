@@ -9,7 +9,7 @@ export interface IExtraServiceRepository {
 
   update(
     id: string,
-    data: Partial<Pick<ExtraServiceProps, "name" | "description" | "pricing" | "isActive">>,
+    data: Partial<Pick<ExtraServiceProps, "name" | "slug" | "description" | "pricing" | "isActive">>,
     session?: ClientSession
   ): Promise<ExtraService | null>
 

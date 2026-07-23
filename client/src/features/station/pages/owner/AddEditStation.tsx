@@ -301,11 +301,26 @@ export default function AddEditStation() {
       .filter((s) => s.pricing.length > 0)
 
     try {
-      await stationApi.updateStation(stationId, {
+      const updatedRes = await stationApi.updateStation(stationId, {
         step: 4,
         amenities: data.amenities,
         extraServices: cleanedExtraServices,
       })
+
+      if (updatedRes.extraServices) {
+        setExtraServicesData({
+          amenities: data.amenities,
+          extraServices: updatedRes.extraServices.map((es) => ({
+            id: es.id,
+            name: es.name,
+            slug: es.slug,
+            description: es.description || "",
+            pricing: es.pricing || [],
+            isActive: es.isActive ?? true,
+          })),
+        })
+      }
+
       setActiveStep(5)
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to save extra services.")
@@ -461,6 +476,7 @@ export default function AddEditStation() {
         {activeStep === 4 && (
           <ExtraServicesForm
             initialValues={extraServicesData || undefined}
+            pricing={pricing}
             onSubmit={handleStep4Submit}
             onBack={() => setActiveStep(3)}
             onCancel={handleCancel}

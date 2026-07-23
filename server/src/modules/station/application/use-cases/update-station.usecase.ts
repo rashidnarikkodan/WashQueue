@@ -65,15 +65,22 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             }
           }
 
-          // Update basic station info if fields are provided
-          if (updates.name && updates.contact && updates.location && updates.address) {
+          // Update basic station info if any basic info field is provided
+          if (
+            updates.name ||
+            updates.description !== undefined ||
+            updates.contact ||
+            updates.location ||
+            updates.address ||
+            updates.images
+          ) {
             const props = station.getProps()
             station.updateBasicInformation({
-              name: updates.name,
+              name: updates.name ?? props.name,
               description: updates.description ?? props.description,
-              contact: updates.contact,
-              location: updates.location,
-              address: updates.address,
+              contact: updates.contact ?? props.contact,
+              location: updates.location ?? props.location,
+              address: updates.address ?? props.address,
               images: updates.images ?? props.images,
             })
           }
@@ -114,6 +121,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
 
           // Create, update, and delete extra services with slug validation & duplicate checks
           if (updates.extraServices && Array.isArray(updates.extraServices)) {
+            const existingExtraServices = await this.extraServiceRepository.findByStationId(stationId, session)
             const activeServices = updates.extraServices.filter((s) => !s.isDeleted)
 
             // Validate duplicates within incoming payload by name or slug
@@ -133,39 +141,69 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
               seenSlugs.add(slugVal)
             }
 
+            const processedIds = new Set<string>()
+
             for (const serviceInput of updates.extraServices) {
               const generatedSlug = serviceInput.slug || slugify(serviceInput.name)
+              const nameKey = serviceInput.name.toLowerCase().trim()
 
               if (serviceInput.isDeleted) {
-                if (serviceInput.id) {
-                  await this.extraServiceRepository.delete(serviceInput.id, session)
+                const existing = serviceInput.id
+                  ? existingExtraServices.find((e) => e.id === serviceInput.id)
+                  : existingExtraServices.find(
+                      (e) => !processedIds.has(e.id) && (e.getProps().slug === generatedSlug || e.getProps().name.toLowerCase().trim() === nameKey)
+                    )
+
+                if (existing) {
+                  processedIds.add(existing.id)
+                  await this.extraServiceRepository.delete(existing.id, session)
                 }
-              } else if (serviceInput.id) {
-                // Update existing
-                await this.extraServiceRepository.update(
-                  serviceInput.id,
-                  {
-                    name: serviceInput.name,
-                    slug: generatedSlug,
-                    description: serviceInput.description,
-                    pricing: serviceInput.pricing,
-                    isActive: serviceInput.isActive,
-                  },
-                  session
-                )
               } else {
-                // Create new
-                await this.extraServiceRepository.save(
-                  {
-                    stationId,
-                    name: serviceInput.name,
-                    slug: generatedSlug,
-                    description: serviceInput.description,
-                    pricing: serviceInput.pricing,
-                    isActive: serviceInput.isActive,
-                  },
-                  session
-                )
+                // Check if existing record exists by ID or by slug/name matching
+                const existing = serviceInput.id
+                  ? existingExtraServices.find((e) => e.id === serviceInput.id)
+                  : existingExtraServices.find(
+                      (e) => !processedIds.has(e.id) && (e.getProps().slug === generatedSlug || e.getProps().name.toLowerCase().trim() === nameKey)
+                    )
+
+                if (existing) {
+                  processedIds.add(existing.id)
+                  // Update existing record (prevents duplicates!)
+                  await this.extraServiceRepository.update(
+                    existing.id,
+                    {
+                      name: serviceInput.name,
+                      slug: generatedSlug,
+                      description: serviceInput.description,
+                      pricing: serviceInput.pricing,
+                      isActive: serviceInput.isActive,
+                    },
+                    session
+                  )
+                } else {
+                  // Create new record
+                  const created = await this.extraServiceRepository.save(
+                    {
+                      stationId,
+                      name: serviceInput.name,
+                      slug: generatedSlug,
+                      description: serviceInput.description,
+                      pricing: serviceInput.pricing,
+                      isActive: serviceInput.isActive,
+                    },
+                    session
+                  )
+                  if (created && created.id) {
+                    processedIds.add(created.id)
+                  }
+                }
+              }
+            }
+
+            // Clean up any remaining duplicate/orphaned extra services in DB for this station
+            for (const existing of existingExtraServices) {
+              if (!processedIds.has(existing.id)) {
+                await this.extraServiceRepository.delete(existing.id, session)
               }
             }
           }

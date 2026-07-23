@@ -62,14 +62,15 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    // Handle Session Expiry (Try silent refresh on 401, unless it's the refresh token or login request itself)
+    // Handle Session Expiry (Try silent refresh on 401, unless it's refresh token, login, or logout)
     if (status === 401 && !originalRequest._retry) {
-      const isRefreshOrLoginRequest =
+      const isAuthExemptRequest =
         originalRequest.url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
-        originalRequest.url?.includes(API_ROUTES.AUTH.LOGIN)
+        originalRequest.url?.includes(API_ROUTES.AUTH.LOGIN) ||
+        originalRequest.url?.includes(API_ROUTES.AUTH.LOGOUT)
 
-      if (isRefreshOrLoginRequest) {
-        // If the refresh token or login request itself failed, clear credentials and logout
+      if (isAuthExemptRequest) {
+        // If refresh token, login, or logout request failed, clear credentials silently
         localStorage.removeItem("wq_user")
         localStorage.removeItem("wq_auth")
         localStorage.removeItem("wq_temp_email")
@@ -150,13 +151,16 @@ api.interceptors.response.use(
     const status = error.response?.status
     const message = error.response?.data?.message || "Server Error"
     const skipToast = error.config?.skipToast
+    const url = error.config?.url
 
-    // Only display error toast if it wasn't a standard 401 that is being retried
-    if (status !== 401) {
-      const isCriticalError = !status || status >= 500
-      if (isCriticalError || !skipToast) {
-        toast.error(message)
-      }
+    const isExemptFromToast =
+      url?.includes(API_ROUTES.AUTH.LOGOUT) ||
+      url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
+      url?.includes(API_ROUTES.AUTH.LOGIN)
+
+    // Only display error toast if it wasn't a standard 401 or auth exempt request
+    if (status !== 401 && !isExemptFromToast && !skipToast) {
+      toast.error(message)
     }
 
     return Promise.reject(error)

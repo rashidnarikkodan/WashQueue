@@ -56,17 +56,17 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
     const updatedDoc = await ExtraServiceModel.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { returnDocument: "after", session: session || null }
+      { returnDocument: "after", session: session || undefined }
     ).exec()
 
     return updatedDoc ? ExtraServiceMapper.toDomain(updatedDoc) : null
   }
 
   async delete(id: string, session?: ClientSession): Promise<void> {
-    await ExtraServiceModel.findByIdAndDelete(id, { session: session || null }).exec()
+    await ExtraServiceModel.findByIdAndDelete(id, { session: session || undefined }).exec()
   }
 
   async deleteByStationId(stationId: string, session?: ClientSession): Promise<void> {
-    await ExtraServiceModel.deleteMany({ stationId: new Types.ObjectId(stationId) }, { session: session || null }).exec()
+    await ExtraServiceModel.deleteMany({ stationId: new Types.ObjectId(stationId) }, session ? { session } : undefined).exec()
   }
 }

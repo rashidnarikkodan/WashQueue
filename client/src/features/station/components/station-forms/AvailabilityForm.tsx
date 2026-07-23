@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Clock, Calendar, Info, ArrowRight, X } from "lucide-react"
+import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import DatePicker from "@/shared/components/ui/DatePicker"
@@ -114,12 +115,38 @@ export default function AvailabilityForm({
     e.preventDefault()
 
     const validation = availabilitySchema.safeParse(formData)
+    const errMap: Record<string, string> = {}
+
     if (!validation.success) {
-      const errMap: Record<string, string> = {}
       validation.error.issues.forEach((issue) => {
         const path = String(issue.path[0])
         if (path) errMap[path] = issue.message
       })
+    }
+
+    // Custom validations
+    if (formData.walkInReservedSlots > formData.capacityPerWindow) {
+      errMap.walkInReservedSlots = "Walk-in reserved slots cannot exceed total window capacity"
+    }
+
+    const openDays = formData.operatingHours.filter((h) => !h.isClosed)
+    if (openDays.length === 0) {
+      toast.error("At least one operating day must be open")
+      return
+    }
+
+    for (const day of openDays) {
+      if (!day.open || !day.close) {
+        toast.error(`Opening and closing times are required for ${day.day}`)
+        return
+      }
+      if (day.open >= day.close) {
+        toast.error(`Opening time must be earlier than closing time for ${day.day}`)
+        return
+      }
+    }
+
+    if (Object.keys(errMap).length > 0) {
       setErrors(errMap)
       return
     }
@@ -220,24 +247,24 @@ export default function AvailabilityForm({
             label="NUMBER OF BAYS"
             type="number"
             placeholder="2"
-            value={formData.bays}
-            onChange={(e) => handleFieldChange("bays", parseInt(e.target.value) || 0)}
+            value={formData.bays === 0 || (formData.bays as any) === "" ? "" : formData.bays}
+            onChange={(e) => handleFieldChange("bays", e.target.value === "" ? ("" as any) : parseInt(e.target.value))}
             error={errors.bays}
           />
           <FormInput
             label="WINDOW DURATION (MINS)"
             type="number"
             placeholder="30"
-            value={formData.windowDurationMins}
-            onChange={(e) => handleFieldChange("windowDurationMins", parseInt(e.target.value) || 0)}
+            value={formData.windowDurationMins === 0 || (formData.windowDurationMins as any) === "" ? "" : formData.windowDurationMins}
+            onChange={(e) => handleFieldChange("windowDurationMins", e.target.value === "" ? ("" as any) : parseInt(e.target.value))}
             error={errors.windowDurationMins}
           />
           <FormInput
             label="WALK-IN RESERVED SLOTS"
             type="number"
             placeholder="1"
-            value={formData.walkInReservedSlots}
-            onChange={(e) => handleFieldChange("walkInReservedSlots", parseInt(e.target.value) || 0)}
+            value={formData.walkInReservedSlots === 0 || (formData.walkInReservedSlots as any) === "" ? "" : formData.walkInReservedSlots}
+            onChange={(e) => handleFieldChange("walkInReservedSlots", e.target.value === "" ? ("" as any) : parseInt(e.target.value))}
             error={errors.walkInReservedSlots}
           />
         </div>
@@ -247,16 +274,16 @@ export default function AvailabilityForm({
             label="CAPACITY PER WINDOW"
             type="number"
             placeholder="2"
-            value={formData.capacityPerWindow}
-            onChange={(e) => handleFieldChange("capacityPerWindow", parseInt(e.target.value) || 0)}
+            value={formData.capacityPerWindow === 0 || (formData.capacityPerWindow as any) === "" ? "" : formData.capacityPerWindow}
+            onChange={(e) => handleFieldChange("capacityPerWindow", e.target.value === "" ? ("" as any) : parseInt(e.target.value))}
             error={errors.capacityPerWindow}
           />
           <FormInput
             label="MAXIMUM ADVANCED BOOKING DAYS"
             type="number"
             placeholder="7"
-            value={formData.maxAdvanceBookingDays}
-            onChange={(e) => handleFieldChange("maxAdvanceBookingDays", parseInt(e.target.value) || 0)}
+            value={formData.maxAdvanceBookingDays === 0 || (formData.maxAdvanceBookingDays as any) === "" ? "" : formData.maxAdvanceBookingDays}
+            onChange={(e) => handleFieldChange("maxAdvanceBookingDays", e.target.value === "" ? ("" as any) : parseInt(e.target.value))}
             error={errors.maxAdvanceBookingDays}
           />
         </div>

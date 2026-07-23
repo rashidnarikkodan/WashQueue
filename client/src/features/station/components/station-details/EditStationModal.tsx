@@ -175,6 +175,7 @@ export default function EditStationModal({
                   isActive: es.isActive ?? true,
                 })),
               }}
+              pricing={pricing}
               onBack={() => setActiveStep(3)}
               onSubmit={async (data) => {
                 await onSaveStep(4, { step: 4, ...data })

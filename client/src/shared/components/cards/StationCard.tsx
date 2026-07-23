@@ -17,6 +17,7 @@ export interface StationCardProps {
   categories?: string[]
   distanceKm?: number
   isFavorite?: boolean
+  showFavoriteButton?: boolean
   primaryActionLabel?: string
   onClick?: () => void
   onPrimaryAction?: () => void
@@ -80,6 +81,7 @@ const StationCard: React.FC<StationCardProps> = ({
   categories = ["Car", "Bike", "SUV"],
   distanceKm,
   isFavorite = false,
+  showFavoriteButton = true,
   primaryActionLabel,
   onClick,
   onPrimaryAction,
@@ -166,17 +168,19 @@ const StationCard: React.FC<StationCardProps> = ({
         </div>
 
         {/* Favorite Heart Button (Top-Right) */}
-        <button
-          onClick={handleFavClick}
-          className={`absolute top-3.5 right-3.5 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 ${
-            favorite
-              ? "bg-rose-500/20 border-rose-500/40 text-rose-500"
-              : "bg-card/70 border-border text-muted-foreground hover:text-foreground hover:bg-card"
-          }`}
-          aria-label="Toggle Favorite"
-        >
-          <Heart className={`w-4 h-4 ${favorite ? "fill-rose-500 text-rose-500" : ""}`} />
-        </button>
+        {showFavoriteButton && (
+          <button
+            onClick={handleFavClick}
+            className={`absolute top-3.5 right-3.5 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 ${
+              favorite
+                ? "bg-rose-500/20 border-rose-500/40 text-rose-500"
+                : "bg-card/70 border-border text-muted-foreground hover:text-foreground hover:bg-card"
+            }`}
+            aria-label="Toggle Favorite"
+          >
+            <Heart className={`w-4 h-4 ${favorite ? "fill-rose-500 text-rose-500" : ""}`} />
+          </button>
+        )}
       </div>
 
       {/* Card Body */}

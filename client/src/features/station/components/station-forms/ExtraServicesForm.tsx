@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck, Tag } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck, Wrench, X } from "lucide-react"
 import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
@@ -32,6 +32,7 @@ interface ExtraServicesFormProps {
     amenities?: string[]
     extraServices?: ExtraServiceInput[]
   }
+  pricing?: { vehicleClassId: string; isActive?: boolean }[]
   onSubmit: (data: { amenities: string[]; extraServices: ExtraServiceInput[] }) => void
   onBack: () => void
   onCancel?: () => void
@@ -40,16 +41,31 @@ interface ExtraServicesFormProps {
 
 export default function ExtraServicesForm({
   initialValues,
+  pricing,
   onSubmit,
   onBack,
   onCancel,
   isLoading = false,
 }: ExtraServicesFormProps) {
   const { categories, classes, loadData } = useVehicleCatelogStore()
+
+  const activeClassIds = useMemo(() => {
+    if (!pricing || pricing.length === 0) return null
+    const activeSet = new Set(
+      pricing.filter((p) => p.isActive !== false).map((p) => p.vehicleClassId)
+    )
+    return activeSet
+  }, [pricing])
+
   const [amenities, setAmenities] = useState<string[]>(
     initialValues?.amenities || ["Free WiFi", "Parking", "Waiting Lounge"]
   )
   const [customAmenity, setCustomAmenity] = useState("")
+
+  const allAmenitiesList = useMemo(() => {
+    const customList = amenities.filter((a) => !PRESET_AMENITIES.includes(a))
+    return [...PRESET_AMENITIES, ...customList]
+  }, [amenities])
 
   const [extraServices, setExtraServices] = useState<ExtraServiceInput[]>(
     initialValues?.extraServices && initialValues.extraServices.length > 0
@@ -71,6 +87,20 @@ export default function ExtraServicesForm({
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  useEffect(() => {
+    if (initialValues?.amenities) {
+      setAmenities(initialValues.amenities)
+    }
+    if (initialValues?.extraServices) {
+      setExtraServices(
+        initialValues.extraServices.map((s) => ({
+          ...s,
+          slug: s.slug || slugify(s.name),
+        }))
+      )
+    }
+  }, [initialValues])
 
   const getCategoryIcon = (name: string) => {
     const lower = name.toLowerCase()
@@ -97,11 +127,15 @@ export default function ExtraServicesForm({
   }
 
   const handleAddService = () => {
+    const availableClasses = activeClassIds
+      ? classes.filter((c) => activeClassIds.has(c.id))
+      : classes
+
     const newService: ExtraServiceInput = {
       name: "",
       slug: "",
       description: "",
-      pricing: classes.map((c) => ({ vehicleClassId: c.id, price: 99 })),
+      pricing: availableClasses.map((c) => ({ vehicleClassId: c.id, price: "" as unknown as number })),
       isActive: true,
     }
     setExtraServices((prev) => [...prev, newService])
@@ -124,7 +158,6 @@ export default function ExtraServicesForm({
 
       if (field === "name") {
         current.name = value
-        // Auto update slug when name changes unless manually overridden
         current.slug = slugify(value)
       } else if (field === "slug") {
         current.slug = slugify(value)
@@ -137,17 +170,19 @@ export default function ExtraServicesForm({
     })
   }
 
-  const handleServicePriceChange = (serviceIndex: number, classId: string, price: number) => {
+  const handleServicePriceChange = (serviceIndex: number, classId: string, rawValue: string) => {
     setExtraServices((prev) => {
       const next = [...prev]
       const service = { ...next[serviceIndex] }
       const pricingList = [...(service.pricing || [])]
+      const parsed = rawValue === "" ? ("" as unknown as number) : parseFloat(rawValue)
+      const val = typeof parsed === "number" && !isNaN(parsed) && parsed >= 0 ? parsed : ("" as unknown as number)
 
       const idx = pricingList.findIndex((p) => p.vehicleClassId === classId)
       if (idx >= 0) {
-        pricingList[idx] = { ...pricingList[idx], price: price < 0 ? 0 : price }
+        pricingList[idx] = { ...pricingList[idx], price: val }
       } else {
-        pricingList.push({ vehicleClassId: classId, price: price < 0 ? 0 : price })
+        pricingList.push({ vehicleClassId: classId, price: val })
       }
 
       service.pricing = pricingList
@@ -161,7 +196,6 @@ export default function ExtraServicesForm({
 
     const activeServices = extraServices.filter((s) => !s.isDeleted)
 
-    // Validate duplicate names & slugs
     const seenNames = new Map<string, number>()
     const seenSlugs = new Map<string, number>()
 
@@ -185,14 +219,32 @@ export default function ExtraServicesForm({
         return
       }
 
+      const validPricing = (s.pricing || []).filter(
+        (p) =>
+          typeof p.price === "number" &&
+          !isNaN(p.price) &&
+          p.price > 0 &&
+          (!activeClassIds || activeClassIds.has(p.vehicleClassId))
+      )
+      if (validPricing.length === 0) {
+        toast.error(`Please enter valid prices for service "${s.name}".`)
+        return
+      }
+
       seenNames.set(nameKey, i)
       seenSlugs.set(slugKey, i)
     }
 
-    // Assign final computed slugs
     const processedServices = extraServices.map((s) => ({
       ...s,
       slug: s.slug || slugify(s.name),
+      pricing: (s.pricing || []).filter(
+        (p) =>
+          typeof p.price === "number" &&
+          !isNaN(p.price) &&
+          p.price > 0 &&
+          (!activeClassIds || activeClassIds.has(p.vehicleClassId))
+      ),
     }))
 
     onSubmit({
@@ -205,116 +257,146 @@ export default function ExtraServicesForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 text-left">
-      {/* Editorial Header */}
-      <div className="space-y-2 border-b border-slate-800/80 pb-6">
-        <span className="text-[12px] font-bold tracking-[2.4px] text-[#ADC6FF] uppercase">
+      {/* Step Header */}
+      <div className="space-y-2 border-b border-border pb-6">
+        <span className="text-[12px] font-bold tracking-[2.4px] text-primary uppercase">
           STEP 4 OF 5
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#DCE1FB] tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
           Extra Services & Amenities
         </h1>
-        <p className="text-sm sm:text-base text-[#C2C6D6] opacity-80 font-normal">
-          Add details of extra services and amenities at your station.
+        <p className="text-sm sm:text-base text-muted-foreground font-normal">
+          Add details of extra services and amenities supported at your station.
         </p>
       </div>
 
       {/* Section 1: Extra Services */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
-          <Sparkles size={16} className="text-[#ADC6FF]" />
-          <span>EXTRA SERVICES</span>
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-xs font-bold tracking-wider text-primary uppercase">
+            <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary">
+              <Wrench size={16} />
+            </div>
+            <span>EXTRA SERVICES ({activeExtraServices.length})</span>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {activeExtraServices.map((service, index) => {
-            const computedSlug = service.slug || slugify(service.name)
-
+        {activeExtraServices.length === 0 ? (
+          <div className="text-center p-10 border border-dashed border-border rounded-2xl bg-muted/30 space-y-3">
+            <Wrench size={36} className="mx-auto text-muted-foreground" />
+            <h4 className="text-sm font-bold text-foreground">No Extra Services Added</h4>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Click below to offer add-on services like Polish, Interior Detailing, Engine Wash, etc.
+            </p>
+          </div>
+        ) : (
+          activeExtraServices.map((service, index) => {
+            const originalIndex = extraServices.indexOf(service)
             return (
               <div
-                key={index}
-                className="p-6 rounded-2xl border border-slate-800/80 bg-[#070D1F] space-y-4 relative"
+                key={service.id || `service-${originalIndex}`}
+                className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-sm hover:shadow-md transition-all"
               >
-                <button
-                  type="button"
-                  onClick={() => handleRemoveService(index)}
-                  className="absolute top-4 right-4 text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                  title="Remove service"
-                >
-                  <Trash2 size={16} />
-                </button>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <FormInput
-                    label="SERVICE NAME"
-                    type="text"
-                    placeholder="e.g. Underbody Wash"
-                    value={service.name}
-                    onChange={(e) => handleServiceChange(index, "name", e.target.value)}
-                  />
-
-                  {/* Slug Input / Preview */}
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold tracking-wider text-[#C2C6D6] uppercase flex items-center gap-1.5">
-                      <Tag size={12} className="text-[#ADC6FF]" />
-                      <span>SLUG (UNIQUE IDENTIFIER)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="underbody-wash"
-                      value={computedSlug}
-                      onChange={(e) => handleServiceChange(index, "slug", e.target.value)}
-                      className="w-full bg-[#141A2D] text-slate-300 text-xs font-mono px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-blue-500 outline-none"
-                    />
+                {/* Service Card Header */}
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-[11px] font-extrabold uppercase tracking-wider">
+                      SERVICE #{index + 1}
+                    </span>
+                    <h3 className="text-sm font-bold text-foreground">
+                      {service.name || "Untitled Service"}
+                    </h3>
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveService(originalIndex)}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-600 px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                  >
+                    <Trash2 size={15} />
+                    <span>Remove</span>
+                  </button>
+                </div>
+
+                {/* Service Details Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormInput
-                    label="DESCRIPTION"
+                    label="SERVICE NAME *"
                     type="text"
-                    placeholder="Deep cleaning of the vehicle chassis"
-                    value={service.description || ""}
-                    onChange={(e) => handleServiceChange(index, "description", e.target.value)}
+                    placeholder="e.g. Foam Polish / Ceramic Coating"
+                    value={service.name}
+                    onChange={(e) =>
+                      handleServiceChange(originalIndex, "name", e.target.value)
+                    }
+                  />
+                  <FormInput
+                    label="SLUG (OPTIONAL)"
+                    type="text"
+                    placeholder="foam-polish"
+                    value={service.slug || ""}
+                    onChange={(e) =>
+                      handleServiceChange(originalIndex, "slug", e.target.value)
+                    }
                   />
                 </div>
 
-                {/* Price per vehicle category & class */}
-                <div className="space-y-3 pt-2">
-                  <span className="text-xs font-bold tracking-wider text-[#C2C6D6] uppercase block">
-                    PRICING PER VEHICLE CATEGORY & CLASS (₹)
+                <FormInput
+                  label="DESCRIPTION (OPTIONAL)"
+                  type="text"
+                  placeholder="Short explanation of what this service covers..."
+                  value={service.description || ""}
+                  onChange={(e) =>
+                    handleServiceChange(originalIndex, "description", e.target.value)
+                  }
+                />
+
+                {/* Pricing per active category & class - Clean 2-column layout without nested sub-boxes */}
+                <div className="space-y-4 pt-4 border-t border-border">
+                  <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase block">
+                    PRICING PER ACTIVE VEHICLE CLASS (₹)
                   </span>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {categories.map((category) => {
-                      const categoryClasses = classes.filter((cls) => cls.categoryId === category.id)
+                      const categoryClasses = classes.filter((cls) => {
+                        if (cls.categoryId !== category.id) return false
+                        if (activeClassIds && !activeClassIds.has(cls.id)) return false
+                        return true
+                      })
                       if (categoryClasses.length === 0) return null
 
                       return (
-                        <div
-                          key={category.id}
-                          className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3"
-                        >
-                          <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
+                        <div key={category.id} className="space-y-2.5">
+                          {/* Flat category title header */}
+                          <div className="flex items-center gap-2 text-xs font-bold text-primary tracking-wider uppercase pt-1">
                             {getCategoryIcon(category.name)}
                             <span>{category.name}</span>
                           </div>
 
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {/* Minimal 2-column grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {categoryClasses.map((cls) => {
                               const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
+                              const rawPrice = priceItem?.price
+                              const displayPrice = typeof rawPrice === "number" && !isNaN(rawPrice) && rawPrice > 0 ? rawPrice : ""
+
                               return (
-                                <div key={cls.id} className="flex flex-col gap-1">
-                                  <label className="text-[10px] font-semibold text-slate-400 truncate">
+                                <div
+                                  key={cls.id}
+                                  className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60 hover:border-border transition-colors"
+                                >
+                                  <span className="text-xs font-semibold text-foreground truncate pr-2">
                                     {cls.name}
-                                  </label>
-                                  <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
-                                    <span className="text-xs text-slate-400 mr-1">₹</span>
-                                    <input
+                                  </span>
+                                  <div className="w-28 sm:w-32 shrink-0">
+                                    <FormInput
                                       type="number"
-                                      min={0}
-                                      value={priceItem?.price ?? 99}
+                                      placeholder="50"
+                                      prefix="₹"
+                                      value={displayPrice}
                                       onChange={(e) =>
-                                        handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
+                                        handleServicePriceChange(originalIndex, cls.id, e.target.value)
                                       }
-                                      className="w-full bg-transparent text-xs font-bold text-white outline-none"
                                     />
                                   </div>
                                 </div>
@@ -324,107 +406,92 @@ export default function ExtraServicesForm({
                         </div>
                       )
                     })}
-
-                    {/* Fallback for unclassified vehicle classes */}
-                    {(() => {
-                      const unclassified = classes.filter(
-                        (cls) => !cls.categoryId || !categories.some((cat) => cat.id === cls.categoryId)
-                      )
-                      if (unclassified.length === 0) return null
-                      return (
-                        <div className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3">
-                          <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
-                            <Car size={16} />
-                            <span>Other Vehicles</span>
-                          </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {unclassified.map((cls) => {
-                              const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
-                              return (
-                                <div key={cls.id} className="flex flex-col gap-1">
-                                  <label className="text-[10px] font-semibold text-slate-400 truncate">
-                                    {cls.name}
-                                  </label>
-                                  <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
-                                    <span className="text-xs text-slate-400 mr-1">₹</span>
-                                    <input
-                                      type="number"
-                                      min={0}
-                                      value={priceItem?.price ?? 99}
-                                      onChange={(e) =>
-                                        handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
-                                      }
-                                      className="w-full bg-transparent text-xs font-bold text-white outline-none"
-                                    />
-                                  </div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        </div>
-                      )
-                    })()}
                   </div>
                 </div>
               </div>
             )
-          })}
+          })
+        )}
 
-          <button
-            type="button"
-            onClick={handleAddService}
-            className="w-full py-4 border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-950/10 hover:bg-slate-900/30 rounded-2xl flex items-center justify-center gap-2 text-slate-300 font-semibold text-sm transition-all cursor-pointer"
-          >
-            <Plus size={18} />
-            <span>Add Another Service</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleAddService}
+          className="w-full py-3.5 border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 hover:bg-muted/60 rounded-2xl flex items-center justify-center gap-2.5 text-muted-foreground hover:text-foreground font-bold text-sm transition-all cursor-pointer active:scale-[0.99]"
+        >
+          <Plus size={18} className="text-primary" />
+          <span>Add Another Extra Service</span>
+        </button>
       </div>
 
       {/* Section 2: Amenities */}
-      <div className="space-y-4 p-6 sm:p-8 rounded-2xl border border-slate-800/80 bg-[#191F31]">
-        <div className="space-y-1">
-          <h3 className="text-lg font-bold text-white">Amenities</h3>
-          <p className="text-xs text-[#C2C6D6]">
-            Help customers choose you by listing on-site facilities.
+      <div className="space-y-5 p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-sm">
+        <div className="space-y-1 border-b border-border pb-4">
+          <h3 className="text-lg font-bold text-foreground flex items-center gap-2.5">
+            <Sparkles size={18} className="text-primary" />
+            <span>Station Amenities</span>
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Select on-site facilities available at your station for customers.
           </p>
         </div>
 
-        {/* Amenity Chips */}
-        <div className="flex flex-wrap gap-2.5 pt-2">
-          {PRESET_AMENITIES.map((name) => {
+        <div className="flex flex-wrap gap-2.5 pt-1">
+          {allAmenitiesList.map((name) => {
             const isSelected = amenities.includes(name)
+            const isCustom = !PRESET_AMENITIES.includes(name)
             return (
-              <button
+              <div
                 key={name}
-                type="button"
-                onClick={() => toggleAmenity(name)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold border transition-all ${
                   isSelected
-                    ? "bg-[#004395]/40 border-[#ADC6FF] text-white shadow-md"
-                    : "bg-[#23293C]/50 border-slate-800/80 text-[#C2C6D6] hover:bg-slate-800/50"
+                    ? "bg-primary/10 border-primary/40 text-primary shadow-sm"
+                    : "bg-muted/40 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                {isSelected && <Check size={14} className="text-[#ADC6FF]" />}
-                <span>{name}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => toggleAmenity(name)}
+                  className="flex items-center gap-2 cursor-pointer outline-none"
+                >
+                  {isSelected && <Check size={14} className="text-primary" />}
+                  <span>{name}</span>
+                </button>
+                {isCustom && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setAmenities((prev) => prev.filter((a) => a !== name))
+                    }}
+                    className="ml-1 text-muted-foreground hover:text-red-500 transition-colors p-0.5 rounded-md cursor-pointer"
+                    title="Remove custom amenity"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
             )
           })}
         </div>
 
-        {/* Custom Amenity Input */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2.5 pt-2">
           <input
             type="text"
-            placeholder="Add custom amenity..."
+            placeholder="Add custom amenity (e.g. EV Charging)"
             value={customAmenity}
             onChange={(e) => setCustomAmenity(e.target.value)}
-            className="bg-[#2E3447] text-[#FFFFFF] text-xs px-3.5 py-2 rounded-xl border border-slate-700 outline-none flex-1 placeholder:text-slate-500"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                handleAddCustomAmenity()
+              }
+            }}
+            className="bg-muted/40 text-foreground text-xs px-4 py-2.5 rounded-2xl border border-border outline-none flex-1 placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
           />
           <button
             type="button"
             onClick={handleAddCustomAmenity}
-            className="px-4 py-2 text-xs font-bold bg-slate-800 text-white rounded-xl hover:bg-slate-700"
+            className="px-5 py-2.5 text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 rounded-2xl transition-colors cursor-pointer"
           >
             Add
           </button>
@@ -432,12 +499,12 @@ export default function ExtraServicesForm({
       </div>
 
       {/* Footer Navigation */}
-      <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
+      <div className="flex justify-between items-center border-t border-border pt-6">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="px-6 py-2.5 rounded-xl border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/50 text-sm font-bold transition-all cursor-pointer"
+            className="px-6 py-2.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted text-sm font-bold transition-all cursor-pointer"
           >
             Back
           </button>
@@ -445,7 +512,7 @@ export default function ExtraServicesForm({
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 text-sm font-bold transition-all cursor-pointer"
+              className="px-6 py-2.5 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 text-sm font-bold transition-all cursor-pointer"
             >
               Cancel
             </button>
@@ -454,7 +521,7 @@ export default function ExtraServicesForm({
         <button
           type="submit"
           disabled={isLoading}
-          className="flex items-center gap-2 bg-[#ADC6FF] text-[#002E6A] hover:bg-blue-300 disabled:opacity-50 text-sm font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center gap-2 bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 text-sm font-bold px-8 py-2.5 rounded-xl shadow-md cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>{isLoading ? "Saving..." : "Save & Continue"}</span>
           <ArrowRight size={16} />

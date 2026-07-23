@@ -101,7 +101,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         : "/stations"
 
   return (
-    <div className="space-y-8 text-left pb-32 animate-in fade-in duration-300">
+    <div className=" mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-32 space-y-8 text-left animate-in fade-in duration-300">
       {/* Breadcrumb Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Breadcrumbs

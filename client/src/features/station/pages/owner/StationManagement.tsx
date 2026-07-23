@@ -76,6 +76,7 @@ const StationManagement = () => {
                 key={station.id}
                 id={station.id}
                 name={station.name}
+                showFavoriteButton={false}
                 image={
                   station.images?.find((img) => img.isPrimary)?.url ||
                   station.images[0]?.url ||

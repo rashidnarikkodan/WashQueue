@@ -44,6 +44,7 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
     const contact = safeJsonParse(req.body.contact, undefined)
     const location = safeJsonParse(req.body.location, undefined)
     const address = safeJsonParse(req.body.address, undefined)
+    const deletedImagePublicIds = safeJsonParse(req.body.deletedImagePublicIds, undefined)
 
     let images: StationImage[] = safeJsonParse(req.body.images, [])
 
@@ -74,6 +75,7 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
       location,
       address,
       images: images.length > 0 ? images : undefined,
+      deletedImagePublicIds,
       status,
     }
   }
