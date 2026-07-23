@@ -236,7 +236,11 @@ const StationCard: React.FC<StationCardProps> = ({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onPrimaryAction ? onPrimaryAction() : onClick?.()
+              if (onPrimaryAction) {
+                onPrimaryAction()
+              } else {
+                onClick?.()
+              }
             }}
             className={`w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer select-none ${actionBtn.className}`}
           >

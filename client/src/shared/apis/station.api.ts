@@ -9,6 +9,7 @@ import type {
   StationDetail,
   UpdateStationInput,
 } from '@/features/station/types'
+import type { ApiResponse } from "../types/ApiResponse"
 
 export const stationApi = {
   /**
@@ -53,10 +54,10 @@ export const stationApi = {
    */
   createStation: async (
     input: CreateStationInput | FormData
-  ): Promise<{ stationId: string; station: Station }> => {
+  ): Promise<Station> => {
     try {
       const isFormData = typeof FormData !== "undefined" && input instanceof FormData
-      const response = await api.post<{ data: { stationId: string; station: Station } }>(
+      const response = await api.post<ApiResponse<Station>>(
         API_ROUTES.STATIONS.ROOT,
         input,
         isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined
@@ -112,6 +113,29 @@ export const stationApi = {
       return response.data.data
     } catch (error) {
       throw handleApiError(error, `Failed to ${action.toLowerCase()} station`)
+    }
+  },
+
+  /**
+   * Delete a station draft or rejected application.
+   */
+  deleteStation: async (id: string): Promise<void> => {
+    try {
+      await api.delete(API_ROUTES.STATIONS.BY_ID(id))
+    } catch (error) {
+      throw handleApiError(error, "Failed to delete station draft")
+    }
+  },
+
+  /**
+   * Toggle station active status (ACTIVE ↔ INACTIVE).
+   */
+  toggleActiveStation: async (id: string): Promise<Station> => {
+    try {
+      const response = await api.patch<{ data: Station }>(`${API_ROUTES.STATIONS.BY_ID(id)}/toggle-active`)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to toggle station activation status")
     }
   },
 }

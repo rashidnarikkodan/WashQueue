@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { AlertTriangle, ArrowLeft } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useStationStore } from "../store/stationStore"
 import { useAuthStore } from "@/features/auth/store/authStore"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
@@ -28,8 +29,15 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   const id = params.id || params.stationId
   const navigate = useNavigate()
 
-  const { selectedStation, isLoading, fetchStationById, reviewStation, clearSelected } =
-    useStationStore()
+  const {
+    selectedStation,
+    isLoading,
+    fetchStationById,
+    reviewStation,
+    deleteStation,
+    toggleActiveStation,
+    clearSelected,
+  } = useStationStore()
   const user = useAuthStore((state) => state.user)
 
   // Resolve role from props or auth store
@@ -42,6 +50,23 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   const [rejecting, setRejecting] = useState(false)
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
   const [isSubmittingAction, setIsSubmittingAction] = useState(false)
+
+  // Confirmation Modal State
+  const [confirmModalConfig, setConfirmModalConfig] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    confirmText: string
+    confirmVariant: "danger" | "warning" | "primary" | "success"
+    onConfirm: () => Promise<void>
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "Confirm",
+    confirmVariant: "primary",
+    onConfirm: async () => {},
+  })
 
   useEffect(() => {
     if (id) {
@@ -91,6 +116,52 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     } finally {
       setIsSubmittingAction(false)
     }
+  }
+
+  const handleToggleActive = () => {
+    if (!id || !selectedStation) return
+    const currentActive = selectedStation.station.isActive
+    const actionText = currentActive ? "deactivate" : "reactivate"
+    setConfirmModalConfig({
+      isOpen: true,
+      title: `${currentActive ? "Deactivate" : "Reactivate"} Station`,
+      message: `Are you sure you want to ${actionText} station "${selectedStation.station.name}"?`,
+      confirmText: currentActive ? "Deactivate" : "Reactivate",
+      confirmVariant: currentActive ? "warning" : "success",
+      onConfirm: async () => {
+        setIsSubmittingAction(true)
+        try {
+          await toggleActiveStation(id)
+          await fetchStationById(id)
+        } finally {
+          setIsSubmittingAction(false)
+          setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
+      },
+    })
+  }
+
+  const handleDeleteDraft = () => {
+    if (!id || !selectedStation) return
+    setConfirmModalConfig({
+      isOpen: true,
+      title: "Delete Station Draft",
+      message: `Are you sure you want to delete draft station "${selectedStation.station.name}"? This action cannot be undone.`,
+      confirmText: "Delete Draft",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        setIsSubmittingAction(true)
+        try {
+          const success = await deleteStation(id)
+          if (success) {
+            setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))
+            navigate("/owner/stations")
+          }
+        } finally {
+          setIsSubmittingAction(false)
+        }
+      },
+    })
   }
 
   const backPath =
@@ -202,6 +273,8 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             role={currentRole}
             onApprove={handleApprove}
             onReject={() => setRejecting(true)}
+            onToggleActive={handleToggleActive}
+            onDelete={handleDeleteDraft}
             isSubmittingAction={isSubmittingAction}
           />
         </div>
@@ -255,6 +328,18 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModalConfig.isOpen}
+        onClose={() => setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalConfig.onConfirm}
+        title={confirmModalConfig.title}
+        message={confirmModalConfig.message}
+        confirmText={confirmModalConfig.confirmText}
+        confirmVariant={confirmModalConfig.confirmVariant}
+        isLoading={isSubmittingAction}
+      />
     </div>
   )
 }

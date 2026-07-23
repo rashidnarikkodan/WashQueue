@@ -223,6 +223,7 @@ export default function LocationPickerMap({
       map.remove()
       mapRef.current = null
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // run once on mount
 
   // Handle switching map style (Dark / Satellite / Streets)

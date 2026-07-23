@@ -9,6 +9,8 @@ interface StationSidebarCardProps {
   role?: RoleType
   onApprove?: () => void
   onReject?: () => void
+  onToggleActive?: () => void
+  onDelete?: () => void
   isSubmittingAction?: boolean
 }
 
@@ -17,6 +19,8 @@ export function StationSidebarCard({
   role = "customer",
   onApprove,
   onReject,
+  onToggleActive,
+  onDelete,
   isSubmittingAction = false,
 }: StationSidebarCardProps) {
   const navigate = useNavigate()
@@ -118,7 +122,7 @@ export function StationSidebarCard({
           )}
 
           {/* OWNER ROLE */}
-          {role === "owner" && (
+          {role === ROLE.OWNER && (
             <div className="space-y-3">
               <button
                 onClick={() => navigate(`/owner/stations/${station.id}/edit`)}
@@ -134,6 +138,30 @@ export function StationSidebarCard({
                 <Layers size={16} />
                 Manage Live Queue
               </button>
+
+              {(station.status === STATION_STATUS.ACTIVE || station.status === STATION_STATUS.INACTIVE) && (
+                <button
+                  onClick={onToggleActive}
+                  disabled={isSubmittingAction}
+                  className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 ${
+                    station.isActive
+                      ? "border border-amber-500/30 hover:border-amber-500 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300"
+                      : "bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20"
+                  }`}
+                >
+                  {station.isActive ? "Deactivate Station" : "Reactivate Station"}
+                </button>
+              )}
+
+              {(station.status === STATION_STATUS.DRAFT || station.status === STATION_STATUS.REJECTED) && (
+                <button
+                  onClick={onDelete}
+                  disabled={isSubmittingAction}
+                  className="w-full py-3.5 rounded-xl border border-red-500/30 hover:border-red-500 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  Delete Draft Station
+                </button>
+              )}
             </div>
           )}
         </div>

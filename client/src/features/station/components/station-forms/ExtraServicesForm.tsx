@@ -16,14 +16,14 @@ const PRESET_AMENITIES = [
   "Loyalty Program",
 ]
 
-export const slugify = (text: string): string => {
+const slugify = (text: string): string => {
   return text
     .toString()
     .toLowerCase()
     .trim()
     .replace(/[\s_-]+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
     .replace(/^-+|-+$/g, "")
 }
 
@@ -88,7 +88,9 @@ export default function ExtraServicesForm({
     loadData()
   }, [loadData])
 
-  useEffect(() => {
+  const [prevInitialValues, setPrevInitialValues] = useState(initialValues)
+  if (initialValues !== prevInitialValues) {
+    setPrevInitialValues(initialValues)
     if (initialValues?.amenities) {
       setAmenities(initialValues.amenities)
     }
@@ -100,7 +102,7 @@ export default function ExtraServicesForm({
         }))
       )
     }
-  }, [initialValues])
+  }
 
   const getCategoryIcon = (name: string) => {
     const lower = name.toLowerCase()

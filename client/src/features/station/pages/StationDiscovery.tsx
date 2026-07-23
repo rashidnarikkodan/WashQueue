@@ -11,12 +11,13 @@ import {
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/stationStore"
+import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
 import {
-  StationFilterModal,
-  type FilterOptions,
+  STATION_STATUS,
   DEFAULT_FILTERS,
-} from "../components/station-discovery/StationFilterModal"
-import { STATION_STATUS, type Station } from "@/features/station/types"
+  type FilterOptions,
+  type Station,
+} from "@/features/station/types"
 
 const StationDiscovery = () => {
   const navigate = useNavigate()
@@ -159,7 +160,7 @@ const StationDiscovery = () => {
               Sort: {getSortLabel()}
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p) => ({ ...p, sortBy: DEFAULT_FILTERS.sortBy }))}
+                onClick={() => setFilters((p: FilterOptions) => ({ ...p, sortBy: DEFAULT_FILTERS.sortBy }))}
               />
             </span>
           )}
@@ -169,7 +170,7 @@ const StationDiscovery = () => {
               Category Selected
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p) => ({ ...p, vehicleCategory: "all" }))}
+                onClick={() => setFilters((p: FilterOptions) => ({ ...p, vehicleCategory: "all" }))}
               />
             </span>
           )}
@@ -179,7 +180,7 @@ const StationDiscovery = () => {
               {filters.minRating}+ Stars
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p) => ({ ...p, minRating: 0 }))}
+                onClick={() => setFilters((p: FilterOptions) => ({ ...p, minRating: 0 }))}
               />
             </span>
           )}

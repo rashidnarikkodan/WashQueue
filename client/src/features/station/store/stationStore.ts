@@ -26,6 +26,8 @@ interface StationStore {
   updateStation: (id: string, input: UpdateStationInput) => Promise<StationDetail | null>
   submitStation: (id: string) => Promise<boolean>
   reviewStation: (id: string, action: "APPROVE" | "REJECT", rejectionReason?: string) => Promise<boolean>
+  deleteStation: (id: string) => Promise<boolean>
+  toggleActiveStation: (id: string) => Promise<Station | null>
   clearError: () => void
   clearSelected: () => void
 }
@@ -65,11 +67,11 @@ export const useStationStore = create<StationStore>((set) => ({
       const result = await stationApi.createStation(input)
       // Optimistically add the new station to the list
       set((state) => ({
-        stations: [result.station, ...state.stations],
+        stations: [result, ...state.stations],
         isSubmitting: false,
       }))
       toast.success("Station draft created successfully!")
-      return result.station
+      return result
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to create station")
       set({ error: msg, isSubmitting: false })
@@ -136,6 +138,44 @@ export const useStationStore = create<StationStore>((set) => ({
       const msg = getErrorMessage(err, `Failed to ${action.toLowerCase()} station`)
       set({ error: msg, isSubmitting: false })
       return false
+    }
+  },
+
+  deleteStation: async (id: string) => {
+    set({ isSubmitting: true, error: null })
+    try {
+      await stationApi.deleteStation(id)
+      set((state) => ({
+        stations: state.stations.filter((s) => s.id !== id),
+        selectedStation: state.selectedStation?.station.id === id ? null : state.selectedStation,
+        isSubmitting: false,
+      }))
+      toast.success("Station draft deleted successfully!")
+      return true
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to delete station draft")
+      set({ error: msg, isSubmitting: false })
+      return false
+    }
+  },
+
+  toggleActiveStation: async (id: string) => {
+    set({ isSubmitting: true, error: null })
+    try {
+      const updated = await stationApi.toggleActiveStation(id)
+      set((state) => ({
+        stations: state.stations.map((s) => (s.id === id ? updated : s)),
+        selectedStation: state.selectedStation && state.selectedStation.station.id === id
+          ? { ...state.selectedStation, station: updated }
+          : state.selectedStation,
+        isSubmitting: false,
+      }))
+      toast.success(`Station ${updated.isActive ? "activated" : "deactivated"} successfully!`)
+      return updated
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to toggle station active status")
+      set({ error: msg, isSubmitting: false })
+      return null
     }
   },
 

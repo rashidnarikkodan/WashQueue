@@ -224,3 +224,17 @@ export type UpdateStationInput =
   | UpdateAvailabilityInput
   | UpdatePricingInput
   | UpdateAmenitiesInput
+
+export interface FilterOptions {
+  sortBy: "nearest" | "rating" | "fastest" | "popular"
+  vehicleCategory: string
+  maxDistanceKm: number
+  minRating: number
+}
+
+export const DEFAULT_FILTERS: FilterOptions = {
+  sortBy: "nearest",
+  vehicleCategory: "all",
+  maxDistanceKm: 20,
+  minRating: 0,
+}

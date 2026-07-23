@@ -114,7 +114,7 @@ export default function EditStationModal({
                   formData.append("images", file)
                 })
 
-                await onSaveStep(1, formData as any)
+                await onSaveStep(1, formData as unknown as UpdateStationInput)
                 setActiveStep(2)
               }}
               isLoading={isSubmitting}

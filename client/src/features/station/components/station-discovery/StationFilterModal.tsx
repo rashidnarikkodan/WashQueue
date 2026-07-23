@@ -2,20 +2,7 @@ import React, { useState, useEffect } from "react"
 import { X, Star, Bike, Car, Truck, SlidersHorizontal } from "lucide-react"
 import { vehicleCatelogApi } from "@/shared/apis/vehicleCatelog.api"
 import type { VehicleCategory } from "@/features/vehicle-catelog/types"
-
-export interface FilterOptions {
-  sortBy: "nearest" | "rating" | "fastest" | "popular"
-  vehicleCategory: string
-  maxDistanceKm: number
-  minRating: number
-}
-
-export const DEFAULT_FILTERS: FilterOptions = {
-  sortBy: "nearest",
-  vehicleCategory: "all",
-  maxDistanceKm: 20,
-  minRating: 0,
-}
+import { DEFAULT_FILTERS, type FilterOptions } from "../../types"
 
 interface StationFilterModalProps {
   isOpen: boolean
@@ -50,8 +37,18 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
   onResetFilters,
 }) => {
   const [draftFilters, setDraftFilters] = useState<FilterOptions>(currentFilters)
-  const [isRendered, setIsRendered] = useState(isOpen)
   const [isVisible, setIsVisible] = useState(false)
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+  const isRendered = isOpen || isVisible
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen)
+    if (isOpen) {
+      setDraftFilters(currentFilters)
+    } else {
+      setIsVisible(false)
+    }
+  }
 
   // Dynamic Categories from Backend Server
   const [categories, setCategories] = useState<VehicleCategory[]>([])
@@ -76,23 +73,15 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     fetchBackendCategories()
   }, [])
 
-  // Handle smooth open and close transition state
+  // Handle smooth open transition state
   useEffect(() => {
     if (isOpen) {
-      setIsRendered(true)
-      setDraftFilters(currentFilters)
       const timer = setTimeout(() => {
         setIsVisible(true)
       }, 20)
       return () => clearTimeout(timer)
-    } else {
-      setIsVisible(false)
-      const timer = setTimeout(() => {
-        setIsRendered(false)
-      }, 300)
-      return () => clearTimeout(timer)
     }
-  }, [isOpen, currentFilters])
+  }, [isOpen])
 
   if (!isRendered) return null
 

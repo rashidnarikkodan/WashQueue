@@ -180,11 +180,12 @@ export default function AddEditStation() {
     try {
       if (!stationId) {
         // First time creating station draft
-        const res = await stationApi.createStation(formData)
-        setStationId(res.stationId)
-        if (res.station?.images) {
-          setExistingImages(res.station.images)
+        const station = await stationApi.createStation(formData)
+        setStationId(station.id)
+        if (station?.images) {
+          setExistingImages(station.images)
         }
+        setImageFiles([])
       } else {
         // Updating existing draft or active station
         formData.append("step", "1")
@@ -195,6 +196,7 @@ export default function AddEditStation() {
         if (updatedDetail?.station?.images) {
           setExistingImages(updatedDetail.station.images)
         }
+        setImageFiles([])
       }
       setActiveStep(2)
     } catch (err) {
