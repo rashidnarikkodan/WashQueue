@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useAuthStore } from "../../../../features/auth/store/authStore"
-import type { OnboardingDetails } from "../../services/owner.api"
+import type { OnboardingDetails } from "@/shared/apis/owner.api"
 import { step1Schema, step2Schema } from "../../schemas/owner.schema"
 import OwnerKYCStep from "./OwnerKYCStep"
 import PayoutStep from "./PayoutStep"

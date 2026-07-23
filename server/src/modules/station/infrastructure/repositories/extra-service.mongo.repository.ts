@@ -19,6 +19,7 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
     const persistenceData = {
       stationId: new Types.ObjectId(props.stationId),
       name: props.name,
+      slug: props.slug,
       description: props.description,
       pricing: props.pricing.map((p) => ({
         vehicleClassId: new Types.ObjectId(p.vehicleClassId),
@@ -37,11 +38,12 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
 
   async update(
     id: string,
-    data: Partial<Pick<ExtraServiceProps, "name" | "description" | "pricing" | "isActive">>,
+    data: Partial<Pick<ExtraServiceProps, "name" | "slug" | "description" | "pricing" | "isActive">>,
     session?: ClientSession
   ): Promise<ExtraService | null> {
     const updateData: Partial<IExtraService> = {}
     if (data.name !== undefined) updateData.name = data.name
+    if (data.slug !== undefined) updateData.slug = data.slug
     if (data.description !== undefined) updateData.description = data.description
     if (data.isActive !== undefined) updateData.isActive = data.isActive
     if (data.pricing !== undefined) {
@@ -54,19 +56,17 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
     const updatedDoc = await ExtraServiceModel.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true, session }
+      { returnDocument: "after", session: session || null }
     ).exec()
 
     return updatedDoc ? ExtraServiceMapper.toDomain(updatedDoc) : null
   }
 
   async delete(id: string, session?: ClientSession): Promise<void> {
-    await ExtraServiceModel.findByIdAndDelete(id).session(session || null).exec()
+    await ExtraServiceModel.findByIdAndDelete(id, { session: session || null }).exec()
   }
 
   async deleteByStationId(stationId: string, session?: ClientSession): Promise<void> {
-    await ExtraServiceModel.deleteMany({ stationId: new Types.ObjectId(stationId) })
-      .session(session || null)
-      .exec()
+    await ExtraServiceModel.deleteMany({ stationId: new Types.ObjectId(stationId) }, { session: session || null }).exec()
   }
 }

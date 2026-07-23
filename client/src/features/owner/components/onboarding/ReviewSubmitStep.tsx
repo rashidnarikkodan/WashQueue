@@ -1,7 +1,7 @@
 import { ArrowLeft, Send, Check, ShieldCheck } from "lucide-react"
 import Loading from "../../../../shared/components/ui/Loading"
 import OnboardingDetailsSummary from "../../../users/components/ui/OnboardingDetailsSummary"
-import type { OnboardingDetails } from "../../services/owner.api"
+import type { OnboardingDetails } from "@/shared/apis/owner.api"
 
 interface ReviewSubmitStepProps {
   formData: Record<string, unknown>

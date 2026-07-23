@@ -13,38 +13,7 @@ interface EditStationModalProps {
   isSubmitting?: boolean
 }
 
-const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement("canvas")
-        let width = img.width
-        let height = img.height
 
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width)
-          width = maxWidth
-        }
-
-        canvas.width = width
-        canvas.height = height
-
-        const ctx = canvas.getContext("2d")
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height)
-          resolve(canvas.toDataURL("image/jpeg", quality))
-        } else {
-          resolve((event.target?.result as string) || "")
-        }
-      }
-      img.onerror = () => resolve((event.target?.result as string) || "")
-      img.src = (event.target?.result as string) || ""
-    }
-    reader.readAsDataURL(file)
-  })
-}
 
 export default function EditStationModal({
   stationDetail,
@@ -122,34 +91,30 @@ export default function EditStationModal({
               }}
               onCancel={onClose}
               onSubmit={async (data, newImageFiles, remainingExistingImages, deletedImagePublicIds) => {
-                const newlyProcessedImages = await Promise.all(
-                  newImageFiles.map(async (file, idx) => {
-                    const dataUrl = await compressImage(file)
-                    return {
-                      url: dataUrl,
-                      publicId: `img_${Date.now()}_${idx}`,
-                      isPrimary: remainingExistingImages.length === 0 && idx === 0,
-                    }
-                  })
-                )
-                const combinedImages = [...remainingExistingImages, ...newlyProcessedImages]
+                const formData = new FormData()
+                formData.append("step", "1")
+                formData.append("name", data.name)
+                formData.append("description", data.description || "")
+                formData.append("contact", JSON.stringify({ phone: data.phone, email: data.email }))
+                formData.append("location", JSON.stringify({ latitude: data.latitude, longitude: data.longitude }))
+                formData.append("address", JSON.stringify({
+                  street: data.street,
+                  city: data.city,
+                  state: data.state,
+                  country: data.country,
+                  pincode: data.pincode,
+                }))
+                formData.append("images", JSON.stringify(remainingExistingImages))
 
-                await onSaveStep(1, {
-                  step: 1,
-                  name: data.name,
-                  description: data.description,
-                  contact: { phone: data.phone, email: data.email },
-                  location: { latitude: data.latitude, longitude: data.longitude },
-                  address: {
-                    street: data.street,
-                    city: data.city,
-                    state: data.state,
-                    country: data.country,
-                    pincode: data.pincode,
-                  },
-                  images: combinedImages,
-                  deletedImagePublicIds: deletedImagePublicIds.length > 0 ? deletedImagePublicIds : undefined,
+                if (deletedImagePublicIds.length > 0) {
+                  formData.append("deletedImagePublicIds", JSON.stringify(deletedImagePublicIds))
+                }
+
+                newImageFiles.forEach((file) => {
+                  formData.append("images", file)
                 })
+
+                await onSaveStep(1, formData as any)
                 setActiveStep(2)
               }}
               isLoading={isSubmitting}

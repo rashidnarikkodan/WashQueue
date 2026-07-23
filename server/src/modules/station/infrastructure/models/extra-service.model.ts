@@ -8,6 +8,7 @@ interface IExtraServicePricingEntry {
 export interface IExtraService extends Document {
   stationId: Types.ObjectId
   name: string
+  slug: string
   description?: string
   pricing: IExtraServicePricingEntry[]
   isActive: boolean
@@ -19,6 +20,7 @@ const extraServiceSchema = new Schema<IExtraService>(
   {
     stationId: { type: Schema.Types.ObjectId, ref: "Station", required: true, index: true },
     name: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
     pricing: [
       {

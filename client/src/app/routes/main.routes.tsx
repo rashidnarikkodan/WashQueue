@@ -5,6 +5,7 @@ const MainLayout = lazy(() => import("../layouts/MainLayout"))
 const Landing = lazy(() => import("../../features/home/pages/Landing"))
 const Home = lazy(() => import("../../features/home/pages/Home"))
 const StationDetails = lazy(() => import("../../features/station/pages/StationDetails"))
+const StationDiscovery = lazy(() => import("../../features/station/pages/StationDiscovery"))
 import { useAuthStore } from "../../features/auth/store/authStore"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
@@ -50,6 +51,10 @@ export const mainRoutes = {
     {
       index: true,
       element: <RootPathResolver />,
+    },
+    {
+      path: "stations",
+      element: <StationDiscovery />,
     },
     {
       path: "stations/:id",

@@ -76,6 +76,7 @@ export const extraServicePricingSchema = z.object({
 export const extraServiceItemSchema = z.object({
   id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID").optional(),
   name: z.string().trim().min(2, "Service name must be at least 2 characters"),
+  slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   pricing: z.array(extraServicePricingSchema).min(1, "At least one pricing entry is required"),
   isActive: z.boolean().default(true),

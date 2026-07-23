@@ -226,7 +226,7 @@ export default function DatePicker({
 
         {/* Popover Calendar Dropdown */}
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-[#151B2D] border border-slate-800 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute -top-90 left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-[#151B2D] border border-slate-800 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             {/* Month / Year Navigation */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <button

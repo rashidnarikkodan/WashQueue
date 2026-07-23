@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck } from "lucide-react"
+import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck, Tag } from "lucide-react"
+import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 import type { ExtraServiceInput } from "../../types"
@@ -14,6 +15,17 @@ const PRESET_AMENITIES = [
   "Pickup & Drop",
   "Loyalty Program",
 ]
+
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_-]+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
 
 interface ExtraServicesFormProps {
   initialValues?: {
@@ -40,14 +52,20 @@ export default function ExtraServicesForm({
   const [customAmenity, setCustomAmenity] = useState("")
 
   const [extraServices, setExtraServices] = useState<ExtraServiceInput[]>(
-    initialValues?.extraServices || [
-      {
-        name: "Underbody Wash",
-        description: "Deep cleaning of the vehicle chassis",
-        pricing: [],
-        isActive: true,
-      },
-    ]
+    initialValues?.extraServices && initialValues.extraServices.length > 0
+      ? initialValues.extraServices.map((s) => ({
+          ...s,
+          slug: s.slug || slugify(s.name),
+        }))
+      : [
+          {
+            name: "Underbody Wash",
+            slug: "underbody-wash",
+            description: "Deep cleaning of the vehicle chassis",
+            pricing: [],
+            isActive: true,
+          },
+        ]
   )
 
   useEffect(() => {
@@ -81,6 +99,7 @@ export default function ExtraServicesForm({
   const handleAddService = () => {
     const newService: ExtraServiceInput = {
       name: "",
+      slug: "",
       description: "",
       pricing: classes.map((c) => ({ vehicleClassId: c.id, price: 99 })),
       isActive: true,
@@ -94,10 +113,26 @@ export default function ExtraServicesForm({
     )
   }
 
-  const handleServiceChange = (index: number, field: "name" | "description", value: string) => {
+  const handleServiceChange = (
+    index: number,
+    field: "name" | "slug" | "description",
+    value: string
+  ) => {
     setExtraServices((prev) => {
       const next = [...prev]
-      next[index] = { ...next[index], [field]: value }
+      const current = { ...next[index] }
+
+      if (field === "name") {
+        current.name = value
+        // Auto update slug when name changes unless manually overridden
+        current.slug = slugify(value)
+      } else if (field === "slug") {
+        current.slug = slugify(value)
+      } else if (field === "description") {
+        current.description = value
+      }
+
+      next[index] = current
       return next
     })
   }
@@ -123,9 +158,46 @@ export default function ExtraServicesForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    const activeServices = extraServices.filter((s) => !s.isDeleted)
+
+    // Validate duplicate names & slugs
+    const seenNames = new Map<string, number>()
+    const seenSlugs = new Map<string, number>()
+
+    for (let i = 0; i < activeServices.length; i++) {
+      const s = activeServices[i]
+      const nameKey = s.name.trim().toLowerCase()
+      const slugKey = s.slug ? s.slug.trim().toLowerCase() : slugify(s.name)
+
+      if (!nameKey) {
+        toast.error(`Service #${i + 1} requires a service name`)
+        return
+      }
+
+      if (seenNames.has(nameKey)) {
+        toast.error(`Duplicate service name "${s.name}" found. Each extra service must have a unique name.`)
+        return
+      }
+
+      if (seenSlugs.has(slugKey)) {
+        toast.error(`Duplicate service slug "${slugKey}" found for "${s.name}". Service names or slugs cannot repeat.`)
+        return
+      }
+
+      seenNames.set(nameKey, i)
+      seenSlugs.set(slugKey, i)
+    }
+
+    // Assign final computed slugs
+    const processedServices = extraServices.map((s) => ({
+      ...s,
+      slug: s.slug || slugify(s.name),
+    }))
+
     onSubmit({
       amenities,
-      extraServices,
+      extraServices: processedServices,
     })
   }
 
@@ -154,129 +226,149 @@ export default function ExtraServicesForm({
         </div>
 
         <div className="space-y-4">
-          {activeExtraServices.map((service, index) => (
-            <div
-              key={index}
-              className="p-6 rounded-2xl border border-slate-800/80 bg-[#070D1F] space-y-4 relative"
-            >
-              <button
-                type="button"
-                onClick={() => handleRemoveService(index)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                title="Remove service"
+          {activeExtraServices.map((service, index) => {
+            const computedSlug = service.slug || slugify(service.name)
+
+            return (
+              <div
+                key={index}
+                className="p-6 rounded-2xl border border-slate-800/80 bg-[#070D1F] space-y-4 relative"
               >
-                <Trash2 size={16} />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveService(index)}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                  title="Remove service"
+                >
+                  <Trash2 size={16} />
+                </button>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormInput
-                  label="SERVICE NAME"
-                  type="text"
-                  placeholder="e.g. Underbody Wash"
-                  value={service.name}
-                  onChange={(e) => handleServiceChange(index, "name", e.target.value)}
-                />
-                <FormInput
-                  label="DESCRIPTION"
-                  type="text"
-                  placeholder="Deep cleaning of the vehicle chassis"
-                  value={service.description || ""}
-                  onChange={(e) => handleServiceChange(index, "description", e.target.value)}
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <FormInput
+                    label="SERVICE NAME"
+                    type="text"
+                    placeholder="e.g. Underbody Wash"
+                    value={service.name}
+                    onChange={(e) => handleServiceChange(index, "name", e.target.value)}
+                  />
 
-              {/* Price per vehicle category & class */}
-              <div className="space-y-3 pt-2">
-                <span className="text-xs font-bold tracking-wider text-[#C2C6D6] uppercase block">
-                  PRICING PER VEHICLE CATEGORY & CLASS (₹)
-                </span>
+                  {/* Slug Input / Preview */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold tracking-wider text-[#C2C6D6] uppercase flex items-center gap-1.5">
+                      <Tag size={12} className="text-[#ADC6FF]" />
+                      <span>SLUG (UNIQUE IDENTIFIER)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="underbody-wash"
+                      value={computedSlug}
+                      onChange={(e) => handleServiceChange(index, "slug", e.target.value)}
+                      className="w-full bg-[#141A2D] text-slate-300 text-xs font-mono px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-blue-500 outline-none"
+                    />
+                  </div>
 
-                <div className="space-y-3">
-                  {categories.map((category) => {
-                    const categoryClasses = classes.filter((cls) => cls.categoryId === category.id)
-                    if (categoryClasses.length === 0) return null
+                  <FormInput
+                    label="DESCRIPTION"
+                    type="text"
+                    placeholder="Deep cleaning of the vehicle chassis"
+                    value={service.description || ""}
+                    onChange={(e) => handleServiceChange(index, "description", e.target.value)}
+                  />
+                </div>
 
-                    return (
-                      <div
-                        key={category.id}
-                        className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3"
-                      >
-                        <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
-                          {getCategoryIcon(category.name)}
-                          <span>{category.name}</span>
-                        </div>
+                {/* Price per vehicle category & class */}
+                <div className="space-y-3 pt-2">
+                  <span className="text-xs font-bold tracking-wider text-[#C2C6D6] uppercase block">
+                    PRICING PER VEHICLE CATEGORY & CLASS (₹)
+                  </span>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          {categoryClasses.map((cls) => {
-                            const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
-                            return (
-                              <div key={cls.id} className="flex flex-col gap-1">
-                                <label className="text-[10px] font-semibold text-slate-400 truncate">
-                                  {cls.name}
-                                </label>
-                                <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
-                                  <span className="text-xs text-slate-400 mr-1">₹</span>
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    value={priceItem?.price ?? 99}
-                                    onChange={(e) =>
-                                      handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
-                                    }
-                                    className="w-full bg-transparent text-xs font-bold text-white outline-none"
-                                  />
+                  <div className="space-y-3">
+                    {categories.map((category) => {
+                      const categoryClasses = classes.filter((cls) => cls.categoryId === category.id)
+                      if (categoryClasses.length === 0) return null
+
+                      return (
+                        <div
+                          key={category.id}
+                          className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3"
+                        >
+                          <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
+                            {getCategoryIcon(category.name)}
+                            <span>{category.name}</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {categoryClasses.map((cls) => {
+                              const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
+                              return (
+                                <div key={cls.id} className="flex flex-col gap-1">
+                                  <label className="text-[10px] font-semibold text-slate-400 truncate">
+                                    {cls.name}
+                                  </label>
+                                  <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
+                                    <span className="text-xs text-slate-400 mr-1">₹</span>
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={priceItem?.price ?? 99}
+                                      onChange={(e) =>
+                                        handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
+                                      }
+                                      className="w-full bg-transparent text-xs font-bold text-white outline-none"
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          })}
+                              )
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
 
-                  {/* Fallback for unclassified vehicle classes */}
-                  {(() => {
-                    const unclassified = classes.filter(
-                      (cls) => !cls.categoryId || !categories.some((cat) => cat.id === cls.categoryId)
-                    )
-                    if (unclassified.length === 0) return null
-                    return (
-                      <div className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3">
-                        <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
-                          <Car size={16} />
-                          <span>Other Vehicles</span>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          {unclassified.map((cls) => {
-                            const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
-                            return (
-                              <div key={cls.id} className="flex flex-col gap-1">
-                                <label className="text-[10px] font-semibold text-slate-400 truncate">
-                                  {cls.name}
-                                </label>
-                                <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
-                                  <span className="text-xs text-slate-400 mr-1">₹</span>
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    value={priceItem?.price ?? 99}
-                                    onChange={(e) =>
-                                      handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
-                                    }
-                                    className="w-full bg-transparent text-xs font-bold text-white outline-none"
-                                  />
+                    {/* Fallback for unclassified vehicle classes */}
+                    {(() => {
+                      const unclassified = classes.filter(
+                        (cls) => !cls.categoryId || !categories.some((cat) => cat.id === cls.categoryId)
+                      )
+                      if (unclassified.length === 0) return null
+                      return (
+                        <div className="p-4 rounded-xl border border-slate-800/80 bg-[#141A2D] space-y-3">
+                          <div className="flex items-center gap-2 text-xs font-bold text-[#ADC6FF] tracking-wider uppercase border-b border-slate-800/60 pb-2">
+                            <Car size={16} />
+                            <span>Other Vehicles</span>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {unclassified.map((cls) => {
+                              const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
+                              return (
+                                <div key={cls.id} className="flex flex-col gap-1">
+                                  <label className="text-[10px] font-semibold text-slate-400 truncate">
+                                    {cls.name}
+                                  </label>
+                                  <div className="flex items-center rounded-lg border border-slate-800 bg-[#2E3447] px-2.5 py-1.5 focus-within:border-blue-500/60 transition-colors">
+                                    <span className="text-xs text-slate-400 mr-1">₹</span>
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={priceItem?.price ?? 99}
+                                      onChange={(e) =>
+                                        handleServicePriceChange(index, cls.id, parseFloat(e.target.value) || 0)
+                                      }
+                                      className="w-full bg-transparent text-xs font-bold text-white outline-none"
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          })}
+                              )
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })()}
+                      )
+                    })()}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           <button
             type="button"
@@ -327,7 +419,7 @@ export default function ExtraServicesForm({
             placeholder="Add custom amenity..."
             value={customAmenity}
             onChange={(e) => setCustomAmenity(e.target.value)}
-            className="bg-[#2E3447] text-white text-xs px-3.5 py-2 rounded-xl border border-slate-700 outline-none flex-1 placeholder:text-slate-500"
+            className="bg-[#2E3447] text-[#FFFFFF] text-xs px-3.5 py-2 rounded-xl border border-slate-700 outline-none flex-1 placeholder:text-slate-500"
           />
           <button
             type="button"

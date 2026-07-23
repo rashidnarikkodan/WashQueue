@@ -10,7 +10,7 @@ import {
 import FormInput from "../../../../shared/components/form/FormInput"
 import FormSelect from "../../../../shared/components/form/FormSelect"
 import FormUpload from "../../../../shared/components/form/FormUpload"
-import type { OnboardingDetails } from "../../services/owner.api"
+import type { OnboardingDetails } from "@/shared/apis/owner.api"
 
 interface PayoutStepProps {
   formData: {

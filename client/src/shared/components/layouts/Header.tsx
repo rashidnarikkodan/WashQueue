@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Menu, X, Search, Heart } from "lucide-react"
-import ThemeToggle from "../ui/header/ThemeToggle"
-import LocationSelector from "../ui/header/LocationSelector"
-import SearchPill from "../ui/header/SearchPill"
-import NotificationDropdown from "../ui/header/NotificationDropdown"
-import ProfileDropdown from "../ui/header/ProfileDropdown"
+import ThemeToggle from "../header/ThemeToggle"
+// import LocationSelector from "../header/LocationSelector"
+import SearchPill from "../header/SearchPill"
+import NotificationDropdown from "../header/NotificationDropdown"
+import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/authStore"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
 
@@ -94,9 +94,8 @@ export default function Header({ role }: { role?: string }) {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
-                        isActive ? "text-foreground font-semibold" : "text-muted-foreground"
-                      }`}
+                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                        }`}
                     >
                       {link.name}
                       {isActive && (
@@ -113,7 +112,7 @@ export default function Header({ role }: { role?: string }) {
         {/* Right Side: Utilities, Profile & Hamburger Menu */}
         <div className="col-span-1 flex justify-end items-center gap-3">
           {/* Location Selector (Consumer-only) */}
-          {!isSearchExpanded && isCustomer && <LocationSelector className="hidden lg:flex" />}
+          {/* {!isSearchExpanded && isCustomer && <LocationSelector className="hidden lg:flex" />} */}
 
           {/* Search Trigger Button (Consumer-only) */}
           {!isSearchExpanded && isCustomer && (
@@ -177,11 +176,10 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
                       ? "bg-primary/10 text-primary font-semibold"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {link.name}
                 </Link>

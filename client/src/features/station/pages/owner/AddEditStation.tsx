@@ -7,7 +7,7 @@ import { ADD_STATION_STEPPER } from "../../config/stepper.config"
 import { stationApi } from "@/shared/apis/station.api"
 import { getErrorMessage } from "@/shared/utils/error"
 import { STATION_STATUS } from "../../types"
-import type { CreateStationInput, ExtraServiceInput, StationImage } from "../../types"
+import type { ExtraServiceInput, StationImage } from "../../types"
 
 // Form Step Components
 import {
@@ -23,38 +23,7 @@ import type { PricingItem } from "../../components/station-forms/PricingConfigur
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
 
-const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement("canvas")
-        let width = img.width
-        let height = img.height
 
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width)
-          width = maxWidth
-        }
-
-        canvas.width = width
-        canvas.height = height
-
-        const ctx = canvas.getContext("2d")
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height)
-          resolve(canvas.toDataURL("image/jpeg", quality))
-        } else {
-          resolve((event.target?.result as string) || "")
-        }
-      }
-      img.onerror = () => resolve((event.target?.result as string) || "")
-      img.src = (event.target?.result as string) || ""
-    }
-    reader.readAsDataURL(file)
-  })
-}
 
 export default function AddEditStation() {
   const navigate = useNavigate()
@@ -190,63 +159,42 @@ export default function AddEditStation() {
     setImageFiles(images)
     setExistingImages(remainingExistingImages)
 
-    const newlyProcessedImages = await Promise.all(
-      images.map(async (file, idx) => {
-        const dataUrl = await compressImage(file)
-        return {
-          url: dataUrl,
-          publicId: `img_${Date.now()}_${idx}`,
-          isPrimary: remainingExistingImages.length === 0 && idx === 0,
-        }
-      })
-    )
+    const formData = new FormData()
+    formData.append("name", data.name)
+    formData.append("description", data.description || "")
+    formData.append("contact", JSON.stringify({ phone: data.phone, email: data.email }))
+    formData.append("location", JSON.stringify({ latitude: data.latitude, longitude: data.longitude }))
+    formData.append("address", JSON.stringify({
+      street: data.street,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      pincode: data.pincode,
+    }))
+    formData.append("images", JSON.stringify(remainingExistingImages))
 
-    const combinedImages = [...remainingExistingImages, ...newlyProcessedImages]
-
-    const payload: CreateStationInput = {
-      name: data.name,
-      description: data.description || "",
-      contact: {
-        phone: data.phone,
-        email: data.email,
-      },
-      location: {
-        latitude: data.latitude,
-        longitude: data.longitude,
-      },
-      address: {
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        pincode: data.pincode,
-      },
-      images: combinedImages,
-    }
+    images.forEach((file) => {
+      formData.append("images", file)
+    })
 
     try {
       if (!stationId) {
         // First time creating station draft
-        const res = await stationApi.createStation(payload)
+        const res = await stationApi.createStation(formData)
         setStationId(res.stationId)
+        if (res.station?.images) {
+          setExistingImages(res.station.images)
+        }
       } else {
         // Updating existing draft or active station
-        await stationApi.updateStation(stationId, {
-          step: 1,
-          name: data.name,
-          description: data.description,
-          contact: { phone: data.phone, email: data.email },
-          location: { latitude: data.latitude, longitude: data.longitude },
-          address: {
-            street: data.street,
-            city: data.city,
-            state: data.state,
-            country: data.country,
-            pincode: data.pincode,
-          },
-          images: combinedImages,
-          deletedImagePublicIds: deletedPublicIds.length > 0 ? deletedPublicIds : undefined,
-        })
+        formData.append("step", "1")
+        if (deletedPublicIds.length > 0) {
+          formData.append("deletedImagePublicIds", JSON.stringify(deletedPublicIds))
+        }
+        const updatedDetail = await stationApi.updateStation(stationId, formData)
+        if (updatedDetail?.station?.images) {
+          setExistingImages(updatedDetail.station.images)
+        }
       }
       setActiveStep(2)
     } catch (err) {

@@ -82,6 +82,7 @@ export interface ExtraService {
   id: string
   stationId: string
   name: string
+  slug: string
   description?: string
   pricing: { vehicleClassId: string; price: number }[]
   isActive: boolean
@@ -205,6 +206,7 @@ export interface UpdatePricingInput {
 export interface ExtraServiceInput {
   id?: string
   name: string
+  slug?: string
   description?: string
   pricing: { vehicleClassId: string; price: number }[]
   isActive: boolean

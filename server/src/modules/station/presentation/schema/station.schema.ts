@@ -43,9 +43,14 @@ export const createStationSchema = z.object({
   images: z.array(imageSchema).min(1, "At least one image is required"),
 })
 
+const stepPreprocessor = z.preprocess(
+  (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+  z.number()
+)
+
 // Step 1 — basic info update (after initial creation)
 const step1Schema = z.object({
-  step: z.literal(1),
+  step: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.literal(1)),
   name: z
     .string({ message: "Station name is required" })
     .trim()
@@ -84,7 +89,7 @@ const slotConfigurationSchema = z.object({
 })
 
 const step2Schema = z.object({
-  step: z.literal(2),
+  step: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.literal(2)),
   operatingHours: z.array(operatingHourSchema).min(1, "At least one operating hour slot is required"),
   holidays: z.array(holidaySchema).optional().default([]),
   slotConfig: slotConfigurationSchema,
@@ -99,7 +104,7 @@ const pricingEntrySchema = z.object({
 })
 
 const step3Schema = z.object({
-  step: z.literal(3),
+  step: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.literal(3)),
   pricing: z.array(pricingEntrySchema).min(1, "At least one pricing entry is required"),
 })
 
@@ -112,6 +117,7 @@ const extraServicePricingSchema = z.object({
 const extraServiceInputSchema = z.object({
   id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID").optional(),
   name: z.string().trim().min(2, "Service name must be at least 2 characters"),
+  slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   pricing: z.array(extraServicePricingSchema).min(1, "At least one pricing entry is required"),
   isActive: z.boolean().default(true),
@@ -119,7 +125,7 @@ const extraServiceInputSchema = z.object({
 })
 
 const step4Schema = z.object({
-  step: z.literal(4),
+  step: z.preprocess((val) => (typeof val === "string" ? parseInt(val, 10) : val), z.literal(4)),
   amenities: z.array(z.string()).optional().default([]),
   extraServices: z.array(extraServiceInputSchema).optional().default([]),
 })

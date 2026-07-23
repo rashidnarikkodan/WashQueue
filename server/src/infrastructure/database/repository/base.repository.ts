@@ -20,7 +20,7 @@ export abstract class BaseRepository<
     const entityId = entity.id
     if (entityId && typeof entityId === "string" && entityId.trim() !== "") {
       const updatedDoc = await this.model
-        .findByIdAndUpdate(entityId, { $set: persistenceData }, { new: true })
+        .findByIdAndUpdate(entityId, { $set: persistenceData }, { returnDocument: "after" })
         .exec()
       if (updatedDoc) {
         return this.mapper.toDomain(updatedDoc)
@@ -39,7 +39,7 @@ export abstract class BaseRepository<
   async update(id: string, updates: Partial<TDomain>): Promise<TDomain | null> {
     const persistenceData = this.mapper.toPersistence(updates)
     const updatedDoc = await this.model
-      .findByIdAndUpdate(id, { $set: persistenceData }, { new: true })
+      .findByIdAndUpdate(id, { $set: persistenceData }, { returnDocument: "after" })
       .exec()
     return updatedDoc ? this.mapper.toDomain(updatedDoc) : null
   }

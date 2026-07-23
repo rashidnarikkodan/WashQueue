@@ -93,7 +93,7 @@ export class CloudinaryService implements IMediaStorage {
           }
 
           resolve({
-            url: result.secure_url,
+            url: result.url,
             publicId: result.public_id,
           })
         }

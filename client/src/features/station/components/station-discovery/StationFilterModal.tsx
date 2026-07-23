@@ -1,0 +1,359 @@
+import React, { useState, useEffect } from "react"
+import { X, Star, Bike, Car, Truck, SlidersHorizontal } from "lucide-react"
+import { vehicleCatelogApi } from "@/shared/apis/vehicleCatelog.api"
+import type { VehicleCategory } from "@/features/vehicle-catelog/types"
+
+export interface FilterOptions {
+  sortBy: "nearest" | "rating" | "fastest" | "popular"
+  vehicleCategory: string
+  maxDistanceKm: number
+  minRating: number
+}
+
+export const DEFAULT_FILTERS: FilterOptions = {
+  sortBy: "nearest",
+  vehicleCategory: "all",
+  maxDistanceKm: 20,
+  minRating: 0,
+}
+
+interface StationFilterModalProps {
+  isOpen: boolean
+  onClose: () => void
+  currentFilters: FilterOptions
+  onApplyFilters: (filters: FilterOptions) => void
+  onResetFilters: () => void
+}
+
+const SORT_OPTIONS: { id: FilterOptions["sortBy"]; label: string }[] = [
+  { id: "nearest", label: "Nearest First" },
+  { id: "rating", label: "Highest Rated" },
+  { id: "fastest", label: "Fastest Service" },
+  { id: "popular", label: "Most Popular" },
+]
+
+const DISTANCE_PRESETS = [2, 5, 10, 20, 50]
+
+const RATING_OPTIONS = [
+  { value: 5.0, label: "5.0 Star Rated" },
+  { value: 4.0, label: "4.0+ Star Rated" },
+  { value: 3.0, label: "3.0+ Star Rated" },
+  { value: 1.0, label: "1.0+ Star Rated" },
+  { value: 0, label: "Any Rating" },
+]
+
+export const StationFilterModal: React.FC<StationFilterModalProps> = ({
+  isOpen,
+  onClose,
+  currentFilters,
+  onApplyFilters,
+  onResetFilters,
+}) => {
+  const [draftFilters, setDraftFilters] = useState<FilterOptions>(currentFilters)
+  const [isRendered, setIsRendered] = useState(isOpen)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Dynamic Categories from Backend Server
+  const [categories, setCategories] = useState<VehicleCategory[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(false)
+
+  // Fetch backend categories on mount
+  useEffect(() => {
+    const fetchBackendCategories = async () => {
+      setLoadingCategories(true)
+      try {
+        const data = await vehicleCatelogApi.getCategories()
+        if (data && data.length > 0) {
+          setCategories(data.filter((c) => c.isActive !== false))
+        }
+      } catch {
+        // Fallback or quiet catch
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
+    fetchBackendCategories()
+  }, [])
+
+  // Handle smooth open and close transition state
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true)
+      setDraftFilters(currentFilters)
+      const timer = setTimeout(() => {
+        setIsVisible(true)
+      }, 20)
+      return () => clearTimeout(timer)
+    } else {
+      setIsVisible(false)
+      const timer = setTimeout(() => {
+        setIsRendered(false)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, currentFilters])
+
+  if (!isRendered) return null
+
+  // Calculate active filter count
+  const getActiveFilterCount = (): number => {
+    let count = 0
+    if (draftFilters.sortBy !== DEFAULT_FILTERS.sortBy) count++
+    if (draftFilters.vehicleCategory !== DEFAULT_FILTERS.vehicleCategory) count++
+    if (draftFilters.maxDistanceKm !== DEFAULT_FILTERS.maxDistanceKm) count++
+    if (draftFilters.minRating > 0) count++
+    return count
+  }
+
+  const activeCount = getActiveFilterCount()
+
+  const handleReset = () => {
+    setDraftFilters(DEFAULT_FILTERS)
+    onResetFilters()
+  }
+
+  const handleApply = () => {
+    onApplyFilters(draftFilters)
+    onClose()
+  }
+
+  // Get icon component for category based on name/slug
+  const getCategoryIcon = (name: string, slug?: string) => {
+    const term = `${name} ${slug || ""}`.toLowerCase()
+    if (term.includes("bike") || term.includes("two") || term.includes("cycle")) return Bike
+    if (term.includes("truck") || term.includes("heavy") || term.includes("bus")) return Truck
+    return Car
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      {/* Dimmed Backdrop with smooth fade transition */}
+      <div
+        onClick={onClose}
+        className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
+          isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      />
+
+      {/* Full Width Bottom Sheet Container with smooth pop-up slide transition */}
+      <div
+        className={`relative w-full max-w-full max-h-[92vh] flex flex-col rounded-t-[36px] sm:rounded-t-[44px] bg-card border-t border-border shadow-2xl z-10 overflow-hidden transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+        }`}
+      >
+        {/* Drag Handle Bar Indicator */}
+        <div className="flex justify-center items-center pt-3.5 pb-1 shrink-0">
+          <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
+        </div>
+
+        {/* Modal Header */}
+        <div className="flex items-start justify-between px-6 sm:px-12 py-4 border-b border-border/60 shrink-0">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <SlidersHorizontal className="w-6 h-6 text-primary" />
+              <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                Station Filter & Sort
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Refine your search to find the perfect cleaning station for your vehicle and schedule.
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-2.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            aria-label="Close Filter Modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Scrollable Content Body - Two Columns */}
+        <div className="flex-1 overflow-y-auto px-6 sm:px-12 py-8 text-foreground">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+            {/* PART 1: SORT & CATEGORY PREFERENCES */}
+            <div className="space-y-8 pr-0 lg:pr-6 border-b lg:border-b-0 lg:border-r border-border/60 pb-8 lg:pb-0">
+
+
+              {/* Subheading: SORT BY */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                  SORT BY
+                </h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {SORT_OPTIONS.map((opt) => {
+                    const isActive = draftFilters.sortBy === opt.id
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, sortBy: opt.id }))}
+                        className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none ${
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]"
+                            : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Subheading: VEHICLE CATEGORY (Backend API Server Data) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    VEHICLE CATEGORY
+                  </h3>
+                  {loadingCategories && (
+                    <span className="text-[11px] text-muted-foreground animate-pulse">Loading categories...</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {/* All Vehicles option */}
+                  <button
+                    onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleCategory: "all" }))}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
+                      draftFilters.vehicleCategory === "all"
+                        ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                        : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <Car className="w-4 h-4 shrink-0" />
+                    <span>All Vehicles</span>
+                  </button>
+
+                  {/* Backend Categories */}
+                  {categories.map((cat) => {
+                    const Icon = getCategoryIcon(cat.name, cat.slug)
+                    const isActive = draftFilters.vehicleCategory === cat.id || draftFilters.vehicleCategory === cat.name
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleCategory: cat.id }))}
+                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
+                          isActive
+                            ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span>{cat.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* PART 2: DISTANCE & RATINGS */}
+            <div className="space-y-8">
+  
+              {/* Subheading: DISTANCE FILTER */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-baseline">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    DISTANCE FILTER
+                  </h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold text-foreground">Up to {draftFilters.maxDistanceKm}</span>
+                    <span className="text-xs text-muted-foreground font-medium">km</span>
+                  </div>
+                </div>
+
+                <input
+                  type="range"
+                  min={1}
+                  max={50}
+                  value={draftFilters.maxDistanceKm}
+                  onChange={(e) =>
+                    setDraftFilters((prev) => ({ ...prev, maxDistanceKm: Number(e.target.value) }))
+                  }
+                  className="w-full accent-primary h-2 bg-muted rounded-lg cursor-pointer"
+                />
+
+                <div className="flex justify-between gap-2 overflow-x-auto pb-1">
+                  {DISTANCE_PRESETS.map((km) => {
+                    const isActive = draftFilters.maxDistanceKm === km
+                    return (
+                      <button
+                        key={km}
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, maxDistanceKm: km }))}
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer select-none ${
+                          isActive
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "bg-muted/50 border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {km}km
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Subheading: MINIMUM RATING */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                  MINIMUM RATING
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {RATING_OPTIONS.map((rate) => {
+                    const isSelected = draftFilters.minRating === rate.value
+                    return (
+                      <button
+                        key={rate.value}
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, minRating: rate.value }))}
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border text-sm transition-all cursor-pointer select-none ${
+                          isSelected
+                            ? "bg-primary/10 border-primary text-primary font-bold"
+                            : "bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span>{rate.label}</span>
+                        </div>
+
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
+                          }`}
+                        >
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky Bottom Footer Bar */}
+        <div className="flex items-center justify-between px-6 sm:px-12 py-4 border-t border-border bg-card shrink-0 gap-4">
+          <button
+            onClick={handleReset}
+            className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          >
+            Reset All
+          </button>
+
+          <button
+            onClick={handleApply}
+            className="flex items-center justify-center px-10 py-3.5 bg-primary hover:opacity-90 text-primary-foreground font-extrabold rounded-2xl shadow-lg shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer text-sm"
+          >
+            Apply Filters {activeCount > 0 && `(${activeCount})`}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default StationFilterModal

@@ -8,6 +8,7 @@ export class ExtraServiceMapper {
       id: raw._id.toString(),
       stationId: raw.stationId.toString(),
       name: raw.name,
+      slug: raw.slug,
       description: raw.description ?? "",
       pricing: (raw.pricing ?? []).map((p) => ({
         vehicleClassId: p.vehicleClassId.toString(),
@@ -25,6 +26,7 @@ export class ExtraServiceMapper {
       const props = entity.getProps()
       const raw: Partial<IExtraService> = {
         name: props.name,
+        slug: props.slug,
         description: props.description,
         pricing: props.pricing.map((p) => ({
           vehicleClassId: new Types.ObjectId(p.vehicleClassId),

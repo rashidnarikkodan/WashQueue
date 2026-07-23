@@ -13,8 +13,8 @@ import {
   AlertTriangle,
   UserPlus,
 } from "lucide-react"
-import { useAuthStore } from "../../../../features/auth/store/authStore"
-import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
+import { useAuthStore } from "../../../features/auth/store/authStore"
+import { ROLE, VIEW_MODE } from "../../constants/role.const"
 
 interface ProfileDropdownProps {
   currentRole: "admin" | "manager" | "owner" | "customer"
@@ -92,11 +92,11 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
   const initials = user.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .substring(0, 2)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2)
     : "U"
 
   return (

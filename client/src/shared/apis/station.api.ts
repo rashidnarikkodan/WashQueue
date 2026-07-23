@@ -49,15 +49,17 @@ export const stationApi = {
   },
 
   /**
-   * Create a new station draft (Step 1 of setup).
+   * Create a new station draft (Step 1 of setup, supports FormData multipart file upload).
    */
   createStation: async (
-    input: CreateStationInput
+    input: CreateStationInput | FormData
   ): Promise<{ stationId: string; station: Station }> => {
     try {
+      const isFormData = typeof FormData !== "undefined" && input instanceof FormData
       const response = await api.post<{ data: { stationId: string; station: Station } }>(
         API_ROUTES.STATIONS.ROOT,
-        input
+        input,
+        isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined
       )
       return response.data.data
     } catch (error) {
@@ -66,13 +68,15 @@ export const stationApi = {
   },
 
   /**
-   * Update a station with any of the 4 setup steps.
+   * Update a station with any of the 4 setup steps (supports FormData multipart file upload).
    */
-  updateStation: async (id: string, input: UpdateStationInput): Promise<StationDetail> => {
+  updateStation: async (id: string, input: UpdateStationInput | FormData): Promise<StationDetail> => {
     try {
+      const isFormData = typeof FormData !== "undefined" && input instanceof FormData
       const response = await api.patch<{ data: StationDetail }>(
         API_ROUTES.STATIONS.BY_ID(id),
-        input
+        input,
+        isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined
       )
       return response.data.data
     } catch (error) {

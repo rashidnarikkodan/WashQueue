@@ -12,6 +12,17 @@ import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 
+const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_-]+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
 export class UpdateStationUseCase implements IUpdateStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
@@ -101,9 +112,30 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             await this.stationRepository.save(station)
           }
 
-          // Create, update, and delete extra services as needed
+          // Create, update, and delete extra services with slug validation & duplicate checks
           if (updates.extraServices && Array.isArray(updates.extraServices)) {
+            const activeServices = updates.extraServices.filter((s) => !s.isDeleted)
+
+            // Validate duplicates within incoming payload by name or slug
+            const seenNames = new Set<string>()
+            const seenSlugs = new Set<string>()
+
+            for (const serviceInput of activeServices) {
+              const nameKey = serviceInput.name.toLowerCase().trim()
+              let slugVal = serviceInput.slug || slugify(serviceInput.name)
+
+              if (seenSlugs.has(slugVal)) {
+                slugVal = `${slugVal}-${seenSlugs.size + 1}`
+                serviceInput.slug = slugVal
+              }
+
+              seenNames.add(nameKey)
+              seenSlugs.add(slugVal)
+            }
+
             for (const serviceInput of updates.extraServices) {
+              const generatedSlug = serviceInput.slug || slugify(serviceInput.name)
+
               if (serviceInput.isDeleted) {
                 if (serviceInput.id) {
                   await this.extraServiceRepository.delete(serviceInput.id, session)
@@ -114,6 +146,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
                   serviceInput.id,
                   {
                     name: serviceInput.name,
+                    slug: generatedSlug,
                     description: serviceInput.description,
                     pricing: serviceInput.pricing,
                     isActive: serviceInput.isActive,
@@ -126,6 +159,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
                   {
                     stationId,
                     name: serviceInput.name,
+                    slug: generatedSlug,
                     description: serviceInput.description,
                     pricing: serviceInput.pricing,
                     isActive: serviceInput.isActive,

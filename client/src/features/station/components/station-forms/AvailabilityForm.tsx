@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Clock, Calendar, Info, ArrowRight, Plus, X } from "lucide-react"
+import { Clock, Calendar, Info, ArrowRight, X } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import DatePicker from "@/shared/components/ui/DatePicker"
@@ -50,7 +50,6 @@ export default function AvailabilityForm({
   const [holidays, setHolidays] = useState<{ date: string; reason?: string }[]>(
     initialValues?.holidays || []
   )
-  const [showAddHoliday, setShowAddHoliday] = useState(false)
   const [newHolidayDate, setNewHolidayDate] = useState("")
   const [newHolidayReason, setNewHolidayReason] = useState("")
 
@@ -105,7 +104,6 @@ export default function AvailabilityForm({
     setHolidays((prev) => [...prev, { date: newHolidayDate, reason: newHolidayReason }])
     setNewHolidayDate("")
     setNewHolidayReason("")
-    setShowAddHoliday(false)
   }
 
   const handleRemoveHoliday = (index: number) => {
@@ -271,41 +269,22 @@ export default function AvailabilityForm({
             <Calendar size={16} className="text-[#ADC6FF]" />
             <span>HOLIDAYS & CLOSURES</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowAddHoliday(true)}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#ADC6FF] hover:underline cursor-pointer"
-          >
-            <Plus size={14} />
-            <span>Add Holiday</span>
-          </button>
         </div>
 
         {/* Add Holiday Inline Form */}
-        {showAddHoliday && (
           <div className="p-4 rounded-xl border border-slate-800 bg-[#151B2D] space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <DatePicker
                 value={newHolidayDate}
                 onChange={setNewHolidayDate}
                 placeholder="Select holiday date"
               />
-              <input
+              <FormInput
                 type="text"
                 placeholder="Holiday reason (e.g. Christmas)"
                 value={newHolidayReason}
                 onChange={(e) => setNewHolidayReason(e.target.value)}
-                className="bg-[#2E3447] text-white text-xs px-3 py-2 rounded-lg border border-slate-700 outline-none placeholder:text-slate-500"
               />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAddHoliday(false)}
-                className="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white"
-              >
-                Cancel
-              </button>
               <button
                 type="button"
                 onClick={handleAddHoliday}
@@ -315,7 +294,6 @@ export default function AvailabilityForm({
               </button>
             </div>
           </div>
-        )}
 
         {/* Holiday Chips */}
         <div className="flex flex-wrap gap-3">

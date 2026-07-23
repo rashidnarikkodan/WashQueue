@@ -31,7 +31,7 @@ export class StationPricingMongoRepository implements IStationPricingRepository 
     }
     const options = {
       upsert: true,
-      new: true,
+      returnDocument: "after" as const,
       session,
     }
     const doc = await StationPricingModel.findOneAndUpdate(query, update, options).exec()

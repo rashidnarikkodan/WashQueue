@@ -7,6 +7,7 @@ export interface ExtraServiceProps {
   id: string
   stationId: string
   name: string
+  slug: string
   description?: string
   pricing: ExtraServicePricingEntry[]
   isActive: boolean
@@ -27,6 +28,10 @@ export class ExtraService {
 
   get name() {
     return this.props.name
+  }
+
+  get slug() {
+    return this.props.slug
   }
 
   get description() {

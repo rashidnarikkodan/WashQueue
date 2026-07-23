@@ -4,7 +4,7 @@ import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import UserStats from "../components/ui/UserStats"
-import { usersApi } from "../service/users.api"
+import { usersApi } from "@/shared/apis/users.api"
 import type { User } from "../types"
 import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 import OnboardingDetailsSummary from "../components/ui/OnboardingDetailsSummary"
@@ -56,18 +56,18 @@ const OwnerApproval = () => {
       })
 
       const totalCount = allOwnersResponse.users.length
-      const approvedCount = allOwnersResponse.users.filter((u) => u.isVerified).length
+      const approvedCount = allOwnersResponse.users.filter((u: User) => u.isVerified).length
       const pendingCount = allOwnersResponse.users.filter(
-        (u) => u.onboardingStep === 4 && !u.isVerified
+        (u: User) => u.onboardingStep === 4 && !u.isVerified
       ).length
 
       setStats({ total: totalCount, approved: approvedCount, pending: pendingCount })
 
       let processed = response.users
       if (activeTab === "customer") {
-        processed = processed.filter((u) => u.onboardingStep === 4 && !u.isVerified)
+        processed = processed.filter((u: User) => u.onboardingStep === 4 && !u.isVerified)
       } else if (activeTab === "owner") {
-        processed = processed.filter((u) => u.isVerified)
+        processed = processed.filter((u: User) => u.isVerified)
       }
 
       setOwners(processed)

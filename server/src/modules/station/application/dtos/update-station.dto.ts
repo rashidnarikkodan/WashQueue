@@ -36,6 +36,7 @@ export interface ExtraServicePricingInput {
 export interface ExtraServiceInput {
   id?: string // if provided, update. if missing, create.
   name: string
+  slug?: string
   description?: string
   pricing: ExtraServicePricingInput[]
   isActive: boolean
