@@ -37,7 +37,8 @@ export default function OwnerOnboarding() {
       // Reset fetching status so it starts as true next time the component mounts
       useOwnerStore.setState({ isFetchingStatus: true })
     }
-  }, [fetchOnboardingStatus, user])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // If already submitted, redirect away
   useEffect(() => {

@@ -65,13 +65,14 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isSubmitting: true, error: null })
     try {
       const result = await stationApi.createStation(input)
+      const station = result.station
       // Optimistically add the new station to the list
       set((state) => ({
-        stations: [result, ...state.stations],
+        stations: [station, ...state.stations],
         isSubmitting: false,
       }))
       toast.success("Station draft created successfully!")
-      return result
+      return station
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to create station")
       set({ error: msg, isSubmitting: false })

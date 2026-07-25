@@ -180,10 +180,11 @@ export default function AddEditStation() {
     try {
       if (!stationId) {
         // First time creating station draft
-        const station = await stationApi.createStation(formData)
-        setStationId(station.id)
-        if (station?.images) {
-          setExistingImages(station.images)
+        const res = await stationApi.createStation(formData)
+        const newStationId = res.stationId || res.station?.id
+        setStationId(newStationId)
+        if (res.station?.images) {
+          setExistingImages(res.station.images)
         }
         setImageFiles([])
       } else {

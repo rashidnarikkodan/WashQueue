@@ -3,6 +3,7 @@ import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
 import type {
   CreateStationInput,
+  CreateStationResponse,
   GetStationsQuery,
   GetStationsResponse,
   Station,
@@ -54,10 +55,10 @@ export const stationApi = {
    */
   createStation: async (
     input: CreateStationInput | FormData
-  ): Promise<Station> => {
+  ): Promise<CreateStationResponse> => {
     try {
       const isFormData = typeof FormData !== "undefined" && input instanceof FormData
-      const response = await api.post<ApiResponse<Station>>(
+      const response = await api.post<ApiResponse<CreateStationResponse>>(
         API_ROUTES.STATIONS.ROOT,
         input,
         isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined

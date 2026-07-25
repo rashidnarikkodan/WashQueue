@@ -1,40 +1,58 @@
+import { Trash2 } from "lucide-react"
 import type { Vehicle } from "../types"
 
 type Props = {
-    vehicle:Vehicle
-    image:string
-    className:string
-    categoryName:string
+  vehicle: Vehicle
+  image: string
+  className: string
+  categoryName: string
+  onDelete?: (vehicle: Vehicle) => void
 }
 
-const VehicleCard = ({vehicle,image,categoryName,className}:Props) => {
-            return (
-            <div
-              key={vehicle.id}
-              className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-border/80 transition-all duration-300"
+const VehicleCard = ({ vehicle, image, categoryName, className, onDelete }: Props) => {
+  return (
+    <div
+      key={vehicle.id}
+      className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group hover:border-border/80 transition-all duration-300"
+    >
+      {/* Image and status badge */}
+      <div className="h-56 relative overflow-hidden">
+        <img
+          src={image}
+          alt={`${vehicle.brand} ${vehicle.model}`}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-60" />
+
+        <span
+          className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md bg-emerald-500/25 text-emerald-400 border border-emerald-500/25"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          Good Condition
+        </span>
+
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          {vehicle.isPrimary && (
+            <span className="bg-primary/10 text-primary border border-primary/20 backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-md">
+              PRIMARY
+            </span>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(vehicle)
+              }}
+              title="Delete Vehicle"
+              className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-md"
+              aria-label="Delete vehicle"
             >
-              {/* Image and status badge */}
-              <div className="h-56 relative overflow-hidden">
-                <img
-                  src={image}
-                  alt={`${vehicle.brand} ${vehicle.model}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-60" />
-
-                <span
-                  className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md bg-emerald-500/25 text-emerald-400 border border-emerald-500/25"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Good Condition
-                </span>
-
-                {vehicle.isPrimary && (
-                  <span className="absolute top-4 right-4 bg-primary/10 text-primary border border-primary/20 backdrop-blur-md px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-md">
-                    PRIMARY
-                  </span>
-                )}
-              </div>
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      </div>
 
               {/* Body details */}
               <div className="p-6 space-y-6 flex-grow flex flex-col justify-between">

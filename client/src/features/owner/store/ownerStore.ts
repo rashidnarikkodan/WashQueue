@@ -37,8 +37,17 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
     set({ isFetchingStatus: true })
     try {
       const status = await ownerApi.getOnboardingStatus()
-      // Sync authStore user profile to update onboardingStep & prevent redirect loops
-      await useAuthStore.getState().refreshUser()
+      // Sync authStore user profile in-memory & localStorage to prevent redirect loops
+      const currentUser = useAuthStore.getState().user
+      if (currentUser) {
+        const updatedUser = {
+          ...currentUser,
+          onboardingStep: status.step,
+          onboardingDetails: status.details,
+        }
+        useAuthStore.setState({ user: updatedUser })
+        localStorage.setItem("wq_user", JSON.stringify(updatedUser))
+      }
       set({
         onboardingStep: status.step,
         onboardingDetails: status.details,
@@ -55,12 +64,21 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
     set({ isLoading: true })
     try {
       const result = await ownerApi.saveOnboardingStep(currentStep, formData)
+      const currentUser = useAuthStore.getState().user
+      if (currentUser) {
+        const updatedUser = {
+          ...currentUser,
+          onboardingStep: nextStep,
+          onboardingDetails: result.details,
+        }
+        useAuthStore.setState({ user: updatedUser })
+        localStorage.setItem("wq_user", JSON.stringify(updatedUser))
+      }
       set({
         onboardingStep: nextStep,
         onboardingDetails: result.details,
         isLoading: false,
       })
-      await useAuthStore.getState().refreshUser()
       setStep(nextStep)
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to save progress. Please try again."))

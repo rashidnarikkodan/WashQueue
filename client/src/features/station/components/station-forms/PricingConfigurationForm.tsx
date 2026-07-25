@@ -39,15 +39,13 @@ export default function PricingConfigurationForm({
   useEffect(() => {
     if (classes.length > 0) {
       const state: Record<string, PricingItem> = {}
-      const hasInitial = initialValues.length > 0
-
       classes.forEach((cls) => {
         const existing = initialValues.find((p) => p.vehicleClassId === cls.id)
         state[cls.id] = {
           vehicleClassId: cls.id,
           halfWashPrice: existing && typeof existing.halfWashPrice === "number" && existing.halfWashPrice > 0 ? existing.halfWashPrice : ("" as unknown as number),
           fullWashPrice: existing && typeof existing.fullWashPrice === "number" && existing.fullWashPrice > 0 ? existing.fullWashPrice : ("" as unknown as number),
-          isActive: existing ? (existing.isActive ?? false) : !hasInitial,
+          isActive: existing ? (existing.isActive ?? false) : false,
         }
       })
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -57,15 +55,11 @@ export default function PricingConfigurationForm({
         const catActive: Record<string, boolean> = {}
         categories.forEach((cat) => {
           const catClasses = classes.filter((c) => c.categoryId === cat.id)
-          if (!hasInitial) {
-            catActive[cat.id] = true
-          } else {
-            const isCatActive = catClasses.length > 0 && catClasses.some((c) => {
-              const item = initialValues.find((p) => p.vehicleClassId === c.id)
-              return item ? item.isActive === true : false
-            })
-            catActive[cat.id] = isCatActive
-          }
+          const isCatActive = catClasses.length > 0 && catClasses.some((c) => {
+            const item = initialValues.find((p) => p.vehicleClassId === c.id)
+            return item ? item.isActive === true : false
+          })
+          catActive[cat.id] = isCatActive
         })
         setCategoryActive(catActive)
       }
@@ -92,6 +86,16 @@ export default function PricingConfigurationForm({
         isActive,
       },
     }))
+
+    if (isActive) {
+      const cls = classes.find((c) => c.id === classId)
+      if (cls) {
+        setCategoryActive((prev) => ({
+          ...prev,
+          [cls.categoryId]: true,
+        }))
+      }
+    }
   }
 
   const handleCategoryToggle = (catId: string, isActive: boolean) => {
@@ -192,7 +196,7 @@ export default function PricingConfigurationForm({
           const categoryClasses = classes.filter((cls) => cls.categoryId === category.id)
           if (categoryClasses.length === 0) return null
 
-          const isActive = categoryActive[category.id] ?? true
+          const isActive = categoryActive[category.id] ?? false
 
           return (
             <div
@@ -250,7 +254,7 @@ export default function PricingConfigurationForm({
                         vehicleClassId: cls.id,
                         halfWashPrice: "" as unknown as number,
                         fullWashPrice: "" as unknown as number,
-                        isActive: true,
+                        isActive: false,
                       }
 
                       return (

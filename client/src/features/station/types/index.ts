@@ -118,6 +118,12 @@ export interface GetStationsResponse {
   }
 }
 
+
+export interface CreateStationResponse {
+  stationId: string
+  station: Station
+}
+
 // --- Input types matching server DTOs ---
 
 export interface StationImage {

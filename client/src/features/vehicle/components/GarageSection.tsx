@@ -4,12 +4,15 @@ import { useVehicleStore } from "../store/vehicleStore"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 import AddVehicleModal from "./AddVehicleModal"
 import VehicleCard from "./VehicleCard"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import type { Vehicle } from "../types"
 
 export default function GarageSection() {
-  const { vehicles, isActionLoading, loadVehicles, addVehicle } = useVehicleStore()
+  const { vehicles, isActionLoading, loadVehicles, addVehicle, deleteVehicle } = useVehicleStore()
   const { categories, classes, loadData } = useVehicleCatelogStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
 
   useEffect(() => {
     loadVehicles()
@@ -17,6 +20,14 @@ export default function GarageSection() {
       loadData()
     }
   }, [loadVehicles, categories.length, classes.length, loadData])
+
+  const handleDeleteConfirm = async () => {
+    if (!vehicleToDelete) return
+    const success = await deleteVehicle(vehicleToDelete.id)
+    if (success) {
+      setVehicleToDelete(null)
+    }
+  }
 
   return (
     <section className="mb-12 space-y-6 text-left">
@@ -38,7 +49,16 @@ export default function GarageSection() {
             ? "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"
             : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80")
 
-          return <VehicleCard image={image} vehicle={vehicle} className={className} categoryName={categoryName}  />
+          return (
+            <VehicleCard
+              key={vehicle.id}
+              image={image}
+              vehicle={vehicle}
+              className={className}
+              categoryName={categoryName}
+              onDelete={(v) => setVehicleToDelete(v)}
+            />
+          )
         })}
 
         {/* Add Card placeholder matching original layout */}
@@ -67,6 +87,19 @@ export default function GarageSection() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={addVehicle}
         isSubmitting={isActionLoading}
+      />
+
+      <ConfirmationModal
+        isOpen={Boolean(vehicleToDelete)}
+        onClose={() => setVehicleToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Remove Vehicle"
+        message={`Are you sure you want to remove ${
+          vehicleToDelete ? `${vehicleToDelete.brand} ${vehicleToDelete.model}` : "this vehicle"
+        } from your digital garage?`}
+        confirmText="Delete Vehicle"
+        confirmVariant="danger"
+        isLoading={isActionLoading}
       />
     </section>
   )
