@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { X, MapPin, Camera, Check, Loader2, Navigation, UserCheck } from "lucide-react"
 import type { UserProfile, UpdateProfileInput } from "../types"
 import { toast } from "sonner"
+import { getInitials } from "@/shared/utils/avatar"
 
 interface EditProfileModalProps {
   isOpen: boolean
@@ -166,14 +167,8 @@ export default function EditProfileModal({
     }
   }
 
-  const avatarInitials = profile?.name
-    ? profile.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .substring(0, 2)
-    : "U"
+  const [imgError, setImgError] = useState(false)
+  const avatarInitials = getInitials(name || profile?.name)
 
   return (
     <dialog
@@ -216,10 +211,11 @@ export default function EditProfileModal({
             <div className="md:col-span-4 flex flex-col items-center sm:items-start gap-4">
               <div className="relative">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#2E3447] overflow-hidden bg-gradient-to-br from-[#1E293B] to-[#0F172A] flex items-center justify-center shadow-xl">
-                  {profile?.avatar ? (
+                  {profile?.avatar && !imgError ? (
                     <img
                       src={profile.avatar}
                       alt={profile.name}
+                      onError={() => setImgError(true)}
                       className="w-full h-full object-cover"
                     />
                   ) : (

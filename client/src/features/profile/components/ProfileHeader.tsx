@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { Mail, Phone, Calendar, Pencil, CheckCircle2 } from "lucide-react"
 import type { UserProfile } from "../types"
+import { getInitials } from "@/shared/utils/avatar"
 
 interface ProfileHeaderProps {
   profile: UserProfile
@@ -7,14 +9,8 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderProps) {
-  const initials = profile.name
-    ? profile.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .substring(0, 2)
-    : "U"
+  const [imgError, setImgError] = useState(false)
+  const initials = getInitials(profile.name)
 
   const roleLabel =
     profile.role === "owner"
@@ -39,10 +35,11 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
           {/* Avatar Container */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-full bg-[#ADC6FF]/20 blur-xl opacity-50" />
-            {profile.avatar ? (
+            {profile.avatar && !imgError ? (
               <img
                 src={profile.avatar}
                 alt={profile.name}
+                onError={() => setImgError(true)}
                 className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#1E293B] object-cover shadow-2xl"
               />
             ) : (

@@ -93,6 +93,7 @@ export default function ProfilePage() {
           onUpdateSettingsClick={() => setEditModalOpen(true)}
           onChangePasswordClick={() => setChangePasswordModalOpen(true)}
           onSignOutClick={handleSignOut}
+          isLocal={profile.authProvider === 'local'}
         />
       </div>
 

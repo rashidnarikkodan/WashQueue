@@ -6,6 +6,7 @@ import { ownerSideBarItems } from "../../shared/config/sidebar.config"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { useAuthStore } from "../../features/auth/store/authStore"
 import Loading from "../../shared/components/ui/Loading"
+import Banner from "../../shared/components/ui/Banner"
 
 const OwnerLayout = () => {
   const { isAuthenticated, user, isLoading, activeViewMode, setActiveViewMode } = useAuthStore()
@@ -67,12 +68,21 @@ const OwnerLayout = () => {
       </div>
     )
   }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header role={ROLE.OWNER} />
       <div className="flex flex-1 pt-20 px-6">
         <Sidebar items={ownerSideBarItems} />
         <main className="flex-1 md:pl-24 pl-0 pb-24 md:pb-6 overflow-y-auto">
+          {user && !user.isVerified && (
+            <Banner
+              status="warn"
+              title="Account Verification Pending Admin Approval"
+              badgeText="Under Review"
+              description="Your owner account and business documents have been submitted and are currently being reviewed by our administrative team. Station listings and payout operations will unlock once approved."
+            />
+          )}
           <Suspense fallback={<Loading text="Loading page..." />}>
             <Outlet />
           </Suspense>
