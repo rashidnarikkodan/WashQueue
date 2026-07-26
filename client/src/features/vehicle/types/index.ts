@@ -25,3 +25,28 @@ export interface CreateVehicleInput {
   isPrimary?: boolean
   imageFile?: File | null
 }
+
+export interface VehicleDocument {
+  id: string
+  name: string
+  size?: string
+  fileUrl?: string
+  uploadedAt: string
+}
+
+export interface VehicleWashActivity {
+  id: string
+  stationName: string
+  serviceName: string
+  date: string
+  amount: number
+  status: "COMPLETED" | "CANCELLED" | "IN_PROGRESS"
+}
+
+export interface VehicleMaintenanceInfo {
+  usagePattern: string
+  lastWashDate: string
+  suggestedNextWashDate: string
+  recommendationAlert?: string
+}
+

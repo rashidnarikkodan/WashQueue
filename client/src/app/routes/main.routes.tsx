@@ -6,6 +6,8 @@ const Landing = lazy(() => import("../../features/home/pages/Landing"))
 const Home = lazy(() => import("../../features/home/pages/Home"))
 const StationDetails = lazy(() => import("../../features/station/pages/StationDetails"))
 const StationDiscovery = lazy(() => import("../../features/station/pages/StationDiscovery"))
+const VehicleDetails = lazy(() => import("../../features/vehicle/pages/VehicleDetails"))
+const ProfilePage = lazy(() => import("../../features/profile/pages/ProfilePage"))
 import { useAuthStore } from "../../features/auth/store/authStore"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
@@ -59,6 +61,14 @@ export const mainRoutes = {
     {
       path: "stations/:id",
       element: <StationDetails />,
+    },
+    {
+      path: "vehicles/:id",
+      element: <VehicleDetails />,
+    },
+    {
+      path: "profile",
+      element: <ProfilePage />,
     },
     {
       path: "about",

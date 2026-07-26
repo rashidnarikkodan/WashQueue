@@ -11,6 +11,10 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
+import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
+import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { ROLE } from "@/common/constants/role.constants"
+
 export class UserController {
   constructor(
     private readonly getUsersUseCase: IGetUsersUseCase,
@@ -34,9 +38,16 @@ export class UserController {
     success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
   }
 
-  updateUser = async (req: Request, res: Response) => {
+  updateUser = async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params
+    const currentUserId = req.user?.userId
+    const currentUserRole = req.user?.role
+
     if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED)
+    if (currentUserId !== id && currentUserRole !== ROLE.ADMIN) {
+      throw new ForbiddenError("You are not authorized to update this profile")
+    }
+
     const user = await this.updateUserUseCase.execute(id, req.body)
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)

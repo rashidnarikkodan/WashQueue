@@ -6,7 +6,7 @@ import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
 import { vehicleCatelogApi } from "@/shared/apis/vehicleCatelog.api"
 import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
-import type { CreateVehicleInput } from "../types"
+import type { Vehicle, CreateVehicleInput } from "../types"
 
 // ─────────────────────────────────────────────
 // Inline helper: info badge with popover tooltip
@@ -70,6 +70,7 @@ interface AddVehicleModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (input: CreateVehicleInput) => Promise<boolean>
+  initialVehicle?: Vehicle | null
   isSubmitting?: boolean
 }
 
@@ -77,6 +78,7 @@ export default function AddVehicleModal({
   isOpen,
   onClose,
   onSubmit,
+  initialVehicle = null,
   isSubmitting = false,
 }: AddVehicleModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -119,6 +121,39 @@ export default function AddVehicleModal({
     setImageFile(null)
     setImagePreview(null)
   }
+
+  // Populate initial vehicle data if editing
+  useEffect(() => {
+    if (isOpen && initialVehicle) {
+      setNickname(initialVehicle.nickname || "")
+      setBrand(initialVehicle.brand || "")
+      setModel(initialVehicle.model || "")
+      setYear(initialVehicle.year || new Date().getFullYear())
+      setRegistrationNumber(initialVehicle.registrationNumber || "")
+      setCategoryId(initialVehicle.categoryId || "")
+      setClassId(initialVehicle.classId || "")
+      setIsPrimary(initialVehicle.isPrimary || false)
+      if (initialVehicle.image?.url) {
+        setImagePreview(initialVehicle.image.url)
+      }
+
+      if (initialVehicle.categoryId) {
+        setIsLoadingClasses(true)
+        vehicleCatelogApi
+          .getClasses({ categoryId: initialVehicle.categoryId })
+          .then((data) => {
+            setCategoryClasses(data ?? [])
+          })
+          .catch((err) => {
+            console.error("Failed to load classes", err)
+            setCategoryClasses([])
+          })
+          .finally(() => {
+            setIsLoadingClasses(false)
+          })
+      }
+    }
+  }, [isOpen, initialVehicle])
 
   // Fetch categories when modal opens (if not already loaded)
   useEffect(() => {
@@ -240,7 +275,9 @@ export default function AddVehicleModal({
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <Car className="w-5 h-5" />
           </div>
-          <h2 className="text-lg font-black text-foreground">Register Premium Vehicle</h2>
+          <h2 className="text-lg font-black text-foreground">
+            {initialVehicle ? "Edit Vehicle Details" : "Register Premium Vehicle"}
+          </h2>
         </div>
         <button
           onClick={onClose}

@@ -26,7 +26,6 @@ export const createUsersRouter = (userController: UserController): Router => {
   router.patch(
     API_ROUTES.USERS.UPDATE,
     authenticate,
-    authorize(ROLE.ADMIN),
     validateRequest(updateUserSchema, "body"),
     asyncHandler(userController.updateUser)
   )

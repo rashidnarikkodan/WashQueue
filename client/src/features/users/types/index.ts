@@ -7,6 +7,7 @@ export interface User {
   email: string
   role: RoleType
   phone?: string
+  avatar?: string
   isBlocked: boolean
   isVerified: boolean
   createdAt: string

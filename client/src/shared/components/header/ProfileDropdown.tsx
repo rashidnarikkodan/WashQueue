@@ -121,10 +121,12 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card bg-emerald-500"></span>
               </div>
 
-              <div className="flex flex-col">
-                <h2 className="text-lg font-bold text-foreground leading-tight">{user.name}</h2>
+              <div className="flex flex-col hover:cursor-pointer"  onClick={() => {
+                setIsOpen(false)
+                navigate("/profile")
+              }}>
+                <h2 className="text-lg font-bold text-foreground hover:text-primary leading-tight">{user.name}</h2>
                 <span className="text-xs text-muted-foreground">{user.email}</span>
-
                 {/* Verified Badge */}
                 <span className="inline-flex items-center gap-1 text-[9px] font-bold text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-2 uppercase w-fit tracking-wider">
                   <ShieldCheck className="h-3 w-3" />
@@ -136,7 +138,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <button
               onClick={() => {
                 setIsOpen(false)
-                navigate(currentRole === "customer" ? "/settings" : `/${currentRole}/settings`)
+                navigate("/profile")
               }}
               className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all cursor-pointer"
               title="Profile Settings"

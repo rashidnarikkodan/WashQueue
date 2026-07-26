@@ -6,10 +6,13 @@ import { vehicleApi } from "@/shared/apis"
 
 interface VehicleStore {
   vehicles: Vehicle[]
+  currentVehicle: Vehicle | null
   isLoading: boolean
+  isLoadingCurrentVehicle: boolean
   isActionLoading: boolean
 
   loadVehicles: () => Promise<void>
+  loadVehicleById: (id: string) => Promise<Vehicle | null>
   addVehicle: (input: CreateVehicleInput) => Promise<boolean>
   updateVehicle: (id: string, input: Partial<CreateVehicleInput>) => Promise<boolean>
   deleteVehicle: (id: string) => Promise<boolean>
@@ -18,7 +21,9 @@ interface VehicleStore {
 
 export const useVehicleStore = create<VehicleStore>((set, get) => ({
   vehicles: [],
+  currentVehicle: null,
   isLoading: false,
+  isLoadingCurrentVehicle: false,
   isActionLoading: false,
 
   loadVehicles: async () => {
@@ -30,6 +35,20 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
       toast.error(getErrorMessage(error, "Failed to load vehicles"))
     } finally {
       set({ isLoading: false })
+    }
+  },
+
+  loadVehicleById: async (id: string) => {
+    set({ isLoadingCurrentVehicle: true })
+    try {
+      const vehicle = await vehicleApi.getVehicleById(id)
+      set({ currentVehicle: vehicle })
+      return vehicle
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to load vehicle details"))
+      return null
+    } finally {
+      set({ isLoadingCurrentVehicle: false })
     }
   },
 
@@ -59,6 +78,7 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
       const updated = await vehicleApi.updateVehicle(id, input)
       set((state) => ({
         vehicles: state.vehicles.map((v) => (v.id === id ? updated : v)),
+        currentVehicle: state.currentVehicle?.id === id ? updated : state.currentVehicle,
       }))
       toast.success("Vehicle updated successfully")
       return true
@@ -80,7 +100,10 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
 
       set((state) => {
         const filtered = state.vehicles.filter((v) => v.id !== id)
-        return { vehicles: filtered }
+        return {
+          vehicles: filtered,
+          currentVehicle: state.currentVehicle?.id === id ? null : state.currentVehicle,
+        }
       })
 
       if (wasPrimary) {
@@ -106,6 +129,12 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
         vehicles: state.vehicles.map((v) =>
           v.id === id ? { ...v, isPrimary: true } : { ...v, isPrimary: false }
         ),
+        currentVehicle:
+          state.currentVehicle?.id === id
+            ? { ...state.currentVehicle, isPrimary: true }
+            : state.currentVehicle
+            ? { ...state.currentVehicle, isPrimary: false }
+            : null,
       }))
       toast.success(`${updated.nickname} set as primary vehicle`)
       return true

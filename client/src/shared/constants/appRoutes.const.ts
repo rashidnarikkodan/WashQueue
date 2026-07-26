@@ -45,4 +45,8 @@ export const APP_ROUTES = {
     TEAM: "/owner/team",
     ONBOARDING: "/owner/onboarding",
   },
+  VEHICLES: {
+    DETAILS: (id: string | number) => `/vehicles/${id}`,
+  },
+  PROFILE: "/profile",
 } as const
