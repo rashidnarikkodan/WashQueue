@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { X, Star, Bike, Car, Truck, SlidersHorizontal } from "lucide-react"
-import { vehicleCatelogApi } from "@/shared/apis/vehicleCatelog.api"
+import { vehicleCatelogApi } from "@/shared/apis/catelog.api"
 import type { VehicleCategory } from "@/features/vehicle-catelog/types"
 import { DEFAULT_FILTERS, type FilterOptions } from "../../types"
 

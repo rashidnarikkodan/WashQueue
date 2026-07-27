@@ -3,11 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { AlertTriangle, Info } from "lucide-react"
 import { Stepper } from "@/shared/components/stepper"
-import { ADD_STATION_STEPPER } from "../../config/stepper.config"
+import { ADD_STATION_STEPPER } from "../config/stepper.config"
 import { stationApi } from "@/shared/apis/station.api"
 import { getErrorMessage } from "@/shared/utils/error"
-import { STATION_STATUS } from "../../types"
-import type { ExtraServiceInput, StationImage } from "../../types"
+import { STATION_STATUS } from "../types"
+import type { ExtraServiceInput, StationImage } from "../types"
 
 // Form Step Components
 import {
@@ -16,10 +16,10 @@ import {
   PricingConfigurationForm,
   ExtraServicesForm,
   ReviewSubmit,
-} from "../../components/station-forms"
+} from "../components/station-forms"
 
-import type { StationDetailsFormData, AvailabilityFormData } from "../../schemas/station.schema"
-import type { PricingItem } from "../../components/station-forms/PricingConfigurationForm"
+import type { StationDetailsFormData, AvailabilityFormData } from "../schemas/station.schema"
+import type { PricingItem } from "../components/station-forms/PricingConfigurationForm"
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
 

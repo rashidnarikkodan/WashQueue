@@ -3,8 +3,8 @@ import { lazy } from "react"
 import { Navigate } from "react-router-dom"
 const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
-import StationManagement from "@/features/station/pages/owner/StationManagement"
-import AddEditStation from "@/features/station/pages/owner/AddEditStation"
+import StationManagement from "@/features/station/pages/StationManagement"
+import AddEditStation from "@/features/station/pages/AddEditStation"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
