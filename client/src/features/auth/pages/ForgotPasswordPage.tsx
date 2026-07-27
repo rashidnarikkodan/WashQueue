@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import FormInput from "../../../shared/components/form/FormInput"
 import Loading from "../../../shared/components/ui/Loading"
-import { useAuthFormStore } from "../store/authFormStore"
-import { useAuthStore } from "../store/authStore"
+import { useAuthFormStore } from "../store/auth-form.store"
+import { useAuthStore } from "../store/auth.store"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 

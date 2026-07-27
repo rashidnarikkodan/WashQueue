@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { Outlet, Navigate } from "react-router-dom"
 import Header from "../../shared/components/layouts/Header"
 import { ROLE } from "../../shared/constants/role.const"
-import { useAuthStore } from "../../features/auth/store/authStore"
+import { useAuthStore } from "../../features/auth/store/auth.store"
 import Loading from "../../shared/components/ui/Loading"
 
 const ManagerLayout = () => {

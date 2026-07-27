@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock"
 import { getGreeting } from "@/shared/utils/greeting"
 

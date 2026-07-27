@@ -3,7 +3,7 @@ import { router } from "./app/routes"
 import ThemeProvider from "./shared/providers/ThemeProvider"
 import { Toaster } from "sonner"
 import { GoogleOAuthProvider } from "@react-oauth/google"
-import { useAuthStore } from "./features/auth/store/authStore"
+import { useAuthStore } from "./features/auth/store/auth.store"
 import { useEffect } from "react"
 import { authApi } from "./shared/apis/auth.api"
 

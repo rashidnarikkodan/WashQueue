@@ -7,6 +7,7 @@ import type {
   CreateStationInput,
   UpdateStationInput,
   GetStationsQuery,
+  GetStationsResponse,
 } from "../types"
 import { getErrorMessage } from "@/shared/utils/error"
 import { stationApi } from "@/shared/apis"

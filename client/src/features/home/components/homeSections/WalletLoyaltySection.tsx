@@ -1,5 +1,5 @@
 import { HelpCircle, ChevronRight, MessageSquare } from "lucide-react"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import { MOCK_DASHBOARD_DATA } from "../../mock/dashboard.mock"
 import FeatureLock from "@/shared/components/ui/FeatureLock"
 

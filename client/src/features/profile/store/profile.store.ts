@@ -3,7 +3,7 @@ import { toast } from "sonner"
 import type { UserProfile, UpdateProfileInput, ProfileStats } from "../types"
 import { profileApi } from "../services/profile.api"
 import { getErrorMessage } from "@/shared/utils/error"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 
 interface ProfileStore {
   profile: UserProfile | null

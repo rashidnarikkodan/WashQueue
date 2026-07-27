@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck, Wrench, X } from "lucide-react"
 import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
-import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { ExtraServiceInput } from "../../types"
 
 const PRESET_AMENITIES = [

@@ -24,9 +24,9 @@ import {
   Wind,
   Clock,
 } from "lucide-react"
-import { useVehicleStore } from "../store/vehicleStore"
-import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useVehicleStore } from "../store/vehicle.store"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import AddVehicleModal from "../components/AddVehicleModal"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"

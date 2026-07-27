@@ -1,5 +1,5 @@
 import { Info, Clock, DollarSign, Sparkles, CheckCircle2, AlertCircle, Edit2 } from "lucide-react"
-import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { StationDetailsFormData, AvailabilityFormData } from "../../schemas/station.schema"
 import type { PricingItem } from "./PricingConfigurationForm"
 import type { ExtraServiceInput, StationImage } from "../../types"

@@ -6,7 +6,7 @@ import ThemeToggle from "../header/ThemeToggle"
 import SearchPill from "../header/SearchPill"
 import NotificationDropdown from "../header/NotificationDropdown"
 import ProfileDropdown from "../header/ProfileDropdown"
-import { useAuthStore } from "../../../features/auth/store/authStore"
+import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
 
 export default function Header({ role }: { role?: string }) {

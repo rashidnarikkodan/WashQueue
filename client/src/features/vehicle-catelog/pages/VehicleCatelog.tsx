@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { FolderTree, Table, Plus } from "lucide-react"
 import type { VehicleCategory, VehicleClass, CreateCategoryInput, UpdateCategoryInput, CreateClassInput, UpdateClassInput } from "../types"
-import { useVehicleCatelogStore } from "../store/vehicleCatelogStore"
+import { useVehicleCatelogStore } from "../store/catelog.store"
 
 import CategoryCard from "../components/ui/CategoryCard"
 import ClassCard from "../components/ui/ClassCard"

@@ -1,6 +1,6 @@
 import axios from "axios"
 import { toast } from "sonner"
-import { useAuthStore } from "../../features/auth/store/authStore"
+import { useAuthStore } from "../../features/auth/store/auth.store"
 import { API_ROUTES } from "../constants/api.const"
 
 declare module "axios" {

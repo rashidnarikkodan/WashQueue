@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   UserPlus,
 } from "lucide-react"
-import { useAuthStore } from "../../../features/auth/store/authStore"
+import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../constants/role.const"
 
 interface ProfileDropdownProps {

@@ -3,7 +3,7 @@ import { ArrowRight, Car, Bike, Truck } from "lucide-react"
 import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
-import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 
 export interface PricingItem {
   vehicleClassId: string

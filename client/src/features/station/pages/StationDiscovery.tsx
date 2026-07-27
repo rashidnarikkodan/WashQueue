@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
-import { useStationStore } from "@/features/station/store/stationStore"
+import { useStationStore } from "@/features/station/store/station.store"
 import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
 import {

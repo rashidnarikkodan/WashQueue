@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { Link, Outlet, Navigate, useLocation } from "react-router-dom"
-import { useAuthStore } from "../../features/auth/store/authStore"
+import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE } from "../../shared/constants/role.const"
 import Loading from "../../shared/components/ui/Loading"
 

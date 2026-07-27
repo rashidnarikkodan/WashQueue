@@ -4,7 +4,7 @@ import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
 import { ownerSideBarItems } from "../../shared/config/sidebar.config"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
-import { useAuthStore } from "../../features/auth/store/authStore"
+import { useAuthStore } from "../../features/auth/store/auth.store"
 import Loading from "../../shared/components/ui/Loading"
 import Banner from "../../shared/components/ui/Banner"
 

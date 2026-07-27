@@ -3,7 +3,7 @@ import { Outlet, Navigate } from "react-router-dom"
 import Sidebar from "../../shared/components/layouts/Sidebar"
 import Header from "../../shared/components/layouts/Header"
 import { adminSideBarItems } from "../../shared/config/sidebar.config"
-import { useAuthStore } from "../../features/auth/store/authStore"
+import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE } from "../../shared/constants/role.const"
 import Loading from "../../shared/components/ui/Loading"
 

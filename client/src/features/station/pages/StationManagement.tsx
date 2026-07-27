@@ -16,8 +16,8 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
-import { useStationStore } from "../store/stationStore"
-import { useAuthStore } from "@/features/auth/store/authStore"
+import { useStationStore } from "../store/station.store"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import { STATION_STATUS, type Station } from "../types"
 
 // Admin Tab definitions for filtering stations

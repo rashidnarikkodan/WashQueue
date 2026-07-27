@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import { useAuthStore } from "../../auth/store/authStore"
+import { useAuthStore } from "../../auth/store/auth.store"
 import { getErrorMessage } from "../../../shared/utils/error"
 import { ownerApi, type OnboardingDetails } from "@/shared/apis/owner.api"
 

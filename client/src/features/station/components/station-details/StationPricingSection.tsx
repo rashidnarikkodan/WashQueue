@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { Car, Bike, Truck, Sparkles } from "lucide-react"
 import type { StationPricing } from "../../types"
-import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/vehicleCatelogStore"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import FormSelect from "@/shared/components/form/FormSelect"
 
 interface StationPricingSectionProps {
