@@ -11,6 +11,19 @@ export type StationStatus = (typeof StationStatus)[keyof typeof StationStatus]
 
 export const STATION_STATUS = StationStatus
 
+export interface OperatingBreak {
+  name?: string
+  start: string
+  end: string
+}
+
+export interface OperatingHourDay {
+  day: string
+  open: string
+  close: string
+  isClosed: boolean
+  breaks?: OperatingBreak[]
+}
 
 export interface Station {
   id: string
@@ -37,12 +50,7 @@ export interface Station {
     publicId: string
     isPrimary: boolean
   }[]
-  operatingHours: {
-    day: string
-    open: string
-    close: string
-    isClosed: boolean
-  }[]
+  operatingHours: OperatingHourDay[]
   holidays: {
     date: string
     reason?: string
@@ -63,6 +71,7 @@ export interface Station {
   rejectionReason?: string
   status: StationStatus
   isActive: boolean
+  distanceKm?: number
   createdAt: string
   updatedAt: string
 }
@@ -104,6 +113,11 @@ export interface GetStationsQuery {
   sortBy?: string
   sortOrder?: "asc" | "desc"
   ownerId?: string
+  latitude?: number
+  longitude?: number
+  maxDistanceKm?: number
+  minRating?: number
+  vehicleCategory?: string
 }
 
 export interface GetStationsResponse {
@@ -179,12 +193,7 @@ export interface UpdateBasicInfoInput {
 
 export interface UpdateAvailabilityInput {
   step: 2
-  operatingHours: {
-    day: string
-    open: string
-    close: string
-    isClosed: boolean
-  }[]
+  operatingHours: OperatingHourDay[]
   holidays: { date: string; reason?: string }[]
   slotConfig: {
     bays: number
@@ -236,6 +245,9 @@ export interface FilterOptions {
   vehicleCategory: string
   maxDistanceKm: number
   minRating: number
+  latitude?: number
+  longitude?: number
+  search?: string
 }
 
 export const DEFAULT_FILTERS: FilterOptions = {

@@ -8,12 +8,16 @@ import {
   Map as MapIcon,
   LayoutGrid,
   Search,
+  Crosshair,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/stationStore"
 import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
+import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
 import {
-  STATION_STATUS,
   DEFAULT_FILTERS,
   type FilterOptions,
   type Station,
@@ -21,24 +25,84 @@ import {
 
 const StationDiscovery = () => {
   const navigate = useNavigate()
-  const { stations, isLoading, error, fetchStations } = useStationStore()
+  const { stations, pagination, isLoading, error, fetchStations } = useStationStore()
 
   // View state
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS)
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [isLocating, setIsLocating] = useState(false)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
 
-  // Fetch stations on mount
+  // Debounce search query input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1) // Reset to page 1 on new search
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Fetch stations from backend whenever filters, location, search, or page changes
   const loadData = useCallback(async () => {
-    await fetchStations()
-  }, [fetchStations])
+    await fetchStations({
+      page,
+      limit: 12,
+      search: debouncedSearch.trim() || undefined,
+      latitude: userLocation?.latitude,
+      longitude: userLocation?.longitude,
+      maxDistanceKm: filters.maxDistanceKm,
+      minRating: filters.minRating > 0 ? filters.minRating : undefined,
+      vehicleCategory: filters.vehicleCategory !== "all" ? filters.vehicleCategory : undefined,
+      sortBy: filters.sortBy,
+    })
+  }, [fetchStations, page, debouncedSearch, userLocation, filters])
 
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Trigger HTML5 Geolocation to get user coordinates
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.")
+      return
+    }
+    setIsLocating(true)
+    setLocationError(null)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = parseFloat(position.coords.latitude.toFixed(6))
+        const lng = parseFloat(position.coords.longitude.toFixed(6))
+        setUserLocation({ latitude: lat, longitude: lng })
+        setIsLocating(false)
+        setPage(1)
+      },
+      (err) => {
+        setIsLocating(false)
+        setLocationError(
+          err.code === 1
+            ? "Location permission denied. Please allow location access."
+            : "Could not retrieve your location. Try again."
+        )
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    )
+  }
+
+  // Clear active user location
+  const handleClearLocation = () => {
+    setUserLocation(null)
+    setLocationError(null)
+    setPage(1)
+  }
 
   // Count active non-default filters
   const activeFilterCount = useMemo(() => {
@@ -47,49 +111,16 @@ const StationDiscovery = () => {
     if (filters.vehicleCategory !== DEFAULT_FILTERS.vehicleCategory) count++
     if (filters.maxDistanceKm !== DEFAULT_FILTERS.maxDistanceKm) count++
     if (filters.minRating > 0) count++
+    if (userLocation) count++
     return count
-  }, [filters])
-
-  // Filter & Sort Logic applied on stations list
-  const filteredStations = useMemo(() => {
-    return stations
-      .filter((st: Station) => {
-        // Must be active for customer view
-        if (st.status && st.status !== STATION_STATUS.ACTIVE) {
-          return false
-        }
-
-        // Text Search
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase()
-          const matchName = st.name.toLowerCase().includes(q)
-          const matchAddr = `${st.address?.street || ""} ${st.address?.city || ""} ${st.address?.state || ""}`
-            .toLowerCase()
-            .includes(q)
-          if (!matchName && !matchAddr) return false
-        }
-
-        // Minimum Rating Filter
-        if (filters.minRating > 0 && (st.rating || 0) < filters.minRating) {
-          return false
-        }
-
-        return true
-      })
-      .sort((a: Station, b: Station) => {
-        if (filters.sortBy === "rating") {
-          return (b.rating || 0) - (a.rating || 0)
-        }
-        if (filters.sortBy === "popular") {
-          return (b.reviewCount || 0) - (a.reviewCount || 0)
-        }
-        return a.name.localeCompare(b.name)
-      })
-  }, [stations, searchQuery, filters])
+  }, [filters, userLocation])
 
   const handleResetFilters = () => {
     setSearchQuery("")
+    setDebouncedSearch("")
+    setUserLocation(null)
     setFilters(DEFAULT_FILTERS)
+    setPage(1)
   }
 
   const getSortLabel = () => {
@@ -107,23 +138,71 @@ const StationDiscovery = () => {
 
   return (
     <div className="min-h-screen pt-24 sm:pt-28 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
-      {/* Top Header Section aligned to layout without overlapping fixed header */}
+      {/* Top Header Section aligned to layout */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/60 pb-6">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Find Wash Stations
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base mt-1.5 font-medium">
-            {filteredStations.length} results • {filters.maxDistanceKm}km radius
+            {pagination ? `${pagination.total} stations found` : `${stations.length} results`}
+            {userLocation ? " • Nearby your location" : ` • ${filters.maxDistanceKm}km radius`}
           </p>
         </div>
 
-        {/* Right Side Controls: Map Toggle Button */}
-        <div className="flex items-center gap-3">
+        {/* Right Side Controls: Search Bar & View Mode Toggle */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Main Search Input */}
+          <div className="relative flex items-center min-w-[260px] sm:min-w-[320px]">
+            <Search className="w-4.5 h-4.5 text-muted-foreground absolute left-4 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search station name, city, street..."
+              className="w-full pl-11 pr-10 py-2.5 rounded-full bg-card border border-border text-foreground placeholder:text-muted-foreground text-sm font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Location Trigger Button */}
+          <button
+            onClick={userLocation ? handleClearLocation : handleGetLocation}
+            disabled={isLocating}
+            title={userLocation ? "Clear location filter" : "Find stations near me"}
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
+              userLocation
+                ? "bg-primary/10 border-primary text-primary shadow-sm"
+                : "bg-card border-border hover:bg-muted text-foreground"
+            }`}
+          >
+            {isLocating ? (
+              <Loader2 className="w-4 h-4 text-primary animate-spin" />
+            ) : userLocation ? (
+              <>
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>Near Me (Active)</span>
+                <X className="w-3.5 h-3.5 ml-1 opacity-70 hover:opacity-100" />
+              </>
+            ) : (
+              <>
+                <Crosshair className="w-4 h-4 text-primary" />
+                <span>Use My Location</span>
+              </>
+            )}
+          </button>
+
           {/* Map View Convert Toggle Button */}
           <button
             onClick={() => setViewMode((prev) => (prev === "grid" ? "map" : "grid"))}
-            className="flex items-center gap-2.5 px-6 py-3 rounded-full border border-border bg-card hover:bg-muted text-foreground text-sm font-semibold transition-all duration-200 shadow-md cursor-pointer select-none"
+            className="flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-full border border-border bg-card hover:bg-muted text-foreground text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md cursor-pointer select-none shrink-0"
           >
             {viewMode === "grid" ? (
               <>
@@ -140,6 +219,19 @@ const StationDiscovery = () => {
         </div>
       </div>
 
+      {/* Location Permission / Error Alert */}
+      {locationError && (
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs sm:text-sm">
+          <span>{locationError}</span>
+          <button
+            onClick={() => setLocationError(null)}
+            className="text-xs font-bold underline hover:opacity-80 cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Active Filter Pills Tag Bar */}
       {(activeFilterCount > 0 || searchQuery) && (
         <div className="flex items-center flex-wrap gap-2 text-xs pt-1">
@@ -151,6 +243,16 @@ const StationDiscovery = () => {
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
                 onClick={() => setSearchQuery("")}
+              />
+            </span>
+          )}
+
+          {userLocation && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
+              Location Filter Active
+              <X
+                className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
+                onClick={handleClearLocation}
               />
             </span>
           )}
@@ -167,7 +269,7 @@ const StationDiscovery = () => {
 
           {filters.vehicleCategory !== "all" && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-foreground font-medium">
-              Category Selected
+              Category Filter Active
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
                 onClick={() => setFilters((p: FilterOptions) => ({ ...p, vehicleCategory: "all" }))}
@@ -211,12 +313,12 @@ const StationDiscovery = () => {
       {/* View Content Section (Grid vs Map View) */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="h-96 rounded-3xl bg-muted/40 animate-pulse border border-border" />
           ))}
         </div>
-      ) : filteredStations.length === 0 ? (
-        /* Clean Unboxed Centered Empty State */
+      ) : stations.length === 0 ? (
+        /* Empty State */
         <div className="flex flex-col items-center justify-center py-24 px-4 text-center space-y-4">
           <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Search className="w-7 h-7" />
@@ -226,64 +328,27 @@ const StationDiscovery = () => {
               No stations found
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
-              We couldn't find any stations matching your search or filters. Try expanding your search criteria.
+              We couldn't find any wash stations matching your query or filters. Try expanding your search radius or clearing active filters.
             </p>
           </div>
           <button
             onClick={handleResetFilters}
             className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all cursor-pointer shadow-md"
           >
-            Reset Filters
+            Reset Filters & Search
           </button>
         </div>
       ) : viewMode === "map" ? (
-        /* Map View Mode */
-        <div className="relative w-full h-[600px] rounded-3xl overflow-hidden border border-border bg-card shadow-xl flex flex-col md:flex-row">
-          {/* Map Interactive Canvas */}
-          <div className="flex-1 bg-muted relative flex items-center justify-center p-6">
-            <div className="text-center space-y-3 max-w-md">
-              <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 text-primary mx-auto flex items-center justify-center">
-                <MapPin className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Interactive Map View</h3>
-              <p className="text-xs text-muted-foreground">
-                Showing {filteredStations.length} available stations. Select a station pin to view queue status & book.
-              </p>
-            </div>
-          </div>
-
-          {/* Map Station Sidebar */}
-          <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border bg-card p-4 overflow-y-auto max-h-[600px] space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Stations List ({filteredStations.length})
-            </p>
-            {filteredStations.map((station: Station) => (
-              <div
-                key={station.id}
-                onClick={() => navigate(`/stations/${station.id}`)}
-                className="p-3.5 rounded-2xl border border-border hover:border-primary/40 bg-muted/30 hover:bg-muted/60 transition-all cursor-pointer space-y-1.5"
-              >
-                <div className="flex justify-between items-start">
-                  <h4 className="font-bold text-sm text-foreground line-clamp-1">{station.name}</h4>
-                  <span className="text-xs font-semibold text-amber-400">★ {station.rating?.toFixed(1) || "4.8"}</span>
-                </div>
-                <p className="text-xs text-muted-foreground line-clamp-1">
-                  {station.address?.street || ""}, {station.address?.city || ""}
-                </p>
-                <div className="flex items-center justify-between text-[11px] pt-1">
-                  <span className="text-emerald-400 font-semibold">
-                    {station.slotConfig?.bays || 4} Bays
-                  </span>
-                  <span className="text-primary font-bold">Book Wash →</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        /* Interactive Map View Mode */
+        <StationDiscoveryMap
+          stations={stations}
+          userLocation={userLocation}
+          onStationSelect={(id) => navigate(`/stations/${id}`)}
+        />
       ) : (
         /* Responsive Stations Grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredStations.map((station: Station) => (
+          {stations.map((station: Station) => (
             <StationCard
               key={station.id}
               id={station.id}
@@ -301,6 +366,7 @@ const StationDiscovery = () => {
               baysCount={station.slotConfig?.bays || 4}
               services={station.amenities || ["Basic Wash", "Full Wash", "Interior Clean"]}
               categories={["Car", "Bike", "SUV"]}
+              distanceKm={station.distanceKm}
               primaryActionLabel="Book Now"
               onClick={() => navigate(`/stations/${station.id}`)}
               onPrimaryAction={() => navigate(`/stations/${station.id}`)}
@@ -310,7 +376,34 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      {/* Floating Capsule Filter & Sort Bar (Matching Figma Design) */}
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-6 pb-12">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={!pagination.hasPrevPage || isLoading}
+            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+            aria-label="Previous Page"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <span className="text-sm font-semibold text-foreground px-4">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+            disabled={!pagination.hasNextPage || isLoading}
+            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+            aria-label="Next Page"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Floating Capsule Filter & Sort Bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <div
           onClick={() => setIsFilterModalOpen(true)}
@@ -342,7 +435,10 @@ const StationDiscovery = () => {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         currentFilters={filters}
-        onApplyFilters={(newFilters) => setFilters(newFilters)}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters)
+          setPage(1)
+        }}
         onResetFilters={handleResetFilters}
       />
     </div>

@@ -17,7 +17,7 @@ export interface IGetStationUseCase {
 }
 
 export interface IGetStationsUseCase {
-  execute(query: GetStationsQuery): Promise<Station[]>
+  execute(query: GetStationsQuery): Promise<{ stations: Station[]; total: number }>
 }
 
 export interface ISubmitStationUseCase {

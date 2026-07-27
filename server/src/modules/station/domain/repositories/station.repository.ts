@@ -10,7 +10,13 @@ export interface StationFilter {
   isActive?: boolean
   search?: string
   
-  // Pricing
+  // Geolocation
+  latitude?: number
+  longitude?: number
+  maxDistanceKm?: number
+
+  // Pricing & Category
+  vehicleCategory?: string
   vehicleClassId?: string
   minHalfWashPrice?: number
   maxHalfWashPrice?: number
@@ -53,6 +59,6 @@ export interface NearbyStationFilter {
 export interface IStationRepository extends IBaseRepository<Station> {
   findByOwnerId(ownerId: string): Promise<Station[]>
   findByName(name: string): Promise<Station | null>
-  findAll(filter: StationFilter): Promise<Station[]>
+  findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }>
   findNearby(filter: NearbyStationFilter): Promise<Station[]>
 }

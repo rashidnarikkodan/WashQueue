@@ -70,9 +70,57 @@ export class StationController {
   }
 
   getStations = async (req: AuthenticatedRequest, res: Response) => {
-    const stations = await this.getStationsUseCase.execute(req.query)
-    const data = stations.map((s) => s.getProps())
-    success(res, data, HTTP_STATUS.OK, "Stations retrieved successfully")
+    const query = req.query || {}
+    const parsedQuery = {
+      ...query,
+      page: query.page ? Number(query.page) : 1,
+      limit: query.limit ? Number(query.limit) : 10,
+      latitude: query.latitude ? Number(query.latitude) : undefined,
+      longitude: query.longitude ? Number(query.longitude) : undefined,
+      maxDistanceKm: query.maxDistanceKm ? Number(query.maxDistanceKm) : undefined,
+      minimumRating: query.minimumRating
+        ? Number(query.minimumRating)
+        : query.minRating
+        ? Number(query.minRating)
+        : undefined,
+      search: query.search ? String(query.search) : undefined,
+      status: query.status ? String(query.status) : undefined,
+      sortBy: query.sortBy ? String(query.sortBy) : undefined,
+      sortOrder: query.sortOrder === "asc" ? ("asc" as const) : ("desc" as const),
+      ownerId: query.ownerId ? String(query.ownerId) : undefined,
+      vehicleCategory: query.vehicleCategory ? String(query.vehicleCategory) : undefined,
+    }
+
+    const { stations, total } = await this.getStationsUseCase.execute(parsedQuery)
+    const page = Math.max(1, parsedQuery.page || 1)
+    const limit = Math.max(1, parsedQuery.limit || 10)
+    const totalPages = Math.ceil(total / limit) || 1
+
+    const data = stations.map((s) => {
+      const props = s.getProps()
+      const distanceKm = (s as unknown as { distanceKm?: number }).distanceKm
+      if (typeof distanceKm === "number") {
+        (props as unknown as { distanceKm?: number }).distanceKm = distanceKm
+      }
+      return props
+    })
+
+    success(
+      res,
+      {
+        stations: data,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
+      },
+      HTTP_STATUS.OK,
+      "Stations retrieved successfully"
+    )
   }
 
   submit = async (req: AuthenticatedRequest, res: Response) => {

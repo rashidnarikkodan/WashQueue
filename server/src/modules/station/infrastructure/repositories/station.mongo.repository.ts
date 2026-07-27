@@ -26,45 +26,34 @@ export class StationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
-  async findAll(filter: StationFilter): Promise<Station[]> {
+  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }> {
     const pipeline: PipelineStage[] = []
 
-    // 1. Match Stage
+    // 1. GeoNear Stage (Must be first stage if location filter is present)
+    if (
+      typeof filter.latitude === "number" &&
+      typeof filter.longitude === "number" &&
+      !isNaN(filter.latitude) &&
+      !isNaN(filter.longitude) &&
+      filter.latitude !== 0 &&
+      filter.longitude !== 0
+    ) {
+      const radiusKm = filter.maxDistanceKm && filter.maxDistanceKm > 0 ? filter.maxDistanceKm : 50
+      pipeline.push({
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [filter.longitude, filter.latitude],
+          },
+          distanceField: "distance",
+          maxDistance: radiusKm * 1000,
+          spherical: true,
+        },
+      })
+    }
+
+    // 2. Match Stage
     const matchStage = this.buildMatchStage(filter)
-    if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage })
-    }
-
-    // 2. Pricing Lookup & Match
-    pipeline.push(...this.buildPricingLookup(filter))
-
-    // 3. Extra Services Lookup & Match
-    pipeline.push(...this.buildExtraServiceLookup(filter))
-
-    // 4. Sort Stage
-    pipeline.push(this.buildSortStage(filter.sortBy, filter.sortOrder))
-
-    // 5. Pagination
-    pipeline.push(...this.buildPagination(filter.page, filter.limit))
-
-    const docs = await this.model.aggregate(pipeline).exec()
-    return docs.map((doc) => this.mapper.toDomain(doc as IStation))
-  }
-
-  async findNearby(filter: NearbyStationFilter): Promise<Station[]> {
-    const pipeline: PipelineStage[] = []
-
-    // 1. GeoNear Stage (Must be first)
-    pipeline.push(this.buildNearbyPipeline(filter))
-
-    // 2. Additional Match Stage (e.g., minimumRating, status=ACTIVE could be added here if needed)
-    const matchStage: Record<string, unknown> = {}
-    if (filter.minimumRating !== undefined) {
-      matchStage.rating = { $gte: filter.minimumRating }
-    }
-    // We can default to only showing active stations for nearby search
-    matchStage.isActive = true
-    
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage })
     }
@@ -75,11 +64,58 @@ export class StationMongoRepository
     // 4. Extra Services Lookup & Match
     pipeline.push(...this.buildExtraServiceLookup(filter))
 
-    // 5. Pagination (Sorting is implicitly done by $geoNear distance)
-    pipeline.push(...this.buildPagination(filter.page, filter.limit))
+    // 5. Sort Stage
+    pipeline.push(this.buildSortStage(filter.sortBy, filter.sortOrder, filter.latitude !== undefined))
 
-    const docs = await this.model.aggregate(pipeline).exec()
-    return docs.map((doc) => this.mapper.toDomain(doc as IStation))
+    // 6. Facet Stage for Count + Pagination
+    const page = Math.max(1, Number(filter.page) || 1)
+    const limit = Math.max(1, Number(filter.limit) || 10)
+    const skip = (page - 1) * limit
+
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [{ $skip: skip }, { $limit: limit }],
+      },
+    })
+
+    const result = await this.model.aggregate(pipeline).exec()
+    const metadata = result[0]?.metadata?.[0] || { total: 0 }
+    const rawDocs = result[0]?.data || []
+
+    const stations = rawDocs.map((doc: IStation & { distance?: number }) => {
+      const domainObj = this.mapper.toDomain(doc as IStation)
+      // Attach calculated distance in km if available from geoNear
+      if (typeof doc.distance === "number") {
+        const distanceKm = parseFloat((doc.distance / 1000).toFixed(1))
+        ;(domainObj as unknown as Record<string, unknown>).distanceKm = distanceKm
+      }
+      return domainObj
+    })
+
+    return {
+      stations,
+      total: metadata.total,
+    }
+  }
+
+  async findNearby(filter: NearbyStationFilter): Promise<Station[]> {
+    const res = await this.findAll({
+      latitude: filter.latitude,
+      longitude: filter.longitude,
+      maxDistanceKm: filter.radiusKm,
+      vehicleClassId: filter.vehicleClassId,
+      extraServiceIds: filter.extraServiceIds,
+      minimumRating: filter.minimumRating,
+      minHalfWashPrice: filter.minHalfWashPrice,
+      maxHalfWashPrice: filter.maxHalfWashPrice,
+      minFullWashPrice: filter.minFullWashPrice,
+      maxFullWashPrice: filter.maxFullWashPrice,
+      page: filter.page,
+      limit: filter.limit,
+      status: "ACTIVE",
+    })
+    return res.stations
   }
 
   private buildMatchStage(filter: StationFilter): Record<string, unknown> {
@@ -90,26 +126,37 @@ export class StationMongoRepository
     }
     if (filter.status) {
       match.status = filter.status
+    } else if (!filter.ownerId) {
+      // Default to ACTIVE for public discovery if no status explicitly requested
+      match.status = "ACTIVE"
     }
+
     if (filter.city) {
-      match["address.city"] = filter.city
+      match["address.city"] = { $regex: filter.city, $options: "i" }
     }
     if (filter.state) {
-      match["address.state"] = filter.state
+      match["address.state"] = { $regex: filter.state, $options: "i" }
     }
     if (filter.country) {
-      match["address.country"] = filter.country
+      match["address.country"] = { $regex: filter.country, $options: "i" }
     }
     if (filter.isActive !== undefined) {
       match.isActive = filter.isActive
     }
-    if (filter.minimumRating !== undefined) {
+    if (filter.minimumRating !== undefined && filter.minimumRating > 0) {
       match.rating = { $gte: filter.minimumRating }
     }
-    if (filter.search) {
+
+    if (filter.search && filter.search.trim().length > 0) {
+      const q = filter.search.trim()
+      const regex = new RegExp(q, "i")
       match.$or = [
-        { name: { $regex: filter.search, $options: "i" } },
-        { description: { $regex: filter.search, $options: "i" } },
+        { name: regex },
+        { description: regex },
+        { "address.street": regex },
+        { "address.city": regex },
+        { "address.state": regex },
+        { "address.pincode": regex },
       ]
     }
 
@@ -121,6 +168,7 @@ export class StationMongoRepository
     
     const hasPricingFilter = 
       filter.vehicleClassId || 
+      ("vehicleCategory" in filter && filter.vehicleCategory && filter.vehicleCategory !== "all") ||
       filter.minHalfWashPrice !== undefined || 
       filter.maxHalfWashPrice !== undefined ||
       filter.minFullWashPrice !== undefined ||
@@ -152,11 +200,13 @@ export class StationMongoRepository
           from: "station_pricing",
           localField: "_id",
           foreignField: "stationId",
-          as: "pricing"
-        }
+          as: "pricing",
+        },
       })
       
-      pipeline.push({ $match: pricingMatch })
+      if (Object.keys(pricingMatch).length > 0) {
+        pipeline.push({ $match: pricingMatch })
+      }
     }
     
     return pipeline
@@ -173,26 +223,37 @@ export class StationMongoRepository
           from: "extra_services",
           localField: "_id",
           foreignField: "stationId",
-          as: "extraServices"
-        }
+          as: "extraServices",
+        },
       })
       
       pipeline.push({
         $match: {
-          "extraServices._id": { $in: extraServiceObjectIds }
-        }
+          "extraServices._id": { $in: extraServiceObjectIds },
+        },
       })
     }
     
     return pipeline
   }
 
-  private buildSortStage(sortBy?: string, sortOrder?: "asc" | "desc"): PipelineStage {
-    const allowedSortFields = ["createdAt", "updatedAt", "rating", "reviewCount", "name"]
-    const sortField = sortBy && allowedSortFields.includes(sortBy) ? sortBy : "createdAt"
-    const sortDirection = sortOrder === "asc" ? 1 : -1
+  private buildSortStage(sortBy?: string, sortOrder?: "asc" | "desc", hasGeo: boolean = false): PipelineStage {
+    const dir = sortOrder === "asc" ? 1 : -1
     
-    return { $sort: { [sortField]: sortDirection } }
+    switch (sortBy) {
+      case "nearest":
+        return hasGeo ? { $sort: { distance: 1 } } : { $sort: { createdAt: -1 } }
+      case "rating":
+        return { $sort: { rating: dir, reviewCount: -1 } }
+      case "popular":
+        return { $sort: { reviewCount: dir, rating: -1 } }
+      case "fastest":
+        return { $sort: { "slotConfig.windowDurationMins": 1, "slotConfig.bays": -1 } }
+      case "name":
+        return { $sort: { name: sortOrder === "desc" ? -1 : 1 } }
+      default:
+        return hasGeo ? { $sort: { distance: 1 } } : { $sort: { rating: -1, createdAt: -1 } }
+    }
   }
 
   private buildPagination(page: number = 1, limit: number = 10): PipelineStage[] {
@@ -219,3 +280,4 @@ export class StationMongoRepository
     }
   }
 }
+

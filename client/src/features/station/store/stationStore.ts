@@ -14,6 +14,7 @@ import { stationApi } from "@/shared/apis"
 interface StationStore {
   // State
   stations: Station[]
+  pagination: GetStationsResponse["pagination"] | null
   selectedStation: StationDetail | null
   isLoading: boolean
   isSubmitting: boolean
@@ -34,6 +35,7 @@ interface StationStore {
 
 export const useStationStore = create<StationStore>((set) => ({
   stations: [],
+  pagination: null,
   selectedStation: null,
   isLoading: false,
   isSubmitting: false,
@@ -43,7 +45,7 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isLoading: true, error: null })
     try {
       const response = await stationApi.getStations(query)
-      set({ stations: response.stations, isLoading: false })
+      set({ stations: response.stations, pagination: response.pagination, isLoading: false })
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to load stations")
       set({ error: msg, isLoading: false })

@@ -175,11 +175,21 @@ export function StationSidebarCard({
           {station.operatingHours && station.operatingHours.length > 0 ? (
             <div className="space-y-2 text-xs">
               {station.operatingHours.map((oh) => (
-                <div key={oh.day} className="flex justify-between items-center">
-                  <span className="text-slate-400 font-semibold capitalize">{oh.day}</span>
-                  <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                    {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
-                  </span>
+                <div key={oh.day} className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 font-semibold capitalize">{oh.day}</span>
+                    <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+                      {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
+                    </span>
+                  </div>
+                  {!oh.isClosed && oh.breaks && oh.breaks.length > 0 && (
+                    <div className="flex justify-between items-center text-[10px] text-amber-400 pl-2">
+                      <span>Break:</span>
+                      <span className="font-mono">
+                        {oh.breaks.map((b) => (b.name ? `${b.name} (${b.start}-${b.end})` : `${b.start}-${b.end}`)).join(", ")}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -222,14 +222,22 @@ export default function ReviewSubmit({
             {availability?.operatingHours?.map((oh) => (
               <div
                 key={oh.day}
-                className="p-2 rounded-lg bg-slate-900/60 border border-slate-800/60 flex justify-between items-center"
+                className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 space-y-1"
               >
-                <span className="font-semibold text-slate-300">{oh.day}</span>
-                <span
-                  className={oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"}
-                >
-                  {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
-                </span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-slate-300">{oh.day}</span>
+                  <span
+                    className={oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"}
+                  >
+                    {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
+                  </span>
+                </div>
+                {!oh.isClosed && oh.breaks && oh.breaks.length > 0 && (
+                  <div className="text-[10px] text-amber-400 font-mono flex items-center justify-between border-t border-slate-800/80 pt-1 mt-1">
+                    <span>Break:</span>
+                    <span>{oh.breaks.map((b) => `${b.start}-${b.end}`).join(", ")}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

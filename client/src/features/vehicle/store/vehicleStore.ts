@@ -100,16 +100,14 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
 
       set((state) => {
         const filtered = state.vehicles.filter((v) => v.id !== id)
+        if (wasPrimary && filtered.length > 0) {
+          filtered[0] = { ...filtered[0], isPrimary: true }
+        }
         return {
           vehicles: filtered,
           currentVehicle: state.currentVehicle?.id === id ? null : state.currentVehicle,
         }
       })
-
-      if (wasPrimary) {
-        const vehicles = await vehicleApi.getVehicles()
-        set({ vehicles })
-      }
 
       toast.success("Vehicle removed successfully")
       return true

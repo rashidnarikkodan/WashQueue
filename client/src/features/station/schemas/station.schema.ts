@@ -47,11 +47,18 @@ export const stationDetailsSchema = z.object({
     .refine((val) => val !== 0, "Please select or enter valid station longitude"),
 })
 
+export const operatingBreakSchema = z.object({
+  name: z.string().trim().optional(),
+  start: z.string().regex(/^\d{2}:\d{2}$/, "Start time must be in HH:mm format"),
+  end: z.string().regex(/^\d{2}:\d{2}$/, "End time must be in HH:mm format"),
+})
+
 export const operatingHourSchema = z.object({
   day: z.string().min(1, "Day is required"),
   open: z.string().regex(/^\d{2}:\d{2}$/, "Open time must be in HH:mm format"),
   close: z.string().regex(/^\d{2}:\d{2}$/, "Close time must be in HH:mm format"),
   isClosed: z.boolean(),
+  breaks: z.array(operatingBreakSchema).optional(),
 })
 
 export const availabilitySchema = z.object({

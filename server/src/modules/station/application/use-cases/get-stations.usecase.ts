@@ -8,7 +8,7 @@ export class GetStationsUseCase implements IGetStationsUseCase {
     private readonly stationRepository: IStationRepository
   ) {}
 
-  async execute(query: GetStationsQuery = {}): Promise<Station[]> {
+  async execute(query: GetStationsQuery = {}): Promise<{ stations: Station[]; total: number }> {
     return this.stationRepository.findAll(query)
   }
 }

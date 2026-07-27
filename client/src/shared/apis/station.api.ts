@@ -18,14 +18,31 @@ export const stationApi = {
    */
   getStations: async (query: GetStationsQuery = {}): Promise<GetStationsResponse> => {
     try {
-      const response = await api.get<{ data: Station[] }>(API_ROUTES.STATIONS.ROOT, {
+      const response = await api.get<{
+        data: Station[] | { stations: Station[]; pagination: GetStationsResponse["pagination"] }
+      }>(API_ROUTES.STATIONS.ROOT, {
         params: query,
       })
-      const stations = response.data.data || []
+
+      const raw = response.data.data
+      if (Array.isArray(raw)) {
+        return {
+          stations: raw,
+          pagination: {
+            total: raw.length,
+            page: query.page ?? 1,
+            limit: query.limit ?? 10,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        }
+      }
+
       return {
-        stations,
-        pagination: {
-          total: stations.length,
+        stations: raw?.stations || [],
+        pagination: raw?.pagination || {
+          total: 0,
           page: query.page ?? 1,
           limit: query.limit ?? 10,
           totalPages: 1,
