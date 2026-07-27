@@ -7,6 +7,7 @@ export interface StepperProps {
   steps: StepDef[]
   currentStep: number
   heading?: string
+  setActiveStep:(step:number)=>void
   description?: string
   footerNote?: string
 }
@@ -16,6 +17,7 @@ export default function Stepper({
   currentStep,
   heading,
   description,
+  setActiveStep,
   footerNote,
 }: StepperProps) {
   const stepsWithStatus = getStepsWithStatus(steps, currentStep)
@@ -34,6 +36,7 @@ export default function Stepper({
     heading,
     description,
     footerNote,
+    setActiveStep
   }
 
   return (

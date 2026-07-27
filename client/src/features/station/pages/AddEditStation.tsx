@@ -390,6 +390,7 @@ export default function AddEditStation() {
         <Stepper
           steps={ADD_STATION_STEPPER}
           currentStep={activeStep}
+          setActiveStep={setActiveStep}
           heading={stepperHeading}
           description={stepperDescription}
           footerNote={isEditMode ? "Station updates will be sent for review." : "Application will be reviewed before activation."}

@@ -38,6 +38,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     toggleActiveStation,
     clearSelected,
   } = useStationStore()
+  
   const user = useAuthStore((state) => state.user)
 
   // Resolve role from props or auth store
@@ -95,9 +96,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     setIsSubmittingAction(true)
     try {
       const success = await reviewStation(id, "APPROVE")
-      if (success) {
-        await fetchStationById(id)
-      }
     } finally {
       setIsSubmittingAction(false)
     }

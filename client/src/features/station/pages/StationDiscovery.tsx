@@ -22,6 +22,7 @@ import {
   type FilterOptions,
   type Station,
 } from "@/features/station/types"
+import { useDebounce } from "@/shared/hooks/useDebounce"
 
 const StationDiscovery = () => {
   const navigate = useNavigate()
@@ -32,22 +33,17 @@ const StationDiscovery = () => {
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS)
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-
+  
   // Debounce search query input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery)
-      setPage(1) // Reset to page 1 on new search
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+  const debouncedSearch = useDebounce(searchQuery,400)
+  
+
 
   // Fetch stations from backend whenever filters, location, search, or page changes
   const loadData = useCallback(async () => {
@@ -117,7 +113,6 @@ const StationDiscovery = () => {
 
   const handleResetFilters = () => {
     setSearchQuery("")
-    setDebouncedSearch("")
     setUserLocation(null)
     setFilters(DEFAULT_FILTERS)
     setPage(1)

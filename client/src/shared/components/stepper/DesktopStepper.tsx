@@ -7,6 +7,7 @@ export default function DesktopStepper({
   description,
   footerNote,
   className = "",
+  setActiveStep
 }: StepperRenderProps) {
   return (
     <div
@@ -39,6 +40,7 @@ export default function DesktopStepper({
           return (
             <div
               key={step.id}
+              onClick={()=>{isCompleted && setActiveStep(step.id)}}
               className={`flex items-center gap-4 transition-all duration-300 ${
                 isActive ? "opacity-100 scale-[1.02]" : "opacity-50"
               }`}
