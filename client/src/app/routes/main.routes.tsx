@@ -8,6 +8,7 @@ const StationDetails = lazy(() => import("../../features/station/pages/StationDe
 const StationDiscovery = lazy(() => import("../../features/station/pages/StationDiscovery"))
 const VehicleDetails = lazy(() => import("../../features/vehicle/pages/VehicleDetails"))
 const ProfilePage = lazy(() => import("../../features/profile/pages/ProfilePage"))
+const BookmarksPage = lazy(() => import("../../features/station/pages/BookmarksPage"))
 import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
@@ -61,6 +62,14 @@ export const mainRoutes = {
     {
       path: "stations/:id",
       element: <StationDetails />,
+    },
+    {
+      path: "bookmarks",
+      element: <BookmarksPage />,
+    },
+    {
+      path: "favorites",
+      element: <Navigate to="/bookmarks" replace />,
     },
     {
       path: "vehicles/:id",

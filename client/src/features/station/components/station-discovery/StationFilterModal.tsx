@@ -13,11 +13,14 @@ interface StationFilterModalProps {
 }
 
 const SORT_OPTIONS: { id: FilterOptions["sortBy"]; label: string }[] = [
-  { id: "nearest", label: "Nearest First" },
-  { id: "rating", label: "Highest Rated" },
-  { id: "fastest", label: "Fastest Service" },
-  { id: "popular", label: "Most Popular" },
+  { id: "RECOMMENDED", label: "Recommended" },
+  { id: "DISTANCE", label: "Nearest First" },
+  { id: "RATING", label: "Highest Rated" },
+  { id: "WAIT_TIME", label: "Fastest Service" },
+  { id: "PRICE_LOW_TO_HIGH", label: "Price: Low to High" },
+  { id: "PRICE_HIGH_TO_LOW", label: "Price: High to Low" },
 ]
+
 
 const DISTANCE_PRESETS = [2, 5, 10, 20, 50]
 

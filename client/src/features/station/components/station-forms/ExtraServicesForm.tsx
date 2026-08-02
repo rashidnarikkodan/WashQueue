@@ -73,16 +73,9 @@ export default function ExtraServicesForm({
           ...s,
           slug: s.slug || slugify(s.name),
         }))
-      : [
-          {
-            name: "Underbody Wash",
-            slug: "underbody-wash",
-            description: "Deep cleaning of the vehicle chassis",
-            pricing: [],
-            isActive: true,
-          },
-        ]
+      : []
   )
+
 
   useEffect(() => {
     loadData()

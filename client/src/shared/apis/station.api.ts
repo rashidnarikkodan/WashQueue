@@ -4,23 +4,32 @@ import { handleApiError } from "@/shared/utils/handleApiError"
 import type {
   CreateStationInput,
   CreateStationResponse,
+  FilterMetadata,
   GetStationsQuery,
   GetStationsResponse,
   Station,
   StationDetail,
   UpdateStationInput,
 } from '@/features/station/types'
+
 import type { ApiResponse } from "../types/ApiResponse"
 
 export const stationApi = {
-  /**
-   * Fetch a paginated list of stations. Pass ownerId to filter by owner.
-   */
-  getStations: async (query: GetStationsQuery = {}): Promise<GetStationsResponse> => {
+
+  getFilterOptions: async (): Promise<FilterMetadata> => {
     try {
-      const response = await api.get<{
-        data: Station[] | { stations: Station[]; pagination: GetStationsResponse["pagination"] }
-      }>(API_ROUTES.STATIONS.ROOT, {
+      const response = await api.get(`${API_ROUTES.STATIONS.ROOT}/filter-options`)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to retrieve filter options")
+    }
+  },
+
+  getStations: async (query: GetStationsQuery = {}): Promise<GetStationsResponse> => {
+
+    try {
+      console.log(query)
+      const response = await api.get(API_ROUTES.STATIONS.ROOT, {
         params: query,
       })
 
@@ -116,11 +125,11 @@ export const stationApi = {
   },
 
   /**
-   * Review (approve or reject) a station.
+   * Review (approve, reject, or suspend) a station.
    */
   reviewStation: async (
     id: string,
-    action: "APPROVE" | "REJECT",
+    action: "APPROVE" | "REJECT" | "SUSPEND",
     rejectionReason?: string
   ): Promise<Station> => {
     try {

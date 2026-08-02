@@ -8,7 +8,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Eye,
   Layers,
   Star,
 } from "lucide-react"
@@ -25,6 +24,7 @@ const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
   { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
   { id: "active", label: "Active Stations", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
   { id: "rejected", label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
@@ -62,8 +62,12 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         statusFilter = STATION_STATUS.PENDING_REVIEW
       } else if (activeTab === "active") {
         statusFilter = STATION_STATUS.ACTIVE
+      } else if (activeTab === "suspended") {
+        statusFilter = STATION_STATUS.SUSPENDED
       } else if (activeTab === "rejected") {
         statusFilter = STATION_STATUS.REJECTED
+      } else {
+        statusFilter = "all"
       }
 
       await fetchStations({
@@ -188,6 +192,10 @@ export default function StationManagement({ role: explicitRole }: StationManagem
             dotStyle = "bg-emerald-500"
             break
           case STATION_STATUS.PENDING_REVIEW:
+            badgeStyle = "bg-amber-500/10 text-amber-500 border-amber-500/20"
+            dotStyle = "bg-amber-500"
+            break
+          case STATION_STATUS.SUSPENDED:
             badgeStyle = "bg-amber-500/10 text-amber-500 border-amber-500/20"
             dotStyle = "bg-amber-500"
             break
@@ -318,7 +326,8 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Owner", path: "/owner/dashboard" }, { label: "Stations" }]} />
 
-      {/* Header */}
+      {/* Header */}qq
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Stations Management</h1>
@@ -328,8 +337,19 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         </div>
 
         <button
-          onClick={() => navigate("/owner/stations/new")}
-          className="flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer"
+          onClick={() => {
+            if (!isAdmin && user && !user.isVerified) {
+              return
+            }
+            navigate("/owner/stations/new")
+          }}
+          disabled={!isAdmin && user ? !user.isVerified : false}
+          title={!isAdmin && user && !user.isVerified ? "Account pending admin approval" : "Create Station"}
+          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
+            !isAdmin && user && !user.isVerified
+              ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+              : "bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          }`}
         >
           <Plus className="w-4 h-4" />
           <span>Create Station</span>
@@ -360,16 +380,21 @@ export default function StationManagement({ role: explicitRole }: StationManagem
             <div className="col-span-full flex flex-col items-center justify-center min-h-[50vh] space-y-3">
               <p className="text-[#C2C6D6] font-semibold text-lg">No stations found</p>
               <p className="text-sm text-muted-foreground max-w-sm text-center">
-                Get started by creating your first wash station.
+                {!isAdmin && user && !user.isVerified
+                  ? "Station creation will unlock once your partner application is approved by an administrator."
+                  : "Get started by creating your first wash station."}
               </p>
-              <button
-                onClick={() => navigate("/owner/stations/new")}
-                className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-md"
-              >
-                Create Station
-              </button>
+              {(!isAdmin && user && !user.isVerified) ? null : (
+                <button
+                  onClick={() => navigate("/owner/stations/new")}
+                  className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-md"
+                >
+                  Create Station
+                </button>
+              )}
             </div>
           ) : (
+
             stations.map((station) => (
               <StationCard
                 key={station.id}

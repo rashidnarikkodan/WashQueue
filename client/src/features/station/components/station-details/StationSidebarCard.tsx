@@ -1,4 +1,4 @@
-import { Star, Zap, CheckCircle2, XCircle, Edit, Layers } from "lucide-react"
+import { Star, Zap, CheckCircle2, XCircle, Edit, Layers, Ban } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
@@ -9,6 +9,7 @@ interface StationSidebarCardProps {
   role?: RoleType
   onApprove?: () => void
   onReject?: () => void
+  onSuspend?: () => void
   onToggleActive?: () => void
   onDelete?: () => void
   isSubmittingAction?: boolean
@@ -19,6 +20,7 @@ export function StationSidebarCard({
   role = "customer",
   onApprove,
   onReject,
+  onSuspend,
   onToggleActive,
   onDelete,
   isSubmittingAction = false,
@@ -30,11 +32,11 @@ export function StationSidebarCard({
   return (
     <div className="space-y-6 lg:sticky lg:top-24">
       {/* Main Station Summary Card */}
-      <div className="p-8 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl space-y-6">
+      <div className="p-8 rounded-2xl bg-background shadow-2xl space-y-6">
         {/* Title & Status */}
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-black text-slate-100 tracking-tight">
+            <h1 className="text-3xl font-black text-forground tracking-tight">
               {station.name}
             </h1>
 
@@ -43,7 +45,7 @@ export function StationSidebarCard({
                 <Star size={14} className="fill-emerald-400 text-emerald-400" />
                 <span className="font-extrabold text-sm">{station.rating ? station.rating.toFixed(1) : "New"}</span>
               </div>
-              <span className="text-slate-600">•</span>
+              <span className="text-forground">•</span>
               <div className="flex items-center gap-1.5 text-emerald-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span className="uppercase tracking-widest text-[10px] font-black">
@@ -57,22 +59,22 @@ export function StationSidebarCard({
         {/* Metrics List */}
         <div className="space-y-3 pt-2">
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Slot Window</span>
+            <span className="text-sm font-semibold text-forground">Slot Window</span>
             <span className="text-lg font-black text-blue-400">
               {station.slotConfig?.windowDurationMins ? `${station.slotConfig.windowDurationMins} Mins` : "N/A"}
             </span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Window Capacity</span>
-            <span className="text-lg font-black text-slate-100">
+            <span className="text-sm font-semibold text-foreground">Window Capacity</span>
+            <span className="text-lg font-black text-forground">
               {station.slotConfig?.capacityPerWindow ? `${station.slotConfig.capacityPerWindow} Slots` : "N/A"}
             </span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
-            <span className="text-sm font-semibold text-slate-400">Service Bays</span>
-            <span className="text-lg font-black text-slate-100">
+            <span className="text-sm font-semibold text-forground">Service Bays</span>
+            <span className="text-lg font-black text-forground">
               {station.slotConfig?.bays ? `${station.slotConfig.bays} Bays` : "N/A"}
             </span>
           </div>
@@ -94,7 +96,7 @@ export function StationSidebarCard({
           {/* ADMIN ROLE */}
           {role === "admin" && (
             <div className="space-y-3">
-              {isPending ? (
+              {isPending && (
                 <>
                   <button
                     onClick={onApprove}
@@ -113,10 +115,28 @@ export function StationSidebarCard({
                     Reject Application
                   </button>
                 </>
-              ) : (
-                <div className="w-full py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs uppercase tracking-wider text-center">
-                  Status: {station.status}
-                </div>
+              )}
+
+              {station.status !== STATION_STATUS.SUSPENDED && (
+                <button
+                  onClick={onSuspend}
+                  disabled={isSubmittingAction}
+                  className="w-full py-3.5 rounded-xl border border-amber-500/30 hover:border-amber-500 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <Ban size={16} />
+                  Suspend Station
+                </button>
+              )}
+
+              {station.status === STATION_STATUS.SUSPENDED && (
+                <button
+                  onClick={onApprove}
+                  disabled={isSubmittingAction}
+                  className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 size={16} />
+                  Reactivate Station
+                </button>
               )}
             </div>
           )}
@@ -168,7 +188,7 @@ export function StationSidebarCard({
 
         {/* Hours of Operation */}
         <div className="pt-4 border-t border-slate-800/60 space-y-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <span className="text-[10px] font-black uppercase tracking-widest text-forground">
             Hours of Operation
           </span>
 
@@ -177,7 +197,7 @@ export function StationSidebarCard({
               {station.operatingHours.map((oh) => (
                 <div key={oh.day} className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 font-semibold capitalize">{oh.day}</span>
+                    <span className="text-forground font-semibold capitalize">{oh.day}</span>
                     <span className="font-bold text-slate-200 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
                       {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
                     </span>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { AlertTriangle, ArrowLeft } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
@@ -28,6 +28,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   const params = useParams<{ id?: string; stationId?: string }>()
   const id = params.id || params.stationId
   const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     selectedStation,
@@ -38,18 +39,27 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     toggleActiveStation,
     clearSelected,
   } = useStationStore()
-  
+
   const user = useAuthStore((state) => state.user)
 
-  // Resolve role from props or auth store
-  let currentRole = role
-  if (!role && user) {
-    if (user.role === ROLE.ADMIN) currentRole = ROLE.ADMIN
-    else if (user.role === ROLE.OWNER) currentRole = ROLE.OWNER
+  // Resolve role from explicit prop OR portal route context (admin portal vs owner portal vs user portal)
+  let currentRole: RoleType = ROLE.CUSTOMER
+  if (role) {
+    currentRole = role
+  } else if (location.pathname.startsWith("/admin") && user?.role === ROLE.ADMIN) {
+    currentRole = ROLE.ADMIN
+  } else if (location.pathname.startsWith("/owner") && user?.role === ROLE.OWNER) {
+    currentRole = ROLE.OWNER
+  } else {
+    // When in User Portal (/stations/:id), render user/customer components regardless of account role
+    currentRole = ROLE.CUSTOMER
   }
+
 
   const [rejecting, setRejecting] = useState(false)
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
+  const [suspending, setSuspending] = useState(false)
+  const [suspensionReasonInput, setSuspensionReasonInput] = useState("")
   const [isSubmittingAction, setIsSubmittingAction] = useState(false)
 
   // Confirmation Modal State
@@ -90,12 +100,13 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   const { station, pricing, extraServices } = selectedStation
   const isRejected = station.status === STATION_STATUS.REJECTED
   const isPending = station.status === STATION_STATUS.PENDING_REVIEW
+  const isSuspended = station.status === STATION_STATUS.SUSPENDED
 
   const handleApprove = async () => {
     if (!id) return
     setIsSubmittingAction(true)
     try {
-      const success = await reviewStation(id, "APPROVE")
+      await reviewStation(id, "APPROVE")
     } finally {
       setIsSubmittingAction(false)
     }
@@ -109,6 +120,21 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       if (success) {
         setRejecting(false)
         setRejectionReasonInput("")
+        await fetchStationById(id)
+      }
+    } finally {
+      setIsSubmittingAction(false)
+    }
+  }
+
+  const handleSuspend = async () => {
+    if (!id) return
+    setIsSubmittingAction(true)
+    try {
+      const success = await reviewStation(id, "SUSPEND", suspensionReasonInput.trim() || undefined)
+      if (success) {
+        setSuspending(false)
+        setSuspensionReasonInput("")
         await fetchStationById(id)
       }
     } finally {
@@ -239,6 +265,36 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       )}
 
+      {/* Suspended Alert Banner */}
+      {isSuspended && (
+        <div className="p-5 border border-amber-500/30 bg-amber-500/10 rounded-2xl flex items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-amber-300">Station Status: Suspended</h3>
+              <p className="text-xs text-amber-200/90 leading-relaxed">
+                This station has been suspended by an administrator.
+                {station.rejectionReason && (
+                  <>
+                    <br />
+                    <strong>Reason:</strong> {station.rejectionReason}
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          {currentRole === ROLE.ADMIN && (
+            <button
+              onClick={handleApprove}
+              disabled={isSubmittingAction}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-50 shrink-0"
+            >
+              Reactivate Station
+            </button>
+          )}
+        </div>
+      )}
+
       {/* MAIN LAYOUT: 70% Left Column + 30% Right Sticky Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column (70%) */}
@@ -271,6 +327,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             role={currentRole}
             onApprove={handleApprove}
             onReject={() => setRejecting(true)}
+            onSuspend={() => setSuspending(true)}
             onToggleActive={handleToggleActive}
             onDelete={handleDeleteDraft}
             isSubmittingAction={isSubmittingAction}
@@ -321,6 +378,55 @@ export function StationDetails({ role }: CommonStationDetailProps) {
                 className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-slate-950 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-red-500/10"
               >
                 Reject Station
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Suspension Reason Input Modal */}
+      {suspending && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <AlertTriangle size={18} />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-100 uppercase tracking-wider">
+                  Suspend Station Operations
+                </h3>
+                <p className="text-[11px] text-slate-500 font-semibold">
+                  Provide reason for suspending this station
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider pl-1">
+                Reason for Suspension
+              </label>
+              <textarea
+                value={suspensionReasonInput}
+                onChange={(e) => setSuspensionReasonInput(e.target.value)}
+                placeholder="e.g. Policy violation, maintenance compliance, or customer safety investigation..."
+                className="w-full h-32 bg-slate-950 text-slate-100 border border-slate-800 rounded-xl p-4 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500/80 transition-all resize-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setSuspending(false)}
+                className="flex-1 py-3 border border-slate-800 hover:bg-slate-800 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isSubmittingAction}
+                onClick={handleSuspend}
+                className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-amber-500/10"
+              >
+                Suspend Station
               </button>
             </div>
           </div>

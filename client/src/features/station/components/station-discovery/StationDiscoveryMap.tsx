@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { Star, Layers, Globe, Moon, Sun, Crosshair, MapPin, ArrowRight } from "lucide-react"
+import { Layers, Globe, Moon, Sun, Crosshair, ArrowRight } from "lucide-react"
 import type { Station } from "../../types"
 
 export type MapStyleMode = "dark" | "satellite" | "streets"
@@ -131,6 +131,8 @@ export default function StationDiscoveryMap({
           mapRef.current.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2 })
         }
       })
+
+      if (!mapRef.current) return
 
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([lng, lat])

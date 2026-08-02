@@ -39,6 +39,7 @@ export default function Header({ role }: { role?: string }) {
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
+      { name: "Bookmarks", path: APP_ROUTES.BOOKMARKS },
     ],
   }
 
@@ -128,9 +129,9 @@ export default function Header({ role }: { role?: string }) {
           {/* Favorites Heart Icon (Consumer-only & Authenticated) */}
           {isAuthenticated && isCustomer && (
             <Link
-              to="/favorites"
+              to={APP_ROUTES.BOOKMARKS}
               className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
-              aria-label="View Favorites"
+              aria-label="View Bookmarks"
             >
               <Heart className="h-4.5 w-4.5" />
             </Link>

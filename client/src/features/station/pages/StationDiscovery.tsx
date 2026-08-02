@@ -10,8 +10,6 @@ import {
   Search,
   Crosshair,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/station.store"
@@ -23,11 +21,13 @@ import {
   type Station,
 } from "@/features/station/types"
 import { useDebounce } from "@/shared/hooks/useDebounce"
+import Pagination from "@/shared/components/ui/Pagination"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 
 const StationDiscovery = () => {
   const navigate = useNavigate()
   const { stations, pagination, isLoading, error, fetchStations } = useStationStore()
-
+  const user = useAuthStore()
   // View state
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
 
@@ -39,35 +39,16 @@ const StationDiscovery = () => {
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-  
+  const [hasAttemptedLocationCheck, setHasAttemptedLocationCheck] = useState(false)
+
   // Debounce search query input
-  const debouncedSearch = useDebounce(searchQuery,400)
-  
-
-
-  // Fetch stations from backend whenever filters, location, search, or page changes
-  const loadData = useCallback(async () => {
-    await fetchStations({
-      page,
-      limit: 12,
-      search: debouncedSearch.trim() || undefined,
-      latitude: userLocation?.latitude,
-      longitude: userLocation?.longitude,
-      maxDistanceKm: filters.maxDistanceKm,
-      minRating: filters.minRating > 0 ? filters.minRating : undefined,
-      vehicleCategory: filters.vehicleCategory !== "all" ? filters.vehicleCategory : undefined,
-      sortBy: filters.sortBy,
-    })
-  }, [fetchStations, page, debouncedSearch, userLocation, filters])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  const debouncedSearch = useDebounce(searchQuery, 400)
 
   // Trigger HTML5 Geolocation to get user coordinates
-  const handleGetLocation = () => {
+  const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser.")
+      setHasAttemptedLocationCheck(true)
       return
     }
     setIsLocating(true)
@@ -79,19 +60,86 @@ const StationDiscovery = () => {
         const lng = parseFloat(position.coords.longitude.toFixed(6))
         setUserLocation({ latitude: lat, longitude: lng })
         setIsLocating(false)
+        setHasAttemptedLocationCheck(true)
         setPage(1)
       },
       (err) => {
         setIsLocating(false)
-        setLocationError(
-          err.code === 1
-            ? "Location permission denied. Please allow location access."
-            : "Could not retrieve your location. Try again."
-        )
+        setHasAttemptedLocationCheck(true)
+        if (err.code === 1) {
+          setLocationError("Location permission denied. Please allow location access for nearest station results.")
+        } else {
+          setLocationError("Could not retrieve your location. Try again.")
+        }
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 5000, enableHighAccuracy: true }
     )
-  }
+  }, [])
+
+  // Check initial location on mount before firing data fetch
+  useEffect(() => {
+    let isMounted = true
+    if (!navigator.geolocation) {
+      setHasAttemptedLocationCheck(true)
+      return
+    }
+
+    setIsLocating(true)
+    const fallbackTimer = setTimeout(() => {
+      if (isMounted) {
+        setIsLocating(false)
+        setHasAttemptedLocationCheck(true)
+      }
+    }, 2500)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!isMounted) return
+        clearTimeout(fallbackTimer)
+        const lat = parseFloat(position.coords.latitude.toFixed(6))
+        const lng = parseFloat(position.coords.longitude.toFixed(6))
+        setUserLocation({ latitude: lat, longitude: lng })
+        setIsLocating(false)
+        setHasAttemptedLocationCheck(true)
+      },
+      (err) => {
+        if (!isMounted) return
+        clearTimeout(fallbackTimer)
+        setIsLocating(false)
+        setHasAttemptedLocationCheck(true)
+        if (err.code === 1) {
+          setLocationError("Location permission denied. Please allow location access for nearest station results.")
+        }
+      },
+      { timeout: 2500, enableHighAccuracy: true }
+    )
+
+    return () => {
+      isMounted = false
+      clearTimeout(fallbackTimer)
+    }
+  }, [])
+
+  // Fetch stations from backend once location check resolves or filter/search/page changes
+  const loadData = useCallback(async () => {
+    if (!hasAttemptedLocationCheck) return
+
+    await fetchStations({
+      page,
+      limit: 8,
+      search: debouncedSearch.trim() || undefined,
+      latitude: userLocation?.latitude,
+      longitude: userLocation?.longitude,
+      maxDistanceKm: filters.maxDistanceKm,
+      minRating: filters.minRating > 0 ? filters.minRating : undefined,
+      vehicleCategory: filters.vehicleCategory !== "all" ? filters.vehicleCategory : undefined,
+      sortBy: filters.sortBy,
+    })
+  }, [fetchStations, page, debouncedSearch, userLocation, filters, hasAttemptedLocationCheck])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   // Clear active user location
   const handleClearLocation = () => {
@@ -120,16 +168,25 @@ const StationDiscovery = () => {
 
   const getSortLabel = () => {
     switch (filters.sortBy) {
+      case "RATING":
       case "rating":
         return "Highest Rated"
+      case "WAIT_TIME":
       case "fastest":
         return "Fastest Service"
-      case "popular":
-        return "Most Popular"
-      default:
+      case "PRICE_LOW_TO_HIGH":
+        return "Price: Low to High"
+      case "PRICE_HIGH_TO_LOW":
+        return "Price: High to Low"
+      case "DISTANCE":
+      case "nearest":
         return "Nearest First"
+      case "RECOMMENDED":
+      default:
+        return "Recommended"
     }
   }
+
 
   return (
     <div className="min-h-screen pt-24 sm:pt-28 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
@@ -223,6 +280,24 @@ const StationDiscovery = () => {
             className="text-xs font-bold underline hover:opacity-80 cursor-pointer"
           >
             Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Nearest Sort Location Prompt */}
+      {(filters.sortBy === "nearest" || filters.sortBy === "DISTANCE") && !userLocation && !locationError && (
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs sm:text-sm">
+          <div className="flex items-center gap-2">
+            <Crosshair className="w-4 h-4 text-blue-400 shrink-0" />
+            <span>Nearest sorting requires your location. Enable location to calculate accurate station distance.</span>
+          </div>
+          <button
+            onClick={handleGetLocation}
+            disabled={isLocating}
+            className="px-4 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs shrink-0 cursor-pointer transition-all disabled:opacity-50"
+          >
+            {isLocating ? "Locating…" : "Enable Location"}
           </button>
         </div>
       )}
@@ -355,48 +430,29 @@ const StationDiscovery = () => {
               }
               address={`${station.address?.street || ""}, ${station.address?.city || ""}`}
               status={station.status}
-              rating={station.rating || 4.8}
-              reviewCount={station.reviewCount || 124}
+              rating={station.rating || 0.0}
+              reviewCount={station.reviewCount || 0}
               queueCount={3}
-              baysCount={station.slotConfig?.bays || 4}
+              baysCount={station.slotConfig?.bays || 0}
               services={station.amenities || ["Basic Wash", "Full Wash", "Interior Clean"]}
               categories={["Car", "Bike", "SUV"]}
               distanceKm={station.distanceKm}
-              primaryActionLabel="Book Now"
+              primaryActionLabel="View Details"
+              showFavoriteButton={user.isAuthenticated}
               onClick={() => navigate(`/stations/${station.id}`)}
-              onPrimaryAction={() => navigate(`/stations/${station.id}`)}
-              onSecondaryAction={() => navigate(`/stations/${station.id}`)}
+              // onPrimaryAction={() => navigate(`/stations/${station.id}`)}
             />
           ))}
         </div>
       )}
 
       {/* Pagination Controls */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-6 pb-12">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={!pagination.hasPrevPage || isLoading}
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-            aria-label="Previous Page"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <span className="text-sm font-semibold text-foreground px-4">
-            Page {pagination.page} of {pagination.totalPages}
-          </span>
-
-          <button
-            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-            disabled={!pagination.hasNextPage || isLoading}
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-            aria-label="Next Page"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+      {pagination && (
+        <div className="pt-6 border-t border-border/60">
+          <Pagination meta={pagination} onPageChange={setPage} />
         </div>
       )}
+
 
       {/* Floating Capsule Filter & Sort Bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
@@ -433,6 +489,9 @@ const StationDiscovery = () => {
         onApplyFilters={(newFilters) => {
           setFilters(newFilters)
           setPage(1)
+          if (newFilters.sortBy === "nearest" && !userLocation) {
+            handleGetLocation()
+          }
         }}
         onResetFilters={handleResetFilters}
       />

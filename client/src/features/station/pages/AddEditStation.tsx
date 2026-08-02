@@ -25,6 +25,8 @@ const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
 
 
 
+import { useAuthStore } from "@/features/auth/store/auth.store"
+
 export default function AddEditStation() {
   const navigate = useNavigate()
   const params = useParams<{ stationId?: string }>()
@@ -32,7 +34,18 @@ export default function AddEditStation() {
   const targetStationId = params.stationId || searchParams.get("editStationId") || null
   const isEditMode = Boolean(targetStationId)
 
+  const user = useAuthStore((state) => state.user)
+
+  // Redirect unapproved owners away from creation/editing wizard
+  useEffect(() => {
+    if (user && user.role === "owner" && !user.isVerified) {
+      toast.error("Your owner account is pending approval by an administrator before you can create or manage wash stations.")
+      navigate("/owner/stations")
+    }
+  }, [user, navigate])
+
   // Orchestrator State
+
   const [activeStep, setActiveStep] = useState<number>(1)
   const [stationId, setStationId] = useState<string | null>(targetStationId)
   const [isLoading, setIsLoading] = useState<boolean>(false)

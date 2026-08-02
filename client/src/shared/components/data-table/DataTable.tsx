@@ -72,8 +72,11 @@ function DataTable<T>({
             </table>
           </div>
           {pagination && onPageChange && (
-            <Pagination meta={pagination} onPageChange={onPageChange} />
+            <div className="border-t border-border/60 bg-card/30">
+              <Pagination meta={pagination} onPageChange={onPageChange} />
+            </div>
           )}
+
         </div>
       )}
     </div>

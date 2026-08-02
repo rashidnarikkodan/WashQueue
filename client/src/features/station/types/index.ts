@@ -105,19 +105,67 @@ export interface StationDetail {
   extraServices: ExtraService[]
 }
 
+export const StationSortBy = {
+  RECOMMENDED: 'RECOMMENDED',
+  DISTANCE: 'DISTANCE',
+  RATING: 'RATING',
+  PRICE_LOW_TO_HIGH: 'PRICE_LOW_TO_HIGH',
+  PRICE_HIGH_TO_LOW: 'PRICE_HIGH_TO_LOW',
+  WAIT_TIME: 'WAIT_TIME',
+  REVIEW_COUNT: 'REVIEW_COUNT',
+  NEWEST: 'NEWEST',
+  // Backward compatibility alias keys:
+  nearest: 'DISTANCE',
+  rating: 'RATING',
+  fastest: 'WAIT_TIME',
+  popular: 'REVIEW_COUNT',
+} as const
+
+export type StationSortBy = keyof typeof StationSortBy | (typeof StationSortBy)[keyof typeof StationSortBy]
+
+export const STATION_SORT_BY = StationSortBy
+
+export type WashType = 'HALF' | 'FULL' | 'ALL'
+
 export interface GetStationsQuery {
-  page?: number
-  limit?: number
-  search?: string
-  status?: string
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
-  ownerId?: string
+  // Location
   latitude?: number
   longitude?: number
+  radiusKm?: number
   maxDistanceKm?: number
-  minRating?: number
+
+  // Search & Status
+  search?: string
+  status?: string
+  ownerId?: string
+
+  // Vehicle & Category
   vehicleCategory?: string
+  vehicleClassId?: string
+
+  // Pricing
+  washType?: WashType
+  minPrice?: number
+  maxPrice?: number
+
+  // Rating
+  minRating?: number
+  minimumRating?: number
+
+  // Filters
+  amenities?: string[]
+  extraServices?: string[]
+  openNow?: boolean
+  availableToday?: boolean
+  verifiedOnly?: boolean
+
+  // Sorting
+  sortBy?: StationSortBy | string
+  sortOrder?: 'asc' | 'desc'
+
+  // Pagination
+  page?: number
+  limit?: number
 }
 
 export interface GetStationsResponse {
@@ -132,6 +180,13 @@ export interface GetStationsResponse {
   }
 }
 
+export interface FilterMetadata {
+  vehicleCategories: Array<{ id: string; slug: string; name: string }>
+  vehicleClasses: Array<{ id: string; categoryId: string; slug: string; name: string }>
+  amenities: Array<{ slug: string; name: string; icon: string }>
+  priceBounds: { minPrice: number; maxPrice: number; currency: string }
+  sortOptions: Array<{ value: string; label: string }>
+}
 
 export interface CreateStationResponse {
   stationId: string
@@ -241,18 +296,25 @@ export type UpdateStationInput =
   | UpdateAmenitiesInput
 
 export interface FilterOptions {
-  sortBy: "nearest" | "rating" | "fastest" | "popular"
+  sortBy: StationSortBy | string
   vehicleCategory: string
   maxDistanceKm: number
   minRating: number
+  minPrice?: number
+  maxPrice?: number
+  amenities?: string[]
+  openNow?: boolean
+  verifiedOnly?: boolean
   latitude?: number
   longitude?: number
   search?: string
 }
 
 export const DEFAULT_FILTERS: FilterOptions = {
-  sortBy: "nearest",
+  sortBy: "RECOMMENDED",
   vehicleCategory: "all",
-  maxDistanceKm: 20,
+  maxDistanceKm: 25,
   minRating: 0,
+  openNow: false,
 }
+

@@ -27,7 +27,7 @@ interface StationStore {
   createStation: (input: CreateStationInput) => Promise<Station | null>
   updateStation: (id: string, input: UpdateStationInput) => Promise<StationDetail | null>
   submitStation: (id: string) => Promise<boolean>
-  reviewStation: (id: string, action: "APPROVE" | "REJECT", rejectionReason?: string) => Promise<boolean>
+  reviewStation: (id: string, action: "APPROVE" | "REJECT" | "SUSPEND", rejectionReason?: string) => Promise<boolean>
   deleteStation: (id: string) => Promise<boolean>
   toggleActiveStation: (id: string) => Promise<Station | null>
   clearError: () => void
@@ -46,6 +46,7 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isLoading: true, error: null })
     try {
       const response = await stationApi.getStations(query)
+      console.log(response)
       set({ stations: response.stations, pagination: response.pagination, isLoading: false })
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to load stations")
@@ -125,7 +126,7 @@ export const useStationStore = create<StationStore>((set) => ({
     }
   },
 
-  reviewStation: async (id: string, action: "APPROVE" | "REJECT", rejectionReason?: string) => {
+  reviewStation: async (id: string, action: "APPROVE" | "REJECT" | "SUSPEND", rejectionReason?: string) => {
     set({ isSubmitting: true, error: null })
     try {
       const updated = await stationApi.reviewStation(id, action, rejectionReason)
@@ -136,7 +137,8 @@ export const useStationStore = create<StationStore>((set) => ({
           : state.selectedStation,
         isSubmitting: false,
       }))
-      toast.success(`Station ${action === "APPROVE" ? "approved" : "rejected"} successfully!`)
+      const actionPastTense = action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : "suspended"
+      toast.success(`Station ${actionPastTense} successfully!`)
       return true
     } catch (err) {
       const msg = getErrorMessage(err, `Failed to ${action.toLowerCase()} station`)

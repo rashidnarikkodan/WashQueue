@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { ImageOff, MapPin, Star, Heart } from "lucide-react"
 import { StationStatus, STATION_STATUS } from "@/features/station/types"
+import { usersApi } from "@/shared/apis/users.api"
 
 export interface StationCardProps {
   id: string
@@ -30,19 +31,19 @@ const STATUS_CONFIG: Record<
   { bg: string; dot: string; text: string; label: string }
 > = {
   [STATION_STATUS.ACTIVE]: {
-    bg: "bg-emerald-500/20 border-emerald-500/30",
+    bg: "bg-emerald-600/50 border-emerald-600/30",
     dot: "bg-emerald-400",
     text: "text-emerald-400",
     label: "Active",
   },
   [STATION_STATUS.INACTIVE]: {
-    bg: "bg-slate-500/20 border-slate-500/30",
-    dot: "bg-slate-400",
-    text: "text-slate-300",
+    bg: "bg-slate-600/50 border-slate-600/30",
+    dot: "bg-slate-200",
+    text: "text-slate-200",
     label: "Inactive",
   },
   [STATION_STATUS.DRAFT]: {
-    bg: "bg-blue-500/20 border-blue-500/30",
+    bg: "bg-blue-600/50 border-blue-500/30",
     dot: "bg-blue-400",
     text: "text-blue-400",
     label: "Draft",
@@ -94,10 +95,18 @@ const StationCard: React.FC<StationCardProps> = ({
 
   const hasValidImage = image && !image.includes("placehold") && image !== "No Image" && !imgError
 
-  const handleFavClick = (e: React.MouseEvent) => {
+  const handleFavClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
     setFavorite((prev) => !prev)
-    onFavoriteToggle?.(id)
+    if (onFavoriteToggle) {
+      onFavoriteToggle(id)
+    } else {
+      try {
+        await usersApi.toggleBookmark(id)
+      } catch {
+        setFavorite((prev) => !prev)
+      }
+    }
   }
 
   const getActionButtonConfig = () => {
@@ -133,8 +142,10 @@ const StationCard: React.FC<StationCardProps> = ({
   }
 
   const actionBtn = getActionButtonConfig()
-  const servicesText = services.length > 0 ? services.slice(0, 3).join(" • ") : "Exterior • Interior • Polish"
-  const categoriesText = categories.length > 0 ? categories.slice(0, 3).join(" • ") : "Car • Bike • SUV"
+  const servicesText =
+    services.length > 0 ? services.slice(0, 3).join(" • ") : "Exterior • Interior • Polish"
+  const categoriesText =
+    categories.length > 0 ? categories.slice(0, 3).join(" • ") : "Car • Bike • SUV"
 
   return (
     <div
@@ -219,9 +230,7 @@ const StationCard: React.FC<StationCardProps> = ({
 
           <div className="flex items-center justify-end gap-1.5 text-right">
             <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
-            <span className="text-amber-500 font-medium">
-              {queueCount} in queue
-            </span>
+            <span className="text-amber-500 font-medium">{queueCount} in queue</span>
           </div>
         </div>
 
@@ -233,20 +242,21 @@ const StationCard: React.FC<StationCardProps> = ({
 
         {/* Actions */}
         <div className="flex flex-col gap-2 mt-auto pt-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              if (onPrimaryAction) {
-                onPrimaryAction()
-              } else {
-                onClick?.()
-              }
-            }}
-            className={`w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer select-none ${actionBtn.className}`}
-          >
-            {actionBtn.label}
-          </button>
-
+          {onPrimaryAction && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onPrimaryAction) {
+                  onPrimaryAction()
+                } else {
+                  onClick?.()
+                }
+              }}
+              className={`w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer select-none ${actionBtn.className}`}
+            >
+              {actionBtn.label}
+            </button>
+          )}
           {onSecondaryAction && (
             <button
               onClick={(e) => {
