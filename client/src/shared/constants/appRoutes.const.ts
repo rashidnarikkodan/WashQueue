@@ -1,6 +1,7 @@
 export const APP_ROUTES = {
   HOME: "/",
   ABOUT: "/about",
+  BOOKMARKS: "/bookmarks",
   AUTH: {
     LOGIN: "/login",
     SIGNUP: "/signup",

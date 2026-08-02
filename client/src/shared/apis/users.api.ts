@@ -12,6 +12,7 @@ interface UserApiPayload {
   phone?: string
   isBlocked?: boolean
   isVerified?: boolean
+  bookmarks?: string[]
   createdAt?: string
   updatedAt?: string
   authProvider?: string
@@ -51,6 +52,7 @@ const toUser = (u?: UserApiPayload): User => ({
   phone: u?.phone,
   isBlocked: u?.isBlocked ?? false,
   isVerified: u?.isVerified ?? false,
+  bookmarks: u?.bookmarks ?? [],
   createdAt: u?.createdAt ?? "",
   updatedAt: u?.updatedAt ?? "",
   authProvider: u?.authProvider,
@@ -140,6 +142,26 @@ export const usersApi = {
       return toUser(u)
     } catch (error: unknown) {
       handleApiError(error, "Failed to update user")
+    }
+  },
+
+  getBookmarks: async (): Promise<unknown[]> => {
+    try {
+      const response = await api.get(API_ROUTES.USERS.BOOKMARKS)
+      const resData = response.data as { data?: unknown[] }
+      return resData.data ?? []
+    } catch (error: unknown) {
+      handleApiError(error, "Failed to retrieve bookmarked stations")
+    }
+  },
+
+  toggleBookmark: async (stationId: string): Promise<User> => {
+    try {
+      const response = await api.post(API_ROUTES.USERS.TOGGLE_BOOKMARK, { stationId })
+      const resData = response.data as { data?: UserApiPayload }
+      return toUser(resData.data)
+    } catch (error: unknown) {
+      handleApiError(error, "Failed to update bookmarks")
     }
   },
 }

@@ -10,6 +10,7 @@ export interface User {
   avatar?: string
   isBlocked: boolean
   isVerified: boolean
+  bookmarks?: string[]
   createdAt: string
   updatedAt: string
   authProvider?: string

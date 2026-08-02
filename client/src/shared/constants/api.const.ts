@@ -13,6 +13,8 @@ export const API_ROUTES = {
   },
   USERS: {
     ROOT: "/users",
+    BOOKMARKS: "/users/bookmarks",
+    TOGGLE_BOOKMARK: "/users/bookmarks/toggle",
     BY_ID: (id: string) => `/users/${id}`,
   },
   STATIONS: {
