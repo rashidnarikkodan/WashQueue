@@ -3,6 +3,8 @@ import {
   IGetUsersUseCase,
   IGetUserUseCase,
   IUpdateUserUseCase,
+  IGetBookmarksUseCase,
+  IToggleBookmarkUseCase,
 } from "../application/interfaces/user-usecases.interfaces"
 import { usersQuerySchema } from "./schema/get-users.schema"
 import success from "@/common/utils/success"
@@ -19,7 +21,9 @@ export class UserController {
   constructor(
     private readonly getUsersUseCase: IGetUsersUseCase,
     private readonly getUserUseCase: IGetUserUseCase,
-    private readonly updateUserUseCase: IUpdateUserUseCase
+    private readonly updateUserUseCase: IUpdateUserUseCase,
+    private readonly getBookmarksUseCase: IGetBookmarksUseCase,
+    private readonly toggleBookmarkUseCase: IToggleBookmarkUseCase
   ) {}
 
   getUsers = async (req: Request, res: Response) => {
@@ -53,5 +57,21 @@ export class UserController {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
     }
     success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS)
+  }
+
+  getBookmarks = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) throw new ForbiddenError("User authentication required")
+    const stations = await this.getBookmarksUseCase.execute(userId)
+    success(res, stations, HTTP_STATUS.OK, "Bookmarks retrieved successfully")
+  }
+
+  toggleBookmark = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) throw new ForbiddenError("User authentication required")
+    const { stationId } = req.body
+    if (!stationId) throw new NotFoundError("Station ID is required")
+    const user = await this.toggleBookmarkUseCase.execute(userId, stationId)
+    success(res, user, HTTP_STATUS.OK, "Bookmarks updated successfully")
   }
 }

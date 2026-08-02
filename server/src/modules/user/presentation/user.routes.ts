@@ -10,12 +10,22 @@ import { updateUserSchema } from "./schema/update-user.schema"
 
 export const createUsersRouter = (userController: UserController): Router => {
   const router = Router()
-
+ 
   router.get(
     API_ROUTES.USERS.GET_ALL,
     authenticate,
     authorize(ROLE.ADMIN),
     asyncHandler(userController.getUsers)
+  )
+  router.get(
+    API_ROUTES.USERS.BOOKMARKS,
+    authenticate,
+    asyncHandler(userController.getBookmarks)
+  )
+  router.post(
+    API_ROUTES.USERS.TOGGLE_BOOKMARK,
+    authenticate,
+    asyncHandler(userController.toggleBookmark)
   )
   router.get(
     API_ROUTES.USERS.GET_BY_ID,

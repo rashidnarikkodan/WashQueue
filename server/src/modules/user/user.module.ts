@@ -1,10 +1,13 @@
 import { GetUsersUseCase } from "./application/use-cases/get-users.use-case"
 import { GetUserUseCase } from "./application/use-cases/get-user.use-case"
 import { UpdateUserUseCase } from "./application/use-cases/update-user.use-case"
+import { GetBookmarksUseCase } from "./application/use-cases/get-bookmarks.use-case"
+import { ToggleBookmarkUseCase } from "./application/use-cases/toggle-bookmark.use-case"
 import { UserRepository } from "./infrastructure/repository/user.mongo.repository"
 import { UserController } from "./presentation/user.controller"
 import { createUsersRouter } from "./presentation/user.routes"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
+import { stationRepository } from "../station/station.module"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 import { MailService } from "../auth/infrastructure/services/mail.service"
 
@@ -23,9 +26,17 @@ const updateUserUseCase = new UpdateUserUseCase(
   ownerRepository,
   mailService
 )
+const getBookmarksUseCase = new GetBookmarksUseCase(userRepository, stationRepository)
+const toggleBookmarkUseCase = new ToggleBookmarkUseCase(userRepository)
 
 // presentation
-const userController = new UserController(getUsersUseCase, getUserUseCase, updateUserUseCase)
+const userController = new UserController(
+  getUsersUseCase,
+  getUserUseCase,
+  updateUserUseCase,
+  getBookmarksUseCase,
+  toggleBookmarkUseCase
+)
 const router = createUsersRouter(userController)
 
 export default router

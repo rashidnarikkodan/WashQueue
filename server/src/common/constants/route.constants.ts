@@ -16,6 +16,8 @@ export const API_ROUTES = {
   USERS: {
     ROOT: "/api/users",
     GET_ALL: "/",
+    BOOKMARKS: "/bookmarks",
+    TOGGLE_BOOKMARK: "/bookmarks/toggle",
     GET_BY_ID: "/:id",
     UPDATE: "/:id",
   },
