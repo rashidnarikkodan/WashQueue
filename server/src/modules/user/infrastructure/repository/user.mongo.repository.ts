@@ -195,4 +195,23 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       },
     }
   }
+
+  async toggleBookmark(userId: string, stationId: string): Promise<User | null> {
+    const userDoc = await UserModel.findById(userId).exec()
+    if (!userDoc) return null
+
+    if (!userDoc.bookmarks) {
+      userDoc.bookmarks = []
+    }
+
+    const index = userDoc.bookmarks.indexOf(stationId)
+    if (index > -1) {
+      userDoc.bookmarks.splice(index, 1)
+    } else {
+      userDoc.bookmarks.push(stationId)
+    }
+
+    await userDoc.save()
+    return this.mapper.toDomain(userDoc)
+  }
 }

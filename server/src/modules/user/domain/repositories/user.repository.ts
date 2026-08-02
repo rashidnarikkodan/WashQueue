@@ -12,4 +12,5 @@ export interface IUserRepository extends IBaseRepository<User> {
   resetPassword(userId: string, passwordHash: string): Promise<void>
   updateRole(userId: string, role: RoleType): Promise<void>
   getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse>
+  toggleBookmark(userId: string, stationId: string): Promise<User | null>
 }

@@ -15,6 +15,7 @@ export interface UserProps {
   authProvider?: AuthProvider
   isBlocked?: boolean
   isVerified?: boolean
+  bookmarks?: string[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -33,6 +34,7 @@ export class User implements UserProps {
   readonly authProvider: AuthProvider
   readonly isBlocked: boolean
   readonly isVerified: boolean
+  readonly bookmarks: string[]
   readonly createdAt?: Date
   readonly updatedAt?: Date
 
@@ -50,6 +52,7 @@ export class User implements UserProps {
     this.authProvider = props.authProvider ?? AUTH_PROVIDER.LOCAL
     this.isBlocked = props.isBlocked ?? false
     this.isVerified = props.isVerified ?? false
+    this.bookmarks = props.bookmarks ?? []
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }

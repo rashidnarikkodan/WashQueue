@@ -11,6 +11,7 @@ export interface UserSummaryDto {
   avatar?: string
   lastLoginAt?: Date
   walletBalance?: number
+  bookmarks?: string[]
   createdAt?: Date
   updatedAt?: Date
   onboardingStep?: number
