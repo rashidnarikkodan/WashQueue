@@ -5,6 +5,10 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
+import redis from "@/infrastructure/cache/redis.client"
+import { VehicleCategoryModel } from "@/modules/vehicle-catelog/infrastructure/models/category.model"
+import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
+import { StationPricingModel } from "../infrastructure/models/station-pricing.model"
 import {
   ICreateStationUseCase,
   IUpdateStationUseCase,
@@ -17,6 +21,7 @@ import {
 } from "../application/interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationRequestMapper } from "./mappers/station.mapper"
+
 
 export class StationController {
   constructor(
@@ -69,6 +74,80 @@ export class StationController {
     success(res, result, HTTP_STATUS.OK, "Station retrieved successfully")
   }
 
+  getFilterOptions = async (_req: Request, res: Response) => {
+    // Check Redis cache first
+    try {
+      const cached = await redis.get("cache:stations:filter_options")
+      if (cached) {
+        success(res, JSON.parse(cached), HTTP_STATUS.OK, "Filter options retrieved successfully")
+        return
+      }
+    } catch {
+      // Ignore redis read error fallback to DB
+    }
+
+    const categories = await VehicleCategoryModel.find({ isActive: true }).sort({ order: 1 }).exec()
+    const classes = await VehicleClassModel.find({ isActive: true }).sort({ order: 1 }).exec()
+    const priceAggregation = await StationPricingModel.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: null,
+          minHalf: { $min: "$halfWashPrice" },
+          maxHalf: { $max: "$halfWashPrice" },
+          minFull: { $min: "$fullWashPrice" },
+          maxFull: { $max: "$fullWashPrice" },
+        },
+      },
+    ]).exec()
+
+    const priceStats = priceAggregation[0] || { minHalf: 10, maxHalf: 200, minFull: 20, maxFull: 300 }
+    const minPrice = Math.min(priceStats.minHalf || 10, priceStats.minFull || 20)
+    const maxPrice = Math.max(priceStats.maxHalf || 200, priceStats.maxFull || 300)
+
+    const payload = {
+      vehicleCategories: categories.map((c) => ({
+        id: c._id.toString(),
+        slug: c.slug,
+        name: c.name,
+      })),
+      vehicleClasses: classes.map((c) => ({
+        id: c._id.toString(),
+        categoryId: c.categoryId.toString(),
+        slug: c.slug,
+        name: c.name,
+      })),
+      amenities: [
+        { slug: "wifi", name: "Free Wi-Fi", icon: "wifi" },
+        { slug: "waiting_lounge", name: "AC Waiting Lounge", icon: "sofa" },
+        { slug: "cafe", name: "Café / Coffee", icon: "coffee" },
+        { slug: "ev_charging", name: "EV Charging", icon: "zap" },
+        { slug: "restroom", name: "Clean Restrooms", icon: "bath" },
+      ],
+      priceBounds: {
+        minPrice,
+        maxPrice,
+        currency: "USD",
+      },
+      sortOptions: [
+        { value: "RECOMMENDED", label: "Recommended" },
+        { value: "DISTANCE", label: "Nearest" },
+        { value: "RATING", label: "Highest Rated" },
+        { value: "WAIT_TIME", label: "Shortest Wait Time" },
+        { value: "PRICE_LOW_TO_HIGH", label: "Price: Low to High" },
+        { value: "PRICE_HIGH_TO_LOW", label: "Price: High to Low" },
+      ],
+    }
+
+    try {
+      await redis.set("cache:stations:filter_options", JSON.stringify(payload), "EX", 86400) // 24h
+    } catch {
+      // Ignore cache write error
+    }
+
+    success(res, payload, HTTP_STATUS.OK, "Filter options retrieved successfully")
+  }
+
   getStations = async (req: AuthenticatedRequest, res: Response) => {
     const query = req.query || {}
     const parsedQuery = {
@@ -78,17 +157,21 @@ export class StationController {
       latitude: query.latitude ? Number(query.latitude) : undefined,
       longitude: query.longitude ? Number(query.longitude) : undefined,
       maxDistanceKm: query.maxDistanceKm ? Number(query.maxDistanceKm) : undefined,
-      minimumRating: query.minimumRating
-        ? Number(query.minimumRating)
-        : query.minRating
-        ? Number(query.minRating)
-        : undefined,
-      search: query.search ? String(query.search) : undefined,
+      radiusKm: query.radiusKm ? Number(query.radiusKm) : undefined,
+      minRating: query.minRating ? Number(query.minRating) : query.minimumRating ? Number(query.minimumRating) : undefined,
+      minimumRating: query.minimumRating ? Number(query.minimumRating) : query.minRating ? Number(query.minRating) : undefined,
+      minPrice: query.minPrice ? Number(query.minPrice) : undefined,
+      maxPrice: query.maxPrice ? Number(query.maxPrice) : undefined,
+      search: query.search ? String(query.search) : query.q ? String(query.q) : undefined,
       status: query.status ? String(query.status) : undefined,
       sortBy: query.sortBy ? String(query.sortBy) : undefined,
       sortOrder: query.sortOrder === "asc" ? ("asc" as const) : ("desc" as const),
       ownerId: query.ownerId ? String(query.ownerId) : undefined,
       vehicleCategory: query.vehicleCategory ? String(query.vehicleCategory) : undefined,
+      vehicleClassId: query.vehicleClassId ? String(query.vehicleClassId) : undefined,
+      openNow: String(query.openNow) === "true",
+      verifiedOnly: String(query.verifiedOnly) === "true",
+
     }
 
     const { stations, total } = await this.getStationsUseCase.execute(parsedQuery)
@@ -98,10 +181,12 @@ export class StationController {
 
     const data = stations.map((s) => {
       const props = s.getProps()
-      const distanceKm = (s as unknown as { distanceKm?: number }).distanceKm
-      if (typeof distanceKm === "number") {
-        (props as unknown as { distanceKm?: number }).distanceKm = distanceKm
-      }
+      const rec = s as unknown as Record<string, unknown>
+      if (typeof rec.distanceKm === "number") (props as unknown as Record<string, unknown>).distanceKm = rec.distanceKm
+      if (typeof rec.startingPrice === "number") (props as unknown as Record<string, unknown>).startingPrice = rec.startingPrice
+      if (typeof rec.estimatedWaitMins === "number") (props as unknown as Record<string, unknown>).estimatedWaitMins = rec.estimatedWaitMins
+      if (typeof rec.queueDepth === "number") (props as unknown as Record<string, unknown>).queueDepth = rec.queueDepth
+      if (typeof rec.isOpen === "boolean") (props as unknown as Record<string, unknown>).isOpen = rec.isOpen
       return props
     })
 

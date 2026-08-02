@@ -10,7 +10,7 @@ export class ReviewStationUseCase implements IReviewStationUseCase {
 
   async execute(
     stationId: string,
-    action: "APPROVE" | "REJECT",
+    action: "APPROVE" | "REJECT" | "SUSPEND",
     rejectionReason?: string
   ): Promise<Station> {
     const station = await this.stationRepository.findById(stationId)
@@ -25,6 +25,8 @@ export class ReviewStationUseCase implements IReviewStationUseCase {
         throw new AppError("Rejection reason is required for rejection", HTTP_STATUS.BAD_REQUEST)
       }
       station.reject(rejectionReason.trim())
+    } else if (action === "SUSPEND") {
+      station.suspend(rejectionReason?.trim())
     } else {
       throw new AppError("Invalid action type", HTTP_STATUS.BAD_REQUEST)
     }

@@ -28,6 +28,11 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       throw new ForbiddenError("You are not authorized to submit this station")
     }
 
+    if (!owner?.isVerified) {
+      throw new ForbiddenError("Your owner account is pending approval by an administrator before you can submit stations.")
+    }
+
+
     if (station.status !== StationStatus.DRAFT && station.status !== StationStatus.REJECTED) {
       throw new AppError("Only draft or rejected stations can be submitted for review", HTTP_STATUS.BAD_REQUEST)
     }

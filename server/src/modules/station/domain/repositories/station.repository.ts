@@ -1,42 +1,13 @@
 import { IBaseRepository } from "@/core/domain/repository.interface"
 import { Station } from "../entities/Station"
+import { GetStationsQuery } from "../../application/dtos/get-stations.dto"
 
-export interface StationFilter {
-  ownerId?: string
-  status?: string
+export interface StationFilter extends GetStationsQuery {
   city?: string
   state?: string
   country?: string
-  isActive?: boolean
-  search?: string
-  
-  // Geolocation
-  latitude?: number
-  longitude?: number
-  maxDistanceKm?: number
-
-  // Pricing & Category
-  vehicleCategory?: string
-  vehicleClassId?: string
-  minHalfWashPrice?: number
-  maxHalfWashPrice?: number
-  minFullWashPrice?: number
-  maxFullWashPrice?: number
-
-  // Extra Services
-  extraServiceIds?: string[]
-
-  // Ratings
-  minimumRating?: number
-
-  // Pagination
-  page?: number
-  limit?: number
-
-  // Sorting
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
 }
+
 
 export interface NearbyStationFilter {
   latitude: number
@@ -59,6 +30,7 @@ export interface NearbyStationFilter {
 export interface IStationRepository extends IBaseRepository<Station> {
   findByOwnerId(ownerId: string): Promise<Station[]>
   findByName(name: string): Promise<Station | null>
+  findByIds(ids: string[]): Promise<Station[]>
   findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }>
   findNearby(filter: NearbyStationFilter): Promise<Station[]>
 }

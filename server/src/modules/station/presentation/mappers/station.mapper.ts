@@ -7,7 +7,7 @@ import { StationStepParserFactory, safeJsonParse } from "../parsers/station-step
 import { StationImage } from "../../domain/entities/Station"
 
 export interface ReviewStationRequestInput {
-  action: "APPROVE" | "REJECT"
+  action: "APPROVE" | "REJECT" | "SUSPEND"
   rejectionReason?: string
 }
 
@@ -30,8 +30,8 @@ export class StationRequestMapper {
    */
   extractReviewInput(req: AuthenticatedRequest): ReviewStationRequestInput {
     const { action, rejectionReason } = req.body
-    if (action !== "APPROVE" && action !== "REJECT") {
-      throw new AppError("Action must be either APPROVE or REJECT", HTTP_STATUS.BAD_REQUEST)
+    if (action !== "APPROVE" && action !== "REJECT" && action !== "SUSPEND") {
+      throw new AppError("Action must be APPROVE, REJECT, or SUSPEND", HTTP_STATUS.BAD_REQUEST)
     }
     return {
       action,

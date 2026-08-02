@@ -10,16 +10,22 @@ import { stationUpload } from "@/infrastructure/multer/multer.middleware"
 export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
-  // Public routes — list stations & get station by ID (unrestricted access)
+  // Public routes — list stations, filter metadata & get station by ID
   router.get(
     "/",
     asyncHandler(stationController.getStations)
   )
 
   router.get(
+    "/filter-options",
+    asyncHandler(stationController.getFilterOptions)
+  )
+
+  router.get(
     "/:stationId",
     asyncHandler(stationController.getById)
   )
+
 
   
   // Authenticated routes

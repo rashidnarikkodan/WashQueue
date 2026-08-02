@@ -51,6 +51,11 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       throw new ForbiddenError("You are not authorized to update this station")
     }
 
+    if (!owner?.isVerified) {
+      throw new ForbiddenError("Your owner account is pending approval by an administrator before you can modify stations.")
+    }
+
+
     // A session to be used for transactions
     const session = await mongoose.startSession()
 

@@ -29,7 +29,7 @@ export interface IDeleteStationUseCase {
 }
 
 export interface IReviewStationUseCase {
-  execute(stationId: string, action: "APPROVE" | "REJECT", rejectionReason?: string): Promise<Station>
+  execute(stationId: string, action: "APPROVE" | "REJECT" | "SUSPEND", rejectionReason?: string): Promise<Station>
 }
 
 export interface IToggleActiveStationUseCase {

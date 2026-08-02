@@ -4,6 +4,11 @@ import { Station } from "../../domain/entities/Station"
 import { IStationRepository, StationFilter, NearbyStationFilter } from "../../domain/repositories/station.repository"
 import { StationMapper } from "../mappers/station.mapper"
 import { PipelineStage, Types } from "mongoose"
+import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
+import { StationPricingModel } from "../models/station-pricing.model"
+import { ExtraServiceModel } from "../models/extra-service.model"
+import { StationRankingService, HydratedStationItem } from "../../domain/services/station-ranking.service"
+import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
 
 export class StationMongoRepository
   extends BaseRepository<Station, IStation>
@@ -26,24 +31,54 @@ export class StationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
-  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }> {
-    const pipeline: PipelineStage[] = []
+  async findById(id: string): Promise<Station | null> {
+    if (Types.ObjectId.isValid(id)) {
+      const doc = await this.model.findById(id).exec()
+      if (doc) return this.mapper.toDomain(doc)
+    }
+    // Fallback: search by name/slug if id parameter is a slug
+    return this.findByName(id)
+  }
 
-    // 1. GeoNear Stage (Must be first stage if location filter is present)
-    if (
+  async findByIds(ids: string[]): Promise<Station[]> {
+    if (!ids || ids.length === 0) return []
+
+    const validObjectIds = ids
+      .filter((id) => Types.ObjectId.isValid(id))
+      .map((id) => new Types.ObjectId(id))
+
+    const docs = await this.model
+      .find({
+        $or: [{ _id: { $in: validObjectIds } }, { _id: { $in: ids } }],
+      })
+      .exec()
+
+    return docs.map((doc) => this.mapper.toDomain(doc))
+  }
+
+  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }> {
+    const page = Math.max(1, Number(filter.page) || 1)
+    const limit = Math.max(1, Number(filter.limit) || 10)
+
+    const hasGeo =
       typeof filter.latitude === "number" &&
       typeof filter.longitude === "number" &&
       !isNaN(filter.latitude) &&
       !isNaN(filter.longitude) &&
       filter.latitude !== 0 &&
       filter.longitude !== 0
-    ) {
-      const radiusKm = filter.maxDistanceKm && filter.maxDistanceKm > 0 ? filter.maxDistanceKm : 50
-      pipeline.push({
+
+    // --- PHASE 1: Candidate Search Aggregation (Indexed Scan) ---
+    const candidatePipeline: PipelineStage[] = []
+
+    const radiusKm = filter.maxDistanceKm || filter.radiusKm || 50
+
+    if (hasGeo) {
+      candidatePipeline.push({
         $geoNear: {
           near: {
             type: "Point",
-            coordinates: [filter.longitude, filter.latitude],
+            coordinates: [filter.longitude!, filter.latitude!],
           },
           distanceField: "distance",
           maxDistance: radiusKm * 1000,
@@ -52,40 +87,21 @@ export class StationMongoRepository
       })
     }
 
-    // 2. Match Stage
     const matchStage = this.buildMatchStage(filter)
     if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage })
+      candidatePipeline.push({ $match: matchStage })
     }
 
-    // 3. Pricing Lookup & Match
-    pipeline.push(...this.buildPricingLookup(filter))
+    // Limit candidate pool size to prevent high memory usage during hydration
+    candidatePipeline.push({ $limit: 150 })
 
-    // 4. Extra Services Lookup & Match
-    pipeline.push(...this.buildExtraServiceLookup(filter))
+    const candidateDocs = await this.model.aggregate(candidatePipeline).exec()
+    if (!candidateDocs || candidateDocs.length === 0) {
+      return { stations: [], total: 0 }
+    }
 
-    // 5. Sort Stage
-    pipeline.push(this.buildSortStage(filter.sortBy, filter.sortOrder, filter.latitude !== undefined))
-
-    // 6. Facet Stage for Count + Pagination
-    const page = Math.max(1, Number(filter.page) || 1)
-    const limit = Math.max(1, Number(filter.limit) || 10)
-    const skip = (page - 1) * limit
-
-    pipeline.push({
-      $facet: {
-        metadata: [{ $count: "total" }],
-        data: [{ $skip: skip }, { $limit: limit }],
-      },
-    })
-
-    const result = await this.model.aggregate(pipeline).exec()
-    const metadata = result[0]?.metadata?.[0] || { total: 0 }
-    const rawDocs = result[0]?.data || []
-
-    const stations = rawDocs.map((doc: IStation & { distance?: number }) => {
+    const candidateStations = candidateDocs.map((doc: IStation & { distance?: number }) => {
       const domainObj = this.mapper.toDomain(doc as IStation)
-      // Attach calculated distance in km if available from geoNear
       if (typeof doc.distance === "number") {
         const distanceKm = parseFloat((doc.distance / 1000).toFixed(1))
         ;(domainObj as unknown as Record<string, unknown>).distanceKm = distanceKm
@@ -93,9 +109,140 @@ export class StationMongoRepository
       return domainObj
     })
 
+    const candidateIds = candidateStations.map((s) => new Types.ObjectId(s.id))
+
+    // --- PHASE 2: Targeted Batch Relational Hydration & Filtering ---
+    let matchingClassIds: Types.ObjectId[] | undefined = undefined
+    if (filter.vehicleCategory && filter.vehicleCategory !== "all") {
+      if (Types.ObjectId.isValid(filter.vehicleCategory)) {
+        const catId = new Types.ObjectId(filter.vehicleCategory)
+        const found = await VehicleClassModel.find({
+          $or: [{ categoryId: catId }, { _id: catId }],
+        }).select("_id").exec()
+        matchingClassIds = found.map((c) => c._id as Types.ObjectId)
+        if (matchingClassIds.length === 0) matchingClassIds = [catId]
+      }
+    } else if (filter.vehicleClassId && Types.ObjectId.isValid(filter.vehicleClassId)) {
+      matchingClassIds = [new Types.ObjectId(filter.vehicleClassId)]
+    }
+
+    // Pricing Filter & Map
+    const pricingQuery: Record<string, unknown> = {
+      stationId: { $in: candidateIds },
+      isActive: true,
+    }
+    if (matchingClassIds && matchingClassIds.length > 0) {
+      pricingQuery.vehicleClassId = { $in: matchingClassIds }
+    }
+
+    const pricings = await StationPricingModel.find(pricingQuery).exec()
+    const stationPricingMap = new Map<string, Array<{ half: number; full: number }>>()
+    pricings.forEach((p) => {
+      const sid = p.stationId.toString()
+      const list = stationPricingMap.get(sid) || []
+      list.push({ half: p.halfWashPrice, full: p.fullWashPrice })
+      stationPricingMap.set(sid, list)
+    })
+
+    // Extra Services Filter
+    let filterExtraServiceIds: Types.ObjectId[] | undefined = undefined
+    if (filter.extraServices?.length || filter.extraServiceIds?.length) {
+      const rawIds = filter.extraServices || filter.extraServiceIds || []
+      filterExtraServiceIds = rawIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id))
+    }
+
+    const extraServiceQuery: Record<string, unknown> = {
+      stationId: { $in: candidateIds },
+      isActive: true,
+    }
+    if (filterExtraServiceIds && filterExtraServiceIds.length > 0) {
+      extraServiceQuery._id = { $in: filterExtraServiceIds }
+    }
+
+    const extraServices = await ExtraServiceModel.find(extraServiceQuery).exec()
+    const stationExtraServicesMap = new Map<string, number>()
+    extraServices.forEach((es) => {
+      const sid = es.stationId.toString()
+      stationExtraServicesMap.set(sid, (stationExtraServicesMap.get(sid) || 0) + 1)
+    })
+
+    // --- PHASE 3: Redis Live Hydration ---
+    const liveStateMap = await StationRedisHydrationService.hydrateLiveStates(candidateStations)
+
+    // --- PHASE 4: Build Hydrated Candidate Items & Apply Relational Filters ---
+    let hydratedItems: HydratedStationItem[] = []
+
+    for (const station of candidateStations) {
+      const sid = station.id
+      const liveState = liveStateMap.get(sid) || { queueDepth: 0, estimatedWaitMins: 0, isOpen: true }
+
+      // Filter openNow
+      if (filter.openNow && !liveState.isOpen) {
+        continue
+      }
+
+      // Filter vehicle category / class if filter active and no pricing matched
+      if (matchingClassIds && matchingClassIds.length > 0 && !stationPricingMap.has(sid)) {
+        continue
+      }
+
+      // Filter extra services if filter active and no extra services matched
+      if (filterExtraServiceIds && filterExtraServiceIds.length > 0 && !stationExtraServicesMap.has(sid)) {
+        continue
+      }
+
+      const pList = stationPricingMap.get(sid) || []
+      let startingPrice: number | undefined = undefined
+      if (pList.length > 0) {
+        const prices = pList.flatMap((p) => [p.half, p.full]).filter((pr) => pr > 0)
+        if (prices.length > 0) startingPrice = Math.min(...prices)
+      }
+
+      // Price Range Filter
+      const minP = filter.minPrice ?? filter.minHalfWashPrice ?? filter.minFullWashPrice
+      const maxP = filter.maxPrice ?? filter.maxHalfWashPrice ?? filter.maxFullWashPrice
+      if (startingPrice !== undefined) {
+        if (typeof minP === "number" && startingPrice < minP) continue
+        if (typeof maxP === "number" && startingPrice > maxP) continue
+      }
+
+      const item: HydratedStationItem = {
+        station,
+        distanceKm: (station as unknown as { distanceKm?: number }).distanceKm,
+        startingPrice,
+        queueDepth: liveState.queueDepth,
+        estimatedWaitMins: liveState.estimatedWaitMins,
+        isVerified: !!station.getProps().verifiedAt,
+        rating: station.getProps().rating || 0,
+      }
+
+      item.score = StationRankingService.computeScore(item)
+      hydratedItems.push(item)
+    }
+
+    // --- PHASE 5: Deterministic Smart Ranking & Sorting ---
+    hydratedItems = StationRankingService.sort(hydratedItems, filter.sortBy, filter.sortOrder)
+
+    const total = hydratedItems.length
+
+    // --- PHASE 6: Pagination Slicing & Property Hydration ---
+    const skip = (page - 1) * limit
+    const paginatedItems = hydratedItems.slice(skip, skip + limit)
+
+    const resultStations = paginatedItems.map((item) => {
+      const domainObj = item.station
+      const rec = domainObj as unknown as Record<string, unknown>
+      rec.distanceKm = item.distanceKm
+      rec.startingPrice = item.startingPrice
+      rec.estimatedWaitMins = item.estimatedWaitMins
+      rec.queueDepth = item.queueDepth
+      rec.isOpen = liveStateMap.get(domainObj.id)?.isOpen ?? true
+      return domainObj
+    })
+
     return {
-      stations,
-      total: metadata.total,
+      stations: resultStations,
+      total,
     }
   }
 
@@ -122,12 +269,14 @@ export class StationMongoRepository
     const match: Record<string, unknown> = {}
 
     if (filter.ownerId) {
+      //for owners only
       match.ownerId = new Types.ObjectId(filter.ownerId)
     }
-    if (filter.status) {
+    if (filter.status && filter.status !== "all") {
+      //for admin and owners
       match.status = filter.status
-    } else if (!filter.ownerId) {
-      // Default to ACTIVE for public discovery if no status explicitly requested
+    } else if (!filter.status && !filter.ownerId) {
+      //for public users
       match.status = "ACTIVE"
     }
 
@@ -143,13 +292,24 @@ export class StationMongoRepository
     if (filter.isActive !== undefined) {
       match.isActive = filter.isActive
     }
-    if (filter.minimumRating !== undefined && filter.minimumRating > 0) {
-      match.rating = { $gte: filter.minimumRating }
+    if (filter.verifiedOnly) {
+      match.verifiedAt = { $exists: true, $ne: null }
     }
 
-    if (filter.search && filter.search.trim().length > 0) {
-      const q = filter.search.trim()
-      const regex = new RegExp(q, "i")
+    const minRating = filter.minimumRating ?? filter.minRating
+    if (minRating !== undefined && minRating > 0) {
+      match.rating = { $gte: minRating }
+    }
+
+    //in-case we add amenties filteration
+    if (filter.amenities && filter.amenities.length > 0) {
+      match.amenities = { $all: filter.amenities }
+    }
+
+    const q = filter.search ?? (filter as unknown as { q?: string }).q
+    if (q && q.trim().length > 0) {
+      const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      const regex = new RegExp(escaped, "i")
       match.$or = [
         { name: regex },
         { description: regex },
@@ -162,122 +322,4 @@ export class StationMongoRepository
 
     return match
   }
-
-  private buildPricingLookup(filter: StationFilter | NearbyStationFilter): PipelineStage[] {
-    const pipeline: PipelineStage[] = []
-    
-    const hasPricingFilter = 
-      filter.vehicleClassId || 
-      ("vehicleCategory" in filter && filter.vehicleCategory && filter.vehicleCategory !== "all") ||
-      filter.minHalfWashPrice !== undefined || 
-      filter.maxHalfWashPrice !== undefined ||
-      filter.minFullWashPrice !== undefined ||
-      filter.maxFullWashPrice !== undefined
-
-    if (hasPricingFilter) {
-      const pricingMatch: Record<string, unknown> = {}
-      
-      if (filter.vehicleClassId) {
-        pricingMatch["pricing.vehicleClassId"] = new Types.ObjectId(filter.vehicleClassId)
-      }
-      
-      if (filter.minHalfWashPrice !== undefined || filter.maxHalfWashPrice !== undefined) {
-        const halfRange: Record<string, number> = {}
-        if (filter.minHalfWashPrice !== undefined) halfRange.$gte = filter.minHalfWashPrice
-        if (filter.maxHalfWashPrice !== undefined) halfRange.$lte = filter.maxHalfWashPrice
-        pricingMatch["pricing.halfWashPrice"] = halfRange
-      }
-      
-      if (filter.minFullWashPrice !== undefined || filter.maxFullWashPrice !== undefined) {
-        const fullRange: Record<string, number> = {}
-        if (filter.minFullWashPrice !== undefined) fullRange.$gte = filter.minFullWashPrice
-        if (filter.maxFullWashPrice !== undefined) fullRange.$lte = filter.maxFullWashPrice
-        pricingMatch["pricing.fullWashPrice"] = fullRange
-      }
-
-      pipeline.push({
-        $lookup: {
-          from: "station_pricing",
-          localField: "_id",
-          foreignField: "stationId",
-          as: "pricing",
-        },
-      })
-      
-      if (Object.keys(pricingMatch).length > 0) {
-        pipeline.push({ $match: pricingMatch })
-      }
-    }
-    
-    return pipeline
-  }
-
-  private buildExtraServiceLookup(filter: StationFilter | NearbyStationFilter): PipelineStage[] {
-    const pipeline: PipelineStage[] = []
-
-    if (filter.extraServiceIds && filter.extraServiceIds.length > 0) {
-      const extraServiceObjectIds = filter.extraServiceIds.map((id) => new Types.ObjectId(id))
-      
-      pipeline.push({
-        $lookup: {
-          from: "extra_services",
-          localField: "_id",
-          foreignField: "stationId",
-          as: "extraServices",
-        },
-      })
-      
-      pipeline.push({
-        $match: {
-          "extraServices._id": { $in: extraServiceObjectIds },
-        },
-      })
-    }
-    
-    return pipeline
-  }
-
-  private buildSortStage(sortBy?: string, sortOrder?: "asc" | "desc", hasGeo: boolean = false): PipelineStage {
-    const dir = sortOrder === "asc" ? 1 : -1
-    
-    switch (sortBy) {
-      case "nearest":
-        return hasGeo ? { $sort: { distance: 1 } } : { $sort: { createdAt: -1 } }
-      case "rating":
-        return { $sort: { rating: dir, reviewCount: -1 } }
-      case "popular":
-        return { $sort: { reviewCount: dir, rating: -1 } }
-      case "fastest":
-        return { $sort: { "slotConfig.windowDurationMins": 1, "slotConfig.bays": -1 } }
-      case "name":
-        return { $sort: { name: sortOrder === "desc" ? -1 : 1 } }
-      default:
-        return hasGeo ? { $sort: { distance: 1 } } : { $sort: { rating: -1, createdAt: -1 } }
-    }
-  }
-
-  private buildPagination(page: number = 1, limit: number = 10): PipelineStage[] {
-    const p = Math.max(1, Number(page) || 1)
-    const l = Math.max(1, Number(limit) || 10)
-    const skip = (p - 1) * l
-    return [
-      { $skip: skip },
-      { $limit: l }
-    ]
-  }
-
-  private buildNearbyPipeline(filter: NearbyStationFilter): PipelineStage {
-    return {
-      $geoNear: {
-        near: {
-          type: "Point",
-          coordinates: [filter.longitude, filter.latitude]
-        },
-        distanceField: "distance",
-        maxDistance: filter.radiusKm * 1000,
-        spherical: true
-      }
-    }
-  }
 }
-

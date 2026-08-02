@@ -28,6 +28,11 @@ export class CreateStationUseCase implements ICreateStationUseCase {
       throw new ForbiddenError(ERROR_MESSAGES.OWNER_NOT_FOUND)
     }
 
+    if (!owner.isVerified) {
+      throw new ForbiddenError("Your owner account is pending approval by an administrator before you can create or manage wash stations.")
+    }
+
+
     let images: StationImage[] = input.images ? [...input.images] : []
 
     if (input.newFiles && input.newFiles.length > 0 && this.mediaUploadService) {

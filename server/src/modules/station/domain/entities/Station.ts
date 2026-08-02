@@ -108,6 +108,10 @@ export class Station {
     return { ...this.props };
   }
 
+  toJSON(): StationProps {
+    return this.getProps();
+  }
+
   updateBasicInformation(data: {
     name: string;
     description: string;
@@ -177,6 +181,7 @@ export class Station {
 
   suspend(reason?: string): void {
     this.props.status = StationStatus.SUSPENDED;
+    this.props.isActive = false;
 
     if (reason) {
       this.props.rejectionReason = reason;
