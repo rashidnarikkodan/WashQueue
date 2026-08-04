@@ -17,6 +17,7 @@ import { StationReviewsSection } from "../components/station-details/StationRevi
 import { StationQASection } from "../components/station-details/StationQASection"
 import { StationLocationSection } from "../components/station-details/StationLocationSection"
 import { StationSidebarCard } from "../components/station-details/StationSidebarCard"
+import { SelectManagerModal } from "../components/station-details/SelectManagerModal"
 
 // Modular Details Components
 
@@ -37,6 +38,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     reviewStation,
     deleteStation,
     toggleActiveStation,
+    assignManager,
     clearSelected,
   } = useStationStore()
 
@@ -55,7 +57,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     currentRole = ROLE.CUSTOMER
   }
 
-
+  const [isManagerModalOpen, setIsManagerModalOpen] = useState(false)
   const [rejecting, setRejecting] = useState(false)
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
   const [suspending, setSuspending] = useState(false)
@@ -330,10 +332,21 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             onSuspend={() => setSuspending(true)}
             onToggleActive={handleToggleActive}
             onDelete={handleDeleteDraft}
+            onOpenAssignManager={() => setIsManagerModalOpen(true)}
             isSubmittingAction={isSubmittingAction}
           />
         </div>
       </div>
+
+      {/* Select Manager Modal */}
+      <SelectManagerModal
+        isOpen={isManagerModalOpen}
+        onClose={() => setIsManagerModalOpen(false)}
+        onAssignSelf={async () => {
+          await assignSelfManager(station.id)
+        }}
+        isCurrentManagerSelf={station.managerId === user?.id}
+      />
 
       {/* Custom Rejection Reason Input Modal */}
       {rejecting && (

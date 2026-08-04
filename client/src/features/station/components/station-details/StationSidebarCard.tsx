@@ -1,4 +1,4 @@
-import { Star, Zap, CheckCircle2, XCircle, Edit, Layers, Ban } from "lucide-react"
+import { Star, Zap, CheckCircle2, XCircle, Edit, Layers, Ban, UserCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
@@ -12,6 +12,7 @@ interface StationSidebarCardProps {
   onSuspend?: () => void
   onToggleActive?: () => void
   onDelete?: () => void
+  onOpenAssignManager?: () => void
   isSubmittingAction?: boolean
 }
 
@@ -23,6 +24,7 @@ export function StationSidebarCard({
   onSuspend,
   onToggleActive,
   onDelete,
+  onOpenAssignManager,
   isSubmittingAction = false,
 }: StationSidebarCardProps) {
   const navigate = useNavigate()
@@ -144,6 +146,14 @@ export function StationSidebarCard({
           {/* OWNER ROLE */}
           {role === ROLE.OWNER && (
             <div className="space-y-3">
+              <button
+                onClick={onOpenAssignManager}
+                className="w-full py-3.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <UserCheck size={16} />
+                {station.managerId ? "Station Manager Assigned" : "+ Assign Station Manager"}
+              </button>
+
               <button
                 onClick={() => navigate(`/owner/stations/${station.id}/edit`)}
                 className="w-full py-3.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"

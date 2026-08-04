@@ -14,6 +14,7 @@ export class StationMapper implements IMapper<Station, IStation> {
     const props: StationProps = {
       id: raw._id.toString(),
       ownerId: raw.ownerId ? raw.ownerId.toString() : "",
+      managerId: raw.managerId ? raw.managerId.toString() : undefined,
 
       name: raw.name,
       description: raw.description ?? "",
@@ -117,6 +118,10 @@ export class StationMapper implements IMapper<Station, IStation> {
 
     if (props.ownerId) {
       raw.ownerId = new Types.ObjectId(props.ownerId)
+    }
+
+    if (props.managerId) {
+      raw.managerId = new Types.ObjectId(props.managerId)
     }
     if (props.verifiedAt !== undefined) {
       raw.verifiedAt = props.verifiedAt

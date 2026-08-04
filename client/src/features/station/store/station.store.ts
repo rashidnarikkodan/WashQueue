@@ -30,6 +30,10 @@ interface StationStore {
   reviewStation: (id: string, action: "APPROVE" | "REJECT" | "SUSPEND", rejectionReason?: string) => Promise<boolean>
   deleteStation: (id: string) => Promise<boolean>
   toggleActiveStation: (id: string) => Promise<Station | null>
+  assignManager: (
+    id: string,
+    input: { managerType: "SELF" | "INVITE"; email?: string }
+  ) => Promise<Station | null>
   clearError: () => void
   clearSelected: () => void
 }
@@ -181,6 +185,31 @@ export const useStationStore = create<StationStore>((set) => ({
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to toggle station active status")
       set({ error: msg, isSubmitting: false })
+      return null
+    }
+  },
+
+  assignManager: async (id: string, input: { managerType: "SELF" | "INVITE"; email?: string }) => {
+    set({ isSubmitting: true, error: null })
+    try {
+      const updated = await stationApi.assignManager(id, input)
+      set((state) => ({
+        stations: state.stations.map((s) => (s.id === id ? updated : s)),
+        selectedStation: state.selectedStation && state.selectedStation.station.id === id
+          ? { ...state.selectedStation, station: updated }
+          : state.selectedStation,
+        isSubmitting: false,
+      }))
+      toast.success(
+        input.managerType === "SELF"
+          ? "Assigned yourself as manager for this station successfully!"
+          : "Manager invitation processed successfully!"
+      )
+      return updated
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to assign manager")
+      set({ error: msg, isSubmitting: false })
+      toast.error(msg)
       return null
     }
   },

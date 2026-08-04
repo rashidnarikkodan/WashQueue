@@ -49,6 +49,7 @@ interface ISlotConfig {
 
 export interface IStation extends Document {
   ownerId: Types.ObjectId
+  managerId?: Types.ObjectId | null
 
   name: string
   description: string
@@ -83,6 +84,7 @@ export interface IStation extends Document {
 const stationSchema = new Schema<IStation>(
   {
     ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    managerId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
 
     name: { type: String, required: true, trim: true },
     description: { type: String, default: "", trim: true },

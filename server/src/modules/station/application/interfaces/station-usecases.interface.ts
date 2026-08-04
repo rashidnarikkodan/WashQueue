@@ -35,3 +35,11 @@ export interface IReviewStationUseCase {
 export interface IToggleActiveStationUseCase {
   execute(stationId: string, userId: string): Promise<Station>
 }
+
+export interface IAssignManagerUseCase {
+  execute(
+    stationId: string,
+    userId: string,
+    input: import("../use-cases/assign-manager.usecase").AssignManagerInput
+  ): Promise<import("../../domain/entities/Station").StationProps>
+}

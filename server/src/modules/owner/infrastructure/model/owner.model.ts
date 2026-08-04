@@ -9,6 +9,7 @@ export interface IOwner extends Document {
   businessEmail?: string
   phone?: string
   isVerified?: boolean
+  isManager?: boolean
   verifiedAt?: Date
   createdAt: Date
   updatedAt: Date
@@ -61,6 +62,10 @@ const ownerSchema = new Schema<IOwner>(
       trim: true,
     },
     isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isManager: {
       type: Boolean,
       default: false,
     },

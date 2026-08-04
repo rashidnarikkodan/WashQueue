@@ -58,6 +58,7 @@ export interface SlotConfiguration {
 export interface StationProps {
   id: string;
   ownerId: string;
+  managerId?: string;
 
   name: string;
   description: string;
@@ -98,6 +99,10 @@ export class Station {
 
   get ownerId() {
     return this.props.ownerId;
+  }
+
+  get managerId() {
+    return this.props.managerId;
   }
 
   get status() {

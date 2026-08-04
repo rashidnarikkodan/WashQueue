@@ -8,6 +8,7 @@ export interface OwnerProps {
   businessEmail?: string
   phone?: string
   isVerified?: boolean
+  isManager?: boolean
   verifiedAt?: Date
   createdAt?: Date
   updatedAt?: Date
@@ -39,6 +40,7 @@ export class Owner implements OwnerProps {
   readonly hasMobileService?: boolean
   readonly mobileActive?: boolean
   readonly isVerified?: boolean
+  readonly isManager?: boolean
   readonly verifiedAt?: Date
   readonly createdAt?: Date
   readonly updatedAt?: Date
@@ -66,6 +68,7 @@ export class Owner implements OwnerProps {
     this.businessEmail = props.businessEmail
     this.phone = props.phone
     this.isVerified = props.isVerified ?? false
+    this.isManager = props.isManager ?? false
     this.verifiedAt = props.verifiedAt
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt

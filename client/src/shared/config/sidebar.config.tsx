@@ -13,6 +13,7 @@ import {
   Settings,
   Calendar,
   CreditCard,
+  Car,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -132,5 +133,38 @@ export const ownerSideBarItems: SidebarItem[] = [
     name: "Team & Managers",
     path: "/owner/team",
     icon: Users,
+  },
+]
+
+export const managerSideBarItems: SidebarItem[] = [
+  {
+    name: "Dashboard",
+    path: "/manager/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Queue Management",
+    path: "/manager/queues",
+    icon: Hourglass,
+  },
+  {
+    name: "Bookings",
+    path: "/manager/bookings",
+    icon: Calendar,
+  },
+  {
+    name: "Customer Feedback",
+    path: "/manager/feedback",
+    icon: MessageSquareMore,
+  },
+  {
+    name: "Notifications",
+    path: "/manager/notifications",
+    icon: Bell,
+  },
+  {
+    name: "Station",
+    path: "/manager/station",
+    icon: Car,
   },
 ]

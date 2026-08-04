@@ -29,6 +29,7 @@ const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
 
 import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
 import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
+import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
 
 // Instantiate use cases
 const createStationUseCase = new CreateStationUseCase(
@@ -65,6 +66,7 @@ const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
   stationRepository,
   ownerRepository
 )
+const assignManagerUseCase = new AssignManagerUseCase(stationRepository, ownerRepository)
 
 // Instantiate controller
 const stationController = new StationController(
@@ -76,6 +78,7 @@ const stationController = new StationController(
   reviewStationUseCase,
   deleteStationUseCase,
   toggleActiveStationUseCase,
+  assignManagerUseCase,
   ownerRepository,
   stationRequestMapper
 )

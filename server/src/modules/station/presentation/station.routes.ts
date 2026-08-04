@@ -61,6 +61,11 @@ export const createRouter = (stationController: StationController): Router => {
     asyncHandler(stationController.toggleActive)
   )
 
+  router.post(
+    "/:stationId/assign-manager",
+    asyncHandler(stationController.assignManager)
+  )
+
   router.delete(
     "/:stationId",
     asyncHandler(stationController.delete)

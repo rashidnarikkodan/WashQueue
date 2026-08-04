@@ -22,6 +22,7 @@ export const API_ROUTES = {
     BY_ID: (id: string) => `/stations/${id}`,
     SUBMIT: (id: string) => `/stations/${id}/submit`,
     REVIEW: (id: string) => `/stations/${id}/review`,
+    ASSIGN_MANAGER: (id: string) => `/stations/${id}/assign-manager`,
   },
   VEHICLES: {
     ROOT: "/vehicles",

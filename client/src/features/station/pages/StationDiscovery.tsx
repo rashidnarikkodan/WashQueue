@@ -126,7 +126,7 @@ const StationDiscovery = () => {
 
     await fetchStations({
       page,
-      limit: 8,
+      limit: 12,
       search: debouncedSearch.trim() || undefined,
       latitude: userLocation?.latitude,
       longitude: userLocation?.longitude,

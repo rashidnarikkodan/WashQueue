@@ -28,6 +28,7 @@ export interface OperatingHourDay {
 export interface Station {
   id: string
   ownerId: string
+  managerId?: string
   name: string
   description: string
   contact: {

@@ -18,6 +18,7 @@ import {
   IReviewStationUseCase,
   IDeleteStationUseCase,
   IToggleActiveStationUseCase,
+  IAssignManagerUseCase,
 } from "../application/interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationRequestMapper } from "./mappers/station.mapper"
@@ -33,6 +34,7 @@ export class StationController {
     private readonly reviewStationUseCase: IReviewStationUseCase,
     private readonly deleteStationUseCase: IDeleteStationUseCase,
     private readonly toggleActiveStationUseCase: IToggleActiveStationUseCase,
+    private readonly assignManagerUseCase: IAssignManagerUseCase,
     private readonly ownerRepository: IOwnerRepository,
     private readonly stationMapper: StationRequestMapper
   ) {}
@@ -259,6 +261,27 @@ export class StationController {
       props,
       HTTP_STATUS.OK,
       `Station ${props.isActive ? "activated" : "deactivated"} successfully`
+    )
+  }
+
+  assignManager = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const stationId = this.stationMapper.extractStationId(req)
+    const { managerType, email } = req.body || {}
+    const station = await this.assignManagerUseCase.execute(stationId, userId, {
+      managerType: managerType || "SELF",
+      email,
+    })
+
+    success(
+      res,
+      station,
+      HTTP_STATUS.OK,
+      "Manager assigned for this station successfully"
     )
   }
 }
