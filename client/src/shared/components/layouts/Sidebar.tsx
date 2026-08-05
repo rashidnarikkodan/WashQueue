@@ -118,9 +118,9 @@ const Sidebar = ({ items }: Props) => {
                 duration-200
                 border
                 focus:outline-none
-                focus:ring-2
-                focus:ring-blue-500
-                focus:border-blue-500
+                focus:ring-1
+                focus:ring-primary
+                focus:border-primary
 
                 ${
                   isActive

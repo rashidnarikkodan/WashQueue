@@ -104,7 +104,7 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
         <button
           type="button"
           onClick={() => scroll("left")}
-          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-1 focus:ring-primary"
           title="Scroll left"
           aria-label="Scroll left"
         >
@@ -128,7 +128,7 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
               }}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`px-5 py-2.5 text-xs font-bold transition-all duration-300 ease-out cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none rounded-none border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`px-5 py-2.5 text-xs font-bold transition-all duration-300 ease-out cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none rounded-none border-b-2 focus:outline-none focus:ring-1 focus:ring-primary ${
                 isActive
                   ? "bg-primary/10 text-primary border-primary font-black"
                   : "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
@@ -154,7 +154,7 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
         <button
           type="button"
           onClick={() => scroll("right")}
-          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-1 focus:ring-primary"
           title="Scroll right"
           aria-label="Scroll right"
         >
