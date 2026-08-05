@@ -8,6 +8,7 @@ import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
 import { STATION_STATUS } from "../types"
+import { managerApi, type ManagerPermission } from "@/shared/apis/manager.api"
 import { StationHeroGallery } from "../components/station-details/StationHeroGallery"
 import { StationAboutSection } from "../components/station-details/StationAboutSection"
 import { StationPricingSection } from "../components/station-details/StationPricingSection"
@@ -43,7 +44,11 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
   const user = useAuthStore((state) => state.user)
 
-  // Resolve role from explicit prop OR portal route context (admin portal vs owner portal vs user portal)
+  // Manager state tracking
+  const [managerPermissions, setManagerPermissions] = useState<ManagerPermission[]>([])
+  const [noManagedStation, setNoManagedStation] = useState(false)
+
+  // Resolve role from explicit prop OR portal route context
   let currentRole: RoleType = ROLE.CUSTOMER
   if (role) {
     currentRole = role
@@ -51,8 +56,9 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     currentRole = ROLE.ADMIN
   } else if (location.pathname.startsWith("/owner") && user?.role === ROLE.OWNER) {
     currentRole = ROLE.OWNER
+  } else if (location.pathname.startsWith("/manager") && user?.role === ROLE.MANAGER) {
+    currentRole = ROLE.MANAGER
   } else {
-    // When in User Portal (/stations/:id), render user/customer components regardless of account role
     currentRole = ROLE.CUSTOMER
   }
 
@@ -80,11 +86,62 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   })
 
   useEffect(() => {
-    if (id) {
-      fetchStationById(id)
+    let isMounted = true
+
+    async function initStation() {
+      if (currentRole === ROLE.MANAGER) {
+        try {
+          const managedList = await managerApi.getManagedStations()
+          if (!isMounted) return
+          if (managedList && managedList.length > 0) {
+            const targetId = id || managedList[0].stationId
+            const activeAssignment = managedList.find((m) => m.stationId === targetId) || managedList[0]
+            setManagerPermissions(activeAssignment.permissions || [])
+            await fetchStationById(activeAssignment.stationId)
+          } else {
+            setNoManagedStation(true)
+          }
+        } catch {
+          if (id) {
+            await fetchStationById(id)
+          } else {
+            setNoManagedStation(true)
+          }
+        }
+      } else if (id) {
+        await fetchStationById(id)
+      }
     }
-    return () => clearSelected()
-  }, [id, fetchStationById, clearSelected])
+
+    initStation()
+
+    return () => {
+      isMounted = false
+      clearSelected()
+    }
+  }, [id, currentRole, fetchStationById, clearSelected])
+
+  if (noManagedStation) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <AlertTriangle size={32} />
+        </div>
+        <div className="space-y-1 max-w-md">
+          <h2 className="text-xl font-bold text-foreground">No Station Assigned</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Your manager account is not currently assigned to any active station. Please ask the station owner to send you a manager invitation.
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/manager/dashboard")}
+          className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-md"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    )
+  }
 
   if (isLoading || !selectedStation) {
     return (
@@ -193,7 +250,9 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       ? "/admin/stations"
       : currentRole === ROLE.OWNER
         ? "/owner/stations"
-        : "/stations"
+        : currentRole === ROLE.MANAGER
+          ? "/manager/dashboard"
+          : "/stations"
 
   return (
     <div className=" mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-32 space-y-8 text-left animate-in fade-in duration-300">
@@ -202,7 +261,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         <Breadcrumbs
           items={[
             {
-              label: currentRole === "admin" ? "Admin" : currentRole === "owner" ? "Owner" : "Home",
+              label: currentRole === ROLE.ADMIN ? "Admin" : currentRole === ROLE.OWNER ? "Owner" : currentRole === ROLE.MANAGER ? "Manager" : "Home",
               path: backPath,
             },
             { label: "Stations", path: backPath },
@@ -211,7 +270,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         />
         <button
           onClick={() => navigate(backPath)}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors cursor-pointer w-fit"
+          className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer w-fit"
         >
           <ArrowLeft size={14} />
           <span>Back to Stations</span>
@@ -335,6 +394,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           <StationSidebarCard
             station={station}
             role={currentRole}
+            managerPermissions={managerPermissions}
             onApprove={handleApprove}
             onReject={() => setRejecting(true)}
             onSuspend={() => setSuspending(true)}

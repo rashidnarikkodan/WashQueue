@@ -368,7 +368,11 @@ export default function AddEditStation() {
         })
         toast.success("Station updates submitted! Station is now pending admin review.")
       }
-      navigate("/owner/stations")
+      if (user?.role === "manager") {
+        navigate(`/manager/station/${stationId}`)
+      } else {
+        navigate("/owner/stations")
+      }
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to submit station updates.")
       setError(msg)
@@ -379,7 +383,11 @@ export default function AddEditStation() {
   }
 
   const handleCancel = () => {
-    navigate("/owner/stations")
+    if (user?.role === "manager") {
+      navigate(stationId ? `/manager/station/${stationId}` : "/manager/station")
+    } else {
+      navigate("/owner/stations")
+    }
   }
 
   const stepperHeading =

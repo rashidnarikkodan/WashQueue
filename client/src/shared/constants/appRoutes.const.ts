@@ -33,6 +33,8 @@ export const APP_ROUTES = {
     DASHBOARD: "/manager/dashboard",
     QUEUE: "/manager/queue",
     WALK_INS: "/manager/walk-ins",
+    STATION: "/manager/station",
+    STATION_DETAILS: (id: string | number) => `/manager/station/${id}`,
   },
   OWNER: {
     ROOT: "/owner",

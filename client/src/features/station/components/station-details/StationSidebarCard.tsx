@@ -1,12 +1,14 @@
-import { Star, Zap, CheckCircle2, XCircle, Edit, Ban, UserCheck } from "lucide-react"
+import { Star, Zap, CheckCircle2, XCircle, Edit, Ban, UserCheck, ShieldCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
+import type { ManagerPermission } from "@/shared/apis/manager.api"
 
 interface StationSidebarCardProps {
   station: Station
   role?: RoleType
+  managerPermissions?: ManagerPermission[]
   onApprove?: () => void
   onReject?: () => void
   onSuspend?: () => void
@@ -19,6 +21,7 @@ interface StationSidebarCardProps {
 export function StationSidebarCard({
   station,
   role = "customer",
+  managerPermissions = [],
   onApprove,
   onReject,
   onSuspend,
@@ -184,6 +187,43 @@ export function StationSidebarCard({
                 >
                   Delete Draft Station
                 </button>
+              )}
+            </div>
+          )}
+
+          {/* MANAGER ROLE */}
+          {role === ROLE.MANAGER && (
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 space-y-1.5 text-left">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs">
+                  <ShieldCheck size={16} />
+                  <span>Station Manager Control Panel</span>
+                </div>
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {managerPermissions && managerPermissions.length > 0 ? (
+                    managerPermissions.map((perm) => (
+                      <span key={perm} className="px-2 py-0.5 rounded text-[10px] font-bold bg-card border border-border text-foreground">
+                        {perm.replace(/_/g, " ")}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">Standard Manager Access</span>
+                  )}
+                </div>
+              </div>
+
+              {managerPermissions.includes("STATION_SETTINGS") ? (
+                <button
+                  onClick={() => navigate(`/manager/station/${station.id}/edit`)}
+                  className="w-full py-3.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                >
+                  <Edit size={16} />
+                  Edit Station Configurations
+                </button>
+              ) : (
+                <p className="text-[11px] text-muted-foreground text-center font-medium italic">
+                  Note: "Station Settings" permission required to edit configuration.
+                </p>
               )}
             </div>
           )}

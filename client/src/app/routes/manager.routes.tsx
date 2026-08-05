@@ -3,6 +3,9 @@ import { lazy } from "react"
 const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
+const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
+import AddEditStation from "@/features/station/pages/AddEditStation"
+
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
   element: <ManagerLayout />,
@@ -18,6 +21,18 @@ export const managerRoutes = {
     {
       path: "walk-ins",
       element: <div>Walk In Management</div>,
+    },
+    {
+      path: "station",
+      element: <StationDetail role="manager" />,
+    },
+    {
+      path: "station/:stationId",
+      element: <StationDetail role="manager" />,
+    },
+    {
+      path: "station/:stationId/edit",
+      element: <AddEditStation />,
     },
   ],
 }

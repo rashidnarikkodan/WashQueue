@@ -63,6 +63,7 @@ export const API_ROUTES = {
     REJECT_INVITATION: "/invitations/reject",
     INVITE: "/invite",
     LIST: "/",
+    MY_STATIONS: "/my-stations",
     LIST_INVITATIONS: "/invitations",
     UPDATE_PERMISSIONS: "/:assignmentId/permissions",
     SUSPEND: "/:assignmentId/suspend",

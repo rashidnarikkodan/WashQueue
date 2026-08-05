@@ -42,6 +42,12 @@ export const createManagerRouter = (managerController: ManagerController): Route
   )
 
   router.get(
+    API_ROUTES.MANAGERS.MY_STATIONS,
+    authorize("manager"),
+    asyncHandler(managerController.getManagedStations)
+  )
+
+  router.get(
     API_ROUTES.MANAGERS.LIST,
     authorize("owner", "admin"),
     asyncHandler(managerController.getOwnerManagers)
