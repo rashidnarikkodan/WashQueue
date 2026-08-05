@@ -9,6 +9,8 @@ interface SplitAuthLayoutProps {
   buttonText?: string
   onRedirectClick?: () => void
   footerElement?: ReactNode
+  showLogo?: boolean
+  centerBranding?: boolean
   children: ReactNode
 }
 
@@ -20,6 +22,8 @@ export default function SplitAuthLayout({
   buttonText,
   onRedirectClick,
   footerElement,
+  showLogo = true,
+  centerBranding = false,
   children,
 }: SplitAuthLayoutProps) {
   const isBlueOnLeft = side === "left"
@@ -36,15 +40,23 @@ export default function SplitAuthLayout({
       <div className="absolute right-[-50px] top-[-50px] h-[300px] w-[300px] rounded-full bg-primary-foreground/10 filter blur-3xl"></div>
 
       {/* Brand Header */}
-      <div className="flex items-center gap-2 z-10">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
-          <Droplets className="h-5 w-5" />
+      {showLogo ? (
+        <div className="flex items-center gap-2 z-10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
+            <Droplets className="h-5 w-5" />
+          </div>
+          <span className="text-2xl font-bold italic tracking-tight">WashQueue</span>
         </div>
-        <span className="text-2xl font-bold italic tracking-tight">WashQueue</span>
-      </div>
+      ) : (
+        <div />
+      )}
 
       {/* Central Message */}
-      <div className="my-auto space-y-4 max-w-lg z-10">
+      <div
+        className={`my-auto space-y-4 max-w-lg z-10 ${
+          centerBranding ? "text-center mx-auto flex flex-col items-center justify-center" : ""
+        }`}
+      >
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
           {title}
         </h1>
@@ -53,7 +65,11 @@ export default function SplitAuthLayout({
 
       {/* Bottom Footer or Redirect Button */}
       {(footerElement || (buttonText && onRedirectClick)) && (
-        <div className="flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20">
+        <div
+          className={`flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20 ${
+            centerBranding ? "items-center text-center justify-center" : ""
+          }`}
+        >
           {footerElement ? (
             footerElement
           ) : (

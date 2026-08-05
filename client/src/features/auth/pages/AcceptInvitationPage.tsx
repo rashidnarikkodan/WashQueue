@@ -95,6 +95,8 @@ export default function AcceptInvitationPage() {
       side="right"
       title="Welcome to WashQueue"
       description="Book nearby vehicle washes without waiting in line. Manage your station operations seamlessly."
+      showLogo={false}
+      centerBranding={true}
       footerElement={
         <div className="flex items-center gap-2 text-xs md:text-sm font-semibold text-primary-foreground/90 pt-1">
           <ShieldCheck className="w-4 h-4 text-primary-foreground shrink-0" />
