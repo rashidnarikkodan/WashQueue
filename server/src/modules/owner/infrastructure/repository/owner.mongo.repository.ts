@@ -17,4 +17,13 @@ export class OwnerMongoRepository
     const doc = await this.model.findOne({ userId: new Types.ObjectId(userId) }).exec()
     return doc ? this.mapper.toDomain(doc) : null
   }
+
+  async updateIsManager(userId: string, isManager: boolean): Promise<void> {
+    await this.model
+      .updateOne(
+        { userId: Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : userId },
+        { $set: { isManager } }
+      )
+      .exec()
+  }
 }

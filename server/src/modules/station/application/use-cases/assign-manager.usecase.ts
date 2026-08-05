@@ -4,8 +4,6 @@ import { ConflictError } from "@/common/errors/conflict-error"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationProps } from "../../domain/entities/Station"
-import { Owner } from "@/modules/owner/infrastructure/model/owner.model"
-import { Types } from "mongoose"
 import { IAssignManagerUseCase } from "../interfaces/station-usecases.interface"
 
 export interface AssignManagerInput {
@@ -30,7 +28,7 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
       throw new NotFoundError("Station not found")
     }
 
-    // Check ownership using owner.id (owner._id)
+    // Check ownership using owner.id
     if (station.ownerId.toString() !== owner.id.toString()) {
       throw new ForbiddenError("Only the station owner can assign a manager to this station")
     }
@@ -49,31 +47,16 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
         )
       }
 
-      // Update Owner model: isManager = true
-      await Owner.updateOne(
-        { userId: new Types.ObjectId(userId) },
-        { $set: { isManager: true } }
-      ).exec()
+      // Update owner manager status via domain repository
+      await this.ownerRepository.updateIsManager(userId, true)
 
-      // Assign manager to station via domain entity & repository
+      // Update station manager assignment via domain entity & repository
       station.assignManager(userId)
-      await this.stationRepository.update(station.id, { managerId: userId })
-    } else if (input.managerType === "INVITE") {
-      // Handle manager invitation workflow
-      if (input.email) {
-        // If email provided, we can set up invitation or placeholder
-        await Owner.updateOne(
-          { userId: new Types.ObjectId(userId) },
-          { $set: { isManager: true } }
-        ).exec()
-      }
+      const updatedStation = await this.stationRepository.update(station.id, { managerId: userId })
+
+      return updatedStation ? updatedStation.getProps() : station.getProps()
     }
 
-    const updatedStation = await this.stationRepository.findById(stationId)
-    if (!updatedStation) {
-      throw new NotFoundError("Station not found after update")
-    }
-
-    return updatedStation.getProps()
+    return station.getProps()
   }
 }
