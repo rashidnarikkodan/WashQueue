@@ -15,6 +15,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
+import ScrollableTabs from "@/shared/components/ui/ScrollableTabs"
 import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { STATION_STATUS, type Station } from "../types"
@@ -368,23 +369,12 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="flex items-center gap-6 border-b border-border/40 pb-2 overflow-x-auto">
-        {OWNER_TABS.map((tab) => {
-          const isActive = activeTab === tab.id
-          return (
-            <div
-              key={tab.id}
-              onClick={() => updateParams({ tab: tab.id })}
-              className={`relative pb-2 text-sm font-semibold cursor-pointer whitespace-nowrap transition-colors duration-200 ${
-                isActive
-                  ? "text-primary font-bold border-b-2 border-primary -mb-[9px]"
-                  : "text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-[9px]"
-              }`}
-            >
-              {tab.label}
-            </div>
-          )
-        })}
+      <div className="border-b border-border/40 pb-2">
+        <ScrollableTabs
+          tabs={OWNER_TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => updateParams({ tab: tabId })}
+        />
       </div>
 
       {/* Error Alert */}

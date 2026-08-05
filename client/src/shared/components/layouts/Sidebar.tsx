@@ -1,6 +1,5 @@
-// Sidebar.tsx
-
-import { NavLink } from "react-router-dom"
+import { useEffect } from "react"
+import { NavLink, useNavigate, useLocation } from "react-router-dom"
 import type { SidebarItem } from "../../config/sidebar.config"
 
 type Props = {
@@ -8,6 +7,40 @@ type Props = {
 }
 
 const Sidebar = ({ items }: Props) => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an editable field
+      const target = e.target as HTMLElement
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable
+      ) {
+        return
+      }
+
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault()
+        const currentIndex = items.findIndex((item) => location.pathname.startsWith(item.path))
+        let nextIndex = 0
+        if (e.key === "ArrowDown") {
+          nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0
+        } else {
+          nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1
+        }
+        if (items[nextIndex]) {
+          navigate(items[nextIndex].path)
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [items, location.pathname, navigate])
   return (
     <aside
       className="
