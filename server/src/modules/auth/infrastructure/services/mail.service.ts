@@ -130,4 +130,44 @@ export class MailService implements IMailService {
       )
     }
   }
+
+  async sendManagerInvitationEmail(
+    email: string,
+    data: { managerName?: string; stationName: string; token: string }
+  ): Promise<void> {
+    const inviteUrl = `${env.CLIENT_URL}/accept-invitation?token=${data.token}`
+    const subject = `WashQueue - Station Manager Invitation for ${data.stationName}`
+    const greeting = data.managerName ? `Dear ${data.managerName},` : "Hello,"
+    const text = `${greeting}\n\nYou have been invited to manage ${data.stationName} on WashQueue!\n\nPlease accept your invitation by clicking this link: ${inviteUrl}\n\nThis invitation will expire in 7 days.\n\nBest regards,\nThe WashQueue Team`
+    const html = `
+      <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+        <h2 style="color: #007bff;">Station Manager Invitation</h2>
+        <p>${greeting}</p>
+        <p>You have been invited to join WashQueue as the manager for <strong>${data.stationName}</strong>.</p>
+        <p>Click the button below to review and accept your manager invitation:</p>
+        <div style="margin: 25px 0;">
+          <a href="${inviteUrl}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Accept Invitation</a>
+        </div>
+        <p style="font-size: 13px; color: #666;">Or copy and paste this link in your browser: <br/><a href="${inviteUrl}" style="color: #007bff;">${inviteUrl}</a></p>
+        <br />
+        <p style="font-size: 12px; color: #999;">This invitation link will expire in 7 days.</p>
+        <p>Best regards,<br/><strong>The WashQueue Team</strong></p>
+      </div>
+    `
+
+    if (this.transporter) {
+      await this.transporter.sendMail({
+        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+        to: email,
+        subject,
+        text,
+        html,
+      })
+      logger.info(`Manager invitation email sent to ${email} for station ${data.stationName}`)
+    } else {
+      logger.info(
+        `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Link: ${inviteUrl}`
+      )
+    }
+  }
 }

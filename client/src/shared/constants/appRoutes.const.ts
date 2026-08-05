@@ -9,6 +9,7 @@ export const APP_ROUTES = {
     SETUP_ACCOUNT: "/setup-account",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
+    ACCEPT_INVITATION: "/accept-invitation",
   },
   ADMIN: {
     ROOT: "/admin",

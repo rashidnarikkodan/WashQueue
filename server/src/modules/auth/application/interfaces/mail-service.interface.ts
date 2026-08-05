@@ -3,4 +3,8 @@ export interface IMailService {
   sendForgotPasswordEmail(email: string, otp: string): Promise<void>
   sendOwnerApprovalEmail(email: string, fullName: string): Promise<void>
   sendOwnerRejectionEmail(email: string, fullName: string, reason: string): Promise<void>
+  sendManagerInvitationEmail(
+    email: string,
+    data: { managerName?: string; stationName: string; token: string }
+  ): Promise<void>
 }

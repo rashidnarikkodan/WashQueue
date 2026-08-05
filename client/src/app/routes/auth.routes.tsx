@@ -6,6 +6,7 @@ const ForgotPasswordPage = lazy(() => import("../../features/auth/pages/ForgotPa
 const ResetPasswordPage = lazy(() => import("../../features/auth/pages/ResetPasswordPage"))
 const OTPPage = lazy(() => import("../../features/auth/pages/OTPPage"))
 const SetupAccountPage = lazy(() => import("../../features/auth/pages/SetupAccountPage"))
+const AcceptInvitationPage = lazy(() => import("../../features/auth/pages/AcceptInvitationPage"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 export const authRoutes = {
@@ -35,6 +36,10 @@ export const authRoutes = {
     {
       path: "setup-account",
       element: <SetupAccountPage />,
+    },
+    {
+      path: "accept-invitation",
+      element: <AcceptInvitationPage />,
     },
   ],
 }

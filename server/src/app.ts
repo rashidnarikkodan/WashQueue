@@ -10,6 +10,7 @@ import ownerRouter from "@/modules/owner/owner.module"
 import vehicleRouter from "@/modules/vehicle-catelog/vehicle.module"
 import stationRouter from "@/modules/station/station.module"
 import userVehicleRouter from "@/modules/vehicle/vehicle.module"
+import managerRouter from "@/modules/manager/manager.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
@@ -26,6 +27,8 @@ app.use(API_ROUTES.OWNER.ROOT, ownerRouter)
 app.use(API_ROUTES.VEHICLE_CATALOG.ROOT, vehicleRouter)
 app.use(API_ROUTES.STATIONS.ROOT, stationRouter)
 app.use(API_ROUTES.VEHICLES.ROOT, userVehicleRouter)
+app.use(API_ROUTES.MANAGERS.ROOT, managerRouter)
+app.use(API_ROUTES.MANAGERS.OWNER_ROOT, managerRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

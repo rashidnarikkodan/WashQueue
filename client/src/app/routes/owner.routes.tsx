@@ -8,6 +8,7 @@ import AddEditStation from "@/features/station/pages/AddEditStation"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
+const ManagerManagement = lazy(() => import("@/features/owner/pages/ManagerManagementPage"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -67,7 +68,12 @@ export const ownerRoutes = {
     },
     {
       path: "team",
-      element: <>Team & Managers</>,
+      element: <ManagerManagement />,
+    },
+    {
+      path: "managers",
+      element: <ManagerManagement />,
     },
   ],
 }
+

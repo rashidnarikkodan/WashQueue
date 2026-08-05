@@ -43,4 +43,9 @@ export const API_ROUTES = {
   VEHICLES: {
     ROOT: "/api/vehicles",
   },
+  MANAGERS: {
+    ROOT: "/api/managers",
+    OWNER_ROOT: "/api/owner/managers",
+  },
 } as const
+

@@ -1,5 +1,6 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { ConflictError } from "@/common/errors/conflict-error"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationProps } from "../../domain/entities/Station"
@@ -39,6 +40,19 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
     }
 
     if (input.managerType === "SELF") {
+      // Check Rule 2: An owner can only directly manage ONE station queue
+      const existingManagedStation = await StationModel.findOne({
+        ownerId: new Types.ObjectId(owner.id),
+        managerId: new Types.ObjectId(userId),
+        _id: { $ne: new Types.ObjectId(stationId) },
+      }).exec()
+
+      if (existingManagedStation) {
+        throw new ConflictError(
+          "An owner can only directly manage one station queue. Please invite a manager for your other stations."
+        )
+      }
+
       // Update Owner model: isManager = true
       await Owner.updateOne(
         { userId: new Types.ObjectId(userId) },

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { X, UserPlus, Store, Loader2, CheckCircle2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface SelectManagerModalProps {
   isOpen: boolean
@@ -23,8 +24,8 @@ export function SelectManagerModal({
       setIsSubmitting(managerType)
       await onAssignManager({ managerType, email })
       onClose()
-    } catch (err) {
-      console.error(`Error assigning manager (${managerType}):`, err)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || `Error setting manager (${managerType})`)
     } finally {
       setIsSubmitting(null)
     }
@@ -127,7 +128,7 @@ export function SelectManagerModal({
         {/* Bottom Note Box */}
         <div className="w-full bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
           <p className="text-xs font-medium text-blue-400/90 leading-relaxed">
-            <strong className="font-bold">Note:</strong> If you operate a single station and do not have a station manager, you can manage the station yourself. However, if you operate multiple stations, assigning a manager to each station is recommended to ensure efficient day-to-day operations and proper station management.
+            <strong className="font-bold">Station Rules:</strong> 1. Each station can have only 1 manager, and a manager can only manage 1 station. 2. Station owners can directly manage the queue of only 1 station. If you operate multiple stations, you must assign dedicated managers to your other stations.
           </p>
         </div>
       </div>

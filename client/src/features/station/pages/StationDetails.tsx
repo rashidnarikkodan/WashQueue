@@ -342,11 +342,12 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       <SelectManagerModal
         isOpen={isManagerModalOpen}
         onClose={() => setIsManagerModalOpen(false)}
-        onAssignSelf={async () => {
-          await assignSelfManager(station.id)
+        onAssignManager={async (input) => {
+          await assignManager(station.id, input)
         }}
         isCurrentManagerSelf={station.managerId === user?.id}
       />
+
 
       {/* Custom Rejection Reason Input Modal */}
       {rejecting && (

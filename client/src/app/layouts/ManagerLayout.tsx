@@ -14,13 +14,13 @@ const ManagerLayout = () => {
     return <Loading fullScreen text="Loading Manager Dashboard..." />
   }
 
-  // if (!isAuthenticated || !user || user.role !== ROLE.MANAGER) {
-  //   return <Navigate to="/login" replace />
-  // }
+  if (!isAuthenticated || !user || user.role !== ROLE.MANAGER) {
+    return <Navigate to="/login" replace />
+  }
 
-  // if (user && !user.isVerified && user.authProvider === "local") {
-  //   return <Navigate to="/verify-email" replace />
-  // }
+  if (user && !user.isVerified && user.authProvider === "local") {
+    return <Navigate to="/verify-email" replace />
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
