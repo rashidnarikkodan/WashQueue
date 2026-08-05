@@ -125,20 +125,22 @@ export default function AddVehicleModal({
   // Populate initial vehicle data if editing
   useEffect(() => {
     if (isOpen && initialVehicle) {
-      setNickname(initialVehicle.nickname || "")
-      setBrand(initialVehicle.brand || "")
-      setModel(initialVehicle.model || "")
-      setYear(initialVehicle.year || new Date().getFullYear())
-      setRegistrationNumber(initialVehicle.registrationNumber || "")
-      setCategoryId(initialVehicle.categoryId || "")
-      setClassId(initialVehicle.classId || "")
-      setIsPrimary(initialVehicle.isPrimary || false)
-      if (initialVehicle.image?.url) {
-        setImagePreview(initialVehicle.image.url)
-      }
+      queueMicrotask(() => {
+        setNickname(initialVehicle.nickname || "")
+        setBrand(initialVehicle.brand || "")
+        setModel(initialVehicle.model || "")
+        setYear(initialVehicle.year || new Date().getFullYear())
+        setRegistrationNumber(initialVehicle.registrationNumber || "")
+        setCategoryId(initialVehicle.categoryId || "")
+        setClassId(initialVehicle.classId || "")
+        setIsPrimary(initialVehicle.isPrimary || false)
+        if (initialVehicle.image?.url) {
+          setImagePreview(initialVehicle.image.url)
+        }
+      })
 
       if (initialVehicle.categoryId) {
-        setIsLoadingClasses(true)
+        queueMicrotask(() => setIsLoadingClasses(true))
         vehicleCatelogApi
           .getClasses({ categoryId: initialVehicle.categoryId })
           .then((data) => {

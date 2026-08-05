@@ -26,6 +26,11 @@ export const profileApi = {
           if (onboarding && onboarding.details) {
             businessName = onboarding.details.businessName
             whatsapp = onboarding.details.whatsapp
+            const detailsObj = onboarding.details as Record<string, string | undefined>
+            address = detailsObj.address
+            city = detailsObj.city
+            state = detailsObj.state
+            headquarters = detailsObj.headquarters
             if (onboarding.details.phone && !authUser.phone) {
               authUser.phone = onboarding.details.phone
             }

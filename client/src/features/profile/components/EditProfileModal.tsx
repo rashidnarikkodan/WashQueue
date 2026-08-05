@@ -67,7 +67,22 @@ export default function EditProfileModal({
 
   useEffect(() => {
     if (isOpen && profile) {
-      resetForm()
+      queueMicrotask(() => {
+        setName(profile.name || "")
+        setPhone(profile.phone || "")
+        setBusinessName(profile.businessName || "")
+        setBusinessEmail(profile.businessEmail || profile.email || "")
+        setWhatsapp(profile.whatsapp || profile.phone || "")
+        setHeadquarters(profile.headquarters || profile.address || "")
+        setBuilding(profile.building || "")
+        setStreet(profile.street || "")
+        setCity(profile.city || "")
+        setDistrict(profile.district || "")
+        setState(profile.state || "")
+        setPincode(profile.pincode || "")
+        setCountry(profile.country || "United States")
+        setErrors({})
+      })
     }
   }, [isOpen, profile])
 
