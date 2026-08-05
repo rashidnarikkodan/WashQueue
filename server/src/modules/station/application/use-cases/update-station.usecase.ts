@@ -10,6 +10,8 @@ import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { ManagerPermission } from "@/modules/manager/domain/entities/ManagerAssignment"
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationImage } from "../../domain/entities/Station"
@@ -32,7 +34,8 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     private readonly stationPricingRepository: IStationPricingRepository,
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly mediaStorage?: IMediaStorage,
-    private readonly mediaUploadService?: MediaUploadService
+    private readonly mediaUploadService?: MediaUploadService,
+    private readonly managerAssignmentRepository?: IManagerAssignmentRepository
   ) {}
 
   async execute(
@@ -46,13 +49,31 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     }
 
     const owner = await this.ownerRepository.findByUserId(userId)
+    let isAuthorized = false
 
-    if (station.ownerId !== owner?.id) {
-      throw new ForbiddenError("You are not authorized to update this station")
+    if (owner && station.ownerId === owner.id) {
+      if (!owner.isVerified) {
+        throw new ForbiddenError(
+          "Your owner account is pending approval by an administrator before you can modify stations."
+        )
+      }
+      isAuthorized = true
+    } else if (this.managerAssignmentRepository) {
+      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
+        userId,
+        stationId
+      )
+      if (
+        assignment &&
+        assignment.isActive &&
+        assignment.hasPermission(ManagerPermission.STATION_SETTINGS)
+      ) {
+        isAuthorized = true
+      }
     }
 
-    if (!owner?.isVerified) {
-      throw new ForbiddenError("Your owner account is pending approval by an administrator before you can modify stations.")
+    if (!isAuthorized) {
+      throw new ForbiddenError("You are not authorized to update this station")
     }
 
 

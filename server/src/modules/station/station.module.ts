@@ -27,6 +27,7 @@ const mediaUploadService = new MediaUploadService(cloudinaryService)
 const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
 
+import { managerAssignmentRepository } from "../manager/manager.module"
 import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
 import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
 import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
@@ -43,7 +44,8 @@ const updateStationUseCase = new UpdateStationUseCase(
   stationPricingRepository,
   extraServiceRepository,
   cloudinaryService,
-  mediaUploadService
+  mediaUploadService,
+  managerAssignmentRepository
 )
 const getStationUseCase = new GetStationUseCase(
   stationRepository,
