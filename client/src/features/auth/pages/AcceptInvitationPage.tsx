@@ -89,15 +89,18 @@ export default function AcceptInvitationPage() {
     }
   }
 
-  // Common Split Layout wrapper
+  // Common Split Layout wrapper - Blue card on RIGHT (side="right"), Form on LEFT
   const renderLayout = (children: React.ReactNode) => (
     <SplitAuthLayout
-      side="left"
-      title="Manager Invitation"
-      description="Join WashQueue to oversee vehicle wash station queues, operations, and bookings."
-      promptText="Already registered or have an account?"
-      buttonText="Login"
-      onRedirectClick={() => navigate(APP_ROUTES.AUTH.LOGIN)}
+      side="right"
+      title="Welcome to WashQueue"
+      description="Book nearby vehicle washes without waiting in line. Manage your station operations seamlessly."
+      footerElement={
+        <div className="flex items-center gap-2 text-xs md:text-sm font-semibold text-primary-foreground/90 pt-1">
+          <ShieldCheck className="w-4 h-4 text-primary-foreground shrink-0" />
+          <span>Station Manager Onboarding</span>
+        </div>
+      }
     >
       {children}
     </SplitAuthLayout>
@@ -167,21 +170,21 @@ export default function AcceptInvitationPage() {
     )
   }
 
-  // 4. Main Invitation Acceptance Form
+  // 4. Main Invitation Acceptance Form (Form on LEFT, NO Google Auth, NO Login switch button)
   return renderLayout(
     <div className="space-y-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
       {/* Form Header */}
       <div className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
-          Accept Manager Role
+          Join as Manager
         </h1>
         <p className="text-sm text-muted-foreground font-medium">
-          Set up your manager account credentials to access your assigned station.
+          Set up your credentials to manage station operations
         </p>
       </div>
 
       {/* Station Details Invitation Card */}
-      <div className="p-4.5 rounded-2xl bg-card border border-border/80 shadow-sm space-y-3">
+      <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-sm space-y-3">
         <div className="flex items-center gap-2.5 text-foreground font-bold text-sm">
           <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Building2 className="w-4.5 h-4.5" />
@@ -208,7 +211,7 @@ export default function AcceptInvitationPage() {
         )}
       </div>
 
-      {/* Acceptance Form */}
+      {/* Direct Registration Form (No Google Auth, No Or Email Divider) */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormInput
           id="manager-name-input"
@@ -260,7 +263,7 @@ export default function AcceptInvitationPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-3.5 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all shadow-md text-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all shadow-md text-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
           {submitting ? (
             <>

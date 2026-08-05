@@ -5,9 +5,10 @@ interface SplitAuthLayoutProps {
   side: "left" | "right"
   title: string
   description: string
-  promptText: string
-  buttonText: string
-  onRedirectClick: () => void
+  promptText?: string
+  buttonText?: string
+  onRedirectClick?: () => void
+  footerElement?: ReactNode
   children: ReactNode
 }
 
@@ -18,6 +19,7 @@ export default function SplitAuthLayout({
   promptText,
   buttonText,
   onRedirectClick,
+  footerElement,
   children,
 }: SplitAuthLayoutProps) {
   const isBlueOnLeft = side === "left"
@@ -38,7 +40,7 @@ export default function SplitAuthLayout({
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
           <Droplets className="h-5 w-5" />
         </div>
-        <span className={`text-2xl font-bold italic tracking-tight`}>WashQueue</span>
+        <span className="text-2xl font-bold italic tracking-tight">WashQueue</span>
       </div>
 
       {/* Central Message */}
@@ -49,16 +51,24 @@ export default function SplitAuthLayout({
         <p className="text-base md:text-lg opacity-90 font-light">{description}</p>
       </div>
 
-      {/* Bottom Switch Redirect */}
-      <div className="flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20">
-        <span className="text-xs md:text-sm font-medium opacity-80">{promptText}</span>
-        <button
-          onClick={onRedirectClick}
-          className="w-full md:w-56 py-3 px-6 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
-        >
-          {buttonText}
-        </button>
-      </div>
+      {/* Bottom Footer or Redirect Button */}
+      {(footerElement || (buttonText && onRedirectClick)) && (
+        <div className="flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20">
+          {footerElement ? (
+            footerElement
+          ) : (
+            <>
+              {promptText && <span className="text-xs md:text-sm font-medium opacity-80">{promptText}</span>}
+              <button
+                onClick={onRedirectClick}
+                className="w-full md:w-56 py-3 px-6 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"
+              >
+                {buttonText}
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 
