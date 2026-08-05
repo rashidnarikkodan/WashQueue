@@ -30,17 +30,17 @@ export const createRouter = (
   )
 
   router.get(
-    "/stations/:stationId/booking-calendar",
+    "/:stationId/booking-calendar",
     asyncHandler(stationController.getBookingCalendar)
   )
 
   router.get(
-    "/stations/:stationId/time-windows",
+    "/:stationId/time-windows",
     asyncHandler(stationController.getAvailableTimeWindows)
   )
 
   router.get(
-    "/stations/:stationId/slot-config",
+    "/:stationId/slot-config",
     asyncHandler(stationController.getSlotConfig)
   )
 
@@ -55,7 +55,7 @@ export const createRouter = (
   router.use(authenticate)
 
   router.put(
-    "/stations/:stationId/slot-config",
+    "/:stationId/slot-config",
     asyncHandler(stationController.configureSlotConfig)
   )
 

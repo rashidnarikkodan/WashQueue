@@ -50,7 +50,7 @@ export class StationRedisHydrationService {
           isOpen: this.checkIsOpen(station),
         })
       })
-    } catch (err) {
+    } catch {
       // In case Redis connection issue occurs, fallback cleanly without failing query
       stations.forEach((station) => {
         resultMap.set(station.id, {

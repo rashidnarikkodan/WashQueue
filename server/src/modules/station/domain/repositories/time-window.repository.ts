@@ -7,6 +7,8 @@ export interface ITimeWindowRepository {
     startDate: string,
     endDate: string
   ): Promise<TimeWindowInstance[]>
+
+  findLatestWindowDateForStation(stationId: string): Promise<string | null>
   findById(id: string): Promise<TimeWindowInstance | null>
   findByStationIdAndWindowStart(
     stationId: string,

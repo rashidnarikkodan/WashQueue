@@ -29,6 +29,17 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     return docs.map(TimeWindowMapper.toDomain)
   }
 
+  async findLatestWindowDateForStation(stationId: string): Promise<string | null> {
+    if (!Types.ObjectId.isValid(stationId)) return null
+    const doc = await TimeWindowModel.findOne(
+      { stationId: new Types.ObjectId(stationId) },
+      { date: 1 }
+    )
+      .sort({ date: -1 })
+      .lean()
+    return doc ? (doc.date as string) : null
+  }
+
   async findById(id: string): Promise<TimeWindowInstance | null> {
     if (!Types.ObjectId.isValid(id)) return null
     const doc = await TimeWindowModel.findById(id)

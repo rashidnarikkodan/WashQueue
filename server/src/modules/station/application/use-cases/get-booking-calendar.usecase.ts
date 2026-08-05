@@ -1,7 +1,7 @@
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { ISlotConfigRepository } from "../../domain/repositories/slot-config.repository"
 import { ITimeWindowRepository } from "../../domain/repositories/time-window.repository"
-import { GenerateTimeWindowsUseCase } from "./generate-time-windows.usecase"
+import { EnsureBookingHorizonService } from "../services/ensure-booking-horizon.service"
 import { BookingCalendarResponseDTO, CalendarDateEntryDTO } from "../dtos/booking-calendar.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
@@ -13,7 +13,7 @@ export class GetBookingCalendarUseCase {
     private stationRepository: IStationRepository,
     private slotConfigRepository: ISlotConfigRepository,
     private timeWindowRepository: ITimeWindowRepository,
-    private generateTimeWindowsUseCase: GenerateTimeWindowsUseCase
+    private ensureBookingHorizonService: EnsureBookingHorizonService
   ) {}
 
   async execute(stationId: string): Promise<BookingCalendarResponseDTO> {
@@ -22,13 +22,13 @@ export class GetBookingCalendarUseCase {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    let slotConfig = await this.slotConfigRepository.findByStationId(stationId)
-    const maxAdvanceDays = slotConfig ? slotConfig.maxAdvanceBookingDays : 7
+    // Lazily ensure all windows up to the booking horizon exist before querying
+    await this.ensureBookingHorizonService.ensureBookingHorizon(stationId)
 
-    // Auto-generate windows if config exists
-    if (slotConfig) {
-      await this.generateTimeWindowsUseCase.execute(stationId)
-    }
+    const slotConfig = await this.slotConfigRepository.findByStationId(stationId)
+    const maxAdvanceDays = slotConfig
+      ? slotConfig.maxAdvanceBookingDays
+      : station.getProps().slotConfig?.maxAdvanceBookingDays || 7
 
     const today = new Date()
     const endDate = new Date(today)

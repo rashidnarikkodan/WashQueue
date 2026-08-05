@@ -86,11 +86,12 @@ export class StationRankingService {
           return (new Date(b.station.getProps().createdAt).getTime() - new Date(a.station.getProps().createdAt).getTime()) * dir
 
         case "RECOMMENDED":
-        default:
+        default: {
           // Sort by computed smart score descending
           const scoreA = a.score ?? StationRankingService.computeScore(a)
           const scoreB = b.score ?? StationRankingService.computeScore(b)
           return scoreB - scoreA
+        }
       }
     })
   }

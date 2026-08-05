@@ -21,18 +21,18 @@ export class TimeWindowGenerationService {
     const generated: TimeWindowInstance[] = []
     const now = new Date()
 
-    // Normalize start date and end date to midnight UTC/Local
+    // Normalize start date and end date to midnight local
     const current = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
     const targetEnd = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
 
     const holidaysSet = new Set(
       (station.holidays || []).map((h: { date: Date; reason?: string }) =>
-        this.formatDateISO(new Date(h.date))
+        this.dateToISO(new Date(h.date))
       )
     )
 
     while (current <= targetEnd) {
-      const dateStr = this.formatDateISO(current)
+      const dateStr = this.dateToISO(current)
 
       // Skip holidays
       if (holidaysSet.has(dateStr)) {
@@ -91,22 +91,23 @@ export class TimeWindowGenerationService {
         if (!existingStarts.has(windowStartIso)) {
           const status = windowEnd <= now ? "PAST" : "OPEN"
 
-          const instance = new TimeWindowInstance({
-            id: randomUUID(),
-            stationId: station.id,
-            date: dateStr,
-            windowStart,
-            windowEnd,
-            capacityTotal: slotConfig.capacityPerWindow,
-            walkInReservedSlots: slotConfig.walkInReservedSlots,
-            advanceBookedCount: 0,
-            walkInCount: 0,
-            status,
-            createdAt: now,
-            updatedAt: now,
-          })
+          generated.push(
+            new TimeWindowInstance({
+              id: randomUUID(),
+              stationId: station.id,
+              date: dateStr,
+              windowStart: new Date(windowStart),
+              windowEnd,
+              capacityTotal: slotConfig.capacityPerWindow,
+              walkInReservedSlots: slotConfig.walkInReservedSlots,
+              advanceBookedCount: 0,
+              walkInCount: 0,
+              status,
+              createdAt: now,
+              updatedAt: now,
+            })
+          )
 
-          generated.push(instance)
           existingStarts.add(windowStartIso)
         }
 
@@ -119,7 +120,8 @@ export class TimeWindowGenerationService {
     return generated
   }
 
-  private formatDateISO(d: Date): string {
+  /** Format a local Date as YYYY-MM-DD */
+  dateToISO(d: Date): string {
     const yyyy = d.getFullYear()
     const mm = String(d.getMonth() + 1).padStart(2, "0")
     const dd = String(d.getDate()).padStart(2, "0")

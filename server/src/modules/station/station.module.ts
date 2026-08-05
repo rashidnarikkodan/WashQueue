@@ -4,6 +4,7 @@ import { ExtraServiceMongoRepository } from "./infrastructure/repositories/extra
 import { SlotConfigMongoRepository } from "./infrastructure/repositories/slot-config.mongo.repository"
 import { TimeWindowMongoRepository } from "./infrastructure/repositories/time-window.mongo.repository"
 import { TimeWindowGenerationService } from "./domain/services/TimeWindowGenerationService"
+import { EnsureBookingHorizonService } from "./application/services/ensure-booking-horizon.service"
 import { CreateStationUseCase } from "./application/use-cases/create-station.usecase"
 import { UpdateStationUseCase } from "./application/use-cases/update-station.usecase"
 import { GetStationUseCase } from "./application/use-cases/get-station.usecase"
@@ -44,7 +45,15 @@ const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
 const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
-// Instantiate use cases
+// Lazy booking-horizon service (replaces GenerateTimeWindowsUseCase as the entry point)
+const ensureBookingHorizonService = new EnsureBookingHorizonService(
+  stationRepository,
+  slotConfigRepository,
+  timeWindowRepository,
+  timeWindowGenerationService
+)
+
+// Keep GenerateTimeWindowsUseCase for ConfigureSlotConfigUseCase (eager initial generation on config save)
 const generateTimeWindowsUseCase = new GenerateTimeWindowsUseCase(
   stationRepository,
   slotConfigRepository,
@@ -67,13 +76,13 @@ const getBookingCalendarUseCase = new GetBookingCalendarUseCase(
   stationRepository,
   slotConfigRepository,
   timeWindowRepository,
-  generateTimeWindowsUseCase
+  ensureBookingHorizonService
 )
 
 const getAvailableTimeWindowsUseCase = new GetAvailableTimeWindowsUseCase(
   stationRepository,
   timeWindowRepository,
-  generateTimeWindowsUseCase
+  ensureBookingHorizonService
 )
 
 const createStationUseCase = new CreateStationUseCase(

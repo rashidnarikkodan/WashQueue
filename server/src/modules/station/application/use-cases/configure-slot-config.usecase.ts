@@ -20,7 +20,7 @@ export class ConfigureSlotConfigUseCase {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    let existing = await this.slotConfigRepository.findByStationId(input.stationId)
+    const existing = await this.slotConfigRepository.findByStationId(input.stationId)
     const now = new Date()
 
     let updatedConfig: SlotConfig
