@@ -7,6 +7,7 @@ import { PipelineStage, Types } from "mongoose"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
 import { StationPricingModel } from "../models/station-pricing.model"
 import { ExtraServiceModel } from "../models/extra-service.model"
+import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
 import { StationRankingService, HydratedStationItem } from "../../domain/services/station-ranking.service"
 import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
 
@@ -105,7 +106,7 @@ export class StationMongoRepository
       })
     }
 
-    const matchStage = this.buildMatchStage(filter)
+    const matchStage = await this.buildMatchStage(filter)
     if (Object.keys(matchStage).length > 0) {
       candidatePipeline.push({ $match: matchStage })
     }
@@ -283,13 +284,41 @@ export class StationMongoRepository
     return res.stations
   }
 
-  private buildMatchStage(filter: StationFilter): Record<string, unknown> {
+  private async buildMatchStage(filter: StationFilter): Promise<Record<string, unknown>> {
     const match: Record<string, unknown> = {}
 
     if (filter.ownerId) {
-      //for owners only
-      match.ownerId = new Types.ObjectId(filter.ownerId)
+      const ownerIdStr = String(filter.ownerId)
+      const possibleIds: Types.ObjectId[] = []
+      if (Types.ObjectId.isValid(ownerIdStr)) {
+        possibleIds.push(new Types.ObjectId(ownerIdStr))
+      }
+
+      try {
+        const ownerDoc = await OwnerModel.findOne({
+          $or: [
+            ...(Types.ObjectId.isValid(ownerIdStr) ? [{ _id: new Types.ObjectId(ownerIdStr) }] : []),
+            ...(Types.ObjectId.isValid(ownerIdStr) ? [{ userId: new Types.ObjectId(ownerIdStr) }] : []),
+          ],
+        }).exec()
+
+        if (ownerDoc) {
+          const ownerObjId = ownerDoc._id as Types.ObjectId
+          const userObjId = ownerDoc.userId as Types.ObjectId
+          if (ownerObjId && !possibleIds.some((id) => id.equals(ownerObjId))) {
+            possibleIds.push(ownerObjId)
+          }
+          if (userObjId && !possibleIds.some((id) => id.equals(userObjId))) {
+            possibleIds.push(userObjId)
+          }
+        }
+      } catch {
+        // Ignore fallback to provided id
+      }
+
+      match.ownerId = { $in: possibleIds }
     }
+
     if (filter.status && filter.status !== "all") {
       //for admin and owners
       match.status = filter.status

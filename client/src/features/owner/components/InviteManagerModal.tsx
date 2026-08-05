@@ -99,15 +99,22 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
   const fetchOwnerStations = async () => {
     try {
       setFetchingStations(true)
-      const ownerUserId = user?.ownerId
+      const ownerUserId = user?.ownerId || user?.id
+      if (!ownerUserId) {
+        setStations([])
+        return
+      }
       const res = await stationApi.getStations({
         ownerId: ownerUserId,
         limit: 100,
+        status: "all",
       })
       const list = res.stations || []
       setStations(list)
       if (list.length > 0) {
         setSelectedStationId(list[0].id)
+      } else {
+        setSelectedStationId("")
       }
     } catch {
       toast.error("Failed to fetch your stations")

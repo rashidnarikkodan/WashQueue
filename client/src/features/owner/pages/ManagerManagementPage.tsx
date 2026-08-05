@@ -50,11 +50,11 @@ export const ManagerManagementPage = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const ownerUserId = user?.id
+      const ownerUserId = user?.ownerId || user?.id
       const [mgrRes, invRes, stnRes] = await Promise.all([
         managerApi.getOwnerManagers({ limit: 100 }),
         managerApi.getOwnerInvitations(),
-        stationApi.getStations({ ownerId: ownerUserId, limit: 100 }),
+        stationApi.getStations({ ownerId: ownerUserId, limit: 100, status: "all" }),
       ])
       setManagers(mgrRes.managers || [])
       setInvitations(invRes || [])
