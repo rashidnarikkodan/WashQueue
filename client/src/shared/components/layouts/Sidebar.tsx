@@ -30,7 +30,7 @@ const Sidebar = ({ items }: Props) => {
           (el) => el && el === document.activeElement
         )
 
-        let nextIndex = 0
+        let nextIndex: number
         if (activeFocusedIndex !== -1) {
           if (e.key === "ArrowDown") {
             nextIndex = (activeFocusedIndex + 1) % items.length

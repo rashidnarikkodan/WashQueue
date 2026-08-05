@@ -68,7 +68,7 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
         (t) => tabRefs.current[t.id] === document.activeElement
       )
 
-      let nextIndex = 0
+      let nextIndex: number
       if (activeFocusedIndex !== -1) {
         if (e.key === "ArrowRight") {
           nextIndex = (activeFocusedIndex + 1) % tabs.length
