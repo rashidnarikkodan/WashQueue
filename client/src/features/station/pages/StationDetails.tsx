@@ -17,7 +17,7 @@ import { StationReviewsSection } from "../components/station-details/StationRevi
 import { StationQASection } from "../components/station-details/StationQASection"
 import { StationLocationSection } from "../components/station-details/StationLocationSection"
 import { StationSidebarCard } from "../components/station-details/StationSidebarCard"
-import { SelectManagerModal } from "../components/station-details/SelectManagerModal"
+import { StationManagerSection } from "../components/station-details/StationManagerSection"
 
 // Modular Details Components
 
@@ -38,7 +38,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     reviewStation,
     deleteStation,
     toggleActiveStation,
-    assignManager,
     clearSelected,
   } = useStationStore()
 
@@ -57,7 +56,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     currentRole = ROLE.CUSTOMER
   }
 
-  const [isManagerModalOpen, setIsManagerModalOpen] = useState(false)
   const [rejecting, setRejecting] = useState(false)
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
   const [suspending, setSuspending] = useState(false)
@@ -305,6 +303,16 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
           <StationAboutSection stationName={station.name} description={station.description} />
 
+          {currentRole === ROLE.OWNER && (
+            <div id="station-manager-section">
+              <StationManagerSection
+                station={station}
+                onRefresh={() => fetchStationById(id!)}
+                isOwner={currentRole === ROLE.OWNER}
+              />
+            </div>
+          )}
+
           <StationPricingSection pricing={pricing} />
 
           <StationExtraServicesSection extraServices={extraServices} />
@@ -332,21 +340,14 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             onSuspend={() => setSuspending(true)}
             onToggleActive={handleToggleActive}
             onDelete={handleDeleteDraft}
-            onOpenAssignManager={() => setIsManagerModalOpen(true)}
+            onOpenAssignManager={() => {
+              const el = document.getElementById("station-manager-section")
+              if (el) el.scrollIntoView({ behavior: "smooth" })
+            }}
             isSubmittingAction={isSubmittingAction}
           />
         </div>
       </div>
-
-      {/* Select Manager Modal */}
-      <SelectManagerModal
-        isOpen={isManagerModalOpen}
-        onClose={() => setIsManagerModalOpen(false)}
-        onAssignManager={async (input) => {
-          await assignManager(station.id, input)
-        }}
-        isCurrentManagerSelf={station.managerId === user?.id}
-      />
 
 
       {/* Custom Rejection Reason Input Modal */}

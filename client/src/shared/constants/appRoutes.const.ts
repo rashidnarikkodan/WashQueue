@@ -44,7 +44,6 @@ export const APP_ROUTES = {
     ANALYTICS: "/owner/analytics",
     FEEDBACK: "/owner/feedback",
     NOTIFICATIONS: "/owner/notifications",
-    TEAM: "/owner/team",
     ONBOARDING: "/owner/onboarding",
   },
   VEHICLES: {

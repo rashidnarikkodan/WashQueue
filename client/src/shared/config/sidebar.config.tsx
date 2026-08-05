@@ -129,11 +129,6 @@ export const ownerSideBarItems: SidebarItem[] = [
     path: "/owner/notifications",
     icon: Bell,
   },
-  {
-    name: "Team & Managers",
-    path: "/owner/team",
-    icon: Users,
-  },
 ]
 
 export const managerSideBarItems: SidebarItem[] = [
