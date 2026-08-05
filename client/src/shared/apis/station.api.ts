@@ -183,4 +183,50 @@ export const stationApi = {
       throw handleApiError(error, "Failed to assign manager for this station")
     }
   },
+
+  /**
+   * Fetch booking calendar statuses for a station.
+   */
+  getBookingCalendar: async (
+    stationId: string
+  ): Promise<{
+    minDate: string
+    maxDate: string
+    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
+  }> => {
+    try {
+      const response = await api.get(`/stations/${stationId}/booking-calendar`)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to retrieve booking calendar")
+    }
+  },
+
+  /**
+   * Fetch available time windows for a station on a given date.
+   */
+  getAvailableTimeWindows: async (
+    stationId: string,
+    date: string
+  ): Promise<{
+    stationId: string
+    date: string
+    windows: {
+      windowId: string
+      start: string
+      end: string
+      bookedCount: number
+      remainingCapacity: number
+      status: "OPEN" | "FULL" | "CLOSED" | "PAST"
+    }[]
+  }> => {
+    try {
+      const response = await api.get(`/stations/${stationId}/time-windows`, {
+        params: { date },
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to retrieve time windows")
+    }
+  },
 }

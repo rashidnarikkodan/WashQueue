@@ -8,6 +8,7 @@ interface DatePickerProps {
   placeholder?: string
   minDate?: string // YYYY-MM-DD
   maxDate?: string // YYYY-MM-DD
+  disabledDates?: string[] // Array of YYYY-MM-DD dates that cannot be selected
   disabled?: boolean
   error?: string
   id?: string
@@ -38,6 +39,7 @@ export default function DatePicker({
   placeholder = "Select date...",
   minDate,
   maxDate,
+  disabledDates = [],
   disabled = false,
   error,
   id,
@@ -151,6 +153,7 @@ export default function DatePicker({
   function isDateDisabled(dateStr: string, min?: string, max?: string) {
     if (min && dateStr < min) return true
     if (max && dateStr > max) return true
+    if (disabledDates && disabledDates.includes(dateStr)) return true
     return false
   }
 

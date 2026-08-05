@@ -5,6 +5,7 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { AppError } from "@/common/errors/app-error"
 import redis from "@/infrastructure/cache/redis.client"
 import { VehicleCategoryModel } from "@/modules/vehicle-catelog/infrastructure/models/category.model"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
@@ -24,6 +25,12 @@ import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repo
 import { StationRequestMapper } from "./mappers/station.mapper"
 
 
+import { ConfigureSlotConfigUseCase } from "../application/use-cases/configure-slot-config.usecase"
+import { GetSlotConfigUseCase } from "../application/use-cases/get-slot-config.usecase"
+import { GetBookingCalendarUseCase } from "../application/use-cases/get-booking-calendar.usecase"
+import { GetAvailableTimeWindowsUseCase } from "../application/use-cases/get-available-time-windows.usecase"
+import { configureSlotConfigSchema, getAvailableTimeWindowsQuerySchema } from "./schema/station.schema"
+
 export class StationController {
   constructor(
     private readonly createStationUseCase: ICreateStationUseCase,
@@ -36,7 +43,11 @@ export class StationController {
     private readonly toggleActiveStationUseCase: IToggleActiveStationUseCase,
     private readonly assignManagerUseCase: IAssignManagerUseCase,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly stationMapper: StationRequestMapper
+    private readonly stationMapper: StationRequestMapper,
+    private readonly configureSlotConfigUseCase: ConfigureSlotConfigUseCase,
+    private readonly getSlotConfigUseCase: GetSlotConfigUseCase,
+    private readonly getBookingCalendarUseCase: GetBookingCalendarUseCase,
+    private readonly getAvailableTimeWindowsUseCase: GetAvailableTimeWindowsUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -210,7 +221,7 @@ export class StationController {
     )
   }
 
-  submit = async (req: AuthenticatedRequest, res: Response) => {
+  submitForReview = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
@@ -219,12 +230,17 @@ export class StationController {
     const stationId = this.stationMapper.extractStationId(req)
     const station = await this.submitStationUseCase.execute(stationId, userId)
 
-    success(res, station.getProps(), HTTP_STATUS.OK, "Station submitted successfully for review")
+    success(res, station.getProps(), HTTP_STATUS.OK, "Station submitted for review successfully")
   }
 
   review = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
     const stationId = this.stationMapper.extractStationId(req)
-    const { action, rejectionReason } = this.stationMapper.extractReviewInput(req)
+    const { action, rejectionReason } = req.body || {}
     const station = await this.reviewStationUseCase.execute(stationId, action, rejectionReason)
 
     success(res, station.getProps(), HTTP_STATUS.OK, `Station ${action.toLowerCase()}d successfully`)
@@ -283,5 +299,49 @@ export class StationController {
       HTTP_STATUS.OK,
       "Manager assigned for this station successfully"
     )
+  }
+
+  configureSlotConfig = async (req: AuthenticatedRequest, res: Response) => {
+    const stationId = req.params.stationId || req.params.id
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+    const validated = configureSlotConfigSchema.parse(req.body)
+
+    const result = await this.configureSlotConfigUseCase.execute({
+      stationId,
+      ...validated,
+    })
+
+    success(res, result, HTTP_STATUS.OK, "Slot configuration saved successfully")
+  }
+
+  getSlotConfig = async (req: Request, res: Response) => {
+    const stationId = req.params.stationId || req.params.id
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+    const result = await this.getSlotConfigUseCase.execute(stationId)
+    success(res, result, HTTP_STATUS.OK, "Slot configuration fetched successfully")
+  }
+
+  getBookingCalendar = async (req: Request, res: Response) => {
+    const stationId = req.params.stationId || req.params.id
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+    const result = await this.getBookingCalendarUseCase.execute(stationId)
+    success(res, result, HTTP_STATUS.OK, "Booking calendar fetched successfully")
+  }
+
+  getAvailableTimeWindows = async (req: Request, res: Response) => {
+    const stationId = req.params.stationId || req.params.id
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+    const { date } = getAvailableTimeWindowsQuerySchema.parse(req.query)
+
+    const result = await this.getAvailableTimeWindowsUseCase.execute(stationId, date)
+    success(res, result, HTTP_STATUS.OK, "Time windows fetched successfully")
   }
 }

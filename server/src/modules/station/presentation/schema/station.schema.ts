@@ -206,3 +206,31 @@ export const patchStationSchema = z.preprocess(
   patchBodyPreprocess,
   z.discriminatedUnion("step", [step1Schema, step2Schema, step3Schema, step4Schema])
 )
+
+export const configureSlotConfigSchema = z.object({
+  windowDurationMins: z.preprocess(
+    (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+    z.number().int().min(5, "Window duration must be at least 5 mins").max(240, "Window duration cannot exceed 240 mins")
+  ),
+  capacityPerWindow: z.preprocess(
+    (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+    z.number().int().min(1, "Capacity per window must be at least 1")
+  ),
+  walkInReservedSlots: z.preprocess(
+    (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+    z.number().int().min(0, "Walk-in reserved slots cannot be negative")
+  ),
+  maxAdvanceBookingDays: z.preprocess(
+    (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+    z.number().int().min(1, "Max advance booking days must be at least 1").max(365, "Max advance booking days cannot exceed 365")
+  ),
+  allowWalkIns: z.preprocess(
+    (val) => (typeof val === "string" ? val === "true" || val === "1" : val),
+    z.boolean().optional().default(true)
+  ),
+})
+
+export const getAvailableTimeWindowsQuerySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format, must be YYYY-MM-DD"),
+})
+

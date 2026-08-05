@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { useStationStore } from "@/features/station/store/station.store"
+import { stationApi } from "@/shared/apis/station.api"
 import { vehicleApi } from "@/shared/apis/vehicle.api"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
@@ -39,11 +40,120 @@ export default function Booking() {
   // Date & Slot State
   const todayIso = new Date().toISOString().split("T")[0]
   const [selectedDate, setSelectedDate] = useState<string>(todayIso)
-  const [selectedSlotId, setSelectedSlotId] = useState<string | null>("SLOT_2")
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
+
+  // Real Calendar & Time Window API State
+  const [bookingCalendar, setBookingCalendar] = useState<{
+    minDate: string
+    maxDate: string
+    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
+  } | null>(null)
+  const [serverWindows, setServerWindows] = useState<{
+    windowId: string
+    start: string
+    end: string
+    bookedCount: number
+    remainingCapacity: number
+    status: "OPEN" | "FULL" | "CLOSED" | "PAST"
+  }[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
   // Booking Submit State
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
   const [bookingSuccess, setBookingSuccess] = useState(false)
+
+  // Fetch Booking Calendar from server
+  useEffect(() => {
+    if (!stationId) return
+    stationApi
+      .getBookingCalendar(stationId)
+      .then((data) => {
+        setBookingCalendar(data)
+        if (data.dates.length > 0) {
+          const currentValid = data.dates.find(
+            (d) => d.date === selectedDate && d.status === "AVAILABLE"
+          )
+          if (!currentValid) {
+            const firstAvailable = data.dates.find((d) => d.status === "AVAILABLE")
+            if (firstAvailable) {
+              setSelectedDate(firstAvailable.date)
+            }
+          }
+        }
+      })
+      .catch(() => {})
+  }, [stationId])
+
+  // Fetch Available Time Windows for selectedDate
+  useEffect(() => {
+    if (!stationId || !selectedDate) return
+    setIsLoadingSlots(true)
+    stationApi
+      .getAvailableTimeWindows(stationId, selectedDate)
+      .then((data) => {
+        const windowsList = data.windows || []
+        setServerWindows(windowsList)
+        const available = windowsList.filter(
+          (w) => w.status === "OPEN" && w.remainingCapacity > 0
+        )
+        if (available.length > 0) {
+          setSelectedSlotId((prev) => {
+            const exists = available.some((w) => w.windowId === prev)
+            return exists ? prev : available[0].windowId
+          })
+        } else {
+          setSelectedSlotId(null)
+        }
+      })
+      .catch(() => {
+        setServerWindows([])
+        setSelectedSlotId(null)
+      })
+      .finally(() => {
+        setIsLoadingSlots(false)
+      })
+  }, [stationId, selectedDate])
+
+  // Compute disabled dates array (dates that are NOT available)
+  const disabledDates = useMemo(() => {
+    if (!bookingCalendar?.dates) return []
+    return bookingCalendar.dates
+      .filter((d) => d.status !== "AVAILABLE")
+      .map((d) => d.date)
+  }, [bookingCalendar])
+
+  // Transform server windows into TimeSlotOption items
+  const timeSlotOptions: TimeSlotOption[] = useMemo(() => {
+    if (serverWindows.length > 0) {
+      return serverWindows.map((w) => {
+        const startDateObj = new Date(w.start)
+        const endDateObj = new Date(w.end)
+        const formatTime = (d: Date) =>
+          d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
+        const timeWindow = `${formatTime(startDateObj)} - ${formatTime(endDateObj)}`
+
+        let label = `${w.remainingCapacity} slots left`
+        let status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL" = "AVAILABLE"
+
+        if (w.status === "FULL" || w.remainingCapacity <= 0) {
+          status = "FULL"
+          label = "Fully Booked"
+        } else if (w.remainingCapacity <= 2) {
+          status = "LIMITED"
+          label = `Only ${w.remainingCapacity} slot${w.remainingCapacity === 1 ? "" : "s"} left`
+        }
+
+        return {
+          id: w.windowId,
+          timeWindow,
+          label,
+          status,
+          slotsLeft: w.remainingCapacity,
+        }
+      })
+    }
+    return []
+  }, [serverWindows])
 
   // Fetch Station details & Catalog data on mount
   useEffect(() => {
@@ -177,34 +287,10 @@ export default function Booking() {
     return []
   }, [selectedStation?.extraServices, selectedVehicle?.classId])
 
-  // Available Time Slots
-  const timeSlots: TimeSlotOption[] = useMemo(
-    () => [
-      { id: "SLOT_1", timeWindow: "09:00 - 10:00", label: "Morning Slot", status: "AVAILABLE" },
-      {
-        id: "SLOT_2",
-        timeWindow: "10:00 - 11:00",
-        label: "Selected Slot",
-        status: "SELECTED",
-      },
-      { id: "SLOT_3", timeWindow: "11:00 - 12:00", label: "Fully Booked", status: "FULL" },
-      {
-        id: "SLOT_4",
-        timeWindow: "13:00 - 14:00",
-        label: "Limited Availability",
-        status: "LIMITED",
-        slotsLeft: 1,
-      },
-      {
-        id: "SLOT_5",
-        timeWindow: "14:00 - 15:00",
-        label: "2 Slots Left",
-        status: "LIMITED",
-        slotsLeft: 2,
-      },
-      { id: "SLOT_6", timeWindow: "15:00 - 16:00", label: "Late Session", status: "AVAILABLE" },
-    ],
-    []
+  // Selected Slot Option Object
+  const selectedSlot = useMemo(
+    () => timeSlotOptions.find((s) => s.id === selectedSlotId) || null,
+    [timeSlotOptions, selectedSlotId]
   )
 
   const selectedPlan = useMemo(
@@ -215,11 +301,6 @@ export default function Booking() {
   const selectedExtras = useMemo(
     () => extraServices.filter((e) => selectedExtraIds.includes(e.id)),
     [extraServices, selectedExtraIds]
-  )
-
-  const selectedSlot = useMemo(
-    () => timeSlots.find((s) => s.id === selectedSlotId) || null,
-    [timeSlots, selectedSlotId]
   )
 
   const formattedDate = useMemo(() => {
@@ -263,9 +344,7 @@ export default function Booking() {
           <span>Back to Stations</span>
         </button>
 
-        <h1 className="text-base font-extrabold text-foreground tracking-tight">
-          Slot Booking Checkout
-        </h1>
+       
       </div>
 
       {/* Main 12-Column Layout Grid */}
@@ -306,9 +385,14 @@ export default function Booking() {
           <TimeSlotSelectionStep
             selectedDate={selectedDate}
             onDateChange={(d) => setSelectedDate(d)}
-            slots={timeSlots}
+            slots={timeSlotOptions}
             selectedSlotId={selectedSlotId}
             onSelectSlot={(id) => setSelectedSlotId(id)}
+            minDate={bookingCalendar?.minDate}
+            maxDate={bookingCalendar?.maxDate}
+            disabledDates={disabledDates}
+            calendarDates={bookingCalendar?.dates}
+            isLoadingSlots={isLoadingSlots}
           />
         </div>
 

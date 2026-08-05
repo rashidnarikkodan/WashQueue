@@ -108,6 +108,14 @@ export class Station {
     return this.props.status;
   }
 
+  get operatingHours() {
+    return this.props.operatingHours || [];
+  }
+
+  get holidays() {
+    return this.props.holidays || [];
+  }
+
   getProps(): StationProps {
     return { ...this.props };
   }

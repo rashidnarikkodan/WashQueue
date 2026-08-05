@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { Check, AlertCircle, Ban } from "lucide-react"
 import DatePicker from "@/shared/components/ui/DatePicker"
 
@@ -9,12 +10,22 @@ export interface TimeSlotOption {
   slotsLeft?: number
 }
 
+export interface CalendarDateEntry {
+  date: string
+  status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED"
+}
+
 interface TimeSlotSelectionStepProps {
   selectedDate: string
   onDateChange: (date: string) => void
   slots: TimeSlotOption[]
   selectedSlotId: string | null
   onSelectSlot: (slotId: string) => void
+  minDate?: string
+  maxDate?: string
+  disabledDates?: string[]
+  calendarDates?: CalendarDateEntry[]
+  isLoadingSlots?: boolean
 }
 
 export default function TimeSlotSelectionStep({
@@ -23,24 +34,45 @@ export default function TimeSlotSelectionStep({
   slots,
   selectedSlotId,
   onSelectSlot,
+  minDate,
+  maxDate,
+  disabledDates = [],
+  calendarDates = [],
+  isLoadingSlots = false,
 }: TimeSlotSelectionStepProps) {
 
-  // Quick date chips (Today, Tomorrow, +2 Days)
-  const today = new Date()
-  const todayIso = today.toISOString().split("T")[0]
+  // Quick date chips derived from calendar API entries (or fallback date offsets)
+  const dateOptions = useMemo(() => {
+    if (calendarDates.length > 0) {
+      return calendarDates.map((item) => {
+        const d = new Date(item.date + "T00:00:00")
+        const label = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+        return {
+          isoDate: item.date,
+          label,
+          status: item.status,
+          isDisabled: item.status !== "AVAILABLE",
+        }
+      })
+    }
 
-  const dateOptions = [0, 1, 2, 3, 4].map((offset) => {
-    const d = new Date(today)
-    d.setDate(d.getDate() + offset)
-    const isoDate = d.toISOString().split("T")[0]
-    const label =
-      offset === 0
-        ? "Today"
-        : offset === 1
-          ? "Tomorrow"
-          : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-    return { isoDate, label }
-  })
+    const today = new Date()
+    return [0, 1, 2, 3, 4, 5, 6].map((offset) => {
+      const d = new Date(today)
+      d.setDate(d.getDate() + offset)
+      const isoDate = d.toISOString().split("T")[0]
+      const label =
+        offset === 0
+          ? "Today"
+          : offset === 1
+            ? "Tomorrow"
+            : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+      const isDisabled = disabledDates.includes(isoDate)
+      return { isoDate, label, status: isDisabled ? "CLOSED" : "AVAILABLE", isDisabled }
+    })
+  }, [calendarDates, disabledDates])
+
+  const todayIso = minDate || new Date().toISOString().split("T")[0]
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
@@ -66,6 +98,8 @@ export default function TimeSlotSelectionStep({
               value={selectedDate}
               onChange={onDateChange}
               minDate={todayIso}
+              maxDate={maxDate}
+              disabledDates={disabledDates}
               placeholder="Select service date..."
             />
 
@@ -73,20 +107,28 @@ export default function TimeSlotSelectionStep({
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {dateOptions.map((opt) => {
                 const isActive = selectedDate === opt.isoDate
+                const isChipDisabled = opt.isDisabled
+
                 return (
                   <button
                     key={opt.isoDate}
                     type="button"
+                    disabled={isChipDisabled}
                     onClick={() => {
-                      onDateChange(opt.isoDate)
+                      if (!isChipDisabled) onDateChange(opt.isoDate)
                     }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-muted text-muted-foreground border border-border hover:text-foreground"
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                      isChipDisabled
+                        ? "bg-muted/40 text-muted-foreground/50 border border-border/30 cursor-not-allowed line-through opacity-60"
+                        : isActive
+                        ? "bg-primary text-primary-foreground shadow-xs cursor-pointer"
+                        : "bg-muted text-muted-foreground border border-border hover:text-foreground cursor-pointer"
                     }`}
                   >
                     {opt.label}
+                    {opt.status === "HOLIDAY" && " (Holiday)"}
+                    {opt.status === "CLOSED" && " (Closed)"}
+                    {opt.status === "FULL" && " (Full)"}
                   </button>
                 )
               })}
@@ -102,7 +144,18 @@ export default function TimeSlotSelectionStep({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {isLoadingSlots ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 rounded-2xl border border-border bg-card/50 animate-pulse p-4" />
+              ))}
+            </div>
+          ) : slots.length === 0 ? (
+            <div className="p-6 rounded-2xl border border-dashed border-border bg-card/30 text-center text-sm text-muted-foreground">
+              No available booking windows for this date.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {slots.map((slot) => {
               const isSelected = selectedSlotId === slot.id
               const isFull = slot.status === "FULL"
@@ -158,6 +211,7 @@ export default function TimeSlotSelectionStep({
               )
             })}
           </div>
+          )}
         </div>
       </div>
     </div>

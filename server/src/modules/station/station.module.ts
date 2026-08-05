@@ -1,6 +1,9 @@
 import { StationMongoRepository } from "./infrastructure/repositories/station.mongo.repository"
 import { StationPricingMongoRepository } from "./infrastructure/repositories/station-pricing.mongo.repository"
 import { ExtraServiceMongoRepository } from "./infrastructure/repositories/extra-service.mongo.repository"
+import { SlotConfigMongoRepository } from "./infrastructure/repositories/slot-config.mongo.repository"
+import { TimeWindowMongoRepository } from "./infrastructure/repositories/time-window.mongo.repository"
+import { TimeWindowGenerationService } from "./domain/services/TimeWindowGenerationService"
 import { CreateStationUseCase } from "./application/use-cases/create-station.usecase"
 import { UpdateStationUseCase } from "./application/use-cases/update-station.usecase"
 import { GetStationUseCase } from "./application/use-cases/get-station.usecase"
@@ -14,27 +17,65 @@ import { ReviewStationUseCase } from "./application/use-cases/review-station.use
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationStepParserFactory } from "./presentation/parsers/station-step.parser"
+import { ConfigureSlotConfigUseCase } from "./application/use-cases/configure-slot-config.usecase"
+import { GetSlotConfigUseCase } from "./application/use-cases/get-slot-config.usecase"
+import { GenerateTimeWindowsUseCase } from "./application/use-cases/generate-time-windows.usecase"
+import { GetBookingCalendarUseCase } from "./application/use-cases/get-booking-calendar.usecase"
+import { GetAvailableTimeWindowsUseCase } from "./application/use-cases/get-available-time-windows.usecase"
+import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
+import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
+import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
+import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
 
 // Instantiate repositories & services
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
 export const stationPricingRepository = new StationPricingMongoRepository()
 export const extraServiceRepository = new ExtraServiceMongoRepository()
+export const slotConfigRepository = new SlotConfigMongoRepository()
+export const timeWindowRepository = new TimeWindowMongoRepository()
+
+const timeWindowGenerationService = new TimeWindowGenerationService()
 const cloudinaryService = new CloudinaryService()
 const mediaUploadService = new MediaUploadService(cloudinaryService)
 
 // Instantiate step parser factory & request mapper
 const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
-
-import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
-import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
-import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
-import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
-
 const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
 // Instantiate use cases
+const generateTimeWindowsUseCase = new GenerateTimeWindowsUseCase(
+  stationRepository,
+  slotConfigRepository,
+  timeWindowRepository,
+  timeWindowGenerationService
+)
+
+const configureSlotConfigUseCase = new ConfigureSlotConfigUseCase(
+  stationRepository,
+  slotConfigRepository,
+  generateTimeWindowsUseCase
+)
+
+const getSlotConfigUseCase = new GetSlotConfigUseCase(
+  stationRepository,
+  slotConfigRepository
+)
+
+const getBookingCalendarUseCase = new GetBookingCalendarUseCase(
+  stationRepository,
+  slotConfigRepository,
+  timeWindowRepository,
+  generateTimeWindowsUseCase
+)
+
+const getAvailableTimeWindowsUseCase = new GetAvailableTimeWindowsUseCase(
+  stationRepository,
+  timeWindowRepository,
+  generateTimeWindowsUseCase
+)
+
 const createStationUseCase = new CreateStationUseCase(
   stationRepository,
   ownerRepository,
@@ -84,10 +125,15 @@ const stationController = new StationController(
   toggleActiveStationUseCase,
   assignManagerUseCase,
   ownerRepository,
-  stationRequestMapper
+  stationRequestMapper,
+  configureSlotConfigUseCase,
+  getSlotConfigUseCase,
+  getBookingCalendarUseCase,
+  getAvailableTimeWindowsUseCase
 )
 
 // Create router
 const stationRouter = createRouter(stationController)
 
 export default stationRouter
+

@@ -30,6 +30,21 @@ export const createRouter = (
   )
 
   router.get(
+    "/stations/:stationId/booking-calendar",
+    asyncHandler(stationController.getBookingCalendar)
+  )
+
+  router.get(
+    "/stations/:stationId/time-windows",
+    asyncHandler(stationController.getAvailableTimeWindows)
+  )
+
+  router.get(
+    "/stations/:stationId/slot-config",
+    asyncHandler(stationController.getSlotConfig)
+  )
+
+  router.get(
     API_ROUTES.STATIONS.BY_ID,
     asyncHandler(stationController.getById)
   )
@@ -38,6 +53,11 @@ export const createRouter = (
    * Protected routes
    */
   router.use(authenticate)
+
+  router.put(
+    "/stations/:stationId/slot-config",
+    asyncHandler(stationController.configureSlotConfig)
+  )
 
   router.post(
     API_ROUTES.STATIONS.CREATE,
@@ -55,7 +75,7 @@ export const createRouter = (
 
   router.post(
     API_ROUTES.STATIONS.SUBMIT,
-    asyncHandler(stationController.submit)
+    asyncHandler(stationController.submitForReview)
   )
 
   router.patch(
