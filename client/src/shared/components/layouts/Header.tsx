@@ -39,7 +39,6 @@ export default function Header({ role }: { role?: string }) {
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
-      { name: "Bookmarks", path: APP_ROUTES.BOOKMARKS },
     ],
   }
 
