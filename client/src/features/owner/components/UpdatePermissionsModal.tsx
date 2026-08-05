@@ -35,7 +35,7 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
 
   useEffect(() => {
     if (manager) {
-      setSelectedPermissions(manager.permissions || [])
+      queueMicrotask(() => setSelectedPermissions(manager.permissions || []))
     }
   }, [manager])
 
@@ -65,8 +65,9 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
       toast.success("Manager permissions updated successfully")
       onSuccess()
       onClose()
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update permissions")
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } }
+      toast.error(errorObj?.response?.data?.message || "Failed to update permissions")
     } finally {
       setLoading(false)
     }

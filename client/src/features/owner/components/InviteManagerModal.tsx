@@ -87,9 +87,11 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setIsSuccessState(false)
-      setEmail("")
-      setName("")
+      queueMicrotask(() => {
+        setIsSuccessState(false)
+        setEmail("")
+        setName("")
+      })
     }
   }, [isOpen])
 
@@ -132,8 +134,9 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
       setSuccessResultMsg(res.message || "Invitation sent successfully!")
       setIsSuccessState(true)
       onSuccess()
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to send invitation")
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } }
+      toast.error(errorObj?.response?.data?.message || "Failed to send invitation")
     } finally {
       setLoading(false)
     }

@@ -21,9 +21,14 @@ export default function AcceptInvitationPage() {
   const token = searchParams.get("token") || ""
   const navigate = useNavigate()
 
-  const [loading, setLoading] = useState(true)
+  // Derive missing-token error without setState in effect
+  const missingToken = !token
+
+  const [loading, setLoading] = useState(!missingToken)
   const [invitation, setInvitation] = useState<ManagerInvitationItem | null>(null)
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(
+    missingToken ? "Invalid invitation link. No token provided." : null
+  )
 
   // Form State
   const [name, setName] = useState("")
@@ -34,11 +39,7 @@ export default function AcceptInvitationPage() {
   const [isAccepted, setIsAccepted] = useState(false)
 
   useEffect(() => {
-    if (!token) {
-      setErrorMsg("Invalid invitation link. No token provided.")
-      setLoading(false)
-      return
-    }
+    if (!token) return
 
     const verify = async () => {
       try {
@@ -46,9 +47,10 @@ export default function AcceptInvitationPage() {
         const inv = await managerApi.verifyInvitationToken(token)
         setInvitation(inv)
         if (inv.name) setName(inv.name)
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
         setErrorMsg(
-          err.response?.data?.message || "Invalid or expired manager invitation link."
+          errorObj?.response?.data?.message || "Invalid or expired manager invitation link."
         )
       } finally {
         setLoading(false)
@@ -82,8 +84,9 @@ export default function AcceptInvitationPage() {
 
       setIsAccepted(true)
       toast.success("Invitation accepted successfully!")
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to accept invitation.")
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
+      toast.error(errorObj?.response?.data?.message || "Failed to accept invitation.")
     } finally {
       setSubmitting(false)
     }
