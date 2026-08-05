@@ -152,6 +152,11 @@ export class Station {
     this.touch();
   }
 
+  assignManager(managerId?: string): void {
+    this.props.managerId = managerId
+    this.touch()
+  }
+
   updateStatus(status: StationStatus): void {
     this.props.status = status;
     this.props.isActive = status === StationStatus.ACTIVE;

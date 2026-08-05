@@ -31,6 +31,24 @@ export class StationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
+  async findStationManagedByOwner(
+    ownerId: string,
+    managerUserId: string,
+    excludeStationId?: string
+  ): Promise<Station | null> {
+    const query: Record<string, unknown> = {
+      ownerId: Types.ObjectId.isValid(ownerId) ? new Types.ObjectId(ownerId) : ownerId,
+      managerId: Types.ObjectId.isValid(managerUserId) ? new Types.ObjectId(managerUserId) : managerUserId,
+    }
+
+    if (excludeStationId && Types.ObjectId.isValid(excludeStationId)) {
+      query._id = { $ne: new Types.ObjectId(excludeStationId) }
+    }
+
+    const doc = await this.model.findOne(query).exec()
+    return doc ? this.mapper.toDomain(doc) : null
+  }
+
   async findById(id: string): Promise<Station | null> {
     if (Types.ObjectId.isValid(id)) {
       const doc = await this.model.findById(id).exec()

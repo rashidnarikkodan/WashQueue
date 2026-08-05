@@ -5,16 +5,12 @@ import { IStationRepository } from "../../domain/repositories/station.repository
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationProps } from "../../domain/entities/Station"
 import { Owner } from "@/modules/owner/infrastructure/model/owner.model"
-import { StationModel } from "../../infrastructure/models/station.model"
 import { Types } from "mongoose"
+import { IAssignManagerUseCase } from "../interfaces/station-usecases.interface"
 
 export interface AssignManagerInput {
   managerType: "SELF" | "INVITE"
   email?: string
-}
-
-export interface IAssignManagerUseCase {
-  execute(stationId: string, userId: string, input: AssignManagerInput): Promise<StationProps>
 }
 
 export class AssignManagerUseCase implements IAssignManagerUseCase {
@@ -41,11 +37,11 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
 
     if (input.managerType === "SELF") {
       // Check Rule 2: An owner can only directly manage ONE station queue
-      const existingManagedStation = await StationModel.findOne({
-        ownerId: new Types.ObjectId(owner.id),
-        managerId: new Types.ObjectId(userId),
-        _id: { $ne: new Types.ObjectId(stationId) },
-      }).exec()
+      const existingManagedStation = await this.stationRepository.findStationManagedByOwner(
+        owner.id,
+        userId,
+        stationId
+      )
 
       if (existingManagedStation) {
         throw new ConflictError(
@@ -59,11 +55,9 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
         { $set: { isManager: true } }
       ).exec()
 
-      // Update Station model: managerId = userId
-      await StationModel.updateOne(
-        { _id: new Types.ObjectId(stationId) },
-        { $set: { managerId: new Types.ObjectId(userId) } }
-      ).exec()
+      // Assign manager to station via domain entity & repository
+      station.assignManager(userId)
+      await this.stationRepository.update(station.id, { managerId: userId })
     } else if (input.managerType === "INVITE") {
       // Handle manager invitation workflow
       if (input.email) {

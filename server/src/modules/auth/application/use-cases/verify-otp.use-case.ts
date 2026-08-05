@@ -9,8 +9,6 @@ import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { IHashService, IOtpService, ITokenService, IVerifyOtpUseCase } from "../interfaces"
 import { AuthOutput, VerifyOtpInput } from "../dto"
 
-import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
@@ -18,8 +16,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly otpService: IOtpService,
     private readonly tokenService: ITokenService,
-    private readonly hashService: IHashService,
-    private readonly ownerRepository?: IOwnerRepository
+    private readonly hashService: IHashService
   ) {}
 
   async execute(data: VerifyOtpInput): Promise<AuthOutput> {
@@ -37,7 +34,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     }
 
     // Generate JWT tokens using the payload mapper
-    const tokenPayload = await TokenPayloadMapper.toTokenPayload(user, this.ownerRepository)
+    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)

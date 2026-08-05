@@ -106,7 +106,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
         userId: userDoc.id || userId,
         role: ROLE.OWNER,
         email: userDoc.email,
-        ...(savedOwner.id ? { ownerId: savedOwner.id } : {}),
       }
 
       const accessToken = this.tokenService.generateAccessToken(tokenPayload)

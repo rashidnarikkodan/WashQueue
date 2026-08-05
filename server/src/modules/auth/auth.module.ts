@@ -47,8 +47,7 @@ const verifyOtpUseCase = new VerifyOtpUseCase(
   refreshTokenRepository,
   otpService,
   tokenService,
-  hashService,
-  ownerRepository
+  hashService
 )
 const loginUseCase = new LoginUseCase(
   userRepository,
@@ -57,23 +56,20 @@ const loginUseCase = new LoginUseCase(
   hashService,
   otpRepository,
   otpService,
-  mailService,
-  ownerRepository
+  mailService
 )
 const refreshTokenUseCase = new RefreshTokenUseCase(
   userRepository,
   refreshTokenRepository,
   tokenService,
-  hashService,
-  ownerRepository
+  hashService
 )
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
 const googleAuthUseCase = new GoogleAuthUseCase(
   userRepository,
   refreshTokenRepository,
   tokenService,
-  hashService,
-  ownerRepository
+  hashService
 )
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
 const forgotPasswordUseCase = new ForgotPasswordUseCase(

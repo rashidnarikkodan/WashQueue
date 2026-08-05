@@ -8,15 +8,12 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces"
 
-import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
-    private readonly hashService: IHashService,
-    private readonly ownerRepository?: IOwnerRepository
+    private readonly hashService: IHashService
   ) {}
 
   async execute(refreshToken: string) {
@@ -48,7 +45,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       }
 
       // Map payload and generate tokens
-      const tokenPayload = await TokenPayloadMapper.toTokenPayload(user, this.ownerRepository)
+      const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
       const newAccessToken = this.tokenService.generateAccessToken(tokenPayload)
       const newRefreshToken = this.tokenService.generateRefreshToken(tokenPayload)

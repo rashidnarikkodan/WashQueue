@@ -2,7 +2,6 @@ export interface TokenPayload {
   userId: string
   role: string
   email: string
-  ownerId?: string
 }
 
 export interface ITokenService {
