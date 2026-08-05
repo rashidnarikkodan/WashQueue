@@ -68,7 +68,6 @@ export const availabilitySchema = z.object({
   capacityPerWindow: z.coerce.number().int().min(1, "Capacity per window must be at least 1"),
   walkInReservedSlots: z.coerce.number().int().min(0, "Walk-in slots cannot be negative"),
   maxAdvanceBookingDays: z.coerce.number().int().min(1, "Max advance booking days must be at least 1").max(365, "Max advance booking days cannot exceed 365"),
-  bufferBetweenWindowsMins: z.coerce.number().int().min(0).default(0),
   allowWalkIns: z.boolean().default(true),
 })
 

@@ -109,7 +109,6 @@ export default function AddEditStation() {
               capacityPerWindow: 1,
               walkInReservedSlots: 0,
               maxAdvanceBookingDays: 7,
-              bufferBetweenWindowsMins: 5,
               allowWalkIns: true,
             }),
           })
@@ -245,7 +244,6 @@ export default function AddEditStation() {
           capacityPerWindow: data.capacityPerWindow,
           walkInReservedSlots: data.walkInReservedSlots,
           maxAdvanceBookingDays: data.maxAdvanceBookingDays,
-          bufferBetweenWindowsMins: data.bufferBetweenWindowsMins,
           allowWalkIns: data.allowWalkIns,
         },
       })

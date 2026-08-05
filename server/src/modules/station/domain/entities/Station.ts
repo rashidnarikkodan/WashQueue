@@ -51,7 +51,6 @@ export interface SlotConfiguration {
   capacityPerWindow: number;
   walkInReservedSlots: number;
   maxAdvanceBookingDays: number;
-  bufferBetweenWindowsMins: number;
   allowWalkIns: boolean;
 }
 

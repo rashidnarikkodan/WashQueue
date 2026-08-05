@@ -132,7 +132,6 @@ export default function EditStationModal({
                   capacityPerWindow: 1,
                   walkInReservedSlots: 0,
                   maxAdvanceBookingDays: 7,
-                  bufferBetweenWindowsMins: 5,
                   allowWalkIns: true,
                 }),
               }}

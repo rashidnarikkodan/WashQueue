@@ -61,7 +61,6 @@ export class StationMapper implements IMapper<Station, IStation> {
         capacityPerWindow: raw.slotConfig?.capacityPerWindow ?? 0,
         walkInReservedSlots: raw.slotConfig?.walkInReservedSlots ?? 0,
         maxAdvanceBookingDays: raw.slotConfig?.maxAdvanceBookingDays ?? 0,
-        bufferBetweenWindowsMins: raw.slotConfig?.bufferBetweenWindowsMins ?? 0,
         allowWalkIns: raw.slotConfig?.allowWalkIns ?? false,
       },
 

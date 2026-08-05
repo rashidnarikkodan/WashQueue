@@ -115,10 +115,6 @@ const slotConfigurationSchema = z.object({
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
     z.number().int().min(1, "Max advance booking days must be at least 1")
   ),
-  bufferBetweenWindowsMins: z.preprocess(
-    (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-    z.number().int().min(0).default(0)
-  ),
   allowWalkIns: z.preprocess(
     (val) => (typeof val === "string" ? val === "true" || val === "1" : val),
     z.boolean().default(false)

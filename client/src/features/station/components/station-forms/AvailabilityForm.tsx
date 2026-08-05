@@ -45,7 +45,6 @@ export default function AvailabilityForm({
     capacityPerWindow: initialValues?.capacityPerWindow ?? 1,
     walkInReservedSlots: initialValues?.walkInReservedSlots ?? 0,
     maxAdvanceBookingDays: initialValues?.maxAdvanceBookingDays ?? 7,
-    bufferBetweenWindowsMins: initialValues?.bufferBetweenWindowsMins ?? 0,
     allowWalkIns: initialValues?.allowWalkIns ?? true,
   })
 

@@ -82,7 +82,6 @@ export class CreateStationUseCase implements ICreateStationUseCase {
         capacityPerWindow: 0,
         walkInReservedSlots: 0,
         maxAdvanceBookingDays: 0,
-        bufferBetweenWindowsMins: 0,
         allowWalkIns: false,
       },
       amenities: [],

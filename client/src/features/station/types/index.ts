@@ -62,7 +62,6 @@ export interface Station {
     capacityPerWindow: number
     walkInReservedSlots: number
     maxAdvanceBookingDays: number
-    bufferBetweenWindowsMins: number
     allowWalkIns: boolean
   }
   amenities: string[]
@@ -257,7 +256,6 @@ export interface UpdateAvailabilityInput {
     capacityPerWindow: number
     walkInReservedSlots: number
     maxAdvanceBookingDays: number
-    bufferBetweenWindowsMins: number
     allowWalkIns: boolean
   }
 }

@@ -43,7 +43,6 @@ interface ISlotConfig {
   capacityPerWindow: number
   walkInReservedSlots: number
   maxAdvanceBookingDays: number
-  bufferBetweenWindowsMins: number
   allowWalkIns: boolean
 }
 
@@ -141,7 +140,6 @@ const stationSchema = new Schema<IStation>(
       capacityPerWindow: { type: Number, default: 0 },
       walkInReservedSlots: { type: Number, default: 0 },
       maxAdvanceBookingDays: { type: Number, default: 0 },
-      bufferBetweenWindowsMins: { type: Number, default: 0 },
       allowWalkIns: { type: Boolean, default: false },
     },
 
