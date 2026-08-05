@@ -156,7 +156,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
   const { station, pricing, extraServices } = selectedStation
   const isRejected = station.status === STATION_STATUS.REJECTED
-  const isPending = station.status === STATION_STATUS.PENDING_REVIEW
   const isSuspended = station.status === STATION_STATUS.SUSPENDED
 
   const handleApprove = async () => {
@@ -255,7 +254,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           : "/stations"
 
   return (
-    <div className=" mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-32 space-y-8 text-left animate-in fade-in duration-300">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-32 space-y-4 sm:space-y-6 text-left animate-in fade-in duration-300">
       {/* Breadcrumb Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Breadcrumbs
@@ -286,40 +285,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             <p className="text-xs text-red-200/90 leading-relaxed">
               <strong>Reason:</strong> {station.rejectionReason}
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Pending Approval Notice Banner (Admin view) */}
-      {currentRole === "admin" && isPending && (
-        <div className="p-5 border border-amber-500/30 bg-amber-500/10 rounded-2xl flex items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0" />
-            <div>
-              <h3 className="text-base font-extrabold text-amber-300">
-                Station Verification Pending
-              </h3>
-              <p className="text-xs text-amber-200/90 mt-0.5">
-                Review operating hours, slot configs, pricing models, and amenities below before
-                taking action.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={handleApprove}
-              disabled={isSubmittingAction}
-              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-50"
-            >
-              Approve Station
-            </button>
-            <button
-              onClick={() => setRejecting(true)}
-              disabled={isSubmittingAction}
-              className="px-5 py-2.5 rounded-xl border border-red-500/30 hover:border-red-500 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50"
-            >
-              Reject Application
-            </button>
           </div>
         </div>
       )}
