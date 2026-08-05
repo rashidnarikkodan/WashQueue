@@ -1,3 +1,4 @@
+import { Types } from "mongoose"
 import {
   ManagerInvitation,
   ManagerInvitationStatus,
@@ -26,8 +27,8 @@ export class ManagerInvitationMapper {
     return {
       email: entity.email,
       name: entity.name,
-      stationId: entity.stationId as any,
-      ownerId: entity.ownerId as any,
+      stationId: new Types.ObjectId(entity.stationId),
+      ownerId: new Types.ObjectId(entity.ownerId),
       permissions: entity.permissions,
       token: entity.token,
       status: entity.status,

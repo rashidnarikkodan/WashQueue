@@ -50,7 +50,7 @@ export interface ManagerListItemResponse {
 export interface ManagedStationResponse {
   stationId: string
   stationName: string
-  stationAddress?: any
+  stationAddress?: unknown
   permissions: ManagerPermission[]
   status: string
 }
@@ -60,7 +60,7 @@ export interface IInviteManagerUseCase {
 }
 
 export interface IAcceptInvitationUseCase {
-  execute(input: AcceptInvitationInput): Promise<{ message: string; user: any }>
+  execute(input: AcceptInvitationInput): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }>
 }
 
 export interface IRejectInvitationUseCase {

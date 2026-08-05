@@ -22,7 +22,7 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
     private readonly userRepository: IUserRepository
   ) {}
 
-  async execute(input: AcceptInvitationInput): Promise<{ message: string; user: any }> {
+  async execute(input: AcceptInvitationInput): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }> {
     const invitation = await this.managerInvitationRepository.findByToken(input.token)
     if (!invitation) {
       throw new NotFoundError("Invitation token not found")

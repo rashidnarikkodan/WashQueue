@@ -1,3 +1,4 @@
+import { Types } from "mongoose"
 import {
   ManagerAssignment,
   ManagerAssignmentStatus,
@@ -22,9 +23,9 @@ export class ManagerAssignmentMapper {
 
   static toPersistence(entity: ManagerAssignment): Partial<IManagerAssignment> {
     return {
-      managerUserId: entity.managerUserId as any,
-      stationId: entity.stationId as any,
-      ownerId: entity.ownerId as any,
+      managerUserId: new Types.ObjectId(entity.managerUserId),
+      stationId: new Types.ObjectId(entity.stationId),
+      ownerId: new Types.ObjectId(entity.ownerId),
       permissions: entity.permissions,
       status: entity.status,
       assignedAt: entity.assignedAt,

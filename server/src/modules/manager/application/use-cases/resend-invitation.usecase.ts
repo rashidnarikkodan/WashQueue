@@ -1,7 +1,6 @@
 import crypto from "crypto"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
-import { BadRequestError } from "@/common/errors/bad-request-error"
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
 import { ManagerInvitation } from "../../domain/entities/ManagerInvitation"
 import { IResendInvitationUseCase } from "../interfaces/manager-usecases.interface"

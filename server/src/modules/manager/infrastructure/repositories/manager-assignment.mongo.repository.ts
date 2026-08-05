@@ -66,7 +66,7 @@ export class MongoManagerAssignmentRepository implements IManagerAssignmentRepos
       ownerIds.push(ownerDoc._id as Types.ObjectId)
     }
 
-    const query: any = { ownerId: { $in: ownerIds } }
+    const query: Record<string, unknown> = { ownerId: { $in: ownerIds } }
 
     if (filters?.stationId && Types.ObjectId.isValid(filters.stationId)) {
       query.stationId = new Types.ObjectId(filters.stationId)
