@@ -9,7 +9,7 @@ import { createUsersRouter } from "./presentation/user.routes"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
 import { stationRepository } from "../station/station.module"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
-import { MailService } from "../auth/infrastructure/services/mail.service"
+import { MailService } from "../../core/application/services/mail.service"
 
 // infrastructures
 export const userRepository = new UserRepository()

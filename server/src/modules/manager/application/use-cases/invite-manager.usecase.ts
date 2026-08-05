@@ -22,7 +22,7 @@ import {
 } from "../interfaces/manager-usecases.interface"
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { IMailService } from "@/modules/auth/application/interfaces/mail-service.interface"
+import { IMailService } from "@/core/application/interfaces/mail.interface"
 
 export class InviteManagerUseCase implements IInviteManagerUseCase {
   constructor(

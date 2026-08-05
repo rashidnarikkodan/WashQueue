@@ -8,7 +8,7 @@ import { IResendInvitationUseCase } from "../interfaces/manager-usecases.interfa
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
-import { IMailService } from "@/modules/auth/application/interfaces/mail-service.interface"
+import { IMailService } from "@/core/application/interfaces/mail.interface"
 
 export class ResendInvitationUseCase implements IResendInvitationUseCase {
   constructor(

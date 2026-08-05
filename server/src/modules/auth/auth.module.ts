@@ -1,5 +1,5 @@
 import { userRepository } from "../user/user.module"
-import { MailService } from "./infrastructure/services/mail.service"
+import { MailService } from "../../core/application/services/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
 import { Argon2HashService } from "./infrastructure/services/hash.service"

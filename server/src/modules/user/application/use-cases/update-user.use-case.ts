@@ -8,7 +8,7 @@ import { Owner } from "@/modules/owner/domain/entities/Owner"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
-import { IMailService } from "@/modules/auth/application/interfaces/mail-service.interface"
+import { IMailService } from "@/core/application/interfaces/mail.interface"
 
 const BLOCKED_USER_TTL_SECONDS = 30 * 24 * 60 * 60 // 30 days
 

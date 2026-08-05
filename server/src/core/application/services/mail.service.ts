@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
-import { IMailService } from "../../application/interfaces"
+import { IMailService } from "../../../modules/auth/application/interfaces"
 import transporter from "@/configs/nodemailer.config"
 
 export class MailService implements IMailService {
