@@ -5,6 +5,7 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 
 export const managerRoutes = {
@@ -18,6 +19,10 @@ export const managerRoutes = {
     {
       path: "bookings",
       element: <BookingManagement role="manager" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails />,
     },
     {
       path: "queue",

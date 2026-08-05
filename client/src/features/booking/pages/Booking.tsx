@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { useStationStore } from "@/features/station/store/station.store"
 import { stationApi } from "@/shared/apis/station.api"
 import { vehicleApi } from "@/shared/apis/vehicle.api"
+import { bookingApi } from "@/shared/apis/booking.api"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
@@ -82,15 +83,16 @@ export default function Booking() {
         }
       })
       .catch(() => {})
-  }, [stationId])
+  }, [stationId, selectedDate])
 
   // Fetch Available Time Windows for selectedDate
   useEffect(() => {
     if (!stationId || !selectedDate) return
-    setIsLoadingSlots(true)
-    stationApi
-      .getAvailableTimeWindows(stationId, selectedDate)
-      .then((data) => {
+
+    const fetchWindows = async () => {
+      setIsLoadingSlots(true)
+      try {
+        const data = await stationApi.getAvailableTimeWindows(stationId, selectedDate)
         const windowsList = data.windows || []
         setServerWindows(windowsList)
         const available = windowsList.filter(
@@ -104,14 +106,15 @@ export default function Booking() {
         } else {
           setSelectedSlotId(null)
         }
-      })
-      .catch(() => {
+      } catch {
         setServerWindows([])
         setSelectedSlotId(null)
-      })
-      .finally(() => {
+      } finally {
         setIsLoadingSlots(false)
-      })
+      }
+    }
+
+    void fetchWindows()
   }, [stationId, selectedDate])
 
   // Compute disabled dates array (dates that are NOT available)
@@ -165,7 +168,7 @@ export default function Booking() {
     }
   }, [stationId, fetchStationById, categories.length, classes.length, loadCatalogData])
 
-  // Fetch User Vehicles from API
+  // Fetch User Vehicles from API — extracted so it can be re-called after adding a vehicle
   const loadUserVehicles = useCallback(async () => {
     setIsVehiclesLoading(true)
     try {
@@ -179,14 +182,14 @@ export default function Booking() {
   }, [])
 
   useEffect(() => {
-    loadUserVehicles()
+    void loadUserVehicles()
   }, [loadUserVehicles])
 
   // Station Supported Class IDs Set
   const stationClassIds = useMemo(() => {
     if (!selectedStation?.pricing || selectedStation.pricing.length === 0) return null
     return new Set(selectedStation.pricing.filter((p) => p.isActive !== false).map((p) => p.vehicleClassId))
-  }, [selectedStation?.pricing])
+  }, [selectedStation])
 
   // Available Vehicles matching station's supported classes (Wait for stationClassIds to avoid flash)
   const availableVehicles = useMemo(() => {
@@ -199,15 +202,17 @@ export default function Booking() {
 
   // Keep selected vehicle ID synced to valid available vehicle
   useEffect(() => {
-    if (availableVehicles.length > 0) {
-      const isCurrentValid = availableVehicles.some((v) => v.id === selectedVehicleId)
-      if (!isCurrentValid) {
-        const primary = availableVehicles.find((v) => v.isPrimary) || availableVehicles[0]
-        setSelectedVehicleId(primary.id)
+    queueMicrotask(() => {
+      if (availableVehicles.length > 0) {
+        const isCurrentValid = availableVehicles.some((v) => v.id === selectedVehicleId)
+        if (!isCurrentValid) {
+          const primary = availableVehicles.find((v) => v.isPrimary) || availableVehicles[0]
+          setSelectedVehicleId(primary.id)
+        }
+      } else {
+        setSelectedVehicleId(null)
       }
-    } else {
-      setSelectedVehicleId(null)
-    }
+    })
   }, [availableVehicles, selectedVehicleId])
 
   // Selected Vehicle Object
@@ -224,7 +229,7 @@ export default function Booking() {
       if (found) return found
     }
     return selectedStation.pricing[0]
-  }, [selectedStation?.pricing, selectedVehicle?.classId])
+  }, [selectedStation, selectedVehicle])
 
   // Handle Add Vehicle Submission from Modal
   const handleAddVehicleSubmit = async (input: CreateVehicleInput): Promise<boolean> => {
@@ -285,7 +290,7 @@ export default function Booking() {
       })
     }
     return []
-  }, [selectedStation?.extraServices, selectedVehicle?.classId])
+  }, [selectedStation, selectedVehicle])
 
   // Selected Slot Option Object
   const selectedSlot = useMemo(
@@ -318,14 +323,21 @@ export default function Booking() {
 
   // Submit Booking Action
   const handleConfirmBooking = async () => {
-    if (!canSubmit) return
+    if (!canSubmit || !stationId || !selectedSlotId || !selectedVehicleId) return
     setIsSubmittingBooking(true)
     try {
-      // Simulate real booking creation delay
-      await new Promise((res) => setTimeout(res, 1200))
+      const serviceType = selectedPlanId === "full" ? "FULL" : "HALF"
+      await bookingApi.createBooking({
+        stationId,
+        vehicleId: selectedVehicleId,
+        timeWindowId: selectedSlotId,
+        serviceType,
+        extraServiceIds: selectedExtraIds,
+        paymentType: "ONLINE_FULL",
+      })
       setBookingSuccess(true)
     } catch (err) {
-      console.error("Booking error:", err)
+      console.error("Booking submission error:", err)
     } finally {
       setIsSubmittingBooking(false)
     }

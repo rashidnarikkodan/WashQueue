@@ -9,6 +9,7 @@ const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/Vehic
 const StationManagement = lazy(() => import("../../features/station/pages/StationManagement"))
 const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -45,6 +46,10 @@ export const adminRoutes = {
     {
       path: "bookings",
       element: <BookingManagement role="admin" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails />,
     },
     {
       path: "queues",

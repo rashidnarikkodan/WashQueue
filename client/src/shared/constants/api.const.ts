@@ -30,4 +30,14 @@ export const API_ROUTES = {
     BY_ID: (id: string) => `/vehicles/${id}`,
     PRIMARY: (id: string) => `/vehicles/${id}/primary`,
   },
+  BOOKINGS: {
+    ROOT: "/bookings",
+    BY_ID: (id: string) => `/bookings/${id}`,
+    CANCEL: (id: string) => `/bookings/${id}/cancel`,
+    WALK_IN: "/bookings/walk-in",
+    CHECK_IN: "/bookings/check-in",
+    UPDATE_STATUS: (id: string) => `/bookings/${id}/status`,
+    UPCOMING: "/bookings/upcoming",
+    HISTORY: "/bookings/history",
+  },
 } as const

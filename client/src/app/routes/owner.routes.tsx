@@ -9,6 +9,7 @@ const StationDetail = lazy(() => import("@/features/station/pages/StationDetails
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -33,6 +34,10 @@ export const ownerRoutes = {
     {
       path: "bookings",
       element: <BookingManagement role="owner" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails />,
     },
     {
       path: "stations",

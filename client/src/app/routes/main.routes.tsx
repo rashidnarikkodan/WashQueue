@@ -13,6 +13,8 @@ import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const Booking = lazy(()=> import("@/features/booking/pages/Booking"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 
 const RootPathResolver = () => {
   const { isAuthenticated, user, isLoading, activeViewMode } = useAuthStore()
@@ -83,6 +85,14 @@ export const mainRoutes = {
     {
       path: "bookings/new",
       element: <Booking />,
+    },
+    {
+      path: "bookings",
+      element: <BookingManagement role="customer" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails />,
     },
     {
       path: "about",

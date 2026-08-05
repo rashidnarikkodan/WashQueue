@@ -2,6 +2,8 @@ export type BookingStatus =
   | "ALL"
   | "PENDING"
   | "CONFIRMED"
+  | "CHECKED_IN"
+  | "IN_SERVICE"
   | "IN_PROGRESS"
   | "COMPLETED"
   | "CANCELLED"
