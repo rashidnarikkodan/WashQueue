@@ -46,7 +46,7 @@ export default function ServiceSelectionStep({
       </div>
 
       {/* Main Wash Packages Grid */}
-      <div className="flex  gap-4 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {plans.map((p) => {
           const isSelected = selectedPlanId === p.id
           return (

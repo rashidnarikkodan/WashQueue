@@ -1,5 +1,6 @@
 import { Plus, Car } from "lucide-react"
 import type { Vehicle } from "@/features/vehicle/types"
+import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import VehicleCard from "@/features/vehicle/components/VehicleCard"
 
 interface VehicleSelectionStepProps {
@@ -8,6 +9,8 @@ interface VehicleSelectionStepProps {
   onSelectVehicle: (id: string) => void
   onAddVehicle: () => void
   isLoading?: boolean
+  categories?: VehicleCategory[]
+  classes?: VehicleClass[]
 }
 
 export default function VehicleSelectionStep({
@@ -16,6 +19,8 @@ export default function VehicleSelectionStep({
   onSelectVehicle,
   onAddVehicle,
   isLoading,
+  categories = [],
+  classes = [],
 }: VehicleSelectionStepProps) {
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
@@ -73,10 +78,15 @@ export default function VehicleSelectionStep({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 w-full">
           {vehicles.map((v) => {
             const isSelected = selectedVehicleId === v.id
+            const catName = categories.find((c) => c.id === v.categoryId)?.name || "Car"
+            const clsName = classes.find((c) => c.id === v.classId)?.name || "Sedan"
+
             return (
               <VehicleCard
                 key={v.id}
                 vehicle={v}
+                categoryName={catName}
+                className={clsName}
                 isSelected={isSelected}
                 onSelect={() => onSelectVehicle(v.id)}
                 selectable

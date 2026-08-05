@@ -33,8 +33,8 @@ const VehicleCard = ({
 }: Props) => {
   const navigate = useNavigate()
   const displayImage = image || vehicle.image?.url || DEFAULT_CAR_IMAGE
-  const displayCategory = categoryName || "Car"
-  const displayClass = className || "Sedan"
+  const displayCategory = categoryName
+  const displayClass = className
 
   const handleCardClick = () => {
     if (selectable && onSelect) {
@@ -110,12 +110,16 @@ const VehicleCard = ({
               </p>
             </div>
             <div className="flex gap-2">
-              <span className="bg-muted/80 text-muted-foreground text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
-                {displayCategory.toUpperCase()}
-              </span>
-              <span className="bg-muted/80 text-muted-foreground text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
-                {displayClass.toUpperCase()}
-              </span>
+              {displayCategory && (
+                <span className="bg-muted/80 text-muted-foreground text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
+                  {displayCategory.toUpperCase()}
+                </span>
+              )}
+              {displayClass && (
+                <span className="bg-muted/80 text-muted-foreground text-[9px] font-black px-2 py-1 rounded-md tracking-wider">
+                  {displayClass.toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
 
@@ -138,9 +142,7 @@ const VehicleCard = ({
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
                   Next Wash
                 </span>
-                <span className="text-sm font-bold text-emerald-400">
-                  In 14 Days
-                </span>
+                <span className="text-sm font-bold text-emerald-400">In 14 Days</span>
               </div>
               <div>
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">

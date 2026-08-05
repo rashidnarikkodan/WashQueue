@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { useStationStore } from "@/features/station/store/station.store"
 import { vehicleApi } from "@/shared/apis/vehicle.api"
+import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
 
@@ -22,6 +23,7 @@ export default function Booking() {
   const stationId = urlQuery.get("stationId")
 
   const { fetchStationById, selectedStation } = useStationStore()
+  const { categories, classes, loadData: loadCatalogData } = useVehicleCatelogStore()
 
   // User Vehicles State
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -43,12 +45,15 @@ export default function Booking() {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
   const [bookingSuccess, setBookingSuccess] = useState(false)
 
-  // Fetch Station details on mount if stationId provided
+  // Fetch Station details & Catalog data on mount
   useEffect(() => {
     if (stationId) {
       fetchStationById(stationId)
     }
-  }, [stationId, fetchStationById])
+    if (categories.length === 0 || classes.length === 0) {
+      loadCatalogData()
+    }
+  }, [stationId, fetchStationById, categories.length, classes.length, loadCatalogData])
 
   // Fetch User Vehicles from API
   const loadUserVehicles = useCallback(async () => {
@@ -72,6 +77,22 @@ export default function Booking() {
     loadUserVehicles()
   }, [loadUserVehicles])
 
+  // Selected Vehicle Object
+  const selectedVehicle = useMemo(
+    () => vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0] || null,
+    [vehicles, selectedVehicleId]
+  )
+
+  // Match Station Pricing based on Selected Vehicle's classId
+  const matchingPricing = useMemo(() => {
+    if (!selectedStation?.pricing || selectedStation.pricing.length === 0) return null
+    if (selectedVehicle?.classId) {
+      const found = selectedStation.pricing.find((p) => p.vehicleClassId === selectedVehicle.classId)
+      if (found) return found
+    }
+    return selectedStation.pricing[0]
+  }, [selectedStation?.pricing, selectedVehicle?.classId])
+
   // Handle Add Vehicle Submission from Modal
   const handleAddVehicleSubmit = async (input: CreateVehicleInput): Promise<boolean> => {
     setIsAddingVehicle(true)
@@ -89,10 +110,10 @@ export default function Booking() {
     }
   }
 
-  // Derive Service Plans from selectedStation or standard pricing fallbacks
+  // Derive Service Plans from matched vehicle class pricing
   const plans: ServicePlanOption[] = useMemo(() => {
-    if (selectedStation?.pricing && selectedStation.pricing.length > 0) {
-      const p = selectedStation.pricing[0]
+    const p = matchingPricing
+    if (p) {
       return [
         {
           id: "HALF_WASH",
@@ -105,7 +126,7 @@ export default function Booking() {
         {
           id: "FULL_WASH",
           name: "Complete Full Wash",
-          price: p.fullWashPrice || 650,
+          price: p.fullWashPrice,
           durationMins: 60,
           description:
             "Full body foam wash, interior vacuuming, dashboard wipe down, tire polish & underbody wash.",
@@ -114,17 +135,21 @@ export default function Booking() {
     }
 
     return []
-  }, [selectedStation?.pricing])
+  }, [matchingPricing])
 
-  // Derive Extra Services from selectedStation
+  // Derive Extra Services dynamically based on vehicle classId
   const extraServices: ExtraServiceOption[] = useMemo(() => {
     if (selectedStation?.extraServices && selectedStation.extraServices.length > 0) {
-      return selectedStation.extraServices.map((e) => ({
-        id: e.id,
-        name: e.name,
-        price: e.pricing?.[0]?.price || 150,
-        description: e.description,
-      }))
+      return selectedStation.extraServices.map((e) => {
+        const classPricing = e.pricing?.find((p) => p.vehicleClassId === selectedVehicle?.classId)
+        const price = classPricing ? classPricing.price : (e.pricing?.[0]?.price || 150)
+        return {
+          id: e.id,
+          name: e.name,
+          price,
+          description: e.description,
+        }
+      })
     }
 
     return [
@@ -132,7 +157,7 @@ export default function Booking() {
       { id: "POLISH", name: "Tire & Alloy Wheel Polish", price: 200 },
       { id: "ENGINE", name: "Engine Bay Degreasing", price: 250 },
     ]
-  }, [selectedStation?.extraServices])
+  }, [selectedStation?.extraServices, selectedVehicle?.classId])
 
   // Available Time Slots
   const timeSlots: TimeSlotOption[] = useMemo(
@@ -162,12 +187,6 @@ export default function Booking() {
       { id: "SLOT_6", timeWindow: "15:00 - 16:00", label: "Late Session", status: "AVAILABLE" },
     ],
     []
-  )
-
-  // Selected Entities
-  const selectedVehicle = useMemo(
-    () => vehicles.find((v) => v.id === selectedVehicleId) || null,
-    [vehicles, selectedVehicleId]
   )
 
   const selectedPlan = useMemo(
@@ -242,6 +261,8 @@ export default function Booking() {
             onSelectVehicle={(id) => setSelectedVehicleId(id)}
             onAddVehicle={() => setIsAddVehicleModalOpen(true)}
             isLoading={isVehiclesLoading}
+            categories={categories}
+            classes={classes}
           />
 
           <div className="w-full h-px bg-border" />
