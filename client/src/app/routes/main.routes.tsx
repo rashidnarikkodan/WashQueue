@@ -12,13 +12,13 @@ const BookmarksPage = lazy(() => import("../../features/station/pages/BookmarksP
 import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
-import Booking from "@/features/booking/pages/Booking"
+const Booking = lazy(()=> import("@/features/booking/pages/Booking"))
 
 const RootPathResolver = () => {
   const { isAuthenticated, user, isLoading, activeViewMode } = useAuthStore()
 
   if (isLoading) {
-    return null // wait for session check before deciding which page to show
+    return null
   }
 
   if (!isAuthenticated || !user) {
