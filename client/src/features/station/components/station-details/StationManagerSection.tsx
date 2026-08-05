@@ -100,9 +100,27 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     try {
       setIsSubmittingAction(true)
       await stationApi.assignManager(station.id, { managerType: "SELF" })
+      setManagerAssignment({
+        assignmentId: `self-${station.id}`,
+        stationId: station.id,
+        stationName: station.name,
+        managerId: user?.id || "",
+        managerUserId: user?.id || "",
+        managerName: user?.name || "Owner (Self)",
+        managerEmail: user?.email || "",
+        permissions: [
+          "BOOKING_MANAGEMENT",
+          "QUEUE_MANAGEMENT",
+          "CUSTOMER_MANAGEMENT",
+          "PRICING_MANAGEMENT",
+          "REPORTS_VIEW",
+          "STATION_SETTINGS",
+        ],
+        status: "ACTIVE",
+        assignedAt: new Date().toISOString(),
+      })
+      setPendingInvitation(null)
       toast.success("Assigned yourself as manager for this station!")
-      await loadManagerData()
-      await onRefresh()
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || "Failed to self-assign as manager")
     } finally {
@@ -113,6 +131,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   // Action: Remove Manager
   const handleRemoveManager = () => {
     if (!managerAssignment) return
+    const targetAssignment = managerAssignment
     setConfirmModal({
       isOpen: true,
       title: "Remove Station Manager",
@@ -122,11 +141,11 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       onConfirm: async () => {
         setIsSubmittingAction(true)
         try {
-          await managerApi.removeManager(managerAssignment.assignmentId)
+          setManagerAssignment(null)
+          await managerApi.removeManager(targetAssignment.assignmentId)
           toast.success("Station manager removed successfully")
-          await loadManagerData()
-          await onRefresh()
         } catch (err: any) {
+          setManagerAssignment(targetAssignment)
           toast.error(err?.response?.data?.message || "Failed to remove manager")
         } finally {
           setIsSubmittingAction(false)
@@ -140,6 +159,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   const handleToggleSuspend = () => {
     if (!managerAssignment) return
     const isSuspended = managerAssignment.status === "SUSPENDED"
+    const targetStatus = isSuspended ? "ACTIVE" : "SUSPENDED"
     setConfirmModal({
       isOpen: true,
       title: isSuspended ? "Reactivate Manager" : "Suspend Manager",
@@ -149,6 +169,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       onConfirm: async () => {
         setIsSubmittingAction(true)
         try {
+          setManagerAssignment((prev) => (prev ? { ...prev, status: targetStatus } : null))
           if (isSuspended) {
             await managerApi.reactivateManager(managerAssignment.assignmentId)
             toast.success("Manager reactivated successfully")
@@ -156,9 +177,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             await managerApi.suspendManager(managerAssignment.assignmentId)
             toast.success("Manager suspended successfully")
           }
-          await loadManagerData()
-          await onRefresh()
         } catch (err: any) {
+          setManagerAssignment((prev) => (prev ? { ...prev, status: managerAssignment.status } : null))
           toast.error(err?.response?.data?.message || "Failed to update manager status")
         } finally {
           setIsSubmittingAction(false)
@@ -171,6 +191,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   // Action: Cancel Pending Invitation
   const handleCancelInvitation = () => {
     if (!pendingInvitation) return
+    const targetInvitation = pendingInvitation
     setConfirmModal({
       isOpen: true,
       title: "Cancel Manager Invitation",
@@ -180,11 +201,11 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       onConfirm: async () => {
         setIsSubmittingAction(true)
         try {
-          await managerApi.cancelInvitation(pendingInvitation.id)
+          setPendingInvitation(null)
+          await managerApi.cancelInvitation(targetInvitation.id)
           toast.success("Invitation cancelled successfully")
-          await loadManagerData()
-          await onRefresh()
         } catch (err: any) {
+          setPendingInvitation(targetInvitation)
           toast.error(err?.response?.data?.message || "Failed to cancel invitation")
         } finally {
           setIsSubmittingAction(false)

@@ -1,4 +1,4 @@
-import { Star, Zap, CheckCircle2, XCircle, Edit, Layers, Ban, UserCheck } from "lucide-react"
+import { Star, Zap, CheckCircle2, XCircle, Edit, Ban, UserCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
@@ -160,13 +160,6 @@ export function StationSidebarCard({
               >
                 <Edit size={16} />
                 Edit Station Configurations
-              </button>
-              <button
-                onClick={() => navigate("/owner/queues")}
-                className="w-full py-3.5 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Layers size={16} />
-                Manage Live Queue
               </button>
 
               {(station.status === STATION_STATUS.ACTIVE || station.status === STATION_STATUS.INACTIVE) && (

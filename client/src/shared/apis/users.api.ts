@@ -164,4 +164,23 @@ export const usersApi = {
       handleApiError(error, "Failed to update bookmarks")
     }
   },
+
+  exportUsers: async (filters?: GetUsersFilters): Promise<Blob> => {
+    try {
+      const params: Record<string, boolean | string | number> = {}
+      if (filters?.search) params.search = filters.search
+      if (filters?.role && filters.role !== "all") params.role = filters.role
+      if (typeof filters?.isBlocked === "boolean") {
+        params.isBlocked = filters.isBlocked ? "true" : "false"
+      }
+
+      const response = await api.get(API_ROUTES.USERS.EXPORT, {
+        params,
+        responseType: "blob",
+      })
+      return response.data as Blob
+    } catch (error: unknown) {
+      handleApiError(error, "Failed to export users data")
+    }
+  },
 }

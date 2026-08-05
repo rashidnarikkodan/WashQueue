@@ -47,10 +47,9 @@ export const useStationStore = create<StationStore>((set) => ({
   error: null,
 
   fetchStations: async (query = {}) => {
-    set({ isLoading: true, error: null })
+    set({ isLoading: true, error: null, stations: [] })
     try {
       const response = await stationApi.getStations(query)
-      console.log(response)
       set({ stations: response.stations, pagination: response.pagination, isLoading: false })
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to load stations")

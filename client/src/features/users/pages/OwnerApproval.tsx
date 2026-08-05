@@ -107,19 +107,29 @@ const OwnerApproval = () => {
   // ─── Actions ────────────────────────────────────────────────────────────────
   const handleApprove = async (id: string) => {
     try {
+      setOwners((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, isVerified: true } : o))
+      )
       await usersApi.updateUser(id, { isVerified: true })
       toast.success("Owner approved and activated successfully!")
       if (selectedOwner?.id === id) {
         setSelectedOwner((prev: User | null) => (prev ? { ...prev, isVerified: true } : null))
       }
-      fetchOwners()
     } catch (e: unknown) {
+      setOwners((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, isVerified: false } : o))
+      )
       toast.error(e instanceof Error ? e.message : "Failed to approve owner")
     }
   }
 
   const handleReject = async (id: string, reason: string) => {
     try {
+      setOwners((prev) =>
+        prev.map((o) =>
+          o.id === id ? { ...o, isVerified: false, onboardingStep: 1, rejectionReason: reason } : o
+        )
+      )
       await usersApi.updateUser(id, {
         isVerified: false,
         onboardingStep: 1,
@@ -129,7 +139,6 @@ const OwnerApproval = () => {
       if (selectedOwner?.id === id) setSelectedOwner(null)
       setRejectingOwnerId(null)
       setRejectionReasonInput("")
-      fetchOwners()
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to reject owner")
     }

@@ -68,8 +68,10 @@ const Toolbar = ({
                   tabRefs.current[tab.id] = el
                 }}
                 onClick={() => onTabChange?.(tab.id)}
-                className={`pb-3.5 text-sm font-semibold border-b-2 border-transparent transition-colors duration-200 cursor-pointer relative ${
-                  isActive ? activeTextColor : "text-muted-foreground hover:text-foreground"
+                className={`px-4 py-2 text-xs font-semibold rounded-lg border-b-2 transition-all duration-300 ease-out cursor-pointer relative transform active:scale-95 ${
+                  isActive
+                    ? `bg-primary/10 ${activeTextColor} border-primary font-bold shadow-xs`
+                    : "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/30"
                 }`}
               >
                 {tab.label}

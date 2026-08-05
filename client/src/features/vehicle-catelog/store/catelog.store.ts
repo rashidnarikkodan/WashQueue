@@ -76,18 +76,28 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
 
   toggleCategoryStatus: async (id, currentStatus) => {
     try {
+      set((state) => ({
+        categories: state.categories.map((c) => (c.id === id ? { ...c, isActive: !currentStatus } : c)),
+      }))
       await vehicleCatelogApi.updateCategory(id, { isActive: !currentStatus })
-      await get().loadData()
     } catch {
+      set((state) => ({
+        categories: state.categories.map((c) => (c.id === id ? { ...c, isActive: currentStatus } : c)),
+      }))
       toast.error("Failed to update category status")
     }
   },
 
   toggleClassStatus: async (id, currentStatus) => {
     try {
+      set((state) => ({
+        classes: state.classes.map((cls) => (cls.id === id ? { ...cls, isActive: !currentStatus } : cls)),
+      }))
       await vehicleCatelogApi.updateClass(id, { isActive: !currentStatus })
-      await get().loadData()
     } catch {
+      set((state) => ({
+        classes: state.classes.map((cls) => (cls.id === id ? { ...cls, isActive: currentStatus } : cls)),
+      }))
       toast.error("Failed to update class status")
     }
   },
@@ -95,7 +105,10 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
   deleteCategory: async (id) => {
     try {
       await vehicleCatelogApi.deleteCategory(id)
-      await get().loadData()
+      set((state) => ({
+        categories: state.categories.filter((c) => c.id !== id),
+        classes: state.classes.filter((cls) => cls.categoryId !== id),
+      }))
     } catch {
       toast.error("Failed to delete category")
       throw new Error("Delete failed")
@@ -105,7 +118,9 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
   deleteClass: async (id) => {
     try {
       await vehicleCatelogApi.deleteClass(id)
-      await get().loadData()
+      set((state) => ({
+        classes: state.classes.filter((cls) => cls.id !== id),
+      }))
     } catch {
       toast.error("Failed to delete class")
       throw new Error("Delete failed")
@@ -114,19 +129,29 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
 
   saveCategory: async (editingCategoryId, data) => {
     if (editingCategoryId) {
-      await vehicleCatelogApi.updateCategory(editingCategoryId, data as UpdateCategoryInput)
+      const updated = await vehicleCatelogApi.updateCategory(editingCategoryId, data as UpdateCategoryInput)
+      set((state) => ({
+        categories: state.categories.map((c) => (c.id === editingCategoryId ? { ...c, ...updated } : c)),
+      }))
     } else {
-      await vehicleCatelogApi.createCategory(data as CreateCategoryInput)
+      const created = await vehicleCatelogApi.createCategory(data as CreateCategoryInput)
+      set((state) => ({
+        categories: [...state.categories, created].sort((a, b) => a.order - b.order),
+      }))
     }
-    await get().loadData()
   },
 
   saveClass: async (editingClassId, data) => {
     if (editingClassId) {
-      await vehicleCatelogApi.updateClass(editingClassId, data as UpdateClassInput)
+      const updated = await vehicleCatelogApi.updateClass(editingClassId, data as UpdateClassInput)
+      set((state) => ({
+        classes: state.classes.map((cls) => (cls.id === editingClassId ? { ...cls, ...updated } : cls)),
+      }))
     } else {
-      await vehicleCatelogApi.createClass(data as CreateClassInput)
+      const created = await vehicleCatelogApi.createClass(data as CreateClassInput)
+      set((state) => ({
+        classes: [...state.classes, created].sort((a, b) => a.order - b.order),
+      }))
     }
-    await get().loadData()
   },
 }))

@@ -18,6 +18,7 @@ export const API_ROUTES = {
     GET_ALL: "/",
     BOOKMARKS: "/bookmarks",
     TOGGLE_BOOKMARK: "/bookmarks/toggle",
+    EXPORT: "/export",
     GET_BY_ID: "/:id",
     UPDATE: "/:id",
   },

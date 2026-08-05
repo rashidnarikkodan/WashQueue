@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import UserStats from "../components/ui/UserStats"
 import { usersApi } from "@/shared/apis/users.api"
+import { toast } from "sonner"
 import { FILTER_STATUS } from "@/shared/constants/status.const"
 import type { PaginationMeta } from "@/shared/types"
 import { getErrorMessage } from "@/shared/utils/error"
@@ -103,40 +104,44 @@ const UserManagement = () => {
   // ─── Actions ────────────────────────────────────────────────────────────────
   const handleConfirmToggle = async () => {
     if (!pendingToggleUser) return
+    const targetId = pendingToggleUser.id
+    const targetNewBlocked = !pendingToggleUser.isBlocked
     try {
-      await usersApi.updateUser(pendingToggleUser.id, {
-        isBlocked: !pendingToggleUser.isBlocked,
-      })
-      fetchUsers()
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetId ? { ...u, isBlocked: targetNewBlocked } : u))
+      )
+      await usersApi.updateUser(targetId, { isBlocked: targetNewBlocked })
+      toast.success(`User ${targetNewBlocked ? "blocked" : "unblocked"} successfully`)
     } catch (err: unknown) {
-      alert(getErrorMessage(err, "Failed to update block status"))
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetId ? { ...u, isBlocked: !targetNewBlocked } : u))
+      )
+      toast.error(getErrorMessage(err, "Failed to update block status"))
     } finally {
       setPendingToggleUser(null)
     }
   }
 
-  const handleExport = () => {
-    const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"]
-    const rows = users.map((u) => [
-      u.id,
-      u.name || "",
-      u.email,
-      u.role,
-      u.isBlocked ? "BLOCKED" : "ACTIVE",
-      new Date(u.createdAt).toISOString().split("T")[0],
-    ])
-    const csvContent = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute(
-      "download",
-      `washqueue_users_export_${new Date().toISOString().split("T")[0]}.csv`
-    )
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleExport = async () => {
+    try {
+      const blob = await usersApi.exportUsers({
+        search: searchQuery,
+        role: roleFilter,
+        isBlocked: statusFilter === "blocked" ? true : statusFilter === "active" ? false : undefined,
+      })
+      if (!blob) return
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      link.setAttribute("download", `washqueue_users_export_${new Date().toISOString().split("T")[0]}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      toast.success("User export downloaded successfully!")
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to export users"))
+    }
   }
 
   // ─── Table configuration (built each render — cheap) ───────────────────────

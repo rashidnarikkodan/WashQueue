@@ -22,6 +22,12 @@ export const createUsersRouter = (userController: UserController): Router => {
     authenticate,
     asyncHandler(userController.getBookmarks)
   )
+  router.get(
+    API_ROUTES.USERS.EXPORT,
+    authenticate,
+    authorize(ROLE.ADMIN),
+    asyncHandler(userController.exportUsers)
+  )
   router.post(
     API_ROUTES.USERS.TOGGLE_BOOKMARK,
     authenticate,

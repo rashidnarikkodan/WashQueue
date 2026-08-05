@@ -74,4 +74,26 @@ export class UserController {
     const user = await this.toggleBookmarkUseCase.execute(userId, stationId)
     success(res, user, HTTP_STATUS.OK, "Bookmarks updated successfully")
   }
+
+  exportUsers = async (req: Request, res: Response) => {
+    const query = usersQuerySchema.parse({ ...req.query, page: 1, limit: 10000 })
+    const data = await this.getUsersUseCase.execute(query)
+    const users = data.users || []
+
+    const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"]
+    const rows = users.map((u: any) => [
+      u.id || u._id || "",
+      `"${(u.name || "").replace(/"/g, '""')}"`,
+      `"${(u.email || "").replace(/"/g, '""')}"`,
+      u.role || "customer",
+      u.isBlocked ? "BLOCKED" : "ACTIVE",
+      u.createdAt ? new Date(u.createdAt).toISOString().split("T")[0] : "",
+    ])
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8")
+    res.setHeader("Content-Disposition", 'attachment; filename="users-export.csv"')
+    res.status(HTTP_STATUS.OK).send(csvContent)
+  }
 }

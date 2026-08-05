@@ -19,13 +19,20 @@ import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { STATION_STATUS, type Station } from "../types"
 
-// Admin Tab definitions for filtering stations
+// Tab definitions for filtering stations
 const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
   { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
   { id: "active", label: "Active Stations", activeColor: "border-emerald-500 text-emerald-500" },
   { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
   { id: "rejected", label: "Rejected", activeColor: "border-red-500 text-red-500" },
+]
+
+const OWNER_TABS: TabConfig[] = [
+  { id: "all", label: "All Stations" },
+  { id: "active", label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: "inactive", label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
+  { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
 ]
 
 export interface StationManagementProps {
@@ -55,21 +62,22 @@ export default function StationManagement({ role: explicitRole }: StationManagem
 
   // Fetch station list
   const loadStations = useCallback(async () => {
-    if (isAdmin) {
-      // Admin View: Fetch stations with status filtering, search query & pagination
-      let statusFilter: string | undefined = undefined
-      if (activeTab === "pending") {
-        statusFilter = STATION_STATUS.PENDING_REVIEW
-      } else if (activeTab === "active") {
-        statusFilter = STATION_STATUS.ACTIVE
-      } else if (activeTab === "suspended") {
-        statusFilter = STATION_STATUS.SUSPENDED
-      } else if (activeTab === "rejected") {
-        statusFilter = STATION_STATUS.REJECTED
-      } else {
-        statusFilter = "all"
-      }
+    let statusFilter: string | undefined = undefined
+    if (activeTab === "pending") {
+      statusFilter = STATION_STATUS.PENDING_REVIEW
+    } else if (activeTab === "active") {
+      statusFilter = STATION_STATUS.ACTIVE
+    } else if (activeTab === "inactive") {
+      statusFilter = STATION_STATUS.INACTIVE
+    } else if (activeTab === "suspended") {
+      statusFilter = STATION_STATUS.SUSPENDED
+    } else if (activeTab === "rejected") {
+      statusFilter = STATION_STATUS.REJECTED
+    } else {
+      statusFilter = "all"
+    }
 
+    if (isAdmin) {
       await fetchStations({
         page: currentPage,
         limit,
@@ -77,14 +85,15 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         status: statusFilter,
       })
     } else {
-      // Owner View: Fetch stations associated with logged-in owner
-      if (user?.ownerId) {
-        await fetchStations({ ownerId: user.ownerId })
-      } else {
-        await fetchStations()
+      const ownerUserId = user?.ownerId || user?.id
+      if (ownerUserId) {
+        await fetchStations({
+          ownerId: ownerUserId,
+          status: statusFilter,
+        })
       }
     }
-  }, [isAdmin, activeTab, currentPage, searchQuery, user?.ownerId, fetchStations])
+  }, [isAdmin, activeTab, currentPage, searchQuery, user?.ownerId, user?.id, fetchStations])
 
   useEffect(() => {
     loadStations()
@@ -356,6 +365,26 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         </button>
       </div>
 
+      {/* Status Filter Tabs */}
+      <div className="flex items-center gap-6 border-b border-border/40 pb-2 overflow-x-auto">
+        {OWNER_TABS.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <div
+              key={tab.id}
+              onClick={() => updateParams({ tab: tab.id })}
+              className={`relative pb-2 text-sm font-semibold cursor-pointer whitespace-nowrap transition-colors duration-200 ${
+                isActive
+                  ? "text-primary font-bold border-b-2 border-primary -mb-[9px]"
+                  : "text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-[9px]"
+              }`}
+            >
+              {tab.label}
+            </div>
+          )
+        })}
+      </div>
+
       {/* Error Alert */}
       {error && (
         <div className="bg-red-500/10 text-red-400 p-4 rounded-xl text-sm border border-red-500/20">
@@ -375,23 +404,18 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         </div>
       ) : (
         /* Responsive Card Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
+        <div
+          key={activeTab}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2 animate-in fade-in slide-in-from-bottom-3 duration-300 ease-out"
+        >
           {stations.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center min-h-[50vh] space-y-3">
-              <p className="text-[#C2C6D6] font-semibold text-lg">No stations found</p>
+            <div className="col-span-full flex flex-col items-center justify-center min-h-[40vh] space-y-2 py-12">
+              <p className="text-foreground font-semibold text-lg">No stations found</p>
               <p className="text-sm text-muted-foreground max-w-sm text-center">
                 {!isAdmin && user && !user.isVerified
                   ? "Station creation will unlock once your partner application is approved by an administrator."
-                  : "Get started by creating your first wash station."}
+                  : "No stations match the selected filter."}
               </p>
-              {(!isAdmin && user && !user.isVerified) ? null : (
-                <button
-                  onClick={() => navigate("/owner/stations/new")}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-md"
-                >
-                  Create Station
-                </button>
-              )}
             </div>
           ) : (
 
@@ -428,7 +452,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
                     navigate(`/owner/stations/${station.id}`)
                   }
                 }}
-                onSecondaryAction={() => navigate(`/owner/stations/${station.id}`)}
+                onClick={() => navigate(`/owner/stations/${station.id}`)}
               />
             ))
           )}

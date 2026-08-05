@@ -82,7 +82,15 @@ export default function BookmarksPage() {
           <div className="flex flex-col items-center justify-center py-16 px-4 bg-red-500/10 border border-red-500/20 rounded-3xl text-center">
             <p className="text-red-400 font-semibold text-sm mb-4">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setIsLoading(true)
+                setError(null)
+                usersApi
+                  .getBookmarks()
+                  .then((data) => setStations((data as Station[]) || []))
+                  .catch(() => setError("Failed to load bookmarked stations"))
+                  .finally(() => setIsLoading(false))
+              }}
               className="px-5 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer"
             >
               Retry
