@@ -58,6 +58,7 @@ export interface Booking {
 }
 
 export interface OwnerStation {
+  _id?: string
   name: string
   location: string
   status: "ONLINE" | "OFFLINE" | "MAINTENANCE"

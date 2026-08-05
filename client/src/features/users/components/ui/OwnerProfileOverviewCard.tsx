@@ -1,5 +1,7 @@
+import { useMemo } from "react"
 import { Building, Shield } from "lucide-react"
 import OnboardingDetailsSummary from "./OnboardingDetailsSummary"
+import { DataTable, type Column } from "@/shared/components/data-table"
 import type { User, OwnerStation } from "../../types"
 
 interface OwnerProfileOverviewCardProps {
@@ -11,6 +13,50 @@ export default function OwnerProfileOverviewCard({
   user,
   stations,
 }: OwnerProfileOverviewCardProps) {
+  const columns: Column<OwnerStation>[] = useMemo(
+    () => [
+      {
+        id: "name",
+        header: "Station Name",
+        accessor: "name",
+        cell: (s) => <span className="font-extrabold text-foreground">{s.name}</span>,
+      },
+      {
+        id: "location",
+        header: "Location",
+        accessor: "location",
+        cell: (s) => <span className="text-muted-foreground">{s.location}</span>,
+      },
+      {
+        id: "status",
+        header: "Status",
+        accessor: "status",
+        cell: (s) => (
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded font-bold border text-[9px] uppercase ${
+              s.status === "ONLINE"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : s.status === "MAINTENANCE"
+                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
+            }`}
+          >
+            {s.status}
+          </span>
+        ),
+      },
+      {
+        id: "sessions",
+        header: "Total Sessions",
+        accessor: "sessions",
+        cell: (s) => (
+          <span className="font-black text-foreground">{s.sessions.toLocaleString()}</span>
+        ),
+      },
+    ],
+    []
+  )
+
   return (
     <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 text-left">
       <div className="space-y-1">
@@ -44,50 +90,12 @@ export default function OwnerProfileOverviewCard({
             Registered Service Stations ({stations.length})
           </h4>
 
-          <div className="overflow-x-auto border border-border/40 rounded-2xl bg-background/20">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-border text-[9px] text-muted-foreground font-bold uppercase tracking-wider">
-                  <th className="p-3">Station Name</th>
-                  <th className="p-3">Location</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 text-right">Total Sessions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {stations.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="p-6 text-center text-muted-foreground font-medium">
-                      No stations registered under this account.
-                    </td>
-                  </tr>
-                ) : (
-                  stations.map((s, idx) => (
-                    <tr key={idx} className="hover:bg-slate-850/10">
-                      <td className="p-3 font-extrabold text-foreground">{s.name}</td>
-                      <td className="p-3 text-muted-foreground">{s.location}</td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded font-bold border text-[9px] ${
-                            s.status === "ONLINE"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : s.status === "MAINTENANCE"
-                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                : "bg-slate-500/10 text-muted-foreground border-slate-500/20"
-                          }`}
-                        >
-                          {s.status}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right font-black text-foreground">
-                        {s.sessions.toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable<OwnerStation>
+            columns={columns}
+            data={stations}
+            rowKey={(s) => s._id ?? s.name}
+            emptyMessage="No stations registered under this account."
+          />
         </div>
       </div>
     </div>
