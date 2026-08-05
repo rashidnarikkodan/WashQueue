@@ -27,10 +27,12 @@ const mediaUploadService = new MediaUploadService(cloudinaryService)
 const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
 
-import { managerAssignmentRepository } from "../manager/manager.module"
+import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
 import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
 import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
 import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
+
+const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
 // Instantiate use cases
 const createStationUseCase = new CreateStationUseCase(

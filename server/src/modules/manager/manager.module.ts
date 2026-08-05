@@ -28,7 +28,7 @@ import { mailService } from "@/modules/auth/auth.module"
 // Repositories
 const userRepository = new UserRepository()
 const stationRepository = new StationMongoRepository()
-export const managerAssignmentRepository = new MongoManagerAssignmentRepository()
+const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 const managerInvitationRepository = new MongoManagerInvitationRepository()
 const ownerRepository = new OwnerMongoRepository()
 
