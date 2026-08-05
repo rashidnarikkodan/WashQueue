@@ -127,7 +127,7 @@ export const managerApi = {
     password?: string
     name?: string
     phone?: string
-  }): Promise<{ message: string; user: any }> => {
+  }): Promise<{ message: string; user: unknown }> => {
     const response = await api.post(`/managers/invitations/accept`, data)
     return response.data.data
   },

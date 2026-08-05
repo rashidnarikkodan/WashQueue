@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect } from "react"
 import type { Station } from "../../types"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { stationApi } from "@/shared/apis/station.api"
@@ -63,7 +63,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     onConfirm: async () => {},
   })
 
-  const loadManagerData = useCallback(async () => {
+  const loadManagerData = async () => {
     if (!station?.id || !isOwner) return
     try {
       setLoading(true)
@@ -84,11 +84,41 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     } finally {
       setLoading(false)
     }
-  }, [station?.id, isOwner])
+  }
 
   useEffect(() => {
-    loadManagerData()
-  }, [loadManagerData])
+    if (!station?.id || !isOwner) return
+    let isMounted = true
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [mgrRes, invRes] = await Promise.all([
+          managerApi.getOwnerManagers({ stationId: station.id }),
+          managerApi.getOwnerInvitations(),
+        ])
+
+        if (!isMounted) return
+        const assigned = (mgrRes.managers || []).find((m) => m.stationId === station.id) || null
+        const pending = (invRes || []).find(
+          (inv) => inv.stationId === station.id && inv.status === "PENDING"
+        ) || null
+
+        setManagerAssignment(assigned)
+        setPendingInvitation(pending)
+      } catch {
+        // Quiet fail if missing manager context
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [station?.id, isOwner])
 
   if (!isOwner) return null
 
@@ -121,8 +151,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       })
       setPendingInvitation(null)
       toast.success("Assigned yourself as manager for this station!")
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to self-assign as manager")
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
+      toast.error(errorObj?.response?.data?.message || errorObj?.message || "Failed to self-assign as manager")
     } finally {
       setIsSubmittingAction(false)
     }
@@ -144,9 +175,10 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           setManagerAssignment(null)
           await managerApi.removeManager(targetAssignment.assignmentId)
           toast.success("Station manager removed successfully")
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorObj = err as { response?: { data?: { message?: string } } }
           setManagerAssignment(targetAssignment)
-          toast.error(err?.response?.data?.message || "Failed to remove manager")
+          toast.error(errorObj?.response?.data?.message || "Failed to remove manager")
         } finally {
           setIsSubmittingAction(false)
           setConfirmModal((prev) => ({ ...prev, isOpen: false }))
@@ -177,9 +209,10 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             await managerApi.suspendManager(managerAssignment.assignmentId)
             toast.success("Manager suspended successfully")
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorObj = err as { response?: { data?: { message?: string } } }
           setManagerAssignment((prev) => (prev ? { ...prev, status: managerAssignment.status } : null))
-          toast.error(err?.response?.data?.message || "Failed to update manager status")
+          toast.error(errorObj?.response?.data?.message || "Failed to update manager status")
         } finally {
           setIsSubmittingAction(false)
           setConfirmModal((prev) => ({ ...prev, isOpen: false }))
@@ -204,9 +237,10 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           setPendingInvitation(null)
           await managerApi.cancelInvitation(targetInvitation.id)
           toast.success("Invitation cancelled successfully")
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorObj = err as { response?: { data?: { message?: string } } }
           setPendingInvitation(targetInvitation)
-          toast.error(err?.response?.data?.message || "Failed to cancel invitation")
+          toast.error(errorObj?.response?.data?.message || "Failed to cancel invitation")
         } finally {
           setIsSubmittingAction(false)
           setConfirmModal((prev) => ({ ...prev, isOpen: false }))
@@ -222,8 +256,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       setIsSubmittingAction(true)
       await managerApi.resendInvitation(pendingInvitation.id)
       toast.success(`Invitation email resent to ${pendingInvitation.email}!`)
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to resend invitation")
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } }
+      toast.error(errorObj?.response?.data?.message || "Failed to resend invitation")
     } finally {
       setIsSubmittingAction(false)
     }

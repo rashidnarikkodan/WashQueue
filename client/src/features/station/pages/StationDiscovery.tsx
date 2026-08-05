@@ -39,7 +39,7 @@ const StationDiscovery = () => {
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-  const [hasAttemptedLocationCheck, setHasAttemptedLocationCheck] = useState(false)
+  const [hasAttemptedLocationCheck, setHasAttemptedLocationCheck] = useState(() => !navigator?.geolocation)
 
   // Debounce search query input
   const debouncedSearch = useDebounce(searchQuery, 400)
@@ -78,13 +78,12 @@ const StationDiscovery = () => {
 
   // Check initial location on mount before firing data fetch
   useEffect(() => {
+    if (!navigator?.geolocation) return
     let isMounted = true
-    if (!navigator.geolocation) {
-      setHasAttemptedLocationCheck(true)
-      return
-    }
 
-    setIsLocating(true)
+    queueMicrotask(() => {
+      if (isMounted) setIsLocating(true)
+    })
     const fallbackTimer = setTimeout(() => {
       if (isMounted) {
         setIsLocating(false)

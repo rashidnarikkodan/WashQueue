@@ -68,22 +68,20 @@ export default function StationManagement({ role: explicitRole }: StationManagem
 
   // Fetch station list
   const loadStations = useCallback(async () => {
-    let statusFilter: string | undefined = undefined
-    if (activeTab === "draft") {
-      statusFilter = STATION_STATUS.DRAFT
-    } else if (activeTab === "pending") {
-      statusFilter = STATION_STATUS.PENDING_REVIEW
-    } else if (activeTab === "active") {
-      statusFilter = STATION_STATUS.ACTIVE
-    } else if (activeTab === "inactive") {
-      statusFilter = STATION_STATUS.INACTIVE
-    } else if (activeTab === "suspended") {
-      statusFilter = STATION_STATUS.SUSPENDED
-    } else if (activeTab === "rejected") {
-      statusFilter = STATION_STATUS.REJECTED
-    } else {
-      statusFilter = "all"
-    }
+    const statusFilter =
+      activeTab === "draft"
+        ? STATION_STATUS.DRAFT
+        : activeTab === "pending"
+        ? STATION_STATUS.PENDING_REVIEW
+        : activeTab === "active"
+        ? STATION_STATUS.ACTIVE
+        : activeTab === "inactive"
+        ? STATION_STATUS.INACTIVE
+        : activeTab === "suspended"
+        ? STATION_STATUS.SUSPENDED
+        : activeTab === "rejected"
+        ? STATION_STATUS.REJECTED
+        : "all"
 
     if (isAdmin) {
       await fetchStations({

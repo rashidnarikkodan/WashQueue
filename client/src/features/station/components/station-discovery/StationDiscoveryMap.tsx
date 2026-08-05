@@ -89,7 +89,7 @@ export default function StationDiscoveryMap({
       map.remove()
       mapRef.current = null
     }
-  }, []) // run once on mount
+  }, [stations, userLocation])
 
   // Sync Station Markers
   useEffect(() => {

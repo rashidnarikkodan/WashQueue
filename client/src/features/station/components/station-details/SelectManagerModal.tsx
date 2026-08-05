@@ -24,8 +24,9 @@ export function SelectManagerModal({
       setIsSubmitting(managerType)
       await onAssignManager({ managerType, email })
       onClose()
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || `Error setting manager (${managerType})`)
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
+      toast.error(errorObj?.response?.data?.message || errorObj?.message || `Error setting manager (${managerType})`)
     } finally {
       setIsSubmitting(null)
     }
