@@ -113,32 +113,7 @@ export default function Booking() {
       ]
     }
 
-    return [
-      {
-        id: "HALF_WASH",
-        name: "Express Half Wash",
-        price: 350,
-        durationMins: 30,
-        description:
-          "Exterior foam wash, pressure rinse, wheel cleaning, and exterior window buffing.",
-      },
-      {
-        id: "FULL_WASH",
-        name: "Complete Full Wash",
-        price: 650,
-        durationMins: 60,
-        description:
-          "Full body foam wash, interior vacuuming, dashboard wipe down, tire polish & underbody wash.",
-      },
-      {
-        id: "PREMIUM_DETAIL",
-        name: "Premium Ceramic Polish",
-        price: 1200,
-        durationMins: 90,
-        description:
-          "Deep interior steam clean, hydrophobic ceramic coating spray, engine bay wipe & odor removal.",
-      },
-    ]
+    return []
   }, [selectedStation?.pricing])
 
   // Derive Extra Services from selectedStation
