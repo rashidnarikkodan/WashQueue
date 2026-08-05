@@ -12,6 +12,7 @@ const BookmarksPage = lazy(() => import("../../features/station/pages/BookmarksP
 import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
+import Booking from "@/features/booking/pages/Booking"
 
 const RootPathResolver = () => {
   const { isAuthenticated, user, isLoading, activeViewMode } = useAuthStore()
@@ -78,6 +79,10 @@ export const mainRoutes = {
     {
       path: "profile",
       element: <ProfilePage />,
+    },
+    {
+      path: "bookings/new",
+      element: <Booking />,
     },
     {
       path: "about",
