@@ -58,32 +58,36 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
     setTimeout(checkScroll, 300)
   }
 
-  const handlePrevTab = () => {
-    const currentIndex = tabs.findIndex((t) => t.id === activeTab)
-    if (currentIndex > 0) {
-      onTabChange(tabs[currentIndex - 1].id)
-    } else {
-      scroll("left")
-    }
-  }
-
-  const handleNextTab = () => {
-    const currentIndex = tabs.findIndex((t) => t.id === activeTab)
-    if (currentIndex < tabs.length - 1) {
-      onTabChange(tabs[currentIndex + 1].id)
-    } else {
-      scroll("right")
-    }
-  }
-
-  // Keyboard Left / Right Arrow Key Navigation
+  // Keyboard Left / Right Arrow Key Focus Navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowLeft") {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault()
-      handlePrevTab()
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault()
-      handleNextTab()
+
+      // Find which tab button currently has focus
+      const activeFocusedIndex = tabs.findIndex(
+        (t) => tabRefs.current[t.id] === document.activeElement
+      )
+
+      let nextIndex = 0
+      if (activeFocusedIndex !== -1) {
+        if (e.key === "ArrowRight") {
+          nextIndex = (activeFocusedIndex + 1) % tabs.length
+        } else {
+          nextIndex = (activeFocusedIndex - 1 + tabs.length) % tabs.length
+        }
+      } else {
+        const currentActiveIndex = tabs.findIndex((t) => t.id === activeTab)
+        if (e.key === "ArrowRight") {
+          nextIndex = currentActiveIndex < tabs.length - 1 ? currentActiveIndex + 1 : 0
+        } else {
+          nextIndex = currentActiveIndex > 0 ? currentActiveIndex - 1 : tabs.length - 1
+        }
+      }
+
+      const targetTab = tabs[nextIndex]
+      if (targetTab && tabRefs.current[targetTab.id]) {
+        tabRefs.current[targetTab.id]?.focus()
+      }
     }
   }
 
@@ -91,20 +95,20 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
 
   return (
     <div
-      tabIndex={0}
+      tabIndex={-1}
       onKeyDown={handleKeyDown}
-      className={`relative flex items-center group focus:outline-none ${className}`}
+      className={`relative flex items-center group outline-none ${className}`}
     >
       {/* Left Arrow Button */}
       <button
         type="button"
-        onClick={handlePrevTab}
-        disabled={!canScrollLeft && tabs.findIndex((t) => t.id === activeTab) <= 0}
-        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 mr-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none ${
+        onClick={() => scroll("left")}
+        disabled={!canScrollLeft}
+        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 mr-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
           canScrollLeft ? "opacity-100" : "opacity-60"
         }`}
-        title="Previous tab (Left Arrow)"
-        aria-label="Previous tab"
+        title="Scroll left"
+        aria-label="Scroll left"
       >
         <ChevronLeft size={16} />
       </button>
@@ -125,7 +129,7 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
               }}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none ${
+              className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 isActive
                   ? "bg-primary/10 text-primary border-primary/40 font-extrabold shadow-xs"
                   : "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40"
@@ -149,13 +153,13 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
       {/* Right Arrow Button */}
       <button
         type="button"
-        onClick={handleNextTab}
-        disabled={!canScrollRight && tabs.findIndex((t) => t.id === activeTab) >= tabs.length - 1}
-        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 ml-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none ${
+        onClick={() => scroll("right")}
+        disabled={!canScrollRight}
+        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 ml-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
           canScrollRight ? "opacity-100" : "opacity-60"
         }`}
-        title="Next tab (Right Arrow)"
-        aria-label="Next tab"
+        title="Scroll right"
+        aria-label="Scroll right"
       >
         <ChevronRight size={16} />
       </button>

@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { NavLink, useNavigate, useLocation } from "react-router-dom"
+import { useEffect, useRef } from "react"
+import { NavLink, useLocation } from "react-router-dom"
 import type { SidebarItem } from "../../config/sidebar.config"
 
 type Props = {
@@ -7,8 +7,8 @@ type Props = {
 }
 
 const Sidebar = ({ items }: Props) => {
-  const navigate = useNavigate()
   const location = useLocation()
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -25,22 +25,43 @@ const Sidebar = ({ items }: Props) => {
 
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault()
-        const currentIndex = items.findIndex((item) => location.pathname.startsWith(item.path))
+
+        const activeFocusedIndex = itemRefs.current.findIndex(
+          (el) => el && el === document.activeElement
+        )
+
         let nextIndex = 0
-        if (e.key === "ArrowDown") {
-          nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0
+        if (activeFocusedIndex !== -1) {
+          if (e.key === "ArrowDown") {
+            nextIndex = (activeFocusedIndex + 1) % items.length
+          } else {
+            nextIndex = (activeFocusedIndex - 1 + items.length) % items.length
+          }
         } else {
-          nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1
+          const currentActiveIndex = items.findIndex((item) =>
+            location.pathname.startsWith(item.path)
+          )
+          if (currentActiveIndex !== -1) {
+            nextIndex =
+              e.key === "ArrowDown"
+                ? (currentActiveIndex + 1) % items.length
+                : (currentActiveIndex - 1 + items.length) % items.length
+          } else {
+            nextIndex = e.key === "ArrowDown" ? 0 : items.length - 1
+          }
         }
-        if (items[nextIndex]) {
-          navigate(items[nextIndex].path)
+
+        const targetEl = itemRefs.current[nextIndex]
+        if (targetEl) {
+          targetEl.focus()
         }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [items, location.pathname, navigate])
+  }, [items, location.pathname])
+
   return (
     <aside
       className="
@@ -72,13 +93,16 @@ const Sidebar = ({ items }: Props) => {
       "
     >
       <nav className="flex flex-col gap-1.5 [@media(max-height:800px)]:gap-1 overflow-y-auto max-h-full scrollbar-none">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const Icon = item.icon
 
           return (
             <NavLink
               key={item.path}
               to={item.path}
+              ref={(el) => {
+                itemRefs.current[index] = el
+              }}
               className={({ isActive }) =>
                 `
                 flex
@@ -93,6 +117,10 @@ const Sidebar = ({ items }: Props) => {
                 transition-all
                 duration-200
                 border
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-500
+                focus:border-blue-500
 
                 ${
                   isActive
