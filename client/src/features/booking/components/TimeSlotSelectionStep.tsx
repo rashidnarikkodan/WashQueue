@@ -1,4 +1,5 @@
-import { Calendar, Check, AlertCircle, Ban } from "lucide-react"
+import { Check, AlertCircle, Ban } from "lucide-react"
+import DatePicker from "@/shared/components/ui/DatePicker"
 
 export interface TimeSlotOption {
   id: string
@@ -26,6 +27,8 @@ export default function TimeSlotSelectionStep({
 
   // Quick date chips (Today, Tomorrow, +2 Days)
   const today = new Date()
+  const todayIso = today.toISOString().split("T")[0]
+
   const dateOptions = [0, 1, 2, 3, 4].map((offset) => {
     const d = new Date(today)
     d.setDate(d.getDate() + offset)
@@ -36,17 +39,8 @@ export default function TimeSlotSelectionStep({
         : offset === 1
           ? "Tomorrow"
           : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-    const fullFormatted = d.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-    return { isoDate, label, fullFormatted }
+    return { isoDate, label }
   })
-
-  const currentOption =
-    dateOptions.find((d) => d.isoDate === selectedDate) || dateOptions[0]
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
@@ -67,16 +61,16 @@ export default function TimeSlotSelectionStep({
             SERVICE DATE
           </div>
 
-          <div className="relative">
-            <div className="flex items-center justify-between w-full p-4 rounded-2xl border border-border bg-card text-foreground font-semibold text-sm shadow-xs">
-              <div className="flex items-center gap-3">
-                <Calendar size={18} className="text-primary" />
-                <span>{currentOption.fullFormatted}</span>
-              </div>
-            </div>
+          <div className="space-y-3">
+            <DatePicker
+              value={selectedDate}
+              onChange={onDateChange}
+              minDate={todayIso}
+              placeholder="Select service date..."
+            />
 
             {/* Quick Date Chips Bar */}
-            <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {dateOptions.map((opt) => {
                 const isActive = selectedDate === opt.isoDate
                 return (

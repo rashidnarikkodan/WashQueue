@@ -226,25 +226,25 @@ export default function DatePicker({
 
         {/* Popover Calendar Dropdown */}
         {isOpen && (
-          <div className="absolute -top-90 left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-[#151B2D] border border-slate-800 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute top-full left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-card border border-border shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 text-card-foreground">
             {/* Month / Year Navigation */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
                 <ChevronLeft size={18} />
               </button>
 
-              <span className="text-sm font-bold text-slate-100">
+              <span className="text-sm font-bold text-foreground">
                 {MONTH_NAMES[month]} {year}
               </span>
 
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
                 <ChevronRight size={18} />
               </button>
@@ -253,7 +253,7 @@ export default function DatePicker({
             {/* Day Names Row */}
             <div className="grid grid-cols-7 text-center">
               {DAY_NAMES.map((d) => (
-                <span key={d} className="text-[11px] font-bold text-slate-400 uppercase">
+                <span key={d} className="text-[11px] font-bold text-muted-foreground uppercase">
                   {d}
                 </span>
               ))}
@@ -273,14 +273,14 @@ export default function DatePicker({
                     onClick={() => handleSelectDate(item.dateStr)}
                     className={`h-8 w-full rounded-lg text-xs font-semibold flex items-center justify-center transition-all cursor-pointer ${
                       item.isDisabled
-                        ? "text-slate-600 cursor-not-allowed opacity-40"
+                        ? "text-muted-foreground/40 cursor-not-allowed opacity-40"
                         : isSelected
-                        ? "bg-[#ADC6FF] text-[#002E6A] font-bold shadow-md shadow-blue-500/20"
+                        ? "bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20"
                         : isToday
                         ? "bg-primary/20 text-primary border border-primary/40 font-bold"
                         : item.isCurrentMonth
-                        ? "text-slate-200 hover:bg-slate-800 hover:text-white"
-                        : "text-slate-600 hover:bg-slate-800/50"
+                        ? "text-foreground hover:bg-muted hover:text-foreground"
+                        : "text-muted-foreground/60 hover:bg-muted/50"
                     }`}
                   >
                     {item.dayNum}
@@ -290,11 +290,11 @@ export default function DatePicker({
             </div>
 
             {/* Quick Actions Footer */}
-            <div className="flex justify-between items-center border-t border-slate-800/80 pt-3 text-xs">
+            <div className="flex justify-between items-center border-t border-border pt-3 text-xs">
               <button
                 type="button"
                 onClick={handleSelectToday}
-                className="text-primary font-semibold hover:underline cursor-pointer"
+                className="text-primary font-bold hover:underline cursor-pointer"
               >
                 Today
               </button>
@@ -305,7 +305,7 @@ export default function DatePicker({
                     onChange("")
                     setIsOpen(false)
                   }}
-                  className="text-slate-400 font-semibold hover:text-white cursor-pointer"
+                  className="text-muted-foreground font-semibold hover:text-foreground cursor-pointer"
                 >
                   Clear
                 </button>
