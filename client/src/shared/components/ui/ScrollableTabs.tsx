@@ -100,24 +100,23 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
       className={`relative flex items-center group outline-none ${className}`}
     >
       {/* Left Arrow Button */}
-      <button
-        type="button"
-        onClick={() => scroll("left")}
-        disabled={!canScrollLeft}
-        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 mr-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-          canScrollLeft ? "opacity-100" : "opacity-60"
-        }`}
-        title="Scroll left"
-        aria-label="Scroll left"
-      >
-        <ChevronLeft size={16} />
-      </button>
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scroll("left")}
+          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          title="Scroll left"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft size={16} />
+        </button>
+      )}
 
       {/* Tabs Container */}
       <div
         ref={containerRef}
         onScroll={checkScroll}
-        className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth py-1 px-0.5 w-full"
+        className="flex items-center gap-0 overflow-x-auto scrollbar-none scroll-smooth py-0 px-0 w-full"
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id
@@ -129,16 +128,16 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
               }}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`px-5 py-2.5 text-xs font-bold transition-all duration-300 ease-out cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-2 select-none rounded-none border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 isActive
-                  ? "bg-primary/10 text-primary border-primary/40 font-extrabold shadow-xs"
-                  : "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40"
+                  ? "bg-primary/10 text-primary border-primary font-black"
+                  : "bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/20"
               }`}
             >
               <span>{tab.label}</span>
               {typeof tab.count === "number" && (
                 <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  className={`px-1.5 py-0.5 text-[10px] font-extrabold rounded-none ${
                     isActive ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -151,18 +150,17 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
       </div>
 
       {/* Right Arrow Button */}
-      <button
-        type="button"
-        onClick={() => scroll("right")}
-        disabled={!canScrollRight}
-        className={`p-1.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shrink-0 ml-1.5 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed select-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-          canScrollRight ? "opacity-100" : "opacity-60"
-        }`}
-        title="Scroll right"
-        aria-label="Scroll right"
-      >
-        <ChevronRight size={16} />
-      </button>
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scroll("right")}
+          className="p-2 border-b-2 border-transparent bg-background/80 hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all duration-300 cursor-pointer shrink-0 select-none rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          title="Scroll right"
+          aria-label="Scroll right"
+        >
+          <ChevronRight size={16} />
+        </button>
+      )}
     </div>
   )
 }
