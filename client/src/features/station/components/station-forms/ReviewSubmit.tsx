@@ -264,7 +264,7 @@ export default function ReviewSubmit({
         <div className="space-y-2">
           {pricing.map((item) => {
             const cls = classes.find((c) => c.id === item.vehicleClassId)
-            return (
+            return ( item.isActive &&
               <div
                 key={item.vehicleClassId}
                 className="flex justify-between items-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs"

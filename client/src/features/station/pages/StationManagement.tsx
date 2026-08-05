@@ -15,6 +15,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
+import Pagination from "@/shared/components/ui/Pagination"
 import ScrollableTabs from "@/shared/components/ui/ScrollableTabs"
 import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -23,6 +24,7 @@ import { STATION_STATUS, type Station } from "../types"
 // Tab definitions for filtering stations
 const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
+  { id: "draft", label: "Draft", activeColor: "border-blue-500 text-blue-500" },
   { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
   { id: "active", label: "Active Stations", activeColor: "border-emerald-500 text-emerald-500" },
   { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
@@ -31,6 +33,7 @@ const ADMIN_TABS: TabConfig[] = [
 
 const OWNER_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
+  { id: "draft", label: "Draft", activeColor: "border-blue-500 text-blue-500" },
   { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
   { id: "active", label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
   { id: "inactive", label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
@@ -66,7 +69,9 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   // Fetch station list
   const loadStations = useCallback(async () => {
     let statusFilter: string | undefined = undefined
-    if (activeTab === "pending") {
+    if (activeTab === "draft") {
+      statusFilter = STATION_STATUS.DRAFT
+    } else if (activeTab === "pending") {
       statusFilter = STATION_STATUS.PENDING_REVIEW
     } else if (activeTab === "active") {
       statusFilter = STATION_STATUS.ACTIVE
@@ -93,10 +98,12 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         await fetchStations({
           ownerId: ownerUserId,
           status: statusFilter,
+          page: currentPage,
+          limit,
         })
       }
     }
-  }, [isAdmin, activeTab, currentPage, searchQuery, user?.ownerId, user?.id, fetchStations])
+  }, [isAdmin, activeTab, currentPage, searchQuery, limit, user?.ownerId, user?.id, fetchStations])
 
   useEffect(() => {
     loadStations()
@@ -450,6 +457,13 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           )}
         </div>
       )}
+
+      {/* Owner View Pagination */}
+      <Pagination
+        meta={paginationMeta}
+        onPageChange={(p) => updateParams({ page: p })}
+        className="pt-4 border-t border-border/40"
+      />
     </div>
   )
 }
