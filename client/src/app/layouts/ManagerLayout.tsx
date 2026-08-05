@@ -25,12 +25,14 @@ const ManagerLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header role={ROLE.MANAGER} />
-      <Sidebar items={managerSideBarItems} />
-      <main className="flex-1 p-6">
-        <Suspense fallback={<Loading text="Loading page..." />}>
-          <Outlet />
-        </Suspense>
-      </main>
+      <div className="flex flex-1 pt-20 px-6">
+        <Sidebar items={managerSideBarItems} />
+        <main className="flex-1 md:pl-24 pl-0 pb-24 md:pb-6 overflow-y-auto">
+          <Suspense fallback={<Loading text="Loading page..." />}>
+            <Outlet />
+          </Suspense>
+        </main>
+      </div>
     </div>
   )
 }
