@@ -5,6 +5,7 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { createVehicleSchema, updateVehicleSchema } from "./schema/vehicle.schema"
 import { vehicleUpload } from "@/infrastructure/multer/multer.middleware"
+import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createVehicleRouter = (vehicleController: VehicleController): Router => {
   const router = Router()
@@ -13,37 +14,25 @@ export const createVehicleRouter = (vehicleController: VehicleController): Route
   router.use(authenticate)
 
   router.post(
-    "/",
+    API_ROUTES.VEHICLES.CREATE,
     vehicleUpload,
     validateRequest(createVehicleSchema),
     asyncHandler(vehicleController.create)
   )
 
-  router.get(
-    "/",
-    asyncHandler(vehicleController.getAll)
-  )
+  router.get(API_ROUTES.VEHICLES.LIST, asyncHandler(vehicleController.getAll))
 
-  router.get(
-    "/:id",
-    asyncHandler(vehicleController.getById)
-  )
+  router.get(API_ROUTES.VEHICLES.BY_ID, asyncHandler(vehicleController.getById))
 
   router.patch(
-    "/:id",
+    API_ROUTES.VEHICLES.BY_ID,
     validateRequest(updateVehicleSchema),
     asyncHandler(vehicleController.update)
   )
 
-  router.delete(
-    "/:id",
-    asyncHandler(vehicleController.delete)
-  )
+  router.delete(API_ROUTES.VEHICLES.BY_ID, asyncHandler(vehicleController.delete))
 
-  router.patch(
-    "/:id/primary",
-    asyncHandler(vehicleController.setPrimary)
-  )
+  router.patch(API_ROUTES.VEHICLES.SET_PRIMARY, asyncHandler(vehicleController.setPrimary))
 
   return router
 }

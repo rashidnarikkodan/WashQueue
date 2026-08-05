@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends Request {
     userId: string
     role: string
     email: string
+    ownerId?: string
   }
 }
 
@@ -39,12 +40,14 @@ export const authenticate = async (
       userId: string
       role: string
       email: string
+      ownerId?: string
     }
     try {
       decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as {
         userId: string
         role: string
         email: string
+        ownerId?: string
       }
     } catch {
       throw new UnauthorizedError("Invalid or expired authentication token")

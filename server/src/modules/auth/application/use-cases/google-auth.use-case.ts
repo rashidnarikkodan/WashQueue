@@ -17,6 +17,8 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ROLE } from "@/common/constants/role.constants"
 import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
 
@@ -24,7 +26,8 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
-    private readonly hashService: IHashService
+    private readonly hashService: IHashService,
+    private readonly ownerRepository?: IOwnerRepository
   ) {
     if (env.GOOGLE_CLIENT_ID) {
       this.client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
@@ -115,7 +118,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     }
 
     // Map payload using mapper
-    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
+    const tokenPayload = await TokenPayloadMapper.toTokenPayload(user, this.ownerRepository)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)

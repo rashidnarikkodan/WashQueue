@@ -19,6 +19,8 @@ import {
 } from "../interfaces"
 import { AuthOutput, LoginInput } from "../dto"
 
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+
 export class LoginUseCase implements ILoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
@@ -27,7 +29,8 @@ export class LoginUseCase implements ILoginUseCase {
     private readonly hashService: IHashService,
     private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
-    private readonly mailService: IMailService
+    private readonly mailService: IMailService,
+    private readonly ownerRepository?: IOwnerRepository
   ) {}
 
   async execute(data: LoginInput): Promise<AuthOutput> {
@@ -72,7 +75,7 @@ export class LoginUseCase implements ILoginUseCase {
     }
 
     // Generate JWT access & refresh tokens
-    const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
+    const tokenPayload = await TokenPayloadMapper.toTokenPayload(user, this.ownerRepository)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)

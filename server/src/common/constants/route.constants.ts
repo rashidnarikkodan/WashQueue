@@ -39,13 +39,24 @@ export const API_ROUTES = {
   },
   STATIONS: {
     ROOT: "/api/stations",
+    LIST: "/",
+    CREATE: "/",
+    BY_ID: "/:stationId",
+    FILTER_OPTIONS: "/filter-options",
+    SUBMIT: "/:stationId/submit",
+    TOGGLE_ACTIVE: "/:stationId/toggle-active",
+    ASSIGN_MANAGER: "/:stationId/assign-manager",
+    REVIEW: "/:stationId/review",
   },
   VEHICLES: {
     ROOT: "/api/vehicles",
+    LIST: "/",
+    CREATE: "/",
+    BY_ID: "/:id",
+    SET_PRIMARY: "/:id/primary",
   },
   MANAGERS: {
     ROOT: "/api/managers",
     OWNER_ROOT: "/api/owner/managers",
   },
 } as const
-

@@ -64,6 +64,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       userId: userDoc.id || userId,
       role: userDoc.role,
       email: userDoc.email,
+      ...(owner.id ? { ownerId: owner.id } : {}),
     }
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)

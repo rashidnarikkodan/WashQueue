@@ -3,71 +3,79 @@ import { StationController } from "./station.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
-import { createStationSchema, patchStationSchema } from "./schema/station.schema"
+import {
+  createStationSchema,
+  patchStationSchema,
+} from "./schema/station.schema"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { stationUpload } from "@/infrastructure/multer/multer.middleware"
+import { API_ROUTES } from "@/common/constants/route.constants"
 
-export const createRouter = (stationController: StationController): Router => {
+export const createRouter = (
+  stationController: StationController
+): Router => {
   const router = Router()
 
-  // Public routes — list stations, filter metadata & get station by ID
+  /**
+   * Public routes
+   */
   router.get(
-    "/",
+    API_ROUTES.STATIONS.LIST,
     asyncHandler(stationController.getStations)
   )
 
   router.get(
-    "/filter-options",
+    API_ROUTES.STATIONS.FILTER_OPTIONS,
     asyncHandler(stationController.getFilterOptions)
   )
 
   router.get(
-    "/:stationId",
+    API_ROUTES.STATIONS.BY_ID,
     asyncHandler(stationController.getById)
   )
 
-
-  
-  // Authenticated routes
+  /**
+   * Protected routes
+   */
   router.use(authenticate)
 
-  router.patch(
-    "/:stationId/review",
-    authorize("admin"),
-    asyncHandler(stationController.review)
-  )
-
   router.post(
-    "/",
+    API_ROUTES.STATIONS.CREATE,
     stationUpload,
     validateRequest(createStationSchema),
     asyncHandler(stationController.create)
   )
 
   router.patch(
-    "/:stationId",
+    API_ROUTES.STATIONS.BY_ID,
     stationUpload,
     validateRequest(patchStationSchema),
     asyncHandler(stationController.update)
   )
 
   router.post(
-    "/:stationId/submit",
+    API_ROUTES.STATIONS.SUBMIT,
     asyncHandler(stationController.submit)
   )
 
   router.patch(
-    "/:stationId/toggle-active",
+    API_ROUTES.STATIONS.TOGGLE_ACTIVE,
     asyncHandler(stationController.toggleActive)
   )
 
   router.post(
-    "/:stationId/assign-manager",
+    API_ROUTES.STATIONS.ASSIGN_MANAGER,
     asyncHandler(stationController.assignManager)
   )
 
+  router.patch(
+    API_ROUTES.STATIONS.REVIEW,
+    authorize("admin"),
+    asyncHandler(stationController.review)
+  )
+
   router.delete(
-    "/:stationId",
+    API_ROUTES.STATIONS.BY_ID,
     asyncHandler(stationController.delete)
   )
 
