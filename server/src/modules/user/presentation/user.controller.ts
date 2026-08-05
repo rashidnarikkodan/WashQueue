@@ -17,6 +17,16 @@ import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authentic
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
+interface ExportUserRecord {
+  id?: string
+  _id?: string
+  name?: string
+  email?: string
+  role?: string
+  isBlocked?: boolean
+  createdAt?: string | Date
+}
+
 export class UserController {
   constructor(
     private readonly getUsersUseCase: IGetUsersUseCase,
@@ -81,7 +91,7 @@ export class UserController {
     const users = data.users || []
 
     const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"]
-    const rows = users.map((u: any) => [
+    const rows = users.map((u: ExportUserRecord) => [
       u.id || u._id || "",
       `"${(u.name || "").replace(/"/g, '""')}"`,
       `"${(u.email || "").replace(/"/g, '""')}"`,

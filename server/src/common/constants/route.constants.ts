@@ -72,4 +72,16 @@ export const API_ROUTES = {
     RESEND_INVITATION: "/invitations/:invitationId/resend",
     CANCEL_INVITATION: "/invitations/:invitationId",
   },
+  BOOKINGS: {
+    ROOT: "/api/bookings",
+    CREATE: "/",
+    LIST: "/",
+    UPCOMING: "/upcoming",
+    HISTORY: "/history",
+    BY_ID: "/:bookingId",
+    CANCEL: "/:bookingId/cancel",
+    WALK_IN: "/walk-in",
+    CHECK_IN: "/check-in",
+    UPDATE_STATUS: "/:bookingId/status",
+  },
 } as const
