@@ -17,6 +17,8 @@ type Props = {
   selectable?: boolean
   showActions?: boolean
   showSpecs?: boolean
+  isAvailable?: boolean
+  unavailabilityReason?: string
 }
 
 const VehicleCard = ({
@@ -30,6 +32,8 @@ const VehicleCard = ({
   selectable = false,
   showActions = true,
   showSpecs = true,
+  isAvailable = true,
+  unavailabilityReason,
 }: Props) => {
   const navigate = useNavigate()
   const displayImage = image || vehicle.image?.url || DEFAULT_CAR_IMAGE
@@ -37,6 +41,7 @@ const VehicleCard = ({
   const displayClass = className
 
   const handleCardClick = () => {
+    if (!isAvailable) return
     if (selectable && onSelect) {
       onSelect(vehicle)
     }
@@ -46,14 +51,31 @@ const VehicleCard = ({
     <div
       key={vehicle.id}
       onClick={handleCardClick}
-      className={`bg-card rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group transition-all duration-300 ${
-        selectable ? "cursor-pointer" : ""
+      className={`relative bg-card rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between group transition-all duration-300 ${
+        !isAvailable
+          ? "opacity-75 cursor-not-allowed border border-border"
+          : selectable
+            ? "cursor-pointer"
+            : ""
       } ${
-        isSelected
+        isAvailable && isSelected
           ? "border-2 border-primary shadow-primary/20 scale-[1.01]"
-          : "border border-border hover:border-primary/50"
+          : isAvailable
+            ? "border border-border hover:border-primary/50"
+            : ""
       }`}
     >
+      {/* Disabled Overlay for Unavailable Vehicle Class */}
+      {!isAvailable && (
+        <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center cursor-not-allowed">
+          <span className="px-3.5 py-1.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-wider shadow-md">
+            Class Not Serviced
+          </span>
+          <span className="text-[11px] font-medium text-muted-foreground mt-1.5 max-w-[200px] leading-snug">
+            {unavailabilityReason || "This station does not support this vehicle class"}
+          </span>
+        </div>
+      )}
       {/* Image and status badge */}
       <div className="h-48 sm:h-56 relative overflow-hidden bg-muted">
         <img

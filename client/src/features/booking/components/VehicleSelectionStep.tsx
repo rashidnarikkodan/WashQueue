@@ -11,6 +11,7 @@ interface VehicleSelectionStepProps {
   isLoading?: boolean
   categories?: VehicleCategory[]
   classes?: VehicleClass[]
+  stationClassIds?: Set<string> | null
 }
 
 export default function VehicleSelectionStep({
@@ -21,6 +22,7 @@ export default function VehicleSelectionStep({
   isLoading,
   categories = [],
   classes = [],
+  stationClassIds,
 }: VehicleSelectionStepProps) {
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
@@ -80,6 +82,11 @@ export default function VehicleSelectionStep({
             const isSelected = selectedVehicleId === v.id
             const catName = categories.find((c) => c.id === v.categoryId)?.name || "Car"
             const clsName = classes.find((c) => c.id === v.classId)?.name || "Sedan"
+            const isAvailable = stationClassIds
+              ? v.classId
+                ? stationClassIds.has(v.classId)
+                : false
+              : true
 
             return (
               <VehicleCard
@@ -92,6 +99,7 @@ export default function VehicleSelectionStep({
                 selectable
                 showActions={false}
                 showSpecs={false}
+                isAvailable={isAvailable}
               />
             )
           })}

@@ -61,26 +61,49 @@ export default function Booking() {
     try {
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
-      // Auto-select primary or first vehicle if none selected yet
-      if (data.length > 0 && !selectedVehicleId) {
-        const primary = data.find((v) => v.isPrimary) || data[0]
-        setSelectedVehicleId(primary.id)
-      }
     } catch {
       // Ignore API errors gracefully
     } finally {
       setIsVehiclesLoading(false)
     }
-  }, [selectedVehicleId])
+  }, [])
 
   useEffect(() => {
     loadUserVehicles()
   }, [loadUserVehicles])
 
+  // Station Supported Class IDs Set
+  const stationClassIds = useMemo(() => {
+    if (!selectedStation?.pricing || selectedStation.pricing.length === 0) return null
+    return new Set(selectedStation.pricing.filter((p) => p.isActive !== false).map((p) => p.vehicleClassId))
+  }, [selectedStation?.pricing])
+
+  // Available Vehicles matching station's supported classes (Wait for stationClassIds to avoid flash)
+  const availableVehicles = useMemo(() => {
+    if (!stationClassIds) return []
+    return vehicles.filter((v) => v.classId && stationClassIds.has(v.classId))
+  }, [vehicles, stationClassIds])
+
+  // Combined Loading State to prevent dual rendering / UI flicker
+  const isStep1Loading = isVehiclesLoading || (Boolean(stationId) && !selectedStation)
+
+  // Keep selected vehicle ID synced to valid available vehicle
+  useEffect(() => {
+    if (availableVehicles.length > 0) {
+      const isCurrentValid = availableVehicles.some((v) => v.id === selectedVehicleId)
+      if (!isCurrentValid) {
+        const primary = availableVehicles.find((v) => v.isPrimary) || availableVehicles[0]
+        setSelectedVehicleId(primary.id)
+      }
+    } else {
+      setSelectedVehicleId(null)
+    }
+  }, [availableVehicles, selectedVehicleId])
+
   // Selected Vehicle Object
   const selectedVehicle = useMemo(
-    () => vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0] || null,
-    [vehicles, selectedVehicleId]
+    () => availableVehicles.find((v) => v.id === selectedVehicleId) || availableVehicles[0] || null,
+    [availableVehicles, selectedVehicleId]
   )
 
   // Match Station Pricing based on Selected Vehicle's classId
@@ -151,12 +174,7 @@ export default function Booking() {
         }
       })
     }
-
-    return [
-      { id: "VACUUM", name: "Interior Deep Vacuuming", price: 150 },
-      { id: "POLISH", name: "Tire & Alloy Wheel Polish", price: 200 },
-      { id: "ENGINE", name: "Engine Bay Degreasing", price: 250 },
-    ]
+    return []
   }, [selectedStation?.extraServices, selectedVehicle?.classId])
 
   // Available Time Slots
@@ -260,9 +278,10 @@ export default function Booking() {
             selectedVehicleId={selectedVehicleId}
             onSelectVehicle={(id) => setSelectedVehicleId(id)}
             onAddVehicle={() => setIsAddVehicleModalOpen(true)}
-            isLoading={isVehiclesLoading}
+            isLoading={isStep1Loading}
             categories={categories}
             classes={classes}
+            stationClassIds={stationClassIds}
           />
 
           <div className="w-full h-px bg-border" />
