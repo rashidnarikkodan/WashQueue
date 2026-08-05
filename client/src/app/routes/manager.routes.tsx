@@ -4,6 +4,7 @@ const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 
 export const managerRoutes = {
@@ -13,6 +14,10 @@ export const managerRoutes = {
     {
       path: "dashboard",
       element: <div>Manager Dashboard</div>,
+    },
+    {
+      path: "bookings",
+      element: <BookingManagement role="manager" />,
     },
     {
       path: "queue",

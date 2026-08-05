@@ -20,7 +20,7 @@ const UserManagement = () => {
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
     total: 0,
     page: 1,
-    limit: 5,
+    limit: 10,
     totalPages: 0,
     hasNextPage: false,
     hasPrevPage: false,

@@ -8,6 +8,7 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
 const StationManagement = lazy(() => import("../../features/station/pages/StationManagement"))
 const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -43,7 +44,7 @@ export const adminRoutes = {
     },
     {
       path: "bookings",
-      element: <>Booking Monitoring</>,
+      element: <BookingManagement role="admin" />,
     },
     {
       path: "queues",
