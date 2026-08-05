@@ -28,7 +28,6 @@ app.use(API_ROUTES.VEHICLE_CATALOG.ROOT, vehicleRouter)
 app.use(API_ROUTES.STATIONS.ROOT, stationRouter)
 app.use(API_ROUTES.VEHICLES.ROOT, userVehicleRouter)
 app.use(API_ROUTES.MANAGERS.ROOT, managerRouter)
-app.use(API_ROUTES.MANAGERS.OWNER_ROOT, managerRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

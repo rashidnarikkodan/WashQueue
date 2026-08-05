@@ -60,59 +60,59 @@ export const managerApi = {
     page?: number
     limit?: number
   }): Promise<{ managers: ManagerListItem[]; total: number }> => {
-    const response = await api.get("/owner/managers", { params })
+    const response = await api.get("/managers", { params })
     return response.data.data
   },
 
   /** Fetch all pending invitations for the owner */
   getOwnerInvitations: async (): Promise<ManagerInvitationItem[]> => {
-    const response = await api.get("/owner/managers/invitations")
+    const response = await api.get("/managers/invitations")
     return response.data.data
   },
 
   /** Send an invitation or directly assign a manager */
   inviteManager: async (payload: InviteManagerPayload): Promise<InviteManagerResult> => {
-    const response = await api.post("/owner/managers/invite", payload)
+    const response = await api.post("/managers/invite", payload)
     return response.data.data
   },
 
   /** Update manager permissions */
   updatePermissions: async (
-    managerId: string,
+    assignmentId: string,
     permissions: ManagerPermission[]
   ): Promise<ManagerListItem> => {
-    const response = await api.patch(`/owner/managers/${managerId}/permissions`, {
+    const response = await api.patch(`/managers/${assignmentId}/permissions`, {
       permissions,
     })
     return response.data.data
   },
 
   /** Suspend manager */
-  suspendManager: async (managerId: string): Promise<ManagerListItem> => {
-    const response = await api.patch(`/owner/managers/${managerId}/suspend`)
+  suspendManager: async (assignmentId: string): Promise<ManagerListItem> => {
+    const response = await api.patch(`/managers/${assignmentId}/suspend`)
     return response.data.data
   },
 
   /** Reactivate suspended manager */
-  reactivateManager: async (managerId: string): Promise<ManagerListItem> => {
-    const response = await api.patch(`/owner/managers/${managerId}/reactivate`)
+  reactivateManager: async (assignmentId: string): Promise<ManagerListItem> => {
+    const response = await api.patch(`/managers/${assignmentId}/reactivate`)
     return response.data.data
   },
 
   /** Remove manager assignment */
-  removeManager: async (managerId: string): Promise<void> => {
-    await api.delete(`/owner/managers/${managerId}`)
+  removeManager: async (assignmentId: string): Promise<void> => {
+    await api.delete(`/managers/${assignmentId}`)
   },
 
   /** Resend invitation */
   resendInvitation: async (invitationId: string): Promise<ManagerInvitationItem> => {
-    const response = await api.post(`/owner/managers/invitations/${invitationId}/resend`)
+    const response = await api.post(`/managers/invitations/${invitationId}/resend`)
     return response.data.data
   },
 
   /** Cancel invitation */
   cancelInvitation: async (invitationId: string): Promise<void> => {
-    await api.delete(`/owner/managers/invitations/${invitationId}`)
+    await api.delete(`/managers/invitations/${invitationId}`)
   },
 
   /** Public: Verify invitation token */
@@ -135,11 +135,5 @@ export const managerApi = {
   /** Public: Reject invitation */
   rejectInvitation: async (token: string): Promise<void> => {
     await api.post(`/managers/invitations/reject`, { token })
-  },
-
-  /** Manager: Get assigned stations */
-  getManagedStations: async (): Promise<any[]> => {
-    const response = await api.get(`/managers/my-stations`)
-    return response.data.data
   },
 }

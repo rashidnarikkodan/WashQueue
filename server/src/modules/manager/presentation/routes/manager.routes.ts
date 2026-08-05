@@ -9,73 +9,83 @@ import {
   acceptInvitationSchema,
   updatePermissionsSchema,
 } from "../schemas/manager.schema"
+import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createManagerRouter = (managerController: ManagerController): Router => {
   const router = Router()
 
-  // Public Invitation endpoints
-  router.get("/invitations/verify", asyncHandler(managerController.verifyToken))
+ // Public invitation routes
+  router.get(
+    API_ROUTES.MANAGERS.VERIFY_INVITATION,
+    asyncHandler(managerController.verifyToken)
+  )
+
   router.post(
-    "/invitations/accept",
+    API_ROUTES.MANAGERS.ACCEPT_INVITATION,
     validateRequest(acceptInvitationSchema),
     asyncHandler(managerController.acceptInvitation)
   )
-  router.post("/invitations/reject", asyncHandler(managerController.rejectInvitation))
+
+  router.post(
+    API_ROUTES.MANAGERS.REJECT_INVITATION,
+    asyncHandler(managerController.rejectInvitation)
+  )
 
   // Authenticated routes
   router.use(authenticate)
 
-  // Manager self routes
-  router.get("/my-stations", asyncHandler(managerController.getManagedStations))
-
-  // Owner manager management routes (Owner or Admin)
   router.post(
-    "/invite",
-    authorize("owner", "admin"),
+    API_ROUTES.MANAGERS.INVITE,
+    authorize("owner"),
     validateRequest(inviteManagerSchema),
     asyncHandler(managerController.invite)
   )
 
-  router.get("/", authorize("owner", "admin"), asyncHandler(managerController.getOwnerManagers))
   router.get(
-    "/invitations",
+    API_ROUTES.MANAGERS.LIST,
+    authorize("owner", "admin"),
+    asyncHandler(managerController.getOwnerManagers)
+  )
+
+  router.get(
+    API_ROUTES.MANAGERS.LIST_INVITATIONS,
     authorize("owner", "admin"),
     asyncHandler(managerController.getOwnerInvitations)
   )
 
   router.patch(
-    "/:assignmentId/permissions",
+    API_ROUTES.MANAGERS.UPDATE_PERMISSIONS,
     authorize("owner", "admin"),
     validateRequest(updatePermissionsSchema),
     asyncHandler(managerController.updatePermissions)
   )
 
   router.patch(
-    "/:assignmentId/suspend",
+    API_ROUTES.MANAGERS.SUSPEND,
     authorize("owner", "admin"),
     asyncHandler(managerController.suspend)
   )
 
   router.patch(
-    "/:assignmentId/reactivate",
+    API_ROUTES.MANAGERS.REACTIVATE,
     authorize("owner", "admin"),
     asyncHandler(managerController.reactivate)
   )
 
   router.delete(
-    "/:assignmentId",
+    API_ROUTES.MANAGERS.REMOVE,
     authorize("owner", "admin"),
     asyncHandler(managerController.remove)
   )
 
   router.post(
-    "/invitations/:invitationId/resend",
+    API_ROUTES.MANAGERS.RESEND_INVITATION,
     authorize("owner", "admin"),
     asyncHandler(managerController.resendInvitation)
   )
 
   router.delete(
-    "/invitations/:invitationId",
+    API_ROUTES.MANAGERS.CANCEL_INVITATION,
     authorize("owner", "admin"),
     asyncHandler(managerController.cancelInvitation)
   )

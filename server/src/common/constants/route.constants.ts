@@ -1,13 +1,13 @@
 export const API_ROUTES = {
   BASE: "/api",
   AUTH: {
+    ME: "/me",
     ROOT: "/api/auth",
     SIGNUP: "/signup",
     LOGIN: "/login",
     VERIFY_OTP: "/verify-otp",
     GOOGLE: "/google",
     REFRESH_TOKEN: "/refresh-token",
-    ME: "/me",
     LOGOUT: "/logout",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
@@ -57,6 +57,17 @@ export const API_ROUTES = {
   },
   MANAGERS: {
     ROOT: "/api/managers",
-    OWNER_ROOT: "/api/owner/managers",
+    VERIFY_INVITATION: "/invitations/verify",
+    ACCEPT_INVITATION: "/invitations/accept",
+    REJECT_INVITATION: "/invitations/reject",
+    INVITE: "/invite",
+    LIST: "/",
+    LIST_INVITATIONS: "/invitations",
+    UPDATE_PERMISSIONS: "/:assignmentId/permissions",
+    SUSPEND: "/:assignmentId/suspend",
+    REACTIVATE: "/:assignmentId/reactivate",
+    REMOVE: "/:assignmentId",
+    RESEND_INVITATION: "/invitations/:invitationId/resend",
+    CANCEL_INVITATION: "/invitations/:invitationId",
   },
 } as const
