@@ -71,12 +71,12 @@ export default function FormSelect({
           }`}
         >
           {placeholder && (
-            <option value="" className="text-slate-600">
+            <option value="" className="bg-card text-muted-foreground">
               {placeholder}
             </option>
           )}
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} className="bg-card text-foreground">
               {opt.label}
             </option>
           ))}

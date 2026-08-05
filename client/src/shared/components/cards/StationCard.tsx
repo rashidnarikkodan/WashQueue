@@ -37,9 +37,9 @@ const STATUS_CONFIG: Record<
     label: "Active",
   },
   [STATION_STATUS.INACTIVE]: {
-    bg: "bg-slate-600/50 border-slate-600/30",
-    dot: "bg-slate-200",
-    text: "text-slate-200",
+    bg: "bg-muted/80 border-border",
+    dot: "bg-muted-foreground",
+    text: "text-muted-foreground",
     label: "Inactive",
   },
   [STATION_STATUS.DRAFT]: {

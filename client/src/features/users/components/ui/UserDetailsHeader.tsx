@@ -51,7 +51,7 @@ export default function UserDetailsHeader({
   }
 
   return (
-    <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
+    <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
       {/* Decorative subtle background gradients */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -98,7 +98,7 @@ export default function UserDetailsHeader({
 
           {/* Badges for Authentication & Role */}
           <div className="flex flex-wrap gap-2 pt-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1e293b] text-muted-foreground border border-border">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-muted text-muted-foreground border border-border">
               <Shield size={11} className="text-muted-foreground" />
               {user.authProvider === "GOOGLE" ? "GOOGLE Google Auth" : "LOCAL Password Auth"}
             </span>
@@ -122,7 +122,7 @@ export default function UserDetailsHeader({
           {/* Send Notification focus/trigger */}
           <button
             onClick={onScrollToNotification}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-border hover:bg-muted text-muted-foreground font-semibold text-xs transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-muted border border-border hover:bg-muted/80 text-foreground font-semibold text-xs transition-all cursor-pointer"
           >
             <Send size={13} />
             <span>Send Notification</span>

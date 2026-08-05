@@ -74,25 +74,25 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
-      <div className="w-full max-w-[560px] md:max-w-[600px] bg-[#191F31] border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden text-[#DCE1FB] relative flex flex-col my-auto animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-[560px] md:max-w-[600px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col my-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-slate-800/80 bg-[#151B2D]/60 shrink-0">
+        <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#ADC6FF]/10 border border-[#ADC6FF]/20 flex items-center justify-center text-[#ADC6FF] shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
                 Update Manager Permissions
               </h2>
-              <p className="text-xs text-slate-400 font-normal mt-0.5">
-                {manager.managerName || manager.managerEmail} • <span className="text-[#ADC6FF]">{manager.stationName}</span>
+              <p className="text-xs text-muted-foreground font-normal mt-0.5">
+                {manager.managerName || manager.managerEmail} • <span className="text-primary">{manager.stationName}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#C2C6D6] hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -103,14 +103,14 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5">
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold text-[#C2C6D6] uppercase tracking-wider flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#ADC6FF]" />
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                 <span>Manager Access Permissions</span>
               </label>
               <button
                 type="button"
                 onClick={selectAllPermissions}
-                className="text-xs font-semibold text-[#ADC6FF] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
               >
                 Select All
               </button>
@@ -125,19 +125,19 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
                     onClick={() => togglePermission(perm.id)}
                     className={`flex items-start justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all select-none ${
                       isChecked
-                        ? "bg-[#ADC6FF]/10 border-[#ADC6FF]/50 text-[#ADC6FF] shadow-sm"
-                        : "bg-[#070D1F]/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300"
+                        ? "bg-primary/10 border-primary/50 text-primary shadow-sm"
+                        : "bg-muted/40 border-border text-muted-foreground hover:border-border hover:text-foreground"
                     }`}
                   >
                     <div className="space-y-0.5 pr-2">
-                      <p className="font-bold text-white text-xs">{perm.label}</p>
-                      <p className="text-[10px] text-slate-400 leading-tight">{perm.description}</p>
+                      <p className="font-bold text-foreground text-xs">{perm.label}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{perm.description}</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => {}}
-                      className="mt-0.5 rounded border-slate-700 accent-[#ADC6FF] pointer-events-none"
+                      className="mt-0.5 rounded border-border accent-primary pointer-events-none"
                     />
                   </div>
                 )
@@ -146,19 +146,19 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800/80">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#ADC6FF] hover:bg-[#ADC6FF]/10 transition-colors cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-bold text-sm hover:bg-[#92b5ff] transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>

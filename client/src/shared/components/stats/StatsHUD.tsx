@@ -51,8 +51,8 @@ const VARIANT_CONFIG: Record<
     bg: "bg-primary/10 text-primary",
   },
   slate: {
-    text: "text-slate-100",
-    bg: "bg-slate-800/50 text-slate-400",
+    text: "text-foreground",
+    bg: "bg-muted text-muted-foreground",
   },
   default: {
     text: "text-foreground",

@@ -151,20 +151,19 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div
-        className="w-full max-w-[560px] md:max-w-[620px] bg-[#191F31] border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden text-[#DCE1FB] relative flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200"
-        style={{ boxShadow: "0 32px 64px -16px rgba(0, 0, 0, 0.65)" }}
+        className="w-full max-w-[560px] md:max-w-[620px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-slate-800/80 bg-[#151B2D]/60 shrink-0">
+        <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#ADC6FF]/10 border border-[#ADC6FF]/20 flex items-center justify-center text-[#ADC6FF] shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               {isSuccessState ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <UserPlus className="w-5 h-5" />}
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
                 {isSuccessState ? "Invitation Sent" : "Invite Station Manager"}
               </h2>
-              <p className="text-xs text-slate-400 font-normal mt-0.5">
+              <p className="text-xs text-muted-foreground font-normal mt-0.5">
                 {isSuccessState
                   ? "Manager assignment / invitation registered"
                   : `Assign a manager for ${stationName || "this station"}`}
@@ -173,7 +172,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#C2C6D6] hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -188,32 +187,32 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-emerald-500/15 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/20 animate-bounce-short">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
-              <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-[#191F31] border border-emerald-500/40 text-emerald-400">
+              <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-card border border-emerald-500/40 text-emerald-400">
                 <Sparkles className="w-4 h-4" />
               </div>
             </div>
 
             <div className="space-y-1.5 max-w-md">
-              <h3 className="text-2xl font-bold text-white tracking-tight">Success!</h3>
-              <p className="text-sm text-[#C2C6D6] leading-relaxed">
+              <h3 className="text-2xl font-bold text-foreground tracking-tight">Success!</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {successResultMsg}
               </p>
             </div>
 
             {/* Summary Box */}
-            <div className="w-full bg-[#070D1F] p-4 sm:p-5 rounded-2xl text-left text-xs sm:text-sm space-y-3 border border-slate-800">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-[#8C909F] font-medium">Invited Email</span>
-                <span className="font-semibold text-[#ADC6FF] truncate max-w-[220px]">{email}</span>
+            <div className="w-full bg-muted/40 p-4 sm:p-5 rounded-2xl text-left text-xs sm:text-sm space-y-3 border border-border">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <span className="text-muted-foreground font-medium">Invited Email</span>
+                <span className="font-semibold text-primary truncate max-w-[220px]">{email}</span>
               </div>
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="text-[#8C909F] font-medium">Station</span>
-                <span className="font-semibold text-white truncate max-w-[220px]">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <span className="text-muted-foreground font-medium">Station</span>
+                <span className="font-semibold text-foreground truncate max-w-[220px]">
                   {stationName || "Target Station"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#8C909F] font-medium">Permissions</span>
+                <span className="text-muted-foreground font-medium">Permissions</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   {selectedPermissions.length} Granted
                 </span>
@@ -222,7 +221,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
 
             <button
               onClick={handleDone}
-              className="w-full py-3.5 px-6 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-bold text-sm hover:bg-[#92b5ff] transition-all shadow-lg active:scale-98 cursor-pointer mt-2"
+              className="w-full py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-98 cursor-pointer mt-2"
             >
               Done & Return to Station
             </button>
@@ -233,9 +232,9 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
             <div className="px-6 sm:px-8 py-5 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
               {/* Station Badge Header */}
               {stationName && (
-                <div className="p-3.5 rounded-xl bg-[#070D1F] border border-slate-800 flex items-center gap-2.5 text-xs text-slate-300">
-                  <Building2 className="w-4 h-4 text-[#ADC6FF] shrink-0" />
-                  <span>Inviting manager for: <strong className="text-white">{stationName}</strong></span>
+                <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex items-center gap-2.5 text-xs text-muted-foreground">
+                  <Building2 className="w-4 h-4 text-primary shrink-0" />
+                  <span>Inviting manager for: <strong className="text-foreground">{stationName}</strong></span>
                 </div>
               )}
 
@@ -243,8 +242,8 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Email Input */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#C2C6D6] uppercase tracking-wider flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-[#ADC6FF]" />
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-primary" />
                     <span>Email Address</span>
                   </label>
                   <input
@@ -253,14 +252,14 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-[#070D1F] border border-slate-700/50 text-sm text-white placeholder-[#8C909F] focus:outline-none focus:ring-2 focus:ring-[#ADC6FF]/40 focus:border-[#ADC6FF] transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/40 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Name Input */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-[#C2C6D6] uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-[#ADC6FF]" />
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-primary" />
                     <span>Manager Name (Optional)</span>
                   </label>
                   <input
@@ -268,7 +267,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                     placeholder="e.g. Alex Johnson"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-[#070D1F] border border-slate-700/50 text-sm text-white placeholder-[#8C909F] focus:outline-none focus:ring-2 focus:ring-[#ADC6FF]/40 focus:border-[#ADC6FF] transition-all"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/40 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   />
                 </div>
               </div>
@@ -276,14 +275,14 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               {/* Permissions Selector */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-[#C2C6D6] uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#ADC6FF]" />
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                     <span>Assign Permissions</span>
                   </label>
                   <button
                     type="button"
                     onClick={selectAllPermissions}
-                    className="text-xs font-semibold text-[#ADC6FF] hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-primary hover:underline cursor-pointer"
                   >
                     Select All
                   </button>
@@ -298,19 +297,19 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                         onClick={() => togglePermission(perm.id)}
                         className={`flex items-start justify-between p-3 rounded-xl border text-xs cursor-pointer transition-all select-none ${
                           isChecked
-                            ? "bg-[#ADC6FF]/10 border-[#ADC6FF]/50 text-[#ADC6FF] shadow-sm"
-                            : "bg-[#070D1F]/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300"
+                            ? "bg-primary/10 border-primary/50 text-primary shadow-sm"
+                            : "bg-muted/40 border-border text-muted-foreground hover:border-border hover:text-foreground"
                         }`}
                       >
                         <div className="space-y-0.5 pr-2">
-                          <p className="font-bold text-white text-xs">{perm.label}</p>
-                          <p className="text-[10px] text-slate-400 leading-tight">{perm.description}</p>
+                          <p className="font-bold text-foreground text-xs">{perm.label}</p>
+                          <p className="text-[10px] text-muted-foreground leading-tight">{perm.description}</p>
                         </div>
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}}
-                          className="mt-0.5 rounded border-slate-700 accent-[#ADC6FF] pointer-events-none"
+                          className="mt-0.5 rounded border-border accent-primary pointer-events-none"
                         />
                       </div>
                     )
@@ -319,11 +318,11 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               </div>
 
               {/* Helper Text Container */}
-              <div className="p-3.5 sm:p-4 rounded-xl bg-[#151B2D] border border-slate-800 text-xs text-[#C2C6D6] leading-relaxed flex items-start gap-3">
-                <Info className="w-4 h-4 text-[#ADC6FF] shrink-0 mt-0.5" />
+              <div className="p-3.5 sm:p-4 rounded-xl bg-card border border-border text-xs text-muted-foreground leading-relaxed flex items-start gap-3">
+                <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
-                  An invitation email will be sent to <span className="text-[#ADC6FF] font-semibold">{email || "this email"}</span>.
-                  <p className="mt-1 text-[11px] text-slate-400">
+                  An invitation email will be sent to <span className="text-primary font-semibold">{email || "this email"}</span>.
+                  <p className="mt-1 text-[11px] text-muted-foreground">
                     Rule: Each station can have only 1 manager.
                   </p>
                 </div>
@@ -331,19 +330,19 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-slate-800 bg-[#151B2D]/70 shrink-0">
+            <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-border bg-card/70 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#ADC6FF] hover:bg-[#ADC6FF]/10 transition-colors cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-bold text-sm hover:bg-[#92b5ff] transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <>

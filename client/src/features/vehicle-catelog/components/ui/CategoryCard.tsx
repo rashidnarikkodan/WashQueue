@@ -60,40 +60,53 @@ export default function CategoryCard({
   return (
     <div
       onClick={onToggleExpand}
-      className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-3xl border shadow-lg cursor-pointer hover:border-slate-700/60 transition-all duration-200 select-none ${category.isActive
-        ? "border-l-[5px] border-l-[#ADC6FF] border-y-slate-800/80 border-r-slate-800/80 bg-[#191F31] hover:bg-[#1e253a]"
-        : "border-l-[5px] border-l-slate-700 border-y-slate-900 border-r-slate-900 bg-[#121625]/85 opacity-55 hover:opacity-75"
-        }`}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-3xl border shadow-lg cursor-pointer hover:border-primary/40 transition-all duration-200 select-none ${
+        category.isActive
+          ? "border-l-[5px] border-l-primary border-y-border border-r-border bg-card hover:bg-card/90"
+          : "border-l-[5px] border-l-muted-foreground border-y-border border-r-border bg-muted/30 opacity-60 hover:opacity-80"
+      }`}
     >
       <div className="flex items-center gap-5 min-w-0 flex-1">
         {/* Icon Box */}
-        <div className={`flex w-12 h-12 justify-center items-center rounded-xl shrink-0 transition-all duration-200 ${category.isActive
-          ? "bg-[#ADC6FF]/10 border border-[#ADC6FF]/20 text-[#ADC6FF]"
-          : "bg-slate-800/10 border border-slate-800/50 text-slate-500"
-          }`}>
+        <div
+          className={`flex w-12 h-12 justify-center items-center rounded-xl shrink-0 transition-all duration-200 ${
+            category.isActive
+              ? "bg-primary/10 border border-primary/20 text-primary"
+              : "bg-muted border border-border text-muted-foreground"
+          }`}
+        >
           {getCategoryIcon(category.name)}
         </div>
 
         <div className="flex flex-col gap-1 text-left min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h3 className={`text-lg font-bold tracking-wide transition-colors break-words ${category.isActive ? "text-[#DCE1FB]" : "text-slate-500 line-through"
-              }`}>
+            <h3
+              className={`text-lg font-bold tracking-wide transition-colors break-words ${
+                category.isActive ? "text-foreground" : "text-muted-foreground line-through"
+              }`}
+            >
               {category.name}
             </h3>
-            <span className="px-2 py-0.5 rounded-md bg-[#2E3447]/60 text-[#ADC6FF] text-[9px] font-extrabold uppercase tracking-wide border border-[#ADC6FF]/10 shrink-0">
+            <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[9px] font-extrabold uppercase tracking-wide border border-primary/20 shrink-0">
               {catClassesCount} {catClassesCount === 1 ? "Class" : "Classes"}
             </span>
 
             {/* Status Badge */}
-            <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border shrink-0 ${category.isActive
-              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
-              : "bg-red-500/10 text-red-400 border-red-500/20"
-              }`}>
+            <span
+              className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border shrink-0 ${
+                category.isActive
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+                  : "bg-red-500/10 text-red-400 border-red-500/20"
+              }`}
+            >
               {category.isActive ? "Active" : "Inactive"}
             </span>
           </div>
-          <p className={`text-xs leading-normal transition-colors break-words ${category.isActive ? "text-slate-400" : "text-slate-600"
-            }`}>
+          <p
+            className={`text-xs leading-normal transition-colors break-words ${
+              category.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
+            }`}
+          >
             {category.description || getCategoryDescription(category.name)}
           </p>
         </div>
@@ -105,7 +118,7 @@ export default function CategoryCard({
         <button
           onClick={(e) => onToggleStatus(category, e)}
           title={category.isActive ? "Deactivate Category" : "Activate Category"}
-          className="p-2.5 rounded-xl border border-slate-800 bg-[#2E3447]/30 text-slate-400 hover:text-[#ADC6FF] hover:border-[#ADC6FF]/35 hover:bg-[#2E3447] transition-all cursor-pointer shrink-0"
+          className="p-2.5 rounded-xl border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted transition-all cursor-pointer shrink-0"
         >
           {category.isActive ? (
             <div className="flex items-center gap-2">
@@ -124,7 +137,7 @@ export default function CategoryCard({
         <button
           onClick={(e) => onEdit(category, e)}
           title="Edit Category"
-          className="p-2.5 rounded-xl border border-slate-800 bg-[#2E3447]/30 text-slate-400 hover:text-slate-200 hover:border-slate-700 hover:bg-[#2E3447] transition-all cursor-pointer shrink-0"
+          className="p-2.5 rounded-xl border border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted transition-all cursor-pointer shrink-0"
         >
           <Pencil size={14} />
         </button>
@@ -139,7 +152,7 @@ export default function CategoryCard({
         </button>
 
         {/* Chevron (Toggle Expanded) */}
-        <div className="p-2.5 rounded-xl border border-slate-800 bg-[#2E3447]/20 text-slate-400 hover:text-slate-200 transition-all ml-1 shrink-0">
+        <div className="p-2.5 rounded-xl border border-border bg-muted/20 text-muted-foreground hover:text-foreground transition-all ml-1 shrink-0">
           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
       </div>

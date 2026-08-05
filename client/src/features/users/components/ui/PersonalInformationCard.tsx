@@ -11,9 +11,9 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
   const phone = (user.onboardingDetails?.phone as string) || user.phone || "Not Registered"
 
   return (
-    <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
+    <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
       <div className="flex items-center gap-2 mb-6">
-        <UserIcon size={18} className="text-[#ADC6FF]" />
+        <UserIcon size={18} className="text-primary" />
         <h2 className="text-base font-black uppercase text-foreground tracking-widest">
           Personal Information
         </h2>
@@ -73,7 +73,7 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
           Biography
         </p>
-        <p className="text-xs text-slate-450 leading-relaxed italic">No biography registered.</p>
+        <p className="text-xs text-muted-foreground leading-relaxed italic">No biography registered.</p>
       </div>
     </div>
   )

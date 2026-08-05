@@ -204,16 +204,16 @@ const OwnerApproval = () => {
             {/* Header */}
             <div className="p-6 border-b border-border/40 flex items-center justify-between">
               <div className="space-y-1">
-                <h2 className="text-xl font-black text-slate-100 tracking-tight">
+                <h2 className="text-xl font-black text-foreground tracking-tight">
                   Onboarding Application
                 </h2>
-                <p className="text-xs text-slate-500 font-semibold">
+                <p className="text-xs text-muted-foreground font-semibold">
                   Review details and verification documents
                 </p>
               </div>
               <button
                 onClick={() => setSelectedOwner(null)}
-                className="w-8 h-8 rounded-full border border-border/80 hover:bg-muted flex items-center justify-center text-slate-400 hover:text-white cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full border border-border/80 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
               >
                 &times;
               </button>
@@ -269,10 +269,10 @@ const OwnerApproval = () => {
                 <AlertTriangle size={18} />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-100 uppercase tracking-wider">
+                <h3 className="text-base font-black text-foreground uppercase tracking-wider">
                   Reject Application
                 </h3>
-                <p className="text-[11px] text-slate-500 font-semibold">
+                <p className="text-[11px] text-muted-foreground font-semibold">
                   Specify feedback for the car wash partner
                 </p>
               </div>
@@ -294,7 +294,7 @@ const OwnerApproval = () => {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setRejectingOwnerId(null)}
-                  className="flex-1 py-3 border border-slate-800 hover:bg-slate-900/60 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+                  className="flex-1 py-3 border border-border hover:bg-muted rounded-xl text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all cursor-pointer"
                 >
                   Cancel
                 </button>

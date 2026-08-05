@@ -183,19 +183,19 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
     <dialog
       ref={dialogRef}
       onCancel={handleCancelClick}
-      className="m-auto w-full max-w-md rounded-2xl border border-slate-800/80 bg-card p-0 shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
+      className="m-auto w-full max-w-md rounded-2xl border border-border bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col p-6 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 className="text-lg font-bold text-slate-100 leading-snug">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h3 className="text-lg font-bold text-foreground leading-snug">
             {category ? "Edit Category" : "Add New Category"}
           </h3>
           <button
             type="button"
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="text-slate-500 hover:text-slate-300 p-1 hover:bg-slate-800/40 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             aria-label="Close modal"
           >
             <X size={18} />
@@ -232,7 +232,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
           />
 
           <div className="space-y-1.5 text-left">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Description
             </label>
             <textarea
@@ -246,8 +246,8 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
               placeholder="Enter category description..."
               disabled={isSubmitting}
               rows={3}
-              className={`w-full bg-slate-950/40 border text-slate-100 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors disabled:opacity-50 resize-none ${
-                errors.description ? "border-red-500/80 focus:border-red-500" : "border-slate-800/80 focus:border-primary/50"
+              className={`w-full bg-muted/40 border text-foreground rounded-xl px-4 py-2.5 text-sm outline-none transition-colors disabled:opacity-50 resize-none ${
+                errors.description ? "border-red-500/80 focus:border-red-500" : "border-border/80 focus:border-primary/50"
               }`}
             />
             {errors.description && (
@@ -286,12 +286,12 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
             <button
               type="button"
               onClick={handleCancel}
               disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl border border-slate-800 bg-slate-950/30 hover:bg-slate-900/60 text-slate-400 hover:text-slate-200 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
+              className="px-5 py-2.5 rounded-xl border border-border bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
             >
               Cancel
             </button>

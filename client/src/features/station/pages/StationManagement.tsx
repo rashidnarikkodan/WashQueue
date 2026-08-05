@@ -30,9 +30,11 @@ const ADMIN_TABS: TabConfig[] = [
 
 const OWNER_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
+  { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
   { id: "active", label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
   { id: "inactive", label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
   { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
+  { id: "rejected", label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
 export interface StationManagementProps {
@@ -335,11 +337,11 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Owner", path: "/owner/dashboard" }, { label: "Stations" }]} />
 
-      {/* Header */}qq
+      {/* Header */}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">Stations Management</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Stations Management</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Maintain and Manage all your stations.
           </p>

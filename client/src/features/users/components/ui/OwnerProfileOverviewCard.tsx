@@ -12,10 +12,10 @@ export default function OwnerProfileOverviewCard({
   stations,
 }: OwnerProfileOverviewCardProps) {
   return (
-    <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 text-left">
+    <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-6 text-left">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <Building size={16} className="text-[#ADC6FF]" />
+          <Building size={16} className="text-primary" />
           <h2 className="text-base font-black uppercase text-foreground tracking-widest font-sans">
             Owner Profile Overview
           </h2>
@@ -29,8 +29,8 @@ export default function OwnerProfileOverviewCard({
         {/* Onboarding Documents and Details Section */}
         <div className="lg:col-span-12">
           <div className="flex items-center gap-2 mb-4">
-            <Shield size={14} className="text-[#ADC6FF]" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
+            <Shield size={14} className="text-primary" />
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
               Submitted KYC &amp; Verification Details
             </h3>
           </div>
@@ -54,7 +54,7 @@ export default function OwnerProfileOverviewCard({
                   <th className="p-3 text-right">Total Sessions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/30">
+              <tbody className="divide-y divide-border/30">
                 {stations.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-6 text-center text-muted-foreground font-medium">

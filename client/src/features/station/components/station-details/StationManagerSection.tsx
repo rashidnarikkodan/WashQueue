@@ -230,36 +230,36 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   }
 
   return (
-    <div className="p-6 sm:p-7 rounded-3xl bg-[#191F31] border border-slate-800 shadow-xl space-y-6 text-[#DCE1FB] relative overflow-hidden">
+    <div className="p-6 sm:p-7 rounded-3xl bg-card border border-border shadow-xl space-y-6 text-foreground relative overflow-hidden">
       {/* Background ambient glow */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Section Header */}
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#ADC6FF]/10 border border-[#ADC6FF]/20 flex items-center justify-center text-[#ADC6FF]">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <UserCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">Station Manager</h2>
-            <p className="text-xs text-slate-400">Oversee bay operations and live queue for this station</p>
+            <h2 className="text-lg font-bold text-foreground tracking-tight">Station Manager</h2>
+            <p className="text-xs text-muted-foreground">Oversee bay operations and live queue for this station</p>
           </div>
         </div>
 
-        {loading && <Loader2 className="w-5 h-5 animate-spin text-[#ADC6FF]" />}
+        {loading && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
       </div>
 
       {/* STATE 1: ACTIVE MANAGER ASSIGNED */}
       {managerAssignment ? (
         <div className="space-y-5">
-          <div className="p-4 rounded-2xl bg-[#070D1F] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-base">
+                <span className="font-bold text-foreground text-base">
                   {managerAssignment.managerName || "Station Manager"}
                 </span>
                 {isSelfManager && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                     <Crown className="w-3 h-3" />
                     You (Owner)
                   </span>
@@ -274,8 +274,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                   {managerAssignment.status}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Mail className="w-3.5 h-3.5 text-slate-500" />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>{managerAssignment.managerEmail}</span>
                 {managerAssignment.managerPhone && (
                   <span>• {managerAssignment.managerPhone}</span>
@@ -287,15 +287,15 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIsEditPermissionsModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-muted hover:bg-muted/80 text-xs font-semibold text-foreground transition-colors flex items-center gap-1.5 cursor-pointer border border-border"
               >
-                <Settings2 className="w-3.5 h-3.5 text-[#ADC6FF]" />
+                <Settings2 className="w-3.5 h-3.5 text-primary" />
                 <span>Permissions</span>
               </button>
 
               <button
                 onClick={() => setIsInviteModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-xs font-semibold text-indigo-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-xs font-semibold text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>Replace</span>
@@ -328,15 +328,15 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           {/* Manager Granted Permissions List */}
           {managerAssignment.permissions && managerAssignment.permissions.length > 0 && (
             <div className="space-y-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#ADC6FF]" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                 Granted Operational Permissions ({managerAssignment.permissions.length})
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {managerAssignment.permissions.map((perm) => (
                   <span
                     key={perm}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-cyan-300 border border-slate-800"
+                    className="px-2.5 py-1 rounded-lg text-xs font-medium bg-muted text-foreground border border-border"
                   >
                     {perm.replace(/_/g, " ")}
                   </span>
@@ -351,7 +351,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-amber-200 text-sm">Invitation Pending</span>
+                <span className="font-bold text-amber-400 text-sm">Invitation Pending</span>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
                   Awaiting Acceptance
                 </span>
@@ -385,14 +385,14 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         </div>
       ) : (
         /* STATE 3: NO MANAGER ASSIGNED */
-        <div className="p-6 rounded-2xl bg-[#070D1F] border border-slate-800 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+        <div className="p-6 rounded-2xl bg-muted/40 border border-border text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6 text-amber-400" />
           </div>
 
           <div className="space-y-1 max-w-sm mx-auto">
-            <h3 className="text-base font-bold text-white">No Manager Assigned</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-base font-bold text-foreground">No Manager Assigned</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Each station requires a manager to control live queue status and process booking arrivals.
             </p>
           </div>
@@ -401,7 +401,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             <button
               onClick={() => setIsInviteModalOpen(true)}
               disabled={isSubmittingAction}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-bold text-xs hover:bg-[#92b5ff] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <UserPlus className="w-4 h-4" />
               <span>Invite Manager</span>
@@ -410,9 +410,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             <button
               onClick={handleSelfAssign}
               disabled={Boolean(isSubmittingAction || isSelfManager)}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <Building2 className="w-4 h-4 text-indigo-400" />
+              <Building2 className="w-4 h-4 text-primary" />
               <span>Assign Myself</span>
             </button>
           </div>

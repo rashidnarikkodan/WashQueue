@@ -27,10 +27,10 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
   return (
     <div
       id="quick-notification-form"
-      className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5 text-left"
+      className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-5 text-left"
     >
       <div className="flex items-center gap-2">
-        <Send size={16} className="text-[#ADC6FF]" />
+        <Send size={16} className="text-primary" />
         <h2 className="text-base font-black uppercase text-foreground tracking-widest">
           Quick Notification
         </h2>
@@ -44,12 +44,12 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
           <select
             value={notification.type}
             onChange={(e) => setNotification((prev) => ({ ...prev, type: e.target.value }))}
-            className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground"
+            className="w-full bg-muted/40 border border-border rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground"
           >
-            <option value="Account Alert">Account Alert</option>
-            <option value="Promotional">Promotional Offer</option>
-            <option value="Maintenance">System Maintenance</option>
-            <option value="Warning">Policy Warning</option>
+            <option value="Account Alert" className="bg-card text-foreground">Account Alert</option>
+            <option value="Promotional" className="bg-card text-foreground">Promotional Offer</option>
+            <option value="Maintenance" className="bg-card text-foreground">System Maintenance</option>
+            <option value="Warning" className="bg-card text-foreground">Policy Warning</option>
           </select>
         </div>
 
@@ -62,7 +62,7 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
             placeholder="Enter message subject..."
             value={notification.subject}
             onChange={(e) => setNotification((prev) => ({ ...prev, subject: e.target.value }))}
-            className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-slate-600"
+            className="w-full bg-muted/40 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
             placeholder="Type your message here..."
             value={notification.content}
             onChange={(e) => setNotification((prev) => ({ ...prev, content: e.target.value }))}
-            className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-slate-600 resize-none"
+            className="w-full bg-muted/40 border border-border rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground resize-none"
           />
         </div>
 

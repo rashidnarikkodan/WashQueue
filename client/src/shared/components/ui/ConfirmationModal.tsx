@@ -94,7 +94,7 @@ export default function ConfirmationModal({
     const base =
       "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md select-none shrink-0"
     if (isLoading || isSubmitting) {
-      return `${base} bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700`
+      return `${base} bg-muted text-muted-foreground cursor-not-allowed border border-border`
     }
     switch (confirmVariant) {
       case "danger":
@@ -104,7 +104,7 @@ export default function ConfirmationModal({
       case "success":
         return `${base} bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-emerald-950/20 border border-emerald-500/20`
       default:
-        return `${base} bg-gradient-to-r from-primary to-blue-600 hover:from-sky-400 hover:to-blue-500 text-foreground hover:shadow-primary/20 border border-primary/20`
+        return `${base} bg-primary hover:opacity-90 text-primary-foreground border border-primary/20`
     }
   }
 
@@ -112,7 +112,7 @@ export default function ConfirmationModal({
     <dialog
       ref={dialogRef}
       onCancel={handleCancelClick}
-      className="m-auto w-full max-w-md rounded-2xl border border-slate-800/80 bg-card p-0 shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
+      className="m-auto w-full max-w-md rounded-2xl border border-border bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col p-6 space-y-4">
         {/* Header Grid */}
@@ -132,15 +132,15 @@ export default function ConfirmationModal({
           </div>
 
           <div className="space-y-1.5 grow min-w-0 text-left">
-            <h3 className="text-lg font-bold text-slate-100 leading-snug">{title}</h3>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed">{message}</p>
+            <h3 className="text-lg font-bold text-foreground leading-snug">{title}</h3>
+            <p className="text-xs text-muted-foreground font-medium leading-relaxed">{message}</p>
           </div>
 
           <button
             type="button"
             onClick={handleCancel}
             disabled={isLoading || isSubmitting}
-            className="text-slate-500 hover:text-slate-300 p-1 hover:bg-slate-800/40 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+            className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             aria-label="Close modal"
           >
             <X size={16} />
@@ -153,7 +153,7 @@ export default function ConfirmationModal({
             type="button"
             onClick={handleCancel}
             disabled={isLoading || isSubmitting}
-            className="px-5 py-2.5 rounded-xl border border-slate-800 bg-slate-950/30 hover:bg-slate-900/60 text-slate-400 hover:text-slate-200 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
+            className="px-5 py-2.5 rounded-xl border border-border bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
           >
             {cancelText}
           </button>

@@ -21,31 +21,31 @@ export default function ClassCard({
     <div className="relative flex flex-col justify-center pl-10 min-h-[56px]">
       {/* Connect parent category bottom line to the first child's curve top */}
       {index === 0 && (
-        <div className="absolute left-[16px] top-[-16px] h-[16px] w-[2px] bg-slate-800/80"></div>
+        <div className="absolute left-[16px] top-[-16px] h-[16px] w-[2px] bg-border"></div>
       )}
 
-      {/* Continuation line to subsequent children (always true because placeholder follows) */}
-      <div className="absolute left-[16px] top-0 -bottom-4 w-[2px] bg-slate-800/80"></div>
+      {/* Continuation line to subsequent children */}
+      <div className="absolute left-[16px] top-0 -bottom-4 w-[2px] bg-border"></div>
 
       {/* L-shaped curved line */}
-      <div className="absolute left-[16px] top-0 w-[24px] h-[28px] border-l-2 border-b-2 border-slate-800/80 rounded-bl-xl"></div>
+      <div className="absolute left-[16px] top-0 w-[24px] h-[28px] border-l-2 border-b-2 border-border rounded-bl-xl"></div>
 
       {/* Class Content Card */}
       <div className={`flex items-center justify-between p-4 rounded-3xl border transition-all duration-200 shadow-sm ${
         cls.isActive
-          ? "border-l-[4px] border-l-[#ADC6FF]/50 border-y-slate-900 border-r-slate-900 bg-[#151B2D] hover:bg-[#1a2136] hover:border-slate-800"
-          : "border-l-[4px] border-l-slate-700 border-y-slate-950 border-r-slate-950 bg-[#111422] opacity-55 hover:opacity-75"
+          ? "border-l-[4px] border-l-primary/50 border-y-border border-r-border bg-card hover:bg-card/90"
+          : "border-l-[4px] border-l-muted-foreground border-y-border border-r-border bg-muted/30 opacity-60 hover:opacity-80"
       }`}>
         <div className="flex items-center gap-4 text-left min-w-0 flex-1">
           <div className="min-w-0 flex-1">
             <h4 className={`text-sm font-bold leading-snug break-words ${
-              cls.isActive ? "text-slate-100" : "text-slate-500 line-through"
+              cls.isActive ? "text-foreground" : "text-muted-foreground line-through"
             }`}>
               {cls.name}
             </h4>
             <div className="flex flex-wrap items-center gap-3 mt-0.5 min-w-0">
               <span className={`text-[10px] font-medium font-mono break-all ${
-                cls.isActive ? "text-slate-400" : "text-slate-600"
+                cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
               }`}>
                 Class Code: {cls.slug}
               </span>
@@ -62,7 +62,7 @@ export default function ClassCard({
 
             {cls.description && (
               <p className={`text-xs mt-1.5 break-words transition-colors ${
-                cls.isActive ? "text-slate-400" : "text-slate-600"
+                cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
               }`}>
                 {cls.description}
               </p>
@@ -76,7 +76,7 @@ export default function ClassCard({
           <button
             onClick={(e) => onToggleStatus(cls, e)}
             title={cls.isActive ? "Deactivate Class" : "Activate Class"}
-            className="p-2 rounded-xl border border-slate-800 bg-[#2E3447]/30 text-slate-400 hover:text-[#ADC6FF] hover:border-[#ADC6FF]/35 hover:bg-[#2E3447] transition-all cursor-pointer"
+            className="p-2 rounded-xl border border-border bg-muted/30 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted transition-all cursor-pointer"
           >
             {cls.isActive ? <EyeOff size={13} /> : <Eye size={13} />}
           </button>
@@ -84,7 +84,7 @@ export default function ClassCard({
           <button
             onClick={(e) => onEdit(cls, e)}
             title="Edit Sub-class"
-            className="p-2 rounded-xl border border-slate-800 bg-[#2E3447]/30 text-slate-400 hover:text-slate-100 hover:bg-[#2E3447] hover:border-slate-700 transition-all cursor-pointer"
+            className="p-2 rounded-xl border border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
           >
             <Pencil size={13} />
           </button>
