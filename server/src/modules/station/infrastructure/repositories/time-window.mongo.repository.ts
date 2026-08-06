@@ -5,8 +5,17 @@ import { TimeWindowMapper } from "../mappers/time-window.mapper"
 import { Types } from "mongoose"
 
 export class TimeWindowMongoRepository implements ITimeWindowRepository {
+  async updateExpiredWindowsStatus(now: Date = new Date()): Promise<number> {
+    const res = await TimeWindowModel.updateMany(
+      { windowEnd: { $lte: now }, status: { $in: ["OPEN", "FULL"] } },
+      { $set: { status: "PAST" } }
+    )
+    return res.modifiedCount
+  }
+
   async findByStationIdAndDate(stationId: string, date: string): Promise<TimeWindowInstance[]> {
     if (!Types.ObjectId.isValid(stationId)) return []
+    await this.updateExpiredWindowsStatus()
     const docs = await TimeWindowModel.find({
       stationId: new Types.ObjectId(stationId),
       date,
@@ -21,6 +30,7 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     endDate: string
   ): Promise<TimeWindowInstance[]> {
     if (!Types.ObjectId.isValid(stationId)) return []
+    await this.updateExpiredWindowsStatus()
     const docs = await TimeWindowModel.find({
       stationId: new Types.ObjectId(stationId),
       date: { $gte: startDate, $lte: endDate },

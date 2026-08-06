@@ -18,4 +18,5 @@ export interface ITimeWindowRepository {
   save(window: TimeWindowInstance): Promise<TimeWindowInstance>
   reserveCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null>
   deleteByStationId(stationId: string): Promise<boolean>
+  updateExpiredWindowsStatus(now?: Date): Promise<number>
 }
