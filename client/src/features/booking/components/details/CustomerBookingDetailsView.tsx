@@ -1,18 +1,16 @@
 import {
   Clock,
   Car,
-  QrCode,
   XCircle,
   Phone,
-  Navigation,
   CheckCircle2,
   ShieldCheck,
   CreditCard,
-  MapPin,
   Download,
   MessageSquare,
   ChevronRight,
 } from "lucide-react"
+import QRCodePass from "@/shared/components/ui/QRCodePass"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import { toast } from "sonner"
 
@@ -31,14 +29,29 @@ export default function CustomerBookingDetailsView({
   stages,
   onOpenCancelModal,
 }: CustomerBookingDetailsViewProps) {
-  const stationName = booking.stationDetails?.name || "WashQueue Service Terminal"
-  const stationLocation = booking.stationDetails?.city || "Kavanur, Malappuram"
-  const vehicleName = booking.vehicleDetails?.brand
-    ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
-    : "Porsche 911 GT3 RS"
+  const stationName = booking.stationDetails?.name || "WashQueue Station"
+  const stationLocation = booking.stationDetails?.city || "Station Location"
+  const vehicleName = booking.vehicleDetails?.nickname
+    ? booking.vehicleDetails.nickname
+    : booking.vehicleDetails?.brand
+      ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
+      : "Registered Vehicle"
   const plateNumber =
-    booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "KL23AB1234"
-  const serviceName = booking.serviceType === "FULL" ? "Diamond Ceramic Full Wash" : "Express Half Wash"
+    booking.vehicleDetails?.registrationNumber ||
+    booking.walkInVehicle?.registrationNumber ||
+    "N/A"
+  const serviceName =
+    booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
+
+  const qrPayload =
+    booking.rawQrToken ||
+    JSON.stringify({
+      bookingNumber: booking.bookingNumber,
+      id: booking.id,
+      stationId: booking.stationId,
+      vehicleId: booking.vehicleId,
+      status: booking.status,
+    })
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
@@ -95,7 +108,7 @@ export default function CustomerBookingDetailsView({
 
             <div className="text-left sm:text-right space-y-1 bg-background/40 p-4 rounded-2xl border border-white/5 sm:border-0 sm:p-0 sm:bg-transparent">
               <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
-                Total Paid Amount
+                Total Amount
               </span>
               <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
                 ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
@@ -178,7 +191,7 @@ export default function CustomerBookingDetailsView({
 
             <button
               type="button"
-              onClick={() => toast.info("Downloading Invoice PDF...")}
+              onClick={() => toast.info(`Invoice #${booking.bookingNumber} printed`)}
               className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm"
             >
               <Download size={15} />
@@ -189,105 +202,27 @@ export default function CustomerBookingDetailsView({
 
         {/* Right 4-Column Check-in QR & Quick Access Card */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Check-In QR Pass Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl text-center space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                <QrCode size={18} className="text-primary" />
-                <span>Check-In QR Pass</span>
-              </div>
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">
-                #{booking.bookingNumber}
-              </span>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl border border-border flex items-center justify-center">
-              <div className="p-2 border-4 border-black rounded-xl text-black text-center space-y-2">
-                <QrCode size={160} className="text-black mx-auto" />
-                <div className="text-[10px] font-mono font-black tracking-widest text-slate-900">
-                  {booking.bookingNumber}
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Show this QR code at the station bay entrance for automated check-in scanning.
-            </p>
-          </div>
-
-          {/* Station Details & Directions */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
-                Station &amp; Location
-              </h3>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                4.9 ★ Rating
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <h4 className="text-base font-bold text-foreground">{stationName}</h4>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <MapPin size={13} className="text-primary shrink-0" />
-                <span>{stationLocation}</span>
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                window.open(
-                  `https://maps.google.com/?q=${encodeURIComponent(stationName + " " + stationLocation)}`,
-                  "_blank"
-                )
-              }
-              className="w-full py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <Navigation size={14} className="text-primary" />
-              <span>Get Directions</span>
-            </button>
-          </div>
+          {/* Movie Ticket Pass Component */}
+          <QRCodePass
+            value={qrPayload}
+            bookingNumber={booking.bookingNumber}
+            stationName={stationName}
+            stationCity={stationLocation}
+            vehicleName={vehicleName}
+            plateNumber={plateNumber}
+            serviceName={serviceName}
+            scheduledDate={formattedDates.dateStr}
+            scheduledTime={formattedDates.timeStr}
+            totalPrice={booking.pricingSnapshot.totalPrice}
+            paymentStatus={booking.paymentStatus}
+          />
         </div>
       </div>
 
       {/* Bottom 12-Column Grid Details Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left 8-Column Intelligence HUD & Specifications */}
+        {/* Left 8-Column Specifications & Breakdown */}
         <div className="lg:col-span-8 space-y-8">
-          {/* Queue Intelligence 3 Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-6 rounded-3xl border border-white/5 bg-[#151b2d] space-y-2 text-left">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
-                Queue Position
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-foreground">#03</span>
-                <span className="text-xs font-bold text-emerald-400">Top 5%</span>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl border border-white/5 bg-[#151b2d] space-y-2 text-left">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
-                Vehicles Ahead
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-foreground">02</span>
-                <span className="text-xs font-medium text-primary">In live queue</span>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-3xl border border-white/5 bg-[#151b2d] space-y-2 text-left">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
-                Estimated Wait
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-foreground">12</span>
-                <span className="text-xs text-muted-foreground font-medium">mins</span>
-              </div>
-            </div>
-          </div>
-
           {/* Booking Tier & Specifications Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
             <div className="flex items-center gap-2 border-b border-white/5 pb-4">
@@ -301,7 +236,7 @@ export default function CustomerBookingDetailsView({
                   Service Tier
                 </span>
                 <h4 className="text-base font-bold text-foreground">{serviceName}</h4>
-                <p className="text-xs text-muted-foreground">Precision wash &amp; surface shine treatment</p>
+                <p className="text-xs text-muted-foreground">Precision wash &amp; surface treatment</p>
               </div>
 
               <div className="space-y-1">
@@ -332,7 +267,7 @@ export default function CustomerBookingDetailsView({
                   <CreditCard size={16} className="text-primary" />
                   <span>{booking.paymentType.replace("_", " ")}</span>
                 </div>
-                <p className="text-xs text-muted-foreground font-mono">**** 9012 • Verified</p>
+                <p className="text-xs text-emerald-400 font-medium">✓ {booking.paymentStatus}</p>
               </div>
 
               <div className="space-y-1">
@@ -388,7 +323,7 @@ export default function CustomerBookingDetailsView({
           {/* Active Vehicle Info Card */}
           <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
-              Active Vehicle Snapshot
+              Vehicle Information
             </h3>
 
             <div className="flex items-center gap-4">
@@ -401,23 +336,7 @@ export default function CustomerBookingDetailsView({
                   <span className="px-2 py-0.5 rounded bg-muted text-[11px] font-mono font-bold text-muted-foreground">
                     {plateNumber}
                   </span>
-                  <span className="text-xs text-muted-foreground">Premium SUV</span>
                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-background/30 border border-white/5 space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-muted-foreground block">
-                  Color
-                </span>
-                <span className="text-xs font-bold text-foreground">Shark Blue</span>
-              </div>
-              <div className="p-3 rounded-xl bg-background/30 border border-white/5 space-y-0.5">
-                <span className="text-[9px] font-black uppercase text-muted-foreground block">
-                  Year
-                </span>
-                <span className="text-xs font-bold text-foreground">2023</span>
               </div>
             </div>
           </div>
@@ -429,19 +348,21 @@ export default function CustomerBookingDetailsView({
             </h3>
 
             <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() =>
-                  toast.info(`Calling station at ${booking.stationDetails?.phone || "+91 98765 43210"}`)
-                }
-                className="w-full p-3.5 rounded-2xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <Phone size={16} className="text-primary" />
-                  <span>Contact Station</span>
-                </div>
-                <ChevronRight size={14} className="text-muted-foreground" />
-              </button>
+              {booking.stationDetails?.phone && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    toast.info(`Calling station at ${booking.stationDetails?.phone}`)
+                  }
+                  className="w-full p-3.5 rounded-2xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <Phone size={16} className="text-primary" />
+                    <span>Contact Station ({booking.stationDetails.phone})</span>
+                  </div>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </button>
+              )}
 
               <button
                 type="button"

@@ -97,7 +97,9 @@ const updateStationUseCase = new UpdateStationUseCase(
   extraServiceRepository,
   cloudinaryService,
   mediaUploadService,
-  managerAssignmentRepository
+  managerAssignmentRepository,
+  slotConfigRepository,
+  generateTimeWindowsUseCase
 )
 const getStationUseCase = new GetStationUseCase(
   stationRepository,

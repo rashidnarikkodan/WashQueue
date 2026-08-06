@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import { Check, AlertCircle, Ban } from "lucide-react"
 import DatePicker from "@/shared/components/ui/DatePicker"
 
@@ -37,40 +36,8 @@ export default function TimeSlotSelectionStep({
   minDate,
   maxDate,
   disabledDates = [],
-  calendarDates = [],
   isLoadingSlots = false,
 }: TimeSlotSelectionStepProps) {
-
-  // Quick date chips derived from calendar API entries (or fallback date offsets)
-  const dateOptions = useMemo(() => {
-    if (calendarDates.length > 0) {
-      return calendarDates.map((item) => {
-        const d = new Date(item.date + "T00:00:00")
-        const label = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-        return {
-          isoDate: item.date,
-          label,
-          status: item.status,
-          isDisabled: item.status !== "AVAILABLE",
-        }
-      })
-    }
-
-    const today = new Date()
-    return [0, 1, 2, 3, 4, 5, 6].map((offset) => {
-      const d = new Date(today)
-      d.setDate(d.getDate() + offset)
-      const isoDate = d.toISOString().split("T")[0]
-      const label =
-        offset === 0
-          ? "Today"
-          : offset === 1
-            ? "Tomorrow"
-            : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-      const isDisabled = disabledDates.includes(isoDate)
-      return { isoDate, label, status: isDisabled ? "CLOSED" : "AVAILABLE", isDisabled }
-    })
-  }, [calendarDates, disabledDates])
 
   const todayIso = minDate || new Date().toISOString().split("T")[0]
 
@@ -102,37 +69,6 @@ export default function TimeSlotSelectionStep({
               disabledDates={disabledDates}
               placeholder="Select service date..."
             />
-
-            {/* Quick Date Chips Bar */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {dateOptions.map((opt) => {
-                const isActive = selectedDate === opt.isoDate
-                const isChipDisabled = opt.isDisabled
-
-                return (
-                  <button
-                    key={opt.isoDate}
-                    type="button"
-                    disabled={isChipDisabled}
-                    onClick={() => {
-                      if (!isChipDisabled) onDateChange(opt.isoDate)
-                    }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                      isChipDisabled
-                        ? "bg-muted/40 text-muted-foreground/50 border border-border/30 cursor-not-allowed line-through opacity-60"
-                        : isActive
-                        ? "bg-primary text-primary-foreground shadow-xs cursor-pointer"
-                        : "bg-muted text-muted-foreground border border-border hover:text-foreground cursor-pointer"
-                    }`}
-                  >
-                    {opt.label}
-                    {opt.status === "HOLIDAY" && " (Holiday)"}
-                    {opt.status === "CLOSED" && " (Closed)"}
-                    {opt.status === "FULL" && " (Full)"}
-                  </button>
-                )
-              })}
-            </div>
           </div>
         </div>
 

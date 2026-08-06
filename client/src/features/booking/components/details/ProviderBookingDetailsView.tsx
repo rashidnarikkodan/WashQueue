@@ -30,14 +30,16 @@ export default function ProviderBookingDetailsView({
   isAdvancingStatus,
 }: ProviderBookingDetailsViewProps) {
 
-  const customerName = booking.customerDetails?.name || booking.walkInCustomer?.name || "Rashid Narikkodan"
-  const customerPhone = booking.customerDetails?.phone || booking.walkInCustomer?.phone || "+91 98765 43210"
-  const vehicleName = booking.vehicleDetails?.brand
-    ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
-    : "Honda City 2022 VX"
+  const customerName = booking.customerDetails?.name || booking.walkInCustomer?.name || "Customer"
+  const customerPhone = booking.customerDetails?.phone || booking.walkInCustomer?.phone || "N/A"
+  const vehicleName = booking.vehicleDetails?.nickname
+    ? booking.vehicleDetails.nickname
+    : booking.vehicleDetails?.brand
+      ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
+      : "Registered Vehicle"
   const plateNumber =
-    booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "MH 01 AB 1234"
-  const serviceName = booking.serviceType === "FULL" ? "Sedan Full Wash" : "Express Half Wash"
+    booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "N/A"
+  const serviceName = booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
 
   // Execution Timeline Steps
   const timelineSteps = [

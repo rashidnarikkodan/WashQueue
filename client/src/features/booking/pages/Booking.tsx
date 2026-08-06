@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { useStationStore } from "@/features/station/store/station.store"
 import { stationApi } from "@/shared/apis/station.api"
 import { vehicleApi } from "@/shared/apis/vehicle.api"
-import { bookingApi } from "@/shared/apis/booking.api"
+import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
@@ -18,6 +18,7 @@ import TimeSlotSelectionStep, {
   type TimeSlotOption,
 } from "../components/TimeSlotSelectionStep"
 import BookingSummaryCard from "../components/BookingSummaryCard"
+import BookingResultModal from "../components/BookingResultModal"
 
 export default function Booking() {
   const [urlQuery] = useSearchParams()
@@ -59,9 +60,17 @@ export default function Booking() {
   }[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
-  // Booking Submit State
+  // Booking Submit & Result Modal State
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
-  const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [createdBooking, setCreatedBooking] = useState<BookingResponse | null>(null)
+  const [resultModalState, setResultModalState] = useState<{
+    isOpen: boolean
+    type: "success" | "error"
+    errorMessage?: string
+  }>({
+    isOpen: false,
+    type: "success",
+  })
 
   // Fetch Booking Calendar from server
   useEffect(() => {
@@ -174,22 +183,31 @@ export default function Booking() {
     }
   }, [stationId, fetchStationById, categories.length, classes.length, loadCatalogData])
 
-  // Fetch User Vehicles from API — extracted so it can be re-called after adding a vehicle
+  // Fetch User Vehicles from API
   const loadUserVehicles = useCallback(async () => {
-    setIsVehiclesLoading(true)
     try {
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
     } catch {
       // Ignore API errors gracefully
-    } finally {
-      setIsVehiclesLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    void loadUserVehicles()
-  }, [loadUserVehicles])
+    let isMounted = true
+    vehicleApi
+      .getVehicles()
+      .then((data) => {
+        if (isMounted) setVehicles(data)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setIsVehiclesLoading(false)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Station Supported Class IDs Set
   const stationClassIds = useMemo(() => {
@@ -328,12 +346,19 @@ export default function Booking() {
   const canSubmit = Boolean(selectedVehicleId && selectedPlanId && selectedSlotId)
 
   // Submit Booking Action
-  const handleConfirmBooking = async () => {
+  const handleConfirmBooking = async (paymentData?: {
+    razorpay_payment_id: string
+    razorpay_order_id: string
+    razorpay_signature: string
+  }) => {
     if (!canSubmit || !stationId || !selectedSlotId || !selectedVehicleId) return
     setIsSubmittingBooking(true)
     try {
-      const serviceType = selectedPlanId === "full" ? "FULL" : "HALF"
-      await bookingApi.createBooking({
+      if (paymentData) {
+        console.log("Verified Razorpay payment ID:", paymentData.razorpay_payment_id)
+      }
+      const serviceType = selectedPlanId === "FULL_WASH" || selectedPlanId === "full" ? "FULL" : "HALF"
+      const created = await bookingApi.createBooking({
         stationId,
         vehicleId: selectedVehicleId,
         timeWindowId: selectedSlotId,
@@ -341,9 +366,16 @@ export default function Booking() {
         extraServiceIds: selectedExtraIds,
         paymentType: "ONLINE_FULL",
       })
-      setBookingSuccess(true)
-    } catch (err) {
+      setCreatedBooking(created)
+      setResultModalState({ isOpen: true, type: "success" })
+    } catch (err: unknown) {
+      const errorObj = err as Error
       console.error("Booking submission error:", err)
+      setResultModalState({
+        isOpen: true,
+        type: "error",
+        errorMessage: errorObj?.message || "Failed to finalize booking reservation.",
+      })
     } finally {
       setIsSubmittingBooking(false)
     }
@@ -424,6 +456,13 @@ export default function Booking() {
             selectedDateFormatted={formattedDate}
             selectedTimeWindow={selectedSlot?.timeWindow || null}
             onSubmit={handleConfirmBooking}
+            onError={(err) => {
+              setResultModalState({
+                isOpen: true,
+                type: "error",
+                errorMessage: err || "Payment was cancelled or could not be verified.",
+              })
+            }}
             isSubmitting={isSubmittingBooking}
             canSubmit={canSubmit}
           />
@@ -438,32 +477,26 @@ export default function Booking() {
         isSubmitting={isAddingVehicle}
       />
 
-      {/* Success Modal Notification */}
-      {bookingSuccess && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-8 rounded-3xl bg-card border border-emerald-500/40 shadow-2xl text-center space-y-4 animate-in zoom-in-95 duration-200 text-card-foreground">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
-              <span className="text-3xl">✓</span>
-            </div>
-            <h3 className="text-2xl font-extrabold text-foreground">Booking Confirmed!</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Your washing slot for{" "}
-              <strong className="text-foreground">{selectedVehicle?.nickname || "your vehicle"}</strong>{" "}
-              at <strong className="text-foreground">{selectedStation?.station?.name || "the station"}</strong>{" "}
-              has been successfully reserved for {formattedDate} ({selectedSlot?.timeWindow}).
-            </p>
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => navigate("/bookings")}
-                className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 font-bold text-xs text-primary-foreground transition-all cursor-pointer shadow-md"
-              >
-                View My Bookings
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Full-Screen Booking & Payment Result Modal (Success & Failure) */}
+      <BookingResultModal
+        isOpen={resultModalState.isOpen}
+        type={resultModalState.type}
+        bookingNumber={createdBooking?.bookingNumber || "WQ-20481"}
+        bookingId={createdBooking?.id}
+        stationName={selectedStation?.station?.name || "WashQueue Station"}
+        vehicleName={
+          selectedVehicle?.nickname ||
+          (selectedVehicle?.brand ? `${selectedVehicle.brand} ${selectedVehicle.model || ""}` : undefined)
+        }
+        scheduledDate={formattedDate}
+        scheduledTime={selectedSlot?.timeWindow}
+        totalPrice={selectedPlan ? selectedPlan.price + selectedExtras.reduce((s, e) => s + e.price, 0) : 0}
+        errorMessage={resultModalState.errorMessage}
+        onClose={() => setResultModalState((prev) => ({ ...prev, isOpen: false }))}
+        onRetryPayment={() => {
+          setResultModalState({ isOpen: false, type: "error" })
+        }}
+      />
     </div>
   )
 }

@@ -19,10 +19,10 @@ export class EnsureBookingHorizonService {
     if (!station) return
 
     let slotConfig = await this.slotConfigRepository.findByStationId(stationId)
-    if (!slotConfig) {
-      const stationProps = station.getProps()
-      const embeddedConfig = stationProps.slotConfig
+    const stationProps = station.getProps()
+    const embeddedConfig = stationProps.slotConfig
 
+    if (!slotConfig) {
       const windowDurationMins = embeddedConfig?.windowDurationMins || 30
       const capacityPerWindow = embeddedConfig?.capacityPerWindow || 2
       const walkInReservedSlots = embeddedConfig?.walkInReservedSlots || 0
@@ -47,6 +47,32 @@ export class EnsureBookingHorizonService {
       } catch {
         slotConfig = newSlotConfig
       }
+    } else if (embeddedConfig) {
+      if (
+        embeddedConfig.windowDurationMins !== slotConfig.windowDurationMins ||
+        embeddedConfig.capacityPerWindow !== slotConfig.capacityPerWindow ||
+        embeddedConfig.walkInReservedSlots !== slotConfig.walkInReservedSlots ||
+        embeddedConfig.maxAdvanceBookingDays !== slotConfig.maxAdvanceBookingDays ||
+        embeddedConfig.allowWalkIns !== slotConfig.allowWalkIns
+      ) {
+        const now = new Date()
+        slotConfig = new SlotConfig({
+          id: slotConfig.id,
+          stationId,
+          windowDurationMins: embeddedConfig.windowDurationMins,
+          capacityPerWindow: embeddedConfig.capacityPerWindow,
+          walkInReservedSlots: embeddedConfig.walkInReservedSlots,
+          maxAdvanceBookingDays: embeddedConfig.maxAdvanceBookingDays,
+          allowWalkIns: embeddedConfig.allowWalkIns,
+          createdAt: slotConfig.createdAt,
+          updatedAt: now,
+        })
+        try {
+          await this.slotConfigRepository.save(slotConfig)
+        } catch {
+          // ignore
+        }
+      }
     }
 
     const today = this.localMidnight(new Date())
@@ -55,14 +81,35 @@ export class EnsureBookingHorizonService {
 
     const requiredEndStr = this.generationService.dateToISO(requiredEndDate)
 
+    const todayStr = this.generationService.dateToISO(today)
+    const existingTodayWindows = await this.timeWindowRepository.findByStationIdAndDate(stationId, todayStr)
+
     const latestDateStr = await this.timeWindowRepository.findLatestWindowDateForStation(stationId)
 
-    if (latestDateStr && latestDateStr >= requiredEndStr) {
-      return
+    let durationMismatch = false
+    if (existingTodayWindows.length > 0) {
+      const first = existingTodayWindows[0]
+      if (first) {
+        const durationMins = Math.round((first.windowEnd.getTime() - first.windowStart.getTime()) / 60000)
+        if (durationMins !== slotConfig.windowDurationMins) {
+          durationMismatch = true
+        }
+      }
+    }
+
+    if (durationMismatch) {
+      logger.info(
+        `[EnsureBookingHorizon] Duration mismatch detected for station=${stationId}. Purging unbooked future windows and regenerating.`
+      )
+      await this.timeWindowRepository.deleteUnbookedFutureWindows(stationId, today)
+    } else {
+      if (latestDateStr && latestDateStr >= requiredEndStr) {
+        return
+      }
     }
 
     let generateFrom: Date
-    if (latestDateStr) {
+    if (latestDateStr && !durationMismatch) {
       const [y, m, d] = latestDateStr.split("-").map(Number)
       generateFrom = new Date(y!, m! - 1, d!)
       generateFrom.setDate(generateFrom.getDate() + 1)

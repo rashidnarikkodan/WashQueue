@@ -40,4 +40,8 @@ export const API_ROUTES = {
     UPCOMING: "/bookings/upcoming",
     HISTORY: "/bookings/history",
   },
+  PAYMENT: {
+    CREATE_ORDER: "/create-order",
+    VERIFY_PAYMENT: "/verify-payment",
+  },
 } as const

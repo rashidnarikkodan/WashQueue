@@ -84,4 +84,9 @@ export const API_ROUTES = {
     CHECK_IN: "/check-in",
     UPDATE_STATUS: "/:bookingId/status",
   },
+  PAYMENT: {
+    ROOT: "/api/payment",
+    CREATE_ORDER: "/create-order",
+    VERIFY_PAYMENT: "/verify-payment",
+  },
 } as const

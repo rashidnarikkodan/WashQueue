@@ -27,6 +27,28 @@ export class StationMongoRepository
     return docs.map((doc) => this.mapper.toDomain(doc))
   }
 
+  async findByManagerId(managerId: string): Promise<Station[]> {
+    if (!Types.ObjectId.isValid(managerId)) return []
+    const docs = await this.model
+      .find({ managerId: new Types.ObjectId(managerId) })
+      .sort({ name: 1 })
+      .exec()
+    return docs.map((doc) => this.mapper.toDomain(doc))
+  }
+
+  async setManagerId(stationId: string, managerId: string | null): Promise<void> {
+    if (!Types.ObjectId.isValid(stationId)) return
+    if (managerId && Types.ObjectId.isValid(managerId)) {
+      await this.model.findByIdAndUpdate(stationId, {
+        $set: { managerId: new Types.ObjectId(managerId) },
+      })
+    } else {
+      await this.model.findByIdAndUpdate(stationId, {
+        $unset: { managerId: 1 },
+      })
+    }
+  }
+
   async findByName(name: string): Promise<Station | null> {
     const doc = await this.model.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } }).exec()
     return doc ? this.mapper.toDomain(doc) : null

@@ -53,8 +53,23 @@ export class ConfigureSlotConfigUseCase {
 
     const savedConfig = await this.slotConfigRepository.save(updatedConfig)
 
-    // Trigger time window generation for configured advance booking days
-    await this.generateTimeWindowsUseCase.execute(input.stationId)
+    // Update station embedded slotConfig to keep in sync
+    station.updateAvailability({
+      operatingHours: station.getProps().operatingHours,
+      holidays: station.getProps().holidays,
+      slotConfig: {
+        bays: station.getProps().slotConfig?.bays || 1,
+        windowDurationMins: input.windowDurationMins,
+        capacityPerWindow: input.capacityPerWindow,
+        walkInReservedSlots: input.walkInReservedSlots,
+        maxAdvanceBookingDays: input.maxAdvanceBookingDays,
+        allowWalkIns: input.allowWalkIns,
+      },
+    })
+    await this.stationRepository.save(station)
+
+    // Trigger time window generation for configured advance booking days with forceRegenerate = true
+    await this.generateTimeWindowsUseCase.execute(input.stationId, true)
 
     return {
       id: savedConfig.id,

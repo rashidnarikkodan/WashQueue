@@ -27,6 +27,11 @@ const slugify = (text: string): string => {
     .replace(/^-+|-+$/g, "")
 }
 
+import { ISlotConfigRepository } from "../../domain/repositories/slot-config.repository"
+import { GenerateTimeWindowsUseCase } from "./generate-time-windows.usecase"
+import { SlotConfig } from "../../domain/entities/SlotConfig"
+import { randomUUID } from "node:crypto"
+
 export class UpdateStationUseCase implements IUpdateStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
@@ -35,7 +40,9 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly mediaStorage?: IMediaStorage,
     private readonly mediaUploadService?: MediaUploadService,
-    private readonly managerAssignmentRepository?: IManagerAssignmentRepository
+    private readonly managerAssignmentRepository?: IManagerAssignmentRepository,
+    private readonly slotConfigRepository?: ISlotConfigRepository,
+    private readonly generateTimeWindowsUseCase?: GenerateTimeWindowsUseCase
   ) {}
 
   async execute(
@@ -138,6 +145,27 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             slotConfig: updates.slotConfig,
           })
           await this.stationRepository.save(station)
+
+          if (updates.slotConfig && this.slotConfigRepository) {
+            const existingConfig = await this.slotConfigRepository.findByStationId(stationId)
+            const now = new Date()
+            const configToSave = new SlotConfig({
+              id: existingConfig?.id || randomUUID(),
+              stationId,
+              windowDurationMins: updates.slotConfig.windowDurationMins,
+              capacityPerWindow: updates.slotConfig.capacityPerWindow,
+              walkInReservedSlots: updates.slotConfig.walkInReservedSlots,
+              maxAdvanceBookingDays: updates.slotConfig.maxAdvanceBookingDays,
+              allowWalkIns: updates.slotConfig.allowWalkIns,
+              createdAt: existingConfig?.createdAt || now,
+              updatedAt: now,
+            })
+            await this.slotConfigRepository.save(configToSave)
+          }
+
+          if (this.generateTimeWindowsUseCase) {
+            await this.generateTimeWindowsUseCase.execute(stationId, true)
+          }
         } else if (updates.step === 3) {
           // Upsert station pricing records for every configured vehicle class
           if (updates.pricing && Array.isArray(updates.pricing)) {
