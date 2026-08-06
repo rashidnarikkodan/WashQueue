@@ -40,7 +40,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     updateParams,
     handleConfirmCancel,
     handleRefresh,
-  } = useBookingList({ isManager })
+  } = useBookingList({ isManager, isOwner })
 
   // Operational HUD Stats
   const stats: StatItem[] = useMemo(() => {

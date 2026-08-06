@@ -6,9 +6,10 @@ import type { BookingStatus } from "../types/booking.types"
 
 export interface UseBookingListOptions {
   isManager?: boolean
+  isOwner?: boolean
 }
 
-export function useBookingList({ isManager = false }: UseBookingListOptions = {}) {
+export function useBookingList({ isManager = false, isOwner = false }: UseBookingListOptions = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
 
@@ -38,8 +39,9 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
   const page = parseInt(searchParams.get("page") || "1", 10)
   const refetchParam = searchParams.get("refetch")
 
-  // Derive unique stations for owner station filtering
+  // Derive unique stations ONLY for owner station filtering
   const ownerStations = useMemo(() => {
+    if (!isOwner) return []
     const map = new Map<string, string>()
     bookings.forEach((b) => {
       if (b.stationId && b.stationName) {
@@ -47,7 +49,7 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
       }
     })
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
-  }, [bookings])
+  }, [bookings, isOwner])
 
   // Helper to update query parameters
   const updateParams = useCallback(
@@ -89,8 +91,8 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
         }
       }
 
-      // Station filter for owner view
-      if (selectedStationId && selectedStationId !== "ALL") {
+      // Station filter ONLY for owner view
+      if (isOwner && selectedStationId && selectedStationId !== "ALL") {
         if (b.stationId !== selectedStationId) {
           return false
         }
@@ -119,7 +121,7 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
 
       return true
     })
-  }, [bookings, isManager, managedStation, selectedStationId, activeTab, searchQuery])
+  }, [bookings, isManager, isOwner, managedStation, selectedStationId, activeTab, searchQuery])
 
   // Handle Cancel Submit
   const handleConfirmCancel = async () => {
