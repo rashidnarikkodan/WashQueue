@@ -22,9 +22,12 @@ import { CancelBookingUseCase } from "./application/use-cases/cancel-booking.use
 import { BookingController } from "./presentation/booking.controller"
 import { createBookingRouter } from "./presentation/booking.routes"
 
+import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
+
 // Instantiate repositories & services
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
+const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
 const bookingRedisQueueService = new BookingRedisQueueService()
 const bookingNotificationService = new BookingNotificationService()
@@ -52,7 +55,7 @@ const createWalkInBookingUseCase = new CreateWalkInBookingUseCase(
 )
 
 const getBookingUseCase = new GetBookingUseCase(bookingRepository)
-const getUserBookingsUseCase = new GetUserBookingsUseCase(bookingRepository)
+const getUserBookingsUseCase = new GetUserBookingsUseCase(bookingRepository, managerAssignmentRepository)
 
 const checkInBookingUseCase = new CheckInBookingUseCase(
   bookingRepository,

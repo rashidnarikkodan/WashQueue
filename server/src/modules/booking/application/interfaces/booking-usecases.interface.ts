@@ -18,7 +18,7 @@ export interface IGetBookingUseCase {
 }
 
 export interface IGetUserBookingsUseCase {
-  execute(userId: string, type?: "upcoming" | "history" | "all"): Promise<BookingResponseDTO[]>
+  execute(userId: string, type?: "upcoming" | "history" | "all", role?: string): Promise<BookingResponseDTO[]>
 }
 
 export interface ICheckInBookingUseCase {

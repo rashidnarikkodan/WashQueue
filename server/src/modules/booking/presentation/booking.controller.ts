@@ -58,32 +58,35 @@ export class BookingController {
 
   getUserBookings = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
+    const role = req.user?.role
     if (!userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
     const type = (req.query.type as "upcoming" | "history" | "all") || "all"
-    const bookings = await this.getUserBookingsUseCase.execute(userId, type)
+    const bookings = await this.getUserBookingsUseCase.execute(userId, type, role)
     success(res, bookings, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }
 
   getUpcoming = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
+    const role = req.user?.role
     if (!userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const bookings = await this.getUserBookingsUseCase.execute(userId, "upcoming")
+    const bookings = await this.getUserBookingsUseCase.execute(userId, "upcoming", role)
     success(res, bookings, HTTP_STATUS.OK, "Upcoming bookings retrieved successfully")
   }
 
   getHistory = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
+    const role = req.user?.role
     if (!userId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const bookings = await this.getUserBookingsUseCase.execute(userId, "history")
+    const bookings = await this.getUserBookingsUseCase.execute(userId, "history", role)
     success(res, bookings, HTTP_STATUS.OK, "Booking history retrieved successfully")
   }
 
