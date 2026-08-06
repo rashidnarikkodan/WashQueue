@@ -29,7 +29,7 @@ export default function MyBookingsPage() {
     updateParams,
     handleConfirmCancel,
     handleRefresh,
-  } = useBookingList({ isCustomer: true })
+  } = useBookingList()
 
   // Customer HUD Stats
   const stats: StatItem[] = useMemo(() => {

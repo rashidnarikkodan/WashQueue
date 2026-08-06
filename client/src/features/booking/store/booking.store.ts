@@ -32,7 +32,7 @@ interface BookingStore {
   clearError: () => void
 }
 
-export const useBookingStore = create<BookingStore>((set, get) => ({
+export const useBookingStore = create<BookingStore>((set) => ({
   bookings: [],
   isLoading: false,
   isActionLoading: false,
