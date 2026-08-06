@@ -1,5 +1,7 @@
+import { Types } from "mongoose"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import {
   IGetManagedStationsUseCase,
   ManagedStationResponse,
@@ -22,9 +24,32 @@ export class GetManagedStationsUseCase implements IGetManagedStationsUseCase {
         result.push({
           stationId: station.id,
           stationName: props.name,
-          stationAddress: props.address,
+          stationAddress: props.address
+            ? `${props.address.street}, ${props.address.city}`
+            : "",
           permissions: assignment.permissions,
           status: assignment.status,
+        })
+      }
+    }
+
+    // Direct fallback: check station.managerId in StationModel
+    if (result.length === 0 && Types.ObjectId.isValid(managerUserId)) {
+      const docs = await StationModel.find({ managerId: new Types.ObjectId(managerUserId) })
+      for (const doc of docs) {
+        result.push({
+          stationId: doc._id.toString(),
+          stationName: doc.name,
+          stationAddress: doc.address ? `${doc.address.street}, ${doc.address.city}` : "",
+          permissions: [
+            "BOOKING_MANAGEMENT",
+            "QUEUE_MANAGEMENT",
+            "CUSTOMER_MANAGEMENT",
+            "PRICING_MANAGEMENT",
+            "REPORTS_VIEW",
+            "STATION_SETTINGS",
+          ],
+          status: "ACTIVE",
         })
       }
     }

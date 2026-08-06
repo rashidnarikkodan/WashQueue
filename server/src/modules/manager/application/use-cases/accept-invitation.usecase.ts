@@ -1,4 +1,6 @@
 import argon2 from "argon2"
+import { Types } from "mongoose"
+import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { BadRequestError } from "@/common/errors/bad-request-error"
 import { ROLE } from "@/common/constants/role.constants"
@@ -99,6 +101,13 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
         assignedAt: new Date(),
       })
       await this.managerAssignmentRepository.create(assignment)
+    }
+
+    // Sync managerId directly onto the Station document in MongoDB
+    if (Types.ObjectId.isValid(invitation.stationId) && Types.ObjectId.isValid(userId)) {
+      await StationModel.findByIdAndUpdate(invitation.stationId, {
+        $set: { managerId: new Types.ObjectId(userId) },
+      })
     }
 
     return {

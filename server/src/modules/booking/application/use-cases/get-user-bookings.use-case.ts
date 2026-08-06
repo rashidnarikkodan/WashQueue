@@ -1,5 +1,7 @@
+import { Types } from "mongoose"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IGetUserBookingsUseCase } from "../interfaces/booking-usecases.interface"
@@ -17,14 +19,24 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     role?: string
   ): Promise<BookingResponseDTO[]> {
     // If request comes from a Manager, filter bookings to the station(s) assigned to this manager
-    if (role === "MANAGER" && this.managerAssignmentRepository) {
-      const assignments = await this.managerAssignmentRepository.findByUserId(userId)
-      const activeAssignments = assignments.filter((a) => a.isActive)
+    if (role === "MANAGER") {
+      let stationIds: string[] = []
 
-      if (activeAssignments.length > 0) {
+      if (this.managerAssignmentRepository) {
+        const assignments = await this.managerAssignmentRepository.findByUserId(userId)
+        stationIds = assignments.filter((a) => a.isActive).map((a) => a.stationId)
+      }
+
+      // Direct fallback: check StationModel.managerId directly
+      if (stationIds.length === 0 && Types.ObjectId.isValid(userId)) {
+        const docs = await StationModel.find({ managerId: new Types.ObjectId(userId) })
+        stationIds = docs.map((d) => d._id.toString())
+      }
+
+      if (stationIds.length > 0) {
         let allStationBookings: Booking[] = []
-        for (const assignment of activeAssignments) {
-          const stationBookings = await this.bookingRepository.findByStationId(assignment.stationId)
+        for (const stId of stationIds) {
+          const stationBookings = await this.bookingRepository.findByStationId(stId)
           allStationBookings = allStationBookings.concat(stationBookings)
         }
 
