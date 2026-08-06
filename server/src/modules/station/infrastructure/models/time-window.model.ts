@@ -44,4 +44,7 @@ timeWindowSchema.index({ stationId: 1, date: 1 })
 // 2. Querying by (stationId, windowStart) and UNIQUE index to prevent duplicate windows
 timeWindowSchema.index({ stationId: 1, windowStart: 1 }, { unique: true })
 
+// 3. TTL Index: Automatically delete time window documents 24 hours (86400s) after windowEnd
+timeWindowSchema.index({ windowEnd: 1 }, { expireAfterSeconds: 86400 })
+
 export const TimeWindowModel = model<ITimeWindowDocument>("TimeWindowInstance", timeWindowSchema)
