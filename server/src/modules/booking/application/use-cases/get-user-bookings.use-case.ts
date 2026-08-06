@@ -18,8 +18,10 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     type: "upcoming" | "history" | "all" = "all",
     role?: string
   ): Promise<BookingResponseDTO[]> {
-    // If request comes from a Manager, filter bookings to the station(s) assigned to this manager
-    if (role === "MANAGER") {
+    const normRole = role ? role.toUpperCase() : ""
+
+    // 1. Manager Role: Return bookings for stations assigned to this manager
+    if (normRole === "MANAGER") {
       let stationIds: string[] = []
 
       if (this.managerAssignmentRepository) {
@@ -55,6 +57,47 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
     }
 
+    // 2. Owner Role: Return bookings for all stations owned by this owner
+    if (normRole === "OWNER" && Types.ObjectId.isValid(userId)) {
+      const ownedStations = await StationModel.find({ ownerId: new Types.ObjectId(userId) })
+      const stationIds = ownedStations.map((d) => d._id.toString())
+
+      if (stationIds.length > 0) {
+        let allOwnerBookings: Booking[] = []
+        for (const stId of stationIds) {
+          const stationBookings = await this.bookingRepository.findByStationId(stId)
+          allOwnerBookings = allOwnerBookings.concat(stationBookings)
+        }
+
+        // Also include bookings created directly by this user
+        const userFilter = {
+          userId,
+          upcomingOnly: type === "upcoming",
+          historyOnly: type === "history",
+        }
+        const userOwnBookings = await this.bookingRepository.findByUserId(userFilter)
+
+        const combinedMap = new Map<string, Booking>()
+        allOwnerBookings.forEach((b) => combinedMap.set(b.id, b))
+        userOwnBookings.forEach((b) => combinedMap.set(b.id, b))
+
+        let combined = Array.from(combinedMap.values())
+
+        if (type === "upcoming") {
+          combined = combined.filter((b) =>
+            ["PENDING", "CONFIRMED", "CHECKED_IN", "IN_SERVICE", "IN_PROGRESS"].includes(b.status)
+          )
+        } else if (type === "history") {
+          combined = combined.filter((b) =>
+            ["SERVICE_COMPLETED", "AWAITING_HANDOVER", "COMPLETED", "CANCELLED", "NO_SHOW"].includes(b.status)
+          )
+        }
+
+        return combined.map((b) => BookingDTOMapper.toDTO(b))
+      }
+    }
+
+    // 3. Default (Customer / User Role): Return bookings by userId
     const filter = {
       userId,
       upcomingOnly: type === "upcoming",
@@ -62,7 +105,6 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     }
 
     const bookings = await this.bookingRepository.findByUserId(filter)
-
     return bookings.map((b) => BookingDTOMapper.toDTO(b))
   }
 }
