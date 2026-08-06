@@ -82,6 +82,13 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
   // Filtered bookings calculation
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
+      // Manager view filter: ONLY show bookings for the station assigned to this manager
+      if (isManager && managedStation) {
+        if (managedStation.stationId && b.stationId !== managedStation.stationId) {
+          return false
+        }
+      }
+
       // Station filter for owner view
       if (selectedStationId && selectedStationId !== "ALL") {
         if (b.stationId !== selectedStationId) {
@@ -112,7 +119,7 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
 
       return true
     })
-  }, [bookings, selectedStationId, activeTab, searchQuery])
+  }, [bookings, isManager, managedStation, selectedStationId, activeTab, searchQuery])
 
   // Handle Cancel Submit
   const handleConfirmCancel = async () => {
