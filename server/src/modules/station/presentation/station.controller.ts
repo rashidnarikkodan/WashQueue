@@ -24,12 +24,16 @@ import {
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationRequestMapper } from "./mappers/station.mapper"
 
-
 import { ConfigureSlotConfigUseCase } from "../application/use-cases/configure-slot-config.usecase"
 import { GetSlotConfigUseCase } from "../application/use-cases/get-slot-config.usecase"
 import { GetBookingCalendarUseCase } from "../application/use-cases/get-booking-calendar.usecase"
 import { GetAvailableTimeWindowsUseCase } from "../application/use-cases/get-available-time-windows.usecase"
-import { configureSlotConfigSchema, getAvailableTimeWindowsQuerySchema } from "./schema/station.schema"
+import {
+  configureSlotConfigSchema,
+  getAvailableTimeWindowsQuerySchema,
+} from "./schema/station.schema"
+
+
 
 export class StationController {
   constructor(
@@ -58,7 +62,7 @@ export class StationController {
 
     const input = this.stationMapper.mapToCreateInput(req)
     const station = await this.createStationUseCase.execute(userId, input)
-    
+
     success(
       res,
       { stationId: station.id, station: station.getProps() },
@@ -114,7 +118,12 @@ export class StationController {
       },
     ]).exec()
 
-    const priceStats = priceAggregation[0] || { minHalf: 10, maxHalf: 200, minFull: 20, maxFull: 300 }
+    const priceStats = priceAggregation[0] || {
+      minHalf: 10,
+      maxHalf: 200,
+      minFull: 20,
+      maxFull: 300,
+    }
     const minPrice = Math.min(priceStats.minHalf || 10, priceStats.minFull || 20)
     const maxPrice = Math.max(priceStats.maxHalf || 200, priceStats.maxFull || 300)
 
@@ -171,37 +180,51 @@ export class StationController {
       longitude: query.longitude ? Number(query.longitude) : undefined,
       maxDistanceKm: query.maxDistanceKm ? Number(query.maxDistanceKm) : undefined,
       radiusKm: query.radiusKm ? Number(query.radiusKm) : undefined,
-      minRating: query.minRating ? Number(query.minRating) : query.minimumRating ? Number(query.minimumRating) : undefined,
-      minimumRating: query.minimumRating ? Number(query.minimumRating) : query.minRating ? Number(query.minRating) : undefined,
+      minRating: query.minRating
+        ? Number(query.minRating)
+        : query.minimumRating
+          ? Number(query.minimumRating)
+          : undefined,
+      minimumRating: query.minimumRating
+        ? Number(query.minimumRating)
+        : query.minRating
+          ? Number(query.minRating)
+          : undefined,
       minPrice: query.minPrice ? Number(query.minPrice) : undefined,
       maxPrice: query.maxPrice ? Number(query.maxPrice) : undefined,
       search: query.search ? String(query.search) : query.q ? String(query.q) : undefined,
       status: query.status ? String(query.status) : undefined,
       sortBy: query.sortBy ? String(query.sortBy) : undefined,
-      sortOrder: query.sortOrder === "asc" ? ("asc" as const) : ("desc" as const),
+      sortOrder: query.sortOrder === "desc" ? ("desc" as const) : ("asc" as const),
       ownerId: query.ownerId ? String(query.ownerId) : undefined,
       vehicleCategory: query.vehicleCategory ? String(query.vehicleCategory) : undefined,
       vehicleClassId: query.vehicleClassId ? String(query.vehicleClassId) : undefined,
+      washType: query.washType ? (String(query.washType).toUpperCase() as "HALF" | "FULL" | "ALL") : undefined,
+      amenities: Array.isArray(query.amenities)
+        ? query.amenities.map(String)
+        : typeof query.amenities === "string"
+        ? query.amenities.split(",")
+        : undefined,
       openNow: String(query.openNow) === "true",
       verifiedOnly: String(query.verifiedOnly) === "true",
-
     }
 
     const { stations, total } = await this.getStationsUseCase.execute(parsedQuery)
+
     const page = Math.max(1, parsedQuery.page || 1)
     const limit = Math.max(1, parsedQuery.limit || 10)
     const totalPages = Math.ceil(total / limit) || 1
 
-    const data = stations.map((s) => {
-      const props = s.getProps()
-      const rec = s as unknown as Record<string, unknown>
-      if (typeof rec.distanceKm === "number") (props as unknown as Record<string, unknown>).distanceKm = rec.distanceKm
-      if (typeof rec.startingPrice === "number") (props as unknown as Record<string, unknown>).startingPrice = rec.startingPrice
-      if (typeof rec.estimatedWaitMins === "number") (props as unknown as Record<string, unknown>).estimatedWaitMins = rec.estimatedWaitMins
-      if (typeof rec.queueDepth === "number") (props as unknown as Record<string, unknown>).queueDepth = rec.queueDepth
-      if (typeof rec.isOpen === "boolean") (props as unknown as Record<string, unknown>).isOpen = rec.isOpen
-      return props
-    })
+    const data = stations.map((station) => ({
+      ...station.getProps(),
+      distanceKm: (station as unknown as Record<string, unknown>).distanceKm,
+      startingPrice: (station as unknown as Record<string, unknown>).startingPrice,
+      halfWashPrice: (station as unknown as Record<string, unknown>).halfWashPrice,
+      fullWashPrice: (station as unknown as Record<string, unknown>).fullWashPrice,
+      estimatedWaitMins: (station as unknown as Record<string, unknown>).estimatedWaitMins,
+      queueDepth: (station as unknown as Record<string, unknown>).queueDepth,
+      isOpen: (station as unknown as Record<string, unknown>).isOpen,
+    }))
 
     success(
       res,
@@ -243,7 +266,12 @@ export class StationController {
     const { action, rejectionReason } = req.body || {}
     const station = await this.reviewStationUseCase.execute(stationId, action, rejectionReason)
 
-    success(res, station.getProps(), HTTP_STATUS.OK, `Station ${action.toLowerCase()}d successfully`)
+    success(
+      res,
+      station.getProps(),
+      HTTP_STATUS.OK,
+      `Station ${action.toLowerCase()}d successfully`
+    )
   }
 
   delete = async (req: AuthenticatedRequest, res: Response) => {
@@ -293,12 +321,7 @@ export class StationController {
       email,
     })
 
-    success(
-      res,
-      station,
-      HTTP_STATUS.OK,
-      "Manager assigned for this station successfully"
-    )
+    success(res, station, HTTP_STATUS.OK, "Manager assigned for this station successfully")
   }
 
   configureSlotConfig = async (req: AuthenticatedRequest, res: Response) => {

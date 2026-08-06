@@ -8,7 +8,7 @@ import AddEditStation from "@/features/station/pages/AddEditStation"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
-const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 
 export const ownerRoutes = {

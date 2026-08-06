@@ -132,7 +132,9 @@ export class StationMongoRepository
 
     // --- PHASE 2: Targeted Batch Relational Hydration & Filtering ---
     let matchingClassIds: Types.ObjectId[] | undefined = undefined
-    if (filter.vehicleCategory && filter.vehicleCategory !== "all") {
+    if (filter.vehicleClassId && Types.ObjectId.isValid(filter.vehicleClassId)) {
+      matchingClassIds = [new Types.ObjectId(filter.vehicleClassId)]
+    } else if (filter.vehicleCategory && filter.vehicleCategory !== "all") {
       if (Types.ObjectId.isValid(filter.vehicleCategory)) {
         const catId = new Types.ObjectId(filter.vehicleCategory)
         const found = await VehicleClassModel.find({
@@ -141,8 +143,6 @@ export class StationMongoRepository
         matchingClassIds = found.map((c) => c._id as Types.ObjectId)
         if (matchingClassIds.length === 0) matchingClassIds = [catId]
       }
-    } else if (filter.vehicleClassId && Types.ObjectId.isValid(filter.vehicleClassId)) {
-      matchingClassIds = [new Types.ObjectId(filter.vehicleClassId)]
     }
 
     // Pricing Filter & Map
@@ -155,11 +155,11 @@ export class StationMongoRepository
     }
 
     const pricings = await StationPricingModel.find(pricingQuery).exec()
-    const stationPricingMap = new Map<string, Array<{ half: number; full: number }>>()
+    const stationPricingMap = new Map<string, Array<{ half: number; full: number; vehicleClassId: string }>>()
     pricings.forEach((p) => {
       const sid = p.stationId.toString()
       const list = stationPricingMap.get(sid) || []
-      list.push({ half: p.halfWashPrice, full: p.fullWashPrice })
+      list.push({ half: p.halfWashPrice, full: p.fullWashPrice, vehicleClassId: p.vehicleClassId.toString() })
       stationPricingMap.set(sid, list)
     })
 
@@ -189,7 +189,7 @@ export class StationMongoRepository
     const liveStateMap = await StationRedisHydrationService.hydrateLiveStates(candidateStations)
 
     // --- PHASE 4: Build Hydrated Candidate Items & Apply Relational Filters ---
-    let hydratedItems: HydratedStationItem[] = []
+    let hydratedItems: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[] = []
 
     for (const station of candidateStations) {
       const sid = station.id
@@ -212,23 +212,44 @@ export class StationMongoRepository
 
       const pList = stationPricingMap.get(sid) || []
       let startingPrice: number | undefined = undefined
+      let halfWashPrice: number | undefined = undefined
+      let fullWashPrice: number | undefined = undefined
+
       if (pList.length > 0) {
+        if (filter.vehicleClassId) {
+          const matchP = pList.find((p) => p.vehicleClassId === filter.vehicleClassId) || pList[0]
+          halfWashPrice = matchP?.half
+          fullWashPrice = matchP?.full
+        } else {
+          const halfs = pList.map((p) => p.half).filter((v) => v > 0)
+          const fulls = pList.map((p) => p.full).filter((v) => v > 0)
+          if (halfs.length > 0) halfWashPrice = Math.min(...halfs)
+          if (fulls.length > 0) fullWashPrice = Math.min(...fulls)
+        }
+
         const prices = pList.flatMap((p) => [p.half, p.full]).filter((pr) => pr > 0)
         if (prices.length > 0) startingPrice = Math.min(...prices)
       }
 
+      // Wash Type Filter
+      if (filter.washType === 'HALF' && halfWashPrice === undefined) continue
+      if (filter.washType === 'FULL' && fullWashPrice === undefined) continue
+
       // Price Range Filter
       const minP = filter.minPrice ?? filter.minHalfWashPrice ?? filter.minFullWashPrice
       const maxP = filter.maxPrice ?? filter.maxHalfWashPrice ?? filter.maxFullWashPrice
-      if (startingPrice !== undefined) {
-        if (typeof minP === "number" && startingPrice < minP) continue
-        if (typeof maxP === "number" && startingPrice > maxP) continue
+      const comparePrice = filter.washType === 'HALF' ? halfWashPrice : filter.washType === 'FULL' ? fullWashPrice : startingPrice
+      if (comparePrice !== undefined) {
+        if (typeof minP === "number" && comparePrice < minP) continue
+        if (typeof maxP === "number" && comparePrice > maxP) continue
       }
 
-      const item: HydratedStationItem = {
+      const item: HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number } = {
         station,
         distanceKm: (station as unknown as { distanceKm?: number }).distanceKm,
         startingPrice,
+        halfWashPrice,
+        fullWashPrice,
         queueDepth: liveState.queueDepth,
         estimatedWaitMins: liveState.estimatedWaitMins,
         isVerified: !!station.getProps().verifiedAt,
@@ -253,11 +274,18 @@ export class StationMongoRepository
       const rec = domainObj as unknown as Record<string, unknown>
       rec.distanceKm = item.distanceKm
       rec.startingPrice = item.startingPrice
+      rec.halfWashPrice = item.halfWashPrice
+      rec.fullWashPrice = item.fullWashPrice
       rec.estimatedWaitMins = item.estimatedWaitMins
       rec.queueDepth = item.queueDepth
       rec.isOpen = liveStateMap.get(domainObj.id)?.isOpen ?? true
       return domainObj
     })
+
+    return {
+      stations: resultStations,
+      total,
+    }
 
     return {
       stations: resultStations,

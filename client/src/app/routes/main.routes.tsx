@@ -13,7 +13,7 @@ import { useAuthStore } from "../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const Booking = lazy(()=> import("@/features/booking/pages/Booking"))
-const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 
 const RootPathResolver = () => {

@@ -10,9 +10,14 @@ import {
   Search,
   Crosshair,
   Loader2,
+  Car,
+  Sparkles,
+  ArrowUpDown,
+  ChevronDown,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/station.store"
+import { useVehicleStore } from "@/features/vehicle/store/vehicle.store"
 import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
 import {
@@ -27,7 +32,16 @@ import { useAuthStore } from "@/features/auth/store/auth.store"
 const StationDiscovery = () => {
   const navigate = useNavigate()
   const { stations, pagination, isLoading, error, fetchStations } = useStationStore()
+  const { vehicles, loadVehicles } = useVehicleStore()
   const user = useAuthStore()
+
+  // Load user vehicles if logged in
+  useEffect(() => {
+    if (user.isAuthenticated && vehicles.length === 0) {
+      loadVehicles()
+    }
+  }, [user.isAuthenticated, vehicles.length, loadVehicles])
+
   // View state
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
 
@@ -39,16 +53,24 @@ const StationDiscovery = () => {
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
-  const [hasAttemptedLocationCheck, setHasAttemptedLocationCheck] = useState(() => !navigator?.geolocation)
+
+  // Selected Vehicle details
+  const selectedVehicleObj = useMemo(() => {
+    if (!filters.selectedVehicleId) return null
+    return vehicles.find((v) => v.id === filters.selectedVehicleId)
+  }, [vehicles, filters.selectedVehicleId])
+
+  const selectedVehicleName = selectedVehicleObj
+    ? selectedVehicleObj.nickname || `${selectedVehicleObj.brand} ${selectedVehicleObj.model}`
+    : undefined
 
   // Debounce search query input
   const debouncedSearch = useDebounce(searchQuery, 400)
 
-  // Trigger HTML5 Geolocation to get user coordinates
+  // Trigger HTML5 Geolocation to get user coordinates (only on manual user click)
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser.")
-      setHasAttemptedLocationCheck(true)
       return
     }
     setIsLocating(true)
@@ -60,12 +82,10 @@ const StationDiscovery = () => {
         const lng = parseFloat(position.coords.longitude.toFixed(6))
         setUserLocation({ latitude: lat, longitude: lng })
         setIsLocating(false)
-        setHasAttemptedLocationCheck(true)
         setPage(1)
       },
       (err) => {
         setIsLocating(false)
-        setHasAttemptedLocationCheck(true)
         if (err.code === 1) {
           setLocationError("Location permission denied. Please allow location access for nearest station results.")
         } else {
@@ -76,53 +96,8 @@ const StationDiscovery = () => {
     )
   }, [])
 
-  // Check initial location on mount before firing data fetch
-  useEffect(() => {
-    if (!navigator?.geolocation) return
-    let isMounted = true
-
-    queueMicrotask(() => {
-      if (isMounted) setIsLocating(true)
-    })
-    const fallbackTimer = setTimeout(() => {
-      if (isMounted) {
-        setIsLocating(false)
-        setHasAttemptedLocationCheck(true)
-      }
-    }, 2500)
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (!isMounted) return
-        clearTimeout(fallbackTimer)
-        const lat = parseFloat(position.coords.latitude.toFixed(6))
-        const lng = parseFloat(position.coords.longitude.toFixed(6))
-        setUserLocation({ latitude: lat, longitude: lng })
-        setIsLocating(false)
-        setHasAttemptedLocationCheck(true)
-      },
-      (err) => {
-        if (!isMounted) return
-        clearTimeout(fallbackTimer)
-        setIsLocating(false)
-        setHasAttemptedLocationCheck(true)
-        if (err.code === 1) {
-          setLocationError("Location permission denied. Please allow location access for nearest station results.")
-        }
-      },
-      { timeout: 2500, enableHighAccuracy: true }
-    )
-
-    return () => {
-      isMounted = false
-      clearTimeout(fallbackTimer)
-    }
-  }, [])
-
-  // Fetch stations from backend once location check resolves or filter/search/page changes
+  // Fetch stations from backend on mount or filter/search/page changes
   const loadData = useCallback(async () => {
-    if (!hasAttemptedLocationCheck) return
-
     await fetchStations({
       page,
       limit: 12,
@@ -132,9 +107,11 @@ const StationDiscovery = () => {
       maxDistanceKm: filters.maxDistanceKm,
       minRating: filters.minRating > 0 ? filters.minRating : undefined,
       vehicleCategory: filters.vehicleCategory !== "all" ? filters.vehicleCategory : undefined,
+      vehicleClassId: filters.vehicleClassId,
+      washType: filters.washType && filters.washType !== "ALL" ? filters.washType : undefined,
       sortBy: filters.sortBy,
     })
-  }, [fetchStations, page, debouncedSearch, userLocation, filters, hasAttemptedLocationCheck])
+  }, [fetchStations, page, debouncedSearch, userLocation, filters])
 
   useEffect(() => {
     loadData()
@@ -152,6 +129,8 @@ const StationDiscovery = () => {
     let count = 0
     if (filters.sortBy !== DEFAULT_FILTERS.sortBy) count++
     if (filters.vehicleCategory !== DEFAULT_FILTERS.vehicleCategory) count++
+    if (filters.vehicleClassId) count++
+    if (filters.selectedVehicleId) count++
     if (filters.maxDistanceKm !== DEFAULT_FILTERS.maxDistanceKm) count++
     if (filters.minRating > 0) count++
     if (userLocation) count++
@@ -197,6 +176,7 @@ const StationDiscovery = () => {
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base mt-1.5 font-medium">
             {pagination ? `${pagination.total} stations found` : `${stations.length} results`}
+            {selectedVehicleName ? ` • Rate for ${selectedVehicleName}` : ""}
             {userLocation ? " • Nearby your location" : ` • ${filters.maxDistanceKm}km radius`}
           </p>
         </div>
@@ -250,6 +230,47 @@ const StationDiscovery = () => {
             )}
           </button>
 
+          {/* Sort Dropdown Selector */}
+          <div className="relative flex items-center shrink-0">
+            <ArrowUpDown className="w-4 h-4 text-primary absolute left-3.5 pointer-events-none" />
+            <select
+              value={filters.sortBy}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  sortBy: e.target.value as FilterOptions["sortBy"],
+                }))
+              }
+              className="pl-9 pr-8 py-2.5 rounded-full bg-card border border-border text-foreground text-xs sm:text-sm font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer transition-all shadow-sm"
+            >
+              <option value="RECOMMENDED">Sort: Recommended</option>
+              <option value="DISTANCE">Sort: Nearest First</option>
+              <option value="RATING">Sort: Highest Rated</option>
+              <option value="WAIT_TIME">Sort: Fastest Service</option>
+              <option value="PRICE_LOW_TO_HIGH">Sort: Price Low to High</option>
+              <option value="PRICE_HIGH_TO_LOW">Sort: Price High to Low</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 pointer-events-none" />
+          </div>
+
+          {/* Filter Modal Trigger Button */}
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
+              activeFilterCount > 0
+                ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                : "bg-card border-border hover:bg-muted text-foreground"
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-primary-foreground text-primary font-black text-[11px] flex items-center justify-center ml-0.5">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
           {/* Map View Convert Toggle Button */}
           <button
             onClick={() => setViewMode((prev) => (prev === "grid" ? "map" : "grid"))}
@@ -269,6 +290,56 @@ const StationDiscovery = () => {
           </button>
         </div>
       </div>
+
+      {/* Registered User Vehicles Quick Filter Pill Bar */}
+      {user.isAuthenticated && vehicles.length > 0 && (
+        <div className="flex items-center gap-3 overflow-x-auto pb-1 text-xs">
+          <span className="text-muted-foreground font-semibold text-xs shrink-0 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            My Vehicles:
+          </span>
+          <button
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                selectedVehicleId: undefined,
+                vehicleClassId: undefined,
+              }))
+            }
+            className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold shrink-0 transition-all cursor-pointer ${
+              !filters.selectedVehicleId
+                ? "bg-primary/10 border-primary text-primary shadow-sm"
+                : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            All Vehicles
+          </button>
+          {vehicles.map((v) => {
+            const isSelected = filters.selectedVehicleId === v.id
+            return (
+              <button
+                key={v.id}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    selectedVehicleId: isSelected ? undefined : v.id,
+                    vehicleClassId: isSelected ? undefined : v.classId,
+                    vehicleCategory: isSelected ? "all" : v.categoryId,
+                  }))
+                }
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
+                    : "bg-card border-border text-foreground hover:bg-muted"
+                }`}
+              >
+                <Car className="w-3.5 h-3.5" />
+                <span>{v.nickname || `${v.brand} ${v.model}`}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Location Permission / Error Alert */}
       {locationError && (
@@ -316,6 +387,18 @@ const StationDiscovery = () => {
             </span>
           )}
 
+          {selectedVehicleName && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground border border-primary/20 font-bold">
+              Vehicle: {selectedVehicleName}
+              <X
+                className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
+                onClick={() =>
+                  setFilters((p) => ({ ...p, selectedVehicleId: undefined, vehicleClassId: undefined }))
+                }
+              />
+            </span>
+          )}
+
           {userLocation && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
               Location Filter Active
@@ -336,7 +419,7 @@ const StationDiscovery = () => {
             </span>
           )}
 
-          {filters.vehicleCategory !== "all" && (
+          {filters.vehicleCategory !== "all" && !selectedVehicleName && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-foreground font-medium">
               Category Filter Active
               <X
@@ -397,7 +480,7 @@ const StationDiscovery = () => {
               No stations found
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
-              We couldn't find any wash stations matching your query or filters. Try expanding your search radius or clearing active filters.
+              We couldn't find any wash stations matching your vehicle or filters. Try selecting a different vehicle or clearing active filters.
             </p>
           </div>
           <button
@@ -431,15 +514,18 @@ const StationDiscovery = () => {
               status={station.status}
               rating={station.rating || 0.0}
               reviewCount={station.reviewCount || 0}
-              queueCount={3}
+              queueCount={station.queueDepth ?? 0}
               baysCount={station.slotConfig?.bays || 0}
               services={station.amenities || ["Basic Wash", "Full Wash", "Interior Clean"]}
               categories={["Car", "Bike", "SUV"]}
               distanceKm={station.distanceKm}
+              startingPrice={station.startingPrice}
+              halfWashPrice={station.halfWashPrice}
+              fullWashPrice={station.fullWashPrice}
+              selectedVehicleName={selectedVehicleName}
               primaryActionLabel="View Details"
               showFavoriteButton={user.isAuthenticated}
               onClick={() => navigate(`/stations/${station.id}`)}
-              // onPrimaryAction={() => navigate(`/stations/${station.id}`)}
             />
           ))}
         </div>

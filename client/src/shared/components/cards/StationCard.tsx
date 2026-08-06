@@ -17,6 +17,10 @@ export interface StationCardProps {
   services?: string[]
   categories?: string[]
   distanceKm?: number
+  startingPrice?: number
+  halfWashPrice?: number
+  fullWashPrice?: number
+  selectedVehicleName?: string
   isFavorite?: boolean
   showFavoriteButton?: boolean
   primaryActionLabel?: string
@@ -81,6 +85,9 @@ const StationCard: React.FC<StationCardProps> = ({
   services = [],
   categories = ["Car", "Bike", "SUV"],
   distanceKm,
+  halfWashPrice,
+  fullWashPrice,
+  selectedVehicleName,
   isFavorite = false,
   showFavoriteButton = true,
   primaryActionLabel,
@@ -195,7 +202,7 @@ const StationCard: React.FC<StationCardProps> = ({
       </div>
 
       {/* Card Body */}
-      <div className="flex flex-col justify-between p-5 gap-3.5 flex-1">
+      <div className="flex flex-col justify-between p-5 gap-3 flex-1">
         {/* Title & Rating */}
         <div className="flex justify-between items-start gap-2">
           <h3 className="text-foreground text-lg font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors">
@@ -219,18 +226,42 @@ const StationCard: React.FC<StationCardProps> = ({
           </span>
         </div>
 
-        {/* Live Ops Info (Bays & Queue Stats Bar) */}
-        <div className="grid grid-cols-2 gap-2 py-2 px-3 bg-muted/50 rounded-xl border border-border/50 text-xs">
+        {/* Minimal Vehicle Specific Pricing (Only shown when vehicle filter is active) */}
+        {selectedVehicleName && (halfWashPrice !== undefined || fullWashPrice !== undefined) && (
+          <div className="flex items-center justify-between py-1.5 px-1 border-y border-border/50">
+            {/* Left side: Half Wash Rate */}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Half</span>
+              <span className="text-base sm:text-lg font-black text-blue-400">
+                ${halfWashPrice ?? "—"}
+              </span>
+            </div>
+
+            {/* Subtle Divider Dot */}
+            <div className="w-1 h-1 rounded-full bg-border" />
+
+            {/* Right side: Full Wash Rate */}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Full</span>
+              <span className="text-base sm:text-lg font-black text-emerald-400">
+                ${fullWashPrice ?? "—"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Live Ops Info (Bays & Queue Stats - Minimal Line) */}
+        <div className="flex items-center justify-between text-xs py-0.5">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-            <span className="text-foreground font-semibold line-clamp-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <span className="text-foreground font-semibold text-xs">
               {baysCount > 0 ? `${baysCount} Bays` : "Bays N/A"}
             </span>
           </div>
 
-          <div className="flex items-center justify-end gap-1.5 text-right">
-            <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse" />
-            <span className="text-amber-500 font-medium">{queueCount} in queue</span>
+          <div className="flex items-center gap-1.5 text-amber-400 font-semibold text-xs">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 animate-pulse" />
+            <span>{queueCount} in queue</span>
           </div>
         </div>
 

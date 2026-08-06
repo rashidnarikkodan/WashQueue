@@ -12,10 +12,7 @@ export interface HydratedStationItem {
 }
 
 export class StationRankingService {
-  /**
-   * Computes a deterministic multi-factor recommendation score between 0.0 and 1.0.
-   * Score = 0.35 * Distance + 0.25 * WaitTime + 0.20 * Rating + 0.10 * Verified + 0.10 * Price
-   */
+
   static computeScore(item: HydratedStationItem): number {
     const W_DIST = 0.35
     const W_WAIT = 0.25
@@ -54,43 +51,69 @@ export class StationRankingService {
   /**
    * Sorts array of HydratedStationItem deterministically based on sortBy parameter.
    */
-  static sort(items: HydratedStationItem[], sortBy?: string, sortOrder: "asc" | "desc" = "asc"): HydratedStationItem[] {
+  static sort(items: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[], sortBy?: string, sortOrder: "asc" | "desc" = "asc"): (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[] {
     const dir = sortOrder === "desc" ? -1 : 1
 
     return [...items].sort((a, b) => {
       switch (sortBy) {
         case "DISTANCE":
-        case "nearest":
-          return ((a.distanceKm ?? 999) - (b.distanceKm ?? 999)) * dir
+        case "nearest": {
+          const diff = ((a.distanceKm ?? 999) - (b.distanceKm ?? 999)) * dir
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
         case "RATING":
-        case "rating":
+        case "rating": {
           if (b.rating !== a.rating) return (b.rating - a.rating) * dir
-          return (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
+          const revDiff = (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
+          if (revDiff !== 0) return revDiff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
         case "WAIT_TIME":
-        case "fastest":
-          return (a.estimatedWaitMins - b.estimatedWaitMins) * dir
+        case "fastest": {
+          const diff = (a.estimatedWaitMins - b.estimatedWaitMins) * dir
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
         case "REVIEW_COUNT":
-        case "popular":
-          return (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
+        case "popular": {
+          const diff = (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
-        case "PRICE_LOW_TO_HIGH":
-          return ((a.startingPrice ?? 999) - (b.startingPrice ?? 999)) * dir
+        case "PRICE_LOW_TO_HIGH": {
+          const priceA = a.halfWashPrice ?? a.startingPrice ?? 99999
+          const priceB = b.halfWashPrice ?? b.startingPrice ?? 99999
+          const diff = priceA - priceB
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
-        case "PRICE_HIGH_TO_LOW":
-          return ((b.startingPrice ?? 0) - (a.startingPrice ?? 0)) * dir
+        case "PRICE_HIGH_TO_LOW": {
+          const priceA = a.fullWashPrice ?? a.startingPrice ?? 0
+          const priceB = b.fullWashPrice ?? b.startingPrice ?? 0
+          const diff = priceB - priceA
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
-        case "NEWEST":
-          return (new Date(b.station.getProps().createdAt).getTime() - new Date(a.station.getProps().createdAt).getTime()) * dir
+        case "NEWEST": {
+          const diff = (new Date(b.station.getProps().createdAt).getTime() - new Date(a.station.getProps().createdAt).getTime()) * dir
+          if (diff !== 0) return diff
+          return a.station.id.localeCompare(b.station.id)
+        }
 
         case "RECOMMENDED":
         default: {
-          // Sort by computed smart score descending
           const scoreA = a.score ?? StationRankingService.computeScore(a)
           const scoreB = b.score ?? StationRankingService.computeScore(b)
-          return scoreB - scoreA
+          const diff = scoreB - scoreA
+          if (Math.abs(diff) > 0.0001) return diff
+          return a.station.id.localeCompare(b.station.id)
         }
       }
     })

@@ -72,6 +72,12 @@ export interface Station {
   status: StationStatus
   isActive: boolean
   distanceKm?: number
+  startingPrice?: number
+  halfWashPrice?: number
+  fullWashPrice?: number
+  estimatedWaitMins?: number
+  queueDepth?: number
+  isOpen?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -297,6 +303,9 @@ export type UpdateStationInput =
 export interface FilterOptions {
   sortBy: StationSortBy | string
   vehicleCategory: string
+  vehicleClassId?: string
+  selectedVehicleId?: string
+  washType?: WashType
   maxDistanceKm: number
   minRating: number
   minPrice?: number
@@ -312,8 +321,13 @@ export interface FilterOptions {
 export const DEFAULT_FILTERS: FilterOptions = {
   sortBy: "RECOMMENDED",
   vehicleCategory: "all",
+  vehicleClassId: undefined,
+  selectedVehicleId: undefined,
+  washType: "ALL",
   maxDistanceKm: 25,
   minRating: 0,
   openNow: false,
+  verifiedOnly: false,
+  amenities: [],
 }
 

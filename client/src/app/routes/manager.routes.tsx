@@ -4,7 +4,7 @@ const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
-const BookingManagement = lazy(() => import("@/features/booking/pages/BookingManagement"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 

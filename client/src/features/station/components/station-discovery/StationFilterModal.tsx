@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react"
-import { X, Star, Bike, Car, Truck, SlidersHorizontal } from "lucide-react"
+import { X, Star, Bike, Car, Truck, SlidersHorizontal, Check, Sparkles } from "lucide-react"
 import { vehicleCatelogApi } from "@/shared/apis/catelog.api"
+import { stationApi } from "@/shared/apis/station.api"
+import { useVehicleStore } from "@/features/vehicle/store/vehicle.store"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import type { VehicleCategory } from "@/features/vehicle-catelog/types"
-import { DEFAULT_FILTERS, type FilterOptions } from "../../types"
+import { DEFAULT_FILTERS, type FilterOptions, type FilterMetadata } from "../../types"
 
 interface StationFilterModalProps {
   isOpen: boolean
@@ -21,7 +24,6 @@ const SORT_OPTIONS: { id: FilterOptions["sortBy"]; label: string }[] = [
   { id: "PRICE_HIGH_TO_LOW", label: "Price: High to Low" },
 ]
 
-
 const DISTANCE_PRESETS = [2, 5, 10, 20, 50]
 
 const RATING_OPTIONS = [
@@ -39,6 +41,8 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
   onApplyFilters,
   onResetFilters,
 }) => {
+  const { isAuthenticated } = useAuthStore()
+  const { vehicles, loadVehicles } = useVehicleStore()
   const [draftFilters, setDraftFilters] = useState<FilterOptions>(currentFilters)
   const [isVisible, setIsVisible] = useState(false)
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
@@ -53,28 +57,41 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     }
   }
 
-  // Dynamic Categories from Backend Server
+  // Dynamic Metadata from Backend Server
   const [categories, setCategories] = useState<VehicleCategory[]>([])
-  const [loadingCategories, setLoadingCategories] = useState(false)
+  const [filterMetadata, setFilterMetadata] = useState<FilterMetadata | null>(null)
+  const [loadingMetadata, setLoadingMetadata] = useState(false)
 
-  // Fetch backend categories on mount
+  // Fetch backend categories and filter options metadata
   useEffect(() => {
-    const fetchBackendCategories = async () => {
-      setLoadingCategories(true)
+    const fetchMetadata = async () => {
+      setLoadingMetadata(true)
       try {
-        const data = await vehicleCatelogApi.getCategories()
-        if (data && data.length > 0) {
-          setCategories(data.filter((c) => c.isActive !== false))
+        const [catData, metaData] = await Promise.all([
+          vehicleCatelogApi.getCategories().catch(() => []),
+          stationApi.getFilterOptions().catch(() => null),
+        ])
+
+        if (catData && catData.length > 0) {
+          setCategories(catData.filter((c) => c.isActive !== false))
+        }
+        if (metaData) {
+          setFilterMetadata(metaData)
         }
       } catch {
-        // Fallback or quiet catch
+        // Quiet fallback
       } finally {
-        setLoadingCategories(false)
+        setLoadingMetadata(false)
       }
     }
 
-    fetchBackendCategories()
-  }, [])
+    if (isOpen) {
+      fetchMetadata()
+      if (isAuthenticated && vehicles.length === 0) {
+        loadVehicles()
+      }
+    }
+  }, [isOpen, isAuthenticated, vehicles.length, loadVehicles])
 
   // Handle smooth open transition state
   useEffect(() => {
@@ -93,6 +110,8 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     let count = 0
     if (draftFilters.sortBy !== DEFAULT_FILTERS.sortBy) count++
     if (draftFilters.vehicleCategory !== DEFAULT_FILTERS.vehicleCategory) count++
+    if (draftFilters.vehicleClassId) count++
+    if (draftFilters.selectedVehicleId) count++
     if (draftFilters.maxDistanceKm !== DEFAULT_FILTERS.maxDistanceKm) count++
     if (draftFilters.minRating > 0) count++
     return count
@@ -110,7 +129,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     onClose()
   }
 
-  // Get icon component for category based on name/slug
   const getCategoryIcon = (name: string, slug?: string) => {
     const term = `${name} ${slug || ""}`.toLowerCase()
     if (term.includes("bike") || term.includes("two") || term.includes("cycle")) return Bike
@@ -120,7 +138,7 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Dimmed Backdrop with smooth fade transition */}
+      {/* Dimmed Backdrop */}
       <div
         onClick={onClose}
         className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
@@ -128,13 +146,13 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
         }`}
       />
 
-      {/* Full Width Bottom Sheet Container with smooth pop-up slide transition */}
+      {/* Full Width Bottom Sheet Container */}
       <div
         className={`relative w-full max-w-full max-h-[92vh] flex flex-col rounded-t-[36px] sm:rounded-t-[44px] bg-card border-t border-border shadow-2xl z-10 overflow-hidden transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
       >
-        {/* Drag Handle Bar Indicator */}
+        {/* Drag Handle Bar */}
         <div className="flex justify-center items-center pt-3.5 pb-1 shrink-0">
           <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
         </div>
@@ -145,11 +163,11 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
             <div className="flex items-center gap-2.5">
               <SlidersHorizontal className="w-6 h-6 text-primary" />
               <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                Station Filter & Sort
+                Station Filter & Search
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Refine your search to find the perfect cleaning station for your vehicle and schedule.
+              Filter stations by your vehicle, wash type, distance, amenities, and ratings.
             </p>
           </div>
 
@@ -165,11 +183,68 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
         {/* Scrollable Content Body - Two Columns */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-12 py-8 text-foreground">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-            {/* PART 1: SORT & CATEGORY PREFERENCES */}
+            {/* PART 1: VEHICLE & WASH TYPE PREFERENCES */}
             <div className="space-y-8 pr-0 lg:pr-6 border-b lg:border-b-0 lg:border-r border-border/60 pb-8 lg:pb-0">
+              {/* REGISTERED USER VEHICLES */}
+              {isAuthenticated && vehicles.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      MY REGISTERED VEHICLES
+                    </h3>
+                    <span className="text-[11px] text-muted-foreground font-medium">Select vehicle to check exact station rates</span>
+                  </div>
 
+                  <div className="flex flex-wrap gap-2.5">
+                    {/* Clear vehicle selection option */}
+                    <button
+                      onClick={() =>
+                        setDraftFilters((prev) => ({
+                          ...prev,
+                          selectedVehicleId: undefined,
+                          vehicleClassId: undefined,
+                        }))
+                      }
+                      className={`px-4 py-2.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
+                        !draftFilters.selectedVehicleId
+                          ? "bg-primary/10 border-primary text-primary shadow-sm"
+                          : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      No Specific Vehicle
+                    </button>
 
-              {/* Subheading: SORT BY */}
+                    {vehicles.map((v) => {
+                      const isSelected = draftFilters.selectedVehicleId === v.id
+                      return (
+                        <button
+                          key={v.id}
+                          onClick={() =>
+                            setDraftFilters((prev) => ({
+                              ...prev,
+                              selectedVehicleId: v.id,
+                              vehicleClassId: v.classId,
+                              vehicleCategory: v.categoryId,
+                            }))
+                          }
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
+                              : "bg-muted/50 border-border text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <Car className="w-3.5 h-3.5 shrink-0" />
+                          <span>{v.nickname || `${v.brand} ${v.model}`}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 ml-0.5" />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SORT BY */}
               <div className="space-y-3">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                   SORT BY
@@ -194,21 +269,26 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               </div>
 
-              {/* Subheading: VEHICLE CATEGORY (Backend API Server Data) */}
+              {/* VEHICLE CATEGORY */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                     VEHICLE CATEGORY
                   </h3>
-                  {loadingCategories && (
-                    <span className="text-[11px] text-muted-foreground animate-pulse">Loading categories...</span>
+                  {loadingMetadata && (
+                    <span className="text-[11px] text-muted-foreground animate-pulse">Loading data...</span>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {/* All Vehicles option */}
                   <button
-                    onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleCategory: "all" }))}
+                    onClick={() =>
+                      setDraftFilters((prev) => ({
+                        ...prev,
+                        vehicleCategory: "all",
+                        vehicleClassId: undefined,
+                      }))
+                    }
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
                       draftFilters.vehicleCategory === "all"
                         ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
@@ -219,14 +299,19 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                     <span>All Vehicles</span>
                   </button>
 
-                  {/* Backend Categories */}
                   {categories.map((cat) => {
                     const Icon = getCategoryIcon(cat.name, cat.slug)
                     const isActive = draftFilters.vehicleCategory === cat.id || draftFilters.vehicleCategory === cat.name
                     return (
                       <button
                         key={cat.id}
-                        onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleCategory: cat.id }))}
+                        onClick={() =>
+                          setDraftFilters((prev) => ({
+                            ...prev,
+                            vehicleCategory: cat.id,
+                            vehicleClassId: undefined,
+                          }))
+                        }
                         className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
                           isActive
                             ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
@@ -240,12 +325,57 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                   })}
                 </div>
               </div>
+
+              {/* VEHICLE CLASSES (Sub-classes matching selected category) */}
+              {filterMetadata?.vehicleClasses && filterMetadata.vehicleClasses.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                    SPECIFIC VEHICLE CLASS
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <button
+                      onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleClassId: undefined }))}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
+                        !draftFilters.vehicleClassId
+                          ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                          : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Sparkles className="w-4 h-4 shrink-0" />
+                      <span>Any Class</span>
+                    </button>
+                    {filterMetadata.vehicleClasses
+                      .filter((c) =>
+                        draftFilters.vehicleCategory === "all"
+                          ? true
+                          : c.categoryId === draftFilters.vehicleCategory
+                      )
+                      .map((cls) => {
+                        const isSelected = draftFilters.vehicleClassId === cls.id
+                        const ClassIcon = getCategoryIcon(cls.name)
+                        return (
+                          <button
+                            key={cls.id}
+                            onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleClassId: cls.id }))}
+                            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
+                              isSelected
+                                ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
+                                : "bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                            }`}
+                          >
+                            <ClassIcon className="w-4 h-4 shrink-0" />
+                            <span>{cls.name}</span>
+                          </button>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* PART 2: DISTANCE & RATINGS */}
+            {/* PART 2: DISTANCE, RATING & AMENITIES */}
             <div className="space-y-8">
-  
-              {/* Subheading: DISTANCE FILTER */}
+              {/* DISTANCE FILTER */}
               <div className="space-y-4">
                 <div className="flex justify-between items-baseline">
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
@@ -288,7 +418,7 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               </div>
 
-              {/* Subheading: MINIMUM RATING */}
+              {/* MINIMUM RATING */}
               <div className="space-y-3">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                   MINIMUM RATING
