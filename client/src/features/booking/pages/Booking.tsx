@@ -128,6 +128,7 @@ export default function Booking() {
   // Transform server windows into TimeSlotOption items
   const timeSlotOptions: TimeSlotOption[] = useMemo(() => {
     if (serverWindows.length > 0) {
+      const now = new Date()
       return serverWindows.map((w) => {
         const startDateObj = new Date(w.start)
         const endDateObj = new Date(w.end)
@@ -135,10 +136,15 @@ export default function Booking() {
           d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
         const timeWindow = `${formatTime(startDateObj)} - ${formatTime(endDateObj)}`
 
-        let label = `${w.remainingCapacity} slots left`
-        let status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL" = "AVAILABLE"
+        const isPast = w.status === "PAST" || endDateObj.getTime() <= now.getTime()
 
-        if (w.status === "FULL" || w.remainingCapacity <= 0) {
+        let label = `${w.remainingCapacity} slots left`
+        let status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL" | "PAST" = "AVAILABLE"
+
+        if (isPast) {
+          status = "PAST"
+          label = "Time Elapsed"
+        } else if (w.status === "FULL" || w.remainingCapacity <= 0) {
           status = "FULL"
           label = "Fully Booked"
         } else if (w.remainingCapacity <= 2) {

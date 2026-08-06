@@ -5,8 +5,8 @@ import DatePicker from "@/shared/components/ui/DatePicker"
 export interface TimeSlotOption {
   id: string
   timeWindow: string // e.g. "09:00 - 10:00"
-  label: string // e.g. "Morning Slot", "Selected", "Fully Booked", "Limited Availability", "2 Slots Left"
-  status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL"
+  label: string // e.g. "Morning Slot", "Selected", "Fully Booked", "Time Elapsed", "2 Slots Left"
+  status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL" | "PAST"
   slotsLeft?: number
 }
 
@@ -159,7 +159,9 @@ export default function TimeSlotSelectionStep({
             {slots.map((slot) => {
               const isSelected = selectedSlotId === slot.id
               const isFull = slot.status === "FULL"
+              const isPast = slot.status === "PAST"
               const isLimited = slot.status === "LIMITED"
+              const isDisabled = isFull || isPast
 
               let cardStyle = "border-border bg-card hover:border-primary/50 cursor-pointer shadow-xs"
               let timeStyle = "text-foreground"
@@ -170,9 +172,14 @@ export default function TimeSlotSelectionStep({
                   "border-2 border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 scale-[1.01] cursor-pointer"
                 timeStyle = "text-emerald-600 dark:text-emerald-400"
                 subStyle = "text-emerald-600/80 dark:text-emerald-400/80 font-medium"
+              } else if (isPast) {
+                cardStyle =
+                  "border-border/40 bg-muted/30 opacity-40 cursor-not-allowed pointer-events-none"
+                timeStyle = "text-muted-foreground/60 line-through"
+                subStyle = "text-muted-foreground/60 font-semibold"
               } else if (isFull) {
                 cardStyle =
-                  "border-border/50 bg-muted/40 opacity-50 cursor-not-allowed"
+                  "border-border/50 bg-muted/40 opacity-50 cursor-not-allowed pointer-events-none"
                 timeStyle = "text-muted-foreground line-through"
                 subStyle = "text-red-500 font-bold"
               } else if (isLimited) {
@@ -185,7 +192,7 @@ export default function TimeSlotSelectionStep({
                 <div
                   key={slot.id}
                   onClick={() => {
-                    if (!isFull) onSelectSlot(slot.id)
+                    if (!isDisabled) onSelectSlot(slot.id)
                   }}
                   className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${cardStyle}`}
                 >
@@ -194,7 +201,7 @@ export default function TimeSlotSelectionStep({
                       {slot.timeWindow}
                     </span>
                     <span className={`text-xs ${subStyle}`}>
-                      {isSelected ? "Selected" : isFull ? "Fully Booked" : slot.label}
+                      {isSelected ? "Selected" : isPast ? "Time Elapsed" : isFull ? "Fully Booked" : slot.label}
                     </span>
                   </div>
 
@@ -202,6 +209,8 @@ export default function TimeSlotSelectionStep({
                     <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <Check size={13} className="stroke-[3]" />
                     </div>
+                  ) : isPast ? (
+                    <Ban size={16} className="text-muted-foreground/40 shrink-0" />
                   ) : isFull ? (
                     <Ban size={16} className="text-red-400 shrink-0" />
                   ) : isLimited ? (
