@@ -23,6 +23,8 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   const {
     searchQuery,
     activeTab,
+    selectedStationId,
+    ownerStations,
     page,
     bookings,
     filteredBookings,
@@ -193,7 +195,27 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         </div>
 
         {/* Manager Assigned Station Badge or Info */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {isOwner && ownerStations.length > 0 && (
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
+              <Building2 size={15} className="text-primary shrink-0" />
+              <select
+                value={selectedStationId}
+                onChange={(e) => updateParams({ stationId: e.target.value, page: 1 })}
+                className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="ALL" className="bg-card text-foreground">
+                  All Stations ({ownerStations.length})
+                </option>
+                {ownerStations.map((st) => (
+                  <option key={st.id} value={st.id} className="bg-card text-foreground">
+                    {st.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {isManager && (
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
               <Building2 size={15} className="text-primary shrink-0" />
@@ -244,6 +266,22 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         searchQuery={searchQuery}
         onSearchChange={(q) => updateParams({ q, page: 1 })}
         searchPlaceholder="Search booking ID, customer name, vehicle plate..."
+        selectFilters={
+          isOwner && ownerStations.length > 0
+            ? [
+                {
+                  id: "stationFilter",
+                  label: "Filter by Station",
+                  value: selectedStationId,
+                  onChange: (val) => updateParams({ stationId: val, page: 1 }),
+                  options: [
+                    { label: "All Stations", value: "ALL" },
+                    ...ownerStations.map((st) => ({ label: st.name, value: st.id })),
+                  ],
+                },
+              ]
+            : undefined
+        }
         isLoading={isLoading}
         emptyMessage="No bookings found. There are no reservations matching your current search or status filter."
         pagination={paginationMeta}

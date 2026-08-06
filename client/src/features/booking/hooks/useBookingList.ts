@@ -34,8 +34,20 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
   // Query state from URL
   const searchQuery = searchParams.get("q") || ""
   const activeTab = (searchParams.get("tab") as BookingStatus) || "ALL"
+  const selectedStationId = searchParams.get("stationId") || "ALL"
   const page = parseInt(searchParams.get("page") || "1", 10)
   const refetchParam = searchParams.get("refetch")
+
+  // Derive unique stations for owner station filtering
+  const ownerStations = useMemo(() => {
+    const map = new Map<string, string>()
+    bookings.forEach((b) => {
+      if (b.stationId && b.stationName) {
+        map.set(b.stationId, b.stationName)
+      }
+    })
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
+  }, [bookings])
 
   // Helper to update query parameters
   const updateParams = useCallback(
@@ -70,6 +82,13 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
   // Filtered bookings calculation
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
+      // Station filter for owner view
+      if (selectedStationId && selectedStationId !== "ALL") {
+        if (b.stationId !== selectedStationId) {
+          return false
+        }
+      }
+
       if (activeTab !== "ALL") {
         if (activeTab === "IN_PROGRESS") {
           if (b.status !== "IN_PROGRESS" && b.status !== "IN_SERVICE" && b.status !== "CHECKED_IN") {
@@ -93,7 +112,7 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
 
       return true
     })
-  }, [bookings, activeTab, searchQuery])
+  }, [bookings, selectedStationId, activeTab, searchQuery])
 
   // Handle Cancel Submit
   const handleConfirmCancel = async () => {
@@ -111,6 +130,8 @@ export function useBookingList({ isManager = false }: UseBookingListOptions = {}
   return {
     searchQuery,
     activeTab,
+    selectedStationId,
+    ownerStations,
     page,
     bookings,
     filteredBookings,
