@@ -2,6 +2,7 @@ import { Types } from "mongoose"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { StationModel } from "@/modules/station/infrastructure/models/station.model"
+import { ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import {
   IGetManagedStationsUseCase,
   ManagedStationResponse,
@@ -42,12 +43,12 @@ export class GetManagedStationsUseCase implements IGetManagedStationsUseCase {
           stationName: doc.name,
           stationAddress: doc.address ? `${doc.address.street}, ${doc.address.city}` : "",
           permissions: [
-            "BOOKING_MANAGEMENT",
-            "QUEUE_MANAGEMENT",
-            "CUSTOMER_MANAGEMENT",
-            "PRICING_MANAGEMENT",
-            "REPORTS_VIEW",
-            "STATION_SETTINGS",
+            ManagerPermission.BOOKING_MANAGEMENT,
+            ManagerPermission.QUEUE_MANAGEMENT,
+            ManagerPermission.CUSTOMER_MANAGEMENT,
+            ManagerPermission.PRICING_MANAGEMENT,
+            ManagerPermission.REPORTS_VIEW,
+            ManagerPermission.STATION_SETTINGS,
           ],
           status: "ACTIVE",
         })
