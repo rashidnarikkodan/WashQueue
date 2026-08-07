@@ -1,6 +1,9 @@
 import { Types } from "mongoose"
 import { Booking, BookingStatus } from "../../domain/entities/Booking"
-import { FindUserBookingsFilter, IBookingRepository } from "../../domain/repositories/booking.repository"
+import {
+  FindUserBookingsFilter,
+  IBookingRepository,
+} from "../../domain/repositories/booking.repository"
 import { BookingModel } from "../models/booking.model"
 import { BookingMapper } from "../mappers/booking.mapper"
 
@@ -50,7 +53,12 @@ export class BookingMongoRepository implements IBookingRepository {
 
     if (filter.upcomingOnly) {
       query.status = {
-        $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE],
+        $in: [
+          BookingStatus.PENDING,
+          BookingStatus.CONFIRMED,
+          BookingStatus.CHECKED_IN,
+          BookingStatus.IN_SERVICE,
+        ],
       }
     } else if (filter.historyOnly) {
       query.status = {
@@ -107,11 +115,7 @@ export class BookingMongoRepository implements IBookingRepository {
     }
 
     const raw = BookingMapper.toPersistence(booking)
-    const updated = await BookingModel.findByIdAndUpdate(
-      booking.id,
-      { $set: raw },
-      { new: true }
-    )
+    const updated = await BookingModel.findByIdAndUpdate(booking.id, { $set: raw }, { new: true })
       .populate("stationId")
       .populate("vehicleId")
       .populate("userId")

@@ -13,7 +13,7 @@ export class GetCategoriesUseCase implements IGetCategoriesUseCase {
       slug: category.slug,
       description: category.description,
       order: category.order,
-      isActive: category.isActive
+      isActive: category.isActive,
     }))
   }
 }

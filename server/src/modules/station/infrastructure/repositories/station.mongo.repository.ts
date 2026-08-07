@@ -1,14 +1,21 @@
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 import { IStation, StationModel } from "../models/station.model"
 import { Station } from "../../domain/entities/Station"
-import { IStationRepository, StationFilter, NearbyStationFilter } from "../../domain/repositories/station.repository"
+import {
+  IStationRepository,
+  StationFilter,
+  NearbyStationFilter,
+} from "../../domain/repositories/station.repository"
 import { StationMapper } from "../mappers/station.mapper"
 import { PipelineStage, Types } from "mongoose"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
 import { StationPricingModel } from "../models/station-pricing.model"
 import { ExtraServiceModel } from "../models/extra-service.model"
 import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
-import { StationRankingService, HydratedStationItem } from "../../domain/services/station-ranking.service"
+import {
+  StationRankingService,
+  HydratedStationItem,
+} from "../../domain/services/station-ranking.service"
 import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
 import { StationStatusCounts } from "../../application/dtos/get-stations.dto"
 
@@ -62,7 +69,9 @@ export class StationMongoRepository
   ): Promise<Station | null> {
     const query: Record<string, unknown> = {
       ownerId: Types.ObjectId.isValid(ownerId) ? new Types.ObjectId(ownerId) : ownerId,
-      managerId: Types.ObjectId.isValid(managerUserId) ? new Types.ObjectId(managerUserId) : managerUserId,
+      managerId: Types.ObjectId.isValid(managerUserId)
+        ? new Types.ObjectId(managerUserId)
+        : managerUserId,
     }
 
     if (excludeStationId && Types.ObjectId.isValid(excludeStationId)) {
@@ -98,7 +107,9 @@ export class StationMongoRepository
     return docs.map((doc) => this.mapper.toDomain(doc))
   }
 
-  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }> {
+  async findAll(
+    filter: StationFilter
+  ): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }> {
     const page = Math.max(1, Number(filter.page) || 1)
     const limit = Math.max(1, Number(filter.limit) || 10)
 
@@ -162,7 +173,9 @@ export class StationMongoRepository
         const catId = new Types.ObjectId(filter.vehicleCategory)
         const found = await VehicleClassModel.find({
           $or: [{ categoryId: catId }, { _id: catId }],
-        }).select("_id").exec()
+        })
+          .select("_id")
+          .exec()
         matchingClassIds = found.map((c) => c._id as Types.ObjectId)
         if (matchingClassIds.length === 0) matchingClassIds = [catId]
       }
@@ -178,11 +191,18 @@ export class StationMongoRepository
     }
 
     const pricings = await StationPricingModel.find(pricingQuery).exec()
-    const stationPricingMap = new Map<string, Array<{ half: number; full: number; vehicleClassId: string }>>()
+    const stationPricingMap = new Map<
+      string,
+      Array<{ half: number; full: number; vehicleClassId: string }>
+    >()
     pricings.forEach((p) => {
       const sid = p.stationId.toString()
       const list = stationPricingMap.get(sid) || []
-      list.push({ half: p.halfWashPrice, full: p.fullWashPrice, vehicleClassId: p.vehicleClassId.toString() })
+      list.push({
+        half: p.halfWashPrice,
+        full: p.fullWashPrice,
+        vehicleClassId: p.vehicleClassId.toString(),
+      })
       stationPricingMap.set(sid, list)
     })
 
@@ -190,7 +210,9 @@ export class StationMongoRepository
     let filterExtraServiceIds: Types.ObjectId[] | undefined = undefined
     if (filter.extraServices?.length || filter.extraServiceIds?.length) {
       const rawIds = filter.extraServices || filter.extraServiceIds || []
-      filterExtraServiceIds = rawIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id))
+      filterExtraServiceIds = rawIds
+        .filter((id) => Types.ObjectId.isValid(id))
+        .map((id) => new Types.ObjectId(id))
     }
 
     const extraServiceQuery: Record<string, unknown> = {
@@ -212,11 +234,18 @@ export class StationMongoRepository
     const liveStateMap = await StationRedisHydrationService.hydrateLiveStates(candidateStations)
 
     // --- PHASE 4: Build Hydrated Candidate Items & Apply Relational Filters ---
-    let hydratedItems: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[] = []
+    let hydratedItems: (HydratedStationItem & {
+      halfWashPrice?: number
+      fullWashPrice?: number
+    })[] = []
 
     for (const station of candidateStations) {
       const sid = station.id
-      const liveState = liveStateMap.get(sid) || { queueDepth: 0, estimatedWaitMins: 0, isOpen: true }
+      const liveState = liveStateMap.get(sid) || {
+        queueDepth: 0,
+        estimatedWaitMins: 0,
+        isOpen: true,
+      }
 
       // Filter openNow
       if (filter.openNow && !liveState.isOpen) {
@@ -229,7 +258,11 @@ export class StationMongoRepository
       }
 
       // Filter extra services if filter active and no extra services matched
-      if (filterExtraServiceIds && filterExtraServiceIds.length > 0 && !stationExtraServicesMap.has(sid)) {
+      if (
+        filterExtraServiceIds &&
+        filterExtraServiceIds.length > 0 &&
+        !stationExtraServicesMap.has(sid)
+      ) {
         continue
       }
 
@@ -255,13 +288,18 @@ export class StationMongoRepository
       }
 
       // Wash Type Filter
-      if (filter.washType === 'HALF' && halfWashPrice === undefined) continue
-      if (filter.washType === 'FULL' && fullWashPrice === undefined) continue
+      if (filter.washType === "HALF" && halfWashPrice === undefined) continue
+      if (filter.washType === "FULL" && fullWashPrice === undefined) continue
 
       // Price Range Filter
       const minP = filter.minPrice ?? filter.minHalfWashPrice ?? filter.minFullWashPrice
       const maxP = filter.maxPrice ?? filter.maxHalfWashPrice ?? filter.maxFullWashPrice
-      const comparePrice = filter.washType === 'HALF' ? halfWashPrice : filter.washType === 'FULL' ? fullWashPrice : startingPrice
+      const comparePrice =
+        filter.washType === "HALF"
+          ? halfWashPrice
+          : filter.washType === "FULL"
+            ? fullWashPrice
+            : startingPrice
       if (comparePrice !== undefined) {
         if (typeof minP === "number" && comparePrice < minP) continue
         if (typeof maxP === "number" && comparePrice > maxP) continue
@@ -398,8 +436,12 @@ export class StationMongoRepository
       try {
         const ownerDoc = await OwnerModel.findOne({
           $or: [
-            ...(Types.ObjectId.isValid(ownerIdStr) ? [{ _id: new Types.ObjectId(ownerIdStr) }] : []),
-            ...(Types.ObjectId.isValid(ownerIdStr) ? [{ userId: new Types.ObjectId(ownerIdStr) }] : []),
+            ...(Types.ObjectId.isValid(ownerIdStr)
+              ? [{ _id: new Types.ObjectId(ownerIdStr) }]
+              : []),
+            ...(Types.ObjectId.isValid(ownerIdStr)
+              ? [{ userId: new Types.ObjectId(ownerIdStr) }]
+              : []),
           ],
         }).exec()
 

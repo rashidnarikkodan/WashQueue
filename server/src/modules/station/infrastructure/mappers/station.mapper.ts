@@ -1,10 +1,6 @@
 import { Types } from "mongoose"
 import { IMapper } from "@/core/domain/repository.interface"
-import {
-  Station,
-  StationProps,
-  StationStatus,
-} from "../../domain/entities/Station"
+import { Station, StationProps, StationStatus } from "../../domain/entities/Station"
 import { IStation } from "../models/station.model"
 
 export class StationMapper implements IMapper<Station, IStation> {

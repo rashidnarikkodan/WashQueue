@@ -69,9 +69,9 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
   }
 }
 
-export class StationStep2Parser
-  implements IStationStepParser<{ step: 2 } & UpdateAvailabilityInput>
-{
+export class StationStep2Parser implements IStationStepParser<
+  { step: 2 } & UpdateAvailabilityInput
+> {
   supports(step: number): boolean {
     return step === 2
   }
@@ -82,7 +82,10 @@ export class StationStep2Parser
     const slotConfig = safeJsonParse(req.body.slotConfig, req.body.slotConfig)
 
     if (!slotConfig) {
-      throw new AppError("slotConfig is required for step 2 availability update", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "slotConfig is required for step 2 availability update",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     return {
@@ -94,9 +97,7 @@ export class StationStep2Parser
   }
 }
 
-export class StationStep3Parser
-  implements IStationStepParser<{ step: 3 } & UpsertPricingInput>
-{
+export class StationStep3Parser implements IStationStepParser<{ step: 3 } & UpsertPricingInput> {
   supports(step: number): boolean {
     return step === 3
   }
@@ -111,9 +112,7 @@ export class StationStep3Parser
   }
 }
 
-export class StationStep4Parser
-  implements IStationStepParser<{ step: 4 } & UpdateAmenitiesInput>
-{
+export class StationStep4Parser implements IStationStepParser<{ step: 4 } & UpdateAmenitiesInput> {
   supports(step: number): boolean {
     return step === 4
   }

@@ -23,7 +23,7 @@ export class DeleteVehicleUseCase implements IDeleteVehicleUseCase {
     if (wasPrimary) {
       vehicle.data.isPrimary = false
     }
-    
+
     await this.vehicleRepository.save(vehicle)
 
     // If it was primary, set another active vehicle as primary

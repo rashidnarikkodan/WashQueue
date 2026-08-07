@@ -17,11 +17,7 @@ export const createBookingRouter = (bookingController: BookingController): Route
   router.use(authenticate)
 
   // Customer Routes
-  router.post(
-    "/",
-    validateRequest(createBookingSchema),
-    asyncHandler(bookingController.create)
-  )
+  router.post("/", validateRequest(createBookingSchema), asyncHandler(bookingController.create))
 
   router.get("/", asyncHandler(bookingController.getUserBookings))
   router.get("/upcoming", asyncHandler(bookingController.getUpcoming))

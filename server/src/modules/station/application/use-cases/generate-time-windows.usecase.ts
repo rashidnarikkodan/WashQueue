@@ -15,7 +15,10 @@ export class GenerateTimeWindowsUseCase {
     private timeWindowGenerationService: TimeWindowGenerationService
   ) {}
 
-  async execute(stationId: string, forceRegenerate: boolean = false): Promise<TimeWindowInstance[]> {
+  async execute(
+    stationId: string,
+    forceRegenerate: boolean = false
+  ): Promise<TimeWindowInstance[]> {
     const station = await this.stationRepository.findById(stationId)
     if (!station) {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
@@ -72,7 +75,11 @@ export class GenerateTimeWindowsUseCase {
       await this.timeWindowRepository.saveMany(candidateWindows)
     }
 
-    return this.timeWindowRepository.findByStationIdAndDateRange(stationId, startDateStr, endDateStr)
+    return this.timeWindowRepository.findByStationIdAndDateRange(
+      stationId,
+      startDateStr,
+      endDateStr
+    )
   }
 
   private formatDateISO(d: Date): string {

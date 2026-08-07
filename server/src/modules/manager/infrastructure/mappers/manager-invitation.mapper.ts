@@ -1,8 +1,5 @@
 import { Types } from "mongoose"
-import {
-  ManagerInvitation,
-  ManagerInvitationStatus,
-} from "../../domain/entities/ManagerInvitation"
+import { ManagerInvitation, ManagerInvitationStatus } from "../../domain/entities/ManagerInvitation"
 import { ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import { IManagerInvitation } from "../models/manager-invitation.model"
 

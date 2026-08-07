@@ -29,12 +29,16 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
     }
 
     if (!owner?.isVerified) {
-      throw new ForbiddenError("Your owner account is pending approval by an administrator before you can submit stations.")
+      throw new ForbiddenError(
+        "Your owner account is pending approval by an administrator before you can submit stations."
+      )
     }
 
-
     if (station.status !== StationStatus.DRAFT && station.status !== StationStatus.REJECTED) {
-      throw new AppError("Only draft or rejected stations can be submitted for review", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "Only draft or rejected stations can be submitted for review",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const props = station.getProps()

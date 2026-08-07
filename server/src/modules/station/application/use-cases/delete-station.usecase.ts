@@ -29,10 +29,7 @@ export class DeleteStationUseCase implements IDeleteStationUseCase {
 
     const deletableStatuses = [StationStatus.DRAFT, StationStatus.REJECTED]
     if (!deletableStatuses.includes(station.status)) {
-      throw new AppError(
-        "Only draft or rejected stations can be deleted",
-        HTTP_STATUS.BAD_REQUEST
-      )
+      throw new AppError("Only draft or rejected stations can be deleted", HTTP_STATUS.BAD_REQUEST)
     }
 
     const runDelete = async (session?: unknown) => {

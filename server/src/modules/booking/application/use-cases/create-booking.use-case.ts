@@ -52,7 +52,10 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     const pricings = await this.stationPricingRepository.findByStationId(station.id)
     const pricing = pricings.find((p) => p.vehicleClassId === vehicle.data.classId && p.isActive)
     if (!pricing) {
-      throw new AppError("Station does not support or have active pricing for this vehicle class", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "Station does not support or have active pricing for this vehicle class",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const basePrice = input.serviceType === "FULL" ? pricing.fullWashPrice : pricing.halfWashPrice
@@ -65,7 +68,10 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       for (const extraId of input.extraServiceIds) {
         const extra = availableExtras.find((e) => e.id === extraId && e.isActive)
         if (!extra) {
-          throw new AppError(`Extra service ${extraId} is invalid or inactive for this station`, HTTP_STATUS.BAD_REQUEST)
+          throw new AppError(
+            `Extra service ${extraId} is invalid or inactive for this station`,
+            HTTP_STATUS.BAD_REQUEST
+          )
         }
 
         const classPricing = extra.pricing.find((p) => p.vehicleClassId === vehicle.data.classId)
@@ -87,13 +93,19 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
 
     timeWindow.updateStatusBasedOnTimeAndCapacity()
     if (!timeWindow.isBookable) {
-      throw new AppError("Selected time window is no longer available or is full", HTTP_STATUS.CONFLICT)
+      throw new AppError(
+        "Selected time window is no longer available or is full",
+        HTTP_STATUS.CONFLICT
+      )
     }
 
     // 6. Reserve Capacity Atomically
     const reservedWindow = await this.timeWindowRepository.reserveCapacityAtomically(timeWindow.id)
     if (!reservedWindow) {
-      throw new AppError("Failed to reserve capacity for time window. It may have filled up.", HTTP_STATUS.CONFLICT)
+      throw new AppError(
+        "Failed to reserve capacity for time window. It may have filled up.",
+        HTTP_STATUS.CONFLICT
+      )
     }
 
     // 7. Calculate Pricing & Settlement Snapshots
@@ -134,7 +146,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus: input.paymentType === "ONLINE_FULL" ? PaymentStatus.PAID : PaymentStatus.PENDING,
+      paymentStatus:
+        input.paymentType === "ONLINE_FULL" ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType: input.paymentType,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,

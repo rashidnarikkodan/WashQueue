@@ -10,7 +10,11 @@ import { VehicleProps } from "../../domain/entities/Vehicle"
 export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
 
-  async execute(vehicleId: string, userId: string, dto: UpdateVehicleDto): Promise<VehicleResponseDto> {
+  async execute(
+    vehicleId: string,
+    userId: string,
+    dto: UpdateVehicleDto
+  ): Promise<VehicleResponseDto> {
     const vehicle = await this.vehicleRepository.findById(vehicleId)
     if (!vehicle || !vehicle.data.isActive) {
       throw new NotFoundError("Vehicle not found")

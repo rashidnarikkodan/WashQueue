@@ -37,7 +37,9 @@ export class BookingDTOMapper {
       checkedInAt: props.checkedInAt ? props.checkedInAt.toISOString() : null,
       serviceStartedAt: props.serviceStartedAt ? props.serviceStartedAt.toISOString() : null,
       serviceCompletedAt: props.serviceCompletedAt ? props.serviceCompletedAt.toISOString() : null,
-      handoverInitiatedAt: props.handoverInitiatedAt ? props.handoverInitiatedAt.toISOString() : null,
+      handoverInitiatedAt: props.handoverInitiatedAt
+        ? props.handoverInitiatedAt.toISOString()
+        : null,
       completedAt: props.completedAt ? props.completedAt.toISOString() : null,
       noShowAt: props.noShowAt ? props.noShowAt.toISOString() : null,
       cancellation: props.cancellation

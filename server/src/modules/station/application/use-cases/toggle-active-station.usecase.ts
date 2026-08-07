@@ -28,7 +28,6 @@ export class ToggleActiveStationUseCase implements IToggleActiveStationUseCase {
       throw new ForbiddenError("Your owner account is pending approval by an administrator.")
     }
 
-
     if (station.status !== StationStatus.ACTIVE && station.status !== StationStatus.INACTIVE) {
       throw new AppError(
         "Only approved (active or inactive) stations can be toggled",

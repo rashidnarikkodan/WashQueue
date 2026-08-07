@@ -68,10 +68,7 @@ const configureSlotConfigUseCase = new ConfigureSlotConfigUseCase(
   generateTimeWindowsUseCase
 )
 
-const getSlotConfigUseCase = new GetSlotConfigUseCase(
-  stationRepository,
-  slotConfigRepository
-)
+const getSlotConfigUseCase = new GetSlotConfigUseCase(stationRepository, slotConfigRepository)
 
 const getBookingCalendarUseCase = new GetBookingCalendarUseCase(
   stationRepository,
@@ -152,4 +149,3 @@ const stationController = new StationController(
 const stationRouter = createRouter(stationController)
 
 export default stationRouter
-

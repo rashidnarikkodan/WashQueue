@@ -1,4 +1,9 @@
-import { StationContact, StationLocation, StationAddress, StationImage } from "../../domain/entities/Station"
+import {
+  StationContact,
+  StationLocation,
+  StationAddress,
+  StationImage,
+} from "../../domain/entities/Station"
 
 export interface CreateStationInput {
   name: string
@@ -9,4 +14,3 @@ export interface CreateStationInput {
   images?: StationImage[]
   newFiles?: Express.Multer.File[]
 }
-

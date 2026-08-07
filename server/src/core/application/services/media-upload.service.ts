@@ -14,7 +14,10 @@ export class MediaUploadService {
     try {
       const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
       if (!uploaded || !uploaded.url) {
-        throw new AppError(`Failed to process upload for file ${file.originalname}`, HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        throw new AppError(
+          `Failed to process upload for file ${file.originalname}`,
+          HTTP_STATUS.INTERNAL_SERVER_ERROR
+        )
       }
       return uploaded
     } catch (err: unknown) {

@@ -7,10 +7,7 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
-import {
-  ManagerAssignment,
-  ManagerAssignmentStatus,
-} from "../../domain/entities/ManagerAssignment"
+import { ManagerAssignment, ManagerAssignmentStatus } from "../../domain/entities/ManagerAssignment"
 import {
   IAcceptInvitationUseCase,
   AcceptInvitationInput,
@@ -24,7 +21,10 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
     private readonly stationRepository?: IStationRepository
   ) {}
 
-  async execute(input: AcceptInvitationInput): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }> {
+  async execute(input: AcceptInvitationInput): Promise<{
+    message: string
+    user: { id: string; email: string; name?: string; role: string }
+  }> {
     const invitation = await this.managerInvitationRepository.findByToken(input.token)
     if (!invitation) {
       throw new NotFoundError("Invitation token not found")
@@ -74,7 +74,9 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       (a) => a.stationId !== invitation.stationId && a.status === ManagerAssignmentStatus.ACTIVE
     )
     if (otherActiveAssignment) {
-      throw new BadRequestError("You are already managing another station. A manager can only be assigned to one station.")
+      throw new BadRequestError(
+        "You are already managing another station. A manager can only be assigned to one station."
+      )
     }
 
     // Accept invitation

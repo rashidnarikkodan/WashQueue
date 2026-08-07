@@ -1,7 +1,4 @@
-import {
-  ManagerAssignment,
-  ManagerPermission,
-} from "../../domain/entities/ManagerAssignment"
+import { ManagerAssignment, ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import { ManagerInvitation } from "../../domain/entities/ManagerInvitation"
 
 export interface InviteManagerInput {
@@ -60,7 +57,9 @@ export interface IInviteManagerUseCase {
 }
 
 export interface IAcceptInvitationUseCase {
-  execute(input: AcceptInvitationInput): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }>
+  execute(
+    input: AcceptInvitationInput
+  ): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }>
 }
 
 export interface IRejectInvitationUseCase {

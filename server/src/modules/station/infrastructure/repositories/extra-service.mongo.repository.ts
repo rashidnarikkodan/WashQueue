@@ -38,7 +38,9 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
 
   async update(
     id: string,
-    data: Partial<Pick<ExtraServiceProps, "name" | "slug" | "description" | "pricing" | "isActive">>,
+    data: Partial<
+      Pick<ExtraServiceProps, "name" | "slug" | "description" | "pricing" | "isActive">
+    >,
     session?: ClientSession
   ): Promise<ExtraService | null> {
     const updateData: Partial<IExtraService> = {}
@@ -67,6 +69,9 @@ export class ExtraServiceMongoRepository implements IExtraServiceRepository {
   }
 
   async deleteByStationId(stationId: string, session?: ClientSession): Promise<void> {
-    await ExtraServiceModel.deleteMany({ stationId: new Types.ObjectId(stationId) }, session ? { session } : undefined).exec()
+    await ExtraServiceModel.deleteMany(
+      { stationId: new Types.ObjectId(stationId) },
+      session ? { session } : undefined
+    ).exec()
   }
 }

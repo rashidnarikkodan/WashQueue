@@ -93,7 +93,11 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     const lastWindow = windows[windows.length - 1]
     if (!firstWindow || !lastWindow) return []
 
-    return this.findByStationIdAndDateRange(firstWindow.stationId, firstWindow.date, lastWindow.date)
+    return this.findByStationIdAndDateRange(
+      firstWindow.stationId,
+      firstWindow.date,
+      lastWindow.date
+    )
   }
 
   async save(window: TimeWindowInstance): Promise<TimeWindowInstance> {
@@ -142,9 +146,16 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     return res.deletedCount > 0
   }
 
-  async deleteUnbookedFutureWindows(stationId: string, fromDate: Date = new Date()): Promise<number> {
+  async deleteUnbookedFutureWindows(
+    stationId: string,
+    fromDate: Date = new Date()
+  ): Promise<number> {
     if (!Types.ObjectId.isValid(stationId)) return 0
-    const startOfFromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
+    const startOfFromDate = new Date(
+      fromDate.getFullYear(),
+      fromDate.getMonth(),
+      fromDate.getDate()
+    )
     const res = await TimeWindowModel.deleteMany({
       stationId: new Types.ObjectId(stationId),
       advanceBookedCount: 0,

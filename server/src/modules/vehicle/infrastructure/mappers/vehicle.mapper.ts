@@ -34,7 +34,8 @@ export class VehicleMapper implements IMapper<Vehicle, IVehicle> {
       if (data.brand !== undefined) persist.brand = data.brand
       if (data.model !== undefined) persist.vehicle_model = data.model
       if (data.year !== undefined) persist.year = data.year
-      if (data.registrationNumber !== undefined) persist.registrationNumber = data.registrationNumber
+      if (data.registrationNumber !== undefined)
+        persist.registrationNumber = data.registrationNumber
       if (data.categoryId) persist.categoryId = new Types.ObjectId(data.categoryId)
       if (data.classId) persist.classId = new Types.ObjectId(data.classId)
       if (data.isPrimary !== undefined) persist.isPrimary = data.isPrimary

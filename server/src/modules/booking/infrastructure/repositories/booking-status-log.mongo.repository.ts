@@ -13,7 +13,9 @@ export class BookingStatusLogMongoRepository implements IBookingStatusLogReposit
 
   async findByBookingId(bookingId: string): Promise<BookingStatusLog[]> {
     if (!Types.ObjectId.isValid(bookingId)) return []
-    const docs = await BookingStatusLogModel.find({ bookingId: new Types.ObjectId(bookingId) }).sort({
+    const docs = await BookingStatusLogModel.find({
+      bookingId: new Types.ObjectId(bookingId),
+    }).sort({
       createdAt: 1,
     })
     return docs.map(BookingStatusLogMapper.toDomain)

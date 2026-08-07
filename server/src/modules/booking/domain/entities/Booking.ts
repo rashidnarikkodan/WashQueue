@@ -315,7 +315,9 @@ export class Booking {
       case BookingStatus.PENDING:
         return [BookingStatus.CONFIRMED, BookingStatus.CANCELLED].includes(targetStatus)
       case BookingStatus.CONFIRMED:
-        return [BookingStatus.CHECKED_IN, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(targetStatus)
+        return [BookingStatus.CHECKED_IN, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(
+          targetStatus
+        )
       case BookingStatus.CHECKED_IN:
         return [BookingStatus.IN_SERVICE, BookingStatus.CANCELLED].includes(targetStatus)
       case BookingStatus.IN_SERVICE:

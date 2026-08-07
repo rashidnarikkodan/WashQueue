@@ -26,7 +26,10 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     }
 
     if (!booking.canTransitionTo(BookingStatus.CANCELLED)) {
-      throw new AppError(`Booking in status ${booking.status} cannot be cancelled`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Booking in status ${booking.status} cannot be cancelled`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const fromStatus = booking.status

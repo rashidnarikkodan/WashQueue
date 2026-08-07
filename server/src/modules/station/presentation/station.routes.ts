@@ -3,61 +3,35 @@ import { StationController } from "./station.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
-import {
-  createStationSchema,
-  patchStationSchema,
-} from "./schema/station.schema"
+import { createStationSchema, patchStationSchema } from "./schema/station.schema"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { stationUpload } from "@/infrastructure/multer/multer.middleware"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
-export const createRouter = (
-  stationController: StationController
-): Router => {
+export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
   /**
    * Public routes
    */
-  router.get(
-    API_ROUTES.STATIONS.LIST,
-    asyncHandler(stationController.getStations)
-  )
+  router.get(API_ROUTES.STATIONS.LIST, asyncHandler(stationController.getStations))
 
-  router.get(
-    API_ROUTES.STATIONS.FILTER_OPTIONS,
-    asyncHandler(stationController.getFilterOptions)
-  )
+  router.get(API_ROUTES.STATIONS.FILTER_OPTIONS, asyncHandler(stationController.getFilterOptions))
 
-  router.get(
-    "/:stationId/booking-calendar",
-    asyncHandler(stationController.getBookingCalendar)
-  )
+  router.get("/:stationId/booking-calendar", asyncHandler(stationController.getBookingCalendar))
 
-  router.get(
-    "/:stationId/time-windows",
-    asyncHandler(stationController.getAvailableTimeWindows)
-  )
+  router.get("/:stationId/time-windows", asyncHandler(stationController.getAvailableTimeWindows))
 
-  router.get(
-    "/:stationId/slot-config",
-    asyncHandler(stationController.getSlotConfig)
-  )
+  router.get("/:stationId/slot-config", asyncHandler(stationController.getSlotConfig))
 
-  router.get(
-    API_ROUTES.STATIONS.BY_ID,
-    asyncHandler(stationController.getById)
-  )
+  router.get(API_ROUTES.STATIONS.BY_ID, asyncHandler(stationController.getById))
 
   /**
    * Protected routes
    */
   router.use(authenticate)
 
-  router.put(
-    "/:stationId/slot-config",
-    asyncHandler(stationController.configureSlotConfig)
-  )
+  router.put("/:stationId/slot-config", asyncHandler(stationController.configureSlotConfig))
 
   router.post(
     API_ROUTES.STATIONS.CREATE,
@@ -73,20 +47,11 @@ export const createRouter = (
     asyncHandler(stationController.update)
   )
 
-  router.post(
-    API_ROUTES.STATIONS.SUBMIT,
-    asyncHandler(stationController.submitForReview)
-  )
+  router.post(API_ROUTES.STATIONS.SUBMIT, asyncHandler(stationController.submitForReview))
 
-  router.patch(
-    API_ROUTES.STATIONS.TOGGLE_ACTIVE,
-    asyncHandler(stationController.toggleActive)
-  )
+  router.patch(API_ROUTES.STATIONS.TOGGLE_ACTIVE, asyncHandler(stationController.toggleActive))
 
-  router.post(
-    API_ROUTES.STATIONS.ASSIGN_MANAGER,
-    asyncHandler(stationController.assignManager)
-  )
+  router.post(API_ROUTES.STATIONS.ASSIGN_MANAGER, asyncHandler(stationController.assignManager))
 
   router.patch(
     API_ROUTES.STATIONS.REVIEW,
@@ -94,10 +59,7 @@ export const createRouter = (
     asyncHandler(stationController.review)
   )
 
-  router.delete(
-    API_ROUTES.STATIONS.BY_ID,
-    asyncHandler(stationController.delete)
-  )
+  router.delete(API_ROUTES.STATIONS.BY_ID, asyncHandler(stationController.delete))
 
   return router
 }

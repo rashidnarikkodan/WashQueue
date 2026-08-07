@@ -16,11 +16,7 @@ export class CloudinaryService implements IMediaStorage {
     })
   }
 
-  async update(
-    publicId: string,
-    fileBuffer: Buffer,
-    filename?: string
-  ): Promise<UploadedFile> {
+  async update(publicId: string, fileBuffer: Buffer, filename?: string): Promise<UploadedFile> {
     return this.uploadToCloudinary({
       fileBuffer,
       filename,
@@ -44,10 +40,7 @@ export class CloudinaryService implements IMediaStorage {
         throw error
       }
 
-      throw new AppError(
-        "Failed to delete file from Cloudinary",
-        HTTP_STATUS.INTERNAL_SERVER_ERROR
-      )
+      throw new AppError("Failed to delete file from Cloudinary", HTTP_STATUS.INTERNAL_SERVER_ERROR)
     }
   }
 
@@ -69,9 +62,7 @@ export class CloudinaryService implements IMediaStorage {
           resource_type: "auto",
           overwrite,
           invalidate: overwrite,
-          public_id:
-            publicId ??
-            `${randomUUID()}-${filename ? path.parse(filename).name : "file"}`,
+          public_id: publicId ?? `${randomUUID()}-${filename ? path.parse(filename).name : "file"}`,
         },
         (error, result) => {
           if (error) {

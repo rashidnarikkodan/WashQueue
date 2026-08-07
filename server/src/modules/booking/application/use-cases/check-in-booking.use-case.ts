@@ -40,7 +40,10 @@ export class CheckInBookingUseCase implements ICheckInBookingUseCase {
 
     // 3. Validate status
     if (booking.status !== BookingStatus.CONFIRMED) {
-      throw new AppError(`Booking cannot be checked in from status ${booking.status}`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Booking cannot be checked in from status ${booking.status}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     // 4. Validate QR expiry

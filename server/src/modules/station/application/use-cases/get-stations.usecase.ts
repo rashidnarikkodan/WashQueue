@@ -6,11 +6,11 @@ import { GetStationsQuery } from "../dtos/get-stations.dto"
 import { StationStatusCounts } from "../dtos/get-stations.dto"
 
 export class GetStationsUseCase implements IGetStationsUseCase {
-  constructor(
-    private readonly stationRepository: IStationRepository
-  ) {}
+  constructor(private readonly stationRepository: IStationRepository) {}
 
-  async execute(query: GetStationsQuery = {}): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }> {
+  async execute(
+    query: GetStationsQuery = {}
+  ): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }> {
     return this.stationRepository.findAll(query)
   }
 }

@@ -1,4 +1,9 @@
-import { BookingStatus, PaymentStatus, PaymentType, ServiceType } from "../../domain/entities/Booking"
+import {
+  BookingStatus,
+  PaymentStatus,
+  PaymentType,
+  ServiceType,
+} from "../../domain/entities/Booking"
 
 export interface BookingResponseDTO {
   id: string

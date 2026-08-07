@@ -52,9 +52,7 @@ export class BookingRedisQueueService {
       await redis.hset(bookingKey, "status", booking.status)
 
       // If status reaches terminal state (COMPLETED, CANCELLED, NO_SHOW), remove from active queue
-      if (
-        ["COMPLETED", "CANCELLED", "NO_SHOW"].includes(booking.status)
-      ) {
+      if (["COMPLETED", "CANCELLED", "NO_SHOW"].includes(booking.status)) {
         await redis.zrem(queueKey, bookingId)
         await redis.del(bookingKey)
 
@@ -63,10 +61,16 @@ export class BookingRedisQueueService {
           await redis.hincrby(stationLiveKey, "queueDepth", -1)
         }
 
-        logger.info({ bookingId, status: booking.status }, "[RedisQueue] Booking removed from active Redis queue")
+        logger.info(
+          { bookingId, status: booking.status },
+          "[RedisQueue] Booking removed from active Redis queue"
+        )
       }
     } catch (error) {
-      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Failed to update Redis queue status")
+      logger.error(
+        { error, bookingId: booking.id },
+        "[RedisQueue] Failed to update Redis queue status"
+      )
     }
   }
 }

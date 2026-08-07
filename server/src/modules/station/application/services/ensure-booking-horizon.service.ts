@@ -5,7 +5,6 @@ import { TimeWindowGenerationService } from "../../domain/services/TimeWindowGen
 import { SlotConfig } from "../../domain/entities/SlotConfig"
 import logger from "@/configs/logger.config"
 
-
 export class EnsureBookingHorizonService {
   constructor(
     private readonly stationRepository: IStationRepository,
@@ -82,7 +81,10 @@ export class EnsureBookingHorizonService {
     const requiredEndStr = this.generationService.dateToISO(requiredEndDate)
 
     const todayStr = this.generationService.dateToISO(today)
-    const existingTodayWindows = await this.timeWindowRepository.findByStationIdAndDate(stationId, todayStr)
+    const existingTodayWindows = await this.timeWindowRepository.findByStationIdAndDate(
+      stationId,
+      todayStr
+    )
 
     const latestDateStr = await this.timeWindowRepository.findLatestWindowDateForStation(stationId)
 
@@ -90,7 +92,9 @@ export class EnsureBookingHorizonService {
     if (existingTodayWindows.length > 0) {
       const first = existingTodayWindows[0]
       if (first) {
-        const durationMins = Math.round((first.windowEnd.getTime() - first.windowStart.getTime()) / 60000)
+        const durationMins = Math.round(
+          (first.windowEnd.getTime() - first.windowStart.getTime()) / 60000
+        )
         if (durationMins !== slotConfig.windowDurationMins) {
           durationMismatch = true
         }
@@ -120,9 +124,12 @@ export class EnsureBookingHorizonService {
     if (generateFrom > requiredEndDate) return
 
     logger.debug(
-      "[EnsureBookingHorizon] station=" + stationId +
-      " generating " + this.generationService.dateToISO(generateFrom) +
-      " to " + requiredEndStr
+      "[EnsureBookingHorizon] station=" +
+        stationId +
+        " generating " +
+        this.generationService.dateToISO(generateFrom) +
+        " to " +
+        requiredEndStr
     )
 
     const newWindows = this.generationService.generateWindowsForDateRange(

@@ -19,7 +19,7 @@ export class GetClassUseCase implements IGetClassUseCase {
       slug: vehicleClass.slug,
       description: vehicleClass.description,
       order: vehicleClass.order,
-      isActive: vehicleClass.isActive
+      isActive: vehicleClass.isActive,
     }
   }
 }

@@ -1,4 +1,13 @@
-import { OperatingHour, Holiday, SlotConfiguration, StationContact, StationLocation, StationAddress, StationImage, StationStatus } from "../../domain/entities/Station"
+import {
+  OperatingHour,
+  Holiday,
+  SlotConfiguration,
+  StationContact,
+  StationLocation,
+  StationAddress,
+  StationImage,
+  StationStatus,
+} from "../../domain/entities/Station"
 
 export interface UpdateBasicInfoInput {
   name?: string

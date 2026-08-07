@@ -49,7 +49,13 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
           )
         } else if (type === "history") {
           allStationBookings = allStationBookings.filter((b) =>
-            ["SERVICE_COMPLETED", "AWAITING_HANDOVER", "COMPLETED", "CANCELLED", "NO_SHOW"].includes(b.status)
+            [
+              "SERVICE_COMPLETED",
+              "AWAITING_HANDOVER",
+              "COMPLETED",
+              "CANCELLED",
+              "NO_SHOW",
+            ].includes(b.status)
           )
         }
 
@@ -89,7 +95,13 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
           )
         } else if (type === "history") {
           combined = combined.filter((b) =>
-            ["SERVICE_COMPLETED", "AWAITING_HANDOVER", "COMPLETED", "CANCELLED", "NO_SHOW"].includes(b.status)
+            [
+              "SERVICE_COMPLETED",
+              "AWAITING_HANDOVER",
+              "COMPLETED",
+              "CANCELLED",
+              "NO_SHOW",
+            ].includes(b.status)
           )
         }
 

@@ -14,7 +14,11 @@ export class BookingNotificationService {
   /**
    * Dispatches notifications to customer & station manager based on domain events.
    */
-  async notify(eventType: NotificationEventType, booking: Booking, metadata?: Record<string, unknown>): Promise<void> {
+  async notify(
+    eventType: NotificationEventType,
+    booking: Booking,
+    metadata?: Record<string, unknown>
+  ): Promise<void> {
     try {
       logger.info(
         {
@@ -49,7 +53,10 @@ export class BookingNotificationService {
           break
       }
     } catch (error) {
-      logger.error({ error, eventType, bookingId: booking.id }, "[BookingNotification] Failed to send notification")
+      logger.error(
+        { error, eventType, bookingId: booking.id },
+        "[BookingNotification] Failed to send notification"
+      )
     }
   }
 }

@@ -82,283 +82,296 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       throw new ForbiddenError("You are not authorized to update this station")
     }
 
-
     const runUpdateWork = async (session?: unknown) => {
       // If an active station is modified, check if restricted fields were changed requiring admin approval
-        if (station.status === StationStatus.ACTIVE) {
-          const props = station.getProps()
-          let requiresAdminApproval = false
-
-          if (updates.step === 1) {
-            const nameChanged = updates.name !== undefined && updates.name.trim() !== props.name.trim()
-            const phoneChanged =
-              updates.contact?.phone !== undefined &&
-              updates.contact.phone.trim() !== (props.contact?.phone || "").trim()
-            const emailChanged =
-              updates.contact?.email !== undefined &&
-              updates.contact.email.trim() !== (props.contact?.email || "").trim()
-
-            const latChanged =
-              updates.location?.latitude !== undefined &&
-              updates.location.latitude !== props.location?.latitude
-            const lngChanged =
-              updates.location?.longitude !== undefined &&
-              updates.location.longitude !== props.location?.longitude
-            const locationChanged = latChanged || lngChanged
-
-            const streetChanged =
-              updates.address?.street !== undefined &&
-              updates.address.street.trim() !== (props.address?.street || "").trim()
-            const cityChanged =
-              updates.address?.city !== undefined &&
-              updates.address.city.trim() !== (props.address?.city || "").trim()
-            const stateChanged =
-              updates.address?.state !== undefined &&
-              updates.address.state.trim() !== (props.address?.state || "").trim()
-            const countryChanged =
-              updates.address?.country !== undefined &&
-              updates.address.country.trim() !== (props.address?.country || "").trim()
-            const pincodeChanged =
-              updates.address?.pincode !== undefined &&
-              updates.address.pincode.trim() !== (props.address?.pincode || "").trim()
-            const addressChanged =
-              streetChanged || cityChanged || stateChanged || countryChanged || pincodeChanged
-
-            const imagesChanged =
-              updates.images !== undefined ||
-              Boolean(updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0) ||
-              Boolean(updates.newFiles && updates.newFiles.length > 0)
-
-            if (
-              nameChanged ||
-              phoneChanged ||
-              emailChanged ||
-              locationChanged ||
-              addressChanged ||
-              imagesChanged
-            ) {
-              requiresAdminApproval = true
-            }
-          } else if (updates.step === 2) {
-            const baysChanged =
-              updates.slotConfig?.bays !== undefined &&
-              updates.slotConfig.bays !== props.slotConfig?.bays
-            const windowDurationChanged =
-              updates.slotConfig?.windowDurationMins !== undefined &&
-              updates.slotConfig.windowDurationMins !== props.slotConfig?.windowDurationMins
-            const capacityChanged =
-              updates.slotConfig?.capacityPerWindow !== undefined &&
-              updates.slotConfig.capacityPerWindow !== props.slotConfig?.capacityPerWindow
-
-            if (baysChanged || windowDurationChanged || capacityChanged) {
-              requiresAdminApproval = true
-            }
-          } else if (updates.step === 3) {
-            // Price changes always require admin approval
-            if (updates.pricing && updates.pricing.length > 0) {
-              requiresAdminApproval = true
-            }
-          } else if (updates.step === 4) {
-            // Extra services changes always require admin approval
-            if (updates.extraServices && updates.extraServices.length > 0) {
-              requiresAdminApproval = true
-            }
-          }
-
-          if (requiresAdminApproval) {
-            station.updateStatus(StationStatus.PENDING_REVIEW)
-          }
-        }
+      if (station.status === StationStatus.ACTIVE) {
+        const props = station.getProps()
+        let requiresAdminApproval = false
 
         if (updates.step === 1) {
-          // Delete removed images from media storage if specified
-          if (updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0 && this.mediaStorage) {
-            for (const pubId of updates.deletedImagePublicIds) {
-              try {
-                await this.mediaStorage.delete(pubId)
-              } catch (err) {
-                console.warn(`Failed to delete media asset ${pubId}:`, err)
-              }
-            }
-          }
+          const nameChanged =
+            updates.name !== undefined && updates.name.trim() !== props.name.trim()
+          const phoneChanged =
+            updates.contact?.phone !== undefined &&
+            updates.contact.phone.trim() !== (props.contact?.phone || "").trim()
+          const emailChanged =
+            updates.contact?.email !== undefined &&
+            updates.contact.email.trim() !== (props.contact?.email || "").trim()
 
-          // Process new file uploads if provided
-          const props = station.getProps()
-          let currentImages: StationImage[] = updates.images ?? props.images
-          if (updates.newFiles && updates.newFiles.length > 0 && this.mediaUploadService) {
-            const uploaded = await this.mediaUploadService.uploadMultipleFiles(updates.newFiles)
-            const newStationImages: StationImage[] = uploaded.map((img, idx) => ({
-              url: img.url,
-              publicId: img.publicId,
-              isPrimary: currentImages.length === 0 && idx === 0,
-            }))
-            currentImages = [...currentImages, ...newStationImages]
-          }
+          const latChanged =
+            updates.location?.latitude !== undefined &&
+            updates.location.latitude !== props.location?.latitude
+          const lngChanged =
+            updates.location?.longitude !== undefined &&
+            updates.location.longitude !== props.location?.longitude
+          const locationChanged = latChanged || lngChanged
 
-          // Update basic station info if any basic info field is provided
+          const streetChanged =
+            updates.address?.street !== undefined &&
+            updates.address.street.trim() !== (props.address?.street || "").trim()
+          const cityChanged =
+            updates.address?.city !== undefined &&
+            updates.address.city.trim() !== (props.address?.city || "").trim()
+          const stateChanged =
+            updates.address?.state !== undefined &&
+            updates.address.state.trim() !== (props.address?.state || "").trim()
+          const countryChanged =
+            updates.address?.country !== undefined &&
+            updates.address.country.trim() !== (props.address?.country || "").trim()
+          const pincodeChanged =
+            updates.address?.pincode !== undefined &&
+            updates.address.pincode.trim() !== (props.address?.pincode || "").trim()
+          const addressChanged =
+            streetChanged || cityChanged || stateChanged || countryChanged || pincodeChanged
+
+          const imagesChanged =
+            updates.images !== undefined ||
+            Boolean(updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0) ||
+            Boolean(updates.newFiles && updates.newFiles.length > 0)
+
           if (
-            updates.name ||
-            updates.description !== undefined ||
-            updates.contact ||
-            updates.location ||
-            updates.address ||
-            updates.images ||
-            updates.newFiles
+            nameChanged ||
+            phoneChanged ||
+            emailChanged ||
+            locationChanged ||
+            addressChanged ||
+            imagesChanged
           ) {
-            station.updateBasicInformation({
-              name: updates.name ?? props.name,
-              description: updates.description ?? props.description,
-              contact: updates.contact ?? props.contact,
-              location: updates.location ?? props.location,
-              address: updates.address ?? props.address,
-              images: currentImages,
-            })
+            requiresAdminApproval = true
           }
-          if (updates.status) {
-            station.updateStatus(updates.status)
-          }
-          await this.stationRepository.save(station)
         } else if (updates.step === 2) {
-          // Update operatingHours, holidays, slotConfig
-          station.updateAvailability({
-            operatingHours: updates.operatingHours,
-            holidays: updates.holidays ?? [],
-            slotConfig: updates.slotConfig,
-          })
-          await this.stationRepository.save(station)
+          const baysChanged =
+            updates.slotConfig?.bays !== undefined &&
+            updates.slotConfig.bays !== props.slotConfig?.bays
+          const windowDurationChanged =
+            updates.slotConfig?.windowDurationMins !== undefined &&
+            updates.slotConfig.windowDurationMins !== props.slotConfig?.windowDurationMins
+          const capacityChanged =
+            updates.slotConfig?.capacityPerWindow !== undefined &&
+            updates.slotConfig.capacityPerWindow !== props.slotConfig?.capacityPerWindow
 
-          if (updates.slotConfig && this.slotConfigRepository) {
-            const existingConfig = await this.slotConfigRepository.findByStationId(stationId)
-            const now = new Date()
-            const configToSave = new SlotConfig({
-              id: existingConfig?.id || randomUUID(),
-              stationId,
-              windowDurationMins: updates.slotConfig.windowDurationMins,
-              capacityPerWindow: updates.slotConfig.capacityPerWindow,
-              walkInReservedSlots: updates.slotConfig.walkInReservedSlots,
-              maxAdvanceBookingDays: updates.slotConfig.maxAdvanceBookingDays,
-              allowWalkIns: updates.slotConfig.allowWalkIns,
-              createdAt: existingConfig?.createdAt || now,
-              updatedAt: now,
-            })
-            await this.slotConfigRepository.save(configToSave)
-          }
-
-          if (this.generateTimeWindowsUseCase) {
-            await this.generateTimeWindowsUseCase.execute(stationId, true)
+          if (baysChanged || windowDurationChanged || capacityChanged) {
+            requiresAdminApproval = true
           }
         } else if (updates.step === 3) {
-          // Upsert station pricing records for every configured vehicle class
-          if (updates.pricing && Array.isArray(updates.pricing)) {
-            for (const priceEntry of updates.pricing) {
-              await this.stationPricingRepository.upsertByStationAndClass(
-                stationId,
-                priceEntry.vehicleClassId,
-                {
-                  halfWashPrice: priceEntry.halfWashPrice,
-                  fullWashPrice: priceEntry.fullWashPrice,
-                  isActive: priceEntry.isActive,
-                },
-                session
-              )
-            }
+          // Price changes always require admin approval
+          if (updates.pricing && updates.pricing.length > 0) {
+            requiresAdminApproval = true
           }
         } else if (updates.step === 4) {
-          // Update amenities
-          if (updates.amenities) {
-            station.updateAmenities(updates.amenities)
-            await this.stationRepository.save(station)
+          // Extra services changes always require admin approval
+          if (updates.extraServices && updates.extraServices.length > 0) {
+            requiresAdminApproval = true
           }
+        }
 
-          // Create, update, and delete extra services with slug validation & duplicate checks
-          if (updates.extraServices && Array.isArray(updates.extraServices)) {
-            const existingExtraServices = await this.extraServiceRepository.findByStationId(stationId, session)
-            const activeServices = updates.extraServices.filter((s) => !s.isDeleted)
+        if (requiresAdminApproval) {
+          station.updateStatus(StationStatus.PENDING_REVIEW)
+        }
+      }
 
-            // Validate duplicates within incoming payload by name or slug
-            const seenNames = new Set<string>()
-            const seenSlugs = new Set<string>()
-
-            for (const serviceInput of activeServices) {
-              const nameKey = serviceInput.name.toLowerCase().trim()
-              let slugVal = serviceInput.slug || slugify(serviceInput.name)
-
-              if (seenSlugs.has(slugVal)) {
-                slugVal = `${slugVal}-${seenSlugs.size + 1}`
-                serviceInput.slug = slugVal
-              }
-
-              seenNames.add(nameKey)
-              seenSlugs.add(slugVal)
-            }
-
-            const processedIds = new Set<string>()
-
-            for (const serviceInput of updates.extraServices) {
-              const generatedSlug = serviceInput.slug || slugify(serviceInput.name)
-              const nameKey = serviceInput.name.toLowerCase().trim()
-
-              if (serviceInput.isDeleted) {
-                const existing = serviceInput.id
-                  ? existingExtraServices.find((e) => e.id === serviceInput.id)
-                  : existingExtraServices.find(
-                      (e) => !processedIds.has(e.id) && (e.getProps().slug === generatedSlug || e.getProps().name.toLowerCase().trim() === nameKey)
-                    )
-
-                if (existing) {
-                  processedIds.add(existing.id)
-                  await this.extraServiceRepository.delete(existing.id, session)
-                }
-              } else {
-                // Check if existing record exists by ID or by slug/name matching
-                const existing = serviceInput.id
-                  ? existingExtraServices.find((e) => e.id === serviceInput.id)
-                  : existingExtraServices.find(
-                      (e) => !processedIds.has(e.id) && (e.getProps().slug === generatedSlug || e.getProps().name.toLowerCase().trim() === nameKey)
-                    )
-
-                if (existing) {
-                  processedIds.add(existing.id)
-                  // Update existing record (prevents duplicates!)
-                  await this.extraServiceRepository.update(
-                    existing.id,
-                    {
-                      name: serviceInput.name,
-                      slug: generatedSlug,
-                      description: serviceInput.description,
-                      pricing: serviceInput.pricing,
-                      isActive: serviceInput.isActive,
-                    },
-                    session
-                  )
-                } else {
-                  // Create new record
-                  const created = await this.extraServiceRepository.save(
-                    {
-                      stationId,
-                      name: serviceInput.name,
-                      slug: generatedSlug,
-                      description: serviceInput.description,
-                      pricing: serviceInput.pricing,
-                      isActive: serviceInput.isActive,
-                    },
-                    session
-                  )
-                  if (created && created.id) {
-                    processedIds.add(created.id)
-                  }
-                }
-              }
-            }
-
-            // Clean up any remaining duplicate/orphaned extra services in DB for this station
-            for (const existing of existingExtraServices) {
-              if (!processedIds.has(existing.id)) {
-                await this.extraServiceRepository.delete(existing.id, session)
-              }
+      if (updates.step === 1) {
+        // Delete removed images from media storage if specified
+        if (
+          updates.deletedImagePublicIds &&
+          updates.deletedImagePublicIds.length > 0 &&
+          this.mediaStorage
+        ) {
+          for (const pubId of updates.deletedImagePublicIds) {
+            try {
+              await this.mediaStorage.delete(pubId)
+            } catch (err) {
+              console.warn(`Failed to delete media asset ${pubId}:`, err)
             }
           }
         }
+
+        // Process new file uploads if provided
+        const props = station.getProps()
+        let currentImages: StationImage[] = updates.images ?? props.images
+        if (updates.newFiles && updates.newFiles.length > 0 && this.mediaUploadService) {
+          const uploaded = await this.mediaUploadService.uploadMultipleFiles(updates.newFiles)
+          const newStationImages: StationImage[] = uploaded.map((img, idx) => ({
+            url: img.url,
+            publicId: img.publicId,
+            isPrimary: currentImages.length === 0 && idx === 0,
+          }))
+          currentImages = [...currentImages, ...newStationImages]
+        }
+
+        // Update basic station info if any basic info field is provided
+        if (
+          updates.name ||
+          updates.description !== undefined ||
+          updates.contact ||
+          updates.location ||
+          updates.address ||
+          updates.images ||
+          updates.newFiles
+        ) {
+          station.updateBasicInformation({
+            name: updates.name ?? props.name,
+            description: updates.description ?? props.description,
+            contact: updates.contact ?? props.contact,
+            location: updates.location ?? props.location,
+            address: updates.address ?? props.address,
+            images: currentImages,
+          })
+        }
+        if (updates.status) {
+          station.updateStatus(updates.status)
+        }
+        await this.stationRepository.save(station)
+      } else if (updates.step === 2) {
+        // Update operatingHours, holidays, slotConfig
+        station.updateAvailability({
+          operatingHours: updates.operatingHours,
+          holidays: updates.holidays ?? [],
+          slotConfig: updates.slotConfig,
+        })
+        await this.stationRepository.save(station)
+
+        if (updates.slotConfig && this.slotConfigRepository) {
+          const existingConfig = await this.slotConfigRepository.findByStationId(stationId)
+          const now = new Date()
+          const configToSave = new SlotConfig({
+            id: existingConfig?.id || randomUUID(),
+            stationId,
+            windowDurationMins: updates.slotConfig.windowDurationMins,
+            capacityPerWindow: updates.slotConfig.capacityPerWindow,
+            walkInReservedSlots: updates.slotConfig.walkInReservedSlots,
+            maxAdvanceBookingDays: updates.slotConfig.maxAdvanceBookingDays,
+            allowWalkIns: updates.slotConfig.allowWalkIns,
+            createdAt: existingConfig?.createdAt || now,
+            updatedAt: now,
+          })
+          await this.slotConfigRepository.save(configToSave)
+        }
+
+        if (this.generateTimeWindowsUseCase) {
+          await this.generateTimeWindowsUseCase.execute(stationId, true)
+        }
+      } else if (updates.step === 3) {
+        // Upsert station pricing records for every configured vehicle class
+        if (updates.pricing && Array.isArray(updates.pricing)) {
+          for (const priceEntry of updates.pricing) {
+            await this.stationPricingRepository.upsertByStationAndClass(
+              stationId,
+              priceEntry.vehicleClassId,
+              {
+                halfWashPrice: priceEntry.halfWashPrice,
+                fullWashPrice: priceEntry.fullWashPrice,
+                isActive: priceEntry.isActive,
+              },
+              session
+            )
+          }
+        }
+      } else if (updates.step === 4) {
+        // Update amenities
+        if (updates.amenities) {
+          station.updateAmenities(updates.amenities)
+          await this.stationRepository.save(station)
+        }
+
+        // Create, update, and delete extra services with slug validation & duplicate checks
+        if (updates.extraServices && Array.isArray(updates.extraServices)) {
+          const existingExtraServices = await this.extraServiceRepository.findByStationId(
+            stationId,
+            session
+          )
+          const activeServices = updates.extraServices.filter((s) => !s.isDeleted)
+
+          // Validate duplicates within incoming payload by name or slug
+          const seenNames = new Set<string>()
+          const seenSlugs = new Set<string>()
+
+          for (const serviceInput of activeServices) {
+            const nameKey = serviceInput.name.toLowerCase().trim()
+            let slugVal = serviceInput.slug || slugify(serviceInput.name)
+
+            if (seenSlugs.has(slugVal)) {
+              slugVal = `${slugVal}-${seenSlugs.size + 1}`
+              serviceInput.slug = slugVal
+            }
+
+            seenNames.add(nameKey)
+            seenSlugs.add(slugVal)
+          }
+
+          const processedIds = new Set<string>()
+
+          for (const serviceInput of updates.extraServices) {
+            const generatedSlug = serviceInput.slug || slugify(serviceInput.name)
+            const nameKey = serviceInput.name.toLowerCase().trim()
+
+            if (serviceInput.isDeleted) {
+              const existing = serviceInput.id
+                ? existingExtraServices.find((e) => e.id === serviceInput.id)
+                : existingExtraServices.find(
+                    (e) =>
+                      !processedIds.has(e.id) &&
+                      (e.getProps().slug === generatedSlug ||
+                        e.getProps().name.toLowerCase().trim() === nameKey)
+                  )
+
+              if (existing) {
+                processedIds.add(existing.id)
+                await this.extraServiceRepository.delete(existing.id, session)
+              }
+            } else {
+              // Check if existing record exists by ID or by slug/name matching
+              const existing = serviceInput.id
+                ? existingExtraServices.find((e) => e.id === serviceInput.id)
+                : existingExtraServices.find(
+                    (e) =>
+                      !processedIds.has(e.id) &&
+                      (e.getProps().slug === generatedSlug ||
+                        e.getProps().name.toLowerCase().trim() === nameKey)
+                  )
+
+              if (existing) {
+                processedIds.add(existing.id)
+                // Update existing record (prevents duplicates!)
+                await this.extraServiceRepository.update(
+                  existing.id,
+                  {
+                    name: serviceInput.name,
+                    slug: generatedSlug,
+                    description: serviceInput.description,
+                    pricing: serviceInput.pricing,
+                    isActive: serviceInput.isActive,
+                  },
+                  session
+                )
+              } else {
+                // Create new record
+                const created = await this.extraServiceRepository.save(
+                  {
+                    stationId,
+                    name: serviceInput.name,
+                    slug: generatedSlug,
+                    description: serviceInput.description,
+                    pricing: serviceInput.pricing,
+                    isActive: serviceInput.isActive,
+                  },
+                  session
+                )
+                if (created && created.id) {
+                  processedIds.add(created.id)
+                }
+              }
+            }
+          }
+
+          // Clean up any remaining duplicate/orphaned extra services in DB for this station
+          for (const existing of existingExtraServices) {
+            if (!processedIds.has(existing.id)) {
+              await this.extraServiceRepository.delete(existing.id, session)
+            }
+          }
+        }
+      }
     }
 
     if (this.transactionRunner) {

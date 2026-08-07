@@ -8,7 +8,10 @@ import { IGetBookingUseCase } from "../interfaces/booking-usecases.interface"
 export class GetBookingUseCase implements IGetBookingUseCase {
   constructor(private readonly bookingRepository: IBookingRepository) {}
 
-  async execute(bookingIdOrNumber: string, _requestingUserId?: string): Promise<BookingResponseDTO> {
+  async execute(
+    bookingIdOrNumber: string,
+    _requestingUserId?: string
+  ): Promise<BookingResponseDTO> {
     let booking = await this.bookingRepository.findById(bookingIdOrNumber)
     if (!booking) {
       booking = await this.bookingRepository.findByBookingNumber(bookingIdOrNumber)

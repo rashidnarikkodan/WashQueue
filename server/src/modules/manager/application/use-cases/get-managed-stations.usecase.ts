@@ -23,9 +23,7 @@ export class GetManagedStationsUseCase implements IGetManagedStationsUseCase {
         result.push({
           stationId: station.id,
           stationName: props.name,
-          stationAddress: props.address
-            ? `${props.address.street}, ${props.address.city}`
-            : "",
+          stationAddress: props.address ? `${props.address.street}, ${props.address.city}` : "",
           permissions: assignment.permissions,
           status: assignment.status,
         })

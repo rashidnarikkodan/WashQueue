@@ -1,10 +1,7 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
-import {
-  ManagerAssignment,
-  ManagerPermission,
-} from "../../domain/entities/ManagerAssignment"
+import { ManagerAssignment, ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import { IUpdateManagerPermissionsUseCase } from "../interfaces/manager-usecases.interface"
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"

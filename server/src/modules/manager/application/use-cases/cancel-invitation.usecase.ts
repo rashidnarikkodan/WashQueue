@@ -28,7 +28,9 @@ export class CancelInvitationUseCase implements ICancelInvitationUseCase {
     }
 
     if (!invitation.isPending) {
-      throw new BadRequestError(`Only pending invitations can be cancelled (status: ${invitation.status})`)
+      throw new BadRequestError(
+        `Only pending invitations can be cancelled (status: ${invitation.status})`
+      )
     }
 
     invitation.cancel()

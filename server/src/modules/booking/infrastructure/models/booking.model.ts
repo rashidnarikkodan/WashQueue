@@ -142,7 +142,12 @@ const bookingSchema = new Schema<IBookingDocument>(
     ],
 
     scheduling: {
-      timeWindowId: { type: Schema.Types.ObjectId, ref: "TimeWindowInstance", required: true, index: true },
+      timeWindowId: {
+        type: Schema.Types.ObjectId,
+        ref: "TimeWindowInstance",
+        required: true,
+        index: true,
+      },
       windowStart: { type: Date, required: true },
       windowEnd: { type: Date, required: true },
     },

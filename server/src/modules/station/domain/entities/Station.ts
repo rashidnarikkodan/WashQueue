@@ -10,153 +10,153 @@ export enum StationStatus {
 export const STATION_STATUS = StationStatus
 
 export interface StationImage {
-  url: string;
-  publicId: string;
-  isPrimary: boolean;
+  url: string
+  publicId: string
+  isPrimary: boolean
 }
 
 export interface StationContact {
-  phone: string;
-  email: string;
+  phone: string
+  email: string
 }
 
 export interface StationLocation {
-  latitude: number;
-  longitude: number;
+  latitude: number
+  longitude: number
 }
 
 export interface StationAddress {
-  street: string;
-  city: string;
-  state: string;
-  country: string;
-  pincode: string;
+  street: string
+  city: string
+  state: string
+  country: string
+  pincode: string
 }
 
 export interface OperatingHour {
-  day: string;
-  open: string;
-  close: string;
-  isClosed: boolean;
+  day: string
+  open: string
+  close: string
+  isClosed: boolean
 }
 
 export interface Holiday {
-  date: Date;
-  reason?: string;
+  date: Date
+  reason?: string
 }
 
 export interface SlotConfiguration {
-  bays: number;
-  windowDurationMins: number;
-  capacityPerWindow: number;
-  walkInReservedSlots: number;
-  maxAdvanceBookingDays: number;
-  allowWalkIns: boolean;
+  bays: number
+  windowDurationMins: number
+  capacityPerWindow: number
+  walkInReservedSlots: number
+  maxAdvanceBookingDays: number
+  allowWalkIns: boolean
 }
 
 export interface StationProps {
-  id: string;
-  ownerId: string;
-  managerId?: string;
+  id: string
+  ownerId: string
+  managerId?: string
 
-  name: string;
-  description: string;
+  name: string
+  description: string
 
-  contact: StationContact;
+  contact: StationContact
 
-  location: StationLocation;
-  address: StationAddress;
+  location: StationLocation
+  address: StationAddress
 
-  images: StationImage[];
+  images: StationImage[]
 
-  operatingHours: OperatingHour[];
-  holidays: Holiday[];
+  operatingHours: OperatingHour[]
+  holidays: Holiday[]
 
-  slotConfig: SlotConfiguration;
+  slotConfig: SlotConfiguration
 
-  amenities: string[];
+  amenities: string[]
 
-  rating: number;
-  reviewCount: number;
+  rating: number
+  reviewCount: number
 
-  verifiedAt?: Date;
-  rejectionReason?: string;
+  verifiedAt?: Date
+  rejectionReason?: string
 
-  status: StationStatus;
-  isActive: boolean;
+  status: StationStatus
+  isActive: boolean
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date
+  updatedAt: Date
 }
 
 export class Station {
   constructor(private props: StationProps) {}
 
   get id() {
-    return this.props.id;
+    return this.props.id
   }
 
   get ownerId() {
-    return this.props.ownerId;
+    return this.props.ownerId
   }
 
   get managerId() {
-    return this.props.managerId;
+    return this.props.managerId
   }
 
   get status() {
-    return this.props.status;
+    return this.props.status
   }
 
   get operatingHours() {
-    return this.props.operatingHours || [];
+    return this.props.operatingHours || []
   }
 
   get holidays() {
-    return this.props.holidays || [];
+    return this.props.holidays || []
   }
 
   getProps(): StationProps {
-    return { ...this.props };
+    return { ...this.props }
   }
 
   toJSON(): StationProps {
-    return this.getProps();
+    return this.getProps()
   }
 
   updateBasicInformation(data: {
-    name: string;
-    description: string;
-    contact: StationContact;
-    location: StationLocation;
-    address: StationAddress;
-    images: StationImage[];
+    name: string
+    description: string
+    contact: StationContact
+    location: StationLocation
+    address: StationAddress
+    images: StationImage[]
   }): void {
-    this.props.name = data.name;
-    this.props.description = data.description;
-    this.props.contact = data.contact;
-    this.props.location = data.location;
-    this.props.address = data.address;
-    this.props.images = data.images;
+    this.props.name = data.name
+    this.props.description = data.description
+    this.props.contact = data.contact
+    this.props.location = data.location
+    this.props.address = data.address
+    this.props.images = data.images
 
-    this.touch();
+    this.touch()
   }
 
   updateAvailability(data: {
-    operatingHours: OperatingHour[];
-    holidays: Holiday[];
-    slotConfig: SlotConfiguration;
+    operatingHours: OperatingHour[]
+    holidays: Holiday[]
+    slotConfig: SlotConfiguration
   }): void {
-    this.props.operatingHours = data.operatingHours;
-    this.props.holidays = data.holidays;
-    this.props.slotConfig = data.slotConfig;
+    this.props.operatingHours = data.operatingHours
+    this.props.holidays = data.holidays
+    this.props.slotConfig = data.slotConfig
 
-    this.touch();
+    this.touch()
   }
 
   updateAmenities(amenities: string[]): void {
-    this.props.amenities = amenities;
-    this.touch();
+    this.props.amenities = amenities
+    this.touch()
   }
 
   assignManager(managerId?: string): void {
@@ -165,49 +165,49 @@ export class Station {
   }
 
   updateStatus(status: StationStatus): void {
-    this.props.status = status;
-    this.props.isActive = status === StationStatus.ACTIVE;
-    this.touch();
+    this.props.status = status
+    this.props.isActive = status === StationStatus.ACTIVE
+    this.touch()
   }
 
   submit(): void {
     if (this.props.status !== StationStatus.DRAFT && this.props.status !== StationStatus.REJECTED) {
-      throw new Error("Only draft or rejected stations can be submitted.");
+      throw new Error("Only draft or rejected stations can be submitted.")
     }
 
-    this.props.status = StationStatus.PENDING_REVIEW;
-    this.props.rejectionReason = undefined;
-    this.touch();
+    this.props.status = StationStatus.PENDING_REVIEW
+    this.props.rejectionReason = undefined
+    this.touch()
   }
 
   activate(): void {
-    this.props.status = StationStatus.ACTIVE;
-    this.props.isActive = true;
-    this.props.verifiedAt = new Date();
-    this.props.rejectionReason = undefined;
-    this.touch();
+    this.props.status = StationStatus.ACTIVE
+    this.props.isActive = true
+    this.props.verifiedAt = new Date()
+    this.props.rejectionReason = undefined
+    this.touch()
   }
 
   reject(reason: string): void {
-    this.props.status = StationStatus.REJECTED;
-    this.props.isActive = false;
-    this.props.rejectionReason = reason;
-    this.props.verifiedAt = undefined;
-    this.touch();
+    this.props.status = StationStatus.REJECTED
+    this.props.isActive = false
+    this.props.rejectionReason = reason
+    this.props.verifiedAt = undefined
+    this.touch()
   }
 
   suspend(reason?: string): void {
-    this.props.status = StationStatus.SUSPENDED;
-    this.props.isActive = false;
+    this.props.status = StationStatus.SUSPENDED
+    this.props.isActive = false
 
     if (reason) {
-      this.props.rejectionReason = reason;
+      this.props.rejectionReason = reason
     }
 
-    this.touch();
+    this.touch()
   }
 
   private touch(): void {
-    this.props.updatedAt = new Date();
+    this.props.updatedAt = new Date()
   }
 }

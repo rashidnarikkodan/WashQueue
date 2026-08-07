@@ -149,7 +149,10 @@ export class BookingController {
     const pdfBuffer = await this.pdfInvoiceService.generateInvoicePdf(booking)
 
     res.setHeader("Content-Type", "application/pdf")
-    res.setHeader("Content-Disposition", `attachment; filename=Invoice-${booking.bookingNumber}.pdf`)
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Invoice-${booking.bookingNumber}.pdf`
+    )
     res.setHeader("Content-Length", pdfBuffer.length)
     res.status(200).send(pdfBuffer)
   }

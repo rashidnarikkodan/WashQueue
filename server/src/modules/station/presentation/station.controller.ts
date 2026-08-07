@@ -33,8 +33,6 @@ import {
   getAvailableTimeWindowsQuerySchema,
 } from "./schema/station.schema"
 
-
-
 export class StationController {
   constructor(
     private readonly createStationUseCase: ICreateStationUseCase,
@@ -199,12 +197,14 @@ export class StationController {
       ownerId: query.ownerId ? String(query.ownerId) : undefined,
       vehicleCategory: query.vehicleCategory ? String(query.vehicleCategory) : undefined,
       vehicleClassId: query.vehicleClassId ? String(query.vehicleClassId) : undefined,
-      washType: query.washType ? (String(query.washType).toUpperCase() as "HALF" | "FULL" | "ALL") : undefined,
+      washType: query.washType
+        ? (String(query.washType).toUpperCase() as "HALF" | "FULL" | "ALL")
+        : undefined,
       amenities: Array.isArray(query.amenities)
         ? query.amenities.map(String)
         : typeof query.amenities === "string"
-        ? query.amenities.split(",")
-        : undefined,
+          ? query.amenities.split(",")
+          : undefined,
       openNow: String(query.openNow) === "true",
       verifiedOnly: String(query.verifiedOnly) === "true",
     }

@@ -21,13 +21,13 @@ export const createOwnerRouter = (ownerController: OwnerController): Router => {
     validateRequest(saveOnboardingStepSchema),
     asyncHandler(ownerController.saveOnboardingStep)
   )
-  
+
   router.post(API_ROUTES.OWNER.ONBOARDING_SUBMIT, asyncHandler(ownerController.submitOnboarding))
-  
+
   router.post(API_ROUTES.OWNER.CREATE, asyncHandler(ownerController.createOwner))
-  
+
   router.get(API_ROUTES.OWNER.GET_PROFILE, asyncHandler(ownerController.getOwnerProfile))
-  
+
   router.patch(API_ROUTES.OWNER.UPDATE_PROFILE, asyncHandler(ownerController.updateOwnerProfile))
 
   return router

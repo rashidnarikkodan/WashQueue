@@ -7,14 +7,8 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
-import {
-  ManagerAssignment,
-  ManagerAssignmentStatus,
-} from "../../domain/entities/ManagerAssignment"
-import {
-  ManagerInvitation,
-  ManagerInvitationStatus,
-} from "../../domain/entities/ManagerInvitation"
+import { ManagerAssignment, ManagerAssignmentStatus } from "../../domain/entities/ManagerAssignment"
+import { ManagerInvitation, ManagerInvitationStatus } from "../../domain/entities/ManagerInvitation"
 import {
   IInviteManagerUseCase,
   InviteManagerInput,
@@ -50,7 +44,9 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     }
 
     // Check Rule 1: A station can only have one active manager
-    const stationAssignments = await this.managerAssignmentRepository.findByStationId(input.stationId)
+    const stationAssignments = await this.managerAssignmentRepository.findByStationId(
+      input.stationId
+    )
     const activeStationManager = stationAssignments.find(
       (a) => a.status === ManagerAssignmentStatus.ACTIVE
     )
@@ -61,14 +57,18 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     if (activeStationManager) {
       // Allow re-assigning or updating permissions for the SAME active manager
       if (!existingUser || activeStationManager.managerUserId !== existingUser.id) {
-        throw new ConflictError("This station already has an active manager assigned. A station can only have one manager.")
+        throw new ConflictError(
+          "This station already has an active manager assigned. A station can only have one manager."
+        )
       }
     }
 
     // Check Rule 2: A manager can only be assigned to one station (active pending invitation check)
     const anyPendingInvitation = await this.managerInvitationRepository.findPendingByEmail(email)
     if (anyPendingInvitation && anyPendingInvitation.stationId !== input.stationId) {
-      throw new ConflictError("This email already has a pending manager invitation for another station. A manager can only be assigned to one station.")
+      throw new ConflictError(
+        "This email already has a pending manager invitation for another station. A manager can only be assigned to one station."
+      )
     }
 
     if (existingUser && existingUser.id) {
@@ -78,7 +78,9 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         (a) => a.stationId !== input.stationId && a.status === ManagerAssignmentStatus.ACTIVE
       )
       if (otherActiveAssignment) {
-        throw new ConflictError("This user is already managing another station. A manager can only be assigned to one station.")
+        throw new ConflictError(
+          "This user is already managing another station. A manager can only be assigned to one station."
+        )
       }
 
       // Case A: User already exists
@@ -127,8 +129,10 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     }
 
     // Case B: User does not exist -> Create Invitation
-    const existingPendingInvitation =
-      await this.managerInvitationRepository.findByEmailAndStation(email, input.stationId)
+    const existingPendingInvitation = await this.managerInvitationRepository.findByEmailAndStation(
+      email,
+      input.stationId
+    )
 
     if (existingPendingInvitation && !existingPendingInvitation.isExpired) {
       throw new ConflictError("A pending invitation already exists for this email and station")

@@ -42,7 +42,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       name: input.name,
       slug,
       description: input.description,
-      isActive:true,
+      isActive: true,
       order: input.order ?? 0,
     })
 
@@ -55,7 +55,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       slug: savedClass.slug,
       description: savedClass.description,
       order: savedClass.order,
-      isActive: savedClass.isActive
+      isActive: savedClass.isActive,
     }
   }
 }

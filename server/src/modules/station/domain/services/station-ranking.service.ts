@@ -12,13 +12,12 @@ export interface HydratedStationItem {
 }
 
 export class StationRankingService {
-
   static computeScore(item: HydratedStationItem): number {
     const W_DIST = 0.35
     const W_WAIT = 0.25
-    const W_RATING = 0.20
-    const W_VERIFIED = 0.10
-    const W_PRICE = 0.10
+    const W_RATING = 0.2
+    const W_VERIFIED = 0.1
+    const W_PRICE = 0.1
 
     // 1. Distance Sub-score (Exponential decay: 0km => 1.0, 10km => ~0.36, 25km => ~0.08)
     const distKm = typeof item.distanceKm === "number" ? item.distanceKm : 15
@@ -51,7 +50,11 @@ export class StationRankingService {
   /**
    * Sorts array of HydratedStationItem deterministically based on sortBy parameter.
    */
-  static sort(items: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[], sortBy?: string, sortOrder: "asc" | "desc" = "asc"): (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[] {
+  static sort(
+    items: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[],
+    sortBy?: string,
+    sortOrder: "asc" | "desc" = "asc"
+  ): (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[] {
     const dir = sortOrder === "desc" ? -1 : 1
 
     return [...items].sort((a, b) => {
@@ -66,7 +69,8 @@ export class StationRankingService {
         case "RATING":
         case "rating": {
           if (b.rating !== a.rating) return (b.rating - a.rating) * dir
-          const revDiff = (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
+          const revDiff =
+            (b.station.getProps().reviewCount - a.station.getProps().reviewCount) * dir
           if (revDiff !== 0) return revDiff
           return a.station.id.localeCompare(b.station.id)
         }
@@ -102,7 +106,10 @@ export class StationRankingService {
         }
 
         case "NEWEST": {
-          const diff = (new Date(b.station.getProps().createdAt).getTime() - new Date(a.station.getProps().createdAt).getTime()) * dir
+          const diff =
+            (new Date(b.station.getProps().createdAt).getTime() -
+              new Date(a.station.getProps().createdAt).getTime()) *
+            dir
           if (diff !== 0) return diff
           return a.station.id.localeCompare(b.station.id)
         }

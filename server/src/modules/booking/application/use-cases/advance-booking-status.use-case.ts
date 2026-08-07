@@ -26,7 +26,10 @@ export class AdvanceBookingStatusUseCase implements IAdvanceBookingStatusUseCase
     }
 
     if (!booking.canTransitionTo(input.targetStatus)) {
-      throw new AppError(`Cannot transition booking status from ${booking.status} to ${input.targetStatus}`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Cannot transition booking status from ${booking.status} to ${input.targetStatus}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const fromStatus = booking.status
@@ -47,7 +50,10 @@ export class AdvanceBookingStatusUseCase implements IAdvanceBookingStatusUseCase
         booking.complete()
         break
       default:
-        throw new AppError(`Unsupported status transition to ${input.targetStatus}`, HTTP_STATUS.BAD_REQUEST)
+        throw new AppError(
+          `Unsupported status transition to ${input.targetStatus}`,
+          HTTP_STATUS.BAD_REQUEST
+        )
     }
 
     const updatedBooking = await this.bookingRepository.update(booking)

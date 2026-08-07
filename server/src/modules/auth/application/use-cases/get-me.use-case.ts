@@ -29,12 +29,12 @@ export class GetMeUseCase implements IGetMeUseCase {
     let ownerId: string | undefined = undefined
 
     if (user.role === ROLE.OWNER) {
-       const owner = await this.ownerRepository.findByUserId(userId)
-       if (owner) {
-         isVerified = owner.isVerified ?? false
-         onboardingStep = owner.onboardingStep ?? 1
-         ownerId = owner.id
-       }
+      const owner = await this.ownerRepository.findByUserId(userId)
+      if (owner) {
+        isVerified = owner.isVerified ?? false
+        onboardingStep = owner.onboardingStep ?? 1
+        ownerId = owner.id
+      }
     }
 
     return {

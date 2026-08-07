@@ -12,7 +12,7 @@ export class VehicleClassMapper implements IMapper<VehicleClass, IVehicleClass> 
       slug: raw.slug,
       description: raw.description,
       order: raw.order,
-      isActive: raw.isActive
+      isActive: raw.isActive,
     })
   }
 

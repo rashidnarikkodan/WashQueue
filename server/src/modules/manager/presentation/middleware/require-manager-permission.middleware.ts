@@ -31,7 +31,9 @@ export const createRequireManagerPermissionMiddleware = (
         // Check if user is station owner (Owners have implicit full access to their stations)
         const station = await stationRepository.findById(stationId)
         if (station) {
-          const ownerDoc = await OwnerModel.findOne({ userId: new Types.ObjectId(req.user.userId) }).exec()
+          const ownerDoc = await OwnerModel.findOne({
+            userId: new Types.ObjectId(req.user.userId),
+          }).exec()
           const isOwner =
             station.ownerId.toString() === req.user.userId ||
             (ownerDoc && station.ownerId.toString() === ownerDoc._id.toString())
@@ -56,9 +58,7 @@ export const createRequireManagerPermissionMiddleware = (
         }
 
         if (requiredPermission && !assignment.hasPermission(requiredPermission)) {
-          throw new ForbiddenError(
-            `Insufficient permission. Required: ${requiredPermission}`
-          )
+          throw new ForbiddenError(`Insufficient permission. Required: ${requiredPermission}`)
         }
 
         next()

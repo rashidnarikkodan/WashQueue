@@ -24,10 +24,7 @@ const contactSchema = z.object({
     .string({ message: "Contact phone is required" })
     .trim()
     .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-  email: z
-    .string({ message: "Contact email is required" })
-    .trim()
-    .email("Invalid email format"),
+  email: z.string({ message: "Contact email is required" }).trim().email("Invalid email format"),
 })
 
 const locationSchema = z.object({
@@ -166,7 +163,11 @@ const extraServicePricingSchema = z.object({
 })
 
 const extraServiceInputSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID").optional().or(z.literal("")),
+  id: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID")
+    .optional()
+    .or(z.literal("")),
   name: z.string().trim().min(2, "Service name must be at least 2 characters"),
   slug: z.string().trim().optional().or(z.literal("")),
   description: z.string().trim().optional().or(z.literal("")),
@@ -184,7 +185,10 @@ const extraServiceInputSchema = z.object({
 const step4Schema = z.object({
   step: z.literal(4),
   amenities: z.preprocess(preprocessJson, z.array(z.string()).optional().default([])),
-  extraServices: z.preprocess(preprocessJson, z.array(extraServiceInputSchema).optional().default([])),
+  extraServices: z.preprocess(
+    preprocessJson,
+    z.array(extraServiceInputSchema).optional().default([])
+  ),
 })
 
 const patchBodyPreprocess = (val: unknown) => {
@@ -210,7 +214,11 @@ export const patchStationSchema = z.preprocess(
 export const configureSlotConfigSchema = z.object({
   windowDurationMins: z.preprocess(
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-    z.number().int().min(5, "Window duration must be at least 5 mins").max(240, "Window duration cannot exceed 240 mins")
+    z
+      .number()
+      .int()
+      .min(5, "Window duration must be at least 5 mins")
+      .max(240, "Window duration cannot exceed 240 mins")
   ),
   capacityPerWindow: z.preprocess(
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
@@ -222,7 +230,11 @@ export const configureSlotConfigSchema = z.object({
   ),
   maxAdvanceBookingDays: z.preprocess(
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-    z.number().int().min(1, "Max advance booking days must be at least 1").max(365, "Max advance booking days cannot exceed 365")
+    z
+      .number()
+      .int()
+      .min(1, "Max advance booking days must be at least 1")
+      .max(365, "Max advance booking days cannot exceed 365")
   ),
   allowWalkIns: z.preprocess(
     (val) => (typeof val === "string" ? val === "true" || val === "1" : val),
@@ -233,4 +245,3 @@ export const configureSlotConfigSchema = z.object({
 export const getAvailableTimeWindowsQuerySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format, must be YYYY-MM-DD"),
 })
-

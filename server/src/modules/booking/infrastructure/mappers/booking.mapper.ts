@@ -32,7 +32,12 @@ function getIdString(val: unknown): string {
   if (typeof val === "object" && val !== null && "_id" in val && (val as PopulatedDoc)._id) {
     return (val as PopulatedDoc)._id?.toString() || ""
   }
-  if (typeof val === "object" && val !== null && "toString" in val && typeof (val as PopulatedDoc).toString === "function") {
+  if (
+    typeof val === "object" &&
+    val !== null &&
+    "toString" in val &&
+    typeof (val as PopulatedDoc).toString === "function"
+  ) {
     return (val as PopulatedDoc).toString()
   }
   return String(val)
@@ -47,42 +52,56 @@ function toObjectId(val: unknown): Types.ObjectId | null {
 
 export class BookingMapper {
   static toDomain(doc: IBookingDocument): Booking {
-    const stationObj = doc.stationId && typeof doc.stationId === "object" ? (doc.stationId as PopulatedDoc) : null
-    const vehicleObj = doc.vehicleId && typeof doc.vehicleId === "object" ? (doc.vehicleId as PopulatedDoc) : null
-    const userObj = doc.userId && typeof doc.userId === "object" ? (doc.userId as PopulatedDoc) : null
+    const stationObj =
+      doc.stationId && typeof doc.stationId === "object" ? (doc.stationId as PopulatedDoc) : null
+    const vehicleObj =
+      doc.vehicleId && typeof doc.vehicleId === "object" ? (doc.vehicleId as PopulatedDoc) : null
+    const userObj =
+      doc.userId && typeof doc.userId === "object" ? (doc.userId as PopulatedDoc) : null
 
     const props: BookingProps = {
       id: doc._id?.toString() || (doc as unknown as { id?: string }).id || "",
       bookingNumber: doc.bookingNumber || "",
       userId: doc.userId ? getIdString(doc.userId) : null,
-      providerId: doc.providerId ? getIdString(doc.providerId) : (doc.createdByUserId ? doc.createdByUserId.toString() : ""),
+      providerId: doc.providerId
+        ? getIdString(doc.providerId)
+        : doc.createdByUserId
+          ? doc.createdByUserId.toString()
+          : "",
       stationId: doc.stationId ? getIdString(doc.stationId) : "",
       vehicleId: doc.vehicleId ? getIdString(doc.vehicleId) : null,
-      stationDetails: stationObj && "name" in stationObj
-        ? {
-            name: stationObj.name,
-            city: stationObj.address?.city,
-            phone: stationObj.contact?.phone,
-          }
-        : undefined,
-      vehicleDetails: vehicleObj && "brand" in vehicleObj
-        ? {
-            nickname: vehicleObj.nickname,
-            brand: vehicleObj.brand,
-            model: vehicleObj.vehicle_model,
-            registrationNumber: vehicleObj.registrationNumber,
-          }
-        : undefined,
-      customerDetails: userObj && "name" in userObj
-        ? {
-            name: userObj.name,
-            email: userObj.email,
-            phone: userObj.phone,
-          }
-        : undefined,
+      stationDetails:
+        stationObj && "name" in stationObj
+          ? {
+              name: stationObj.name,
+              city: stationObj.address?.city,
+              phone: stationObj.contact?.phone,
+            }
+          : undefined,
+      vehicleDetails:
+        vehicleObj && "brand" in vehicleObj
+          ? {
+              nickname: vehicleObj.nickname,
+              brand: vehicleObj.brand,
+              model: vehicleObj.vehicle_model,
+              registrationNumber: vehicleObj.registrationNumber,
+            }
+          : undefined,
+      customerDetails:
+        userObj && "name" in userObj
+          ? {
+              name: userObj.name,
+              email: userObj.email,
+              phone: userObj.phone,
+            }
+          : undefined,
       vehicleSnapshot: {
-        vehicleCategoryId: doc.vehicleSnapshot?.vehicleCategoryId ? doc.vehicleSnapshot.vehicleCategoryId.toString() : "",
-        vehicleClassId: doc.vehicleSnapshot?.vehicleClassId ? doc.vehicleSnapshot.vehicleClassId.toString() : "",
+        vehicleCategoryId: doc.vehicleSnapshot?.vehicleCategoryId
+          ? doc.vehicleSnapshot.vehicleCategoryId.toString()
+          : "",
+        vehicleClassId: doc.vehicleSnapshot?.vehicleClassId
+          ? doc.vehicleSnapshot.vehicleClassId.toString()
+          : "",
       },
       serviceType: doc.serviceType as ServiceType,
       pricingSnapshot: {
@@ -111,7 +130,9 @@ export class BookingMapper {
         : null,
       walkInVehicle: doc.walkInVehicle
         ? {
-            vehicleId: doc.walkInVehicle.vehicleId ? doc.walkInVehicle.vehicleId.toString() : undefined,
+            vehicleId: doc.walkInVehicle.vehicleId
+              ? doc.walkInVehicle.vehicleId.toString()
+              : undefined,
             registrationNumber: doc.walkInVehicle.registrationNumber || "",
             categoryId: doc.walkInVehicle.categoryId ? doc.walkInVehicle.categoryId.toString() : "",
             classId: doc.walkInVehicle.classId ? doc.walkInVehicle.classId.toString() : "",
@@ -135,7 +156,9 @@ export class BookingMapper {
         ? {
             photos: doc.preServiceInspection.photos || [],
             notes: doc.preServiceInspection.notes,
-            capturedBy: doc.preServiceInspection.capturedBy ? doc.preServiceInspection.capturedBy.toString() : "",
+            capturedBy: doc.preServiceInspection.capturedBy
+              ? doc.preServiceInspection.capturedBy.toString()
+              : "",
             capturedAt: doc.preServiceInspection.capturedAt || new Date(),
           }
         : null,
@@ -143,7 +166,9 @@ export class BookingMapper {
         ? {
             photos: doc.postServiceInspection.photos || [],
             notes: doc.postServiceInspection.notes,
-            capturedBy: doc.postServiceInspection.capturedBy ? doc.postServiceInspection.capturedBy.toString() : "",
+            capturedBy: doc.postServiceInspection.capturedBy
+              ? doc.postServiceInspection.capturedBy.toString()
+              : "",
             capturedAt: doc.postServiceInspection.capturedAt || new Date(),
           }
         : null,
@@ -158,7 +183,9 @@ export class BookingMapper {
       cancellation: doc.cancellation
         ? {
             cancellationReason: doc.cancellation.cancellationReason || "",
-            cancelledBy: doc.cancellation.cancelledBy ? doc.cancellation.cancelledBy.toString() : "",
+            cancelledBy: doc.cancellation.cancelledBy
+              ? doc.cancellation.cancelledBy.toString()
+              : "",
             cancelledAt: doc.cancellation.cancelledAt || new Date(),
           }
         : null,
@@ -175,11 +202,13 @@ export class BookingMapper {
     const raw: Partial<IBookingDocument> = {
       bookingNumber: props.bookingNumber,
       userId: toObjectId(props.userId),
-      providerId: toObjectId(props.providerId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
+      providerId:
+        toObjectId(props.providerId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
       stationId: toObjectId(props.stationId) || new Types.ObjectId(),
       vehicleId: toObjectId(props.vehicleId),
       vehicleSnapshot: {
-        vehicleCategoryId: toObjectId(props.vehicleSnapshot?.vehicleCategoryId) || new Types.ObjectId(),
+        vehicleCategoryId:
+          toObjectId(props.vehicleSnapshot?.vehicleCategoryId) || new Types.ObjectId(),
         vehicleClassId: toObjectId(props.vehicleSnapshot?.vehicleClassId) || new Types.ObjectId(),
       },
       serviceType: props.serviceType,
@@ -194,7 +223,9 @@ export class BookingMapper {
           const oid = toObjectId(es.serviceId)
           return oid ? { serviceId: oid, name: es.name, price: es.price } : null
         })
-        .filter((es): es is { serviceId: Types.ObjectId; name: string; price: number } => es !== null),
+        .filter(
+          (es): es is { serviceId: Types.ObjectId; name: string; price: number } => es !== null
+        ),
       scheduling: {
         timeWindowId: toObjectId(props.scheduling?.timeWindowId) || new Types.ObjectId(),
         windowStart: props.scheduling?.windowStart || new Date(),
@@ -241,7 +272,11 @@ export class BookingMapper {
       cancellation: props.cancellation
         ? {
             cancellationReason: props.cancellation.cancellationReason || "",
-            cancelledBy: toObjectId(props.cancellation.cancelledBy) || toObjectId(props.userId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
+            cancelledBy:
+              toObjectId(props.cancellation.cancelledBy) ||
+              toObjectId(props.userId) ||
+              toObjectId(props.createdByUserId) ||
+              new Types.ObjectId(),
             cancelledAt: props.cancellation.cancelledAt || new Date(),
           }
         : null,

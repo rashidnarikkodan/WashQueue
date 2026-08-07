@@ -6,7 +6,11 @@ export const createVehicleSchema = z.object({
   model: z.string().min(1, "Model is required").max(50),
   year: z.preprocess(
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-    z.number({ message: "Year must be a number" }).int().min(1900).max(new Date().getFullYear() + 1)
+    z
+      .number({ message: "Year must be a number" })
+      .int()
+      .min(1900)
+      .max(new Date().getFullYear() + 1)
   ),
   registrationNumber: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -26,14 +30,25 @@ export const updateVehicleSchema = z.object({
   model: z.string().min(1, "Model is required").max(50).optional(),
   year: z.preprocess(
     (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-    z.number({ message: "Year must be a number" }).int().min(1900).max(new Date().getFullYear() + 1).optional()
+    z
+      .number({ message: "Year must be a number" })
+      .int()
+      .min(1900)
+      .max(new Date().getFullYear() + 1)
+      .optional()
   ),
   registrationNumber: z.preprocess(
     (val) => (val === "" ? null : val),
     z.string().nullable().optional()
   ),
-  categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Category ID").optional(),
-  classId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Class ID").optional(),
+  categoryId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid Category ID")
+    .optional(),
+  classId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid Class ID")
+    .optional(),
   isPrimary: z.preprocess(
     (val) => (typeof val === "string" ? val === "true" : val),
     z.boolean().optional()

@@ -31,7 +31,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       slug,
       description: input.description,
       order: input.order ?? 0,
-      isActive: true
+      isActive: true,
     })
 
     const savedCategory = await this.categoryRepository.save(category)
@@ -42,7 +42,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       slug: savedCategory.slug,
       description: savedCategory.description,
       order: savedCategory.order,
-      isActive: savedCategory.isActive
+      isActive: savedCategory.isActive,
     }
   }
 }

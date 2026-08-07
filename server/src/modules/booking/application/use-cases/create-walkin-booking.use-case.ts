@@ -29,7 +29,10 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     private readonly notificationService: BookingNotificationService
   ) {}
 
-  async execute(managerUserId: string, input: CreateWalkInBookingInput): Promise<BookingResponseDTO> {
+  async execute(
+    managerUserId: string,
+    input: CreateWalkInBookingInput
+  ): Promise<BookingResponseDTO> {
     // 1. Validate Station
     const station = await this.stationRepository.findById(input.stationId)
     if (!station) {
@@ -44,7 +47,10 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     const pricings = await this.stationPricingRepository.findByStationId(station.id)
     const pricing = pricings.find((p) => p.vehicleClassId === input.vehicle.classId && p.isActive)
     if (!pricing) {
-      throw new AppError("Station does not support or have active pricing for this vehicle class", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "Station does not support or have active pricing for this vehicle class",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const basePrice = input.serviceType === "FULL" ? pricing.fullWashPrice : pricing.halfWashPrice
@@ -57,7 +63,10 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       for (const extraId of input.extraServiceIds) {
         const extra = availableExtras.find((e) => e.id === extraId && e.isActive)
         if (!extra) {
-          throw new AppError(`Extra service ${extraId} is invalid or inactive`, HTTP_STATUS.BAD_REQUEST)
+          throw new AppError(
+            `Extra service ${extraId} is invalid or inactive`,
+            HTTP_STATUS.BAD_REQUEST
+          )
         }
         const classPricing = extra.pricing.find((p) => p.vehicleClassId === input.vehicle.classId)
         selectedExtraServices.push({
@@ -129,7 +138,8 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus: paymentType === PaymentType.CASH_WALKIN ? PaymentStatus.PAID : PaymentStatus.PENDING,
+      paymentStatus:
+        paymentType === PaymentType.CASH_WALKIN ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,

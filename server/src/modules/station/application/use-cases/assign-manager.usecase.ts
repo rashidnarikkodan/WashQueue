@@ -17,7 +17,11 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
     private readonly ownerRepository: IOwnerRepository
   ) {}
 
-  async execute(stationId: string, userId: string, input: AssignManagerInput): Promise<StationProps> {
+  async execute(
+    stationId: string,
+    userId: string,
+    input: AssignManagerInput
+  ): Promise<StationProps> {
     const owner = await this.ownerRepository.findByUserId(userId)
     if (!owner || !owner.id) {
       throw new ForbiddenError("Owner profile not found")

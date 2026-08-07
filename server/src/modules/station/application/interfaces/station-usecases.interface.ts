@@ -9,7 +9,11 @@ export interface ICreateStationUseCase {
 }
 
 export interface IUpdateStationUseCase {
-  execute(stationId: string, userId: string, updates: UpdateStationInput): Promise<StationDetailResponseDto>
+  execute(
+    stationId: string,
+    userId: string,
+    updates: UpdateStationInput
+  ): Promise<StationDetailResponseDto>
 }
 
 export interface IGetStationUseCase {
@@ -17,7 +21,9 @@ export interface IGetStationUseCase {
 }
 
 export interface IGetStationsUseCase {
-  execute(query: GetStationsQuery): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }>
+  execute(
+    query: GetStationsQuery
+  ): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }>
 }
 
 export interface ISubmitStationUseCase {
@@ -29,7 +35,11 @@ export interface IDeleteStationUseCase {
 }
 
 export interface IReviewStationUseCase {
-  execute(stationId: string, action: "APPROVE" | "REJECT" | "SUSPEND", rejectionReason?: string): Promise<Station>
+  execute(
+    stationId: string,
+    action: "APPROVE" | "REJECT" | "SUSPEND",
+    rejectionReason?: string
+  ): Promise<Station>
 }
 
 export interface IToggleActiveStationUseCase {
