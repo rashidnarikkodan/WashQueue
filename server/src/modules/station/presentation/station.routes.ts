@@ -5,7 +5,6 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import {
   createStationSchema,
-  getAvailableTimeWindowsQuerySchema,
   patchStationSchema,
 } from "./schema/station.schema"
 import { authorize } from "@/infrastructure/http/middleware/authorize"

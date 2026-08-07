@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { Clock, Calendar, Info, ArrowRight, X, Plus, Coffee, Trash2 } from "lucide-react"
+import { useState } from "react"
+import { X } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import DatePicker from "@/shared/components/ui/DatePicker"

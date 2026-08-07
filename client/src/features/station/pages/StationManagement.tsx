@@ -5,7 +5,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Layers,
   Star,
 } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
