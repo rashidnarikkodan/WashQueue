@@ -12,15 +12,26 @@ declare global {
   }
 }
 
+import type { BookingResponse } from "@/shared/apis/booking.api"
+
 interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   amountInRupees: number
   serviceName?: string
+  bookingIntentData?: {
+    stationId: string
+    vehicleId: string
+    timeWindowId: string
+    serviceType: "HALF" | "FULL"
+    extraServiceIds?: string[]
+    paymentType?: "ONLINE_FULL" | "PAY_AT_STATION"
+  }
   onSuccess: (paymentData: {
     razorpay_payment_id: string
     razorpay_order_id: string
     razorpay_signature: string
+    booking?: BookingResponse
   }) => void
   onError?: (error: string) => void
   onCancel?: () => void
@@ -31,12 +42,14 @@ export default function PaymentModal({
   onClose,
   amountInRupees,
   serviceName,
+  bookingIntentData,
   onSuccess,
   onError,
   onCancel,
 }: PaymentModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<"upi" | "wallet">("upi")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [activeReservationId, setActiveReservationId] = useState<string | null>(null)
 
   if (!isOpen) return null
 
@@ -55,12 +68,17 @@ export default function PaymentModal({
     setIsProcessing(true)
 
     try {
-      // Step 1: Create Order on Backend
+      // Step 1: Create Order & Reserve Capacity on Backend
       const order = await paymentApi.createOrder({
         amount: amountInPaise,
         currency: "INR",
         receipt: `booking_${Date.now()}`,
+        ...(bookingIntentData || {}),
       })
+
+      if (order.reservation_id) {
+        setActiveReservationId(order.reservation_id)
+      }
 
       const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"
 
@@ -84,7 +102,7 @@ export default function PaymentModal({
           razorpay_signature: string
         }) {
           try {
-            // Step 3: Verify Payment Signature on Backend
+            // Step 3: Verify Payment Signature & Confirm Booking on Backend
             const verification = await paymentApi.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -92,17 +110,28 @@ export default function PaymentModal({
             })
 
             if (verification.success) {
-              toast.success("Payment verified successfully!")
-              onSuccess(response)
+              toast.success("Payment verified and booking confirmed!")
+              onSuccess({
+                ...response,
+                booking: verification.booking,
+              })
               onClose()
             } else {
-              toast.error("Payment verification failed")
-              onError?.("Payment verification failed")
+              toast.error(verification.message || "Payment verification failed")
+              onError?.(verification.message || "Payment verification failed")
             }
           } catch (err: unknown) {
-            const errorObj = err as Error
-            toast.error(errorObj.message || "Failed to verify payment signature")
-            onError?.(errorObj.message || "Verification failed")
+            const errorObj = err as { code?: string; message?: string }
+            if (errorObj.code === "RESERVATION_EXPIRED_REFUND_INITIATED" || errorObj.message?.includes("refund")) {
+              toast.error(
+                "Your payment succeeded, but the 10-minute hold expired. A refund has been automatically initiated.",
+                { duration: 8000 }
+              )
+              onError?.("RESERVATION_EXPIRED_REFUND_INITIATED")
+            } else {
+              toast.error(errorObj.message || "Failed to verify payment signature")
+              onError?.(errorObj.message || "Verification failed")
+            }
           } finally {
             setIsProcessing(false)
           }
@@ -111,6 +140,9 @@ export default function PaymentModal({
           ondismiss: function () {
             toast.info("Payment process cancelled")
             setIsProcessing(false)
+            if (activeReservationId || order.reservation_id) {
+              paymentApi.cancelReservation(activeReservationId || order.reservation_id!)
+            }
             onCancel?.()
           },
         },
@@ -125,15 +157,28 @@ export default function PaymentModal({
         console.error("Razorpay Payment Failed:", response.error)
         toast.error(response.error?.description || "Payment failed. Please try again.")
         setIsProcessing(false)
+        if (order.reservation_id) {
+          paymentApi.cancelReservation(order.reservation_id)
+        }
         onError?.(response.error?.description || "Payment failed")
       })
 
       rzp.open()
     } catch (err: unknown) {
-      const errorObj = err as Error
+      const errorObj = err as { code?: string; message?: string }
       console.error("Error creating Razorpay payment order:", err)
-      toast.error(errorObj.message || "Could not initiate payment. Please try again.")
       setIsProcessing(false)
+
+      if (errorObj.code === "SLOT_UNAVAILABLE" || errorObj.message?.includes("SLOT_UNAVAILABLE") || errorObj.message?.includes("available")) {
+        toast.error("This time slot just filled up or is no longer available. Please choose another time slot.", {
+          duration: 6000,
+        })
+        onError?.("SLOT_UNAVAILABLE")
+        onClose()
+        return
+      }
+
+      toast.error(errorObj.message || "Could not initiate payment. Please try again.")
     }
   }
 

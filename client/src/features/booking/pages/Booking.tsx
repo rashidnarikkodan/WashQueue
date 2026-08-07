@@ -350,13 +350,17 @@ export default function Booking() {
     razorpay_payment_id: string
     razorpay_order_id: string
     razorpay_signature: string
+    booking?: BookingResponse
   }) => {
     if (!canSubmit || !stationId || !selectedSlotId || !selectedVehicleId) return
     setIsSubmittingBooking(true)
     try {
-      if (paymentData) {
-        console.log("Verified Razorpay payment ID:", paymentData.razorpay_payment_id)
+      if (paymentData?.booking) {
+        setCreatedBooking(paymentData.booking)
+        setResultModalState({ isOpen: true, type: "success" })
+        return
       }
+
       const serviceType =
         selectedPlanId === "FULL_WASH" || selectedPlanId === "full" ? "FULL" : "HALF"
       const created = await bookingApi.createBooking({
@@ -454,6 +458,7 @@ export default function Booking() {
             selectedExtras={selectedExtras}
             selectedDateFormatted={formattedDate}
             selectedTimeWindow={selectedSlot?.timeWindow || null}
+            selectedSlotId={selectedSlotId}
             onSubmit={handleConfirmBooking}
             onError={(err) => {
               setResultModalState({

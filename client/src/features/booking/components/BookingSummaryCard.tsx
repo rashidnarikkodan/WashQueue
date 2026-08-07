@@ -17,6 +17,8 @@ import type { Vehicle } from "@/features/vehicle/types"
 import type { ServicePlanOption, ExtraServiceOption } from "./ServiceSelectionStep"
 import PaymentModal from "./PaymentModal"
 
+import type { BookingResponse } from "@/shared/apis/booking.api"
+
 interface BookingSummaryCardProps {
   station: Station | null
   selectedVehicle: Vehicle | null
@@ -24,10 +26,12 @@ interface BookingSummaryCardProps {
   selectedExtras: ExtraServiceOption[]
   selectedDateFormatted: string
   selectedTimeWindow: string | null
+  selectedSlotId?: string | null
   onSubmit: (paymentData?: {
     razorpay_payment_id: string
     razorpay_order_id: string
     razorpay_signature: string
+    booking?: BookingResponse
   }) => void
   onError?: (error: string) => void
   isSubmitting?: boolean
@@ -41,6 +45,7 @@ export default function BookingSummaryCard({
   selectedExtras,
   selectedDateFormatted,
   selectedTimeWindow,
+  selectedSlotId,
   onSubmit,
   onError,
   isSubmitting,
@@ -66,6 +71,7 @@ export default function BookingSummaryCard({
     razorpay_payment_id: string
     razorpay_order_id: string
     razorpay_signature: string
+    booking?: BookingResponse
   }) => {
     setIsPaymentModalOpen(false)
     onSubmit(paymentData)
@@ -266,6 +272,18 @@ export default function BookingSummaryCard({
         onClose={() => setIsPaymentModalOpen(false)}
         amountInRupees={totalPrice}
         serviceName={selectedPlan?.name}
+        bookingIntentData={
+          station && selectedVehicle && selectedSlotId && selectedPlan
+            ? {
+                stationId: station.id,
+                vehicleId: selectedVehicle.id,
+                timeWindowId: selectedSlotId,
+                serviceType: selectedPlan.id === "FULL_WASH" || selectedPlan.id === "full" ? "FULL" : "HALF",
+                extraServiceIds: selectedExtras.map((e) => e.id),
+                paymentType: "ONLINE_FULL",
+              }
+            : undefined
+        }
         onSuccess={handlePaymentSuccess}
         onError={(err) => {
           setIsPaymentModalOpen(false)
