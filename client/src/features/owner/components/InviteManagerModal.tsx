@@ -153,14 +153,16 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
-      <div
-        className="w-full max-w-[560px] md:max-w-[620px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200"
-      >
+      <div className="w-full max-w-[560px] md:max-w-[620px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-              {isSuccessState ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <UserPlus className="w-5 h-5" />}
+              {isSuccessState ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <UserPlus className="w-5 h-5" />
+              )}
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
@@ -197,9 +199,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
 
             <div className="space-y-1.5 max-w-md">
               <h3 className="text-2xl font-bold text-foreground tracking-tight">Success!</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {successResultMsg}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{successResultMsg}</p>
             </div>
 
             {/* Summary Box */}
@@ -237,7 +237,9 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               {stationName && (
                 <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex items-center gap-2.5 text-xs text-muted-foreground">
                   <Building2 className="w-4 h-4 text-primary shrink-0" />
-                  <span>Inviting manager for: <strong className="text-foreground">{stationName}</strong></span>
+                  <span>
+                    Inviting manager for: <strong className="text-foreground">{stationName}</strong>
+                  </span>
                 </div>
               )}
 
@@ -306,7 +308,9 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                       >
                         <div className="space-y-0.5 pr-2">
                           <p className="font-bold text-foreground text-xs">{perm.label}</p>
-                          <p className="text-[10px] text-muted-foreground leading-tight">{perm.description}</p>
+                          <p className="text-[10px] text-muted-foreground leading-tight">
+                            {perm.description}
+                          </p>
                         </div>
                         <input
                           type="checkbox"
@@ -324,7 +328,8 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               <div className="p-3.5 sm:p-4 rounded-xl bg-card border border-border text-xs text-muted-foreground leading-relaxed flex items-start gap-3">
                 <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
-                  An invitation email will be sent to <span className="text-primary font-semibold">{email || "this email"}</span>.
+                  An invitation email will be sent to{" "}
+                  <span className="text-primary font-semibold">{email || "this email"}</span>.
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     Rule: Each station can have only 1 manager.
                   </p>

@@ -95,7 +95,8 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           if (!isMounted) return
           if (managedList && managedList.length > 0) {
             const targetId = id || managedList[0].stationId
-            const activeAssignment = managedList.find((m) => m.stationId === targetId) || managedList[0]
+            const activeAssignment =
+              managedList.find((m) => m.stationId === targetId) || managedList[0]
             setManagerPermissions(activeAssignment.permissions || [])
             await fetchStationById(activeAssignment.stationId)
           } else {
@@ -130,7 +131,8 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         <div className="space-y-1 max-w-md">
           <h2 className="text-xl font-bold text-foreground">No Station Assigned</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Your manager account is not currently assigned to any active station. Please ask the station owner to send you a manager invitation.
+            Your manager account is not currently assigned to any active station. Please ask the
+            station owner to send you a manager invitation.
           </p>
         </div>
         <button
@@ -257,7 +259,14 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         <Breadcrumbs
           items={[
             {
-              label: currentRole === ROLE.ADMIN ? "Admin" : currentRole === ROLE.OWNER ? "Owner" : currentRole === ROLE.MANAGER ? "Manager" : "Home",
+              label:
+                currentRole === ROLE.ADMIN
+                  ? "Admin"
+                  : currentRole === ROLE.OWNER
+                    ? "Owner"
+                    : currentRole === ROLE.MANAGER
+                      ? "Manager"
+                      : "Home",
               path: backPath,
             },
             { label: "Stations", path: backPath },
@@ -347,7 +356,11 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             </>
           )}
           {currentRole !== ROLE.ADMIN && (
-            <StationLocationSection address={station.address} location={station.location} stationName={station.name} />
+            <StationLocationSection
+              address={station.address}
+              location={station.location}
+              stationName={station.name}
+            />
           )}
         </div>
 
@@ -370,7 +383,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           />
         </div>
       </div>
-
 
       {/* Custom Rejection Reason Input Modal */}
       {rejecting && (

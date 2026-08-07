@@ -16,12 +16,36 @@ const ALL_PERMISSIONS: {
   label: string
   description: string
 }[] = [
-  { id: "BOOKING_MANAGEMENT", label: "Booking Management", description: "Manage bookings & schedules" },
-  { id: "QUEUE_MANAGEMENT", label: "Queue Management", description: "Real-time bay & queue control" },
-  { id: "CUSTOMER_MANAGEMENT", label: "Customer Management", description: "Access customer details" },
-  { id: "PRICING_MANAGEMENT", label: "Pricing & Services", description: "Update rates & extra wash services" },
-  { id: "REPORTS_VIEW", label: "Reports & Analytics", description: "View revenue & operational metrics" },
-  { id: "STATION_SETTINGS", label: "Station Settings", description: "Configure hours & bays setup" },
+  {
+    id: "BOOKING_MANAGEMENT",
+    label: "Booking Management",
+    description: "Manage bookings & schedules",
+  },
+  {
+    id: "QUEUE_MANAGEMENT",
+    label: "Queue Management",
+    description: "Real-time bay & queue control",
+  },
+  {
+    id: "CUSTOMER_MANAGEMENT",
+    label: "Customer Management",
+    description: "Access customer details",
+  },
+  {
+    id: "PRICING_MANAGEMENT",
+    label: "Pricing & Services",
+    description: "Update rates & extra wash services",
+  },
+  {
+    id: "REPORTS_VIEW",
+    label: "Reports & Analytics",
+    description: "View revenue & operational metrics",
+  },
+  {
+    id: "STATION_SETTINGS",
+    label: "Station Settings",
+    description: "Configure hours & bays setup",
+  },
 ]
 
 export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
@@ -87,7 +111,8 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
                 Update Manager Permissions
               </h2>
               <p className="text-xs text-muted-foreground font-normal mt-0.5">
-                {manager.managerName || manager.managerEmail} • <span className="text-primary">{manager.stationName}</span>
+                {manager.managerName || manager.managerEmail} •{" "}
+                <span className="text-primary">{manager.stationName}</span>
               </p>
             </div>
           </div>
@@ -132,7 +157,9 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
                   >
                     <div className="space-y-0.5 pr-2">
                       <p className="font-bold text-foreground text-xs">{perm.label}</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">{perm.description}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">
+                        {perm.description}
+                      </p>
                     </div>
                     <input
                       type="checkbox"

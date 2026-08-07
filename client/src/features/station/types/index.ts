@@ -112,26 +112,27 @@ export interface StationDetail {
 }
 
 export const StationSortBy = {
-  RECOMMENDED: 'RECOMMENDED',
-  DISTANCE: 'DISTANCE',
-  RATING: 'RATING',
-  PRICE_LOW_TO_HIGH: 'PRICE_LOW_TO_HIGH',
-  PRICE_HIGH_TO_LOW: 'PRICE_HIGH_TO_LOW',
-  WAIT_TIME: 'WAIT_TIME',
-  REVIEW_COUNT: 'REVIEW_COUNT',
-  NEWEST: 'NEWEST',
+  RECOMMENDED: "RECOMMENDED",
+  DISTANCE: "DISTANCE",
+  RATING: "RATING",
+  PRICE_LOW_TO_HIGH: "PRICE_LOW_TO_HIGH",
+  PRICE_HIGH_TO_LOW: "PRICE_HIGH_TO_LOW",
+  WAIT_TIME: "WAIT_TIME",
+  REVIEW_COUNT: "REVIEW_COUNT",
+  NEWEST: "NEWEST",
   // Backward compatibility alias keys:
-  nearest: 'DISTANCE',
-  rating: 'RATING',
-  fastest: 'WAIT_TIME',
-  popular: 'REVIEW_COUNT',
+  nearest: "DISTANCE",
+  rating: "RATING",
+  fastest: "WAIT_TIME",
+  popular: "REVIEW_COUNT",
 } as const
 
-export type StationSortBy = keyof typeof StationSortBy | (typeof StationSortBy)[keyof typeof StationSortBy]
+export type StationSortBy =
+  keyof typeof StationSortBy | (typeof StationSortBy)[keyof typeof StationSortBy]
 
 export const STATION_SORT_BY = StationSortBy
 
-export type WashType = 'HALF' | 'FULL' | 'ALL'
+export type WashType = "HALF" | "FULL" | "ALL"
 
 export interface GetStationsQuery {
   // Location
@@ -167,7 +168,7 @@ export interface GetStationsQuery {
 
   // Sorting
   sortBy?: StationSortBy | string
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: "asc" | "desc"
 
   // Pagination
   page?: number
@@ -306,10 +307,7 @@ export interface UpdateAmenitiesInput {
 }
 
 export type UpdateStationInput =
-  | UpdateBasicInfoInput
-  | UpdateAvailabilityInput
-  | UpdatePricingInput
-  | UpdateAmenitiesInput
+  UpdateBasicInfoInput | UpdateAvailabilityInput | UpdatePricingInput | UpdateAmenitiesInput
 
 export interface FilterOptions {
   sortBy: StationSortBy | string
@@ -341,4 +339,3 @@ export const DEFAULT_FILTERS: FilterOptions = {
   verifiedOnly: false,
   amenities: [],
 }
-

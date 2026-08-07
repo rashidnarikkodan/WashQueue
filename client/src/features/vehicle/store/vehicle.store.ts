@@ -131,8 +131,8 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
           state.currentVehicle?.id === id
             ? { ...state.currentVehicle, isPrimary: true }
             : state.currentVehicle
-            ? { ...state.currentVehicle, isPrimary: false }
-            : null,
+              ? { ...state.currentVehicle, isPrimary: false }
+              : null,
       }))
       toast.success(`${updated.nickname} set as primary vehicle`)
       return true

@@ -36,7 +36,7 @@ export default function Stepper({
     heading,
     description,
     footerNote,
-    setActiveStep
+    setActiveStep,
   }
 
   return (

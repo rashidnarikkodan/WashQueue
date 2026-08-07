@@ -65,7 +65,6 @@ function DescriptionChip({ description }: DescriptionChipProps) {
   )
 }
 
-
 interface AddVehicleModalProps {
   isOpen: boolean
   onClose: () => void
@@ -258,7 +257,9 @@ export default function AddVehicleModal({
   const activeCategories = categories.filter((c) => c.isActive)
   const activeClasses = categoryClasses.filter((cl) => cl.isActive)
 
-  const selectedCategory: VehicleCategory | undefined = activeCategories.find((c) => c.id === categoryId)
+  const selectedCategory: VehicleCategory | undefined = activeCategories.find(
+    (c) => c.id === categoryId
+  )
   const selectedClass: VehicleClass | undefined = activeClasses.find((cl) => cl.id === classId)
 
   return (
@@ -290,8 +291,10 @@ export default function AddVehicleModal({
       </div>
 
       {/* Body Form */}
-      <form onSubmit={handleFormSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-
+      <form
+        onSubmit={handleFormSubmit}
+        className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]"
+      >
         {/* Landscape Image Upload Zone */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -301,7 +304,10 @@ export default function AddVehicleModal({
             {imagePreview && (
               <button
                 type="button"
-                onClick={() => { setImageFile(null); setImagePreview(null) }}
+                onClick={() => {
+                  setImageFile(null)
+                  setImagePreview(null)
+                }}
                 className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3 h-3" /> Remove
@@ -347,7 +353,9 @@ export default function AddVehicleModal({
               </div>
               <div className="text-center">
                 <p className="text-xs font-bold text-foreground">Upload a landscape photo</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Click or drag & drop · JPG, PNG · Max 10MB</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Click or drag & drop · JPG, PNG · Max 10MB
+                </p>
               </div>
             </div>
           )}

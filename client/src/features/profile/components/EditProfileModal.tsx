@@ -146,9 +146,7 @@ export default function EditProfileModal({
     e.preventDefault()
     if (!validate()) return
 
-    const combinedAddress = [building, street, city, state, country]
-      .filter(Boolean)
-      .join(", ")
+    const combinedAddress = [building, street, city, state, country].filter(Boolean).join(", ")
 
     const inputData: UpdateProfileInput = {
       name: name.trim(),
@@ -218,10 +216,8 @@ export default function EditProfileModal({
       {/* Modal Body: Asymmetrical Bento Layout */}
       <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(90vh-170px)]">
         <div className="p-8 space-y-10 overflow-y-auto custom-scrollbar">
-          
           {/* Section 1: Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            
             {/* Left Col: Avatar Upload & Status Badge */}
             <div className="md:col-span-4 flex flex-col items-center sm:items-start gap-4">
               <div className="relative">
@@ -260,7 +256,6 @@ export default function EditProfileModal({
             {/* Right Col: Personal Input Fields */}
             <div className="md:col-span-8 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                
                 {/* Full Name */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-[#C2C6D6]">
@@ -381,7 +376,6 @@ export default function EditProfileModal({
 
           {/* Section 2: Address Details (Sunken Visual Style #070D1F) */}
           <div className="p-8 rounded-[24px] bg-[#070D1F] border border-[#1E293B]/40 space-y-6">
-            
             {/* Header & Location Action */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -406,7 +400,6 @@ export default function EditProfileModal({
 
             {/* Address Input Grid (3 Columns) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              
               {/* Building / House No. */}
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[#C2C6D6]">
@@ -515,7 +508,6 @@ export default function EditProfileModal({
 
         {/* Sticky Action Bar (Footer) */}
         <div className="flex justify-between items-center px-10 py-6 border-t border-[#1E293B] bg-[#0F172A]">
-          
           {/* Cancel */}
           <button
             type="button"

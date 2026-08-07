@@ -6,9 +6,7 @@ interface CustomerColumnHandlers {
   onNavigate: (bookingId: string) => void
 }
 
-export function getCustomerColumns({
-  onNavigate,
-}: CustomerColumnHandlers): Column<Booking>[] {
+export function getCustomerColumns({ onNavigate }: CustomerColumnHandlers): Column<Booking>[] {
   return [
     {
       id: "bookingNumber",
@@ -103,8 +101,7 @@ export function getCustomerColumns({
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
         if (b.status === "CONFIRMED")
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === "CANCELLED")
-          badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
 
         return (
           <span
@@ -198,7 +195,10 @@ export function getManagementColumns({
       header: "Slot Time",
       accessor: "slotTime",
       cell: (b) => (
-        <div onClick={() => onNavigate(b.id)} className="flex items-center gap-1.5 text-xs font-semibold text-foreground text-left cursor-pointer">
+        <div
+          onClick={() => onNavigate(b.id)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-foreground text-left cursor-pointer"
+        >
           <Clock size={12} className="text-muted-foreground shrink-0" />
           <span>{b.slotTime}</span>
         </div>
@@ -241,8 +241,7 @@ export function getManagementColumns({
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
         if (b.status === "CONFIRMED")
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === "CANCELLED")
-          badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
 
         return (
           <span

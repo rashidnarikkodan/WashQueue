@@ -17,8 +17,12 @@ export default function StationRevenueChart() {
     <div className="bg-[#151b2d] p-8 sm:p-10 rounded-2xl border border-white/5 space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-[#dce1fb] tracking-tight">Revenue Velocity</h2>
-          <p className="text-sm text-[#c2c6d6] opacity-80 mt-1">Real-time performance across service tiers</p>
+          <h2 className="text-2xl font-extrabold text-[#dce1fb] tracking-tight">
+            Revenue Velocity
+          </h2>
+          <p className="text-sm text-[#c2c6d6] opacity-80 mt-1">
+            Real-time performance across service tiers
+          </p>
         </div>
 
         <div className="flex gap-2 bg-[#2e3447] p-1 rounded-xl">

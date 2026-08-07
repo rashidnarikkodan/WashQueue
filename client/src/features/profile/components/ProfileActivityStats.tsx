@@ -8,7 +8,6 @@ interface ProfileActivityStatsProps {
 export default function ProfileActivityStats({ stats }: ProfileActivityStatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      
       {/* Stat 1: Total Bookings */}
       <div className="bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative">
         <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block mb-4">

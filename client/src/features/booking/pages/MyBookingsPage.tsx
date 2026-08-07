@@ -85,12 +85,7 @@ export default function MyBookingsPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       {/* Breadcrumb Bar */}
-      <Breadcrumbs
-        items={[
-          { label: "Home", path: "/" },
-          { label: "My Bookings" },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: "Home", path: "/" }, { label: "My Bookings" }]} />
 
       {/* Top Header Row with Heading & Parallel Refresh Button */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
@@ -110,7 +105,10 @@ export default function MyBookingsPage() {
           className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
           title="Refresh list"
         >
-          <RefreshCw size={15} className={isLoading ? "animate-spin text-primary" : "text-primary"} />
+          <RefreshCw
+            size={15}
+            className={isLoading ? "animate-spin text-primary" : "text-primary"}
+          />
           <span>Refresh</span>
         </button>
       </div>
@@ -162,7 +160,9 @@ export default function MyBookingsPage() {
                 <span>{selectedBookingForQr.bookingNumber}</span>
               </div>
               <h3 className="text-lg font-extrabold text-foreground pt-2">Scan for Gate Entry</h3>
-              <p className="text-xs text-muted-foreground">Show this QR code at the station entrance bay</p>
+              <p className="text-xs text-muted-foreground">
+                Show this QR code at the station entrance bay
+              </p>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-center mx-auto w-48 h-48 shadow-inner">
@@ -176,7 +176,9 @@ export default function MyBookingsPage() {
             <div className="p-3 rounded-xl bg-muted/60 text-xs text-muted-foreground space-y-1 text-left">
               <div className="flex justify-between font-medium">
                 <span>Station:</span>
-                <span className="font-bold text-foreground">{selectedBookingForQr.stationName}</span>
+                <span className="font-bold text-foreground">
+                  {selectedBookingForQr.stationName}
+                </span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Slot:</span>
@@ -213,7 +215,8 @@ export default function MyBookingsPage() {
 
             <p className="text-xs text-muted-foreground">
               Are you sure you want to cancel booking{" "}
-              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong>? This action cannot be undone.
+              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong>?
+              This action cannot be undone.
             </p>
 
             <div className="space-y-1.5">

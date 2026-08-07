@@ -94,8 +94,9 @@ export default function Header({ role }: { role?: string }) {
                     <Link
                       key={link.path}
                       to={link.path}
-                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground"
-                        }`}
+                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                        isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                      }`}
                     >
                       {link.name}
                       {isActive && (
@@ -176,10 +177,11 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isActive
                       ? "bg-primary/10 text-primary font-semibold"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    }`}
+                  }`}
                 >
                   {link.name}
                 </Link>

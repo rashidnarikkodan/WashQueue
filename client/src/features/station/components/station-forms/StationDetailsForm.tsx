@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react"
-import { Info, MapPin, Building, Image as ImageIcon, Navigation, ArrowRight, Upload, X } from "lucide-react"
+import {
+  Info,
+  MapPin,
+  Building,
+  Image as ImageIcon,
+  Navigation,
+  ArrowRight,
+  Upload,
+  X,
+} from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
-import LocationPickerMap, { type LocationChangeData } from "@/shared/components/map/LocationPickerMap"
+import LocationPickerMap, {
+  type LocationChangeData,
+} from "@/shared/components/map/LocationPickerMap"
 import { stationDetailsSchema, type StationDetailsFormData } from "../../schemas/station.schema"
 import type { StationImage } from "../../types"
 
@@ -422,18 +433,14 @@ export default function StationDetailsForm({
             <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
               <Upload size={18} />
             </div>
-            <p className="text-xs font-semibold text-slate-200">
-              Click to upload or drag & drop
-            </p>
+            <p className="text-xs font-semibold text-slate-200">Click to upload or drag & drop</p>
             <p className="text-[10px] text-slate-500 font-medium">
               High-quality station photos (PNG, JPG max 5MB)
             </p>
           </label>
         </div>
 
-        {errors.images && (
-          <span className="text-xs text-red-400 font-medium">{errors.images}</span>
-        )}
+        {errors.images && <span className="text-xs text-red-400 font-medium">{errors.images}</span>}
       </div>
 
       {/* Footer Navigation */}

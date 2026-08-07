@@ -53,11 +53,8 @@ export default function CustomerBookingDetailsView({
       ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
       : "Registered Vehicle"
   const plateNumber =
-    booking.vehicleDetails?.registrationNumber ||
-    booking.walkInVehicle?.registrationNumber ||
-    "N/A"
-  const serviceName =
-    booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
+    booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "N/A"
+  const serviceName = booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
 
   const qrPayload =
     booking.rawQrToken ||
@@ -82,7 +79,8 @@ export default function CustomerBookingDetailsView({
           </span>
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Manage your booking schedules, track live bay queue progress, and access check-in QR passes.
+          Manage your booking schedules, track live bay queue progress, and access check-in QR
+          passes.
         </p>
       </div>
 
@@ -140,7 +138,9 @@ export default function CustomerBookingDetailsView({
             <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-widest">
               <span>Service Progress</span>
               <span className="text-primary font-semibold">
-                {currentStageIndex >= 0 ? `${(currentStageIndex + 1) * 20}% Completed` : "Cancelled"}
+                {currentStageIndex >= 0
+                  ? `${(currentStageIndex + 1) * 20}% Completed`
+                  : "Cancelled"}
               </span>
             </div>
 
@@ -211,7 +211,11 @@ export default function CustomerBookingDetailsView({
               onClick={handleDownloadInvoice}
               className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isDownloading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+              {isDownloading ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Download size={15} />
+              )}
               <span>{isDownloading ? "Downloading..." : "Download Invoice"}</span>
             </button>
           </div>
@@ -252,7 +256,9 @@ export default function CustomerBookingDetailsView({
                   Service Tier
                 </span>
                 <h4 className="text-base font-bold text-foreground">{serviceName}</h4>
-                <p className="text-xs text-muted-foreground">Precision wash &amp; surface treatment</p>
+                <p className="text-xs text-muted-foreground">
+                  Precision wash &amp; surface treatment
+                </p>
               </div>
 
               <div className="space-y-1">
@@ -271,7 +277,9 @@ export default function CustomerBookingDetailsView({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground font-medium">No extra add-ons selected.</p>
+                  <p className="text-xs text-muted-foreground font-medium">
+                    No extra add-ons selected.
+                  </p>
                 )}
               </div>
 
@@ -367,9 +375,7 @@ export default function CustomerBookingDetailsView({
               {booking.stationDetails?.phone && (
                 <button
                   type="button"
-                  onClick={() =>
-                    toast.info(`Calling station at ${booking.stationDetails?.phone}`)
-                  }
+                  onClick={() => toast.info(`Calling station at ${booking.stationDetails?.phone}`)}
                   className="w-full p-3.5 rounded-2xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">

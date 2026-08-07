@@ -29,7 +29,8 @@ export default function OwnerOnboarding() {
 
   // On mount: load server-side draft to resume where user left off
   useEffect(() => {
-    const hasCompleted = user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4
+    const hasCompleted =
+      user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4
     if (!hasCompleted) {
       fetchOnboardingStatus()
     }

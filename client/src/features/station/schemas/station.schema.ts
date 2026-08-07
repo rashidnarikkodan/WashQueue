@@ -1,40 +1,22 @@
 import { z } from "zod"
 
 export const stationDetailsSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Station name must be at least 3 characters"),
+  name: z.string().trim().min(3, "Station name must be at least 3 characters"),
   phone: z
     .string()
     .trim()
     .regex(/^[0-9]{10}$/, "Phone number must be a valid 10-digit number"),
-  email: z
-    .string()
-    .trim()
-    .email("Invalid contact email address"),
+  email: z.string().trim().email("Invalid contact email address"),
   description: z.string().trim().optional(),
-  street: z
-    .string()
-    .trim()
-    .min(3, "Street address must be at least 3 characters"),
-  city: z
-    .string()
-    .trim()
-    .min(2, "Town / City is required"),
+  street: z.string().trim().min(3, "Street address must be at least 3 characters"),
+  city: z.string().trim().min(2, "Town / City is required"),
   pincode: z
     .string()
     .trim()
     .regex(/^[0-9]{5,6}$/, "PIN / Zip Code must be 5 or 6 digits"),
   district: z.string().trim().optional(),
-  state: z
-    .string()
-    .trim()
-    .min(2, "State is required"),
-  country: z
-    .string()
-    .trim()
-    .min(2, "Country is required"),
+  state: z.string().trim().min(2, "State is required"),
+  country: z.string().trim().min(2, "Country is required"),
   latitude: z
     .number({ message: "Latitude is required" })
     .min(-90, "Latitude must be between -90 and 90")
@@ -62,12 +44,22 @@ export const operatingHourSchema = z.object({
 })
 
 export const availabilitySchema = z.object({
-  operatingHours: z.array(operatingHourSchema).min(1, "At least one operating hour entry is required"),
+  operatingHours: z
+    .array(operatingHourSchema)
+    .min(1, "At least one operating hour entry is required"),
   bays: z.coerce.number().int().min(1, "Number of bays must be at least 1"),
-  windowDurationMins: z.coerce.number().int().min(5, "Window duration must be at least 5 mins").max(240, "Window duration cannot exceed 240 mins"),
+  windowDurationMins: z.coerce
+    .number()
+    .int()
+    .min(5, "Window duration must be at least 5 mins")
+    .max(240, "Window duration cannot exceed 240 mins"),
   capacityPerWindow: z.coerce.number().int().min(1, "Capacity per window must be at least 1"),
   walkInReservedSlots: z.coerce.number().int().min(0, "Walk-in slots cannot be negative"),
-  maxAdvanceBookingDays: z.coerce.number().int().min(1, "Max advance booking days must be at least 1").max(365, "Max advance booking days cannot exceed 365"),
+  maxAdvanceBookingDays: z.coerce
+    .number()
+    .int()
+    .min(1, "Max advance booking days must be at least 1")
+    .max(365, "Max advance booking days cannot exceed 365"),
   allowWalkIns: z.boolean().default(true),
 })
 
@@ -88,7 +80,10 @@ export const extraServicePricingSchema = z.object({
 })
 
 export const extraServiceItemSchema = z.object({
-  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID").optional(),
+  id: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid service ID")
+    .optional(),
   name: z.string().trim().min(2, "Service name must be at least 2 characters"),
   slug: z.string().trim().optional(),
   description: z.string().trim().optional(),

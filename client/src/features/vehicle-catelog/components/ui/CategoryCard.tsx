@@ -1,5 +1,16 @@
 import type React from "react"
-import { Pencil, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Car, Bike, Truck, Wrench } from "lucide-react"
+import {
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+  Car,
+  Bike,
+  Truck,
+  Wrench,
+} from "lucide-react"
 import type { VehicleCategory } from "../../types"
 
 // Helper to assign icons based on category name (inherits text color)
@@ -8,13 +19,29 @@ const getCategoryIcon = (name: string) => {
   if (lower.includes("car") || lower.includes("passenger") || lower.includes("auto")) {
     return <Car size={20} />
   }
-  if (lower.includes("two") || lower.includes("bike") || lower.includes("cycle") || lower.includes("moto")) {
+  if (
+    lower.includes("two") ||
+    lower.includes("bike") ||
+    lower.includes("cycle") ||
+    lower.includes("moto")
+  ) {
     return <Bike size={20} />
   }
-  if (lower.includes("truck") || lower.includes("lorry") || lower.includes("cargo") || lower.includes("commercial")) {
+  if (
+    lower.includes("truck") ||
+    lower.includes("lorry") ||
+    lower.includes("cargo") ||
+    lower.includes("commercial")
+  ) {
     return <Truck size={20} />
   }
-  if (lower.includes("heavy") || lower.includes("construction") || lower.includes("equip") || lower.includes("mine") || lower.includes("mach")) {
+  if (
+    lower.includes("heavy") ||
+    lower.includes("construction") ||
+    lower.includes("equip") ||
+    lower.includes("mine") ||
+    lower.includes("mach")
+  ) {
     return <Wrench size={20} />
   }
   return <Car size={20} />

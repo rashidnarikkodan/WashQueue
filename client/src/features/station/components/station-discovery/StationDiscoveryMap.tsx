@@ -297,7 +297,9 @@ export default function StationDiscoveryMap({
 
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
-                  <h4 className="font-bold text-sm text-foreground truncate">{selectedStation.name}</h4>
+                  <h4 className="font-bold text-sm text-foreground truncate">
+                    {selectedStation.name}
+                  </h4>
                   <span className="text-xs font-bold text-amber-400 shrink-0 ml-1">
                     ★ {selectedStation.rating?.toFixed(1) || "4.8"}
                   </span>
@@ -310,7 +312,9 @@ export default function StationDiscoveryMap({
                 <div className="flex items-center gap-3 text-[11px] font-medium text-emerald-400 mt-1">
                   <span>{selectedStation.slotConfig?.bays || 4} Bays</span>
                   {selectedStation.distanceKm !== undefined && (
-                    <span className="text-muted-foreground">• {selectedStation.distanceKm} km away</span>
+                    <span className="text-muted-foreground">
+                      • {selectedStation.distanceKm} km away
+                    </span>
                   )}
                 </div>
               </div>

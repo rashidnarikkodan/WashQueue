@@ -8,21 +8,15 @@ import type { OperatingBreak } from "../../types"
 
 interface AvailabilityFormProps {
   initialValues?: Partial<AvailabilityFormData> & { holidays?: { date: string; reason?: string }[] }
-  onSubmit: (data: AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }) => void
+  onSubmit: (
+    data: AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }
+  ) => void
   onBack: () => void
   onCancel?: () => void
   isLoading?: boolean
 }
 
-const DEFAULT_DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-]
+const DEFAULT_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 export default function AvailabilityForm({
   initialValues,
@@ -32,13 +26,15 @@ export default function AvailabilityForm({
   isLoading = false,
 }: AvailabilityFormProps) {
   const [formData, setFormData] = useState<AvailabilityFormData>({
-    operatingHours: initialValues?.operatingHours || DEFAULT_DAYS.map((day) => ({
-      day,
-      open: "09:00",
-      close: "18:00",
-      isClosed: false,
-      breaks: [],
-    })),
+    operatingHours:
+      initialValues?.operatingHours ||
+      DEFAULT_DAYS.map((day) => ({
+        day,
+        open: "09:00",
+        close: "18:00",
+        isClosed: false,
+        breaks: [],
+      })),
     bays: initialValues?.bays ?? 2,
     windowDurationMins: initialValues?.windowDurationMins ?? 30,
     capacityPerWindow: initialValues?.capacityPerWindow ?? 1,
@@ -103,10 +99,7 @@ export default function AvailabilityForm({
       const currentBreaks: OperatingBreak[] = next[dayIndex].breaks || []
       next[dayIndex] = {
         ...next[dayIndex],
-        breaks: [
-          ...currentBreaks,
-          { name: "Lunch Break", start: "13:00", end: "14:00" },
-        ],
+        breaks: [...currentBreaks, { name: "Lunch Break", start: "13:00", end: "14:00" }],
       }
       return { ...prev, operatingHours: next }
     })
@@ -201,7 +194,9 @@ export default function AvailabilityForm({
             return
           }
           if (brk.start < day.open || brk.end > day.close) {
-            setFormError(`Break time (${brk.start} - ${brk.end}) must be within open hours (${day.open} - ${day.close}) on ${day.day}.`)
+            setFormError(
+              `Break time (${brk.start} - ${brk.end}) must be within open hours (${day.open} - ${day.close}) on ${day.day}.`
+            )
             return
           }
         }
@@ -270,7 +265,10 @@ export default function AvailabilityForm({
 
           <div className="divide-y divide-slate-800/60">
             {formData.operatingHours.map((item, idx) => (
-              <div key={item.day} className="px-6 py-4 hover:bg-slate-900/40 transition-colors space-y-3">
+              <div
+                key={item.day}
+                className="px-6 py-4 hover:bg-slate-900/40 transition-colors space-y-3"
+              >
                 <div className="grid grid-cols-4 items-center">
                   <div className="text-sm font-semibold text-[#DCE1FB] flex items-center gap-2">
                     <span>{item.day}</span>
@@ -336,9 +334,7 @@ export default function AvailabilityForm({
                             type="text"
                             placeholder="Break label (e.g. Lunch Break)"
                             value={brk.name || ""}
-                            onChange={(e) =>
-                              handleBreakChange(idx, bIdx, "name", e.target.value)
-                            }
+                            onChange={(e) => handleBreakChange(idx, bIdx, "name", e.target.value)}
                             className="flex-1 min-w-[140px] bg-[#2E3447] text-white text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700/60 outline-none focus:border-primary"
                           />
 
@@ -359,9 +355,7 @@ export default function AvailabilityForm({
                             <input
                               type="time"
                               value={brk.end}
-                              onChange={(e) =>
-                                handleBreakChange(idx, bIdx, "end", e.target.value)
-                              }
+                              onChange={(e) => handleBreakChange(idx, bIdx, "end", e.target.value)}
                               className="bg-[#2E3447] text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-700/60 outline-none focus:border-primary"
                             />
                           </div>
@@ -398,23 +392,46 @@ export default function AvailabilityForm({
             type="number"
             placeholder="2"
             value={formData.bays === 0 || (formData.bays as unknown) === "" ? "" : formData.bays}
-            onChange={(e) => handleFieldChange("bays", e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value))}
+            onChange={(e) =>
+              handleFieldChange(
+                "bays",
+                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+              )
+            }
             error={errors.bays}
           />
           <FormInput
             label="WINDOW DURATION (MINS)"
             type="number"
             placeholder="30"
-            value={formData.windowDurationMins === 0 || (formData.windowDurationMins as unknown) === "" ? "" : formData.windowDurationMins}
-            onChange={(e) => handleFieldChange("windowDurationMins", e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value))}
+            value={
+              formData.windowDurationMins === 0 || (formData.windowDurationMins as unknown) === ""
+                ? ""
+                : formData.windowDurationMins
+            }
+            onChange={(e) =>
+              handleFieldChange(
+                "windowDurationMins",
+                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+              )
+            }
             error={errors.windowDurationMins}
           />
           <FormInput
             label="WALK-IN RESERVED SLOTS"
             type="number"
             placeholder="1"
-            value={formData.walkInReservedSlots === 0 || (formData.walkInReservedSlots as unknown) === "" ? "" : formData.walkInReservedSlots}
-            onChange={(e) => handleFieldChange("walkInReservedSlots", e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value))}
+            value={
+              formData.walkInReservedSlots === 0 || (formData.walkInReservedSlots as unknown) === ""
+                ? ""
+                : formData.walkInReservedSlots
+            }
+            onChange={(e) =>
+              handleFieldChange(
+                "walkInReservedSlots",
+                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+              )
+            }
             error={errors.walkInReservedSlots}
           />
         </div>
@@ -424,16 +441,35 @@ export default function AvailabilityForm({
             label="CAPACITY PER WINDOW"
             type="number"
             placeholder="2"
-            value={formData.capacityPerWindow === 0 || (formData.capacityPerWindow as unknown) === "" ? "" : formData.capacityPerWindow}
-            onChange={(e) => handleFieldChange("capacityPerWindow", e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value))}
+            value={
+              formData.capacityPerWindow === 0 || (formData.capacityPerWindow as unknown) === ""
+                ? ""
+                : formData.capacityPerWindow
+            }
+            onChange={(e) =>
+              handleFieldChange(
+                "capacityPerWindow",
+                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+              )
+            }
             error={errors.capacityPerWindow}
           />
           <FormInput
             label="MAXIMUM ADVANCED BOOKING DAYS"
             type="number"
             placeholder="7"
-            value={formData.maxAdvanceBookingDays === 0 || (formData.maxAdvanceBookingDays as unknown) === "" ? "" : formData.maxAdvanceBookingDays}
-            onChange={(e) => handleFieldChange("maxAdvanceBookingDays", e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value))}
+            value={
+              formData.maxAdvanceBookingDays === 0 ||
+              (formData.maxAdvanceBookingDays as unknown) === ""
+                ? ""
+                : formData.maxAdvanceBookingDays
+            }
+            onChange={(e) =>
+              handleFieldChange(
+                "maxAdvanceBookingDays",
+                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+              )
+            }
             error={errors.maxAdvanceBookingDays}
           />
         </div>
@@ -449,28 +485,28 @@ export default function AvailabilityForm({
         </div>
 
         {/* Add Holiday Inline Form */}
-          <div className="p-4 rounded-xl border border-slate-800 bg-[#151B2D] space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <DatePicker
-                value={newHolidayDate}
-                onChange={setNewHolidayDate}
-                placeholder="Select holiday date"
-              />
-              <FormInput
-                type="text"
-                placeholder="Holiday reason (e.g. Christmas)"
-                value={newHolidayReason}
-                onChange={(e) => setNewHolidayReason(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={handleAddHoliday}
-                className="px-4 py-1.5 text-xs font-bold bg-[#ADC6FF] text-[#002E6A] rounded-lg"
-              >
-                Add
-              </button>
-            </div>
+        <div className="p-4 rounded-xl border border-slate-800 bg-[#151B2D] space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <DatePicker
+              value={newHolidayDate}
+              onChange={setNewHolidayDate}
+              placeholder="Select holiday date"
+            />
+            <FormInput
+              type="text"
+              placeholder="Holiday reason (e.g. Christmas)"
+              value={newHolidayReason}
+              onChange={(e) => setNewHolidayReason(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={handleAddHoliday}
+              className="px-4 py-1.5 text-xs font-bold bg-[#ADC6FF] text-[#002E6A] rounded-lg"
+            >
+              Add
+            </button>
           </div>
+        </div>
 
         {/* Holiday Chips */}
         <div className="flex flex-wrap gap-3">
@@ -479,7 +515,9 @@ export default function AvailabilityForm({
               key={idx}
               className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-slate-800 bg-slate-900/60 text-xs font-semibold text-[#DCE1FB]"
             >
-              <span>{hol.date} {hol.reason ? `- ${hol.reason}` : ""}</span>
+              <span>
+                {hol.date} {hol.reason ? `- ${hol.reason}` : ""}
+              </span>
               <button
                 type="button"
                 onClick={() => handleRemoveHoliday(idx)}

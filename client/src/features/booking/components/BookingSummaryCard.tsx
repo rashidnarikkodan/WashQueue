@@ -76,12 +76,8 @@ export default function BookingSummaryCard({
       <div className="w-full flex flex-col gap-6 p-6 sm:p-7 rounded-3xl border border-border/60 bg-card shadow-2xl text-left sticky top-24 text-card-foreground">
         {/* Header Section */}
         <div className="space-y-1 pb-4 border-b border-border/60">
-          <h3 className="text-xl font-bold text-foreground tracking-tight">
-            Booking Summary
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Review your wash booking details
-          </p>
+          <h3 className="text-xl font-bold text-foreground tracking-tight">Booking Summary</h3>
+          <p className="text-xs text-muted-foreground">Review your wash booking details</p>
         </div>
 
         {/* Station Details Header */}
@@ -141,7 +137,10 @@ export default function BookingSummaryCard({
 
           {/* Add-ons */}
           {selectedExtras.map((extra) => (
-            <div key={extra.id} className="flex items-center justify-between pl-7 text-xs text-muted-foreground">
+            <div
+              key={extra.id}
+              className="flex items-center justify-between pl-7 text-xs text-muted-foreground"
+            >
               <span>+ {extra.name}</span>
               <span className="font-semibold text-foreground">
                 ₹{extra.price.toLocaleString("en-IN")}
@@ -175,9 +174,7 @@ export default function BookingSummaryCard({
             <span className="text-3xl font-extrabold text-primary tracking-tight">
               ₹{totalPrice.toLocaleString("en-IN")}
             </span>
-            <span className="text-xs text-muted-foreground font-medium">
-              Inclusive of GST
-            </span>
+            <span className="text-xs text-muted-foreground font-medium">Inclusive of GST</span>
           </div>
         </div>
 
@@ -218,9 +215,7 @@ export default function BookingSummaryCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/40" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Pay At Station
-                </span>
+                <span className="text-sm font-medium text-muted-foreground">Pay At Station</span>
               </div>
               <span className="text-[10px] font-bold text-muted-foreground uppercase bg-muted/40 px-2 py-0.5 rounded">
                 UNAVAILABLE

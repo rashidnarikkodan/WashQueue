@@ -75,9 +75,7 @@ export default function ServiceSelectionStep({
               </div>
 
               {/* Description */}
-              <p className="text-xs text-muted-foreground leading-relaxed mb-6">
-                {p.description}
-              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-6">{p.description}</p>
 
               {/* Select Plan Button */}
               <div
@@ -88,11 +86,7 @@ export default function ServiceSelectionStep({
                 }`}
               >
                 <span>{isSelected ? "Selected Plan" : "Select Package"}</span>
-                {isSelected ? (
-                  <Check size={16} className="stroke-[3]" />
-                ) : (
-                  <Sparkles size={14} />
-                )}
+                {isSelected ? <Check size={16} className="stroke-[3]" /> : <Sparkles size={14} />}
               </div>
             </div>
           )

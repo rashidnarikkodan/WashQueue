@@ -127,13 +127,17 @@ const UserManagement = () => {
       const blob = await usersApi.exportUsers({
         search: searchQuery,
         role: roleFilter,
-        isBlocked: statusFilter === "blocked" ? true : statusFilter === "active" ? false : undefined,
+        isBlocked:
+          statusFilter === "blocked" ? true : statusFilter === "active" ? false : undefined,
       })
       if (!blob) return
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.setAttribute("href", url)
-      link.setAttribute("download", `washqueue_users_export_${new Date().toISOString().split("T")[0]}.csv`)
+      link.setAttribute(
+        "download",
+        `washqueue_users_export_${new Date().toISOString().split("T")[0]}.csv`
+      )
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

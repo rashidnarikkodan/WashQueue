@@ -227,7 +227,9 @@ export default function ReviewSubmit({
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-300">{oh.day}</span>
                   <span
-                    className={oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"}
+                    className={
+                      oh.isClosed ? "text-red-400 font-bold" : "text-emerald-400 font-mono"
+                    }
                   >
                     {oh.isClosed ? "Closed" : `${oh.open} - ${oh.close}`}
                   </span>
@@ -264,25 +266,27 @@ export default function ReviewSubmit({
         <div className="space-y-2">
           {pricing.map((item) => {
             const cls = classes.find((c) => c.id === item.vehicleClassId)
-            return ( item.isActive &&
-              <div
-                key={item.vehicleClassId}
-                className="flex justify-between items-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs"
-              >
-                <span className="font-semibold text-white">{cls?.name || "Vehicle Class"}</span>
-                {item.isActive ? (
-                  <div className="flex items-center gap-4 text-slate-300">
-                    <span>
-                      Half Wash: <strong className="text-white">₹{item.halfWashPrice}</strong>
-                    </span>
-                    <span>
-                      Full Wash: <strong className="text-white">₹{item.fullWashPrice}</strong>
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-slate-500 italic">Not Offered</span>
-                )}
-              </div>
+            return (
+              item.isActive && (
+                <div
+                  key={item.vehicleClassId}
+                  className="flex justify-between items-center p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs"
+                >
+                  <span className="font-semibold text-white">{cls?.name || "Vehicle Class"}</span>
+                  {item.isActive ? (
+                    <div className="flex items-center gap-4 text-slate-300">
+                      <span>
+                        Half Wash: <strong className="text-white">₹{item.halfWashPrice}</strong>
+                      </span>
+                      <span>
+                        Full Wash: <strong className="text-white">₹{item.fullWashPrice}</strong>
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-slate-500 italic">Not Offered</span>
+                  )}
+                </div>
+              )
             )
           })}
         </div>
@@ -392,8 +396,8 @@ export default function ReviewSubmit({
                 ? "Saving Changes..."
                 : "Submitting..."
               : isEditMode
-              ? "Save Station Updates"
-              : "Submit Station"}
+                ? "Save Station Updates"
+                : "Submit Station"}
           </span>
         </button>
       </div>

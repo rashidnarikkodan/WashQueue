@@ -1,5 +1,16 @@
 import { useState, useEffect, useMemo } from "react"
-import { Plus, ArrowRight, Car, Bike, Truck, Wrench, X, Trash2, Check, Sparkles } from "lucide-react"
+import {
+  Plus,
+  ArrowRight,
+  Car,
+  Bike,
+  Truck,
+  Wrench,
+  X,
+  Trash2,
+  Check,
+  Sparkles,
+} from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { ExtraServiceInput } from "../../types"
@@ -75,7 +86,6 @@ export default function ExtraServicesForm({
       : []
   )
 
-
   useEffect(() => {
     loadData()
   }, [loadData])
@@ -98,8 +108,10 @@ export default function ExtraServicesForm({
 
   const getCategoryIcon = (name: string) => {
     const lower = name.toLowerCase()
-    if (lower.includes("two") || lower.includes("bike") || lower.includes("motorcycle")) return <Bike size={16} />
-    if (lower.includes("lorry") || lower.includes("truck") || lower.includes("bus")) return <Truck size={16} />
+    if (lower.includes("two") || lower.includes("bike") || lower.includes("motorcycle"))
+      return <Bike size={16} />
+    if (lower.includes("lorry") || lower.includes("truck") || lower.includes("bus"))
+      return <Truck size={16} />
     return <Car size={16} />
   }
 
@@ -129,7 +141,10 @@ export default function ExtraServicesForm({
       name: "",
       slug: "",
       description: "",
-      pricing: availableClasses.map((c) => ({ vehicleClassId: c.id, price: "" as unknown as number })),
+      pricing: availableClasses.map((c) => ({
+        vehicleClassId: c.id,
+        price: "" as unknown as number,
+      })),
       isActive: true,
     }
     setExtraServices((prev) => [...prev, newService])
@@ -170,7 +185,10 @@ export default function ExtraServicesForm({
       const service = { ...next[serviceIndex] }
       const pricingList = [...(service.pricing || [])]
       const parsed = rawValue === "" ? ("" as unknown as number) : parseFloat(rawValue)
-      const val = typeof parsed === "number" && !isNaN(parsed) && parsed >= 0 ? parsed : ("" as unknown as number)
+      const val =
+        typeof parsed === "number" && !isNaN(parsed) && parsed >= 0
+          ? parsed
+          : ("" as unknown as number)
 
       const idx = pricingList.findIndex((p) => p.vehicleClassId === classId)
       if (idx >= 0) {
@@ -206,12 +224,16 @@ export default function ExtraServicesForm({
       }
 
       if (seenNames.has(nameKey)) {
-        setFormError(`Duplicate service name "${s.name}" found. Each extra service must have a unique name.`)
+        setFormError(
+          `Duplicate service name "${s.name}" found. Each extra service must have a unique name.`
+        )
         return
       }
 
       if (seenSlugs.has(slugKey)) {
-        setFormError(`Duplicate service slug "${slugKey}" found for "${s.name}". Service names or slugs cannot repeat.`)
+        setFormError(
+          `Duplicate service slug "${slugKey}" found for "${s.name}". Service names or slugs cannot repeat.`
+        )
         return
       }
 
@@ -290,7 +312,8 @@ export default function ExtraServicesForm({
             <Wrench size={36} className="mx-auto text-muted-foreground" />
             <h4 className="text-sm font-bold text-foreground">No Extra Services Added</h4>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Click below to offer add-on services like Polish, Interior Detailing, Engine Wash, etc.
+              Click below to offer add-on services like Polish, Interior Detailing, Engine Wash,
+              etc.
             </p>
           </div>
         ) : (
@@ -329,18 +352,14 @@ export default function ExtraServicesForm({
                     type="text"
                     placeholder="e.g. Foam Polish / Ceramic Coating"
                     value={service.name}
-                    onChange={(e) =>
-                      handleServiceChange(originalIndex, "name", e.target.value)
-                    }
+                    onChange={(e) => handleServiceChange(originalIndex, "name", e.target.value)}
                   />
                   <FormInput
                     label="SLUG (OPTIONAL)"
                     type="text"
                     placeholder="foam-polish"
                     value={service.slug || ""}
-                    onChange={(e) =>
-                      handleServiceChange(originalIndex, "slug", e.target.value)
-                    }
+                    onChange={(e) => handleServiceChange(originalIndex, "slug", e.target.value)}
                   />
                 </div>
 
@@ -380,9 +399,14 @@ export default function ExtraServicesForm({
                           {/* Minimal 2-column grid */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {categoryClasses.map((cls) => {
-                              const priceItem = (service.pricing || []).find((p) => p.vehicleClassId === cls.id)
+                              const priceItem = (service.pricing || []).find(
+                                (p) => p.vehicleClassId === cls.id
+                              )
                               const rawPrice = priceItem?.price
-                              const displayPrice = typeof rawPrice === "number" && !isNaN(rawPrice) && rawPrice > 0 ? rawPrice : ""
+                              const displayPrice =
+                                typeof rawPrice === "number" && !isNaN(rawPrice) && rawPrice > 0
+                                  ? rawPrice
+                                  : ""
 
                               return (
                                 <div
@@ -399,7 +423,11 @@ export default function ExtraServicesForm({
                                       prefix="₹"
                                       value={displayPrice}
                                       onChange={(e) =>
-                                        handleServicePriceChange(originalIndex, cls.id, e.target.value)
+                                        handleServicePriceChange(
+                                          originalIndex,
+                                          cls.id,
+                                          e.target.value
+                                        )
                                       }
                                     />
                                   </div>

@@ -231,7 +231,9 @@ const StationCard: React.FC<StationCardProps> = ({
           <div className="flex items-center justify-between py-1.5 px-1 border-y border-border/50">
             {/* Left side: Half Wash Rate */}
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Half</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                Half
+              </span>
               <span className="text-base sm:text-lg font-black text-blue-400">
                 ${halfWashPrice ?? "—"}
               </span>
@@ -242,7 +244,9 @@ const StationCard: React.FC<StationCardProps> = ({
 
             {/* Right side: Full Wash Rate */}
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Full</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                Full
+              </span>
               <span className="text-base sm:text-lg font-black text-emerald-400">
                 ${fullWashPrice ?? "—"}
               </span>

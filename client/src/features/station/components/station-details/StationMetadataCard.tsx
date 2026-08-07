@@ -6,7 +6,10 @@ interface StationMetadataCardProps {
   ownerName?: string
 }
 
-export default function StationMetadataCard({ station, ownerName = "David Steinberg" }: StationMetadataCardProps) {
+export default function StationMetadataCard({
+  station,
+  ownerName = "David Steinberg",
+}: StationMetadataCardProps) {
   const fullAddress = [
     station.address?.street,
     station.address?.city,

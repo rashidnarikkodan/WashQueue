@@ -1,7 +1,8 @@
 import type { LucideIcon } from "lucide-react"
 import React from "react"
 
-export type StatVariant = "amber" | "emerald" | "red" | "rose" | "blue" | "primary" | "slate" | "default"
+export type StatVariant =
+  "amber" | "emerald" | "red" | "rose" | "blue" | "primary" | "slate" | "default"
 
 export interface StatItem {
   id?: string
@@ -22,10 +23,7 @@ export interface StatsHUDProps {
   className?: string
 }
 
-const VARIANT_CONFIG: Record<
-  StatVariant,
-  { text: string; bg: string }
-> = {
+const VARIANT_CONFIG: Record<StatVariant, { text: string; bg: string }> = {
   amber: {
     text: "text-amber-500",
     bg: "bg-amber-500/10 text-amber-500",
@@ -68,11 +66,7 @@ const GRID_COLS_MAP: Record<number, string> = {
   5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
 }
 
-export const StatsHUD: React.FC<StatsHUDProps> = ({
-  stats,
-  columns,
-  className = "",
-}) => {
+export const StatsHUD: React.FC<StatsHUDProps> = ({ stats, columns, className = "" }) => {
   if (!stats || stats.length === 0) return null
 
   // Determine grid cols based on stats count if not explicitly set
@@ -113,7 +107,9 @@ export const StatsHUD: React.FC<StatsHUDProps> = ({
               <div className={`p-3 rounded-xl shrink-0 ${bgContainer}`}>
                 {React.isValidElement(Icon)
                   ? Icon
-                  : React.createElement(Icon as React.ComponentType<{ size?: number }>, { size: 22 })}
+                  : React.createElement(Icon as React.ComponentType<{ size?: number }>, {
+                      size: 22,
+                    })}
               </div>
             )}
           </div>

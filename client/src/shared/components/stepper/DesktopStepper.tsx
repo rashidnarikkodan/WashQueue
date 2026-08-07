@@ -7,7 +7,7 @@ export default function DesktopStepper({
   description,
   footerNote,
   className = "",
-  setActiveStep
+  setActiveStep,
 }: StepperRenderProps) {
   return (
     <div

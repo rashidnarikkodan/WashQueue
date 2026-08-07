@@ -23,9 +23,7 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-        Community Q&amp;A
-      </h2>
+      <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Community Q&amp;A</h2>
 
       {/* Ask Question Input Box */}
       <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-xl space-y-4">
@@ -67,7 +65,9 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
                     <span className="px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/20 text-emerald-400 font-black text-[9px] uppercase tracking-widest">
                       Owner
                     </span>
-                    <span className="text-xs font-bold text-slate-200">{item.answer.answeredBy}</span>
+                    <span className="text-xs font-bold text-slate-200">
+                      {item.answer.answeredBy}
+                    </span>
                     <span className="text-xs text-slate-500">{item.answer.answeredAt}</span>
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">{item.answer.text}</p>

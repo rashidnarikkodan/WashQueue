@@ -73,9 +73,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       ])
 
       const assigned = (mgrRes.managers || []).find((m) => m.stationId === station.id) || null
-      const pending = (invRes || []).find(
-        (inv) => inv.stationId === station.id && inv.status === "PENDING"
-      ) || null
+      const pending =
+        (invRes || []).find((inv) => inv.stationId === station.id && inv.status === "PENDING") ||
+        null
 
       setManagerAssignment(assigned)
       setPendingInvitation(pending)
@@ -100,9 +100,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
 
         if (!isMounted) return
         const assigned = (mgrRes.managers || []).find((m) => m.stationId === station.id) || null
-        const pending = (invRes || []).find(
-          (inv) => inv.stationId === station.id && inv.status === "PENDING"
-        ) || null
+        const pending =
+          (invRes || []).find((inv) => inv.stationId === station.id && inv.status === "PENDING") ||
+          null
 
         setManagerAssignment(assigned)
         setPendingInvitation(pending)
@@ -123,7 +123,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   if (!isOwner) return null
 
   // Helper check if owner is self manager
-  const isSelfManager = station.managerId === user?.id || (managerAssignment && managerAssignment.managerUserId === user?.id)
+  const isSelfManager =
+    station.managerId === user?.id ||
+    (managerAssignment && managerAssignment.managerUserId === user?.id)
 
   // Action: Self Assign
   const handleSelfAssign = async () => {
@@ -153,7 +155,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       toast.success("Assigned yourself as manager for this station!")
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(errorObj?.response?.data?.message || errorObj?.message || "Failed to self-assign as manager")
+      toast.error(
+        errorObj?.response?.data?.message || errorObj?.message || "Failed to self-assign as manager"
+      )
     } finally {
       setIsSubmittingAction(false)
     }
@@ -211,7 +215,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           }
         } catch (err: unknown) {
           const errorObj = err as { response?: { data?: { message?: string } } }
-          setManagerAssignment((prev) => (prev ? { ...prev, status: managerAssignment.status } : null))
+          setManagerAssignment((prev) =>
+            prev ? { ...prev, status: managerAssignment.status } : null
+          )
           toast.error(errorObj?.response?.data?.message || "Failed to update manager status")
         } finally {
           setIsSubmittingAction(false)
@@ -277,7 +283,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           </div>
           <div>
             <h2 className="text-lg font-bold text-foreground tracking-tight">Station Manager</h2>
-            <p className="text-xs text-muted-foreground">Oversee bay operations and live queue for this station</p>
+            <p className="text-xs text-muted-foreground">
+              Oversee bay operations and live queue for this station
+            </p>
           </div>
         </div>
 
@@ -312,9 +320,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>{managerAssignment.managerEmail}</span>
-                {managerAssignment.managerPhone && (
-                  <span>• {managerAssignment.managerPhone}</span>
-                )}
+                {managerAssignment.managerPhone && <span>• {managerAssignment.managerPhone}</span>}
               </div>
             </div>
 
@@ -342,7 +348,11 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                     onClick={handleToggleSuspend}
                     disabled={isSubmittingAction}
                     className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-colors cursor-pointer disabled:opacity-50"
-                    title={managerAssignment.status === "SUSPENDED" ? "Reactivate Manager" : "Suspend Manager"}
+                    title={
+                      managerAssignment.status === "SUSPENDED"
+                        ? "Reactivate Manager"
+                        : "Suspend Manager"
+                    }
                   >
                     <Ban className="w-4 h-4" />
                   </button>
@@ -393,7 +403,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               </div>
               <div className="flex items-center gap-2 text-xs text-amber-300/80">
                 <Mail className="w-3.5 h-3.5" />
-                <span>Invited: <strong>{pendingInvitation.email}</strong></span>
+                <span>
+                  Invited: <strong>{pendingInvitation.email}</strong>
+                </span>
               </div>
             </div>
 
@@ -428,7 +440,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           <div className="space-y-1 max-w-sm mx-auto">
             <h3 className="text-base font-bold text-foreground">No Manager Assigned</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Each station requires a manager to control live queue status and process booking arrivals.
+              Each station requires a manager to control live queue status and process booking
+              arrivals.
             </p>
           </div>
 

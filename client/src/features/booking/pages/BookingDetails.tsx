@@ -1,12 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import {
-  ArrowLeft,
-  RefreshCw,
-  AlertTriangle,
-  XCircle,
-  CheckCircle2,
-} from "lucide-react"
+import { ArrowLeft, RefreshCw, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -95,7 +89,10 @@ export default function BookingDetails() {
     if (!booking) return
     setIsSubmittingCancel(true)
     try {
-      const updated = await bookingApi.cancelBooking(booking.id, cancellationReason || "Customer cancelled booking")
+      const updated = await bookingApi.cancelBooking(
+        booking.id,
+        cancellationReason || "Customer cancelled booking"
+      )
       toast.success(`Booking ${booking.bookingNumber} has been cancelled.`)
       setBooking(updated)
       setIsCancelModalOpen(false)
@@ -270,11 +267,14 @@ export default function BookingDetails() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Are you sure you want to cancel booking <strong className="text-foreground font-mono">#{booking.bookingNumber}</strong>?
+              Are you sure you want to cancel booking{" "}
+              <strong className="text-foreground font-mono">#{booking.bookingNumber}</strong>?
             </p>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">Reason for Cancellation</label>
+              <label className="text-xs font-semibold text-foreground">
+                Reason for Cancellation
+              </label>
               <textarea
                 value={cancellationReason}
                 onChange={(e) => setCancellationReason(e.target.value)}

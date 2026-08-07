@@ -1,5 +1,5 @@
 import type { StepDef } from "@/shared/components/stepper"
-export const ADD_STATION_STEPPER:StepDef[] = [
+export const ADD_STATION_STEPPER: StepDef[] = [
   {
     id: 1,
     title: "Station Details",

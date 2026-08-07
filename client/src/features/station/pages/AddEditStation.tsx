@@ -23,8 +23,6 @@ import type { PricingItem } from "../components/station-forms/PricingConfigurati
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/
 
-
-
 import { useAuthStore } from "@/features/auth/store/auth.store"
 
 export default function AddEditStation() {
@@ -39,7 +37,9 @@ export default function AddEditStation() {
   // Redirect unapproved owners away from creation/editing wizard
   useEffect(() => {
     if (user && user.role === "owner" && !user.isVerified) {
-      toast.error("Your owner account is pending approval by an administrator before you can create or manage wash stations.")
+      toast.error(
+        "Your owner account is pending approval by an administrator before you can create or manage wash stations."
+      )
       navigate("/owner/stations")
     }
   }, [user, navigate])
@@ -175,14 +175,20 @@ export default function AddEditStation() {
     formData.append("name", data.name)
     formData.append("description", data.description || "")
     formData.append("contact", JSON.stringify({ phone: data.phone, email: data.email }))
-    formData.append("location", JSON.stringify({ latitude: data.latitude, longitude: data.longitude }))
-    formData.append("address", JSON.stringify({
-      street: data.street,
-      city: data.city,
-      state: data.state,
-      country: data.country,
-      pincode: data.pincode,
-    }))
+    formData.append(
+      "location",
+      JSON.stringify({ latitude: data.latitude, longitude: data.longitude })
+    )
+    formData.append(
+      "address",
+      JSON.stringify({
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        pincode: data.pincode,
+      })
+    )
     formData.append("images", JSON.stringify(remainingExistingImages))
 
     images.forEach((file) => {
@@ -392,15 +398,15 @@ export default function AddEditStation() {
     stationStatus === STATION_STATUS.REJECTED
       ? "Retry Station Setup"
       : isEditMode
-      ? "Edit Wash Station"
-      : "Add Wash Station"
+        ? "Edit Wash Station"
+        : "Add Wash Station"
 
   const stepperDescription =
     stationStatus === STATION_STATUS.REJECTED
       ? "Review & update required details to resubmit your station."
       : isEditMode
-      ? "Update station details, operating hours, pricing, and services."
-      : "Setup station details, availability, pricing and services."
+        ? "Update station details, operating hours, pricing, and services."
+        : "Setup station details, availability, pricing and services."
 
   return (
     <div className="w-full max-w-[1650px] mx-auto flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-16 px-4 py-8 sm:px-8">
@@ -412,7 +418,11 @@ export default function AddEditStation() {
           setActiveStep={setActiveStep}
           heading={stepperHeading}
           description={stepperDescription}
-          footerNote={isEditMode ? "Station updates will be sent for review." : "Application will be reviewed before activation."}
+          footerNote={
+            isEditMode
+              ? "Station updates will be sent for review."
+              : "Application will be reviewed before activation."
+          }
         />
       </div>
 
@@ -425,7 +435,8 @@ export default function AddEditStation() {
             <div>
               <h4 className="text-sm font-extrabold text-red-300">Station Application Rejected</h4>
               <p className="text-xs text-red-200/90 mt-1 leading-relaxed">
-                {rejectionReason || "Your previous station application was rejected. Please review and update the required information below, then click Submit in Step 5."}
+                {rejectionReason ||
+                  "Your previous station application was rejected. Please review and update the required information below, then click Submit in Step 5."}
               </p>
             </div>
           </div>
@@ -438,7 +449,8 @@ export default function AddEditStation() {
             <div>
               <h4 className="text-sm font-extrabold text-blue-300">Resuming Saved Draft</h4>
               <p className="text-xs text-blue-200/90 mt-1 leading-relaxed">
-                You are continuing the setup for your drafted wash station. You can edit any step below.
+                You are continuing the setup for your drafted wash station. You can edit any step
+                below.
               </p>
             </div>
           </div>
@@ -451,7 +463,8 @@ export default function AddEditStation() {
             <div>
               <h4 className="text-sm font-extrabold text-emerald-300">Editing Active Station</h4>
               <p className="text-xs text-emerald-200/90 mt-1 leading-relaxed">
-                Updating your station will save your changes and resubmit your station for admin review.
+                Updating your station will save your changes and resubmit your station for admin
+                review.
               </p>
             </div>
           </div>

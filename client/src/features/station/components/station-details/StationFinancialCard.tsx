@@ -2,7 +2,7 @@ export default function StationFinancialCard() {
   return (
     <div className="bg-[#191f31] p-6 sm:p-8 rounded-2xl border border-[#adc6ff]/10 space-y-6">
       <h3 className="text-lg font-bold text-white">Financial Overview</h3>
-      
+
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-[#8c909f] font-semibold">

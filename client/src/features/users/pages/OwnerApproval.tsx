@@ -107,18 +107,14 @@ const OwnerApproval = () => {
   // ─── Actions ────────────────────────────────────────────────────────────────
   const handleApprove = async (id: string) => {
     try {
-      setOwners((prev) =>
-        prev.map((o) => (o.id === id ? { ...o, isVerified: true } : o))
-      )
+      setOwners((prev) => prev.map((o) => (o.id === id ? { ...o, isVerified: true } : o)))
       await usersApi.updateUser(id, { isVerified: true })
       toast.success("Owner approved and activated successfully!")
       if (selectedOwner?.id === id) {
         setSelectedOwner((prev: User | null) => (prev ? { ...prev, isVerified: true } : null))
       }
     } catch (e: unknown) {
-      setOwners((prev) =>
-        prev.map((o) => (o.id === id ? { ...o, isVerified: false } : o))
-      )
+      setOwners((prev) => prev.map((o) => (o.id === id ? { ...o, isVerified: false } : o)))
       toast.error(e instanceof Error ? e.message : "Failed to approve owner")
     }
   }

@@ -87,7 +87,6 @@ export const adminSideBarItems: SidebarItem[] = [
   },
 ]
 
-
 export const ownerSideBarItems: SidebarItem[] = [
   {
     name: "Dashboard",

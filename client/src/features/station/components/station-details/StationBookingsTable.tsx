@@ -32,7 +32,10 @@ export default function StationBookingsTable() {
     <div className="bg-[#151b2d] rounded-2xl border border-white/5 overflow-hidden">
       <div className="p-6 sm:p-8 flex justify-between items-center border-b border-slate-800/80">
         <h2 className="text-xl font-extrabold text-[#dce1fb] tracking-tight">Active Bookings</h2>
-        <button type="button" className="text-[#adc6ff] hover:underline text-sm font-bold cursor-pointer">
+        <button
+          type="button"
+          className="text-[#adc6ff] hover:underline text-sm font-bold cursor-pointer"
+        >
           View History
         </button>
       </div>

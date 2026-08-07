@@ -29,7 +29,9 @@ export const vehicleCatelogApi = {
 
   getCategory: async (id: string): Promise<VehicleCategory> => {
     try {
-      const response = await api.get<ApiResponse<VehicleCategory>>(`/vehicle-catalog/categories/${id}`)
+      const response = await api.get<ApiResponse<VehicleCategory>>(
+        `/vehicle-catalog/categories/${id}`
+      )
       return response.data.data
     } catch (error: unknown) {
       handleApiError(error, "Failed to retrieve category details")
@@ -38,9 +40,13 @@ export const vehicleCatelogApi = {
 
   createCategory: async (data: CreateCategoryInput): Promise<VehicleCategory> => {
     try {
-      const response = await api.post<ApiResponse<VehicleCategory>>("/vehicle-catalog/categories", data, {
-        successToast: "Category created successfully",
-      })
+      const response = await api.post<ApiResponse<VehicleCategory>>(
+        "/vehicle-catalog/categories",
+        data,
+        {
+          successToast: "Category created successfully",
+        }
+      )
       return response.data.data
     } catch (error: unknown) {
       handleApiError(error, "Failed to create category")
@@ -106,9 +112,13 @@ export const vehicleCatelogApi = {
 
   updateClass: async (id: string, data: UpdateClassInput): Promise<VehicleClass> => {
     try {
-      const response = await api.put<ApiResponse<VehicleClass>>(`/vehicle-catalog/classes/${id}`, data, {
-        successToast: "Class updated successfully",
-      })
+      const response = await api.put<ApiResponse<VehicleClass>>(
+        `/vehicle-catalog/classes/${id}`,
+        data,
+        {
+          successToast: "Class updated successfully",
+        }
+      )
       return response.data.data
     } catch (error: unknown) {
       handleApiError(error, "Failed to update class")

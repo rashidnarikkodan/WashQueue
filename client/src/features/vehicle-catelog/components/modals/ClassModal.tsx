@@ -280,7 +280,9 @@ export default function ClassModal({
               disabled={isSubmitting}
               rows={3}
               className={`w-full bg-slate-950/40 border text-slate-100 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors disabled:opacity-50 resize-none ${
-                errors.description ? "border-red-500/80 focus:border-red-500" : "border-slate-800/80 focus:border-primary/50"
+                errors.description
+                  ? "border-red-500/80 focus:border-red-500"
+                  : "border-slate-800/80 focus:border-primary/50"
               }`}
             />
             {errors.description && (

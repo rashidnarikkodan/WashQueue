@@ -15,10 +15,12 @@ interface StationLocationSectionProps {
   stationName?: string
 }
 
-export function StationLocationSection({ address, location, stationName }: StationLocationSectionProps) {
-  const fullAddress = address?.street
-    ? `${address.street}, ${address.city}`
-    : "Station Address"
+export function StationLocationSection({
+  address,
+  location,
+  stationName,
+}: StationLocationSectionProps) {
+  const fullAddress = address?.street ? `${address.street}, ${address.city}` : "Station Address"
 
   const cityState = address?.city
     ? `${address.city}, ${address.state || ""} ${address.pincode || ""}`
@@ -56,9 +58,7 @@ export function StationLocationSection({ address, location, stationName }: Stati
 
             <div>
               <h4 className="text-base sm:text-lg font-bold text-slate-100">{fullAddress}</h4>
-              <p className="text-xs sm:text-sm font-semibold text-slate-400">
-                {cityState}
-              </p>
+              <p className="text-xs sm:text-sm font-semibold text-slate-400">{cityState}</p>
             </div>
           </div>
 

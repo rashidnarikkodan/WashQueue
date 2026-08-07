@@ -100,7 +100,11 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
 
       if (activeTab !== "ALL") {
         if (activeTab === "IN_PROGRESS") {
-          if (b.status !== "IN_PROGRESS" && b.status !== "IN_SERVICE" && b.status !== "CHECKED_IN") {
+          if (
+            b.status !== "IN_PROGRESS" &&
+            b.status !== "IN_SERVICE" &&
+            b.status !== "CHECKED_IN"
+          ) {
             return false
           }
         } else if (b.status !== activeTab) {

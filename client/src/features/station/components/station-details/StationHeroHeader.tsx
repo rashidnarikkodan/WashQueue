@@ -1,5 +1,15 @@
 import { useState } from "react"
-import { Star, Clock, Edit3, Pause, Play, Share2, Maximize2, ShieldCheck, ImageOff } from "lucide-react"
+import {
+  Star,
+  Clock,
+  Edit3,
+  Pause,
+  Play,
+  Share2,
+  Maximize2,
+  ShieldCheck,
+  ImageOff,
+} from "lucide-react"
 import type { Station } from "../../types"
 import { STATION_STATUS } from "../../types"
 
@@ -23,7 +33,8 @@ export default function StationHeroHeader({
 
   const hasImages = station.images && station.images.length > 0
   const primaryImage = hasImages ? station.images[0].url : ""
-  const subImages = hasImages && station.images.length > 1 ? station.images.slice(1, 3).map((img) => img.url) : []
+  const subImages =
+    hasImages && station.images.length > 1 ? station.images.slice(1, 3).map((img) => img.url) : []
 
   return (
     <header className="grid grid-cols-12 gap-8 lg:gap-12 items-end">
@@ -80,7 +91,9 @@ export default function StationHeroHeader({
             className="bg-[#3e495d] text-[#aeb9d0] hover:bg-[#2e3447] hover:text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
           >
             {station.status === STATION_STATUS.ACTIVE ? <Pause size={18} /> : <Play size={18} />}
-            <span>{station.status === STATION_STATUS.ACTIVE ? "Pause Operations" : "Activate Station"}</span>
+            <span>
+              {station.status === STATION_STATUS.ACTIVE ? "Pause Operations" : "Activate Station"}
+            </span>
           </button>
 
           <button
@@ -115,7 +128,10 @@ export default function StationHeroHeader({
               <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                 <div className="flex -space-x-3">
                   {subImages.map((img, idx) => (
-                    <div key={idx} className="w-14 h-14 rounded-xl border-2 border-[#0c1324] overflow-hidden shadow-md">
+                    <div
+                      key={idx}
+                      className="w-14 h-14 rounded-xl border-2 border-[#0c1324] overflow-hidden shadow-md"
+                    >
                       <img src={img} alt="Station preview" className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -152,7 +168,11 @@ export default function StationHeroHeader({
             >
               Close Gallery
             </button>
-            <img src={primaryImage} alt="Main view" className="max-h-[75vh] max-w-[90vw] rounded-2xl object-contain" />
+            <img
+              src={primaryImage}
+              alt="Main view"
+              className="max-h-[75vh] max-w-[90vw] rounded-2xl object-contain"
+            />
           </div>
         )}
       </div>

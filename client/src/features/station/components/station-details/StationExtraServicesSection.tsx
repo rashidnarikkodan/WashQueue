@@ -4,7 +4,9 @@ interface StationExtraServicesSectionProps {
   extraServices?: ExtraService[]
 }
 
-export function StationExtraServicesSection({ extraServices = [] }: StationExtraServicesSectionProps) {
+export function StationExtraServicesSection({
+  extraServices = [],
+}: StationExtraServicesSectionProps) {
   const activeExtraServices = extraServices.filter((s) => s.isActive !== false)
 
   return (

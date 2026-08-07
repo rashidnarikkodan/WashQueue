@@ -103,7 +103,8 @@ export default function DatePicker({
   const prevMonthDays = new Date(year, month, 0).getDate()
   const trailingDaysCount = firstDayOfWeek
 
-  const days: { dateStr: string; dayNum: number; isCurrentMonth: boolean; isDisabled: boolean }[] = []
+  const days: { dateStr: string; dayNum: number; isCurrentMonth: boolean; isDisabled: boolean }[] =
+    []
 
   // Trailing previous month days
   for (let i = trailingDaysCount - 1; i >= 0; i--) {
@@ -178,9 +179,14 @@ export default function DatePicker({
   const todayStr = formatDateISO(new Date())
 
   // Formatted display text (e.g. "Jul 20, 2026")
-  const displayFormatted = selectedDateObj && !isNaN(selectedDateObj.getTime())
-    ? selectedDateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    : ""
+  const displayFormatted =
+    selectedDateObj && !isNaN(selectedDateObj.getTime())
+      ? selectedDateObj.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : ""
 
   return (
     <div className={`flex flex-col gap-1.5 w-full relative ${className}`} ref={containerRef}>
@@ -205,8 +211,8 @@ export default function DatePicker({
             error
               ? "border-red-500/80 focus:ring-2 focus:ring-red-500/20"
               : isOpen
-              ? "border-primary ring-2 ring-primary/20"
-              : "border-border/80"
+                ? "border-primary ring-2 ring-primary/20"
+                : "border-border/80"
           }`}
         >
           <div className="flex items-center gap-2.5 text-left truncate">
@@ -278,12 +284,12 @@ export default function DatePicker({
                       item.isDisabled
                         ? "text-muted-foreground/40 cursor-not-allowed opacity-40"
                         : isSelected
-                        ? "bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20"
-                        : isToday
-                        ? "bg-primary/20 text-primary border border-primary/40 font-bold"
-                        : item.isCurrentMonth
-                        ? "text-foreground hover:bg-muted hover:text-foreground"
-                        : "text-muted-foreground/60 hover:bg-muted/50"
+                          ? "bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20"
+                          : isToday
+                            ? "bg-primary/20 text-primary border border-primary/40 font-bold"
+                            : item.isCurrentMonth
+                              ? "text-foreground hover:bg-muted hover:text-foreground"
+                              : "text-muted-foreground/60 hover:bg-muted/50"
                     }`}
                   >
                     {item.dayNum}
@@ -319,9 +325,7 @@ export default function DatePicker({
       </div>
 
       {error && (
-        <span className="text-[11px] text-red-400 font-medium pl-1 text-left">
-          {error}
-        </span>
+        <span className="text-[11px] text-red-400 font-medium pl-1 text-left">{error}</span>
       )}
     </div>
   )

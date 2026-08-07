@@ -41,17 +41,11 @@ export default function FormSwitch({
             className="sr-only peer"
           />
           <div className="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:after:bg-foreground disabled:opacity-50"></div>
-          {label && (
-            <span className="text-sm font-semibold text-slate-300">
-              {label}
-            </span>
-          )}
+          {label && <span className="text-sm font-semibold text-slate-300">{label}</span>}
         </label>
       </div>
       {description && (
-        <span className="text-[11px] text-muted-foreground pl-12 text-left">
-          {description}
-        </span>
+        <span className="text-[11px] text-muted-foreground pl-12 text-left">{description}</span>
       )}
     </div>
   )

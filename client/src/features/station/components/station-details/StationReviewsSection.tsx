@@ -24,9 +24,7 @@ export function StationReviewsSection({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-          Reviews &amp; Ratings
-        </h2>
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Reviews &amp; Ratings</h2>
         {reviewCount > 0 && (
           <span className="text-sm font-bold text-blue-400">
             {reviewCount} {reviewCount === 1 ? "Review" : "Reviews"}
@@ -85,9 +83,7 @@ export function StationReviewsSection({
                   </div>
                 </div>
 
-                <p className="text-sm italic text-slate-300 leading-relaxed">
-                  {rev.quote}
-                </p>
+                <p className="text-sm italic text-slate-300 leading-relaxed">{rev.quote}</p>
               </div>
             ))}
           </div>

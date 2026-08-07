@@ -62,8 +62,7 @@ export default function PaymentModal({
         receipt: `booking_${Date.now()}`,
       })
 
-      const razorpayKey =
-        import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"
 
       if (typeof window.Razorpay === "undefined") {
         throw new Error(
@@ -124,9 +123,7 @@ export default function PaymentModal({
 
       rzp.on("payment.failed", function (response: { error?: { description?: string } }) {
         console.error("Razorpay Payment Failed:", response.error)
-        toast.error(
-          response.error?.description || "Payment failed. Please try again."
-        )
+        toast.error(response.error?.description || "Payment failed. Please try again.")
         setIsProcessing(false)
         onError?.(response.error?.description || "Payment failed")
       })
@@ -149,9 +146,7 @@ export default function PaymentModal({
             <h2 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
               Choose Payment Method
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Complete your booking securely
-            </p>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">Complete your booking securely</p>
           </div>
           <button
             type="button"
@@ -189,14 +184,10 @@ export default function PaymentModal({
             </div>
             <div
               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                selectedMethod === "upi"
-                  ? "border-blue-400 bg-blue-400"
-                  : "border-slate-600"
+                selectedMethod === "upi" ? "border-blue-400 bg-blue-400" : "border-slate-600"
               }`}
             >
-              {selectedMethod === "upi" && (
-                <div className="w-2 h-2 rounded-full bg-slate-950" />
-              )}
+              {selectedMethod === "upi" && <div className="w-2 h-2 rounded-full bg-slate-950" />}
             </div>
           </div>
 
@@ -224,14 +215,10 @@ export default function PaymentModal({
             </div>
             <div
               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                selectedMethod === "wallet"
-                  ? "border-blue-400 bg-blue-400"
-                  : "border-slate-600"
+                selectedMethod === "wallet" ? "border-blue-400 bg-blue-400" : "border-slate-600"
               }`}
             >
-              {selectedMethod === "wallet" && (
-                <div className="w-2 h-2 rounded-full bg-slate-950" />
-              )}
+              {selectedMethod === "wallet" && <div className="w-2 h-2 rounded-full bg-slate-950" />}
             </div>
           </div>
         </div>
@@ -245,9 +232,7 @@ export default function PaymentModal({
             </div>
             <div className="flex justify-between text-slate-400">
               <span>Taxes & Fees</span>
-              <span className="text-slate-200 font-medium">
-                ₹{taxesAndFees.toFixed(2)}
-              </span>
+              <span className="text-slate-200 font-medium">₹{taxesAndFees.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center pt-2 text-slate-100">
               <div>

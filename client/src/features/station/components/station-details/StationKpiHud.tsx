@@ -1,4 +1,12 @@
-import { Calendar, Hourglass, CreditCard, Gauge, Timer, TrendingUp, TrendingDown } from "lucide-react"
+import {
+  Calendar,
+  Hourglass,
+  CreditCard,
+  Gauge,
+  Timer,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react"
 import type { Station } from "../../types"
 
 interface StationKpiHudProps {

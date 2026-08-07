@@ -230,10 +230,11 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
                     <button
                       key={result.place_id}
                       onClick={() => handleSelectLocation(cleanName, result.lat, result.lon)}
-                      className={`flex items-center justify-between w-full p-2.5 rounded-xl text-left text-xs transition-colors cursor-pointer group ${isSelected
+                      className={`flex items-center justify-between w-full p-2.5 rounded-xl text-left text-xs transition-colors cursor-pointer group ${
+                        isSelected
                           ? "bg-primary/10 text-primary font-bold"
                           : "hover:bg-muted/70 text-muted-foreground hover:text-foreground font-medium"
-                        }`}
+                      }`}
                       role="option"
                       aria-selected={isSelected}
                     >
@@ -282,10 +283,11 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
                     <button
                       key={location}
                       onClick={() => handleSelectLocation(location)}
-                      className={`flex items-center justify-between w-full p-2 rounded-xl text-left text-xs transition-colors cursor-pointer group ${isSelected
+                      className={`flex items-center justify-between w-full p-2 rounded-xl text-left text-xs transition-colors cursor-pointer group ${
+                        isSelected
                           ? "bg-primary/10 text-primary font-bold"
                           : "hover:bg-muted/70 text-muted-foreground hover:text-foreground font-medium"
-                        }`}
+                      }`}
                       role="option"
                       aria-selected={isSelected}
                     >

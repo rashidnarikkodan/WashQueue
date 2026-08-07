@@ -32,9 +32,7 @@ export default function StationLiveOpsCard({ station }: StationLiveOpsCardProps)
               <span className="text-xs font-semibold text-white">{bay.name}</span>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                  bay.isActive
-                    ? "bg-[#4ae176]/15 text-[#4ae176]"
-                    : "bg-slate-800 text-slate-400"
+                  bay.isActive ? "bg-[#4ae176]/15 text-[#4ae176]" : "bg-slate-800 text-slate-400"
                 }`}
               >
                 {bay.isActive ? "ACTIVE" : "IDLE"}

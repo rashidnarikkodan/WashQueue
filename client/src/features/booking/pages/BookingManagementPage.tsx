@@ -46,7 +46,9 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   const stats: StatItem[] = useMemo(() => {
     const totalCount = bookings.length
     const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length
-    const inProgressCount = bookings.filter((b) => b.status === "CHECKED_IN" || b.status === "IN_SERVICE" || b.status === "IN_PROGRESS").length
+    const inProgressCount = bookings.filter(
+      (b) => b.status === "CHECKED_IN" || b.status === "IN_SERVICE" || b.status === "IN_PROGRESS"
+    ).length
     const completedCount = bookings.filter((b) => b.status === "COMPLETED").length
     const totalRevenue = bookings
       .filter((b) => b.status === "COMPLETED")
@@ -236,7 +238,10 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
             className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
             title="Refresh list"
           >
-            <RefreshCw size={15} className={isLoading ? "animate-spin text-primary" : "text-primary"} />
+            <RefreshCw
+              size={15}
+              className={isLoading ? "animate-spin text-primary" : "text-primary"}
+            />
             <span>Refresh</span>
           </button>
         </div>
@@ -307,8 +312,12 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
 
             <p className="text-xs text-muted-foreground">
               Are you sure you want to cancel booking{" "}
-              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong> for{" "}
-              <span className="font-bold text-foreground">{selectedBookingForCancel.customerName}</span>?
+              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong>{" "}
+              for{" "}
+              <span className="font-bold text-foreground">
+                {selectedBookingForCancel.customerName}
+              </span>
+              ?
             </p>
 
             <div className="space-y-1.5">

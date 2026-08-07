@@ -13,8 +13,6 @@ interface EditStationModalProps {
   isSubmitting?: boolean
 }
 
-
-
 export default function EditStationModal({
   stationDetail,
   onClose,
@@ -90,20 +88,31 @@ export default function EditStationModal({
                 existingImages: station.images || [],
               }}
               onCancel={onClose}
-              onSubmit={async (data, newImageFiles, remainingExistingImages, deletedImagePublicIds) => {
+              onSubmit={async (
+                data,
+                newImageFiles,
+                remainingExistingImages,
+                deletedImagePublicIds
+              ) => {
                 const formData = new FormData()
                 formData.append("step", "1")
                 formData.append("name", data.name)
                 formData.append("description", data.description || "")
                 formData.append("contact", JSON.stringify({ phone: data.phone, email: data.email }))
-                formData.append("location", JSON.stringify({ latitude: data.latitude, longitude: data.longitude }))
-                formData.append("address", JSON.stringify({
-                  street: data.street,
-                  city: data.city,
-                  state: data.state,
-                  country: data.country,
-                  pincode: data.pincode,
-                }))
+                formData.append(
+                  "location",
+                  JSON.stringify({ latitude: data.latitude, longitude: data.longitude })
+                )
+                formData.append(
+                  "address",
+                  JSON.stringify({
+                    street: data.street,
+                    city: data.city,
+                    state: data.state,
+                    country: data.country,
+                    pincode: data.pincode,
+                  })
+                )
                 formData.append("images", JSON.stringify(remainingExistingImages))
 
                 if (deletedImagePublicIds.length > 0) {

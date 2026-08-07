@@ -89,7 +89,9 @@ export const bookingApi = {
     }
   },
 
-  getUserBookings: async (type: "upcoming" | "history" | "all" = "all"): Promise<BookingResponse[]> => {
+  getUserBookings: async (
+    type: "upcoming" | "history" | "all" = "all"
+  ): Promise<BookingResponse[]> => {
     try {
       const response = await api.get(API_ROUTES.BOOKINGS.ROOT, { params: { type } })
       return response.data.data
@@ -109,7 +111,9 @@ export const bookingApi = {
 
   advanceStatus: async (bookingId: string, targetStatus: string): Promise<BookingResponse> => {
     try {
-      const response = await api.patch(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/status`, { targetStatus })
+      const response = await api.patch(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/status`, {
+        targetStatus,
+      })
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to update booking status")

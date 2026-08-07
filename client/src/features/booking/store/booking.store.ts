@@ -59,14 +59,21 @@ export const useBookingStore = create<BookingStore>((set) => ({
       const mapped: Booking[] = res.map((b) => {
         const startDate = new Date(b.scheduling.windowStart)
         const endDate = new Date(b.scheduling.windowEnd)
-        const timeFormat = (d: Date) => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        const dateFormat = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        const timeFormat = (d: Date) =>
+          d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        const dateFormat = (d: Date) =>
+          d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 
         const stationName = b.stationDetails?.name || "WashQueue Station"
         const customerName =
-          b.customerDetails?.name || b.walkInCustomer?.name || (b.userId ? userName || "Customer" : "Walk-In Customer")
+          b.customerDetails?.name ||
+          b.walkInCustomer?.name ||
+          (b.userId ? userName || "Customer" : "Walk-In Customer")
         const customerPhone = b.customerDetails?.phone || b.walkInCustomer?.phone || userPhone || ""
-        const vehicleNumber = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "Vehicle Plate"
+        const vehicleNumber =
+          b.vehicleDetails?.registrationNumber ||
+          b.walkInVehicle?.registrationNumber ||
+          "Vehicle Plate"
         const vehicleType = b.vehicleDetails?.brand
           ? `${b.vehicleDetails.brand} ${b.vehicleDetails.model || ""}`.trim()
           : "Vehicle"
@@ -128,7 +135,8 @@ export const useBookingStore = create<BookingStore>((set) => ({
   },
 
   setSelectedBookingForQr: (booking) => set({ selectedBookingForQr: booking }),
-  setSelectedBookingForCancel: (booking) => set({ selectedBookingForCancel: booking, cancellationReason: "" }),
+  setSelectedBookingForCancel: (booking) =>
+    set({ selectedBookingForCancel: booking, cancellationReason: "" }),
   setCancellationReason: (reason) => set({ cancellationReason: reason }),
   clearError: () => set({ error: null }),
 }))

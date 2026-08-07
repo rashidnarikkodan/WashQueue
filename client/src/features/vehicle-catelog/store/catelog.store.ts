@@ -1,6 +1,13 @@
 import { create } from "zustand"
 import { toast } from "sonner"
-import type { VehicleCategory, VehicleClass, CreateCategoryInput, UpdateCategoryInput, CreateClassInput, UpdateClassInput } from "../types"
+import type {
+  VehicleCategory,
+  VehicleClass,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  CreateClassInput,
+  UpdateClassInput,
+} from "../types"
 import { vehicleCatelogApi } from "@/shared/apis"
 
 interface VehicleCatelogStore {
@@ -19,8 +26,14 @@ interface VehicleCatelogStore {
   toggleClassStatus: (id: string, currentStatus: boolean) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
   deleteClass: (id: string) => Promise<void>
-  saveCategory: (editingCategoryId: string | null, data: CreateCategoryInput | UpdateCategoryInput) => Promise<void>
-  saveClass: (editingClassId: string | null, data: CreateClassInput | UpdateClassInput) => Promise<void>
+  saveCategory: (
+    editingCategoryId: string | null,
+    data: CreateCategoryInput | UpdateCategoryInput
+  ) => Promise<void>
+  saveClass: (
+    editingClassId: string | null,
+    data: CreateClassInput | UpdateClassInput
+  ) => Promise<void>
 }
 
 export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => ({
@@ -77,12 +90,16 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
   toggleCategoryStatus: async (id, currentStatus) => {
     try {
       set((state) => ({
-        categories: state.categories.map((c) => (c.id === id ? { ...c, isActive: !currentStatus } : c)),
+        categories: state.categories.map((c) =>
+          c.id === id ? { ...c, isActive: !currentStatus } : c
+        ),
       }))
       await vehicleCatelogApi.updateCategory(id, { isActive: !currentStatus })
     } catch {
       set((state) => ({
-        categories: state.categories.map((c) => (c.id === id ? { ...c, isActive: currentStatus } : c)),
+        categories: state.categories.map((c) =>
+          c.id === id ? { ...c, isActive: currentStatus } : c
+        ),
       }))
       toast.error("Failed to update category status")
     }
@@ -91,12 +108,16 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
   toggleClassStatus: async (id, currentStatus) => {
     try {
       set((state) => ({
-        classes: state.classes.map((cls) => (cls.id === id ? { ...cls, isActive: !currentStatus } : cls)),
+        classes: state.classes.map((cls) =>
+          cls.id === id ? { ...cls, isActive: !currentStatus } : cls
+        ),
       }))
       await vehicleCatelogApi.updateClass(id, { isActive: !currentStatus })
     } catch {
       set((state) => ({
-        classes: state.classes.map((cls) => (cls.id === id ? { ...cls, isActive: currentStatus } : cls)),
+        classes: state.classes.map((cls) =>
+          cls.id === id ? { ...cls, isActive: currentStatus } : cls
+        ),
       }))
       toast.error("Failed to update class status")
     }
@@ -129,9 +150,14 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
 
   saveCategory: async (editingCategoryId, data) => {
     if (editingCategoryId) {
-      const updated = await vehicleCatelogApi.updateCategory(editingCategoryId, data as UpdateCategoryInput)
+      const updated = await vehicleCatelogApi.updateCategory(
+        editingCategoryId,
+        data as UpdateCategoryInput
+      )
       set((state) => ({
-        categories: state.categories.map((c) => (c.id === editingCategoryId ? { ...c, ...updated } : c)),
+        categories: state.categories.map((c) =>
+          c.id === editingCategoryId ? { ...c, ...updated } : c
+        ),
       }))
     } else {
       const created = await vehicleCatelogApi.createCategory(data as CreateCategoryInput)
@@ -145,7 +171,9 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
     if (editingClassId) {
       const updated = await vehicleCatelogApi.updateClass(editingClassId, data as UpdateClassInput)
       set((state) => ({
-        classes: state.classes.map((cls) => (cls.id === editingClassId ? { ...cls, ...updated } : cls)),
+        classes: state.classes.map((cls) =>
+          cls.id === editingClassId ? { ...cls, ...updated } : cls
+        ),
       }))
     } else {
       const created = await vehicleCatelogApi.createClass(data as CreateClassInput)

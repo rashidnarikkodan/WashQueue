@@ -44,10 +44,12 @@ export default function GarageSection() {
         {vehicles.map((vehicle) => {
           const categoryName = categories.find((c) => c.id === vehicle.categoryId)?.name || "Car"
           const className = classes.find((c) => c.id === vehicle.classId)?.name || "Sedan"
-          
-          const image = vehicle.image?.url || (categoryName.toLowerCase().includes("suv")
-            ? "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"
-            : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80")
+
+          const image =
+            vehicle.image?.url ||
+            (categoryName.toLowerCase().includes("suv")
+              ? "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"
+              : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80")
 
           return (
             <VehicleCard

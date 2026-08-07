@@ -29,7 +29,6 @@ export default function ProviderBookingDetailsView({
   onAdvanceStatus,
   isAdvancingStatus,
 }: ProviderBookingDetailsViewProps) {
-
   const customerName = booking.customerDetails?.name || booking.walkInCustomer?.name || "Customer"
   const customerPhone = booking.customerDetails?.phone || booking.walkInCustomer?.phone || "N/A"
   const vehicleName = booking.vehicleDetails?.nickname
@@ -132,7 +131,9 @@ export default function ProviderBookingDetailsView({
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
                 Booking ID
               </span>
-              <span className="text-lg font-mono font-bold text-primary">#{booking.bookingNumber}</span>
+              <span className="text-lg font-mono font-bold text-primary">
+                #{booking.bookingNumber}
+              </span>
             </div>
 
             <div className="space-y-1">
@@ -229,7 +230,9 @@ export default function ProviderBookingDetailsView({
                 DAMAGE / ISSUE NOTES
               </span>
               <p className="text-xs italic text-slate-300 leading-relaxed">
-                "Minor paint swirl marks observed on the front left fender. Slight curbing on the rear right alloy wheel. Interior leather requires focused conditioning on driver seat side bolsters."
+                "Minor paint swirl marks observed on the front left fender. Slight curbing on the
+                rear right alloy wheel. Interior leather requires focused conditioning on driver
+                seat side bolsters."
               </p>
             </div>
           </div>
@@ -241,7 +244,8 @@ export default function ProviderBookingDetailsView({
             </div>
             <h3 className="text-base font-bold text-foreground">Post-Service Inspection</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-              This section will unlock automatically once the "Washing" and "Drying" phases are marked as completed by the technician.
+              This section will unlock automatically once the "Washing" and "Drying" phases are
+              marked as completed by the technician.
             </p>
           </div>
 
@@ -253,9 +257,12 @@ export default function ProviderBookingDetailsView({
             </div>
 
             <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/10 space-y-1">
-              <h4 className="text-sm font-bold text-amber-300">Delays detected in high-pressure wash bay #2.</h4>
+              <h4 className="text-sm font-bold text-amber-300">
+                Delays detected in high-pressure wash bay #2.
+              </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                The current service phase is exceeding the estimated time by 8 minutes. Potential bottleneck identified in water reclamation pump.
+                The current service phase is exceeding the estimated time by 8 minutes. Potential
+                bottleneck identified in water reclamation pump.
               </p>
             </div>
 
@@ -320,7 +327,9 @@ export default function ProviderBookingDetailsView({
                 <span className="text-[9px] font-black uppercase text-muted-foreground block">
                   SCHEDULED AT
                 </span>
-                <span className="text-xs font-bold text-foreground block">{formattedDates.dateStr}</span>
+                <span className="text-xs font-bold text-foreground block">
+                  {formattedDates.dateStr}
+                </span>
                 <span className="text-[11px] text-muted-foreground">{formattedDates.timeStr}</span>
               </div>
 

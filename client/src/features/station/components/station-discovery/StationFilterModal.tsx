@@ -193,7 +193,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                       <Sparkles className="w-3.5 h-3.5" />
                       MY REGISTERED VEHICLES
                     </h3>
-                    <span className="text-[11px] text-muted-foreground font-medium">Select vehicle to check exact station rates</span>
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      Select vehicle to check exact station rates
+                    </span>
                   </div>
 
                   <div className="flex flex-wrap gap-2.5">
@@ -276,7 +278,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                     VEHICLE CATEGORY
                   </h3>
                   {loadingMetadata && (
-                    <span className="text-[11px] text-muted-foreground animate-pulse">Loading data...</span>
+                    <span className="text-[11px] text-muted-foreground animate-pulse">
+                      Loading data...
+                    </span>
                   )}
                 </div>
 
@@ -301,7 +305,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
 
                   {categories.map((cat) => {
                     const Icon = getCategoryIcon(cat.name, cat.slug)
-                    const isActive = draftFilters.vehicleCategory === cat.id || draftFilters.vehicleCategory === cat.name
+                    const isActive =
+                      draftFilters.vehicleCategory === cat.id ||
+                      draftFilters.vehicleCategory === cat.name
                     return (
                       <button
                         key={cat.id}
@@ -334,7 +340,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                     <button
-                      onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleClassId: undefined }))}
+                      onClick={() =>
+                        setDraftFilters((prev) => ({ ...prev, vehicleClassId: undefined }))
+                      }
                       className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
                         !draftFilters.vehicleClassId
                           ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
@@ -356,7 +364,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                         return (
                           <button
                             key={cls.id}
-                            onClick={() => setDraftFilters((prev) => ({ ...prev, vehicleClassId: cls.id }))}
+                            onClick={() =>
+                              setDraftFilters((prev) => ({ ...prev, vehicleClassId: cls.id }))
+                            }
                             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer select-none ${
                               isSelected
                                 ? "bg-primary/10 border-primary text-primary font-semibold shadow-sm"
@@ -382,7 +392,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                     DISTANCE FILTER
                   </h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-foreground">Up to {draftFilters.maxDistanceKm}</span>
+                    <span className="text-xl font-bold text-foreground">
+                      Up to {draftFilters.maxDistanceKm}
+                    </span>
                     <span className="text-xs text-muted-foreground font-medium">km</span>
                   </div>
                 </div>
@@ -429,7 +441,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                     return (
                       <button
                         key={rate.value}
-                        onClick={() => setDraftFilters((prev) => ({ ...prev, minRating: rate.value }))}
+                        onClick={() =>
+                          setDraftFilters((prev) => ({ ...prev, minRating: rate.value }))
+                        }
                         className={`flex items-center justify-between p-3.5 rounded-2xl border text-sm transition-all cursor-pointer select-none ${
                           isSelected
                             ? "bg-primary/10 border-primary text-primary font-bold"
@@ -446,7 +460,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                             isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
                           }`}
                         >
-                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                          {isSelected && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                          )}
                         </div>
                       </button>
                     )

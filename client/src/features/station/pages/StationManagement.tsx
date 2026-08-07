@@ -1,13 +1,6 @@
 import { useEffect, useCallback, useMemo } from "react"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
-import {
-  Plus,
-  Mail,
-  Phone,
-  MapPin,
-  Layers,
-  Star,
-} from "lucide-react"
+import { Plus, Mail, Phone, MapPin, Layers, Star } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
@@ -68,16 +61,16 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       activeTab === "draft"
         ? STATION_STATUS.DRAFT
         : activeTab === "pending"
-        ? STATION_STATUS.PENDING_REVIEW
-        : activeTab === "active"
-        ? STATION_STATUS.ACTIVE
-        : activeTab === "inactive"
-        ? STATION_STATUS.INACTIVE
-        : activeTab === "suspended"
-        ? STATION_STATUS.SUSPENDED
-        : activeTab === "rejected"
-        ? STATION_STATUS.REJECTED
-        : "all"
+          ? STATION_STATUS.PENDING_REVIEW
+          : activeTab === "active"
+            ? STATION_STATUS.ACTIVE
+            : activeTab === "inactive"
+              ? STATION_STATUS.INACTIVE
+              : activeTab === "suspended"
+                ? STATION_STATUS.SUSPENDED
+                : activeTab === "rejected"
+                  ? STATION_STATUS.REJECTED
+                  : "all"
 
     if (isAdmin) {
       await fetchStations({
@@ -126,8 +119,9 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       header: "Station Info",
       cell: (station) => (
         <div
-        onClick={() => navigate(`/admin/stations/${station.id}`)}
-         className="flex items-center gap-3 hover:cursor-pointer">
+          onClick={() => navigate(`/admin/stations/${station.id}`)}
+          className="flex items-center gap-3 hover:cursor-pointer"
+        >
           <img
             src={
               station.images?.find((img) => img.isPrimary)?.url ||
@@ -137,9 +131,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
             alt={station.name}
             className="w-10 h-10 rounded-xl object-cover border border-slate-800 shrink-0"
           />
-          <div
-            className="flex flex-col text-left"
-          >
+          <div className="flex flex-col text-left">
             <span className="font-semibold hover:text-primary text-foreground leading-none mb-1">
               {station.name || "Unnamed Station"}
             </span>
@@ -231,11 +223,11 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           </span>
         )
       },
-    }
+    },
   ]
 
   // Admin Pagination Metadata
-  const totalCount = statusCounts?.all ?? (pagination?.total ?? stations.length)
+  const totalCount = statusCounts?.all ?? pagination?.total ?? stations.length
 
   const paginationMeta = {
     total: totalCount,
@@ -260,7 +252,9 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Stations Approval</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+              Stations Approval
+            </h1>
             <p className="text-muted-foreground text-sm mt-1">
               Review layout, pricing models, amenities, and verify station registration details.
             </p>
@@ -302,7 +296,9 @@ export default function StationManagement({ role: explicitRole }: StationManagem
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Stations Management</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            Stations Management
+          </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Maintain and Manage all your stations.
           </p>
@@ -316,7 +312,11 @@ export default function StationManagement({ role: explicitRole }: StationManagem
             navigate("/owner/stations/new")
           }}
           disabled={!isAdmin && user ? !user.isVerified : false}
-          title={!isAdmin && user && !user.isVerified ? "Account pending admin approval" : "Create Station"}
+          title={
+            !isAdmin && user && !user.isVerified
+              ? "Account pending admin approval"
+              : "Create Station"
+          }
           className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
             !isAdmin && user && !user.isVerified
               ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
@@ -370,7 +370,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
               </p>
             </div>
           ) : (
-
             stations.map((station) => (
               <StationCard
                 key={station.id}

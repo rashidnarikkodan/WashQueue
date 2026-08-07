@@ -1,4 +1,3 @@
-
 export const getInitials = (name?: string): string => {
   if (!name || !name.trim()) return "U"
   const parts = name.trim().split(/\s+/).filter(Boolean)

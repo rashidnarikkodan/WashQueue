@@ -41,14 +41,14 @@ export function StationSidebarCard({
         {/* Title & Status */}
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-black text-forground tracking-tight">
-              {station.name}
-            </h1>
+            <h1 className="text-3xl font-black text-forground tracking-tight">{station.name}</h1>
 
             <div className="flex items-center gap-3 text-xs font-bold">
               <div className="flex items-center gap-1 text-emerald-400">
                 <Star size={14} className="fill-emerald-400 text-emerald-400" />
-                <span className="font-extrabold text-sm">{station.rating ? station.rating.toFixed(1) : "New"}</span>
+                <span className="font-extrabold text-sm">
+                  {station.rating ? station.rating.toFixed(1) : "New"}
+                </span>
               </div>
               <span className="text-forground">•</span>
               <div className="flex items-center gap-1.5 text-emerald-400">
@@ -66,14 +66,18 @@ export function StationSidebarCard({
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
             <span className="text-sm font-semibold text-forground">Slot Window</span>
             <span className="text-lg font-black text-blue-400">
-              {station.slotConfig?.windowDurationMins ? `${station.slotConfig.windowDurationMins} Mins` : "N/A"}
+              {station.slotConfig?.windowDurationMins
+                ? `${station.slotConfig.windowDurationMins} Mins`
+                : "N/A"}
             </span>
           </div>
 
           <div className="flex justify-between items-center py-3 border-b border-slate-800/60">
             <span className="text-sm font-semibold text-foreground">Window Capacity</span>
             <span className="text-lg font-black text-forground">
-              {station.slotConfig?.capacityPerWindow ? `${station.slotConfig.capacityPerWindow} Slots` : "N/A"}
+              {station.slotConfig?.capacityPerWindow
+                ? `${station.slotConfig.capacityPerWindow} Slots`
+                : "N/A"}
             </span>
           </div>
 
@@ -165,7 +169,8 @@ export function StationSidebarCard({
                 Edit Station Configurations
               </button>
 
-              {(station.status === STATION_STATUS.ACTIVE || station.status === STATION_STATUS.INACTIVE) && (
+              {(station.status === STATION_STATUS.ACTIVE ||
+                station.status === STATION_STATUS.INACTIVE) && (
                 <button
                   onClick={onToggleActive}
                   disabled={isSubmittingAction}
@@ -179,7 +184,8 @@ export function StationSidebarCard({
                 </button>
               )}
 
-              {(station.status === STATION_STATUS.DRAFT || station.status === STATION_STATUS.REJECTED) && (
+              {(station.status === STATION_STATUS.DRAFT ||
+                station.status === STATION_STATUS.REJECTED) && (
                 <button
                   onClick={onDelete}
                   disabled={isSubmittingAction}
@@ -202,12 +208,17 @@ export function StationSidebarCard({
                 <div className="flex flex-wrap gap-1 pt-1">
                   {managerPermissions && managerPermissions.length > 0 ? (
                     managerPermissions.map((perm) => (
-                      <span key={perm} className="px-2 py-0.5 rounded text-[10px] font-bold bg-card border border-border text-foreground">
+                      <span
+                        key={perm}
+                        className="px-2 py-0.5 rounded text-[10px] font-bold bg-card border border-border text-foreground"
+                      >
                         {perm.replace(/_/g, " ")}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[10px] text-muted-foreground">Standard Manager Access</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Standard Manager Access
+                    </span>
                   )}
                 </div>
               </div>
@@ -249,7 +260,11 @@ export function StationSidebarCard({
                     <div className="flex justify-between items-center text-[10px] text-amber-400 pl-2">
                       <span>Break:</span>
                       <span className="font-mono">
-                        {oh.breaks.map((b) => (b.name ? `${b.name} (${b.start}-${b.end})` : `${b.start}-${b.end}`)).join(", ")}
+                        {oh.breaks
+                          .map((b) =>
+                            b.name ? `${b.name} (${b.start}-${b.end})` : `${b.start}-${b.end}`
+                          )
+                          .join(", ")}
                       </span>
                     </div>
                   )}
@@ -264,7 +279,8 @@ export function StationSidebarCard({
 
       {/* Dynamic Disclaimer Footer */}
       <p className="text-[10px] text-slate-500 text-center leading-relaxed px-4">
-        Prices and wait times are dynamic and subject to real-time traffic conditions. Service guarantees depend on real-time situations.
+        Prices and wait times are dynamic and subject to real-time traffic conditions. Service
+        guarantees depend on real-time situations.
       </p>
     </div>
   )

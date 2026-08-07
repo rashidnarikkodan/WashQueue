@@ -76,7 +76,6 @@ function DataTable<T>({
               <Pagination meta={pagination} onPageChange={onPageChange} />
             </div>
           )}
-
         </div>
       )}
     </div>

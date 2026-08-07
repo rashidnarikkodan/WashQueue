@@ -136,10 +136,8 @@ export default function VehicleDetails() {
     )
   }
 
-  const categoryName =
-    categories.find((c) => c.id === currentVehicle.categoryId)?.name || "Car"
-  const className =
-    classes.find((cl) => cl.id === currentVehicle.classId)?.name || "Sedan"
+  const categoryName = categories.find((c) => c.id === currentVehicle.categoryId)?.name || "Car"
+  const className = classes.find((cl) => cl.id === currentVehicle.classId)?.name || "Sedan"
 
   const vehicleImage =
     currentVehicle.image?.url ||
@@ -193,7 +191,6 @@ export default function VehicleDetails() {
   return (
     <div className="min-h-screen bg-[#020617] text-[#DCE1FB] font-sans pt-24 pb-16 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
         {/* Breadcrumb Navigation */}
         <div>
           <Link
@@ -263,10 +260,8 @@ export default function VehicleDetails() {
 
         {/* TOP SECTION: VEHICLE OVERVIEW (Grid: 5 Cols Left, 7 Cols Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
           {/* LEFT: Vehicle Visual Card */}
           <div className="lg:col-span-5 bg-[#191F31] border border-slate-800/80 rounded-3xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative">
-            
             {/* Category / Class Badges */}
             <div className="flex items-center gap-2 z-10">
               <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ADC6FF]/20 text-[#ADC6FF] border border-[#ADC6FF]/20 backdrop-blur-md">
@@ -299,9 +294,7 @@ export default function VehicleDetails() {
                 </div>
                 <div className="text-right flex flex-col items-end">
                   <Zap className="w-5 h-5 text-[#4AE176]" />
-                  <span className="text-xs font-semibold text-[#C2C6D6] mt-1">
-                    EV Platform
-                  </span>
+                  <span className="text-xs font-semibold text-[#C2C6D6] mt-1">EV Platform</span>
                 </div>
               </div>
 
@@ -326,7 +319,6 @@ export default function VehicleDetails() {
           {/* RIGHT: Owner Information & Quick Actions */}
           <div className="lg:col-span-7 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl">
             <div className="space-y-8">
-              
               {/* Heading */}
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 rounded-full bg-[#ADC6FF]" />
@@ -366,9 +358,7 @@ export default function VehicleDetails() {
                   <span className="text-xs font-bold uppercase tracking-wider text-[#C2C6D6] block">
                     DATE ADDED
                   </span>
-                  <p className="text-lg font-semibold text-[#DCE1FB]">
-                    {formattedDateAdded}
-                  </p>
+                  <p className="text-lg font-semibold text-[#DCE1FB]">{formattedDateAdded}</p>
                 </div>
               </div>
 
@@ -381,9 +371,7 @@ export default function VehicleDetails() {
                     </div>
                     <div>
                       <h4 className="text-base font-bold text-[#DCE1FB]">Default Vehicle</h4>
-                      <p className="text-sm text-[#C2C6D6]">
-                        Quick-book this vehicle by default
-                      </p>
+                      <p className="text-sm text-[#C2C6D6]">Quick-book this vehicle by default</p>
                     </div>
                   </div>
 
@@ -410,7 +398,6 @@ export default function VehicleDetails() {
 
         {/* SECOND ROW BENTO GRID FOR SECONDARY CONTENT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
           {/* SERVICE COMPATIBILITY (Wide - 8 Cols) */}
           <div className="lg:col-span-8 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/60 pb-4">
@@ -418,14 +405,11 @@ export default function VehicleDetails() {
                 <div className="w-1.5 h-6 rounded-full bg-[#4AE176]" />
                 <h3 className="text-xl font-bold text-[#DCE1FB]">Available Services</h3>
               </div>
-              <span className="text-sm text-[#C2C6D6]">
-                Optimized for {className}
-              </span>
+              <span className="text-sm text-[#C2C6D6]">Optimized for {className}</span>
             </div>
 
             {/* 2 Compatible Service Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               {/* Service Card 1 */}
               <div className="bg-[#151B2D] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between gap-4 hover:border-[#ADC6FF]/40 transition-all">
                 <div className="space-y-4">
@@ -441,7 +425,8 @@ export default function VehicleDetails() {
                   <div>
                     <h4 className="text-lg font-bold text-[#DCE1FB]">Eco-Hydro Wash</h4>
                     <p className="text-xs text-[#C2C6D6] leading-relaxed mt-2">
-                      High-pressure exterior cleaning with bio-degradable polymer wax coating. Safe for EV sensors.
+                      High-pressure exterior cleaning with bio-degradable polymer wax coating. Safe
+                      for EV sensors.
                     </p>
                   </div>
                 </div>
@@ -473,7 +458,8 @@ export default function VehicleDetails() {
                   <div>
                     <h4 className="text-lg font-bold text-[#DCE1FB]">Deep Interior Purge</h4>
                     <p className="text-xs text-[#C2C6D6] leading-relaxed mt-2">
-                      Steam cleaning and antimicrobial treatment for synthetic leather and high-tech cabin surfaces.
+                      Steam cleaning and antimicrobial treatment for synthetic leather and high-tech
+                      cabin surfaces.
                     </p>
                   </div>
                 </div>
@@ -494,12 +480,12 @@ export default function VehicleDetails() {
 
           {/* QUICK ACTIONS (Vertical - 4 Cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            
             {/* Call to action highlight card */}
             <div className="bg-[#ADC6FF] text-[#002E6A] rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-2xl">
               <div className="space-y-2">
                 <h3 className="text-2xl font-black leading-snug">
-                  Need a<br />Quick Wash?
+                  Need a<br />
+                  Quick Wash?
                 </h3>
                 <p className="text-xs font-medium opacity-90 leading-relaxed">
                   Priority queueing available for "{currentVehicle.nickname}".
@@ -543,7 +529,6 @@ export default function VehicleDetails() {
 
         {/* THIRD ROW: ACTIVITY & INSIGHTS (7 Cols Left, 5 Cols Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
           {/* RECENT WASH ACTIVITY (7 Cols) */}
           <div className="lg:col-span-7 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-800/60 pb-4">
@@ -597,7 +582,6 @@ export default function VehicleDetails() {
 
           {/* MAINTENANCE & DOCUMENTS (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
-            
             {/* Maintenance Insights */}
             <div className="bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
               <h3 className="text-xl font-bold text-[#DCE1FB]">Maintenance Insights</h3>
@@ -630,7 +614,8 @@ export default function VehicleDetails() {
                       Action Recommended
                     </h4>
                     <p className="text-xs text-[#FFDAD6] leading-relaxed mt-1">
-                      Interior cleaning recommended based on usage patterns and spring pollen levels.
+                      Interior cleaning recommended based on usage patterns and spring pollen
+                      levels.
                     </p>
                   </div>
                 </div>

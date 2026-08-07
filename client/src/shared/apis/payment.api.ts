@@ -32,10 +32,7 @@ export interface VerifyPaymentResponse {
 export const paymentApi = {
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResponse> {
     try {
-      const response = await api.post<CreateOrderResponse>(
-        API_ROUTES.PAYMENT.CREATE_ORDER,
-        input
-      )
+      const response = await api.post<CreateOrderResponse>(API_ROUTES.PAYMENT.CREATE_ORDER, input)
       return response.data
     } catch (error) {
       throw handleApiError(error, "Failed to create payment order")

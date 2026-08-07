@@ -46,10 +46,18 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
             onChange={(e) => setNotification((prev) => ({ ...prev, type: e.target.value }))}
             className="w-full bg-muted/40 border border-border rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground"
           >
-            <option value="Account Alert" className="bg-card text-foreground">Account Alert</option>
-            <option value="Promotional" className="bg-card text-foreground">Promotional Offer</option>
-            <option value="Maintenance" className="bg-card text-foreground">System Maintenance</option>
-            <option value="Warning" className="bg-card text-foreground">Policy Warning</option>
+            <option value="Account Alert" className="bg-card text-foreground">
+              Account Alert
+            </option>
+            <option value="Promotional" className="bg-card text-foreground">
+              Promotional Offer
+            </option>
+            <option value="Maintenance" className="bg-card text-foreground">
+              System Maintenance
+            </option>
+            <option value="Warning" className="bg-card text-foreground">
+              Policy Warning
+            </option>
           </select>
         </div>
 

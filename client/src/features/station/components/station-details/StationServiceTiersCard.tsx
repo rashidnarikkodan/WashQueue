@@ -16,7 +16,9 @@ export default function StationServiceTiersCard({
     { name: "Full Detail", duration: "60 min • Interior Deep", price: "$180", featured: false },
   ]
 
-  const hasConfiguredPricing = pricing.some((p) => p.isActive && (p.halfWashPrice > 0 || p.fullWashPrice > 0))
+  const hasConfiguredPricing = pricing.some(
+    (p) => p.isActive && (p.halfWashPrice > 0 || p.fullWashPrice > 0)
+  )
 
   return (
     <div className="bg-[#151b2d] p-6 sm:p-8 rounded-2xl border border-white/5 space-y-6">

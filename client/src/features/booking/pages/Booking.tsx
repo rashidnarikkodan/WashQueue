@@ -14,9 +14,7 @@ import ServiceSelectionStep, {
   type ServicePlanOption,
   type ExtraServiceOption,
 } from "../components/ServiceSelectionStep"
-import TimeSlotSelectionStep, {
-  type TimeSlotOption,
-} from "../components/TimeSlotSelectionStep"
+import TimeSlotSelectionStep, { type TimeSlotOption } from "../components/TimeSlotSelectionStep"
 import BookingSummaryCard from "../components/BookingSummaryCard"
 import BookingResultModal from "../components/BookingResultModal"
 
@@ -50,14 +48,16 @@ export default function Booking() {
     maxDate: string
     dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
   } | null>(null)
-  const [serverWindows, setServerWindows] = useState<{
-    windowId: string
-    start: string
-    end: string
-    bookedCount: number
-    remainingCapacity: number
-    status: "OPEN" | "FULL" | "CLOSED" | "PAST"
-  }[]>([])
+  const [serverWindows, setServerWindows] = useState<
+    {
+      windowId: string
+      start: string
+      end: string
+      bookedCount: number
+      remainingCapacity: number
+      status: "OPEN" | "FULL" | "CLOSED" | "PAST"
+    }[]
+  >([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
   // Booking Submit & Result Modal State
@@ -104,9 +104,7 @@ export default function Booking() {
         const data = await stationApi.getAvailableTimeWindows(stationId, selectedDate)
         const windowsList = data.windows || []
         setServerWindows(windowsList)
-        const available = windowsList.filter(
-          (w) => w.status === "OPEN" && w.remainingCapacity > 0
-        )
+        const available = windowsList.filter((w) => w.status === "OPEN" && w.remainingCapacity > 0)
         if (available.length > 0) {
           setSelectedSlotId((prev) => {
             const exists = available.some((w) => w.windowId === prev)
@@ -129,9 +127,7 @@ export default function Booking() {
   // Compute disabled dates array (dates that are NOT available)
   const disabledDates = useMemo(() => {
     if (!bookingCalendar?.dates) return []
-    return bookingCalendar.dates
-      .filter((d) => d.status !== "AVAILABLE")
-      .map((d) => d.date)
+    return bookingCalendar.dates.filter((d) => d.status !== "AVAILABLE").map((d) => d.date)
   }, [bookingCalendar])
 
   // Transform server windows into TimeSlotOption items
@@ -212,7 +208,9 @@ export default function Booking() {
   // Station Supported Class IDs Set
   const stationClassIds = useMemo(() => {
     if (!selectedStation?.pricing || selectedStation.pricing.length === 0) return null
-    return new Set(selectedStation.pricing.filter((p) => p.isActive !== false).map((p) => p.vehicleClassId))
+    return new Set(
+      selectedStation.pricing.filter((p) => p.isActive !== false).map((p) => p.vehicleClassId)
+    )
   }, [selectedStation])
 
   // Available Vehicles matching station's supported classes (Wait for stationClassIds to avoid flash)
@@ -249,7 +247,9 @@ export default function Booking() {
   const matchingPricing = useMemo(() => {
     if (!selectedStation?.pricing || selectedStation.pricing.length === 0) return null
     if (selectedVehicle?.classId) {
-      const found = selectedStation.pricing.find((p) => p.vehicleClassId === selectedVehicle.classId)
+      const found = selectedStation.pricing.find(
+        (p) => p.vehicleClassId === selectedVehicle.classId
+      )
       if (found) return found
     }
     return selectedStation.pricing[0]
@@ -304,7 +304,7 @@ export default function Booking() {
     if (selectedStation?.extraServices && selectedStation.extraServices.length > 0) {
       return selectedStation.extraServices.map((e) => {
         const classPricing = e.pricing?.find((p) => p.vehicleClassId === selectedVehicle?.classId)
-        const price = classPricing ? classPricing.price : (e.pricing?.[0]?.price || 150)
+        const price = classPricing ? classPricing.price : e.pricing?.[0]?.price || 150
         return {
           id: e.id,
           name: e.name,
@@ -357,7 +357,8 @@ export default function Booking() {
       if (paymentData) {
         console.log("Verified Razorpay payment ID:", paymentData.razorpay_payment_id)
       }
-      const serviceType = selectedPlanId === "FULL_WASH" || selectedPlanId === "full" ? "FULL" : "HALF"
+      const serviceType =
+        selectedPlanId === "FULL_WASH" || selectedPlanId === "full" ? "FULL" : "HALF"
       const created = await bookingApi.createBooking({
         stationId,
         vehicleId: selectedVehicleId,
@@ -393,8 +394,6 @@ export default function Booking() {
           <ArrowLeft size={16} />
           <span>Back to Stations</span>
         </button>
-
-       
       </div>
 
       {/* Main 12-Column Layout Grid */}
@@ -486,11 +485,15 @@ export default function Booking() {
         stationName={selectedStation?.station?.name || "WashQueue Station"}
         vehicleName={
           selectedVehicle?.nickname ||
-          (selectedVehicle?.brand ? `${selectedVehicle.brand} ${selectedVehicle.model || ""}` : undefined)
+          (selectedVehicle?.brand
+            ? `${selectedVehicle.brand} ${selectedVehicle.model || ""}`
+            : undefined)
         }
         scheduledDate={formattedDate}
         scheduledTime={selectedSlot?.timeWindow}
-        totalPrice={selectedPlan ? selectedPlan.price + selectedExtras.reduce((s, e) => s + e.price, 0) : 0}
+        totalPrice={
+          selectedPlan ? selectedPlan.price + selectedExtras.reduce((s, e) => s + e.price, 0) : 0
+        }
         errorMessage={resultModalState.errorMessage}
         onClose={() => setResultModalState((prev) => ({ ...prev, isOpen: false }))}
         onRetryPayment={() => {

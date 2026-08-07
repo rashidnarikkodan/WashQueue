@@ -138,13 +138,15 @@ export const managerApi = {
   },
 
   /** Authenticated Manager: Get assigned stations with permissions */
-  getManagedStations: async (): Promise<{
-    stationId: string
-    stationName: string
-    stationAddress: string
-    permissions: ManagerPermission[]
-    status: "ACTIVE" | "SUSPENDED"
-  }[]> => {
+  getManagedStations: async (): Promise<
+    {
+      stationId: string
+      stationName: string
+      stationAddress: string
+      permissions: ManagerPermission[]
+      status: "ACTIVE" | "SUSPENDED"
+    }[]
+  > => {
     const response = await api.get("/managers/my-stations")
     return response.data.data
   },

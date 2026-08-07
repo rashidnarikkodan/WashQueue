@@ -53,7 +53,7 @@ export const ownerRoutes = {
     },
     {
       path: "stations/:stationId",
-      element: <StationDetail role="owner"/>,
+      element: <StationDetail role="owner" />,
     },
     {
       path: "financial-records",
@@ -73,4 +73,3 @@ export const ownerRoutes = {
     },
   ],
 }
-

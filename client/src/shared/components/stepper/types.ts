@@ -30,5 +30,5 @@ export interface StepperRenderProps {
   /** Optional: small text rendered in the footer on desktop */
   footerNote?: string
   className?: string
-  setActiveStep:(step:number)=>void
+  setActiveStep: (step: number) => void
 }

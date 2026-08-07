@@ -81,10 +81,7 @@ export default function FormInput({
     onChange?.(e)
   }
 
-  const prefixPadding =
-    typeof prefix === "string" && prefix.length <= 3
-      ? "pl-12"
-      : "pl-24"
+  const prefixPadding = typeof prefix === "string" && prefix.length <= 3 ? "pl-12" : "pl-24"
 
   return (
     <div className="flex flex-col gap-1.5 w-full relative">
@@ -147,4 +144,3 @@ export default function FormInput({
     </div>
   )
 }
-

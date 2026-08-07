@@ -131,7 +131,9 @@ export default function BookingResultModal({
             <>
               <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-800/80">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Station</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    Station
+                  </span>
                   <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
                     <MapPin size={12} className="text-blue-400 shrink-0" />
                     <span className="truncate">{stationName}</span>
@@ -139,7 +141,9 @@ export default function BookingResultModal({
                 </div>
                 {vehicleName && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Vehicle</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                      Vehicle
+                    </span>
                     <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
                       <Car size={12} className="text-blue-400 shrink-0" />
                       <span className="truncate">{vehicleName}</span>
@@ -151,7 +155,9 @@ export default function BookingResultModal({
               <div className="grid grid-cols-2 gap-3">
                 {scheduledTime && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Time Window</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                      Time Window
+                    </span>
                     <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
                       <Clock size={12} className="text-blue-400 shrink-0" />
                       <span className="truncate">{scheduledTime}</span>
@@ -166,7 +172,9 @@ export default function BookingResultModal({
                 )}
                 {totalPrice !== undefined && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Amount Paid</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                      Amount Paid
+                    </span>
                     <p className="font-bold text-emerald-400 text-sm mt-0.5">
                       ₹{totalPrice.toLocaleString("en-IN")}
                     </p>
@@ -176,7 +184,9 @@ export default function BookingResultModal({
             </>
           ) : (
             <div className="space-y-1.5 text-center sm:text-left">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">Failure Reason</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                Failure Reason
+              </span>
               <p className="text-slate-300 leading-relaxed text-xs">{errorMessage}</p>
             </div>
           )}

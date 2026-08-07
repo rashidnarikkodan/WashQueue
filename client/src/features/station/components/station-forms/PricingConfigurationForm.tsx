@@ -42,8 +42,14 @@ export default function PricingConfigurationForm({
         const existing = initialValues.find((p) => p.vehicleClassId === cls.id)
         state[cls.id] = {
           vehicleClassId: cls.id,
-          halfWashPrice: existing && typeof existing.halfWashPrice === "number" && existing.halfWashPrice > 0 ? existing.halfWashPrice : ("" as unknown as number),
-          fullWashPrice: existing && typeof existing.fullWashPrice === "number" && existing.fullWashPrice > 0 ? existing.fullWashPrice : ("" as unknown as number),
+          halfWashPrice:
+            existing && typeof existing.halfWashPrice === "number" && existing.halfWashPrice > 0
+              ? existing.halfWashPrice
+              : ("" as unknown as number),
+          fullWashPrice:
+            existing && typeof existing.fullWashPrice === "number" && existing.fullWashPrice > 0
+              ? existing.fullWashPrice
+              : ("" as unknown as number),
           isActive: existing ? (existing.isActive ?? false) : false,
         }
       })
@@ -54,10 +60,12 @@ export default function PricingConfigurationForm({
         const catActive: Record<string, boolean> = {}
         categories.forEach((cat) => {
           const catClasses = classes.filter((c) => c.categoryId === cat.id)
-          const isCatActive = catClasses.length > 0 && catClasses.some((c) => {
-            const item = initialValues.find((p) => p.vehicleClassId === c.id)
-            return item ? item.isActive === true : false
-          })
+          const isCatActive =
+            catClasses.length > 0 &&
+            catClasses.some((c) => {
+              const item = initialValues.find((p) => p.vehicleClassId === c.id)
+              return item ? item.isActive === true : false
+            })
           catActive[cat.id] = isCatActive
         })
         setCategoryActive(catActive)
@@ -65,9 +73,16 @@ export default function PricingConfigurationForm({
     }
   }, [classes, categories, initialValues])
 
-  const handlePriceChange = (classId: string, field: "halfWashPrice" | "fullWashPrice", rawValue: string) => {
+  const handlePriceChange = (
+    classId: string,
+    field: "halfWashPrice" | "fullWashPrice",
+    rawValue: string
+  ) => {
     const parsed = rawValue === "" ? ("" as unknown as number) : parseFloat(rawValue)
-    const val = typeof parsed === "number" && !isNaN(parsed) && parsed >= 0 ? parsed : ("" as unknown as number)
+    const val =
+      typeof parsed === "number" && !isNaN(parsed) && parsed >= 0
+        ? parsed
+        : ("" as unknown as number)
     setPricingState((prev) => ({
       ...prev,
       [classId]: {
@@ -130,8 +145,14 @@ export default function PricingConfigurationForm({
       const isClassActive = item?.isActive ?? false
 
       if (catIsActive && isClassActive) {
-        const half = typeof item?.halfWashPrice === "number" && !isNaN(item.halfWashPrice) ? item.halfWashPrice : 0
-        const full = typeof item?.fullWashPrice === "number" && !isNaN(item.fullWashPrice) ? item.fullWashPrice : 0
+        const half =
+          typeof item?.halfWashPrice === "number" && !isNaN(item.halfWashPrice)
+            ? item.halfWashPrice
+            : 0
+        const full =
+          typeof item?.fullWashPrice === "number" && !isNaN(item.fullWashPrice)
+            ? item.fullWashPrice
+            : 0
 
         if (half <= 0 || full <= 0) {
           missingPriceClasses.push(cls.name)
@@ -146,8 +167,14 @@ export default function PricingConfigurationForm({
       } else {
         finalPricing.push({
           vehicleClassId: cls.id,
-          halfWashPrice: typeof item?.halfWashPrice === "number" && !isNaN(item.halfWashPrice) ? item.halfWashPrice : 0,
-          fullWashPrice: typeof item?.fullWashPrice === "number" && !isNaN(item.fullWashPrice) ? item.fullWashPrice : 0,
+          halfWashPrice:
+            typeof item?.halfWashPrice === "number" && !isNaN(item.halfWashPrice)
+              ? item.halfWashPrice
+              : 0,
+          fullWashPrice:
+            typeof item?.fullWashPrice === "number" && !isNaN(item.fullWashPrice)
+              ? item.fullWashPrice
+              : 0,
           isActive: false,
         })
       }
@@ -172,8 +199,10 @@ export default function PricingConfigurationForm({
 
   const getCategoryIcon = (name: string) => {
     const lower = name.toLowerCase()
-    if (lower.includes("two") || lower.includes("bike") || lower.includes("motorcycle")) return <Bike size={18} />
-    if (lower.includes("lorry") || lower.includes("truck") || lower.includes("bus")) return <Truck size={18} />
+    if (lower.includes("two") || lower.includes("bike") || lower.includes("motorcycle"))
+      return <Bike size={18} />
+    if (lower.includes("lorry") || lower.includes("truck") || lower.includes("bus"))
+      return <Truck size={18} />
     return <Car size={18} />
   }
 
@@ -271,12 +300,12 @@ export default function PricingConfigurationForm({
                           key={cls.id}
                           className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-3 sm:gap-0 p-4 rounded-xl bg-muted/40 border border-border/60 hover:border-border transition-colors"
                         >
-                          <div className="font-semibold text-sm text-foreground">
-                            {cls.name}
-                          </div>
+                          <div className="font-semibold text-sm text-foreground">{cls.name}</div>
 
                           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">HALF WASH:</span>
+                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">
+                              HALF WASH:
+                            </span>
                             <div className="w-36 sm:w-32">
                               <FormInput
                                 type="number"
@@ -292,7 +321,9 @@ export default function PricingConfigurationForm({
                           </div>
 
                           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">FULL WASH:</span>
+                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">
+                              FULL WASH:
+                            </span>
                             <div className="w-36 sm:w-32">
                               <FormInput
                                 type="number"
@@ -308,7 +339,9 @@ export default function PricingConfigurationForm({
                           </div>
 
                           <div className="flex items-center justify-between sm:justify-end w-full">
-                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">AVAILABLE:</span>
+                            <span className="sm:hidden text-xs text-muted-foreground font-semibold">
+                              AVAILABLE:
+                            </span>
                             <FormSwitch
                               checked={item.isActive}
                               onChange={(checked) => handleClassToggle(cls.id, checked)}

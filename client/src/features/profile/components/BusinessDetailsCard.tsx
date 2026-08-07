@@ -8,7 +8,6 @@ interface BusinessDetailsCardProps {
 export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProps) {
   return (
     <div className="bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl">
-      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">

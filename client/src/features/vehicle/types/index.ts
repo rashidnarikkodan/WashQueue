@@ -49,4 +49,3 @@ export interface VehicleMaintenanceInfo {
   suggestedNextWashDate: string
   recommendationAlert?: string
 }
-

@@ -31,39 +31,49 @@ export default function ClassCard({
       <div className="absolute left-[16px] top-0 w-[24px] h-[28px] border-l-2 border-b-2 border-border rounded-bl-xl"></div>
 
       {/* Class Content Card */}
-      <div className={`flex items-center justify-between p-4 rounded-3xl border transition-all duration-200 shadow-sm ${
-        cls.isActive
-          ? "border-l-[4px] border-l-primary/50 border-y-border border-r-border bg-card hover:bg-card/90"
-          : "border-l-[4px] border-l-muted-foreground border-y-border border-r-border bg-muted/30 opacity-60 hover:opacity-80"
-      }`}>
+      <div
+        className={`flex items-center justify-between p-4 rounded-3xl border transition-all duration-200 shadow-sm ${
+          cls.isActive
+            ? "border-l-[4px] border-l-primary/50 border-y-border border-r-border bg-card hover:bg-card/90"
+            : "border-l-[4px] border-l-muted-foreground border-y-border border-r-border bg-muted/30 opacity-60 hover:opacity-80"
+        }`}
+      >
         <div className="flex items-center gap-4 text-left min-w-0 flex-1">
           <div className="min-w-0 flex-1">
-            <h4 className={`text-sm font-bold leading-snug break-words ${
-              cls.isActive ? "text-foreground" : "text-muted-foreground line-through"
-            }`}>
+            <h4
+              className={`text-sm font-bold leading-snug break-words ${
+                cls.isActive ? "text-foreground" : "text-muted-foreground line-through"
+              }`}
+            >
               {cls.name}
             </h4>
             <div className="flex flex-wrap items-center gap-3 mt-0.5 min-w-0">
-              <span className={`text-[10px] font-medium font-mono break-all ${
-                cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
-              }`}>
+              <span
+                className={`text-[10px] font-medium font-mono break-all ${
+                  cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
+                }`}
+              >
                 Class Code: {cls.slug}
               </span>
-              
+
               {/* Status Badge */}
-              <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider border shrink-0 ${
-                cls.isActive
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-red-500/10 text-red-400 border-red-500/20"
-              }`}>
+              <span
+                className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider border shrink-0 ${
+                  cls.isActive
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                }`}
+              >
                 {cls.isActive ? "Active" : "Inactive"}
               </span>
             </div>
 
             {cls.description && (
-              <p className={`text-xs mt-1.5 break-words transition-colors ${
-                cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
-              }`}>
+              <p
+                className={`text-xs mt-1.5 break-words transition-colors ${
+                  cls.isActive ? "text-muted-foreground" : "text-muted-foreground/70"
+                }`}
+              >
                 {cls.description}
               </p>
             )}

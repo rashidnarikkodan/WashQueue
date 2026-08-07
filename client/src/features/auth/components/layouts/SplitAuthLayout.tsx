@@ -74,7 +74,9 @@ export default function SplitAuthLayout({
             footerElement
           ) : (
             <>
-              {promptText && <span className="text-xs md:text-sm font-medium opacity-80">{promptText}</span>}
+              {promptText && (
+                <span className="text-xs md:text-sm font-medium opacity-80">{promptText}</span>
+              )}
               <button
                 onClick={onRedirectClick}
                 className="w-full md:w-56 py-3 px-6 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 shadow-md text-sm cursor-pointer"

@@ -16,10 +16,10 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
     profile.role === "owner"
       ? "Verified Owner"
       : profile.role === "admin"
-      ? "System Admin"
-      : profile.role === "manager"
-      ? "Station Manager"
-      : "Verified Customer"
+        ? "System Admin"
+        : profile.role === "manager"
+          ? "Station Manager"
+          : "Verified Customer"
 
   const formattedMemberSince = profile.createdAt
     ? new Date(profile.createdAt).getFullYear()
@@ -28,10 +28,8 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
   return (
     <div className="relative bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 shadow-2xl overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        
         {/* Left Side: Avatar & Details */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          
           {/* Avatar Container */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-full bg-[#ADC6FF]/20 blur-xl opacity-50" />

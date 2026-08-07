@@ -73,7 +73,9 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
           Biography
         </p>
-        <p className="text-xs text-muted-foreground leading-relaxed italic">No biography registered.</p>
+        <p className="text-xs text-muted-foreground leading-relaxed italic">
+          No biography registered.
+        </p>
       </div>
     </div>
   )

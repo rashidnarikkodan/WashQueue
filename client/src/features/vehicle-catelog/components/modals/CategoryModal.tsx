@@ -113,7 +113,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const newErrors: Record<string, string> = {}
     if (!name.trim()) {
       newErrors.name = "Category name is required"
@@ -247,7 +247,9 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
               disabled={isSubmitting}
               rows={3}
               className={`w-full bg-muted/40 border text-foreground rounded-xl px-4 py-2.5 text-sm outline-none transition-colors disabled:opacity-50 resize-none ${
-                errors.description ? "border-red-500/80 focus:border-red-500" : "border-border/80 focus:border-primary/50"
+                errors.description
+                  ? "border-red-500/80 focus:border-red-500"
+                  : "border-border/80 focus:border-primary/50"
               }`}
             />
             {errors.description && (

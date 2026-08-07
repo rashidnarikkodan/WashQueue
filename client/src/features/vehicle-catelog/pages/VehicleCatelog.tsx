@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react"
 import { FolderTree, Table, Plus } from "lucide-react"
-import type { VehicleCategory, VehicleClass, CreateCategoryInput, UpdateCategoryInput, CreateClassInput, UpdateClassInput } from "../types"
+import type {
+  VehicleCategory,
+  VehicleClass,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  CreateClassInput,
+  UpdateClassInput,
+} from "../types"
 import { useVehicleCatelogStore } from "../store/catelog.store"
 
 import CategoryCard from "../components/ui/CategoryCard"
@@ -178,8 +185,8 @@ export default function VehicleCatelog() {
             Vehicle Classification
           </h1>
           <p className="text-sm md:text-base text-slate-400 font-normal leading-relaxed">
-            Manage the structural taxonomy for all vehicles processed through the Sentinel Auto pipeline.
-            Define categories, sub-classes, and processing rules.
+            Manage the structural taxonomy for all vehicles processed through the Sentinel Auto
+            pipeline. Define categories, sub-classes, and processing rules.
           </p>
         </div>
 
@@ -189,20 +196,22 @@ export default function VehicleCatelog() {
           <div className="flex p-1 bg-[#191F31] rounded-xl border border-slate-800/80">
             <button
               onClick={() => setViewMode("tree")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${viewMode === "tree"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                viewMode === "tree"
                   ? "bg-[#ADC6FF] text-[#002E6A] shadow-md"
                   : "text-slate-400 hover:text-slate-200"
-                }`}
+              }`}
             >
               <FolderTree size={14} />
               <span>Tree View</span>
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${viewMode === "table"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                viewMode === "table"
                   ? "bg-[#ADC6FF] text-[#002E6A] shadow-md"
                   : "text-slate-400 hover:text-slate-200"
-                }`}
+              }`}
             >
               <Table size={14} />
               <span>Table View</span>
@@ -255,7 +264,11 @@ export default function VehicleCatelog() {
 
       {/* Main Content Area */}
       {isLoading ? (
-        <Loading size="lg" text="Loading vehicle classification data..." className="py-20 gap-3 text-slate-400" />
+        <Loading
+          size="lg"
+          text="Loading vehicle classification data..."
+          className="py-20 gap-3 text-slate-400"
+        />
       ) : viewMode === "tree" ? (
         /* TREE ACCORDION VIEW MODE */
         <div className="flex flex-col gap-6">
@@ -343,13 +356,16 @@ export default function VehicleCatelog() {
         isOpen={!!deleteConfirmTarget}
         onClose={() => setDeleteConfirmTarget(null)}
         onConfirm={handleConfirmDelete}
-        title={`Delete Vehicle ${deleteConfirmTarget?.type === "category" ? "Category" : "Sub-Class"
-          }`}
-        message={`Are you sure you want to permanently delete "${deleteConfirmTarget?.name
-          }"? This will permanently delete it unless it is being used by any vehicle class, category or station. ${deleteConfirmTarget?.type === "category"
+        title={`Delete Vehicle ${
+          deleteConfirmTarget?.type === "category" ? "Category" : "Sub-Class"
+        }`}
+        message={`Are you sure you want to permanently delete "${
+          deleteConfirmTarget?.name
+        }"? This will permanently delete it unless it is being used by any vehicle class, category or station. ${
+          deleteConfirmTarget?.type === "category"
             ? "Note that permanently deleting this category will also delete all sub-classes configured inside it."
             : ""
-          }`}
+        }`}
         confirmText="Delete"
         cancelText="Cancel"
         confirmVariant="danger"

@@ -10,12 +10,11 @@ import type {
   Station,
   StationDetail,
   UpdateStationInput,
-} from '@/features/station/types'
+} from "@/features/station/types"
 
 import type { ApiResponse } from "../types/ApiResponse"
 
 export const stationApi = {
-
   getFilterOptions: async (): Promise<FilterMetadata> => {
     try {
       const response = await api.get(`${API_ROUTES.STATIONS.ROOT}/filter-options`)
@@ -26,7 +25,6 @@ export const stationApi = {
   },
 
   getStations: async (query: GetStationsQuery = {}): Promise<GetStationsResponse> => {
-
     try {
       console.log(query)
       const response = await api.get(API_ROUTES.STATIONS.ROOT, {
@@ -79,9 +77,7 @@ export const stationApi = {
   /**
    * Create a new station draft (Step 1 of setup, supports FormData multipart file upload).
    */
-  createStation: async (
-    input: CreateStationInput | FormData
-  ): Promise<CreateStationResponse> => {
+  createStation: async (input: CreateStationInput | FormData): Promise<CreateStationResponse> => {
     try {
       const isFormData = typeof FormData !== "undefined" && input instanceof FormData
       const response = await api.post<ApiResponse<CreateStationResponse>>(
@@ -98,7 +94,10 @@ export const stationApi = {
   /**
    * Update a station with any of the 4 setup steps (supports FormData multipart file upload).
    */
-  updateStation: async (id: string, input: UpdateStationInput | FormData): Promise<StationDetail> => {
+  updateStation: async (
+    id: string,
+    input: UpdateStationInput | FormData
+  ): Promise<StationDetail> => {
     try {
       const isFormData = typeof FormData !== "undefined" && input instanceof FormData
       const response = await api.patch<{ data: StationDetail }>(
@@ -159,7 +158,9 @@ export const stationApi = {
    */
   toggleActiveStation: async (id: string): Promise<Station> => {
     try {
-      const response = await api.patch<{ data: Station }>(`${API_ROUTES.STATIONS.BY_ID(id)}/toggle-active`)
+      const response = await api.patch<{ data: Station }>(
+        `${API_ROUTES.STATIONS.BY_ID(id)}/toggle-active`
+      )
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to toggle station activation status")

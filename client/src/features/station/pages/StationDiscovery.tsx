@@ -20,11 +20,7 @@ import { useStationStore } from "@/features/station/store/station.store"
 import { useVehicleStore } from "@/features/vehicle/store/vehicle.store"
 import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
-import {
-  DEFAULT_FILTERS,
-  type FilterOptions,
-  type Station,
-} from "@/features/station/types"
+import { DEFAULT_FILTERS, type FilterOptions, type Station } from "@/features/station/types"
 import { useDebounce } from "@/shared/hooks/useDebounce"
 import Pagination from "@/shared/components/ui/Pagination"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -49,7 +45,9 @@ const StationDiscovery = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS)
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
+    null
+  )
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
@@ -87,7 +85,9 @@ const StationDiscovery = () => {
       (err) => {
         setIsLocating(false)
         if (err.code === 1) {
-          setLocationError("Location permission denied. Please allow location access for nearest station results.")
+          setLocationError(
+            "Location permission denied. Please allow location access for nearest station results."
+          )
         } else {
           setLocationError("Could not retrieve your location. Try again.")
         }
@@ -164,7 +164,6 @@ const StationDiscovery = () => {
         return "Recommended"
     }
   }
-
 
   return (
     <div className="min-h-screen pt-24 sm:pt-28 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
@@ -355,22 +354,26 @@ const StationDiscovery = () => {
       )}
 
       {/* Nearest Sort Location Prompt */}
-      {(filters.sortBy === "nearest" || filters.sortBy === "DISTANCE") && !userLocation && !locationError && (
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs sm:text-sm">
-          <div className="flex items-center gap-2">
-            <Crosshair className="w-4 h-4 text-blue-400 shrink-0" />
-            <span>Nearest sorting requires your location. Enable location to calculate accurate station distance.</span>
+      {(filters.sortBy === "nearest" || filters.sortBy === "DISTANCE") &&
+        !userLocation &&
+        !locationError && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs sm:text-sm">
+            <div className="flex items-center gap-2">
+              <Crosshair className="w-4 h-4 text-blue-400 shrink-0" />
+              <span>
+                Nearest sorting requires your location. Enable location to calculate accurate
+                station distance.
+              </span>
+            </div>
+            <button
+              onClick={handleGetLocation}
+              disabled={isLocating}
+              className="px-4 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs shrink-0 cursor-pointer transition-all disabled:opacity-50"
+            >
+              {isLocating ? "Locating…" : "Enable Location"}
+            </button>
           </div>
-          <button
-            onClick={handleGetLocation}
-            disabled={isLocating}
-            className="px-4 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold text-xs shrink-0 cursor-pointer transition-all disabled:opacity-50"
-          >
-            {isLocating ? "Locating…" : "Enable Location"}
-          </button>
-        </div>
-      )}
+        )}
 
       {/* Active Filter Pills Tag Bar */}
       {(activeFilterCount > 0 || searchQuery) && (
@@ -393,7 +396,11 @@ const StationDiscovery = () => {
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
                 onClick={() =>
-                  setFilters((p) => ({ ...p, selectedVehicleId: undefined, vehicleClassId: undefined }))
+                  setFilters((p) => ({
+                    ...p,
+                    selectedVehicleId: undefined,
+                    vehicleClassId: undefined,
+                  }))
                 }
               />
             </span>
@@ -414,7 +421,9 @@ const StationDiscovery = () => {
               Sort: {getSortLabel()}
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p: FilterOptions) => ({ ...p, sortBy: DEFAULT_FILTERS.sortBy }))}
+                onClick={() =>
+                  setFilters((p: FilterOptions) => ({ ...p, sortBy: DEFAULT_FILTERS.sortBy }))
+                }
               />
             </span>
           )}
@@ -466,7 +475,10 @@ const StationDiscovery = () => {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="h-96 rounded-3xl bg-muted/40 animate-pulse border border-border" />
+            <div
+              key={i}
+              className="h-96 rounded-3xl bg-muted/40 animate-pulse border border-border"
+            />
           ))}
         </div>
       ) : stations.length === 0 ? (
@@ -480,7 +492,8 @@ const StationDiscovery = () => {
               No stations found
             </h3>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
-              We couldn't find any wash stations matching your vehicle or filters. Try selecting a different vehicle or clearing active filters.
+              We couldn't find any wash stations matching your vehicle or filters. Try selecting a
+              different vehicle or clearing active filters.
             </p>
           </div>
           <button
@@ -506,7 +519,8 @@ const StationDiscovery = () => {
               id={station.id}
               name={station.name}
               image={
-                station.images?.find((img: { isPrimary: boolean; url: string }) => img.isPrimary)?.url ||
+                station.images?.find((img: { isPrimary: boolean; url: string }) => img.isPrimary)
+                  ?.url ||
                 station.images?.[0]?.url ||
                 "https://placehold.co/400x200/1a2240/60a5fa?text=Wash+Station"
               }
@@ -537,7 +551,6 @@ const StationDiscovery = () => {
           <Pagination meta={pagination} onPageChange={setPage} />
         </div>
       )}
-
 
       {/* Floating Capsule Filter & Sort Bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">

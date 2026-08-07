@@ -107,9 +107,7 @@ export default function QRCodePass({
               <div className="text-[9px] font-black uppercase tracking-widest text-blue-950/80">
                 WASHQUEUE PASS
               </div>
-              <h4 className="text-xs font-extrabold text-slate-950 tracking-tight">
-                {title}
-              </h4>
+              <h4 className="text-xs font-extrabold text-slate-950 tracking-tight">{title}</h4>
             </div>
           </div>
 
@@ -163,7 +161,8 @@ export default function QRCodePass({
               </div>
               {totalPrice !== undefined && (
                 <p className="text-[11px] text-slate-400 font-medium">
-                  Paid: <strong className="text-slate-100">₹{totalPrice.toLocaleString("en-IN")}</strong>
+                  Paid:{" "}
+                  <strong className="text-slate-100">₹{totalPrice.toLocaleString("en-IN")}</strong>
                 </p>
               )}
             </div>

@@ -26,7 +26,11 @@ export function SelectManagerModal({
       onClose()
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
-      toast.error(errorObj?.response?.data?.message || errorObj?.message || `Error setting manager (${managerType})`)
+      toast.error(
+        errorObj?.response?.data?.message ||
+          errorObj?.message ||
+          `Error setting manager (${managerType})`
+      )
     } finally {
       setIsSubmitting(null)
     }
@@ -62,11 +66,10 @@ export function SelectManagerModal({
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-5 group-hover:scale-105 transition-transform">
                 <UserPlus className="w-7 h-7" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Invite a new Manager
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-2">Invite a new Manager</h3>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-6">
-                Invite a dedicated station manager to oversee booking appointments and manage day-to-day queue operations.
+                Invite a dedicated station manager to oversee booking appointments and manage
+                day-to-day queue operations.
               </p>
             </div>
 
@@ -92,11 +95,10 @@ export function SelectManagerModal({
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-5 group-hover:scale-105 transition-transform">
                 <Store className="w-7 h-7" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Assign Yourself as Manager
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-2">Assign Yourself as Manager</h3>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xs mb-6">
-                You will manage all of your station's booking, queue management, and live service operations directly.
+                You will manage all of your station's booking, queue management, and live service
+                operations directly.
               </p>
             </div>
 
@@ -129,7 +131,10 @@ export function SelectManagerModal({
         {/* Bottom Note Box */}
         <div className="w-full bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
           <p className="text-xs font-medium text-blue-400/90 leading-relaxed">
-            <strong className="font-bold">Station Rules:</strong> 1. Each station can have only 1 manager, and a manager can only manage 1 station. 2. Station owners can directly manage the queue of only 1 station. If you operate multiple stations, you must assign dedicated managers to your other stations.
+            <strong className="font-bold">Station Rules:</strong> 1. Each station can have only 1
+            manager, and a manager can only manage 1 station. 2. Station owners can directly manage
+            the queue of only 1 station. If you operate multiple stations, you must assign dedicated
+            managers to your other stations.
           </p>
         </div>
       </div>

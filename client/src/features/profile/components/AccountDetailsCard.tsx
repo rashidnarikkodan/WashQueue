@@ -70,7 +70,6 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
 
   return (
     <div className="bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl">
-      
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-[#ADC6FF]/10 flex items-center justify-center text-[#ADC6FF]">
@@ -81,7 +80,6 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        
         {/* Current Status Card */}
         <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-3">
           <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
@@ -116,9 +114,7 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
               <p className="text-base font-bold text-[#F8FAFC] leading-tight">
                 {authDetails.label}
               </p>
-              <p className="text-xs text-[#94A3B8] mt-0.5">
-                {authDetails.description}
-              </p>
+              <p className="text-xs text-[#94A3B8] mt-0.5">{authDetails.description}</p>
             </div>
           </div>
         </div>
@@ -127,9 +123,7 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-1">
           <div className="flex items-center gap-2 text-[#94A3B8] mb-1">
             <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              LAST UPDATED
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider">LAST UPDATED</span>
           </div>
           <p className="text-lg font-semibold text-[#F8FAFC]">
             {new Date().toLocaleDateString("en-US", {
@@ -144,13 +138,9 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-1">
           <div className="flex items-center gap-2 text-[#94A3B8] mb-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              MEMBER SINCE
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider">MEMBER SINCE</span>
           </div>
-          <p className="text-lg font-semibold text-[#F8FAFC]">
-            {formattedMemberSince}
-          </p>
+          <p className="text-lg font-semibold text-[#F8FAFC]">{formattedMemberSince}</p>
         </div>
       </div>
     </div>

@@ -1,12 +1,5 @@
 import React from "react"
-import {
-  CheckCircle2,
-  Info,
-  AlertTriangle,
-  AlertCircle,
-  X,
-  type LucideIcon,
-} from "lucide-react"
+import { CheckCircle2, Info, AlertTriangle, AlertCircle, X, type LucideIcon } from "lucide-react"
 
 export type BannerStatus = "success" | "info" | "warn" | "warning" | "error"
 
@@ -96,8 +89,12 @@ export default function Banner({
       <div className="flex items-start sm:items-center gap-3.5 flex-1">
         {/* Pulsing Icon */}
         <div className="relative shrink-0 mt-0.5 sm:mt-0">
-          <div className={`absolute inset-0 rounded-xl blur-md animate-pulse opacity-50 ${config.iconColor}`} />
-          <div className={`relative p-2.5 rounded-xl border flex items-center justify-center ${config.iconBg}`}>
+          <div
+            className={`absolute inset-0 rounded-xl blur-md animate-pulse opacity-50 ${config.iconColor}`}
+          />
+          <div
+            className={`relative p-2.5 rounded-xl border flex items-center justify-center ${config.iconBg}`}
+          >
             <IconComponent className="w-5 h-5" />
           </div>
         </div>
@@ -107,12 +104,16 @@ export default function Banner({
           {(title || badgeText) && (
             <div className="flex flex-wrap items-center gap-2">
               {title && (
-                <h3 className={`text-sm font-bold tracking-tight flex items-center gap-1.5 ${config.titleColor}`}>
+                <h3
+                  className={`text-sm font-bold tracking-tight flex items-center gap-1.5 ${config.titleColor}`}
+                >
                   {title}
                 </h3>
               )}
               {badgeText && (
-                <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full border ${config.badge}`}>
+                <span
+                  className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full border ${config.badge}`}
+                >
                   {badgeText}
                 </span>
               )}
@@ -120,9 +121,7 @@ export default function Banner({
           )}
 
           {description && (
-            <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">
-              {description}
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">{description}</p>
           )}
 
           {children}

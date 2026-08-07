@@ -50,12 +50,8 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-[#020617] text-[#F8FAFC] font-sans pt-24 pb-16 transition-colors duration-300">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
         {/* Header Section */}
-        <ProfileHeader
-          profile={profile}
-          onEditClick={() => setEditModalOpen(true)}
-        />
+        <ProfileHeader profile={profile} onEditClick={() => setEditModalOpen(true)} />
 
         {/* Activity Stats Quick Glance */}
         <ProfileActivityStats stats={stats} />
@@ -93,7 +89,7 @@ export default function ProfilePage() {
           onUpdateSettingsClick={() => setEditModalOpen(true)}
           onChangePasswordClick={() => setChangePasswordModalOpen(true)}
           onSignOutClick={handleSignOut}
-          isLocal={profile.authProvider === 'local'}
+          isLocal={profile.authProvider === "local"}
         />
       </div>
 

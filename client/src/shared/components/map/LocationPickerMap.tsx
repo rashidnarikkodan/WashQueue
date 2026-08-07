@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { Search, MapPin, Loader2, Navigation, CheckCircle2, Crosshair, Layers, Globe, Moon, Sun } from "lucide-react"
+import {
+  Search,
+  MapPin,
+  Loader2,
+  Navigation,
+  CheckCircle2,
+  Crosshair,
+  Layers,
+  Globe,
+  Moon,
+  Sun,
+} from "lucide-react"
 
 export interface LocationChangeData {
   latitude: number
@@ -155,8 +166,14 @@ export default function LocationPickerMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
-    const validLat = typeof latitude === "number" && !isNaN(latitude) && latitude !== 0 ? latitude : DEFAULT_CENTER[1]
-    const validLng = typeof longitude === "number" && !isNaN(longitude) && longitude !== 0 ? longitude : DEFAULT_CENTER[0]
+    const validLat =
+      typeof latitude === "number" && !isNaN(latitude) && latitude !== 0
+        ? latitude
+        : DEFAULT_CENTER[1]
+    const validLng =
+      typeof longitude === "number" && !isNaN(longitude) && longitude !== 0
+        ? longitude
+        : DEFAULT_CENTER[0]
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -248,12 +265,19 @@ export default function LocationPickerMap({
   // Sync marker position & map center when props change from external updates
   useEffect(() => {
     if (!mapRef.current || !markerRef.current) return
-    if (typeof latitude !== "number" || typeof longitude !== "number" || isNaN(latitude) || isNaN(longitude)) return
+    if (
+      typeof latitude !== "number" ||
+      typeof longitude !== "number" ||
+      isNaN(latitude) ||
+      isNaN(longitude)
+    )
+      return
     if (latitude === 0 && longitude === 0) return
 
     const currentLngLat = markerRef.current.getLngLat()
     const isDifferent =
-      Math.abs(currentLngLat.lat - latitude) > 0.0001 || Math.abs(currentLngLat.lng - longitude) > 0.0001
+      Math.abs(currentLngLat.lat - latitude) > 0.0001 ||
+      Math.abs(currentLngLat.lng - longitude) > 0.0001
 
     if (isDifferent) {
       markerRef.current.setLngLat([longitude, latitude])
@@ -344,13 +368,19 @@ export default function LocationPickerMap({
   }
 
   return (
-    <div className={`relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-[#070D1F] ${className}`}>
+    <div
+      className={`relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-[#070D1F] ${className}`}
+    >
       {/* Search Overlay Bar (If enabled) */}
       {showSearch && (
         <div className="absolute top-3 left-3 right-14 sm:right-auto sm:w-80 md:w-96 z-20 flex flex-col gap-1.5">
           <div className="relative flex items-center w-full bg-[#0c1324]/90 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-lg shadow-black/40 text-slate-200">
             <div className="pl-3.5 pr-2 text-slate-400">
-              {isSearching ? <Loader2 size={16} className="animate-spin text-blue-400" /> : <Search size={16} />}
+              {isSearching ? (
+                <Loader2 size={16} className="animate-spin text-blue-400" />
+              ) : (
+                <Search size={16} />
+              )}
             </div>
             <input
               type="text"
@@ -385,7 +415,10 @@ export default function LocationPickerMap({
                   onClick={() => handleSelectSuggestion(item)}
                   className="w-full text-left px-3.5 py-2.5 border-b border-slate-800/60 last:border-none hover:bg-blue-600/20 transition-colors flex items-start gap-2.5 cursor-pointer group"
                 >
-                  <MapPin size={16} className="text-blue-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <MapPin
+                    size={16}
+                    className="text-blue-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform"
+                  />
                   <div className="flex flex-col overflow-hidden">
                     <span className="text-xs sm:text-sm font-semibold text-slate-100 truncate">
                       {item.display_name.split(",")[0]}

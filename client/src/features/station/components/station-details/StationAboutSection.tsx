@@ -12,9 +12,7 @@ export function StationAboutSection({ stationName, description }: StationAboutSe
       <Info size={120} className="absolute -right-8 -bottom-8 text-border/30 pointer-events-none" />
 
       <div className="space-y-3 relative z-10">
-        <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          About {stationName}
-        </h2>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">About {stationName}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed max-w-5xl break-words">
           {description || "No description provided for this station."}
         </p>
