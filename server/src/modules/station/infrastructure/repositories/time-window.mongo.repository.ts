@@ -140,6 +140,25 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     return TimeWindowMapper.toDomain(doc)
   }
 
+  async releaseCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null> {
+    if (!Types.ObjectId.isValid(windowId)) return null
+
+    const doc = await TimeWindowModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(windowId),
+        advanceBookedCount: { $gt: 0 },
+      },
+      {
+        $inc: { advanceBookedCount: -1 },
+        $set: { status: "OPEN" },
+      },
+      { new: true }
+    )
+
+    if (!doc) return null
+    return TimeWindowMapper.toDomain(doc)
+  }
+
   async deleteByStationId(stationId: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(stationId)) return false
     const res = await TimeWindowModel.deleteMany({ stationId: new Types.ObjectId(stationId) })
