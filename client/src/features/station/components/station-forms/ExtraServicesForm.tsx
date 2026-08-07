@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import { Plus, ArrowRight, Car, Bike, Truck, Wrench, X } from "lucide-react"
+import { Plus, ArrowRight, Car, Bike, Truck, Wrench, X, Trash2, Check, Sparkles } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { ExtraServiceInput } from "../../types"
