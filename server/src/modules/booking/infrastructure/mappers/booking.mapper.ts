@@ -38,6 +38,13 @@ function getIdString(val: unknown): string {
   return String(val)
 }
 
+function toObjectId(val: unknown): Types.ObjectId | null {
+  if (!val) return null
+  const str = String(val).trim()
+  if (!str) return null
+  return Types.ObjectId.isValid(str) ? new Types.ObjectId(str) : null
+}
+
 export class BookingMapper {
   static toDomain(doc: IBookingDocument): Booking {
     const stationObj = doc.stationId && typeof doc.stationId === "object" ? (doc.stationId as PopulatedDoc) : null
@@ -167,13 +174,13 @@ export class BookingMapper {
 
     const raw: Partial<IBookingDocument> = {
       bookingNumber: props.bookingNumber,
-      userId: props.userId && Types.ObjectId.isValid(props.userId) ? new Types.ObjectId(props.userId) : null,
-      providerId: props.providerId && Types.ObjectId.isValid(props.providerId) ? new Types.ObjectId(props.providerId) : new Types.ObjectId(props.createdByUserId),
-      stationId: new Types.ObjectId(props.stationId),
-      vehicleId: props.vehicleId && Types.ObjectId.isValid(props.vehicleId) ? new Types.ObjectId(props.vehicleId) : null,
+      userId: toObjectId(props.userId),
+      providerId: toObjectId(props.providerId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
+      stationId: toObjectId(props.stationId) || new Types.ObjectId(),
+      vehicleId: toObjectId(props.vehicleId),
       vehicleSnapshot: {
-        vehicleCategoryId: new Types.ObjectId(props.vehicleSnapshot.vehicleCategoryId),
-        vehicleClassId: new Types.ObjectId(props.vehicleSnapshot.vehicleClassId),
+        vehicleCategoryId: toObjectId(props.vehicleSnapshot?.vehicleCategoryId) || new Types.ObjectId(),
+        vehicleClassId: toObjectId(props.vehicleSnapshot?.vehicleClassId) || new Types.ObjectId(),
       },
       serviceType: props.serviceType,
       pricingSnapshot: {
@@ -182,33 +189,34 @@ export class BookingMapper {
         totalPrice: props.pricingSnapshot.totalPrice,
         currency: props.pricingSnapshot.currency,
       },
-      extraServices: props.extraServices.map((es) => ({
-        serviceId: new Types.ObjectId(es.serviceId),
-        name: es.name,
-        price: es.price,
-      })),
+      extraServices: (props.extraServices || [])
+        .map((es) => {
+          const oid = toObjectId(es.serviceId)
+          return oid ? { serviceId: oid, name: es.name, price: es.price } : null
+        })
+        .filter((es): es is { serviceId: Types.ObjectId; name: string; price: number } => es !== null),
       scheduling: {
-        timeWindowId: new Types.ObjectId(props.scheduling.timeWindowId),
-        windowStart: props.scheduling.windowStart,
-        windowEnd: props.scheduling.windowEnd,
+        timeWindowId: toObjectId(props.scheduling?.timeWindowId) || new Types.ObjectId(),
+        windowStart: props.scheduling?.windowStart || new Date(),
+        windowEnd: props.scheduling?.windowEnd || new Date(),
       },
       isWalkIn: props.isWalkIn,
       walkInCustomer: props.walkInCustomer
         ? {
-            userId: props.walkInCustomer.userId && Types.ObjectId.isValid(props.walkInCustomer.userId) ? new Types.ObjectId(props.walkInCustomer.userId) : null,
-            name: props.walkInCustomer.name,
-            phone: props.walkInCustomer.phone,
+            userId: toObjectId(props.walkInCustomer.userId),
+            name: props.walkInCustomer.name || "",
+            phone: props.walkInCustomer.phone || "",
           }
         : null,
       walkInVehicle: props.walkInVehicle
         ? {
-            vehicleId: props.walkInVehicle.vehicleId && Types.ObjectId.isValid(props.walkInVehicle.vehicleId) ? new Types.ObjectId(props.walkInVehicle.vehicleId) : null,
-            registrationNumber: props.walkInVehicle.registrationNumber,
-            categoryId: new Types.ObjectId(props.walkInVehicle.categoryId),
-            classId: new Types.ObjectId(props.walkInVehicle.classId),
+            vehicleId: toObjectId(props.walkInVehicle.vehicleId),
+            registrationNumber: props.walkInVehicle.registrationNumber || "",
+            categoryId: toObjectId(props.walkInVehicle.categoryId) || new Types.ObjectId(),
+            classId: toObjectId(props.walkInVehicle.classId) || new Types.ObjectId(),
           }
         : null,
-      createdByUserId: new Types.ObjectId(props.createdByUserId),
+      createdByUserId: toObjectId(props.createdByUserId) || new Types.ObjectId(),
       qr: {
         qrTokenHash: props.qr.qrTokenHash,
         qrExpiresAt: props.qr.qrExpiresAt,
@@ -224,7 +232,7 @@ export class BookingMapper {
       },
       status: props.status,
       checkedInAt: props.checkedInAt || null,
-      checkedInBy: props.checkedInBy && Types.ObjectId.isValid(props.checkedInBy) ? new Types.ObjectId(props.checkedInBy) : null,
+      checkedInBy: toObjectId(props.checkedInBy),
       serviceStartedAt: props.serviceStartedAt || null,
       serviceCompletedAt: props.serviceCompletedAt || null,
       handoverInitiatedAt: props.handoverInitiatedAt || null,
@@ -232,9 +240,9 @@ export class BookingMapper {
       noShowAt: props.noShowAt || null,
       cancellation: props.cancellation
         ? {
-            cancellationReason: props.cancellation.cancellationReason,
-            cancelledBy: new Types.ObjectId(props.cancellation.cancelledBy),
-            cancelledAt: props.cancellation.cancelledAt,
+            cancellationReason: props.cancellation.cancellationReason || "",
+            cancelledBy: toObjectId(props.cancellation.cancelledBy) || toObjectId(props.userId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
+            cancelledAt: props.cancellation.cancelledAt || new Date(),
           }
         : null,
     }
