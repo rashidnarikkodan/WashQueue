@@ -1,19 +1,18 @@
-import { Types } from "mongoose"
-import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IRemoveManagerUseCase } from "../interfaces/manager-usecases.interface"
-
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 
 export class RemoveManagerUseCase implements IRemoveManagerUseCase {
   constructor(
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly userRepository: IUserRepository,
-    private readonly ownerRepository: IOwnerRepository
+    private readonly ownerRepository: IOwnerRepository,
+    private readonly stationRepository?: IStationRepository
   ) {}
 
   async execute(ownerUserId: string, assignmentId: string): Promise<void> {
@@ -34,11 +33,9 @@ export class RemoveManagerUseCase implements IRemoveManagerUseCase {
     const managerUserId = assignment.managerUserId
     await this.managerAssignmentRepository.delete(assignmentId)
 
-    // Unset managerId on Station document
-    if (Types.ObjectId.isValid(assignment.stationId)) {
-      await StationModel.findByIdAndUpdate(assignment.stationId, {
-        $unset: { managerId: 1 },
-      })
+    // Unset managerId on Station entity via repository interface
+    if (this.stationRepository && assignment.stationId) {
+      await this.stationRepository.setManagerId(assignment.stationId, null)
     }
 
     // Check if the user has any other active manager assignments

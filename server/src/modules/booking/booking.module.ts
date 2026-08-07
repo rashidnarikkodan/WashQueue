@@ -56,7 +56,7 @@ const createWalkInBookingUseCase = new CreateWalkInBookingUseCase(
 )
 
 const getBookingUseCase = new GetBookingUseCase(bookingRepository)
-const getUserBookingsUseCase = new GetUserBookingsUseCase(bookingRepository, managerAssignmentRepository)
+const getUserBookingsUseCase = new GetUserBookingsUseCase(bookingRepository, managerAssignmentRepository, stationRepository)
 
 const checkInBookingUseCase = new CheckInBookingUseCase(
   bookingRepository,

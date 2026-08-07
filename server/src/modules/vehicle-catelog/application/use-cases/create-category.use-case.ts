@@ -3,8 +3,8 @@ import { CreateCategoryInput, CategoryResponseDto } from "../dtos/category.dto"
 import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-category.repsoitory"
 import { VehicleCategory } from "../../domain/entities/VehicleCategory"
 import { ConflictError } from "@/common/errors/conflict-error"
-import { Types } from "mongoose"
 import { slugify } from "@/common/utils/slugify"
+import { randomUUID } from "node:crypto"
 
 export class CreateCategoryUseCase implements ICreateCategoryUseCase {
   constructor(private readonly categoryRepository: IVehicleCategoryRepository) {}
@@ -24,7 +24,7 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
       throw new ConflictError(`Vehicle category with slug "${slug}" already exists`)
     }
 
-    const id = new Types.ObjectId().toHexString()
+    const id = randomUUID()
     const category = new VehicleCategory({
       id,
       name: input.name,

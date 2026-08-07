@@ -5,8 +5,8 @@ import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-ca
 import { VehicleClass } from "../../domain/entities/VehicleClass"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
-import { Types } from "mongoose"
 import { slugify } from "@/common/utils/slugify"
+import { randomUUID } from "node:crypto"
 
 export class CreateClassUseCase implements ICreateClassUseCase {
   constructor(
@@ -35,7 +35,7 @@ export class CreateClassUseCase implements ICreateClassUseCase {
       throw new ConflictError(`Vehicle class with slug "${slug}" already exists`)
     }
 
-    const id = new Types.ObjectId().toHexString()
+    const id = randomUUID()
     const vehicleClass = new VehicleClass({
       id,
       categoryId: input.categoryId,

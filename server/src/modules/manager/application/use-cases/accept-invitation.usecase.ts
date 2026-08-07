@@ -1,6 +1,4 @@
 import argon2 from "argon2"
-import { Types } from "mongoose"
-import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { BadRequestError } from "@/common/errors/bad-request-error"
 import { ROLE } from "@/common/constants/role.constants"
@@ -8,6 +6,7 @@ import { User } from "@/modules/user/domain/entities/User"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import {
   ManagerAssignment,
   ManagerAssignmentStatus,
@@ -21,7 +20,8 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
   constructor(
     private readonly managerInvitationRepository: IManagerInvitationRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
-    private readonly userRepository: IUserRepository
+    private readonly userRepository: IUserRepository,
+    private readonly stationRepository?: IStationRepository
   ) {}
 
   async execute(input: AcceptInvitationInput): Promise<{ message: string; user: { id: string; email: string; name?: string; role: string } }> {
@@ -103,11 +103,9 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       await this.managerAssignmentRepository.create(assignment)
     }
 
-    // Sync managerId directly onto the Station document in MongoDB
-    if (Types.ObjectId.isValid(invitation.stationId) && Types.ObjectId.isValid(userId)) {
-      await StationModel.findByIdAndUpdate(invitation.stationId, {
-        $set: { managerId: new Types.ObjectId(userId) },
-      })
+    // Sync managerId directly onto the Station entity via repository interface
+    if (this.stationRepository && invitation.stationId && userId) {
+      await this.stationRepository.setManagerId(invitation.stationId, userId)
     }
 
     return {

@@ -1,8 +1,5 @@
-import mongoose from "mongoose"
-import { AppError } from "@/common/errors/app-error"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
@@ -15,6 +12,7 @@ import { ManagerPermission } from "@/modules/manager/domain/entities/ManagerAssi
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationImage, StationStatus } from "../../domain/entities/Station"
+import { ITransactionRunner } from "@/core/domain/transaction.interface"
 
 const slugify = (text: string): string => {
   return text
@@ -42,7 +40,8 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     private readonly mediaUploadService?: MediaUploadService,
     private readonly managerAssignmentRepository?: IManagerAssignmentRepository,
     private readonly slotConfigRepository?: ISlotConfigRepository,
-    private readonly generateTimeWindowsUseCase?: GenerateTimeWindowsUseCase
+    private readonly generateTimeWindowsUseCase?: GenerateTimeWindowsUseCase,
+    private readonly transactionRunner?: ITransactionRunner
   ) {}
 
   async execute(
@@ -84,12 +83,8 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     }
 
 
-    // A session to be used for transactions
-    const session = await mongoose.startSession()
-
-    try {
-      await session.withTransaction(async () => {
-        // If an active station is modified, check if restricted fields were changed requiring admin approval
+    const runUpdateWork = async (session?: unknown) => {
+      // If an active station is modified, check if restricted fields were changed requiring admin approval
         if (station.status === StationStatus.ACTIVE) {
           const props = station.getProps()
           let requiresAdminApproval = false
@@ -364,15 +359,12 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             }
           }
         }
-      })
-    } catch (error: unknown) {
-      if (error instanceof AppError) {
-        throw error
-      }
-      const message = error instanceof Error ? error.message : "Failed to update station step"
-      throw new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    } finally {
-      await session.endSession()
+    }
+
+    if (this.transactionRunner) {
+      await this.transactionRunner.runInTransaction(runUpdateWork)
+    } else {
+      await runUpdateWork()
     }
 
     // Fetch the updated complete station details

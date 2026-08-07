@@ -1,3 +1,4 @@
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
 import { StationMongoRepository } from "./infrastructure/repositories/station.mongo.repository"
 import { StationPricingMongoRepository } from "./infrastructure/repositories/station-pricing.mongo.repository"
 import { ExtraServiceMongoRepository } from "./infrastructure/repositories/extra-service.mongo.repository"
@@ -90,6 +91,8 @@ const createStationUseCase = new CreateStationUseCase(
   ownerRepository,
   mediaUploadService
 )
+const transactionRunner = new MongooseTransactionRunner()
+
 const updateStationUseCase = new UpdateStationUseCase(
   stationRepository,
   ownerRepository,
@@ -99,7 +102,8 @@ const updateStationUseCase = new UpdateStationUseCase(
   mediaUploadService,
   managerAssignmentRepository,
   slotConfigRepository,
-  generateTimeWindowsUseCase
+  generateTimeWindowsUseCase,
+  transactionRunner
 )
 const getStationUseCase = new GetStationUseCase(
   stationRepository,
@@ -116,7 +120,8 @@ const reviewStationUseCase = new ReviewStationUseCase(stationRepository)
 const deleteStationUseCase = new DeleteStationUseCase(
   stationRepository,
   stationPricingRepository,
-  extraServiceRepository
+  extraServiceRepository,
+  transactionRunner
 )
 const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
   stationRepository,

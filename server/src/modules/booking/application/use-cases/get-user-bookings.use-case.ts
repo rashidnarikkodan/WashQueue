@@ -1,7 +1,6 @@
-import { Types } from "mongoose"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
-import { StationModel } from "@/modules/station/infrastructure/models/station.model"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IGetUserBookingsUseCase } from "../interfaces/booking-usecases.interface"
@@ -10,7 +9,8 @@ import { Booking } from "../../domain/entities/Booking"
 export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
-    private readonly managerAssignmentRepository?: IManagerAssignmentRepository
+    private readonly managerAssignmentRepository?: IManagerAssignmentRepository,
+    private readonly stationRepository?: IStationRepository
   ) {}
 
   async execute(
@@ -29,10 +29,10 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
         stationIds = assignments.filter((a) => a.isActive).map((a) => a.stationId)
       }
 
-      // Direct fallback: check StationModel.managerId directly
-      if (stationIds.length === 0 && Types.ObjectId.isValid(userId)) {
-        const docs = await StationModel.find({ managerId: new Types.ObjectId(userId) })
-        stationIds = docs.map((d) => d._id.toString())
+      // Fallback via station repository interface
+      if (stationIds.length === 0 && this.stationRepository) {
+        const managed = await this.stationRepository.findByManagerId(userId)
+        stationIds = managed.map((s) => s.id)
       }
 
       if (stationIds.length > 0) {
@@ -58,9 +58,9 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     }
 
     // 2. Owner Role: Return bookings for all stations owned by this owner
-    if (normRole === "OWNER" && Types.ObjectId.isValid(userId)) {
-      const ownedStations = await StationModel.find({ ownerId: new Types.ObjectId(userId) })
-      const stationIds = ownedStations.map((d) => d._id.toString())
+    if (normRole === "OWNER" && this.stationRepository) {
+      const ownedStations = await this.stationRepository.findByOwnerId(userId)
+      const stationIds = ownedStations.map((s) => s.id)
 
       if (stationIds.length > 0) {
         let allOwnerBookings: Booking[] = []

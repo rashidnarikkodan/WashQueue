@@ -1,4 +1,3 @@
-import mongoose from "mongoose"
 import { AppError } from "@/common/errors/app-error"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
@@ -8,12 +7,14 @@ import { IStationRepository } from "../../domain/repositories/station.repository
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
 import { IDeleteStationUseCase } from "../interfaces/station-usecases.interface"
+import { ITransactionRunner } from "@/core/domain/transaction.interface"
 
 export class DeleteStationUseCase implements IDeleteStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
     private readonly stationPricingRepository: IStationPricingRepository,
-    private readonly extraServiceRepository: IExtraServiceRepository
+    private readonly extraServiceRepository: IExtraServiceRepository,
+    private readonly transactionRunner?: ITransactionRunner
   ) {}
 
   async execute(stationId: string, ownerId: string): Promise<void> {
@@ -34,22 +35,16 @@ export class DeleteStationUseCase implements IDeleteStationUseCase {
       )
     }
 
-    const session = await mongoose.startSession()
+    const runDelete = async (session?: unknown) => {
+      await this.stationPricingRepository.deleteByStationId(stationId, session)
+      await this.extraServiceRepository.deleteByStationId(stationId, session)
+      await this.stationRepository.delete(stationId)
+    }
 
-    try {
-      await session.withTransaction(async () => {
-        await this.stationPricingRepository.deleteByStationId(stationId, session)
-        await this.extraServiceRepository.deleteByStationId(stationId, session)
-        await this.stationRepository.delete(stationId)
-      })
-    } catch (error: unknown) {
-      if (error instanceof AppError) {
-        throw error
-      }
-      const message = error instanceof Error ? error.message : "Failed to delete station"
-      throw new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    } finally {
-      await session.endSession()
+    if (this.transactionRunner) {
+      await this.transactionRunner.runInTransaction(runDelete)
+    } else {
+      await runDelete()
     }
   }
 }

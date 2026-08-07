@@ -45,7 +45,8 @@ const inviteManagerUseCase = new InviteManagerUseCase(
 const acceptInvitationUseCase = new AcceptInvitationUseCase(
   managerInvitationRepository,
   managerAssignmentRepository,
-  userRepository
+  userRepository,
+  stationRepository
 )
 
 const rejectInvitationUseCase = new RejectInvitationUseCase(managerInvitationRepository)
@@ -88,7 +89,8 @@ const reactivateManagerUseCase = new ReactivateManagerUseCase(
 const removeManagerUseCase = new RemoveManagerUseCase(
   managerAssignmentRepository,
   userRepository,
-  ownerRepository
+  ownerRepository,
+  stationRepository
 )
 
 const getManagedStationsUseCase = new GetManagedStationsUseCase(
