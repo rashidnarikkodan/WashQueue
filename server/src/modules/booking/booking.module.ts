@@ -25,13 +25,57 @@ import { createBookingRouter } from "./presentation/booking.routes"
 
 import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
 
+import { BookingReservationMongoRepository } from "./infrastructure/repositories/booking-reservation.mongo.repository"
+import { CreateBookingReservationUseCase } from "./application/use-cases/create-booking-reservation.use-case"
+import { ConfirmBookingReservationUseCase } from "./application/use-cases/confirm-booking-reservation.use-case"
+import { CancelBookingReservationUseCase } from "./application/use-cases/cancel-booking-reservation.use-case"
+import { ProcessRazorpayWebhookUseCase } from "./application/use-cases/process-razorpay-webhook.use-case"
+import { CleanupExpiredReservationsUseCase } from "./application/use-cases/cleanup-expired-reservations.use-case"
+
 // Instantiate repositories & services
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
+export const bookingReservationRepository = new BookingReservationMongoRepository()
 const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
 const bookingRedisQueueService = new BookingRedisQueueService()
 const bookingNotificationService = new BookingNotificationService()
+
+export const createBookingReservationUseCase = new CreateBookingReservationUseCase(
+  stationRepository,
+  stationPricingRepository,
+  extraServiceRepository,
+  timeWindowRepository,
+  vehicleRepository,
+  bookingReservationRepository
+)
+
+export const confirmBookingReservationUseCase = new ConfirmBookingReservationUseCase(
+  bookingReservationRepository,
+  bookingRepository,
+  bookingStatusLogRepository,
+  stationRepository,
+  stationPricingRepository,
+  extraServiceRepository,
+  timeWindowRepository,
+  vehicleRepository,
+  bookingNotificationService
+)
+
+export const cancelBookingReservationUseCase = new CancelBookingReservationUseCase(
+  bookingReservationRepository,
+  timeWindowRepository
+)
+
+export const processRazorpayWebhookUseCase = new ProcessRazorpayWebhookUseCase(
+  bookingReservationRepository,
+  confirmBookingReservationUseCase
+)
+
+export const cleanupExpiredReservationsUseCase = new CleanupExpiredReservationsUseCase(
+  bookingReservationRepository,
+  timeWindowRepository
+)
 
 // Instantiate use cases
 const createBookingUseCase = new CreateBookingUseCase(
