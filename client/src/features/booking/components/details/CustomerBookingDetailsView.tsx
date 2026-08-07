@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Clock,
   Car,
@@ -7,11 +8,12 @@ import {
   ShieldCheck,
   CreditCard,
   Download,
+  Loader2,
   MessageSquare,
   ChevronRight,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
-import type { BookingResponse } from "@/shared/apis/booking.api"
+import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { toast } from "sonner"
 
 interface CustomerBookingDetailsViewProps {
@@ -29,6 +31,20 @@ export default function CustomerBookingDetailsView({
   stages,
   onOpenCancelModal,
 }: CustomerBookingDetailsViewProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownloadInvoice = async () => {
+    try {
+      setIsDownloading(true)
+      toast.info("Generating invoice PDF...")
+      await bookingApi.downloadInvoice(booking.id, booking.bookingNumber)
+      toast.success("Invoice downloaded successfully")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to download invoice")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
   const stationName = booking.stationDetails?.name || "WashQueue Station"
   const stationLocation = booking.stationDetails?.city || "Station Location"
   const vehicleName = booking.vehicleDetails?.nickname
@@ -191,18 +207,18 @@ export default function CustomerBookingDetailsView({
 
             <button
               type="button"
-              onClick={() => toast.info(`Invoice #${booking.bookingNumber} printed`)}
-              className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+              disabled={isDownloading}
+              onClick={handleDownloadInvoice}
+              className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download size={15} />
-              <span>Download Invoice</span>
+              {isDownloading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+              <span>{isDownloading ? "Downloading..." : "Download Invoice"}</span>
             </button>
           </div>
         </div>
 
         {/* Right 4-Column Check-in QR & Quick Access Card */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Movie Ticket Pass Component */}
           <QRCodePass
             value={qrPayload}
             bookingNumber={booking.bookingNumber}

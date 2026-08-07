@@ -15,6 +15,8 @@ import {
   IGetUserBookingsUseCase,
 } from "../application/interfaces/booking-usecases.interface"
 
+import { PDFInvoiceService } from "../infrastructure/services/pdf-invoice.service"
+
 export class BookingController {
   constructor(
     private readonly createBookingUseCase: ICreateBookingUseCase,
@@ -23,7 +25,8 @@ export class BookingController {
     private readonly getUserBookingsUseCase: IGetUserBookingsUseCase,
     private readonly checkInBookingUseCase: ICheckInBookingUseCase,
     private readonly advanceBookingStatusUseCase: IAdvanceBookingStatusUseCase,
-    private readonly cancelBookingUseCase: ICancelBookingUseCase
+    private readonly cancelBookingUseCase: ICancelBookingUseCase,
+    private readonly pdfInvoiceService: PDFInvoiceService
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -134,5 +137,20 @@ export class BookingController {
       reason: req.body.reason,
     })
     success(res, booking, HTTP_STATUS.OK, "Booking cancelled successfully")
+  }
+
+  downloadInvoice = async (req: AuthenticatedRequest, res: Response) => {
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const booking = await this.getBookingUseCase.execute(bookingId, req.user?.userId)
+    const pdfBuffer = await this.pdfInvoiceService.generateInvoicePdf(booking)
+
+    res.setHeader("Content-Type", "application/pdf")
+    res.setHeader("Content-Disposition", `attachment; filename=Invoice-${booking.bookingNumber}.pdf`)
+    res.setHeader("Content-Length", pdfBuffer.length)
+    res.status(200).send(pdfBuffer)
   }
 }

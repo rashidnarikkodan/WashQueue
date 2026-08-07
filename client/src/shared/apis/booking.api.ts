@@ -124,4 +124,23 @@ export const bookingApi = {
       throw handleApiError(error, "Failed to check in booking")
     }
   },
+
+  downloadInvoice: async (bookingId: string, bookingNumber: string): Promise<void> => {
+    try {
+      const response = await api.get(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/invoice`, {
+        responseType: "blob",
+      })
+      const blob = new Blob([response.data], { type: "application/pdf" })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", `Invoice-${bookingNumber}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode?.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw handleApiError(error, "Failed to download invoice")
+    }
+  },
 }

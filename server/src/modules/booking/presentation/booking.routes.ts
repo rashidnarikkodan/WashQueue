@@ -27,6 +27,7 @@ export const createBookingRouter = (bookingController: BookingController): Route
   router.get("/upcoming", asyncHandler(bookingController.getUpcoming))
   router.get("/history", asyncHandler(bookingController.getHistory))
   router.get("/:bookingId", asyncHandler(bookingController.getById))
+  router.get("/:bookingId/invoice", asyncHandler(bookingController.downloadInvoice))
 
   router.patch(
     "/:bookingId/cancel",

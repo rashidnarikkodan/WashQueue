@@ -2,6 +2,7 @@ import { BookingMongoRepository } from "./infrastructure/repositories/booking.mo
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
 import { BookingRedisQueueService } from "./infrastructure/services/booking-redis-queue.service"
 import { BookingNotificationService } from "./infrastructure/services/booking-notification.service"
+import { PDFInvoiceService } from "./infrastructure/services/pdf-invoice.service"
 
 import {
   stationRepository,
@@ -78,6 +79,8 @@ const cancelBookingUseCase = new CancelBookingUseCase(
   bookingNotificationService
 )
 
+const pdfInvoiceService = new PDFInvoiceService()
+
 // Instantiate controller
 const bookingController = new BookingController(
   createBookingUseCase,
@@ -86,7 +89,8 @@ const bookingController = new BookingController(
   getUserBookingsUseCase,
   checkInBookingUseCase,
   advanceBookingStatusUseCase,
-  cancelBookingUseCase
+  cancelBookingUseCase,
+  pdfInvoiceService
 )
 
 // Create router
