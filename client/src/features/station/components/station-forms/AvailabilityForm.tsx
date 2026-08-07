@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { Clock, Calendar, Info, ArrowRight, X, Plus, Coffee, Trash2 } from "lucide-react"
-import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import DatePicker from "@/shared/components/ui/DatePicker"
@@ -158,6 +157,8 @@ export default function AvailabilityForm({
     setHolidays((prev) => prev.filter((_, idx) => idx !== index))
   }
 
+  const [formError, setFormError] = useState<string | null>(null)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -178,17 +179,17 @@ export default function AvailabilityForm({
 
     const openDays = formData.operatingHours.filter((h) => !h.isClosed)
     if (openDays.length === 0) {
-      toast.error("At least one operating day must be open")
+      setFormError("At least one operating day must be open.")
       return
     }
 
     for (const day of openDays) {
       if (!day.open || !day.close) {
-        toast.error(`Opening and closing times are required for ${day.day}`)
+        setFormError(`Opening and closing times are required for ${day.day}.`)
         return
       }
       if (day.open >= day.close) {
-        toast.error(`Opening time must be earlier than closing time for ${day.day}`)
+        setFormError(`Opening time must be earlier than closing time for ${day.day}.`)
         return
       }
 
@@ -196,11 +197,11 @@ export default function AvailabilityForm({
       if (day.breaks && day.breaks.length > 0) {
         for (const brk of day.breaks) {
           if (brk.start >= brk.end) {
-            toast.error(`Break start time must be earlier than end time on ${day.day}`)
+            setFormError(`Break start time must be earlier than end time on ${day.day}.`)
             return
           }
           if (brk.start < day.open || brk.end > day.close) {
-            toast.error(`Break time (${brk.start} - ${brk.end}) must be within open hours (${day.open} - ${day.close}) on ${day.day}`)
+            setFormError(`Break time (${brk.start} - ${brk.end}) must be within open hours (${day.open} - ${day.close}) on ${day.day}.`)
             return
           }
         }
@@ -209,10 +210,12 @@ export default function AvailabilityForm({
 
     if (Object.keys(errMap).length > 0) {
       setErrors(errMap)
+      setFormError("Please fix the highlighted field errors below.")
       return
     }
 
     setErrors({})
+    setFormError(null)
     onSubmit({
       ...validation.data!,
       holidays,
@@ -232,6 +235,12 @@ export default function AvailabilityForm({
           Define working days and operating hours for your service hub.
         </p>
       </div>
+
+      {formError && (
+        <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-semibold flex items-center gap-2">
+          <span>{formError}</span>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-2xl bg-[#151B2D]/80 border border-slate-800 gap-3">
         <div>

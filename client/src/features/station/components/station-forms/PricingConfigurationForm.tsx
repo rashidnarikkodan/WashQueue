@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { ArrowRight, Car, Bike, Truck } from "lucide-react"
-import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
@@ -117,6 +116,8 @@ export default function PricingConfigurationForm({
     })
   }
 
+  const [formError, setFormError] = useState<string | null>(null)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -153,7 +154,7 @@ export default function PricingConfigurationForm({
     })
 
     if (missingPriceClasses.length > 0) {
-      toast.error(
+      setFormError(
         `Please enter valid positive Half Wash & Full Wash prices for: ${missingPriceClasses.join(", ")}`
       )
       return
@@ -161,10 +162,11 @@ export default function PricingConfigurationForm({
 
     const activePricing = finalPricing.filter((p) => p.isActive)
     if (activePricing.length === 0) {
-      toast.error("Please activate at least one vehicle category and configure valid prices.")
+      setFormError("Please activate at least one vehicle category and configure valid prices.")
       return
     }
 
+    setFormError(null)
     onSubmit(finalPricing)
   }
 
@@ -189,6 +191,13 @@ export default function PricingConfigurationForm({
           Set pricing for vehicle types you service. Toggle off categories you don't support.
         </p>
       </div>
+
+      {/* Inline Form Error Banner */}
+      {formError && (
+        <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-semibold flex items-center gap-2">
+          <span>{formError}</span>
+        </div>
+      )}
 
       {/* Categories Accordion */}
       <div className="space-y-4">

@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
 import { Sparkles, Plus, Trash2, ArrowRight, Check, Car, Bike, Truck, Wrench, X } from "lucide-react"
-import { toast } from "sonner"
 import FormInput from "@/shared/components/form/FormInput"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { ExtraServiceInput } from "../../types"
@@ -186,6 +185,8 @@ export default function ExtraServicesForm({
     })
   }
 
+  const [formError, setFormError] = useState<string | null>(null)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -200,17 +201,17 @@ export default function ExtraServicesForm({
       const slugKey = s.slug ? s.slug.trim().toLowerCase() : slugify(s.name)
 
       if (!nameKey) {
-        toast.error(`Service #${i + 1} requires a service name`)
+        setFormError(`Service #${i + 1} requires a service name`)
         return
       }
 
       if (seenNames.has(nameKey)) {
-        toast.error(`Duplicate service name "${s.name}" found. Each extra service must have a unique name.`)
+        setFormError(`Duplicate service name "${s.name}" found. Each extra service must have a unique name.`)
         return
       }
 
       if (seenSlugs.has(slugKey)) {
-        toast.error(`Duplicate service slug "${slugKey}" found for "${s.name}". Service names or slugs cannot repeat.`)
+        setFormError(`Duplicate service slug "${slugKey}" found for "${s.name}". Service names or slugs cannot repeat.`)
         return
       }
 
@@ -222,7 +223,7 @@ export default function ExtraServicesForm({
           (!activeClassIds || activeClassIds.has(p.vehicleClassId))
       )
       if (validPricing.length === 0) {
-        toast.error(`Please enter valid prices for service "${s.name}".`)
+        setFormError(`Please enter valid prices for service "${s.name}".`)
         return
       }
 
@@ -242,6 +243,7 @@ export default function ExtraServicesForm({
       ),
     }))
 
+    setFormError(null)
     onSubmit({
       amenities,
       extraServices: processedServices,
@@ -264,6 +266,13 @@ export default function ExtraServicesForm({
           Add details of extra services and amenities supported at your station.
         </p>
       </div>
+
+      {/* Inline Form Error Banner */}
+      {formError && (
+        <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-semibold flex items-center gap-2">
+          <span>{formError}</span>
+        </div>
+      )}
 
       {/* Section 1: Extra Services */}
       <div className="space-y-5">

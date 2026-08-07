@@ -2,9 +2,6 @@ import { useEffect, useCallback, useMemo } from "react"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import {
   Plus,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
   Mail,
   Phone,
   MapPin,
@@ -14,7 +11,6 @@ import {
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
-import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import Pagination from "@/shared/components/ui/Pagination"
 import ScrollableTabs from "@/shared/components/ui/ScrollableTabs"
 import { useStationStore } from "../store/station.store"
@@ -50,7 +46,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const { stations, pagination, isLoading, error, fetchStations } = useStationStore()
+  const { stations, pagination, statusCounts, isLoading, error, fetchStations } = useStationStore()
   const user = useAuthStore((state) => state.user)
 
   // Determine active view mode role (explicit prop > auth user role > route path check)
@@ -238,46 +234,8 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     }
   ]
 
-  // Admin Stats Count HUD Calculation
-  const totalCount = pagination?.total ?? stations.length
-  const pendingCount = stations.filter((s) => s.status === STATION_STATUS.PENDING_REVIEW).length
-  const activeCount = stations.filter((s) => s.status === STATION_STATUS.ACTIVE).length
-  const rejectedCount = stations.filter((s) => s.status === STATION_STATUS.REJECTED).length
-
-  const adminStationStats: StatItem[] = [
-    {
-      id: "pending",
-      label: "Pending Review",
-      value: pendingCount,
-      variant: "amber",
-      icon: AlertTriangle,
-      onClick: () => updateParams({ tab: "pending" }),
-    },
-    {
-      id: "active",
-      label: "Active Stations",
-      value: activeCount,
-      variant: "emerald",
-      icon: CheckCircle2,
-      onClick: () => updateParams({ tab: "active" }),
-    },
-    {
-      id: "rejected",
-      label: "Rejected",
-      value: rejectedCount,
-      variant: "red",
-      icon: XCircle,
-      onClick: () => updateParams({ tab: "rejected" }),
-    },
-    {
-      id: "total",
-      label: "Total Stations",
-      value: totalCount,
-      variant: "blue",
-      icon: Layers,
-      onClick: () => updateParams({ tab: "all" }),
-    },
-  ]
+  // Admin Pagination Metadata
+  const totalCount = statusCounts?.all ?? (pagination?.total ?? stations.length)
 
   const paginationMeta = {
     total: totalCount,
@@ -289,7 +247,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   }
 
   // ==========================================
-  // RENDER: ADMIN VIEW (Data Table + Stats HUD)
+  // RENDER: ADMIN VIEW (Data Table)
   // ==========================================
   if (isAdmin) {
     return (
@@ -308,9 +266,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
             </p>
           </div>
         </div>
-
-        {/* Stats HUD */}
-        <StatsHUD stats={adminStationStats} />
 
         {/* DataTable View */}
         <DataTable<Station>

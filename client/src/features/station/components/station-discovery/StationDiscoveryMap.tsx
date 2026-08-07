@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { Layers, Globe, Moon, Sun, Crosshair, ArrowRight } from "lucide-react"
+import { Layers, Globe, Moon, Sun, Crosshair, ArrowRight, X } from "lucide-react"
 import type { Station } from "../../types"
 
 export type MapStyleMode = "dark" | "satellite" | "streets"
@@ -123,6 +123,11 @@ export default function StationDiscoveryMap({
         </div>
       `
 
+      // Mouseenter (hover) shows detail card modal
+      el.addEventListener("mouseenter", () => {
+        setSelectedStation(station)
+      })
+
       el.addEventListener("click", (e) => {
         e.stopPropagation()
         setSelectedStation(station)
@@ -201,85 +206,85 @@ export default function StationDiscoveryMap({
   }
 
   return (
-    <div className="relative w-full h-[600px] rounded-3xl overflow-hidden border border-border bg-card shadow-2xl flex flex-col md:flex-row">
+    <div className="relative w-full h-[650px] rounded-3xl overflow-hidden border border-border bg-card shadow-2xl">
       {/* Interactive Map Canvas */}
-      <div className="flex-1 relative h-full">
-        <div ref={mapContainerRef} className="w-full h-full" />
+      <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Map Layer Switcher (Top Right) */}
-        <div className="absolute top-4 right-4 z-20">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowStyleMenu((prev) => !prev)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border text-xs font-semibold text-foreground hover:bg-muted transition-all shadow-xl cursor-pointer"
-            >
-              <Layers size={15} className="text-primary" />
-              <span className="capitalize hidden sm:inline">{currentMode} View</span>
-            </button>
-
-            {showStyleMenu && (
-              <div className="absolute right-0 mt-2 w-44 bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden p-1.5 z-30 flex flex-col gap-1">
-                <button
-                  type="button"
-                  onClick={() => handleStyleChange("dark")}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
-                    currentMode === "dark"
-                      ? "bg-primary/10 text-primary border border-primary/30"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <Moon size={14} className="text-primary" />
-                  <span>Dark Vector</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleStyleChange("satellite")}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
-                    currentMode === "satellite"
-                      ? "bg-primary/10 text-primary border border-primary/30"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <Globe size={14} className="text-emerald-400" />
-                  <span>Satellite Imagery</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleStyleChange("streets")}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
-                    currentMode === "streets"
-                      ? "bg-primary/10 text-primary border border-primary/30"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <Sun size={14} className="text-amber-400" />
-                  <span>Streets Light</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recenter Button (Top Left) */}
-        {userLocation && (
+      {/* Map Layer Switcher (Top Right) */}
+      <div className="absolute top-4 right-4 z-20">
+        <div className="relative">
           <button
             type="button"
-            onClick={handleRecenterUser}
-            title="Center map on your location"
-            className="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border text-xs font-semibold text-foreground hover:bg-muted transition-all shadow-xl cursor-pointer"
+            onClick={() => setShowStyleMenu((prev) => !prev)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border text-xs font-semibold text-foreground hover:bg-muted transition-all shadow-xl cursor-pointer"
           >
-            <Crosshair size={16} className="text-primary" />
-            <span className="hidden sm:inline">My Location</span>
+            <Layers size={15} className="text-primary" />
+            <span className="capitalize hidden sm:inline">{currentMode} View</span>
           </button>
-        )}
 
-        {/* Selected Station Floating Preview Card (Bottom Center Overlay) */}
-        {selectedStation && (
-          <div className="absolute bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-96 z-30 bg-card/95 backdrop-blur-xl border border-primary/40 rounded-2xl shadow-2xl p-4 transition-all animate-in fade-in slide-in-from-bottom-3">
-            <div className="flex gap-3 items-center">
+          {showStyleMenu && (
+            <div className="absolute right-0 mt-2 w-44 bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden p-1.5 z-30 flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => handleStyleChange("dark")}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "dark"
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Moon size={14} className="text-primary" />
+                <span>Dark Vector</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleStyleChange("satellite")}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "satellite"
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Globe size={14} className="text-emerald-400" />
+                <span>Satellite Imagery</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleStyleChange("streets")}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "streets"
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Sun size={14} className="text-amber-400" />
+                <span>Streets Light</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recenter Button (Top Left) */}
+      {userLocation && (
+        <button
+          type="button"
+          onClick={handleRecenterUser}
+          title="Center map on your location"
+          className="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card/90 backdrop-blur-md border border-border text-xs font-semibold text-foreground hover:bg-muted transition-all shadow-xl cursor-pointer"
+        >
+          <Crosshair size={16} className="text-primary" />
+          <span className="hidden sm:inline">My Location</span>
+        </button>
+      )}
+
+      {/* Selected Station Floating Hover Preview Card (Bottom Center Overlay) */}
+      {selectedStation && (
+        <div className="absolute bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-96 z-30 bg-card/95 backdrop-blur-xl border border-primary/40 rounded-2xl shadow-2xl p-4 transition-all animate-in fade-in slide-in-from-bottom-3">
+          <div className="flex gap-3 items-start justify-between">
+            <div className="flex gap-3 items-center flex-1 min-w-0">
               <img
                 src={
                   selectedStation.images?.find((img) => img.isPrimary)?.url ||
@@ -312,70 +317,23 @@ export default function StationDiscoveryMap({
             </div>
 
             <button
-              onClick={() => navigate(`/stations/${selectedStation.id}`)}
-              className="w-full mt-3 py-2 px-4 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+              onClick={() => setSelectedStation(null)}
+              className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer ml-2 shrink-0"
+              title="Close preview"
             >
-              <span>Book Wash Station</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <X size={16} />
             </button>
           </div>
-        )}
-      </div>
 
-      {/* Map Station Sidebar List */}
-      <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-border bg-card p-4 overflow-y-auto max-h-[600px] space-y-3 shrink-0">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-            Nearby Stations ({stations.length})
-          </p>
+          <button
+            onClick={() => navigate(`/stations/${selectedStation.id}`)}
+            className="w-full mt-3 py-2.5 px-4 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+          >
+            <span>Book Wash Station</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
-
-        {stations.map((station) => {
-          const isSelected = selectedStation?.id === station.id
-          return (
-            <div
-              key={station.id}
-              onClick={() => {
-                setSelectedStation(station)
-                onStationSelect?.(station.id)
-                const lat = station.location?.latitude
-                const lng = station.location?.longitude
-                if (mapRef.current && lat && lng) {
-                  mapRef.current.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2 })
-                }
-              }}
-              className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-1.5 ${
-                isSelected
-                  ? "border-primary bg-primary/10 shadow-md"
-                  : "border-border hover:border-primary/40 bg-muted/30 hover:bg-muted/60"
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <h4 className="font-bold text-sm text-foreground line-clamp-1">{station.name}</h4>
-                <span className="text-xs font-semibold text-amber-400">
-                  ★ {station.rating?.toFixed(1) || "4.8"}
-                </span>
-              </div>
-
-              <p className="text-xs text-muted-foreground line-clamp-1">
-                {station.address?.street || ""}, {station.address?.city || ""}
-              </p>
-
-              <div className="flex items-center justify-between text-[11px] pt-1">
-                <span className="text-emerald-400 font-semibold">
-                  {station.slotConfig?.bays || 4} Bays
-                </span>
-
-                {station.distanceKm !== undefined ? (
-                  <span className="text-muted-foreground font-medium">{station.distanceKm} km</span>
-                ) : (
-                  <span className="text-primary font-bold">View →</span>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      )}
     </div>
   )
 }

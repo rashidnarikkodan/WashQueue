@@ -176,7 +176,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       if (success) {
         setRejecting(false)
         setRejectionReasonInput("")
-        await fetchStationById(id)
       }
     } finally {
       setIsSubmittingAction(false)
@@ -191,7 +190,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       if (success) {
         setSuspending(false)
         setSuspensionReasonInput("")
-        await fetchStationById(id)
       }
     } finally {
       setIsSubmittingAction(false)
@@ -212,7 +210,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         setIsSubmittingAction(true)
         try {
           await toggleActiveStation(id)
-          await fetchStationById(id)
         } finally {
           setIsSubmittingAction(false)
           setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))
