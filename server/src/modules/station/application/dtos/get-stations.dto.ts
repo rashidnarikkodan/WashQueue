@@ -67,3 +67,13 @@ export interface GetStationsQuery {
   page?: number
   limit?: number
 }
+
+export interface StationStatusCounts {
+  all: number
+  draft: number
+  pending: number
+  active: number
+  inactive: number
+  suspended: number
+  rejected: number
+}

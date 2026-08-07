@@ -10,6 +10,7 @@ import { ExtraServiceModel } from "../models/extra-service.model"
 import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
 import { StationRankingService, HydratedStationItem } from "../../domain/services/station-ranking.service"
 import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
+import { StationStatusCounts } from "../../application/dtos/get-stations.dto"
 
 export class StationMongoRepository
   extends BaseRepository<Station, IStation>
@@ -97,7 +98,7 @@ export class StationMongoRepository
     return docs.map((doc) => this.mapper.toDomain(doc))
   }
 
-  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number }> {
+  async findAll(filter: StationFilter): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }> {
     const page = Math.max(1, Number(filter.page) || 1)
     const limit = Math.max(1, Number(filter.limit) || 10)
 
@@ -304,14 +305,64 @@ export class StationMongoRepository
       return domainObj
     })
 
-    return {
-      stations: resultStations,
-      total,
+    // --- PHASE 7: Status Breakdown Counts Aggregation ---
+    const countMatchFilter = { ...filter }
+    delete countMatchFilter.status
+
+    const countMatchStage = await this.buildMatchStage(countMatchFilter)
+    const countAggregation: PipelineStage[] = []
+    if (hasGeo) {
+      countAggregation.push({
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [filter.longitude!, filter.latitude!],
+          },
+          distanceField: "distance",
+          maxDistance: radiusKm * 1000,
+          spherical: true,
+        },
+      })
     }
+    if (Object.keys(countMatchStage).length > 0) {
+      countAggregation.push({ $match: countMatchStage })
+    }
+    countAggregation.push({
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+      },
+    })
+
+    const statusCountsRaw = await this.model.aggregate(countAggregation).exec()
+    const statusCounts: StationStatusCounts = {
+      all: 0,
+      draft: 0,
+      pending: 0,
+      active: 0,
+      inactive: 0,
+      suspended: 0,
+      rejected: 0,
+    }
+
+    let grandTotal = 0
+    statusCountsRaw.forEach((row: { _id: string; count: number }) => {
+      const st = row._id
+      const c = row.count || 0
+      grandTotal += c
+      if (st === "DRAFT") statusCounts.draft = c
+      else if (st === "PENDING_REVIEW") statusCounts.pending = c
+      else if (st === "ACTIVE") statusCounts.active = c
+      else if (st === "INACTIVE") statusCounts.inactive = c
+      else if (st === "SUSPENDED") statusCounts.suspended = c
+      else if (st === "REJECTED") statusCounts.rejected = c
+    })
+    statusCounts.all = grandTotal
 
     return {
       stations: resultStations,
       total,
+      statusCounts,
     }
   }
 

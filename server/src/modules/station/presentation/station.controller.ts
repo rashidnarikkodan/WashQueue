@@ -209,7 +209,7 @@ export class StationController {
       verifiedOnly: String(query.verifiedOnly) === "true",
     }
 
-    const { stations, total } = await this.getStationsUseCase.execute(parsedQuery)
+    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery)
 
     const page = Math.max(1, parsedQuery.page || 1)
     const limit = Math.max(1, parsedQuery.limit || 10)
@@ -238,6 +238,7 @@ export class StationController {
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1,
         },
+        statusCounts,
       },
       HTTP_STATUS.OK,
       "Stations retrieved successfully"

@@ -8,6 +8,7 @@ import type {
   UpdateStationInput,
   GetStationsQuery,
   GetStationsResponse,
+  StationStatusCounts,
 } from "../types"
 import { getErrorMessage } from "@/shared/utils/error"
 import { stationApi } from "@/shared/apis"
@@ -16,6 +17,7 @@ interface StationStore {
   // State
   stations: Station[]
   pagination: GetStationsResponse["pagination"] | null
+  statusCounts: StationStatusCounts | null
   selectedStation: StationDetail | null
   isLoading: boolean
   isSubmitting: boolean
@@ -41,6 +43,7 @@ interface StationStore {
 export const useStationStore = create<StationStore>((set) => ({
   stations: [],
   pagination: null,
+  statusCounts: null,
   selectedStation: null,
   isLoading: false,
   isSubmitting: false,
@@ -50,7 +53,12 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isLoading: true, error: null, stations: [] })
     try {
       const response = await stationApi.getStations(query)
-      set({ stations: response.stations, pagination: response.pagination, isLoading: false })
+      set({
+        stations: response.stations,
+        pagination: response.pagination,
+        statusCounts: response.statusCounts || null,
+        isLoading: false,
+      })
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to load stations")
       set({ error: msg, isLoading: false })

@@ -174,6 +174,16 @@ export interface GetStationsQuery {
   limit?: number
 }
 
+export interface StationStatusCounts {
+  all: number
+  draft: number
+  pending: number
+  active: number
+  inactive: number
+  suspended: number
+  rejected: number
+}
+
 export interface GetStationsResponse {
   stations: Station[]
   pagination: {
@@ -184,6 +194,7 @@ export interface GetStationsResponse {
     hasNextPage: boolean
     hasPrevPage: boolean
   }
+  statusCounts?: StationStatusCounts
 }
 
 export interface FilterMetadata {

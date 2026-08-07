@@ -14,7 +14,7 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { ManagerPermission } from "@/modules/manager/domain/entities/ManagerAssignment"
 import { IMediaStorage } from "@/core/application/interfaces/media.interface"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
-import { StationImage } from "../../domain/entities/Station"
+import { StationImage, StationStatus } from "../../domain/entities/Station"
 
 const slugify = (text: string): string => {
   return text
@@ -89,6 +89,92 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
 
     try {
       await session.withTransaction(async () => {
+        // If an active station is modified, check if restricted fields were changed requiring admin approval
+        if (station.status === StationStatus.ACTIVE) {
+          const props = station.getProps()
+          let requiresAdminApproval = false
+
+          if (updates.step === 1) {
+            const nameChanged = updates.name !== undefined && updates.name.trim() !== props.name.trim()
+            const phoneChanged =
+              updates.contact?.phone !== undefined &&
+              updates.contact.phone.trim() !== (props.contact?.phone || "").trim()
+            const emailChanged =
+              updates.contact?.email !== undefined &&
+              updates.contact.email.trim() !== (props.contact?.email || "").trim()
+
+            const latChanged =
+              updates.location?.latitude !== undefined &&
+              updates.location.latitude !== props.location?.latitude
+            const lngChanged =
+              updates.location?.longitude !== undefined &&
+              updates.location.longitude !== props.location?.longitude
+            const locationChanged = latChanged || lngChanged
+
+            const streetChanged =
+              updates.address?.street !== undefined &&
+              updates.address.street.trim() !== (props.address?.street || "").trim()
+            const cityChanged =
+              updates.address?.city !== undefined &&
+              updates.address.city.trim() !== (props.address?.city || "").trim()
+            const stateChanged =
+              updates.address?.state !== undefined &&
+              updates.address.state.trim() !== (props.address?.state || "").trim()
+            const countryChanged =
+              updates.address?.country !== undefined &&
+              updates.address.country.trim() !== (props.address?.country || "").trim()
+            const pincodeChanged =
+              updates.address?.pincode !== undefined &&
+              updates.address.pincode.trim() !== (props.address?.pincode || "").trim()
+            const addressChanged =
+              streetChanged || cityChanged || stateChanged || countryChanged || pincodeChanged
+
+            const imagesChanged =
+              updates.images !== undefined ||
+              Boolean(updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0) ||
+              Boolean(updates.newFiles && updates.newFiles.length > 0)
+
+            if (
+              nameChanged ||
+              phoneChanged ||
+              emailChanged ||
+              locationChanged ||
+              addressChanged ||
+              imagesChanged
+            ) {
+              requiresAdminApproval = true
+            }
+          } else if (updates.step === 2) {
+            const baysChanged =
+              updates.slotConfig?.bays !== undefined &&
+              updates.slotConfig.bays !== props.slotConfig?.bays
+            const windowDurationChanged =
+              updates.slotConfig?.windowDurationMins !== undefined &&
+              updates.slotConfig.windowDurationMins !== props.slotConfig?.windowDurationMins
+            const capacityChanged =
+              updates.slotConfig?.capacityPerWindow !== undefined &&
+              updates.slotConfig.capacityPerWindow !== props.slotConfig?.capacityPerWindow
+
+            if (baysChanged || windowDurationChanged || capacityChanged) {
+              requiresAdminApproval = true
+            }
+          } else if (updates.step === 3) {
+            // Price changes always require admin approval
+            if (updates.pricing && updates.pricing.length > 0) {
+              requiresAdminApproval = true
+            }
+          } else if (updates.step === 4) {
+            // Extra services changes always require admin approval
+            if (updates.extraServices && updates.extraServices.length > 0) {
+              requiresAdminApproval = true
+            }
+          }
+
+          if (requiresAdminApproval) {
+            station.updateStatus(StationStatus.PENDING_REVIEW)
+          }
+        }
+
         if (updates.step === 1) {
           // Delete removed images from media storage if specified
           if (updates.deletedImagePublicIds && updates.deletedImagePublicIds.length > 0 && this.mediaStorage) {
