@@ -12,7 +12,7 @@ import { BookingNumberService } from "../../domain/services/BookingNumberService
 import { QRTokenService } from "../../domain/services/QRTokenService"
 import { BookingPricingService } from "../../domain/services/BookingPricingService"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
-import { BookingNotificationService } from "../../infrastructure/services/booking-notification.service"
+import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
@@ -26,7 +26,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     private readonly stationPricingRepository: IStationPricingRepository,
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
-    private readonly notificationService: BookingNotificationService
+    private readonly notificationService: IBookingNotificationService
   ) {}
 
   async execute(

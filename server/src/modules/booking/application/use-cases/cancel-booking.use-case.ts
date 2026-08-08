@@ -4,8 +4,8 @@ import { BookingStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
-import { BookingRedisQueueService } from "../../infrastructure/services/booking-redis-queue.service"
-import { BookingNotificationService } from "../../infrastructure/services/booking-notification.service"
+import { IBookingQueueService } from "../interfaces/booking-queue.interface"
+import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
@@ -15,8 +15,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
-    private readonly redisQueueService: BookingRedisQueueService,
-    private readonly notificationService: BookingNotificationService
+    private readonly redisQueueService: IBookingQueueService,
+    private readonly notificationService: IBookingNotificationService
   ) {}
 
   async execute(userId: string, input: CancelBookingInput): Promise<BookingResponseDTO> {

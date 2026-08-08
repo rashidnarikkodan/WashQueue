@@ -1,16 +1,14 @@
 import logger from "@/configs/logger.config"
 import { Booking } from "../../domain/entities/Booking"
 
-export type NotificationEventType =
-  | "BOOKING_CREATED"
-  | "PAYMENT_SUCCESS"
-  | "CHECKIN_SUCCESS"
-  | "WASH_STARTED"
-  | "WASH_COMPLETED"
-  | "BOOKING_CANCELLED"
-  | "REFUND_COMPLETED"
+import {
+  IBookingNotificationService,
+  NotificationEventType,
+} from "../../application/interfaces/booking-notification.interface"
 
-export class BookingNotificationService {
+export type { NotificationEventType }
+
+export class BookingNotificationService implements IBookingNotificationService {
   /**
    * Dispatches notifications to customer & station manager based on domain events.
    */

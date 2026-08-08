@@ -1,8 +1,9 @@
 import redis from "@/infrastructure/cache/redis.client"
 import logger from "@/configs/logger.config"
 import { Booking } from "../../domain/entities/Booking"
+import { IBookingQueueService } from "../../application/interfaces/booking-queue.interface"
 
-export class BookingRedisQueueService {
+export class BookingRedisQueueService implements IBookingQueueService {
   /**
    * Pushes checked-in booking into the station queue in Redis.
    */

@@ -14,8 +14,7 @@ import {
   IGetBookingUseCase,
   IGetUserBookingsUseCase,
 } from "../application/interfaces/booking-usecases.interface"
-
-import { PDFInvoiceService } from "../infrastructure/services/pdf-invoice.service"
+import { IPDFInvoiceService } from "../application/interfaces/pdf-invoice.interface"
 
 export class BookingController {
   constructor(
@@ -26,7 +25,7 @@ export class BookingController {
     private readonly checkInBookingUseCase: ICheckInBookingUseCase,
     private readonly advanceBookingStatusUseCase: IAdvanceBookingStatusUseCase,
     private readonly cancelBookingUseCase: ICancelBookingUseCase,
-    private readonly pdfInvoiceService: PDFInvoiceService
+    private readonly pdfInvoiceService: IPDFInvoiceService
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {

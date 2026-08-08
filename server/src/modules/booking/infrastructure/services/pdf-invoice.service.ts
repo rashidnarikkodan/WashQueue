@@ -3,8 +3,9 @@ import { Types } from "mongoose"
 import { BookingResponseDTO } from "../../application/dtos/booking-response.dto"
 import { VehicleCategoryModel } from "../../../vehicle-catelog/infrastructure/models/category.model"
 import { VehicleClassModel } from "../../../vehicle-catelog/infrastructure/models/class.model"
+import { IPDFInvoiceService } from "../../application/interfaces/pdf-invoice.interface"
 
-export class PDFInvoiceService {
+export class PDFInvoiceService implements IPDFInvoiceService {
   async generateInvoicePdf(booking: BookingResponseDTO): Promise<Buffer> {
     // Dynamically resolve Vehicle Category & Class names by ID if present
     let categoryName = "Standard"
