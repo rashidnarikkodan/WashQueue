@@ -1,9 +1,31 @@
 import { Booking } from "../../domain/entities/Booking"
-import { BookingResponseDTO } from "../dtos/booking-response.dto"
+import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { BookingResponseDTO, BookingStatusLogDTO } from "../dtos/booking-response.dto"
 
 export class BookingDTOMapper {
-  static toDTO(booking: Booking, rawQrToken?: string): BookingResponseDTO {
+  static toDTO(
+    booking: Booking,
+    rawQrToken?: string,
+    statusLogs?: BookingStatusLog[]
+  ): BookingResponseDTO {
     const props = booking.getProps()
+
+    const mappedHistory: BookingStatusLogDTO[] | undefined = statusLogs
+      ? statusLogs.map((log) => {
+          const lProps = log.getProps()
+          return {
+            id: lProps.id,
+            bookingId: lProps.bookingId,
+            fromStatus: lProps.fromStatus,
+            toStatus: lProps.toStatus,
+            changedBy: lProps.changedBy,
+            reason: lProps.reason,
+            notes: lProps.notes,
+            createdAt: lProps.createdAt instanceof Date ? lProps.createdAt.toISOString() : String(lProps.createdAt),
+          }
+        })
+      : undefined
+
     return {
       id: props.id,
       bookingNumber: props.bookingNumber,
@@ -52,8 +74,10 @@ export class BookingDTOMapper {
       stationDetails: props.stationDetails,
       vehicleDetails: props.vehicleDetails,
       customerDetails: props.customerDetails,
+      statusHistory: mappedHistory,
       createdAt: props.createdAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),
     }
   }
 }
+

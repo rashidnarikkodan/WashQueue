@@ -1,6 +1,8 @@
 import { Types } from "mongoose"
 import { Booking, BookingStatus } from "../../domain/entities/Booking"
 import {
+  FindBookingsFilter,
+  FindBookingsResult,
   FindUserBookingsFilter,
   IBookingRepository,
 } from "../../domain/repositories/booking.repository"
@@ -97,6 +99,132 @@ export class BookingMongoRepository implements IBookingRepository {
       .populate("userId")
       .sort({ "scheduling.windowStart": 1 })
     return docs.map(BookingMapper.toDomain)
+  }
+
+  async findBookings(filter: FindBookingsFilter): Promise<FindBookingsResult> {
+    const query: Record<string, unknown> = {}
+
+    if (filter.userId && Types.ObjectId.isValid(filter.userId)) {
+      query.userId = new Types.ObjectId(filter.userId)
+    }
+
+    if (filter.stationId && Types.ObjectId.isValid(filter.stationId)) {
+      query.stationId = new Types.ObjectId(filter.stationId)
+    } else if (filter.stationIds && filter.stationIds.length > 0) {
+      const validStationIds = filter.stationIds
+        .filter((id) => Types.ObjectId.isValid(id))
+        .map((id) => new Types.ObjectId(id))
+      if (validStationIds.length > 0) {
+        query.stationId = { $in: validStationIds }
+      }
+    }
+
+    if (filter.providerId && Types.ObjectId.isValid(filter.providerId)) {
+      query.providerId = new Types.ObjectId(filter.providerId)
+    }
+
+    if (filter.status) {
+      if (Array.isArray(filter.status)) {
+        query.status = { $in: filter.status }
+      } else {
+        query.status = filter.status
+      }
+    } else if (filter.upcomingOnly) {
+      query.status = {
+        $in: [
+          BookingStatus.PENDING,
+          BookingStatus.CONFIRMED,
+          BookingStatus.CHECKED_IN,
+          BookingStatus.IN_SERVICE,
+        ],
+      }
+    } else if (filter.historyOnly) {
+      query.status = {
+        $in: [
+          BookingStatus.SERVICE_COMPLETED,
+          BookingStatus.AWAITING_HANDOVER,
+          BookingStatus.COMPLETED,
+          BookingStatus.CANCELLED,
+          BookingStatus.NO_SHOW,
+        ],
+      }
+    }
+
+    if (filter.startDate || filter.endDate) {
+      const dateFilter: Record<string, Date> = {}
+      if (filter.startDate) dateFilter.$gte = new Date(filter.startDate)
+      if (filter.endDate) dateFilter.$lte = new Date(filter.endDate)
+      query["scheduling.windowStart"] = dateFilter
+    }
+
+    if (filter.search && filter.search.trim()) {
+      const q = filter.search.trim()
+      const searchRegex = new RegExp(q, "i")
+
+      const orConditions: Array<Record<string, unknown>> = [
+        { bookingNumber: searchRegex },
+        { "walkInCustomer.name": searchRegex },
+        { "walkInCustomer.phone": searchRegex },
+        { "walkInVehicle.registrationNumber": searchRegex },
+      ]
+
+      try {
+        const { User } = await import("@/modules/user/infrastructure/model/user.model")
+        const matchingUsers = await User.find({
+          $or: [{ name: searchRegex }, { email: searchRegex }, { phone: searchRegex }],
+        })
+          .select("_id")
+          .lean()
+        if (matchingUsers.length > 0) {
+          orConditions.push({ userId: { $in: matchingUsers.map((u) => u._id) } })
+        }
+      } catch {
+        // Ignore user lookup error if module fails
+      }
+
+      try {
+        const { VehicleModel } = await import(
+          "@/modules/vehicle/infrastructure/models/vehicle.model"
+        )
+        const matchingVehicles = await VehicleModel.find({
+          $or: [
+            { registrationNumber: searchRegex },
+            { nickname: searchRegex },
+            { brand: searchRegex },
+            { vehicle_model: searchRegex },
+          ],
+        } as Record<string, unknown>)
+          .select("_id")
+          .lean()
+        if (matchingVehicles.length > 0) {
+          orConditions.push({ vehicleId: { $in: matchingVehicles.map((v) => v._id) } })
+        }
+      } catch {
+        // Ignore vehicle lookup error if module fails
+      }
+
+      query.$or = orConditions
+    }
+
+    const page = Math.max(1, filter.page || 1)
+    const limit = Math.max(1, Math.min(100, filter.limit || 10))
+    const skip = (page - 1) * limit
+
+    const [docs, total] = await Promise.all([
+      BookingModel.find(query)
+        .populate("stationId")
+        .populate("vehicleId")
+        .populate("userId")
+        .sort({ "scheduling.windowStart": -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      BookingModel.countDocuments(query),
+    ])
+
+    return {
+      bookings: docs.map(BookingMapper.toDomain),
+      total,
+    }
   }
 
   async save(booking: Booking): Promise<Booking> {

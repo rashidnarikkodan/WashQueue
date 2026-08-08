@@ -1,4 +1,5 @@
-import { BookingResponseDTO } from "../dtos/booking-response.dto"
+import { FindBookingsFilter } from "../../domain/repositories/booking.repository"
+import { BookingListResponseDTO, BookingResponseDTO } from "../dtos/booking-response.dto"
 import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
@@ -17,12 +18,16 @@ export interface IGetBookingUseCase {
   execute(bookingId: string, requestingUserId?: string): Promise<BookingResponseDTO>
 }
 
+export interface GetBookingsFilterInput extends FindBookingsFilter {
+  type?: "upcoming" | "history" | "all"
+}
+
 export interface IGetUserBookingsUseCase {
   execute(
     userId: string,
-    type?: "upcoming" | "history" | "all",
+    filter?: GetBookingsFilterInput,
     role?: string
-  ): Promise<BookingResponseDTO[]>
+  ): Promise<BookingListResponseDTO>
 }
 
 export interface ICheckInBookingUseCase {

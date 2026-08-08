@@ -1,10 +1,10 @@
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { FindBookingsFilter, IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
-import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { IGetUserBookingsUseCase } from "../interfaces/booking-usecases.interface"
-import { Booking } from "../../domain/entities/Booking"
+import { BookingListResponseDTO } from "../dtos/booking-response.dto"
+import { GetBookingsFilterInput, IGetUserBookingsUseCase } from "../interfaces/booking-usecases.interface"
+import { buildPaginationMeta } from "@/common/utils/pagination"
 
 export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
   constructor(
@@ -15,12 +15,36 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
 
   async execute(
     userId: string,
-    type: "upcoming" | "history" | "all" = "all",
+    filterInput?: GetBookingsFilterInput,
     role?: string
-  ): Promise<BookingResponseDTO[]> {
+  ): Promise<BookingListResponseDTO> {
     const normRole = role ? role.toUpperCase() : ""
 
-    // 1. Manager Role: Return bookings for stations assigned to this manager
+    const page = Math.max(1, filterInput?.page || 1)
+    const limit = Math.max(1, Math.min(100, filterInput?.limit || 10))
+    const type = filterInput?.type || "all"
+
+    const upcomingOnly = type === "upcoming" || filterInput?.upcomingOnly
+    const historyOnly = type === "history" || filterInput?.historyOnly
+
+    const queryFilter: FindBookingsFilter = {
+      ...filterInput,
+      page,
+      limit,
+      upcomingOnly,
+      historyOnly,
+    }
+
+    // 1. ADMIN Role: Unrestricted listing across all stations/providers with filters & pagination
+    if (normRole === "ADMIN") {
+      const result = await this.bookingRepository.findBookings(queryFilter)
+      return {
+        bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
+        pagination: buildPaginationMeta({ total: result.total, page, limit }),
+      }
+    }
+
+    // 2. MANAGER Role: Filter bookings for stations assigned to this manager
     if (normRole === "MANAGER") {
       let stationIds: string[] = []
 
@@ -29,94 +53,53 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
         stationIds = assignments.filter((a) => a.isActive).map((a) => a.stationId)
       }
 
-      // Fallback via station repository interface
       if (stationIds.length === 0 && this.stationRepository) {
         const managed = await this.stationRepository.findByManagerId(userId)
         stationIds = managed.map((s) => s.id)
       }
 
-      if (stationIds.length > 0) {
-        let allStationBookings: Booking[] = []
-        for (const stId of stationIds) {
-          const stationBookings = await this.bookingRepository.findByStationId(stId)
-          allStationBookings = allStationBookings.concat(stationBookings)
-        }
+      if (queryFilter.stationId) {
+        stationIds = stationIds.filter((id) => id === queryFilter.stationId)
+      }
 
-        // Apply type filter if upcoming/history specified
-        if (type === "upcoming") {
-          allStationBookings = allStationBookings.filter((b) =>
-            ["PENDING", "CONFIRMED", "CHECKED_IN", "IN_SERVICE", "IN_PROGRESS"].includes(b.status)
-          )
-        } else if (type === "history") {
-          allStationBookings = allStationBookings.filter((b) =>
-            [
-              "SERVICE_COMPLETED",
-              "AWAITING_HANDOVER",
-              "COMPLETED",
-              "CANCELLED",
-              "NO_SHOW",
-            ].includes(b.status)
-          )
-        }
+      queryFilter.stationIds = stationIds
+      const result = await this.bookingRepository.findBookings(queryFilter)
 
-        return allStationBookings.map((b) => BookingDTOMapper.toDTO(b))
+      return {
+        bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
+        pagination: buildPaginationMeta({ total: result.total, page, limit }),
       }
     }
 
-    // 2. Owner Role: Return bookings for all stations owned by this owner
-    if (normRole === "OWNER" && this.stationRepository) {
-      const ownedStations = await this.stationRepository.findByOwnerId(userId)
-      const stationIds = ownedStations.map((s) => s.id)
+    // 3. OWNER Role: Filter bookings for stations owned by this owner
+    if (normRole === "OWNER") {
+      let ownedStationIds: string[] = []
+      if (this.stationRepository) {
+        const ownedStations = await this.stationRepository.findByOwnerId(userId)
+        ownedStationIds = ownedStations.map((s) => s.id)
+      }
 
-      if (stationIds.length > 0) {
-        let allOwnerBookings: Booking[] = []
-        for (const stId of stationIds) {
-          const stationBookings = await this.bookingRepository.findByStationId(stId)
-          allOwnerBookings = allOwnerBookings.concat(stationBookings)
-        }
+      if (queryFilter.stationId) {
+        ownedStationIds = ownedStationIds.filter((id) => id === queryFilter.stationId)
+      }
 
-        // Also include bookings created directly by this user
-        const userFilter = {
-          userId,
-          upcomingOnly: type === "upcoming",
-          historyOnly: type === "history",
-        }
-        const userOwnBookings = await this.bookingRepository.findByUserId(userFilter)
+      queryFilter.stationIds = ownedStationIds
+      const result = await this.bookingRepository.findBookings(queryFilter)
 
-        const combinedMap = new Map<string, Booking>()
-        allOwnerBookings.forEach((b) => combinedMap.set(b.id, b))
-        userOwnBookings.forEach((b) => combinedMap.set(b.id, b))
-
-        let combined = Array.from(combinedMap.values())
-
-        if (type === "upcoming") {
-          combined = combined.filter((b) =>
-            ["PENDING", "CONFIRMED", "CHECKED_IN", "IN_SERVICE", "IN_PROGRESS"].includes(b.status)
-          )
-        } else if (type === "history") {
-          combined = combined.filter((b) =>
-            [
-              "SERVICE_COMPLETED",
-              "AWAITING_HANDOVER",
-              "COMPLETED",
-              "CANCELLED",
-              "NO_SHOW",
-            ].includes(b.status)
-          )
-        }
-
-        return combined.map((b) => BookingDTOMapper.toDTO(b))
+      return {
+        bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
+        pagination: buildPaginationMeta({ total: result.total, page, limit }),
       }
     }
 
-    // 3. Default (Customer / User Role): Return bookings by userId
-    const filter = {
-      userId,
-      upcomingOnly: type === "upcoming",
-      historyOnly: type === "history",
-    }
+    // 4. Default / CUSTOMER Role: Filter bookings created by this customer userId
+    queryFilter.userId = userId
+    const result = await this.bookingRepository.findBookings(queryFilter)
 
-    const bookings = await this.bookingRepository.findByUserId(filter)
-    return bookings.map((b) => BookingDTOMapper.toDTO(b))
+    return {
+      bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
+      pagination: buildPaginationMeta({ total: result.total, page, limit }),
+    }
   }
 }
+

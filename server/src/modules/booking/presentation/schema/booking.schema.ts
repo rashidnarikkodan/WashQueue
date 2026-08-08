@@ -60,3 +60,17 @@ export const advanceStatusSchema = z.object({
 export const cancelBookingSchema = z.object({
   reason: z.string().min(1, "Cancellation reason is required"),
 })
+
+export const getBookingListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(10),
+  type: z.enum(["upcoming", "history", "all"]).optional().default("all"),
+  status: z.string().optional(),
+  stationId: z.string().optional(),
+  providerId: z.string().optional(),
+  q: z.string().optional(),
+  search: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+})
+

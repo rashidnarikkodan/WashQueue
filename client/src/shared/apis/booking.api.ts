@@ -11,6 +11,17 @@ export interface CreateBookingInput {
   paymentType?: "ONLINE_FULL" | "DEPOSIT_PLUS_CASH" | "CASH_WALKIN"
 }
 
+export interface BookingStatusHistoryItem {
+  id: string
+  bookingId: string
+  fromStatus: string | null
+  toStatus: string
+  changedBy: string
+  reason?: string
+  notes?: string
+  createdAt: string
+}
+
 export interface BookingResponse {
   id: string
   bookingNumber: string
@@ -66,8 +77,31 @@ export interface BookingResponse {
   paymentType: string
   depositAmount: number
   cashAmount: number
+  statusHistory?: BookingStatusHistoryItem[]
   createdAt: string
   updatedAt: string
+}
+
+export interface GetUserBookingsParams {
+  type?: "upcoming" | "history" | "all"
+  page?: number
+  limit?: number
+  status?: string
+  stationId?: string
+  providerId?: string
+  q?: string
+}
+
+export interface BookingListApiResponse {
+  bookings: BookingResponse[]
+  pagination?: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
 }
 
 export const bookingApi = {
@@ -90,11 +124,31 @@ export const bookingApi = {
   },
 
   getUserBookings: async (
-    type: "upcoming" | "history" | "all" = "all"
-  ): Promise<BookingResponse[]> => {
+    params: "upcoming" | "history" | "all" | GetUserBookingsParams = "all"
+  ): Promise<BookingListApiResponse> => {
     try {
-      const response = await api.get(API_ROUTES.BOOKINGS.ROOT, { params: { type } })
-      return response.data.data
+      const queryParams = typeof params === "string" ? { type: params } : params
+      const response = await api.get(API_ROUTES.BOOKINGS.ROOT, { params: queryParams })
+      const raw = response.data.data
+
+      if (Array.isArray(raw)) {
+        return {
+          bookings: raw,
+          pagination: {
+            total: raw.length,
+            page: typeof queryParams === "object" ? queryParams.page || 1 : 1,
+            limit: typeof queryParams === "object" ? queryParams.limit || 10 : 10,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        }
+      }
+
+      return {
+        bookings: raw?.bookings || [],
+        pagination: raw?.pagination,
+      }
     } catch (error) {
       throw handleApiError(error, "Failed to fetch user bookings")
     }

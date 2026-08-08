@@ -99,7 +99,7 @@ const createWalkInBookingUseCase = new CreateWalkInBookingUseCase(
   bookingNotificationService
 )
 
-const getBookingUseCase = new GetBookingUseCase(bookingRepository)
+const getBookingUseCase = new GetBookingUseCase(bookingRepository, bookingStatusLogRepository)
 const getUserBookingsUseCase = new GetUserBookingsUseCase(
   bookingRepository,
   managerAssignmentRepository,

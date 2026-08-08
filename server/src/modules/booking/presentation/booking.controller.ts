@@ -16,6 +16,9 @@ import {
 } from "../application/interfaces/booking-usecases.interface"
 import { IPDFInvoiceService } from "../application/interfaces/pdf-invoice.interface"
 
+import { getBookingListQuerySchema } from "./schema/booking.schema"
+import { BookingStatus } from "../domain/entities/Booking"
+
 export class BookingController {
   constructor(
     private readonly createBookingUseCase: ICreateBookingUseCase,
@@ -65,9 +68,18 @@ export class BookingController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const type = (req.query.type as "upcoming" | "history" | "all") || "all"
-    const bookings = await this.getUserBookingsUseCase.execute(userId, type, role)
-    success(res, bookings, HTTP_STATUS.OK, "User bookings retrieved successfully")
+    const query = getBookingListQuerySchema.parse(req.query)
+    const search = query.q || query.search
+    const result = await this.getUserBookingsUseCase.execute(
+      userId,
+      {
+        ...query,
+        search,
+        status: query.status ? (query.status as BookingStatus) : undefined,
+      },
+      role
+    )
+    success(res, result, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }
 
   getUpcoming = async (req: AuthenticatedRequest, res: Response) => {
@@ -77,8 +89,13 @@ export class BookingController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const bookings = await this.getUserBookingsUseCase.execute(userId, "upcoming", role)
-    success(res, bookings, HTTP_STATUS.OK, "Upcoming bookings retrieved successfully")
+    const query = getBookingListQuerySchema.parse(req.query)
+    const result = await this.getUserBookingsUseCase.execute(
+      userId,
+      { ...query, type: "upcoming" },
+      role
+    )
+    success(res, result, HTTP_STATUS.OK, "Upcoming bookings retrieved successfully")
   }
 
   getHistory = async (req: AuthenticatedRequest, res: Response) => {
@@ -88,8 +105,13 @@ export class BookingController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const bookings = await this.getUserBookingsUseCase.execute(userId, "history", role)
-    success(res, bookings, HTTP_STATUS.OK, "Booking history retrieved successfully")
+    const query = getBookingListQuerySchema.parse(req.query)
+    const result = await this.getUserBookingsUseCase.execute(
+      userId,
+      { ...query, type: "history" },
+      role
+    )
+    success(res, result, HTTP_STATUS.OK, "Booking history retrieved successfully")
   }
 
   checkIn = async (req: AuthenticatedRequest, res: Response) => {

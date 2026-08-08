@@ -1,9 +1,21 @@
+import { PaginationMeta } from "@/common/types/pagination"
 import {
   BookingStatus,
   PaymentStatus,
   PaymentType,
   ServiceType,
 } from "../../domain/entities/Booking"
+
+export interface BookingStatusLogDTO {
+  id: string
+  bookingId: string
+  fromStatus: BookingStatus | null
+  toStatus: BookingStatus
+  changedBy: string
+  reason?: string
+  notes?: string
+  createdAt: string
+}
 
 export interface BookingResponseDTO {
   id: string
@@ -86,6 +98,13 @@ export interface BookingResponseDTO {
     email?: string
     phone?: string
   }
+  statusHistory?: BookingStatusLogDTO[]
   createdAt: string
   updatedAt: string
 }
+
+export interface BookingListResponseDTO {
+  bookings: BookingResponseDTO[]
+  pagination: PaginationMeta
+}
+
