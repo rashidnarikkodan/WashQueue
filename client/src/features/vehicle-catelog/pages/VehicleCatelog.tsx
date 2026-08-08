@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { FolderTree, Table, Plus } from "lucide-react"
 import type {
   VehicleCategory,
@@ -18,7 +18,7 @@ import ClassModal from "../components/modals/ClassModal"
 
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { DataTable } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar, type PaginationMeta } from "@/shared/components/data-table"
 import { getClassColumns } from "../table/columns"
 import Loading from "@/shared/components/ui/Loading"
 
@@ -41,6 +41,12 @@ export default function VehicleCatelog() {
     saveCategory,
     saveClass,
   } = useVehicleCatelogStore()
+
+  // Local Table Filtering & Pagination States
+  const [selectedCategoryId, setSelectedCategoryId] = useState("ALL")
+  const [selectedStatus, setSelectedStatus] = useState("ALL")
+  const [page, setPage] = useState(1)
+  const limit = 10
 
   // Local Modal UI States
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -146,18 +152,98 @@ export default function VehicleCatelog() {
     await toggleClassStatus(cls.id, cls.isActive)
   }
 
-  // Filter classes for Table view
-  const filteredClasses = classes.filter((cls) => {
-    const parentCat = categories.find((c) => c.id === cls.categoryId)
-    const categoryName = parentCat ? parentCat.name : ""
+  // Filter classes for Table view based on search, category filter, and status filter
+  const filteredClasses = useMemo(() => {
+    return classes.filter((cls) => {
+      const parentCat = categories.find((c) => c.id === cls.categoryId)
+      const categoryName = parentCat ? parentCat.name : ""
 
-    const query = searchQuery.toLowerCase()
-    return (
-      cls.name.toLowerCase().includes(query) ||
-      cls.slug.toLowerCase().includes(query) ||
-      categoryName.toLowerCase().includes(query)
-    )
-  })
+      // Category filter
+      if (selectedCategoryId !== "ALL" && cls.categoryId !== selectedCategoryId) {
+        return false
+      }
+
+      // Status filter
+      if (selectedStatus === "ACTIVE" && !cls.isActive) return false
+      if (selectedStatus === "INACTIVE" && cls.isActive) return false
+
+      // Search query filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase()
+        return (
+          cls.name.toLowerCase().includes(query) ||
+          cls.slug.toLowerCase().includes(query) ||
+          categoryName.toLowerCase().includes(query)
+        )
+      }
+
+      return true
+    })
+  }, [classes, categories, selectedCategoryId, selectedStatus, searchQuery])
+
+  // Category Tabs
+  const categoryTabs = useMemo(
+    () => [
+      { id: "ALL", label: "All Classes" },
+      ...categories.map((c) => ({ id: c.id, label: c.name })),
+    ],
+    [categories]
+  )
+
+  // Select Filters dropdowns
+  const selectFilters = useMemo(
+    () => [
+      {
+        id: "categoryFilter",
+        label: "Filter by Category",
+        value: selectedCategoryId,
+        onChange: (val: string) => {
+          setSelectedCategoryId(val)
+          setPage(1)
+        },
+        options: [
+          { label: "All Categories", value: "ALL" },
+          ...categories.map((c) => ({ label: c.name, value: c.id })),
+        ],
+      },
+      {
+        id: "statusFilter",
+        label: "Filter by Status",
+        value: selectedStatus,
+        onChange: (val: string) => {
+          setSelectedStatus(val)
+          setPage(1)
+        },
+        options: [
+          { label: "All Status", value: "ALL" },
+          { label: "Active Only", value: "ACTIVE" },
+          { label: "Inactive Only", value: "INACTIVE" },
+        ],
+      },
+    ],
+    [selectedCategoryId, selectedStatus, categories]
+  )
+
+  // Paginate classes locally for Table view
+  const total = filteredClasses.length
+  const totalPages = Math.max(1, Math.ceil(total / limit))
+
+  const paginatedClasses = useMemo(() => {
+    const start = (page - 1) * limit
+    return filteredClasses.slice(start, start + limit)
+  }, [filteredClasses, page, limit])
+
+  const paginationMeta: PaginationMeta = useMemo(
+    () => ({
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    }),
+    [total, page, limit, totalPages]
+  )
 
   // Format statistics numbers (Total categories, Total unique classes)
   const formattedCategoryCount = String(categories.length).padStart(2, "0")
@@ -319,16 +405,30 @@ export default function VehicleCatelog() {
           })}
         </div>
       ) : (
-        /* TABLE VIEW MODE (Reusing Generic DataTable Component) */
+        /* TABLE VIEW MODE (Separated Toolbar & Table Components with Filters & Pagination) */
         <div className="flex flex-col gap-4">
+          <DataTableToolbar
+            tabs={categoryTabs}
+            activeTab={selectedCategoryId}
+            onTabChange={(tabId) => {
+              setSelectedCategoryId(tabId)
+              setPage(1)
+            }}
+            searchQuery={searchQuery}
+            onSearchChange={(q) => {
+              setSearchQuery(q)
+              setPage(1)
+            }}
+            searchPlaceholder="Search classes, codes, or categories..."
+            selectFilters={selectFilters}
+          />
           <DataTable
             columns={columns}
-            data={filteredClasses}
+            data={paginatedClasses}
             rowKey={(row) => row.id}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder="Search classes, codes, or categories..."
-            emptyMessage="No matching sub-classes found. Try adjusting your query."
+            emptyMessage="No matching sub-classes found. Try adjusting your search or filters."
+            pagination={paginationMeta}
+            onPageChange={(p) => setPage(p)}
           />
         </div>
       )}
