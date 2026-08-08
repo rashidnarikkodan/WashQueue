@@ -50,6 +50,8 @@ const RootPathResolver = () => {
   }
 }
 
+import ProtectedRoute from "./ProtectedRoute"
+
 export const mainRoutes = {
   path: APP_ROUTES.HOME,
   element: <MainLayout />,
@@ -68,7 +70,11 @@ export const mainRoutes = {
     },
     {
       path: "bookmarks",
-      element: <BookmarksPage />,
+      element: (
+        <ProtectedRoute>
+          <BookmarksPage />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "favorites",
@@ -76,11 +82,19 @@ export const mainRoutes = {
     },
     {
       path: "vehicles/:id",
-      element: <VehicleDetails />,
+      element: (
+        <ProtectedRoute>
+          <VehicleDetails />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "profile",
-      element: <ProfilePage />,
+      element: (
+        <ProtectedRoute>
+          <ProfilePage />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "bookings/new",
@@ -88,11 +102,19 @@ export const mainRoutes = {
     },
     {
       path: "bookings",
-      element: <BookingManagement role="customer" />,
+      element: (
+        <ProtectedRoute>
+          <BookingManagement role="customer" />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "bookings/:id",
-      element: <BookingDetails />,
+      element: (
+        <ProtectedRoute>
+          <BookingDetails />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "about",

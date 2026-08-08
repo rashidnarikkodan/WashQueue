@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Navigate } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { useProfileStore } from "../store/profile.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -14,7 +14,7 @@ import ChangePasswordModal from "../components/ChangePasswordModal"
 
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const { logout } = useAuthStore()
+  const { isAuthenticated, user, logout } = useAuthStore()
 
   const {
     profile,
@@ -30,12 +30,18 @@ export default function ProfilePage() {
   } = useProfileStore()
 
   useEffect(() => {
-    loadProfile()
-  }, [loadProfile])
+    if (isAuthenticated) {
+      loadProfile()
+    }
+  }, [isAuthenticated, loadProfile])
 
   const handleSignOut = () => {
     logout()
     navigate("/login")
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />
   }
 
   if (isLoading || !profile) {
@@ -86,7 +92,6 @@ export default function ProfilePage() {
 
         {/* Footer Action Section */}
         <ProfileFooterActions
-          onUpdateSettingsClick={() => setEditModalOpen(true)}
           onChangePasswordClick={() => setChangePasswordModalOpen(true)}
           onSignOutClick={handleSignOut}
           isLocal={profile.authProvider === "local"}
