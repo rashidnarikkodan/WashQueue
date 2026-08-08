@@ -58,6 +58,9 @@ export interface DataTableProps<T> {
   data: T[]
   rowKey: (row: T) => string
 
+  // Custom standalone toolbar element
+  toolbar?: React.ReactNode
+
   // Toolbar — search
   searchQuery?: string
   onSearchChange?: (q: string) => void

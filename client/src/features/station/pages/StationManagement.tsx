@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { Plus, Mail, Phone, MapPin, Layers, Star } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
-import { DataTable, type Column, type TabConfig } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar, type Column, type TabConfig } from "@/shared/components/data-table"
 import Pagination from "@/shared/components/ui/Pagination"
 import ScrollableTabs from "@/shared/components/ui/ScrollableTabs"
 import { useStationStore } from "../store/station.store"
@@ -261,11 +261,8 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           </div>
         </div>
 
-        {/* DataTable View */}
-        <DataTable<Station>
-          columns={adminColumns}
-          data={stations}
-          rowKey={(s) => s.id}
+        {/* DataTable Toolbar (Search & Tabs) */}
+        <DataTableToolbar
           searchQuery={searchQuery}
           onSearchChange={(q) => updateParams({ q })}
           searchLabel="Search Stations"
@@ -273,6 +270,13 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           tabs={ADMIN_TABS}
           activeTab={activeTab}
           onTabChange={(tab) => updateParams({ tab })}
+        />
+
+        {/* DataTable View */}
+        <DataTable<Station>
+          columns={adminColumns}
+          data={stations}
+          rowKey={(s) => s.id}
           isLoading={isLoading}
           loadingText="Fetching station list..."
           errorMsg={error}

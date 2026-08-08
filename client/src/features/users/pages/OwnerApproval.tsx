@@ -8,7 +8,7 @@ import { usersApi } from "@/shared/apis/users.api"
 import type { User } from "../types"
 import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 import OnboardingDetailsSummary from "../components/ui/OnboardingDetailsSummary"
-import { DataTable } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { getOwnerColumns } from "../table/columns"
 import { ownerApprovalTabs } from "../table/tabs"
 
@@ -169,12 +169,8 @@ const OwnerApproval = () => {
         isOwnerApproval={true}
       />
 
-      {/* DataTable */}
-      <DataTable<User>
-        columns={columns}
-        data={owners}
-        rowKey={(u) => u.id}
-        // Toolbar
+      {/* Toolbar */}
+      <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchLabel="Search Owners"
@@ -182,7 +178,13 @@ const OwnerApproval = () => {
         tabs={ownerApprovalTabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        // State
+      />
+
+      {/* DataTable */}
+      <DataTable<User>
+        columns={columns}
+        data={owners}
+        rowKey={(u) => u.id}
         isLoading={isLoading}
         loadingText="Fetching owner applications..."
         errorMsg={errorMsg}

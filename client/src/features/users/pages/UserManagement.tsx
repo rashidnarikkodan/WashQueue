@@ -8,7 +8,7 @@ import { FILTER_STATUS } from "@/shared/constants/status.const"
 import type { PaginationMeta } from "@/shared/types"
 import { getErrorMessage } from "@/shared/utils/error"
 import type { User } from "../types"
-import { DataTable } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { getUserColumns } from "../table/columns"
 import { userTabs } from "../table/tabs"
 import { buildUserFilters } from "../table/filters"
@@ -74,7 +74,6 @@ const UserManagement = () => {
   }, [currentPage, searchQuery, roleFilter, statusFilter, highCancellation, fraudFlag])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers()
   }, [fetchUsers])
 
@@ -151,8 +150,6 @@ const UserManagement = () => {
   // ─── Table configuration (built each render — cheap) ───────────────────────
   const columns = getUserColumns((user) => setPendingToggleUser(user))
   const { selectFilters, toggleFilters } = buildUserFilters({
-    roleFilter,
-    setRoleFilter,
     statusFilter,
     setStatusFilter,
     highCancellation,
@@ -195,11 +192,8 @@ const UserManagement = () => {
         ownersCount={stats.owners}
       />
 
-      {/* DataTable :owns toolbar, table, pagination */}
-      <DataTable<User>
-        columns={columns}
-        data={users}
-        rowKey={(u) => u.id}
+      {/* User Directory Toolbar (Search & Filters) */}
+      <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchLabel="Search Users"
@@ -209,6 +203,13 @@ const UserManagement = () => {
         onTabChange={(tab) => setRoleFilter(tab)}
         selectFilters={selectFilters}
         toggleFilters={toggleFilters}
+      />
+
+      {/* User Directory DataTable */}
+      <DataTable<User>
+        columns={columns}
+        data={users}
+        rowKey={(u) => u.id}
         isLoading={isLoading}
         loadingText="Fetching user directory..."
         errorMsg={errorMsg}

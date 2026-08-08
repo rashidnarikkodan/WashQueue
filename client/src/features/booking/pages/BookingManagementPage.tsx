@@ -1,8 +1,8 @@
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { RefreshCw, Building2, XCircle } from "lucide-react"
+import { RefreshCw, Building2 } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import { DataTable } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import type { Booking } from "../types/booking.types"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
@@ -26,25 +26,20 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     selectedStationId,
     ownerStations,
     page,
+    pagination,
     bookings,
     filteredBookings,
     isLoading,
     error,
     managedStation,
     isFetchingManagerStation,
-    selectedBookingForCancel,
-    setSelectedBookingForCancel,
-    cancellationReason,
-    setCancellationReason,
-    isSubmittingCancel,
     updateParams,
-    handleConfirmCancel,
     handleRefresh,
-  } = useBookingList({ isManager, isOwner })
+  } = useBookingList({ isManager, isOwner, isAdmin })
 
   // Operational HUD Stats
   const stats: StatItem[] = useMemo(() => {
-    const totalCount = bookings.length
+    const totalCount = pagination?.total ?? bookings.length
     const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length
     const inProgressCount = bookings.filter(
       (b) => b.status === "CHECKED_IN" || b.status === "IN_SERVICE" || b.status === "IN_PROGRESS"
@@ -138,7 +133,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         color: "indigo",
       },
     ]
-  }, [bookings, isManager, isOwner, managedStation])
+  }, [bookings, pagination?.total, isManager, isOwner, managedStation])
 
   // Columns definition
   const columns = useMemo(
@@ -151,6 +146,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   )
 
   const paginationMeta = useMemo(() => {
+    if (pagination) return pagination
     const total = filteredBookings.length
     const limit = 10
     const totalPages = Math.max(1, Math.ceil(total / limit))
@@ -162,7 +158,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
     }
-  }, [filteredBookings.length, page])
+  }, [pagination, filteredBookings.length, page])
 
   const backPath = isAdmin
     ? "/admin/dashboard"
@@ -196,9 +192,9 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
           </p>
         </div>
 
-        {/* Manager Assigned Station Badge or Info */}
+        {/* Manager/Admin/Owner Station Filter Badge */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          {isOwner && ownerStations.length > 0 && (
+          { isOwner && ownerStations.length > 0 && (
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
               <Building2 size={15} className="text-primary shrink-0" />
               <select
@@ -260,11 +256,8 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
       {/* Operational Stats HUD */}
       <StatsHUD stats={stats} />
 
-      {/* Management DataTable */}
-      <DataTable<Booking>
-        data={filteredBookings}
-        columns={columns}
-        rowKey={(r) => r.id}
+      {/* Management Toolbar (Search & Filters) */}
+      <DataTableToolbar
         tabs={MANAGEMENT_BOOKING_TABS}
         activeTab={activeTab}
         onTabChange={(tabId) => updateParams({ tab: tabId, page: 1 })}
@@ -272,7 +265,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         onSearchChange={(q) => updateParams({ q, page: 1 })}
         searchPlaceholder="Search booking ID, customer name, vehicle plate..."
         selectFilters={
-          isOwner && ownerStations.length > 0
+          ( isOwner) && ownerStations.length > 0
             ? [
                 {
                   id: "stationFilter",
@@ -287,6 +280,13 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
               ]
             : undefined
         }
+      />
+
+      {/* Management DataTable */}
+      <DataTable<Booking>
+        data={filteredBookings}
+        columns={columns}
+        rowKey={(r) => r.id}
         isLoading={isLoading}
         emptyMessage="No bookings found. There are no reservations matching your current search or status filter."
         pagination={paginationMeta}
@@ -294,7 +294,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
       />
 
       {/* Operational Cancel Modal */}
-      {selectedBookingForCancel && (
+      {/* {selectedBookingForCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl text-left">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -352,7 +352,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

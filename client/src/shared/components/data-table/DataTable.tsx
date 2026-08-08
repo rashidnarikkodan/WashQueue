@@ -9,7 +9,8 @@ function DataTable<T>({
   columns,
   data,
   rowKey,
-  // Toolbar
+  toolbar,
+  // Toolbar props for backwards compatibility
   searchQuery,
   onSearchChange,
   searchPlaceholder,
@@ -33,24 +34,26 @@ function DataTable<T>({
     (selectFilters && selectFilters.length > 0) || (toggleFilters && toggleFilters.length > 0)
   const searchColSpan = hasFilters ? "md:col-span-2" : "md:col-span-6"
 
-  const hasToolbar = onSearchChange || (tabs && tabs.length > 0) || hasFilters
+  const hasBuiltInToolbar = onSearchChange || (tabs && tabs.length > 0) || hasFilters
 
   return (
     <div className="space-y-4">
-      {hasToolbar && (
-        <Toolbar
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          searchPlaceholder={searchPlaceholder}
-          searchLabel={searchLabel}
-          searchColSpan={searchColSpan}
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={onTabChange}
-          selectFilters={selectFilters}
-          toggleFilters={toggleFilters}
-        />
-      )}
+      {toolbar
+        ? toolbar
+        : hasBuiltInToolbar && (
+            <Toolbar
+              searchQuery={searchQuery}
+              onSearchChange={onSearchChange}
+              searchPlaceholder={searchPlaceholder}
+              searchLabel={searchLabel}
+              searchColSpan={searchColSpan}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={onTabChange}
+              selectFilters={selectFilters}
+              toggleFilters={toggleFilters}
+            />
+          )}
 
       {isLoading ? (
         <Loading size="lg" text={loadingText} className="py-20 gap-3" />

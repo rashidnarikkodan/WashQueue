@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { RefreshCw, QrCode, XCircle } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import { DataTable } from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import type { Booking } from "../types/booking.types"
 import { CUSTOMER_BOOKING_TABS } from "../config/booking-tabs.config"
@@ -126,17 +126,21 @@ export default function MyBookingsPage() {
       {/* Stats HUD Bar */}
       <StatsHUD stats={stats} />
 
-      {/* Bookings DataTable */}
-      <DataTable<Booking>
-        data={filteredBookings}
-        columns={columns}
-        rowKey={(r) => r.id}
+      {/* Bookings Toolbar (Tabs & Search) */}
+      <DataTableToolbar
         tabs={CUSTOMER_BOOKING_TABS}
         activeTab={activeTab}
         onTabChange={(tabId) => updateParams({ tab: tabId, page: 1 })}
         searchQuery={searchQuery}
         onSearchChange={(q) => updateParams({ q, page: 1 })}
         searchPlaceholder="Search booking ID, vehicle number, service..."
+      />
+
+      {/* Bookings DataTable */}
+      <DataTable<Booking>
+        data={filteredBookings}
+        columns={columns}
+        rowKey={(r) => r.id}
         isLoading={isLoading}
         emptyMessage="No bookings found. You don't have any bookings matching your current filter criteria."
         pagination={paginationMeta}

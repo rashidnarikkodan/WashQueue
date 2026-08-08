@@ -1,10 +1,7 @@
 import type { SelectFilter, ToggleFilter } from "@/shared/components/data-table"
-import { ROLE } from "@/shared/constants/role.const"
 import { FILTER_STATUS } from "@/shared/constants/status.const"
 
 interface BuildUserFiltersOptions {
-  roleFilter: string
-  setRoleFilter: (role: string) => void
   statusFilter: string
   setStatusFilter: (status: string) => void
   highCancellation: boolean
@@ -14,8 +11,6 @@ interface BuildUserFiltersOptions {
 }
 
 export function buildUserFilters({
-  roleFilter,
-  setRoleFilter,
   statusFilter,
   setStatusFilter,
   highCancellation,
@@ -27,19 +22,6 @@ export function buildUserFilters({
   toggleFilters: ToggleFilter[]
 } {
   const selectFilters: SelectFilter[] = [
-    {
-      id: "role",
-      label: "Sort By",
-      value: roleFilter,
-      onChange: setRoleFilter,
-      options: [
-        { label: "All Roles", value: "all" },
-        { label: "Admin", value: ROLE.ADMIN },
-        { label: "Manager", value: ROLE.MANAGER },
-        { label: "Owner", value: ROLE.OWNER },
-        { label: "Customer", value: ROLE.CUSTOMER },
-      ],
-    },
     {
       id: "status",
       label: "Status",
