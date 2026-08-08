@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
 import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
@@ -67,6 +68,15 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   const [suspending, setSuspending] = useState(false)
   const [suspensionReasonInput, setSuspensionReasonInput] = useState("")
   const [isSubmittingAction, setIsSubmittingAction] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  const handleBookNow = () => {
+    if (!user) {
+      setIsAuthModalOpen(true)
+      return
+    }
+    navigate(`/bookings/new?stationId=${id}`)
+  }
 
   // Confirmation Modal State
   const [confirmModalConfig, setConfirmModalConfig] = useState<{
@@ -375,6 +385,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             onSuspend={() => setSuspending(true)}
             onToggleActive={handleToggleActive}
             onDelete={handleDeleteDraft}
+            onBookNow={handleBookNow}
             onOpenAssignManager={() => {
               const el = document.getElementById("station-manager-section")
               if (el) el.scrollIntoView({ behavior: "smooth" })
@@ -481,6 +492,15 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           </div>
         </div>
       )}
+
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Sign in to Book a Wash"
+        message="You must be logged in to book a vehicle wash appointment and select live time slots."
+        actionName="book a wash"
+      />
 
       {/* Confirmation Modal */}
       <ConfirmationModal

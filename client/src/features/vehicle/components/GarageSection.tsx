@@ -2,24 +2,38 @@ import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { useVehicleStore } from "../store/vehicle.store"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import AddVehicleModal from "./AddVehicleModal"
 import VehicleCard from "./VehicleCard"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
 import type { Vehicle } from "../types"
 
 export default function GarageSection() {
   const { vehicles, isActionLoading, loadVehicles, addVehicle, deleteVehicle } = useVehicleStore()
   const { categories, classes, loadData } = useVehicleCatelogStore()
+  const { isAuthenticated, user } = useAuthStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
 
   useEffect(() => {
-    loadVehicles()
+    if (isAuthenticated) {
+      loadVehicles()
+    }
     if (categories.length === 0 || classes.length === 0) {
       loadData()
     }
-  }, [loadVehicles, categories.length, classes.length, loadData])
+  }, [isAuthenticated, loadVehicles, categories.length, classes.length, loadData])
+
+  const handleAddVehicleClick = () => {
+    if (!isAuthenticated || !user) {
+      setIsAuthModalOpen(true)
+      return
+    }
+    setIsModalOpen(true)
+  }
 
   const handleDeleteConfirm = async () => {
     if (!vehicleToDelete) return
@@ -65,7 +79,7 @@ export default function GarageSection() {
 
         {/* Add Card placeholder matching original layout */}
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleAddVehicleClick}
           className="border-2 border-dashed border-border hover:border-primary/40 rounded-3xl p-6 flex flex-col justify-center items-center text-center gap-4 transition-all duration-300 min-h-120 w-full cursor-pointer bg-transparent"
         >
           <div className="w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center border border-border text-muted-foreground">
@@ -89,6 +103,14 @@ export default function GarageSection() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={addVehicle}
         isSubmitting={isActionLoading}
+      />
+
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Sign in to Register Vehicle"
+        message="You must be logged in to add vehicles to your digital garage for customized booking slots and wait alerts."
+        actionName="add a vehicle"
       />
 
       <ConfirmationModal

@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import {
   Clock,
   XCircle,
@@ -40,15 +41,53 @@ export default function ProviderBookingDetailsView({
     booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "N/A"
   const serviceName = booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
 
-  // Execution Timeline Steps
-  const timelineSteps = [
-    { label: "Confirmed", time: "09:15 AM", done: true },
-    { label: "Checked-In", time: "10:02 AM", done: true },
-    { label: "Pre-Inspection", time: "10:10 AM", done: true },
-    { label: "Washing", time: "In Progress", active: true },
-    { label: "Ready", time: "Pending", done: false },
-    { label: "Completed", time: "Pending", done: false },
-  ]
+  // Execution Timeline Steps derived from real status history logs
+  const timelineSteps = useMemo(() => {
+    const historyMap = new Map<string, string>()
+    if (booking.statusHistory) {
+      booking.statusHistory.forEach((log) => {
+        const timeStr = new Date(log.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        historyMap.set(log.toStatus, timeStr)
+      })
+    }
+
+    const stages = [
+      { key: "CONFIRMED", label: "Confirmed" },
+      { key: "CHECKED_IN", label: "Checked-In" },
+      { key: "IN_SERVICE", label: "Washing" },
+      { key: "SERVICE_COMPLETED", label: "Ready" },
+      { key: "COMPLETED", label: "Completed" },
+    ]
+
+    const currentStatus = booking.status
+    const order = [
+      "PENDING",
+      "CONFIRMED",
+      "CHECKED_IN",
+      "IN_SERVICE",
+      "SERVICE_COMPLETED",
+      "AWAITING_HANDOVER",
+      "COMPLETED",
+    ]
+    const currentIdx = order.indexOf(currentStatus)
+
+    return stages.map((stg) => {
+      const recordedTime = historyMap.get(stg.key)
+      const stageIdx = order.indexOf(stg.key)
+      const active = currentStatus === stg.key
+      const done = recordedTime ? true : currentIdx >= stageIdx && currentIdx !== -1
+
+      return {
+        label: stg.label,
+        time: recordedTime || (active ? "In Progress" : done ? "Done" : "Pending"),
+        done,
+        active,
+      }
+    })
+  }, [booking.statusHistory, booking.status])
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">

@@ -15,6 +15,7 @@ interface StationSidebarCardProps {
   onToggleActive?: () => void
   onDelete?: () => void
   onOpenAssignManager?: () => void
+  onBookNow?: () => void
   isSubmittingAction?: boolean
 }
 
@@ -28,6 +29,7 @@ export function StationSidebarCard({
   onToggleActive,
   onDelete,
   onOpenAssignManager,
+  onBookNow,
   isSubmittingAction = false,
 }: StationSidebarCardProps) {
   const navigate = useNavigate()
@@ -94,7 +96,13 @@ export function StationSidebarCard({
           {/* USER / CUSTOMER ROLE */}
           {role === ROLE.CUSTOMER && (
             <button
-              onClick={() => navigate(`/bookings/new?stationId=${station.id}`)}
+              onClick={() => {
+                if (onBookNow) {
+                  onBookNow()
+                } else {
+                  navigate(`/bookings/new?stationId=${station.id}`)
+                }
+              }}
               className="w-full py-4 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-base uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2"
             >
               <Zap size={18} />

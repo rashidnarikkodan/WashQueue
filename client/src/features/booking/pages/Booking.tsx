@@ -8,6 +8,8 @@ import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
+import { useAuthStore } from "@/features/auth/store/auth.store"
+import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
 
 import VehicleSelectionStep from "../components/VehicleSelectionStep"
 import ServiceSelectionStep, {
@@ -23,8 +25,27 @@ export default function Booking() {
   const navigate = useNavigate()
   const stationId = urlQuery.get("stationId")
 
+  const { isAuthenticated, user } = useAuthStore()
   const { fetchStationById, selectedStation } = useStationStore()
   const { categories, classes, loadData: loadCatalogData } = useVehicleCatelogStore()
+
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authModalConfig, setAuthModalConfig] = useState<{
+    title?: string
+    message?: string
+    actionName?: string
+  }>({
+    title: "Sign in to Book a Wash",
+    message: "You must be logged in to reserve wash slots and select your vehicles.",
+    actionName: "book a wash",
+  })
+
+  // Prompt unauthenticated users upon landing on Booking page
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      setIsAuthModalOpen(true)
+    }
+  }, [isAuthenticated, user])
 
   // User Vehicles State
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -352,6 +373,15 @@ export default function Booking() {
     razorpay_signature: string
     booking?: BookingResponse
   }) => {
+    if (!isAuthenticated || !user) {
+      setAuthModalConfig({
+        title: "Sign in to Book a Wash",
+        message: "You must be logged in to complete booking reservations.",
+        actionName: "book a wash",
+      })
+      setIsAuthModalOpen(true)
+      return
+    }
     if (!canSubmit || !stationId || !selectedSlotId || !selectedVehicleId) return
     setIsSubmittingBooking(true)
     try {
@@ -409,7 +439,18 @@ export default function Booking() {
             vehicles={vehicles}
             selectedVehicleId={selectedVehicleId}
             onSelectVehicle={(id) => setSelectedVehicleId(id)}
-            onAddVehicle={() => setIsAddVehicleModalOpen(true)}
+            onAddVehicle={() => {
+              if (!isAuthenticated || !user) {
+                setAuthModalConfig({
+                  title: "Sign in to Register Vehicle",
+                  message: "You must be logged in to add vehicles to your digital garage for booking.",
+                  actionName: "add a vehicle",
+                })
+                setIsAuthModalOpen(true)
+                return
+              }
+              setIsAddVehicleModalOpen(true)
+            }}
             isLoading={isStep1Loading}
             categories={categories}
             classes={classes}
@@ -504,6 +545,14 @@ export default function Booking() {
         onRetryPayment={() => {
           setResultModalState({ isOpen: false, type: "error" })
         }}
+      />
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title={authModalConfig.title}
+        message={authModalConfig.message}
+        actionName={authModalConfig.actionName}
       />
     </div>
   )

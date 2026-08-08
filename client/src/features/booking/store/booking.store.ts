@@ -7,9 +7,27 @@ import type { Booking, BookingStatus, PaymentStatus } from "../types/booking.typ
 
 type ManagedStationItem = Awaited<ReturnType<typeof managerApi.getManagedStations>>[number]
 
+export interface LoadBookingsParams {
+  activeTab?: string
+  stationId?: string
+  q?: string
+  page?: number
+  limit?: number
+  userName?: string
+  userPhone?: string
+}
+
 interface BookingStore {
   // State
   bookings: Booking[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
   isLoading: boolean
   isActionLoading: boolean
   error: string | null
@@ -23,7 +41,11 @@ interface BookingStore {
   isSubmittingCancel: boolean
 
   // Actions
-  loadBookings: (activeTab?: string, userName?: string, userPhone?: string) => Promise<void>
+  loadBookings: (
+    params?: string | LoadBookingsParams,
+    userName?: string,
+    userPhone?: string
+  ) => Promise<void>
   loadManagerStation: () => Promise<void>
   cancelBooking: (id: string, reason?: string) => Promise<boolean>
   setSelectedBookingForQr: (booking: Booking | null) => void
@@ -34,6 +56,14 @@ interface BookingStore {
 
 export const useBookingStore = create<BookingStore>((set) => ({
   bookings: [],
+  pagination: {
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  },
   isLoading: false,
   isActionLoading: false,
   error: null,
@@ -44,19 +74,52 @@ export const useBookingStore = create<BookingStore>((set) => ({
   cancellationReason: "",
   isSubmittingCancel: false,
 
-  loadBookings: async (activeTab = "ALL", userName, userPhone) => {
+  loadBookings: async (params = "ALL", userNameArg, userPhoneArg) => {
     set({ isLoading: true, error: null })
     try {
-      const type =
-        activeTab === "CONFIRMED"
-          ? "upcoming"
-          : activeTab === "COMPLETED" || activeTab === "CANCELLED"
-            ? "history"
-            : "all"
+      const opts: LoadBookingsParams =
+        typeof params === "string"
+          ? { activeTab: params, userName: userNameArg, userPhone: userPhoneArg }
+          : params
 
-      const res = await bookingApi.getUserBookings(type)
+      const activeTab = opts.activeTab || "ALL"
+      const page = opts.page || 1
+      const limit = opts.limit || 10
+      const q = opts.q
+      const stationId = opts.stationId
+      const userName = opts.userName || userNameArg
+      const userPhone = opts.userPhone || userPhoneArg
 
-      const mapped: Booking[] = res.map((b) => {
+      const apiParams: Record<string, unknown> = {
+        page,
+        limit,
+      }
+
+      if (q && q.trim()) {
+        apiParams.q = q.trim()
+      }
+
+      if (stationId && stationId !== "ALL") {
+        apiParams.stationId = stationId
+      }
+
+      if (activeTab && activeTab !== "ALL") {
+        if (activeTab === "CONFIRMED") {
+          apiParams.status = "CONFIRMED"
+        } else if (activeTab === "COMPLETED") {
+          apiParams.status = "COMPLETED"
+        } else if (activeTab === "CANCELLED") {
+          apiParams.status = "CANCELLED"
+        } else if (activeTab === "NO_SHOW") {
+          apiParams.status = "NO_SHOW"
+        } else if (activeTab === "IN_PROGRESS") {
+          apiParams.type = "upcoming"
+        }
+      }
+
+      const res = await bookingApi.getUserBookings(apiParams)
+
+      const mapped: Booking[] = (res.bookings || []).map((b) => {
         const startDate = new Date(b.scheduling.windowStart)
         const endDate = new Date(b.scheduling.windowEnd)
         const timeFormat = (d: Date) =>
@@ -98,7 +161,16 @@ export const useBookingStore = create<BookingStore>((set) => ({
         }
       })
 
-      set({ bookings: mapped, isLoading: false })
+      const pagination = res.pagination || {
+        total: mapped.length,
+        page,
+        limit,
+        totalPages: Math.max(1, Math.ceil(mapped.length / limit)),
+        hasNextPage: page < Math.max(1, Math.ceil(mapped.length / limit)),
+        hasPrevPage: page > 1,
+      }
+
+      set({ bookings: mapped, pagination, isLoading: false })
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to load bookings")
       set({ error: msg, isLoading: false })

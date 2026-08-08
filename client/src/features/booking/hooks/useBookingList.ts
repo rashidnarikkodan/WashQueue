@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { useBookingStore } from "../store/booking.store"
@@ -7,15 +7,23 @@ import type { BookingStatus } from "../types/booking.types"
 export interface UseBookingListOptions {
   isManager?: boolean
   isOwner?: boolean
+  isAdmin?: boolean
 }
 
-export function useBookingList({ isManager = false, isOwner = false }: UseBookingListOptions = {}) {
+export function useBookingList({
+  isManager = false,
+  isOwner = false,
+  isAdmin = false,
+}: UseBookingListOptions = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
+
+  const [filterStations, setFilterStations] = useState<Array<{ id: string; name: string }>>([])
 
   // Zustand Store
   const {
     bookings,
+    pagination,
     isLoading,
     error,
     managedStation,
@@ -37,11 +45,33 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
   const activeTab = (searchParams.get("tab") as BookingStatus) || "ALL"
   const selectedStationId = searchParams.get("stationId") || "ALL"
   const page = parseInt(searchParams.get("page") || "1", 10)
+  const limit = 10
   const refetchParam = searchParams.get("refetch")
 
-  // Derive unique stations ONLY for owner station filtering
+  // Fetch station list for station filter dropdown when Admin or Owner
+  useEffect(() => {
+    if (isAdmin || isOwner) {
+      import("@/shared/apis/station.api")
+        .then(({ stationApi }) => stationApi.getStations({ limit: 100 }))
+        .then((res) => {
+          if (res && res.stations) {
+            const list = res.stations.map((st) => ({
+              id: st.id,
+              name: st.name || "Wash Station",
+            }))
+            setFilterStations(list)
+          }
+        })
+        .catch(() => {
+          // Ignore error fallback
+        })
+    }
+  }, [isAdmin, isOwner])
+
+  // Derive unique stations fallback if filterStations empty
   const ownerStations = useMemo(() => {
-    if (!isOwner) return []
+    if (filterStations.length > 0) return filterStations
+
     const map = new Map<string, string>()
     bookings.forEach((b) => {
       if (b.stationId && b.stationName) {
@@ -49,7 +79,7 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
       }
     })
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
-  }, [bookings, isOwner])
+  }, [filterStations, bookings])
 
   // Helper to update query parameters
   const updateParams = useCallback(
@@ -69,10 +99,27 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
     [setSearchParams]
   )
 
-  // Fetch bookings data on tab/user/refetch change
+  // Fetch bookings data on URL params change
   useEffect(() => {
-    loadBookings(activeTab, user?.name, user?.phone)
-  }, [loadBookings, activeTab, user?.name, user?.phone, refetchParam])
+    loadBookings({
+      activeTab,
+      stationId: selectedStationId,
+      q: searchQuery,
+      page,
+      limit,
+      userName: user?.name,
+      userPhone: user?.phone,
+    })
+  }, [
+    loadBookings,
+    activeTab,
+    selectedStationId,
+    searchQuery,
+    page,
+    user?.name,
+    user?.phone,
+    refetchParam,
+  ])
 
   // Fetch manager station if manager role
   useEffect(() => {
@@ -81,58 +128,22 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
     }
   }, [isManager, loadManagerStation])
 
-  // Filtered bookings calculation
-  const filteredBookings = useMemo(() => {
-    return bookings.filter((b) => {
-      // Manager view filter: ONLY show bookings for the station assigned to this manager
-      if (isManager && managedStation) {
-        if (managedStation.stationId && b.stationId !== managedStation.stationId) {
-          return false
-        }
-      }
-
-      // Station filter ONLY for owner view
-      if (isOwner && selectedStationId && selectedStationId !== "ALL") {
-        if (b.stationId !== selectedStationId) {
-          return false
-        }
-      }
-
-      if (activeTab !== "ALL") {
-        if (activeTab === "IN_PROGRESS") {
-          if (
-            b.status !== "IN_PROGRESS" &&
-            b.status !== "IN_SERVICE" &&
-            b.status !== "CHECKED_IN"
-          ) {
-            return false
-          }
-        } else if (b.status !== activeTab) {
-          return false
-        }
-      }
-
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase()
-        return (
-          b.bookingNumber.toLowerCase().includes(q) ||
-          b.customerName.toLowerCase().includes(q) ||
-          b.stationName.toLowerCase().includes(q) ||
-          b.serviceName.toLowerCase().includes(q) ||
-          b.vehicleNumber.toLowerCase().includes(q)
-        )
-      }
-
-      return true
-    })
-  }, [bookings, isManager, isOwner, managedStation, selectedStationId, activeTab, searchQuery])
+  const filteredBookings = bookings
 
   // Handle Cancel Submit
   const handleConfirmCancel = async () => {
     if (!selectedBookingForCancel) return
     const success = await cancelBooking(selectedBookingForCancel.id, cancellationReason)
     if (success) {
-      loadBookings(activeTab, user?.name, user?.phone)
+      loadBookings({
+        activeTab,
+        stationId: selectedStationId,
+        q: searchQuery,
+        page,
+        limit,
+        userName: user?.name,
+        userPhone: user?.phone,
+      })
     }
   }
 
@@ -146,6 +157,7 @@ export function useBookingList({ isManager = false, isOwner = false }: UseBookin
     selectedStationId,
     ownerStations,
     page,
+    pagination,
     bookings,
     filteredBookings,
     isLoading,
