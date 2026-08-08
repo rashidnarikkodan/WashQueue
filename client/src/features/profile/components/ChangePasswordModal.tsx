@@ -3,6 +3,12 @@ import { X, KeyRound, Loader2 } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import { toast } from "sonner"
 
+import { authApi } from "@/shared/apis/auth.api"
+import { getErrorMessage } from "@/shared/utils/error"
+import { useAuthStore } from "@/features/auth/store/auth.store"
+import PasswordStrength from "@/shared/components/ui/PasswordStrength"
+import { passwordRules } from "@/shared/utils/passwordRules"
+
 interface ChangePasswordModalProps {
   isOpen: boolean
   onClose: () => void
@@ -54,14 +60,29 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     if (!currentPassword) {
       newErrors.currentPassword = "Current password is required"
     }
+
     if (!newPassword) {
       newErrors.newPassword = "New password is required"
-    } else if (newPassword.length < 6) {
-      newErrors.newPassword = "Password must be at least 6 characters"
+    } else if (!passwordRules.minLength(newPassword)) {
+      newErrors.newPassword = "Password must be at least 8 characters"
+    } else if (!passwordRules.uppercase(newPassword)) {
+      newErrors.newPassword = "Password must contain at least one uppercase letter"
+    } else if (!passwordRules.lowercase(newPassword)) {
+      newErrors.newPassword = "Password must contain at least one lowercase letter"
+    } else if (!passwordRules.number(newPassword)) {
+      newErrors.newPassword = "Password must contain at least one number"
+    } else if (!passwordRules.special(newPassword)) {
+      newErrors.newPassword = "Password must contain at least one special character (@$!%*?&#)"
+    } else if (newPassword === currentPassword) {
+      newErrors.newPassword = "New password cannot be the same as current password"
     }
-    if (newPassword !== confirmPassword) {
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your new password"
+    } else if (newPassword !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match"
     }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -71,11 +92,19 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     if (!validate()) return
 
     setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      toast.success("Password updated successfully!")
+    setErrors({})
+
+    try {
+      await authApi.changePassword(currentPassword, newPassword)
+      toast.success("Password changed successfully!")
       onClose()
-    }, 800)
+    } catch (err) {
+      const msg = getErrorMessage(err, "Failed to change password")
+      toast.error(msg)
+      setErrors({ submit: msg })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
@@ -83,6 +112,9 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
       onClose()
     }
   }
+
+  const user = useAuthStore((state) => state.user)
+  const isGoogleAccount = user?.authProvider === "google"
 
   return (
     <dialog
@@ -100,7 +132,9 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
           <div className="p-2 rounded-xl bg-[#ADC6FF]/10 text-[#ADC6FF]">
             <KeyRound className="w-5 h-5" />
           </div>
-          <h2 className="text-xl font-bold text-[#F8FAFC]">Change Password</h2>
+          <h2 className="text-xl font-bold text-[#F8FAFC]">
+            {isGoogleAccount ? "Account Security" : "Change Password"}
+          </h2>
         </div>
         <button
           type="button"
@@ -111,59 +145,81 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         </button>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="p-6 space-y-4">
-        <FormInput
-          label="Current Password"
-          type="password"
-          placeholder="••••••••"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          error={errors.currentPassword}
-          required
-        />
-
-        <FormInput
-          label="New Password"
-          type="password"
-          placeholder="••••••••"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          error={errors.newPassword}
-          required
-        />
-
-        <FormInput
-          label="Confirm New Password"
-          type="password"
-          placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          error={errors.confirmPassword}
-          required
-        />
-
-        {/* Footer Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-5 py-3 rounded-xl hover:bg-slate-800 text-slate-300 font-bold text-xs tracking-wider transition-all cursor-pointer"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-3 rounded-xl bg-[#ADC6FF] hover:bg-[#c2d7ff] text-[#002E6A] font-bold text-xs tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-2"
-          >
-            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            Update Password
-          </button>
+      {/* Body / Form */}
+      {isGoogleAccount ? (
+        <div className="p-6 space-y-5 text-left">
+          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs sm:text-sm space-y-2">
+            <h4 className="font-bold text-foreground">Google Managed Account</h4>
+            <p className="leading-relaxed">
+              Your account is authenticated via Google OAuth 2.0 Single Sign-On. Passwords and security credentials are managed directly through your Google Account.
+            </p>
+          </div>
+          <div className="flex justify-end pt-2 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-bold text-xs uppercase tracking-wider hover:bg-[#c2d7ff] transition-all cursor-pointer shadow-md"
+            >
+              Got it
+            </button>
+          </div>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
+          <FormInput
+            label="Current Password"
+            type="password"
+            placeholder="••••••••"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            error={errors.currentPassword}
+            required
+          />
+
+          <FormInput
+            label="New Password"
+            type="password"
+            placeholder="••••••••"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            error={errors.newPassword}
+            required
+          />
+
+          <PasswordStrength password={newPassword} />
+
+          <FormInput
+            label="Confirm New Password"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={errors.confirmPassword}
+            required
+          />
+
+          {/* Footer Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-5 py-3 rounded-xl hover:bg-slate-800 text-slate-300 font-bold text-xs tracking-wider transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-3 rounded-xl bg-[#ADC6FF] hover:bg-[#c2d7ff] text-[#002E6A] font-bold text-xs tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-2"
+            >
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              Update Password
+            </button>
+          </div>
+        </form>
+      )}
     </dialog>
   )
 }
