@@ -11,6 +11,7 @@ export type {
   ILogoutUseCase,
   IRefreshTokenUseCase,
   IResetPasswordUseCase,
+  IChangePasswordUseCase,
   ISignupUseCase,
   IVerifyOtpUseCase,
   IResendOtpUseCase,

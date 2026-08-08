@@ -16,6 +16,7 @@ import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "./application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case"
 import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case"
+import { ChangePasswordUseCase } from "./application/use-cases/change-password.use-case"
 import { ResendOtpUseCase } from "./application/use-cases/resend-otp.use-case"
 
 // router and controller
@@ -79,6 +80,11 @@ const forgotPasswordUseCase = new ForgotPasswordUseCase(
   mailService
 )
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, hashService)
+const changePasswordUseCase = new ChangePasswordUseCase(
+  userRepository,
+  refreshTokenRepository,
+  hashService
+)
 const resendOtpUseCase = new ResendOtpUseCase(
   userRepository,
   otpRepository,
@@ -96,6 +102,7 @@ const authController = new AuthController(
   getMeUseCase,
   forgotPasswordUseCase,
   resetPasswordUseCase,
+  changePasswordUseCase,
   resendOtpUseCase
 )
 
@@ -112,6 +119,7 @@ export {
   refreshTokenUseCase,
   logoutUseCase,
   getMeUseCase,
+  changePasswordUseCase,
   authController,
   authRouter,
 }

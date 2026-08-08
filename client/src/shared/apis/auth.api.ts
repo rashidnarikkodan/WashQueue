@@ -86,4 +86,15 @@ export const authApi = {
       }
     )
   }, "Failed to resend verification code"),
+
+  changePassword: asyncHandle(
+    async (currentPassword: string, newPassword: string): Promise<void> => {
+      await api.patch(
+        API_ROUTES.AUTH.CHANGE_PASSWORD,
+        { currentPassword, newPassword },
+        { skipToast: true }
+      )
+    },
+    "Failed to change password"
+  ),
 }

@@ -8,6 +8,7 @@ import { signupSchema } from "./schema/signup.schema"
 import { verifyOtpSchema } from "./schema/verify-otp.schema"
 import { forgotPasswordSchema } from "./schema/forgot-password.schema"
 import { resetPasswordSchema } from "./schema/reset-password.schema"
+import { changePasswordSchema } from "./schema/change-password.schema"
 import { resendOtpSchema } from "./schema/resend-otp.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
@@ -50,6 +51,13 @@ export const createAuthRouter = (authController: AuthController): Router => {
     API_ROUTES.AUTH.RESET_PASSWORD,
     validateRequest(resetPasswordSchema),
     asyncHandler(authController.resetPassword)
+  )
+
+  router.patch(
+    API_ROUTES.AUTH.CHANGE_PASSWORD,
+    authenticate,
+    validateRequest(changePasswordSchema, "body"),
+    asyncHandler(authController.changePassword)
   )
 
   router.post(

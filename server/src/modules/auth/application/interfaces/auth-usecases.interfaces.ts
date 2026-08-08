@@ -3,6 +3,7 @@ import { SignupInput } from "../dto/signup.dto"
 import { VerifyOtpInput } from "../dto/verify-otp.dto"
 import { ForgotPasswordInput } from "../dto/forgot-password.dto"
 import { ResetPasswordInput } from "../dto/reset-password.dto"
+import { ChangePasswordInput } from "../dto/change-password.dto"
 import { AuthOutput, AuthUser } from "../dto/common/auth-user.dto"
 
 export interface ILoginUseCase {
@@ -42,6 +43,10 @@ export interface IForgotPasswordUseCase {
 
 export interface IResetPasswordUseCase {
   execute(data: ResetPasswordInput): Promise<void>
+}
+
+export interface IChangePasswordUseCase {
+  execute(userId: string, data: ChangePasswordInput): Promise<void>
 }
 
 export interface IResendOtpUseCase {

@@ -9,6 +9,7 @@ import {
   IGetMeUseCase,
   IForgotPasswordUseCase,
   IResetPasswordUseCase,
+  IChangePasswordUseCase,
   IResendOtpUseCase,
 } from "../application/interfaces/auth-usecases.interfaces"
 import success from "@/common/utils/success"
@@ -29,6 +30,7 @@ export class AuthController {
     private readonly getMeUseCase: IGetMeUseCase,
     private readonly forgotPasswordUseCase: IForgotPasswordUseCase,
     private readonly resetPasswordUseCase: IResetPasswordUseCase,
+    private readonly changePasswordUseCase: IChangePasswordUseCase,
     private readonly resendOtpUseCase: IResendOtpUseCase
   ) {}
 
@@ -109,6 +111,22 @@ export class AuthController {
   resetPassword = async (req: Request, res: Response) => {
     await this.resetPasswordUseCase.execute(req.body)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.PASSWORD_RESET_SUCCESS)
+  }
+
+  changePassword = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        message: ERROR_MESSAGES.UNAUTHORIZED,
+        data: null,
+      })
+      return
+    }
+
+    await this.changePasswordUseCase.execute(userId, req.body)
+    clearAuthCookies(res)
+    success(res, null, HTTP_STATUS.OK, "Password changed successfully")
   }
 
   resendOtp = async (req: Request, res: Response) => {
