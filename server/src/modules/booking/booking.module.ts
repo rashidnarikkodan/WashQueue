@@ -31,6 +31,7 @@ import { ConfirmBookingReservationUseCase } from "./application/use-cases/confir
 import { CancelBookingReservationUseCase } from "./application/use-cases/cancel-booking-reservation.use-case"
 import { ProcessRazorpayWebhookUseCase } from "./application/use-cases/process-razorpay-webhook.use-case"
 import { CleanupExpiredReservationsUseCase } from "./application/use-cases/cleanup-expired-reservations.use-case"
+import { creditWalletUseCase } from "../wallet/wallet.module"
 
 // Instantiate repositories & services
 export const bookingRepository = new BookingMongoRepository()
@@ -124,7 +125,8 @@ const cancelBookingUseCase = new CancelBookingUseCase(
   bookingRepository,
   bookingStatusLogRepository,
   bookingRedisQueueService,
-  bookingNotificationService
+  bookingNotificationService,
+  creditWalletUseCase
 )
 
 const pdfInvoiceService = new PDFInvoiceService()

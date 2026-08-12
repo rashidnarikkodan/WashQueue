@@ -90,4 +90,14 @@ export const API_ROUTES = {
     CREATE_ORDER: "/create-order",
     VERIFY_PAYMENT: "/verify-payment",
   },
+  WALLET: {
+    ROOT: "/api/wallet",
+    BALANCE: "/",
+    TRANSACTIONS: "/transactions",
+    TOPUP_ORDER: "/topup/order",
+    TOPUP_VERIFY: "/topup/verify",
+    PAY: "/pay",
+    CREDIT: "/credit",
+    DEBIT: "/debit",
+  },
 } as const

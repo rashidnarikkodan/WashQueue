@@ -182,7 +182,13 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               </div>
 
               {/* Wallet Card */}
-              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group">
+              <div
+                onClick={() => {
+                  setIsOpen(false)
+                  navigate("/wallet")
+                }}
+                className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group"
+              >
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background border border-border/60 text-primary group-hover:scale-105 transition-transform">
                     <CreditCard className="h-5 w-5" />
@@ -195,7 +201,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                   </div>
                 </div>
 
-                <span className="text-sm font-bold text-foreground">₹2,450</span>
+                <span className="text-sm font-bold text-foreground">View Wallet</span>
               </div>
             </div>
 

@@ -93,7 +93,9 @@ export default function BookingDetails() {
         booking.id,
         cancellationReason || "Customer cancelled booking"
       )
-      toast.success(`Booking ${booking.bookingNumber} has been cancelled.`)
+      toast.success(
+        `Booking ${booking.bookingNumber} has been cancelled. Any refund amount has been credited to your Wallet!`
+      )
       setBooking(updated)
       setIsCancelModalOpen(false)
     } catch (err: unknown) {

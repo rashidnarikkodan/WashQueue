@@ -2,6 +2,7 @@ import { useState } from "react"
 import { X, ShieldCheck, ArrowRight, Wallet, Smartphone } from "lucide-react"
 import { toast } from "sonner"
 import { paymentApi } from "@/shared/apis/payment.api"
+import { walletApi } from "@/shared/apis/wallet.api"
 
 declare global {
   interface Window {
@@ -78,6 +79,61 @@ export default function PaymentModal({
 
       if (order.reservation_id) {
         setActiveReservationId(order.reservation_id)
+      }
+
+      // Handle Direct Wallet Payment Flow
+      if (selectedMethod === "wallet") {
+        try {
+          const userWallet = await walletApi.getBalance()
+          if (userWallet.balance < totalAmount) {
+            toast.error(
+              `Insufficient wallet balance (₹${userWallet.balance.toFixed(2)}). Please top up your wallet.`,
+              {
+                action: {
+                  label: "Go to Wallet",
+                  onClick: () => window.location.assign("/wallet"),
+                },
+              }
+            )
+            setIsProcessing(false)
+            if (order.reservation_id) {
+              paymentApi.cancelReservation(order.reservation_id)
+            }
+            return
+          }
+
+          // Debit wallet for booking
+          await walletApi.payWithWallet({
+            amount: totalAmount,
+            referenceId: order.reservation_id || order.order_id,
+            description: serviceName || "Wash Booking Payment",
+          })
+
+          // Verify & confirm booking with wallet transaction ID as payment reference
+          const verification = await paymentApi.verifyPayment({
+            razorpay_order_id: order.order_id,
+            razorpay_payment_id: `wallet_pay_${Date.now()}`,
+            razorpay_signature: "wallet_payment_verified",
+          })
+
+          toast.success("Paid successfully using your Wallet balance!")
+          onSuccess({
+            razorpay_order_id: order.order_id,
+            razorpay_payment_id: `wallet_pay_${Date.now()}`,
+            razorpay_signature: "wallet_payment_verified",
+            booking: verification.booking,
+          })
+          onClose()
+        } catch (walletErr: unknown) {
+          const wErr = walletErr as { message?: string }
+          toast.error(wErr.message || "Failed to process payment using wallet balance")
+          if (order.reservation_id) {
+            paymentApi.cancelReservation(order.reservation_id)
+          }
+        } finally {
+          setIsProcessing(false)
+        }
+        return
       }
 
       const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"

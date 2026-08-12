@@ -15,6 +15,7 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const Booking = lazy(() => import("@/features/booking/pages/Booking"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const WalletPage = lazy(() => import("@/features/wallet/pages/WalletPage"))
 
 const RootPathResolver = () => {
   const { isAuthenticated, user, isLoading, activeViewMode } = useAuthStore()
@@ -113,6 +114,14 @@ export const mainRoutes = {
       element: (
         <ProtectedRoute>
           <BookingDetails />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "wallet",
+      element: (
+        <ProtectedRoute>
+          <WalletPage />
         </ProtectedRoute>
       ),
     },

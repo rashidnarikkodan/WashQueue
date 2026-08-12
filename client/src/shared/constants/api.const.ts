@@ -45,4 +45,11 @@ export const API_ROUTES = {
     CREATE_ORDER: "/create-order",
     VERIFY_PAYMENT: "/verify-payment",
   },
+  WALLET: {
+    BALANCE: "/wallet",
+    TRANSACTIONS: "/wallet/transactions",
+    TOPUP_ORDER: "/wallet/topup/order",
+    TOPUP_VERIFY: "/wallet/topup/verify",
+    PAY: "/wallet/pay",
+  },
 } as const
