@@ -14,7 +14,6 @@ import {
   Calendar,
   CreditCard,
   Car,
-  QrCode,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -136,11 +135,6 @@ export const managerSideBarItems: SidebarItem[] = [
     name: "Dashboard",
     path: "/manager/dashboard",
     icon: LayoutDashboard,
-  },
-  {
-    name: "Customer Check-In",
-    path: "/manager/check-in",
-    icon: QrCode,
   },
   {
     name: "Queue Management",

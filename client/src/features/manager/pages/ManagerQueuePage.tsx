@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Sparkles,
   Calendar as CalendarIcon,
@@ -20,6 +21,7 @@ import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 
 export default function ManagerQueuePage() {
+  const navigate = useNavigate()
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
     stationName: string
@@ -218,7 +220,7 @@ export default function ManagerQueuePage() {
 
         {/* Card 4: New Check-in Action */}
         <div
-          onClick={() => setIsCheckInOpen(true)}
+          onClick={() => navigate("/manager/check-in")}
           className="rounded-3xl bg-gradient-to-br from-[#1E293B] to-[#0F172A] p-6 border border-blue-500/30 hover:border-blue-500 transition-all cursor-pointer space-y-3 flex flex-col justify-between group shadow-lg shadow-blue-500/10"
         >
           <div className="flex items-center justify-between">
