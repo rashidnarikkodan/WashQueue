@@ -9,6 +9,10 @@ export const userTabs: TabConfig[] = [
     label: "Owners",
     activeColor: "border-[#ADC6FF] text-[#ADC6FF]",
   },
+  {
+    id: "manager",
+    label: "Managers",
+  },
 ]
 
 /** Tabs for OwnerApproval page */

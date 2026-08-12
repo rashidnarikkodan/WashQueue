@@ -39,7 +39,7 @@ const UserManagement = () => {
   const searchQuery = searchParams.get("q") || ""
   const roleFilter = searchParams.get("role") || "all"
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL
-  const activeTab = roleFilter === "customer" || roleFilter === "owner" ? roleFilter : "all"
+  const activeTab = roleFilter === "customer" || roleFilter === "owner" || roleFilter === 'manager' ? roleFilter : "all"
   const highCancellation = searchParams.get("cancellation") === "true"
   const fraudFlag = searchParams.get("fraud") === "true"
   const currentPage = Number(searchParams.get("page")) || 1
