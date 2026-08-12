@@ -183,6 +183,21 @@ export const bookingApi = {
     }
   },
 
+  createWalkIn: async (input: {
+    stationId: string
+    serviceType: "HALF" | "FULL"
+    walkInCustomer?: { name: string; phone: string }
+    walkInVehicle: { registrationNumber: string; categoryId: string; classId: string }
+    extraServiceIds?: string[]
+  }): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/walk-in`, input)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to create walk-in booking")
+    }
+  },
+
   downloadInvoice: async (bookingId: string, bookingNumber: string): Promise<void> => {
     try {
       const response = await api.get(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/invoice`, {

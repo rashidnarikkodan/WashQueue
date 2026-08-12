@@ -6,6 +6,11 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const ManagerQueuePage = lazy(() => import("@/features/manager/pages/ManagerQueuePage"))
+const ManagerCheckInPage = lazy(() => import("@/features/manager/pages/ManagerCheckInPage"))
+const ManagerWalkInPage = lazy(() => import("@/features/manager/pages/ManagerWalkInPage"))
+const ManagerPreInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPreInspectionPage"))
+const ManagerPostInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPostInspectionPage"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 
 export const managerRoutes = {
@@ -17,6 +22,10 @@ export const managerRoutes = {
       element: <div>Manager Dashboard</div>,
     },
     {
+      path: "check-in",
+      element: <ManagerCheckInPage />,
+    },
+    {
       path: "bookings",
       element: <BookingManagement role="manager" />,
     },
@@ -25,12 +34,32 @@ export const managerRoutes = {
       element: <BookingDetails />,
     },
     {
+      path: "bookings/:id/inspection",
+      element: <ManagerPreInspectionPage />,
+    },
+    {
+      path: "bookings/:id/post-inspection",
+      element: <ManagerPostInspectionPage />,
+    },
+    {
+      path: "pre-inspection",
+      element: <ManagerPreInspectionPage />,
+    },
+    {
+      path: "post-inspection",
+      element: <ManagerPostInspectionPage />,
+    },
+    {
       path: "queue",
-      element: <div>Queue Board</div>,
+      element: <ManagerQueuePage />,
+    },
+    {
+      path: "queues",
+      element: <ManagerQueuePage />,
     },
     {
       path: "walk-ins",
-      element: <div>Walk In Management</div>,
+      element: <ManagerWalkInPage />,
     },
     {
       path: "station",

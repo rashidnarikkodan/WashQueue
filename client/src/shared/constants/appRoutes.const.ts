@@ -32,6 +32,8 @@ export const APP_ROUTES = {
     ROOT: "/manager",
     DASHBOARD: "/manager/dashboard",
     QUEUE: "/manager/queue",
+    QUEUES: "/manager/queues",
+    CHECK_IN: "/manager/check-in",
     WALK_INS: "/manager/walk-ins",
     STATION: "/manager/station",
     STATION_DETAILS: (id: string | number) => `/manager/station/${id}`,
@@ -52,4 +54,5 @@ export const APP_ROUTES = {
     DETAILS: (id: string | number) => `/vehicles/${id}`,
   },
   PROFILE: "/profile",
+  WALLET: "/wallet",
 } as const
