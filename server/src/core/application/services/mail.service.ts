@@ -11,6 +11,10 @@ export class MailService implements IMailService {
     this.transporter = transporter
   }
 
+  private isSmtpConfigured(): boolean {
+    return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS)
+  }
+
   async sendVerificationEmail(email: string, otp: string): Promise<void> {
     const subject = "WashQueue - Verify Your Account"
     const text = `Welcome to WashQueue! Your verification OTP code is: ${otp}. It will expire in 5 minutes.`
@@ -25,18 +29,23 @@ export class MailService implements IMailService {
       </div>
     `
 
-    if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
-        to: email,
-        subject,
-        text,
-        html,
-      })
-      logger.info(`Verification email sent to ${email}`)
-    } else {
-      logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
+    if (this.transporter && this.isSmtpConfigured()) {
+      try {
+        await this.transporter.sendMail({
+          from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+          to: email,
+          subject,
+          text,
+          html,
+        })
+        logger.info(`Verification email sent to ${email}`)
+        return
+      } catch (err) {
+        logger.error(`SMTP Error sending verification email to ${email}:`, err)
+      }
     }
+
+    logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
   }
 
   async sendForgotPasswordEmail(email: string, otp: string): Promise<void> {
@@ -53,18 +62,23 @@ export class MailService implements IMailService {
       </div>
     `
 
-    if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
-        to: email,
-        subject,
-        text,
-        html,
-      })
-      logger.info(`Password reset email sent to ${email}`)
-    } else {
-      logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
+    if (this.transporter && this.isSmtpConfigured()) {
+      try {
+        await this.transporter.sendMail({
+          from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+          to: email,
+          subject,
+          text,
+          html,
+        })
+        logger.info(`Password reset email sent to ${email}`)
+        return
+      } catch (err) {
+        logger.error(`SMTP Error sending password reset email to ${email}:`, err)
+      }
     }
+
+    logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | OTP: ${otp}`)
   }
 
   async sendOwnerApprovalEmail(email: string, fullName: string): Promise<void> {
@@ -82,18 +96,23 @@ export class MailService implements IMailService {
       </div>
     `
 
-    if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
-        to: email,
-        subject,
-        text,
-        html,
-      })
-      logger.info(`Owner approval email sent to ${email}`)
-    } else {
-      logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Approved`)
+    if (this.transporter && this.isSmtpConfigured()) {
+      try {
+        await this.transporter.sendMail({
+          from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+          to: email,
+          subject,
+          text,
+          html,
+        })
+        logger.info(`Owner approval email sent to ${email}`)
+        return
+      } catch (err) {
+        logger.error(`SMTP Error sending owner approval email to ${email}:`, err)
+      }
     }
+
+    logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Approved`)
   }
 
   async sendOwnerRejectionEmail(email: string, fullName: string, reason: string): Promise<void> {
@@ -115,20 +134,25 @@ export class MailService implements IMailService {
       </div>
     `
 
-    if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
-        to: email,
-        subject,
-        text,
-        html,
-      })
-      logger.info(`Owner rejection email sent to ${email}`)
-    } else {
-      logger.info(
-        `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Rejected | Reason: ${reason}`
-      )
+    if (this.transporter && this.isSmtpConfigured()) {
+      try {
+        await this.transporter.sendMail({
+          from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+          to: email,
+          subject,
+          text,
+          html,
+        })
+        logger.info(`Owner rejection email sent to ${email}`)
+        return
+      } catch (err) {
+        logger.error(`SMTP Error sending owner rejection email to ${email}:`, err)
+      }
     }
+
+    logger.info(
+      `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Status: Rejected | Reason: ${reason}`
+    )
   }
 
   async sendManagerInvitationEmail(
@@ -155,19 +179,24 @@ export class MailService implements IMailService {
       </div>
     `
 
-    if (this.transporter) {
-      await this.transporter.sendMail({
-        from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
-        to: email,
-        subject,
-        text,
-        html,
-      })
-      logger.info(`Manager invitation email sent to ${email} for station ${data.stationName}`)
-    } else {
-      logger.info(
-        `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Link: ${inviteUrl}`
-      )
+    if (this.transporter && this.isSmtpConfigured()) {
+      try {
+        await this.transporter.sendMail({
+          from: `"${env.SMTP_FROM}" <${env.SMTP_USER}>`,
+          to: email,
+          subject,
+          text,
+          html,
+        })
+        logger.info(`Manager invitation email sent to ${email} for station ${data.stationName}`)
+        return
+      } catch (err) {
+        logger.error(`SMTP Error sending manager invitation email to ${email}:`, err)
+      }
     }
+
+    logger.info(
+      `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Link: ${inviteUrl}`
+    )
   }
 }

@@ -37,8 +37,9 @@ export class MongoManagerInvitationRepository implements IManagerInvitationRepos
     const doc = await ManagerInvitationModel.findOne({
       email: email.toLowerCase().trim(),
       stationId: new Types.ObjectId(stationId),
-      status: "PENDING",
-    }).exec()
+    })
+      .sort({ createdAt: -1 })
+      .exec()
     return doc ? ManagerInvitationMapper.toDomain(doc) : null
   }
 

@@ -84,6 +84,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false)
   const [isSuccessState, setIsSuccessState] = useState<boolean>(false)
   const [successResultMsg, setSuccessResultMsg] = useState<string>("")
+  const [createdToken, setCreatedToken] = useState<string>("")
 
   useEffect(() => {
     if (isOpen) {
@@ -91,6 +92,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
         setIsSuccessState(false)
         setEmail("")
         setName("")
+        setCreatedToken("")
       })
     }
   }, [isOpen])
@@ -131,6 +133,9 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
         permissions: selectedPermissions,
       })
 
+      if (res.invitation?.token) {
+        setCreatedToken(res.invitation.token)
+      }
       setSuccessResultMsg(res.message || "Invitation sent successfully!")
       setIsSuccessState(true)
       onSuccess()
@@ -222,9 +227,23 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               </div>
             </div>
 
+            {createdToken && (
+              <button
+                type="button"
+                onClick={() => {
+                  const link = `${window.location.origin}/accept-invitation?token=${createdToken}`
+                  navigator.clipboard.writeText(link)
+                  toast.success("Invitation link copied to clipboard!")
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-[#2E3447] hover:bg-slate-700 text-blue-300 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-blue-500/30"
+              >
+                <span>Copy Direct Invitation Link</span>
+              </button>
+            )}
+
             <button
               onClick={handleDone}
-              className="w-full py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-98 cursor-pointer mt-2"
+              className="w-full py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-lg active:scale-98 cursor-pointer"
             >
               Done & Return to Station
             </button>

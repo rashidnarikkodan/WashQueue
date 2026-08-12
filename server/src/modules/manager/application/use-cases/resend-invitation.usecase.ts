@@ -2,7 +2,7 @@ import crypto from "crypto"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
-import { ManagerInvitation } from "../../domain/entities/ManagerInvitation"
+import { ManagerInvitation, ManagerInvitationStatus } from "../../domain/entities/ManagerInvitation"
 import { IResendInvitationUseCase } from "../interfaces/manager-usecases.interface"
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
@@ -43,7 +43,7 @@ export class ResendInvitationUseCase implements IResendInvitationUseCase {
       ownerId: invitation.ownerId,
       permissions: invitation.permissions,
       token: newToken,
-      status: invitation.status,
+      status: ManagerInvitationStatus.PENDING,
       expiresAt: newExpiresAt,
       createdAt: invitation.createdAt,
     })

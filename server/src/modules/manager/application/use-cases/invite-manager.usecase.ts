@@ -128,31 +128,49 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
       }
     }
 
-    // Case B: User does not exist -> Create Invitation
+    // Case B: User does not exist -> Create or Renew Invitation
     const existingPendingInvitation = await this.managerInvitationRepository.findByEmailAndStation(
       email,
       input.stationId
     )
 
-    if (existingPendingInvitation && !existingPendingInvitation.isExpired) {
-      throw new ConflictError("A pending invitation already exists for this email and station")
-    }
-
     const token = crypto.randomBytes(32).toString("hex")
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days expiration
 
-    const invitation = new ManagerInvitation({
-      email,
-      name: input.name,
-      stationId: input.stationId,
-      ownerId: ownerUserId,
-      permissions: input.permissions,
-      token,
-      status: ManagerInvitationStatus.PENDING,
-      expiresAt,
-    })
+    let createdInvitation: ManagerInvitation
 
-    const createdInvitation = await this.managerInvitationRepository.create(invitation)
+    if (existingPendingInvitation) {
+      if (!existingPendingInvitation.isExpired) {
+        throw new ConflictError("A pending invitation already exists for this email and station")
+      }
+
+      // Renew expired invitation
+      const updated = new ManagerInvitation({
+        id: existingPendingInvitation.id,
+        email,
+        name: input.name || existingPendingInvitation.name,
+        stationId: input.stationId,
+        ownerId: ownerUserId,
+        permissions: input.permissions,
+        token,
+        status: ManagerInvitationStatus.PENDING,
+        expiresAt,
+        createdAt: existingPendingInvitation.createdAt,
+      })
+      createdInvitation = await this.managerInvitationRepository.update(updated)
+    } else {
+      const invitation = new ManagerInvitation({
+        email,
+        name: input.name,
+        stationId: input.stationId,
+        ownerId: ownerUserId,
+        permissions: input.permissions,
+        token,
+        status: ManagerInvitationStatus.PENDING,
+        expiresAt,
+      })
+      createdInvitation = await this.managerInvitationRepository.create(invitation)
+    }
 
     if (this.mailService) {
       await this.mailService.sendManagerInvitationEmail(email, {

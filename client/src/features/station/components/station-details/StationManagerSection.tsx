@@ -409,7 +409,20 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {pendingInvitation.token && (
+                <button
+                  onClick={() => {
+                    const link = `${window.location.origin}/accept-invitation?token=${pendingInvitation.token}`
+                    navigator.clipboard.writeText(link)
+                    toast.success("Invitation link copied to clipboard!")
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Copy Link</span>
+                </button>
+              )}
+
               <button
                 onClick={handleResendInvitation}
                 disabled={isSubmittingAction}
