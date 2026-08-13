@@ -6,10 +6,10 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
-const ManagerQueuePage = lazy(() => import("@/features/manager/pages/ManagerQueuePage"))
-const ManagerCheckInPage = lazy(() => import("@/features/manager/pages/ManagerCheckInPage"))
-const ManagerPreInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPreInspectionPage"))
-const ManagerPostInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPostInspectionPage"))
+const ManagerQueuePage = lazy(() => import("@/features/manager/pages/QueueManagementPage"))
+const CheckInPage = lazy(() => import("@/features/manager/pages/CheckInPage"))
+const ManagerPreInspectionPage = lazy(() => import("@/features/manager/pages/PreInspectionPage"))
+const ManagerPostInspectionPage = lazy(() => import("@/features/manager/pages/PostInspectionPage"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 
 export const managerRoutes = {
@@ -22,11 +22,11 @@ export const managerRoutes = {
     },
     {
       path: "check-in",
-      element: <ManagerCheckInPage />,
+      element: <CheckInPage />,
     },
     {
       path: "walk-ins",
-      element: <ManagerCheckInPage defaultTab="WALK_IN" />,
+      element: <CheckInPage defaultTab="WALK_IN" />,
     },
     {
       path: "bookings",
