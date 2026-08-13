@@ -45,13 +45,15 @@ export default function CustomerBookingDetailsView({
       setIsDownloading(false)
     }
   }
-  const stationName = booking.stationDetails?.name || "WashQueue Station"
-  const stationLocation = booking.stationDetails?.city || "Station Location"
+  const stationName = booking.stationDetails?.name || "Service Station"
+  const stationLocation = booking.stationDetails?.city || ""
   const vehicleName = booking.vehicleDetails?.nickname
     ? booking.vehicleDetails.nickname
     : booking.vehicleDetails?.brand
       ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
-      : "Registered Vehicle"
+      : booking.walkInVehicle?.registrationNumber
+        ? `Walk-In (${booking.walkInVehicle.registrationNumber})`
+        : "Vehicle"
   const plateNumber =
     booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "N/A"
   const serviceName = booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"

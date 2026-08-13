@@ -49,6 +49,12 @@ export class AdvanceBookingStatusUseCase implements IAdvanceBookingStatusUseCase
       case BookingStatus.COMPLETED:
         booking.complete()
         break
+      case BookingStatus.NO_SHOW:
+        booking.markNoShow()
+        break
+      case BookingStatus.CANCELLED:
+        booking.cancel(input.notes || "Cancelled by manager", managerUserId)
+        break
       default:
         throw new AppError(
           `Unsupported status transition to ${input.targetStatus}`,

@@ -34,8 +34,8 @@ interface QRCodePassProps {
 export default function QRCodePass({
   value,
   bookingNumber,
-  stationName = "WashQueue Station",
-  stationCity = "Kavanur",
+  stationName = "Service Station",
+  stationCity = "",
   vehicleName = "Vehicle",
   plateNumber,
   serviceName = "Car Wash Service",

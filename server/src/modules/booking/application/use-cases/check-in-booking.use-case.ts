@@ -21,40 +21,56 @@ export class CheckInBookingUseCase implements ICheckInBookingUseCase {
   ) {}
 
   async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
-    const rawInput = (input.qrToken || input.bookingId || "").trim()
+    let searchStr = (input.qrToken || input.bookingId || "").trim()
 
-    if (!rawInput) {
+    if (!searchStr) {
       throw new AppError("QR token or Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // If input is a JSON string (e.g. from scanned QRCodePass), parse to extract token/bookingNumber
+    if (searchStr.startsWith("{") && searchStr.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(searchStr)
+        if (parsed.rawQrToken) {
+          searchStr = parsed.rawQrToken
+        } else if (parsed.bookingNumber) {
+          searchStr = parsed.bookingNumber
+        } else if (parsed.id) {
+          searchStr = parsed.id
+        }
+      } catch {
+        // Ignore JSON parse failure and proceed with raw string
+      }
     }
 
     let booking = null
 
     // 1. First attempt: Find by QR token hash
     try {
-      const qrHash = QRTokenService.hashToken(rawInput)
+      const qrHash = QRTokenService.hashToken(searchStr)
       booking = await this.bookingRepository.findByQrTokenHash(qrHash)
-    } catch (e) {
+    } catch {
       // Ignore QR hashing errors and fallback to booking number
     }
 
     // 2. Second attempt: Find by bookingNumber (e.g. WQ-829301)
     if (!booking) {
-      booking = await this.bookingRepository.findByBookingNumber(rawInput)
+      booking = await this.bookingRepository.findByBookingNumber(searchStr)
     }
 
     // 3. Third attempt: If input doesn't start with WQ-, try prefixing WQ-
-    if (!booking && !rawInput.toUpperCase().startsWith("WQ-")) {
-      booking = await this.bookingRepository.findByBookingNumber(`WQ-${rawInput}`)
+    if (!booking && !searchStr.toUpperCase().startsWith("WQ-")) {
+      booking = await this.bookingRepository.findByBookingNumber(`WQ-${searchStr}`)
     }
 
     // 4. Fourth attempt: Find by Mongo _id
-    if (!booking && /^[0-9a-fA-F]{24}$/.test(rawInput)) {
-      booking = await this.bookingRepository.findById(rawInput)
+    if (!booking && /^[0-9a-fA-F]{24}$/.test(searchStr)) {
+      booking = await this.bookingRepository.findById(searchStr)
     }
 
     if (!booking) {
       throw new AppError(
-        `Invalid or unknown QR token / Booking ID (${rawInput})`,
+        `Invalid or unknown QR token / Booking ID (${searchStr})`,
         HTTP_STATUS.NOT_FOUND
       )
     }

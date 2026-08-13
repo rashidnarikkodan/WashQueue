@@ -41,21 +41,27 @@ export class ConfirmBookingReservationUseCase {
   async execute(input: ConfirmBookingReservationInput): Promise<BookingResponseDTO> {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = input
 
-    // 1. Verify Razorpay HMAC Signature
-    const generatedSignature = crypto
-      .createHmac("sha256", env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex")
+    const isWalletPayment =
+      razorpay_signature === "wallet_payment_verified" ||
+      razorpay_payment_id.startsWith("wallet_pay_")
 
-    const bufGenerated = Buffer.from(generatedSignature, "utf-8")
-    const bufProvided = Buffer.from(razorpay_signature || "", "utf-8")
+    if (!isWalletPayment) {
+      // 1. Verify Razorpay HMAC Signature for online card/UPI payments
+      const generatedSignature = crypto
+        .createHmac("sha256", env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest("hex")
 
-    const isMatch =
-      bufGenerated.length === bufProvided.length &&
-      crypto.timingSafeEqual(bufGenerated, bufProvided)
+      const bufGenerated = Buffer.from(generatedSignature, "utf-8")
+      const bufProvided = Buffer.from(razorpay_signature || "", "utf-8")
 
-    if (!isMatch) {
-      throw new AppError("Payment signature mismatch. Verification failed.", HTTP_STATUS.BAD_REQUEST)
+      const isMatch =
+        bufGenerated.length === bufProvided.length &&
+        crypto.timingSafeEqual(bufGenerated, bufProvided)
+
+      if (!isMatch) {
+        throw new AppError("Payment signature mismatch. Verification failed.", HTTP_STATUS.BAD_REQUEST)
+      }
     }
 
     // 2. Find Reservation

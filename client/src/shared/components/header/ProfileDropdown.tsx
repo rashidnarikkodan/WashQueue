@@ -9,7 +9,6 @@ import {
   Headphones,
   LogOut,
   ChevronRight,
-  ShieldCheck,
 } from "lucide-react"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../constants/role.const"
@@ -164,7 +163,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 <div className="flex items-center gap-2">
                   <h3 className="font-extrabold text-foreground text-sm truncate">{user.name}</h3>
                   <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                    {user.role}
+                    {getRoleLabel()}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
