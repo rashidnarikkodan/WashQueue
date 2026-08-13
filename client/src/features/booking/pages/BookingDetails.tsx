@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, RefreshCw, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -8,6 +8,7 @@ import { ROLE, VIEW_MODE, type RoleType } from "@/shared/constants/role.const"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
 import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
+import { CancellationModal } from "../components/CancellationModal"
 import { toast } from "sonner"
 
 export default function BookingDetails() {
@@ -21,8 +22,6 @@ export default function BookingDetails() {
 
   // Cancellation Modal state
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
-  const [cancellationReason, setCancellationReason] = useState("")
-  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false)
 
   // Status Advance state
   const [isAdvancingStatus, setIsAdvancingStatus] = useState(false)
@@ -84,27 +83,7 @@ export default function BookingDetails() {
     }
   }, [id])
 
-  // Handle Cancel Action
-  const handleCancelBooking = async () => {
-    if (!booking) return
-    setIsSubmittingCancel(true)
-    try {
-      const updated = await bookingApi.cancelBooking(
-        booking.id,
-        cancellationReason || "Customer cancelled booking"
-      )
-      toast.success(
-        `Booking ${booking.bookingNumber} has been cancelled. Any refund amount has been credited to your Wallet!`
-      )
-      setBooking(updated)
-      setIsCancelModalOpen(false)
-    } catch (err: unknown) {
-      const errorObj = err as { message?: string }
-      toast.error(errorObj?.message || "Failed to cancel booking")
-    } finally {
-      setIsSubmittingCancel(false)
-    }
-  }
+
 
   // Handle Status Transition for Staff/Manager/Owner/Admin
   const handleAdvanceStatus = async (targetStatus: string) => {
@@ -259,62 +238,20 @@ export default function BookingDetails() {
         />
       )}
 
-      {/* Cancel Confirmation Dialog Modal */}
-      {isCancelModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-left">
-            <div className="flex items-center gap-3 text-red-400">
-              <XCircle size={24} />
-              <h3 className="text-lg font-extrabold text-foreground">Cancel Booking</h3>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Are you sure you want to cancel booking{" "}
-              <strong className="text-foreground font-mono">#{booking.bookingNumber}</strong>?
-            </p>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Reason for Cancellation
-              </label>
-              <textarea
-                value={cancellationReason}
-                onChange={(e) => setCancellationReason(e.target.value)}
-                placeholder="Please state why you are cancelling..."
-                className="w-full p-3 rounded-xl border border-border bg-background text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none min-h-[80px]"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsCancelModalOpen(false)}
-                disabled={isSubmittingCancel}
-                className="px-4 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground text-xs font-bold cursor-pointer"
-              >
-                Keep Booking
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelBooking}
-                disabled={isSubmittingCancel}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                {isSubmittingCancel ? (
-                  <>
-                    <RefreshCw size={12} className="animate-spin" />
-                    <span>Cancelling...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={13} />
-                    <span>Confirm Cancel</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Figma Designed Cancellation Confirmation & Success Modal */}
+      {isCancelModalOpen && booking && (
+        <CancellationModal
+          booking={booking}
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          onConfirmCancel={async (reason) => {
+            const updated = await bookingApi.cancelBooking(booking.id, reason)
+            setBooking(updated)
+            toast.success(`Booking #${booking.bookingNumber} has been cancelled cleanly.`)
+          }}
+          onBookAgain={() => navigate("/book")}
+          onBackToHome={() => navigate("/")}
+        />
       )}
     </div>
   )

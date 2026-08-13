@@ -174,5 +174,6 @@ export function useBookingList({
     updateParams,
     handleConfirmCancel,
     handleRefresh,
+    cancelBooking,
   }
 }

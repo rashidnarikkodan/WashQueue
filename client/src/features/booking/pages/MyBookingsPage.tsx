@@ -8,6 +8,7 @@ import type { Booking } from "../types/booking.types"
 import { CUSTOMER_BOOKING_TABS } from "../config/booking-tabs.config"
 import { getCustomerColumns } from "../config/booking-columns.config"
 import { useBookingList } from "../hooks/useBookingList"
+import { CancellationModal } from "../components/CancellationModal"
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()
@@ -23,12 +24,9 @@ export default function MyBookingsPage() {
     setSelectedBookingForQr,
     selectedBookingForCancel,
     setSelectedBookingForCancel,
-    cancellationReason,
-    setCancellationReason,
-    isSubmittingCancel,
     updateParams,
-    handleConfirmCancel,
     handleRefresh,
+    cancelBooking,
   } = useBookingList()
 
   // Customer HUD Stats
@@ -200,61 +198,19 @@ export default function MyBookingsPage() {
         </div>
       )}
 
-      {/* Cancel Booking Modal */}
+      {/* Figma Designed Cancellation Confirmation & Success Modal */}
       {selectedBookingForCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl text-left">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <h3 className="text-lg font-extrabold text-foreground flex items-center gap-2">
-                <XCircle className="text-red-400" size={20} />
-                <span>Cancel Booking</span>
-              </h3>
-              <button
-                onClick={() => setSelectedBookingForCancel(null)}
-                className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted"
-              >
-                <XCircle size={18} />
-              </button>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Are you sure you want to cancel booking{" "}
-              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong>?
-              This action cannot be undone.
-            </p>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                Reason for Cancellation
-              </label>
-              <textarea
-                value={cancellationReason}
-                onChange={(e) => setCancellationReason(e.target.value)}
-                placeholder="Optional: Tell us why you are cancelling..."
-                rows={3}
-                className="w-full p-3 rounded-xl bg-muted/50 border border-border text-foreground text-xs focus:outline-none focus:border-primary resize-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedBookingForCancel(null)}
-                className="px-4 py-2 rounded-xl border border-border bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-bold transition-all"
-              >
-                Keep Booking
-              </button>
-              <button
-                type="button"
-                disabled={isSubmittingCancel}
-                onClick={handleConfirmCancel}
-                className="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-extrabold transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
-              >
-                {isSubmittingCancel ? "Cancelling..." : "Confirm Cancellation"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <CancellationModal
+          booking={selectedBookingForCancel as any}
+          isOpen={Boolean(selectedBookingForCancel)}
+          onClose={() => setSelectedBookingForCancel(null)}
+          onConfirmCancel={async (reason) => {
+            await cancelBooking(selectedBookingForCancel.id, reason)
+            handleRefresh()
+          }}
+          onBookAgain={() => navigate("/book")}
+          onBackToHome={() => navigate("/")}
+        />
       )}
     </div>
   )
