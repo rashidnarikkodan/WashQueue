@@ -8,7 +8,6 @@ const BookingManagement = lazy(() => import("@/features/booking/pages/BookingLis
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 const ManagerQueuePage = lazy(() => import("@/features/manager/pages/ManagerQueuePage"))
 const ManagerCheckInPage = lazy(() => import("@/features/manager/pages/ManagerCheckInPage"))
-const ManagerWalkInPage = lazy(() => import("@/features/manager/pages/ManagerWalkInPage"))
 const ManagerPreInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPreInspectionPage"))
 const ManagerPostInspectionPage = lazy(() => import("@/features/manager/pages/ManagerPostInspectionPage"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
@@ -26,6 +25,10 @@ export const managerRoutes = {
       element: <ManagerCheckInPage />,
     },
     {
+      path: "walk-ins",
+      element: <ManagerCheckInPage defaultTab="WALK_IN" />,
+    },
+    {
       path: "bookings",
       element: <BookingManagement role="manager" />,
     },
@@ -34,7 +37,7 @@ export const managerRoutes = {
       element: <BookingDetails />,
     },
     {
-      path: "bookings/:id/inspection",
+      path: "bookings/:id/pre-inspection",
       element: <ManagerPreInspectionPage />,
     },
     {
@@ -56,10 +59,6 @@ export const managerRoutes = {
     {
       path: "queues",
       element: <ManagerQueuePage />,
-    },
-    {
-      path: "walk-ins",
-      element: <ManagerWalkInPage />,
     },
     {
       path: "station",

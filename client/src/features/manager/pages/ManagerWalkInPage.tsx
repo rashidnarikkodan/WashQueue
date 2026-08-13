@@ -17,7 +17,15 @@ import { managerApi } from "@/shared/apis/manager.api"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 
-export default function ManagerWalkInPage() {
+interface ManagerWalkInPageProps {
+  showEmbeddedHeader?: boolean
+  onTabChange?: (tab: "CHECK_IN" | "WALK_IN") => void
+}
+
+export default function ManagerWalkInPage({
+  showEmbeddedHeader = true,
+  onTabChange,
+}: ManagerWalkInPageProps) {
   const navigate = useNavigate()
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
@@ -134,44 +142,8 @@ export default function ManagerWalkInPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
-      
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-              Customer Arrival Desk
-            </h1>
-          </div>
-          <p className="text-sm text-muted-foreground font-medium">
-            Manage customer arrivals, booking check-ins, and walk-in bookings.
-          </p>
-        </div>
-      </div>
-
-      {/* Tab Navigation Pills */}
-      <div className="flex items-center gap-4 border-b border-border pb-2">
-        <button
-          onClick={() => navigate("/manager/check-in")}
-          className="flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer border border-transparent"
-        >
-          <QrCode className="h-4 w-4" />
-          <span>[ Check-In ]</span>
-        </button>
-
-        <button
-          className="flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm bg-primary/10 text-primary border-2 border-primary/40 shadow-lg shadow-primary/10 transition-all cursor-pointer"
-        >
-          <PlusCircle className="h-4 w-4 text-primary" />
-          <span>[ Walk-In Booking ]</span>
-        </button>
-      </div>
-
-      {/* Main Body 70%-30% Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  const content = (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Column (70% width / 8 Cols) */}
         <div className="lg:col-span-8 space-y-6">
@@ -495,48 +467,97 @@ export default function ManagerWalkInPage() {
             </button>
           </div>
 
+      </div>
+    </div>
+  )
+
+  const createdBookingModal = createdBooking ? (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 text-center shadow-2xl animate-in zoom-in-95">
+        <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
+        
+        <div>
+          <h3 className="text-2xl font-bold text-foreground">Walk-In Booking Created</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Ticket #{createdBooking.bookingNumber} • Cash Paid: ₹{grandTotal}
+          </p>
         </div>
 
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={() => {
+              setCreatedBooking(null)
+              navigate("/manager/queue")
+            }}
+            className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer"
+          >
+            Go to Queue Board
+          </button>
+
+          <button
+            onClick={() => {
+              setCreatedBooking(null)
+              setRegistrationNumber("")
+            }}
+            className="px-5 py-3.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-bold text-sm transition-colors border border-border cursor-pointer"
+          >
+            New Booking
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null
+
+  if (!showEmbeddedHeader) {
+    return (
+      <>
+        {content}
+        {createdBookingModal}
+      </>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Customer Arrival Desk
+            </h1>
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
+            Manage customer arrivals, booking check-ins, and walk-in bookings.
+          </p>
+        </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {createdBooking && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 text-center shadow-2xl animate-in zoom-in-95">
-            <CheckCircle2 className="h-16 w-16 text-emerald-500 mx-auto" />
-            
-            <div>
-              <h3 className="text-2xl font-bold text-foreground">Walk-In Booking Created</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Ticket #{createdBooking.bookingNumber} • Cash Paid: ₹{grandTotal}
-              </p>
-            </div>
+      {/* Tab Navigation Pills */}
+      <div className="flex items-center gap-4 border-b border-border pb-2">
+        <button
+          onClick={() => {
+            if (onTabChange) onTabChange("CHECK_IN")
+            else navigate("/manager/check-in")
+          }}
+          className="flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer border border-transparent"
+        >
+          <QrCode className="h-4 w-4" />
+          <span>[ Check-In ]</span>
+        </button>
 
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={() => {
-                  setCreatedBooking(null)
-                  navigate("/manager/queues")
-                }}
-                className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer"
-              >
-                Go to Queue Board
-              </button>
+        <button
+          className="flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm bg-primary/10 text-primary border-2 border-primary/40 shadow-lg shadow-primary/10 transition-all cursor-pointer"
+        >
+          <PlusCircle className="h-4 w-4 text-primary" />
+          <span>[ Walk-In Booking ]</span>
+        </button>
+      </div>
 
-              <button
-                onClick={() => {
-                  setCreatedBooking(null)
-                  setRegistrationNumber("")
-                }}
-                className="px-5 py-3.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-bold text-sm transition-colors border border-border cursor-pointer"
-              >
-                New Booking
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {content}
 
+      {createdBookingModal}
     </div>
   )
 }
