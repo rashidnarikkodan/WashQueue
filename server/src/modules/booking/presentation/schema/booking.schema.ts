@@ -47,10 +47,14 @@ export const createWalkInBookingSchema = z.object({
   }),
 })
 
-export const checkInBookingSchema = z.object({
-  bookingId: z.string().optional(),
-  qrToken: z.string().min(1, "QR token is required"),
-})
+export const checkInBookingSchema = z
+  .object({
+    bookingId: z.string().optional(),
+    qrToken: z.string().optional(),
+  })
+  .refine((data) => Boolean(data.bookingId || data.qrToken), {
+    message: "Either bookingId or qrToken is required",
+  })
 
 export const advanceStatusSchema = z.object({
   targetStatus: z.enum(["IN_SERVICE", "SERVICE_COMPLETED", "AWAITING_HANDOVER", "COMPLETED"]),

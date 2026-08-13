@@ -21,34 +21,55 @@ export class CheckInBookingUseCase implements ICheckInBookingUseCase {
   ) {}
 
   async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
-    let booking = null
+    const rawInput = (input.qrToken || input.bookingId || "").trim()
 
-    // 1. If QR token provided, hash it and find booking
-    if (input.qrToken) {
-      const qrHash = QRTokenService.hashToken(input.qrToken)
-      booking = await this.bookingRepository.findByQrTokenHash(qrHash)
+    if (!rawInput) {
+      throw new AppError("QR token or Booking ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 2. Fallback to bookingId if provided and not found by QR hash
-    if (!booking && input.bookingId) {
-      booking = await this.bookingRepository.findById(input.bookingId)
+    let booking = null
+
+    // 1. First attempt: Find by QR token hash
+    try {
+      const qrHash = QRTokenService.hashToken(rawInput)
+      booking = await this.bookingRepository.findByQrTokenHash(qrHash)
+    } catch (e) {
+      // Ignore QR hashing errors and fallback to booking number
+    }
+
+    // 2. Second attempt: Find by bookingNumber (e.g. WQ-829301)
+    if (!booking) {
+      booking = await this.bookingRepository.findByBookingNumber(rawInput)
+    }
+
+    // 3. Third attempt: If input doesn't start with WQ-, try prefixing WQ-
+    if (!booking && !rawInput.toUpperCase().startsWith("WQ-")) {
+      booking = await this.bookingRepository.findByBookingNumber(`WQ-${rawInput}`)
+    }
+
+    // 4. Fourth attempt: Find by Mongo _id
+    if (!booking && /^[0-9a-fA-F]{24}$/.test(rawInput)) {
+      booking = await this.bookingRepository.findById(rawInput)
     }
 
     if (!booking) {
-      throw new AppError("Invalid or unknown QR token / Booking ID", HTTP_STATUS.NOT_FOUND)
+      throw new AppError(
+        `Invalid or unknown QR token / Booking ID (${rawInput})`,
+        HTTP_STATUS.NOT_FOUND
+      )
     }
 
-    // 3. Validate status
+    // Check if already checked in
+    if (booking.status === BookingStatus.CHECKED_IN) {
+      throw new AppError("Customer vehicle is already checked in", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Validate status
     if (booking.status !== BookingStatus.CONFIRMED) {
       throw new AppError(
         `Booking cannot be checked in from status ${booking.status}`,
         HTTP_STATUS.BAD_REQUEST
       )
-    }
-
-    // 4. Validate QR expiry
-    if (booking.qr.qrExpiresAt < new Date()) {
-      throw new AppError("QR token has expired", HTTP_STATUS.BAD_REQUEST)
     }
 
     // 5. Update domain status to CHECKED_IN
