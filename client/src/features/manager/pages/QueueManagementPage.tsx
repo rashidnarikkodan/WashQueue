@@ -15,6 +15,11 @@ import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import {
+  getSocketClient,
+  subscribeToStation,
+  unsubscribeFromStation,
+} from "@/shared/services/socket.client"
 
 export default function ManagerQueuePage() {
   const navigate = useNavigate()
@@ -128,6 +133,42 @@ export default function ManagerQueuePage() {
   useEffect(() => {
     fetchStationAndQueue()
   }, [fetchStationAndQueue])
+
+  // Real-Time Socket.IO Subscriptions & Reconnection Handling
+  useEffect(() => {
+    if (!stationInfo?.stationId) return
+
+    subscribeToStation(stationInfo.stationId)
+    const socket = getSocketClient()
+
+    const handleRealTimeUpdate = () => {
+      fetchStationAndQueue()
+    }
+
+    const realTimeEvents = [
+      "QUEUE_UPDATED",
+      "BOOKING_CHECKED_IN",
+      "SERVICE_STARTED",
+      "SERVICE_COMPLETED",
+      "POST_INSPECTION_COMPLETED",
+      "HANDOVER_READY",
+      "BOOKING_COMPLETED",
+      "BOOKING_NO_SHOW",
+      "BOOKING_CANCELLED",
+      "BOOKING_STALLED",
+    ]
+
+    realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
+    socket.on("connect", handleRealTimeUpdate)
+    socket.on("reconnect", handleRealTimeUpdate)
+
+    return () => {
+      realTimeEvents.forEach((evt) => socket.off(evt, handleRealTimeUpdate))
+      socket.off("connect", handleRealTimeUpdate)
+      socket.off("reconnect", handleRealTimeUpdate)
+      unsubscribeFromStation(stationInfo.stationId)
+    }
+  }, [stationInfo?.stationId, fetchStationAndQueue])
 
   // Filtered & Sorted Queue List (First Checked-In Vehicle First)
   const queueList = useMemo(() => {

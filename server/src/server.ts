@@ -7,6 +7,9 @@ import redis from "./infrastructure/cache/redis.client"
 import { startReservationCleanupJob } from "./infrastructure/jobs/reservation-cleanup.job"
 import { startNoShowCleanupJob } from "./infrastructure/jobs/no-show-cleanup.job"
 
+import { createServer } from "http"
+import { SocketServerService } from "./infrastructure/websocket/socket-server.service"
+
 async function startServer() {
   try {
     // Establish database connection
@@ -19,9 +22,13 @@ async function startServer() {
     startReservationCleanupJob(60000)
     startNoShowCleanupJob(300000)
 
-    // Start Express listener
-    app.listen(env.PORT, () => {
-      logger.info(`Server running at http://localhost:${env.PORT}`)
+    // Create HTTP Server & initialize Socket.IO
+    const httpServer = createServer(app)
+    SocketServerService.getInstance().init(httpServer)
+
+    // Start Listener
+    httpServer.listen(env.PORT, () => {
+      logger.info(`Server running with Socket.IO at http://localhost:${env.PORT}`)
     })
   } catch (error) {
     logger.error({ error }, "Failed to start the server")

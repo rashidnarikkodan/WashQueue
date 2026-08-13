@@ -30,6 +30,7 @@
     "pdfkit": "^0.19.1",
     "pino": "^10.3.1",
     "razorpay": "^2.9.8",
+    "socket.io": "^4.8.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {

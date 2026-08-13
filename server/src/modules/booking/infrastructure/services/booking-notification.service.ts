@@ -1,5 +1,6 @@
 import logger from "@/configs/logger.config"
 import { Booking } from "../../domain/entities/Booking"
+import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 
 import {
   IBookingNotificationService,
@@ -11,6 +12,7 @@ export type { NotificationEventType }
 export class BookingNotificationService implements IBookingNotificationService {
   /**
    * Dispatches notifications to customer & station manager based on domain events.
+   * Emits room-scoped Socket.IO events to station managers and customers.
    */
   async notify(
     eventType: NotificationEventType,
@@ -27,33 +29,54 @@ export class BookingNotificationService implements IBookingNotificationService {
           stationId: booking.stationId,
           metadata,
         },
-        `[BookingNotification] Dispatching notification: ${eventType}`
+        `[BookingNotification] Dispatching notification & real-time event: ${eventType}`
       )
 
-      // Event-driven pub-sub / email / SMS handler logic hook
-      switch (eventType) {
-        case "BOOKING_CREATED":
-          logger.info(`Notification sent: Booking ${booking.bookingNumber} created successfully`)
-          break
-        case "CHECKIN_SUCCESS":
-          logger.info(`Notification sent: Booking ${booking.bookingNumber} checked in`)
-          break
-        case "WASH_STARTED":
-          logger.info(`Notification sent: Wash started for booking ${booking.bookingNumber}`)
-          break
-        case "WASH_COMPLETED":
-          logger.info(`Notification sent: Wash completed for booking ${booking.bookingNumber}`)
-          break
-        case "BOOKING_CANCELLED":
-          logger.info(`Notification sent: Booking ${booking.bookingNumber} cancelled`)
-          break
-        default:
-          break
+      const socketService = SocketServerService.getInstance()
+      const payload = {
+        eventType,
+        bookingId: booking.id,
+        bookingNumber: booking.bookingNumber,
+        stationId: booking.stationId,
+        status: booking.status,
+        serviceType: booking.serviceType,
+        paymentStatus: booking.paymentStatus,
+        metadata: metadata || {},
+        timestamp: new Date().toISOString(),
+      }
+
+      // 1. Emit station-scoped operational events to station manager room
+      if (booking.stationId) {
+        socketService.emitToStation(booking.stationId, eventType, payload)
+        // Also trigger general QUEUE_UPDATED refresh on station
+        socketService.emitToStation(booking.stationId, "QUEUE_UPDATED", {
+          stationId: booking.stationId,
+          lastUpdated: new Date().toISOString(),
+        })
+      }
+
+      // 2. Emit customer-scoped events to customer personal room
+      if (booking.userId) {
+        socketService.emitToUser(booking.userId, eventType, payload)
+        socketService.emitToUser(booking.userId, "QUEUE_POSITION_CHANGED", payload)
+
+        if (eventType === "PAYMENT_SUCCESS" || eventType === "PAYMENT_UPDATED") {
+          socketService.emitToUser(booking.userId, "PAYMENT_UPDATED", payload)
+        }
+        if (eventType === "REFUND_COMPLETED" || eventType === "REFUND_PROCESSED") {
+          socketService.emitToUser(booking.userId, "REFUND_PROCESSED", payload)
+          socketService.emitToUser(booking.userId, "WALLET_UPDATED", payload)
+        }
+      }
+
+      // 3. Emit booking-scoped event
+      if (booking.id) {
+        socketService.emitToBooking(booking.id, eventType, payload)
       }
     } catch (error) {
       logger.error(
         { error, eventType, bookingId: booking.id },
-        "[BookingNotification] Failed to send notification"
+        "[BookingNotification] Failed to send notification or socket event"
       )
     }
   }
