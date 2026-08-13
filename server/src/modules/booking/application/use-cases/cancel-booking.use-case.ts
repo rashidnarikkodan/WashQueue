@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
@@ -11,6 +11,10 @@ import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { ICancelBookingUseCase } from "../interfaces/booking-usecases.interface"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
+import { BookingModel } from "../../infrastructure/models/booking.model"
+import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
+
+import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
@@ -18,101 +22,138 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
-    private readonly creditWalletUseCase?: CreditWalletUseCase
+    private readonly creditWalletUseCase?: CreditWalletUseCase,
+    private readonly evaluateAndProcessRefundUseCase?: EvaluateAndProcessRefundUseCase
   ) {}
 
-  async execute(userId: string, input: CancelBookingInput): Promise<BookingResponseDTO> {
+  /**
+   * Domain Refund Calculation Engine:
+   * - Manager / Owner cancellation -> 100% Full Refund
+   * - Customer >24h before windowStart -> 100% Full Refund
+   * - Customer 2h-24h before windowStart -> 50% Partial Refund
+   * - Customer <2h before windowStart -> 0% Non-refundable late cancellation
+   */
+  private calculateRefundAmount(
+    booking: any,
+    isStaffCancellation: boolean,
+    now: Date
+  ): number {
+    const paidAmount =
+      booking.paymentStatus === PaymentStatus.PAID
+        ? booking.pricingSnapshot?.totalPrice || booking.depositAmount || 0
+        : booking.depositAmount || 0
+
+    if (paidAmount <= 0) return 0
+    if (isStaffCancellation) return paidAmount
+
+    const windowStartMs = new Date(booking.scheduling.windowStart).getTime()
+    const hoursRemaining = (windowStartMs - now.getTime()) / (1000 * 60 * 60)
+
+    if (hoursRemaining >= 24) {
+      return paidAmount // 100% full refund
+    } else if (hoursRemaining >= 2) {
+      return Math.round(paidAmount * 0.5) // 50% partial refund
+    } else {
+      return 0 // 0% non-refundable late cancellation
+    }
+  }
+
+  async execute(
+    userId: string,
+    input: CancelBookingInput,
+    userRole?: string
+  ): Promise<BookingResponseDTO> {
     const booking = await this.bookingRepository.findById(input.bookingId)
     if (!booking) {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // Rule 1: Cancellation can only happen before arrival / check-in
+    // Rule 1: Service state check — cancellation prohibited once service has started
     if (
-      booking.status === BookingStatus.CHECKED_IN ||
-      booking.checkedInAt ||
       booking.status === BookingStatus.IN_SERVICE ||
       booking.status === BookingStatus.SERVICE_COMPLETED ||
       booking.status === BookingStatus.COMPLETED
     ) {
       throw new AppError(
-        "Booking cannot be cancelled after arrival or check-in",
+        "Booking cannot be cancelled after wash service has started or completed",
         HTTP_STATUS.BAD_REQUEST
       )
     }
 
-    // Rule 2: Cancellation can only happen at least 24 hours (1 day) before the scheduled booking time
+    if (booking.status === BookingStatus.CANCELLED || booking.status === BookingStatus.NO_SHOW) {
+      throw new AppError(`Booking is already ${booking.status.toLowerCase()}`, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const isStaffCancellation =
+      userRole === "MANAGER" || userRole === "OWNER" || userRole === "ADMIN"
+
     const now = new Date()
-    const scheduledTime = new Date(booking.scheduling.windowStart).getTime()
-    const twentyFourHoursInMs = 24 * 60 * 60 * 1000
-
-    if (scheduledTime - now.getTime() < twentyFourHoursInMs) {
-      throw new AppError(
-        "Cancellations are only allowed at least 24 hours prior to the scheduled booking time",
-        HTTP_STATUS.BAD_REQUEST
-      )
-    }
-
-    if (!booking.canTransitionTo(BookingStatus.CANCELLED)) {
-      throw new AppError(
-        `Booking in status ${booking.status} cannot be cancelled`,
-        HTTP_STATUS.BAD_REQUEST
-      )
-    }
-
     const fromStatus = booking.status
-    const refundAmount =
-      booking.pricingSnapshot?.totalPrice && booking.pricingSnapshot.totalPrice > 0
-        ? booking.pricingSnapshot.totalPrice
-        : booking.depositAmount > 0
-        ? booking.depositAmount
-        : 0
 
-    booking.cancel(input.reason, userId, refundAmount)
-    const updatedBooking = await this.bookingRepository.update(booking)
-
-    // Execute automatic refund to user's Wallet
-    const targetUserId = booking.userId || userId
-    if (refundAmount > 0 && targetUserId && this.creditWalletUseCase) {
-      try {
-        await this.creditWalletUseCase.execute({
-          userId: targetUserId,
-          amount: refundAmount,
-          category: "REFUND",
-          description: `Refund for cancelled booking #${booking.bookingNumber}`,
-          referenceId: booking.id,
-          metadata: {
-            bookingId: booking.id,
-            bookingNumber: booking.bookingNumber,
-            cancellationReason: input.reason,
-          },
-        })
-      } catch (refundError) {
-        console.error(
-          `Failed to credit refund to user wallet for booking ${booking.id}:`,
-          refundError
-        )
-      }
+    const cancellationData = {
+      cancellationReason: input.reason || (isStaffCancellation ? "Cancelled by station manager" : "Cancelled by customer"),
+      cancelledBy: userId,
+      cancelledAt: now,
     }
 
-    // Save audit log
+    // Rule 2: Atomic MongoDB Transition (PENDING/CONFIRMED/CHECKED_IN -> CANCELLED) to prevent duplicate cancellations
+    const updatedDoc = await BookingModel.findOneAndUpdate(
+      {
+        _id: input.bookingId,
+        status: { $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN] },
+      },
+      {
+        $set: {
+          status: BookingStatus.CANCELLED,
+          cancellation: cancellationData,
+          updatedAt: now,
+        },
+      },
+      { new: true }
+    )
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+
+    if (!updatedDoc) {
+      throw new AppError(
+        "Cancellation failed. Booking may have already been cancelled or in service.",
+        HTTP_STATUS.CONFLICT
+      )
+    }
+
+    const domainBooking = BookingMapper.toDomain(updatedDoc)
+
+    const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
+    let processedRefundAmount = 0
+
+    if (this.evaluateAndProcessRefundUseCase) {
+      const refundResult = await this.evaluateAndProcessRefundUseCase.execute({
+        bookingId: domainBooking.id,
+        responsibility,
+        reason: cancellationData.cancellationReason,
+      })
+      processedRefundAmount = refundResult.refundAmount
+    }
+
+    // Rule 5: Audit log
     const statusLog = new BookingStatusLog({
       id: "",
-      bookingId: updatedBooking.id,
+      bookingId: domainBooking.id,
       fromStatus,
       toStatus: BookingStatus.CANCELLED,
       changedBy: userId,
-      reason: input.reason,
-      createdAt: new Date(),
+      reason: cancellationData.cancellationReason,
+      createdAt: now,
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // Sync Redis queue
-    await this.redisQueueService.updateQueueStatus(updatedBooking)
+    // Rule 6: Synchronize Redis operational queue
+    await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // Notify
-    await this.notificationService.notify("BOOKING_CANCELLED", updatedBooking)
+    // Rule 7: Real-time notification
+    await this.notificationService.notify("BOOKING_CANCELLED", domainBooking)
 
-    return BookingDTOMapper.toDTO(updatedBooking)
+    return BookingDTOMapper.toDTO(domainBooking)
   }
 }
