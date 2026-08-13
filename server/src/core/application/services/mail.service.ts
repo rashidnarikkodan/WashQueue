@@ -41,7 +41,7 @@ export class MailService implements IMailService {
         logger.info(`Verification email sent to ${email}`)
         return
       } catch (err) {
-        logger.error(`SMTP Error sending verification email to ${email}:`, err)
+        logger.error(`SMTP Error sending verification email to ${email}: ${String(err)}`)
       }
     }
 
@@ -74,7 +74,7 @@ export class MailService implements IMailService {
         logger.info(`Password reset email sent to ${email}`)
         return
       } catch (err) {
-        logger.error(`SMTP Error sending password reset email to ${email}:`, err)
+        logger.error(`SMTP Error sending password reset email to ${email}: ${String(err)}`)
       }
     }
 
@@ -108,7 +108,7 @@ export class MailService implements IMailService {
         logger.info(`Owner approval email sent to ${email}`)
         return
       } catch (err) {
-        logger.error(`SMTP Error sending owner approval email to ${email}:`, err)
+        logger.error(`SMTP Error sending owner approval email to ${email}: ${String(err)}`)
       }
     }
 
@@ -146,7 +146,7 @@ export class MailService implements IMailService {
         logger.info(`Owner rejection email sent to ${email}`)
         return
       } catch (err) {
-        logger.error(`SMTP Error sending owner rejection email to ${email}:`, err)
+        logger.error(`SMTP Error sending owner rejection email to ${email}: ${String(err)}`)
       }
     }
 
@@ -191,7 +191,7 @@ export class MailService implements IMailService {
         logger.info(`Manager invitation email sent to ${email} for station ${data.stationName}`)
         return
       } catch (err) {
-        logger.error(`SMTP Error sending manager invitation email to ${email}:`, err)
+        logger.error(`SMTP Error sending manager invitation email to ${email}: ${String(err)}`)
       }
     }
 
