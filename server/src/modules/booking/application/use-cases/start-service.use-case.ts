@@ -1,0 +1,147 @@
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { BookingStatus } from "../../domain/entities/Booking"
+import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
+import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { IBookingQueueService } from "../interfaces/booking-queue.interface"
+import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
+import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
+import { BookingResponseDTO } from "../dtos/booking-response.dto"
+import { BookingModel } from "../../infrastructure/models/booking.model"
+import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
+import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+
+export class StartServiceUseCase {
+  constructor(
+    private readonly bookingRepository: IBookingRepository,
+    private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
+    private readonly stationRepository: IStationRepository,
+    private readonly managerAssignmentRepository: IManagerAssignmentRepository,
+    private readonly redisQueueService: IBookingQueueService,
+    private readonly notificationService: IBookingNotificationService
+  ) {}
+
+  async execute(managerUserId: string, bookingId: string): Promise<BookingResponseDTO> {
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const booking = await this.bookingRepository.findById(bookingId)
+    if (!booking) {
+      throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
+    }
+
+    // 1. Station Existence & Bay Capacity
+    const station = await this.stationRepository.findById(booking.stationId)
+    if (!station) {
+      throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
+    }
+
+    // 2. Manager Authorization Check
+    const isOwner = station.getProps().ownerId === managerUserId
+    let isAuthorizedManager = isOwner
+
+    if (!isAuthorizedManager) {
+      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
+        managerUserId,
+        booking.stationId
+      )
+      if (assignment && assignment.status === "ACTIVE") {
+        isAuthorizedManager = true
+      }
+    }
+
+    if (!isAuthorizedManager) {
+      throw new AppError(
+        "You are not authorized to manage service execution for this station",
+        HTTP_STATUS.FORBIDDEN
+      )
+    }
+
+    // 3. Status Eligibility Check (Must be strictly CHECKED_IN)
+    if (booking.status === BookingStatus.IN_SERVICE) {
+      throw new AppError("Service is already active for this booking", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (booking.status !== BookingStatus.CHECKED_IN) {
+      throw new AppError(
+        `Cannot start service for booking in ${booking.status} status. Vehicle must be CHECKED_IN.`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    // 4. Pre-Service Inspection Verification
+    if (!booking.preServiceInspection || !booking.preServiceInspection.capturedAt) {
+      throw new AppError(
+        "Pre-service vehicle inspection must be completed before starting service",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    // 5. Bay Capacity Validation
+    const totalBays = station.getProps().slotConfig?.bays || 1
+    const activeCount = await BookingModel.countDocuments({
+      stationId: booking.stationId,
+      status: BookingStatus.IN_SERVICE,
+    }).exec()
+
+    if (activeCount >= totalBays) {
+      throw new AppError(
+        `All service bays are currently occupied (${activeCount}/${totalBays}). Complete an active service first.`,
+        HTTP_STATUS.CONFLICT
+      )
+    }
+
+    const assignedBayNumber = activeCount + 1
+    const now = new Date()
+
+    // 6. Atomic MongoDB Transition (CHECKED_IN -> IN_SERVICE) to prevent double-start race conditions
+    const updatedDoc = await BookingModel.findOneAndUpdate(
+      { _id: bookingId, status: BookingStatus.CHECKED_IN },
+      {
+        $set: {
+          status: BookingStatus.IN_SERVICE,
+          serviceStartedAt: now,
+          serviceStartedBy: managerUserId,
+          assignedBayNumber,
+          updatedAt: now,
+        },
+      },
+      { new: true }
+    )
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+
+    if (!updatedDoc) {
+      throw new AppError(
+        "Failed to start service. Booking status may have been updated simultaneously by another manager.",
+        HTTP_STATUS.CONFLICT
+      )
+    }
+
+    const domainBooking = BookingMapper.toDomain(updatedDoc)
+
+    // 7. Write Audit Log
+    const statusLog = new BookingStatusLog({
+      id: "",
+      bookingId: domainBooking.id,
+      fromStatus: BookingStatus.CHECKED_IN,
+      toStatus: BookingStatus.IN_SERVICE,
+      changedBy: managerUserId,
+      reason: `Service started in Bay ${assignedBayNumber}`,
+      createdAt: now,
+    })
+    await this.bookingStatusLogRepository.save(statusLog)
+
+    // 8. Synchronize Redis Operational Queue
+    await this.redisQueueService.updateQueueStatus(domainBooking)
+
+    // 9. Dispatch Real-time Notification
+    await this.notificationService.notify("WASH_STARTED", domainBooking)
+
+    return BookingDTOMapper.toDTO(domainBooking)
+  }
+}

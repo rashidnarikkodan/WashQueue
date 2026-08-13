@@ -60,28 +60,48 @@ export default function ManagerPostInspectionPage() {
     }
   }
 
-  // Finalize Handover to Customer
-  const handleHandover = async () => {
+  // Save Post-Service Inspection (IN_SERVICE -> SERVICE_COMPLETED / AWAITING_HANDOVER)
+  const handleSavePostInspection = async () => {
     if (!booking) return
     setIsSubmitting(true)
     try {
-      await bookingApi.advanceStatus(booking.id, "COMPLETED")
-      toast.success("Vehicle handover completed & booking closed!")
-      navigate("/manager/queues")
-    } catch (err: any) {
-      console.error("Handover error:", err)
-      toast.error(err?.message || "Failed to complete handover")
+      await bookingApi.savePostInspection(booking.id, {
+        notes: handoverNotes || "Post-service vehicle quality inspection verified",
+      })
+      toast.success("✓ Post-service inspection saved! Vehicle is ready for customer handover.")
+      fetchBooking()
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
+      console.error("Post inspection error:", err)
+      toast.error(errorObj?.message || "Failed to save post-service inspection")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const bookingIdStr = booking?.bookingNumber || "WQ-8820"
-  const customerName = booking?.customerDetails?.name || booking?.walkInCustomer?.name || "Rashid N."
+  // Finalize Separate Vehicle Handover to Customer (AWAITING_HANDOVER -> COMPLETED)
+  const handleHandover = async () => {
+    if (!booking) return
+    setIsSubmitting(true)
+    try {
+      await bookingApi.completeHandover(booking.id, handoverNotes)
+      toast.success("✓ Vehicle handover completed & booking closed!")
+      navigate("/manager/queues")
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
+      console.error("Handover error:", err)
+      toast.error(errorObj?.message || "Failed to complete vehicle handover")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const bookingIdStr = booking?.bookingNumber || ""
+  const customerName = booking?.customerDetails?.name || booking?.walkInCustomer?.name || (booking?.isWalkIn ? "Walk-In Customer" : "Customer")
   const vehicleName = booking?.vehicleDetails?.brand
-    ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`
-    : "Honda City"
-  const plate = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "MH 01 AB 1234"
+    ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
+    : "Vehicle"
+  const plate = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "N/A"
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
@@ -367,23 +387,27 @@ export default function ManagerPostInspectionPage() {
             </div>
 
             <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => toast.success("Post-inspection saved")}
-                className="px-5 py-3 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border font-extrabold text-xs transition-colors cursor-pointer"
-              >
-                Save
-              </button>
-
-              <button
-                type="button"
-                onClick={handleHandover}
-                disabled={isSubmitting}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <span>{isSubmitting ? "Completing..." : "Handover to customer"}</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              {booking?.status === "IN_SERVICE" ? (
+                <button
+                  type="button"
+                  onClick={handleSavePostInspection}
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>{isSubmitting ? "Saving..." : "Save Post-Inspection & Ready for Handover"}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleHandover}
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>{isSubmitting ? "Handing Over..." : "Finalize Handover & Close Booking"}</span>
+                  <Check className="h-4 w-4 stroke-[3]" />
+                </button>
+              )}
             </div>
           </div>
 
