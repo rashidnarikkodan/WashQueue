@@ -174,9 +174,12 @@ export const bookingApi = {
     }
   },
 
-  checkIn: async (qrToken: string): Promise<BookingResponse> => {
+  checkIn: async (inputVal: string): Promise<BookingResponse> => {
     try {
-      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/check-in`, { qrToken })
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/check-in`, {
+        qrToken: inputVal,
+        bookingId: inputVal,
+      })
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to check in booking")

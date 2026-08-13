@@ -33,7 +33,20 @@ export default function ManagerQueuePage() {
   const [qrInput, setQrInput] = useState("")
   const [isCheckInSubmitting, setIsCheckInSubmitting] = useState(false)
 
-  // 1. Fetch Manager Station
+  // Helper to resolve check-in arrival timestamp
+  const getCheckInTime = useCallback((b: BookingResponse): number => {
+    if (b.statusHistory && b.statusHistory.length > 0) {
+      const checkInLog = b.statusHistory.find(
+        (h) => h.toStatus === "CHECK_IN" || h.toStatus === "CHECKED_IN"
+      )
+      if (checkInLog) {
+        return new Date(checkInLog.createdAt).getTime()
+      }
+    }
+    return new Date(b.updatedAt || b.createdAt).getTime()
+  }, [])
+
+  // 1. Fetch Manager Station & Queue
   const fetchStationAndQueue = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -53,14 +66,18 @@ export default function ManagerQueuePage() {
         const bList = res.bookings || []
         setBookings(bList)
 
-        // Default select the first active/in-service booking
-        const firstActive = bList.find(
-          (b: BookingResponse) => b.status === "IN_SERVICE" || b.status === "CHECKED_IN"
-        )
-        if (firstActive) {
-          setSelectedBookingId(firstActive.id)
-        } else if (bList.length > 0) {
-          setSelectedBookingId(bList[0].id)
+        // Select the first checked-in or in-service booking ordered by arrival time
+        const checkedInList = bList
+          .filter(
+            (b: BookingResponse) =>
+              b.status === "IN_SERVICE" || b.status === "CHECK_IN" || b.status === "CHECKED_IN"
+          )
+          .sort((a: BookingResponse, b: BookingResponse) => getCheckInTime(a) - getCheckInTime(b))
+
+        if (checkedInList.length > 0) {
+          setSelectedBookingId(checkedInList[0].id)
+        } else {
+          setSelectedBookingId(null)
         }
       } else {
         toast.error("No active station assignment found for your manager account.")
@@ -71,38 +88,68 @@ export default function ManagerQueuePage() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [getCheckInTime])
 
   useEffect(() => {
     fetchStationAndQueue()
   }, [fetchStationAndQueue])
 
+  // Filtered & Sorted Queue List (First Checked-In Vehicle First)
+  const queueList = useMemo(() => {
+    const filtered = bookings.filter((b) => {
+      // ONLY show bookings that have been checked in at the desk or beyond in service
+      // Strictly exclude PENDING, CONFIRMED (not yet arrived), NO_SHOW, CANCELLED, and STALLED
+      const isCheckedInOrBeyond =
+        b.status === "CHECK_IN" ||
+        b.status === "CHECKED_IN" ||
+        b.status === "IN_SERVICE" ||
+        b.status === "SERVICE_COMPLETED" ||
+        b.status === "AWAITING_CONFIRMATION" ||
+        b.status === "COMPLETED"
+
+      if (!isCheckedInOrBeyond) return false
+
+      if (filterType === "QUEUED") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
+      if (filterType === "IN_SERVICE") return b.status === "IN_SERVICE"
+      if (filterType === "COMPLETED")
+        return (
+          b.status === "SERVICE_COMPLETED" ||
+          b.status === "AWAITING_CONFIRMATION" ||
+          b.status === "COMPLETED"
+        )
+      return true
+    })
+
+    // Sort strictly by check-in arrival time (First Checked-In First - FIFO)
+    return filtered.sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
+  }, [bookings, filterType, getCheckInTime])
+
   // Active Selected Booking
   const selectedBooking = useMemo(() => {
-    return bookings.find((b) => b.id === selectedBookingId) || bookings[0] || null
-  }, [bookings, selectedBookingId])
+    if (!selectedBookingId) return queueList[0] || null
+    return bookings.find((b) => b.id === selectedBookingId) || queueList[0] || null
+  }, [bookings, queueList, selectedBookingId])
 
-  // Filtered Queue List
-  const queueList = useMemo(() => {
-    return bookings.filter((b) => {
-      if (filterType === "QUEUED") return b.status === "CONFIRMED" || b.status === "CHECKED_IN"
-      if (filterType === "IN_SERVICE") return b.status === "IN_SERVICE"
-      if (filterType === "COMPLETED") return b.status === "SERVICE_COMPLETED" || b.status === "COMPLETED"
-      return b.status !== "CANCELLED" && b.status !== "NO_SHOW"
-    })
-  }, [bookings, filterType])
-
-  // KPI Calculations
+  // KPI Calculations (Only count checked-in or in-service vehicles)
   const todayBookingsCount = bookings.length
-  const activeQueueCount = bookings.filter(
-    (b) => b.status === "CHECKED_IN" || b.status === "IN_SERVICE" || b.status === "CONFIRMED"
-  ).length
+  const activeQueueCount = useMemo(() => {
+    return bookings.filter(
+      (b) =>
+        b.status === "CHECK_IN" ||
+        b.status === "CHECKED_IN" ||
+        b.status === "IN_SERVICE"
+    ).length
+  }, [bookings])
   const estimatedWaitMinutes = activeQueueCount * 15
 
-  // Next Up Booking (First checked-in or confirmed booking)
+  // Next Up Booking (Earliest checked-in vehicle waiting for bay)
   const nextUpBooking = useMemo(() => {
-    return bookings.find((b) => b.status === "CHECKED_IN" || b.status === "CONFIRMED")
-  }, [bookings])
+    const checkedInWaiting = bookings
+      .filter((b) => b.status === "CHECK_IN" || b.status === "CHECKED_IN")
+      .sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
+
+    return checkedInWaiting[0] || null
+  }, [bookings, getCheckInTime])
 
   // Handle Advance Booking Status
   const handleAdvanceStatus = async (targetStatus: string) => {

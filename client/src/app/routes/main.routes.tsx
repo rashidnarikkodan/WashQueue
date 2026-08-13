@@ -36,6 +36,9 @@ const RootPathResolver = () => {
     case ROLE.ADMIN:
       return <Navigate to={APP_ROUTES.ADMIN.DASHBOARD} replace />
     case ROLE.MANAGER:
+      if (activeViewMode === VIEW_MODE.CUSTOMER) {
+        return <Home />
+      }
       return <Navigate to={APP_ROUTES.MANAGER.DASHBOARD} replace />
     case ROLE.OWNER:
       if (

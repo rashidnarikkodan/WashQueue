@@ -8,11 +8,15 @@ import {
   Printer,
   ShieldCheck,
   Check,
+  Loader2,
 } from "lucide-react"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
 import { bookingApi } from "@/shared/apis/booking.api"
+import { vehicleCatelogApi, stationApi } from "@/shared/apis"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
+import type { StationDetail } from "@/features/station/types"
 
 export default function WalkInComponent() {
   const navigate = useNavigate()
@@ -20,11 +24,18 @@ export default function WalkInComponent() {
     stationId: string
     stationName: string
   } | null>(null)
+  const [stationDetail, setStationDetail] = useState<StationDetail | null>(null)
+
+  // Categories & Classes State
+  const [categories, setCategories] = useState<VehicleCategory[]>([])
+  const [classes, setClasses] = useState<VehicleClass[]>([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(true)
+  const [isLoadingClasses, setIsLoadingClasses] = useState<boolean>(false)
 
   // Form State
   const [registrationNumber, setRegistrationNumber] = useState("")
-  const [category, setCategory] = useState("Car")
-  const [vehicleClass, setVehicleClass] = useState("Sedan")
+  const [category, setCategory] = useState("")
+  const [vehicleClass, setVehicleClass] = useState("")
   const [serviceType, setServiceType] = useState<"HALF" | "FULL">("FULL")
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
   
@@ -38,15 +49,84 @@ export default function WalkInComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdBooking, setCreatedBooking] = useState<BookingResponse | null>(null)
 
-  // Fetch Station
+  // Fetch Categories on Mount
+  useEffect(() => {
+    let isMounted = true
+    setIsLoadingCategories(true)
+    vehicleCatelogApi
+      .getCategories()
+      .then((data) => {
+        if (!isMounted) return
+        const active = (data ?? []).filter((c) => c.isActive)
+        setCategories(active)
+        if (active.length > 0) {
+          setCategory(active[0].id)
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load vehicle categories:", err)
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingCategories(false)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  // Fetch Classes whenever Category Changes
+  const fetchClassesForCategory = useCallback(async (catId: string) => {
+    if (!catId) {
+      setClasses([])
+      setVehicleClass("")
+      return
+    }
+    setIsLoadingClasses(true)
+    try {
+      const data = await vehicleCatelogApi.getClasses({ categoryId: catId })
+      const active = (data ?? []).filter((c) => c.isActive)
+      setClasses(active)
+      if (active.length > 0) {
+        setVehicleClass(active[0].id)
+      } else {
+        setVehicleClass("")
+      }
+    } catch (err) {
+      console.error("Failed to load classes for category:", err)
+      setClasses([])
+      setVehicleClass("")
+    } finally {
+      setIsLoadingClasses(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (category) {
+      fetchClassesForCategory(category)
+    }
+  }, [category, fetchClassesForCategory])
+
+  // Handle Category Selection Change
+  const handleCategoryChange = (newCategoryId: string) => {
+    setCategory(newCategoryId)
+  }
+
+  // Fetch Station & Station Details
   const fetchStation = useCallback(async () => {
     try {
       const stations = await managerApi.getManagedStations()
       if (stations && stations.length > 0) {
+        const sId = stations[0].stationId
         setStationInfo({
-          stationId: stations[0].stationId,
+          stationId: sId,
           stationName: stations[0].stationName,
         })
+        try {
+          const detail = await stationApi.getStationById(sId)
+          setStationDetail(detail)
+        } catch (e) {
+          console.error("Failed to load station pricing details:", e)
+        }
       }
     } catch (err) {
       console.error("Failed to load station:", err)
@@ -80,19 +160,34 @@ export default function WalkInComponent() {
     )
   }
 
-  // Price Calculation
-  const basePrice = serviceType === "HALF" ? 250 : 450
-  const extraPriceMap: Record<string, number> = {
-    "interior-cleaning": 150,
-    "wax-polish": 200,
-    "tire-shine": 50,
-    "engine-cleaning": 300,
-  }
-  const extrasTotal = selectedExtras.reduce(
-    (sum, exId) => sum + (extraPriceMap[exId] || 0),
-    0
-  )
+  // Dynamic Price Calculations based on selected Vehicle Class and Station Detail
+  const classPricing = stationDetail?.pricing?.find((p) => p.vehicleClassId === vehicleClass)
+  const halfWashPrice = classPricing?.halfWashPrice ?? 250
+  const fullWashPrice = classPricing?.fullWashPrice ?? 450
+  const basePrice = serviceType === "HALF" ? halfWashPrice : fullWashPrice
+
+  const availableExtras = stationDetail?.extraServices?.length
+    ? stationDetail.extraServices.map((ex) => {
+        const p = ex.pricing?.find((pr) => pr.vehicleClassId === vehicleClass)
+        return {
+          id: ex.id,
+          label: ex.name,
+          price: p ? p.price : 150,
+        }
+      })
+    : [
+        { id: "interior-cleaning", label: "Interior Cleaning", price: 150 },
+        { id: "wax-polish", label: "Wax Polish", price: 200 },
+        { id: "tire-shine", label: "Tire Shine", price: 50 },
+        { id: "engine-cleaning", label: "Engine Cleaning", price: 300 },
+      ]
+
+  const extrasTotal = selectedExtras.reduce((sum, exId) => {
+    const item = availableExtras.find((e) => e.id === exId)
+    return sum + (item ? item.price : 0)
+  }, 0)
   const grandTotal = basePrice + extrasTotal
+
 
   // Submit Walk-In Booking
   const handleCreateWalkIn = async () => {
@@ -163,38 +258,63 @@ export default function WalkInComponent() {
                 </label>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-medium text-base focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  disabled={isLoadingCategories}
+                  className="w-full px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-medium text-base focus:outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <option value="Car">Car</option>
-                  <option value="Bike">Bike</option>
-                  <option value="Truck">Truck</option>
+                  {isLoadingCategories ? (
+                    <option value="">Loading categories...</option>
+                  ) : categories.length === 0 ? (
+                    <option value="">No categories found</option>
+                  ) : (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
 
             {/* Vehicle Class Selector */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                CLASS
+              <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-between">
+                <span>CLASS</span>
+                {isLoadingClasses && (
+                  <span className="flex items-center gap-1 text-[10px] font-medium text-primary normal-case">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Updating classes...
+                  </span>
+                )}
               </label>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {["Hatchback", "Sedan", "SUV", "Premium"].map((cls) => (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={() => setVehicleClass(cls)}
-                    className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all cursor-pointer border ${
-                      vehicleClass === cls
-                        ? "bg-primary/10 text-primary border-primary/80 shadow-md shadow-primary/10"
-                        : "bg-muted text-muted-foreground border-border hover:border-border/80"
-                    }`}
-                  >
-                    {cls}
-                  </button>
-                ))}
-              </div>
+              {isLoadingClasses ? (
+                <div className="flex items-center gap-2 p-4 rounded-2xl bg-muted/40 border border-border text-xs text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span>Loading vehicle classes...</span>
+                </div>
+              ) : classes.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-muted/40 border border-border text-xs text-muted-foreground">
+                  No vehicle classes available for this category.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {classes.map((cls) => (
+                    <button
+                      key={cls.id}
+                      type="button"
+                      onClick={() => setVehicleClass(cls.id)}
+                      className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all cursor-pointer border ${
+                        vehicleClass === cls.id
+                          ? "bg-primary/10 text-primary border-primary/80 shadow-md shadow-primary/10"
+                          : "bg-muted text-muted-foreground border-border hover:border-border/80"
+                      }`}
+                    >
+                      {cls.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -214,8 +334,8 @@ export default function WalkInComponent() {
 
                 <div className="space-y-3">
                   {[
-                    { type: "HALF", name: "Half Wash", price: 250 },
-                    { type: "FULL", name: "Full Wash", price: 450 },
+                    { type: "HALF", name: "Half Wash", price: halfWashPrice },
+                    { type: "FULL", name: "Full Wash", price: fullWashPrice },
                   ].map((w) => (
                     <div
                       key={w.type}
@@ -251,12 +371,7 @@ export default function WalkInComponent() {
                 </span>
 
                 <div className="space-y-2.5">
-                  {[
-                    { id: "interior-cleaning", label: "Interior Cleaning", price: 150 },
-                    { id: "wax-polish", label: "Wax Polish", price: 200 },
-                    { id: "tire-shine", label: "Tire Shine", price: 50 },
-                    { id: "engine-cleaning", label: "Engine Cleaning", price: 300 },
-                  ].map((ex) => {
+                  {availableExtras.map((ex) => {
                     const isChecked = selectedExtras.includes(ex.id)
                     return (
                       <div

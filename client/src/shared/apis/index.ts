@@ -5,3 +5,7 @@ export * from "./users.api"
 export * from "./catelog.api"
 export * from "./vehicle.api"
 export * from "./wallet.api"
+export * from "./booking.api"
+export * from "./manager.api"
+export * from "./payment.api"
+
