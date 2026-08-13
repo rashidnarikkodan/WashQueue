@@ -5,21 +5,36 @@ import {
   Keyboard,
   CheckCircle2,
   HelpCircle,
-  Camera,
-  Focus,
-  Zap,
   ArrowRight,
   Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import { QrCameraScanner } from "../QrCameraScanner"
 
 export default function CheckInComponent() {
   const navigate = useNavigate()
   const [bookingIdInput, setBookingIdInput] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
+
+  // Handle Automatic QR Code Scan Check-In
+  const handleQrScanSuccess = async (scannedValue: string) => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      const res = await bookingApi.checkIn(scannedValue)
+      toast.success("Customer checked in successfully via QR Scan!")
+      setConfirmedBooking(res)
+      setBookingIdInput("")
+    } catch (err: any) {
+      console.error("Check-in error:", err)
+      toast.error(err?.message || "Failed to check in. Please verify QR token or Booking ID.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // Handle Manual Check-In
   const handleManualCheckIn = async (e?: React.FormEvent) => {
@@ -47,42 +62,22 @@ export default function CheckInComponent() {
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         {/* Left Card: Digital Check-In / QR Scanner */}
-        <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 relative overflow-hidden flex flex-col justify-between shadow-md text-card-foreground">
+        <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 relative overflow-hidden flex flex-col justify-between shadow-md text-card-foreground">
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <QrCode className="h-6 w-6 text-primary" />
               <h2 className="text-xl font-bold text-foreground">Digital Check-In</h2>
             </div>
             <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
-              AUTO-GATE SCANNER
+              LIVE GATE SCANNER
             </span>
           </div>
 
-          {/* Scanner Viewfinder Box */}
-          <div className="relative aspect-[4/3] rounded-3xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center p-6 space-y-4 group hover:border-primary transition-colors overflow-hidden">
-            {/* Status Pills */}
-            <div className="absolute top-4 left-4 flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-primary text-primary-foreground flex items-center gap-1">
-                <Camera className="h-3 w-3" /> CAMERA
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500 text-slate-950 flex items-center gap-1">
-                <Focus className="h-3 w-3" /> FOCUS
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-500 text-white flex items-center gap-1">
-                <Zap className="h-3 w-3" /> SCANNER
-              </span>
-            </div>
-
-            {/* Scan Reticle Graphic */}
-            <div className="h-40 w-40 rounded-3xl border-2 border-primary/40 border-t-primary animate-spin-slow flex items-center justify-center relative">
-              <QrCode className="h-16 w-16 text-primary opacity-80" />
-            </div>
-
-            <div className="text-center space-y-1">
-              <p className="text-sm font-bold text-foreground">Position QR Code in viewfinder</p>
-              <p className="text-xs text-muted-foreground">Scanner automatically captures customer pass token</p>
-            </div>
-          </div>
+          {/* Interactive QR Camera Scanner */}
+          <QrCameraScanner
+            onScanSuccess={handleQrScanSuccess}
+            isProcessing={isSubmitting}
+          />
 
           <div className="text-xs text-muted-foreground flex items-center gap-2 pt-2">
             <Sparkles className="h-4 w-4 text-primary shrink-0" />
