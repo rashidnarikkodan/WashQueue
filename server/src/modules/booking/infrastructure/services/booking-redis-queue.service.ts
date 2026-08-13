@@ -167,6 +167,31 @@ export class BookingRedisQueueService implements IBookingQueueService {
   /**
    * Reconciles Redis operational queue against MongoDB persistent source of truth.
    */
+  private computeDynamicServiceDurationMinutes(booking: Booking, historicalAvgMinutes?: number): number {
+    const baseMinutes = booking.serviceType === "FULL" ? 40 : 20
+    const extraServicesMinutes = (booking.extraServices?.length || 0) * 5
+
+    // Vehicle Class / Model Duration Modifier
+    const modelLower = (booking.vehicleDetails?.model || "").toLowerCase()
+    let classModifier = 0
+    if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+      classModifier = 10
+    } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+      classModifier = 15
+    }
+
+    const calculated = baseMinutes + extraServicesMinutes + classModifier
+
+    // Blend with historical station average if available (50/50 weighting)
+    if (historicalAvgMinutes && historicalAvgMinutes >= 10 && historicalAvgMinutes <= 120) {
+      return Math.round((calculated + historicalAvgMinutes) / 2)
+    }
+    return calculated
+  }
+
+  /**
+   * Reconciles Redis operational queue against MongoDB persistent source of truth.
+   */
   async reconcileStationQueue(stationId: string): Promise<OperationalStationQueueDTO> {
     const queueKey = `queue:station:${stationId}:waiting`
     const activeKey = `queue:station:${stationId}:active`
@@ -177,6 +202,32 @@ export class BookingRedisQueueService implements IBookingQueueService {
     const stationDoc = await StationModel.findById(stationId).exec()
     if (stationDoc && stationDoc.slotConfig && typeof stationDoc.slotConfig.bays === "number") {
       totalBays = Math.max(1, stationDoc.slotConfig.bays)
+    }
+
+    // Query historical completed services for actual average duration per station
+    let historicalAvgMinutes: number | undefined
+    try {
+      const historyDocs = await BookingModel.find({
+        stationId,
+        status: { $in: [BookingStatus.COMPLETED, BookingStatus.SERVICE_COMPLETED] },
+        serviceStartedAt: { $exists: true, $ne: null },
+        serviceCompletedAt: { $exists: true, $ne: null },
+      })
+        .sort({ serviceCompletedAt: -1 })
+        .limit(10)
+        .exec()
+
+      if (historyDocs.length > 0) {
+        const totalDuration = historyDocs.reduce((acc, doc) => {
+          const start = new Date(doc.serviceStartedAt!).getTime()
+          const end = new Date(doc.serviceCompletedAt!).getTime()
+          const mins = Math.max(5, Math.round((end - start) / 60000))
+          return acc + mins
+        }, 0)
+        historicalAvgMinutes = Math.round(totalDuration / historyDocs.length)
+      }
+    } catch {
+      // Fall back if history query fails
     }
 
     // 2. Fetch active operational bookings from MongoDB
@@ -216,7 +267,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
     const activeServicesCount = activeServicesList.length
     const availableBays = Math.max(0, totalBays - activeServicesCount)
     const queueDepth = waitingList.length
-    const avgDuration = 25 // Average wash duration in minutes
+    const avgDuration = historicalAvgMinutes || 25 // Average wash duration in minutes
 
     // 5. Build Authoritative Server-Calculated DTOs
     const activeItems: OperationalQueueItemDTO[] = activeServicesList.map((b, idx) => {
@@ -254,7 +305,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
     for (let i = 0; i < totalBays; i++) {
       const activeB = activeServicesList[i]
       if (activeB) {
-        const duration = (activeB.serviceType === "FULL" ? 40 : 20) + ((activeB.extraServices?.length || 0) * 5)
+        const duration = this.computeDynamicServiceDurationMinutes(activeB, historicalAvgMinutes)
         const startMs = activeB.serviceStartedAt ? new Date(activeB.serviceStartedAt).getTime() : nowMs
         const elapsedMinutes = Math.max(0, (nowMs - startMs) / (1000 * 60))
         const remainingMinutes = Math.max(1, Math.round(duration - elapsedMinutes))
@@ -276,7 +327,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
       const estimatedServiceStart = new Date(nowMs + estimatedWaitMinutes * 60 * 1000).toISOString()
 
       // Update earliest bay's finish timeline with this vehicle's service duration
-      const duration = (b.serviceType === "FULL" ? 40 : 20) + ((b.extraServices?.length || 0) * 5)
+      const duration = this.computeDynamicServiceDurationMinutes(b, historicalAvgMinutes)
       bayFinishMinutes[0] = (bayFinishMinutes[0] ?? 0) + duration
 
       return {
