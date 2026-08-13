@@ -84,21 +84,21 @@ export default function ManagerPostInspectionPage() {
   const plate = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "MH 01 AB 1234"
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
       
       {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-100 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
             Post Service Inspection
           </h1>
-          <p className="text-sm text-slate-400 font-medium">
+          <p className="text-sm text-muted-foreground font-medium">
             Review quality standards and finalize handover for vehicle #{bookingIdStr}
           </p>
         </div>
 
-        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-widest">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           SERVICE COMPLETED
         </span>
       </div>
@@ -110,58 +110,58 @@ export default function ManagerPostInspectionPage() {
         <div className="lg:col-span-7 space-y-6">
           
           {/* Booking Summary Card */}
-          <div className="rounded-3xl bg-[#2E3447]/40 backdrop-blur-md border border-slate-800 p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest">
                   BOOKING ID
                 </span>
-                <h2 className="text-2xl font-bold text-white">#{bookingIdStr}</h2>
+                <h2 className="text-2xl font-bold text-foreground">#{bookingIdStr}</h2>
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   CUSTOMER
                 </span>
-                <h3 className="text-lg font-bold text-white">{customerName}</h3>
+                <h3 className="text-lg font-bold text-foreground">{customerName}</h3>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">VEHICLE</span>
-                <p className="font-bold text-white text-sm">{vehicleName}</p>
-                <p className="text-slate-400 text-[11px]">{plate}</p>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">VEHICLE</span>
+                <p className="font-bold text-foreground text-sm">{vehicleName}</p>
+                <p className="text-muted-foreground text-[11px]">{plate}</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">WASH TYPE</span>
-                <p className="font-bold text-white text-sm">{booking?.serviceType || "Full"} Wash</p>
-                <p className="text-slate-400 text-[11px]">Exterior + Interior</p>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">WASH TYPE</span>
+                <p className="font-bold text-foreground text-sm">{booking?.serviceType || "Full"} Wash</p>
+                <p className="text-muted-foreground text-[11px]">Exterior + Interior</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">STARTED</span>
-                <p className="font-bold text-white text-sm">10:02 AM</p>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">STARTED</span>
+                <p className="font-bold text-foreground text-sm">10:02 AM</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">DURATION</span>
-                <p className="font-bold text-white text-sm">43 Mins</p>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">DURATION</span>
+                <p className="font-bold text-foreground text-sm">43 Mins</p>
               </div>
             </div>
           </div>
 
           {/* Inspection Checklist Card */}
-          <div className="rounded-3xl bg-[#0F172A] border border-slate-800 p-6 sm:p-8 space-y-6">
-            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <CheckCircle2 className="h-6 w-6 text-blue-400" />
-              <h2 className="text-xl font-bold text-white">Inspection Checklist</h2>
+          <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
+            <div className="flex items-center gap-3 border-b border-border pb-4">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-bold text-foreground">Inspection Checklist</h2>
             </div>
 
             {/* EXTERIOR INTEGRITY */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 EXTERIOR INTEGRITY
               </span>
 
@@ -173,7 +173,7 @@ export default function ManagerPostInspectionPage() {
                 ].map((item) => (
                   <div
                     key={item.key}
-                    className="p-4 rounded-xl bg-[#191F31]/50 border border-slate-800 flex items-center justify-between"
+                    className="p-4 rounded-xl bg-muted border border-border flex items-center justify-between"
                   >
                     <div
                       onClick={() => toggleChecklistItem(item.key)}
@@ -182,19 +182,19 @@ export default function ManagerPostInspectionPage() {
                       <div
                         className={`h-5 w-5 rounded border flex items-center justify-center ${
                           checklist[item.key]
-                            ? "bg-blue-400 border-blue-400 text-slate-950"
-                            : "border-slate-600 bg-slate-800"
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "border-border bg-muted"
                         }`}
                       >
                         {checklist[item.key] && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                       </div>
-                      <span className="text-sm font-semibold text-white">{item.label}</span>
+                      <span className="text-sm font-semibold text-foreground">{item.label}</span>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => handleAddRemark(item.label)}
-                      className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider cursor-pointer"
+                      className="text-xs font-bold text-primary hover:underline transition-colors uppercase tracking-wider cursor-pointer"
                     >
                       {remarks[item.label] ? "Edit Remark" : "Add Remark"}
                     </button>
@@ -205,7 +205,7 @@ export default function ManagerPostInspectionPage() {
 
             {/* INTERIOR SANITIZATION */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 INTERIOR SANITIZATION
               </span>
 
@@ -216,7 +216,7 @@ export default function ManagerPostInspectionPage() {
                 ].map((item) => (
                   <div
                     key={item.key}
-                    className="p-4 rounded-xl bg-[#191F31]/50 border border-slate-800 flex items-center justify-between"
+                    className="p-4 rounded-xl bg-muted border border-border flex items-center justify-between"
                   >
                     <div
                       onClick={() => toggleChecklistItem(item.key)}
@@ -225,19 +225,19 @@ export default function ManagerPostInspectionPage() {
                       <div
                         className={`h-5 w-5 rounded border flex items-center justify-center ${
                           checklist[item.key]
-                            ? "bg-blue-400 border-blue-400 text-slate-950"
-                            : "border-slate-600 bg-slate-800"
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "border-border bg-muted"
                         }`}
                       >
                         {checklist[item.key] && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                       </div>
-                      <span className="text-sm font-semibold text-white">{item.label}</span>
+                      <span className="text-sm font-semibold text-foreground">{item.label}</span>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => handleAddRemark(item.label)}
-                      className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider cursor-pointer"
+                      className="text-xs font-bold text-primary hover:underline transition-colors uppercase tracking-wider cursor-pointer"
                     >
                       {remarks[item.label] ? "Edit Remark" : "Add Remark"}
                     </button>
@@ -248,11 +248,11 @@ export default function ManagerPostInspectionPage() {
 
             {/* FINAL QUALITY VERIFICATION */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 FINAL QUALITY VERIFICATION
               </span>
 
-              <div className="p-4 rounded-xl bg-[#191F31]/50 border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-muted border border-border flex items-center justify-between">
                 <div
                   onClick={() => toggleChecklistItem("specialRequest")}
                   className="flex items-center gap-3 cursor-pointer"
@@ -260,19 +260,19 @@ export default function ManagerPostInspectionPage() {
                   <div
                     className={`h-5 w-5 rounded border flex items-center justify-center ${
                       checklist.specialRequest
-                        ? "bg-blue-400 border-blue-400 text-slate-950"
-                        : "border-slate-600 bg-slate-800"
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-border bg-muted"
                     }`}
                   >
                     {checklist.specialRequest && <Check className="h-3.5 w-3.5 stroke-[3]" />}
                   </div>
-                  <span className="text-sm font-semibold text-white">Special Request Fulfillment</span>
+                  <span className="text-sm font-semibold text-foreground">Special Request Fulfillment</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => handleAddRemark("Special Request Fulfillment")}
-                  className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider cursor-pointer"
+                  className="text-xs font-bold text-primary hover:underline transition-colors uppercase tracking-wider cursor-pointer"
                 >
                   Add Remark
                 </button>
@@ -287,13 +287,13 @@ export default function ManagerPostInspectionPage() {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Photo Evidence Hub Card */}
-          <div className="rounded-3xl bg-[#0F172A] border border-slate-800 p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="rounded-3xl bg-card border border-border p-6 space-y-4 text-card-foreground shadow-md">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-blue-400" />
-                <h3 className="text-base font-bold text-white">Photo Evidence</h3>
+                <Camera className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-bold text-foreground">Photo Evidence</h3>
               </div>
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">
                 4 / 5 COMPLETE
               </span>
             </div>
@@ -304,57 +304,57 @@ export default function ManagerPostInspectionPage() {
                 { title: "RETAKE REAR", img: "https://api.builder.io/api/v1/image/assets/TEMP/a7601f720acbfe8f0cac773fb1d501c72cb1d0fc?width=635" },
                 { title: "RETAKE LEFT", img: "https://api.builder.io/api/v1/image/assets/TEMP/93b31d3821af229e7a649b2f6ecf696ebfc80ae9?width=635" },
               ].map((p, i) => (
-                <div key={i} className="relative rounded-xl overflow-hidden aspect-video border border-slate-800 group">
+                <div key={i} className="relative rounded-xl overflow-hidden aspect-video border border-border group">
                   <img src={p.img} alt={p.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-                    <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-white font-bold text-[10px] uppercase border border-white/20">
+                    <span className="px-2.5 py-1 rounded-full bg-primary/20 text-white font-bold text-[10px] uppercase border border-white/20">
                       {p.title}
                     </span>
                   </div>
                 </div>
               ))}
 
-              <div className="rounded-xl border-2 border-dashed border-slate-700 bg-slate-900 p-4 flex flex-col items-center justify-center text-center space-y-1">
-                <Plus className="h-5 w-5 text-blue-400" />
-                <span className="text-[10px] font-bold text-slate-300 uppercase">RIGHT PROFILE</span>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-                  <div className="bg-blue-400 h-full w-3/4" />
+              <div className="rounded-xl border-2 border-dashed border-border bg-muted p-4 flex flex-col items-center justify-center text-center space-y-1">
+                <Plus className="h-5 w-5 text-primary" />
+                <span className="text-[10px] font-bold text-foreground uppercase">RIGHT PROFILE</span>
+                <div className="w-full bg-border h-1.5 rounded-full overflow-hidden mt-1">
+                  <div className="bg-primary h-full w-3/4" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Handover Readiness Card */}
-          <div className="rounded-3xl bg-[#0F172A] border border-slate-800 p-6 space-y-6">
-            <h3 className="text-base font-bold text-white border-b border-slate-800 pb-3">
+          <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
+            <h3 className="text-base font-bold text-foreground border-b border-border pb-3">
               Readiness Check
             </h3>
 
             <div className="space-y-3 text-xs">
-              <div className="flex items-center gap-3 text-emerald-400 font-semibold">
+              <div className="flex items-center gap-3 text-emerald-500 font-semibold">
                 <div className="h-5 w-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
                   <Check className="h-3.5 w-3.5 stroke-[3]" />
                 </div>
                 <span>All Checklist Items Verified</span>
               </div>
 
-              <div className="flex items-center gap-3 text-slate-300">
-                <div className="h-5 w-5 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
+              <div className="flex items-center gap-3 text-foreground">
+                <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border">
                   <Check className="h-3.5 w-3.5 stroke-[3]" />
                 </div>
                 <span>Mandatory Photos Uploaded</span>
               </div>
 
-              <div className="flex items-center gap-3 text-slate-300">
-                <div className="h-5 w-5 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
+              <div className="flex items-center gap-3 text-foreground">
+                <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border">
                   <Check className="h-3.5 w-3.5 stroke-[3]" />
                 </div>
                 <span>Manager's Signature/Notes Provided</span>
               </div>
             </div>
 
-            <div className="space-y-2 border-t border-slate-800 pt-4">
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <div className="space-y-2 border-t border-border pt-4">
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 MANAGER'S FINAL OBSERVATIONS
               </label>
               <textarea
@@ -362,7 +362,7 @@ export default function ManagerPostInspectionPage() {
                 value={handoverNotes}
                 onChange={(e) => setHandoverNotes(e.target.value)}
                 placeholder="Add handover notes or customer feedback..."
-                className="w-full p-3 rounded-xl bg-[#2E3447] text-white text-xs font-medium border border-slate-700 focus:outline-none focus:border-blue-400 transition-colors"
+                className="w-full p-3 rounded-xl bg-muted text-foreground text-xs font-medium border border-border focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
               />
             </div>
 
@@ -370,7 +370,7 @@ export default function ManagerPostInspectionPage() {
               <button
                 type="button"
                 onClick={() => toast.success("Post-inspection saved")}
-                className="px-5 py-3 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-extrabold text-xs transition-colors cursor-pointer"
+                className="px-5 py-3 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border font-extrabold text-xs transition-colors cursor-pointer"
               >
                 Save
               </button>
@@ -379,7 +379,7 @@ export default function ManagerPostInspectionPage() {
                 type="button"
                 onClick={handleHandover}
                 disabled={isSubmitting}
-                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-extrabold text-xs transition-all shadow-lg shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <span>{isSubmitting ? "Completing..." : "Handover to customer"}</span>
                 <ArrowRight className="h-4 w-4" />

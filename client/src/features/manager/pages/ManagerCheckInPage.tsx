@@ -10,11 +10,7 @@ import {
   Focus,
   Zap,
   ArrowRight,
-  User,
-  Car,
-  Clock,
   Sparkles,
-  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
@@ -50,29 +46,29 @@ export default function ManagerCheckInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
       
       {/* 1. Page Header */}
-      <div className="space-y-2 border-b border-slate-800/80 pb-6">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-100 tracking-tight">
+      <div className="space-y-2 border-b border-border pb-6">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
           Customer Arrival Desk
         </h1>
-        <p className="text-sm sm:text-base text-slate-400 font-medium">
+        <p className="text-sm sm:text-base text-muted-foreground font-medium">
           Manage customer arrivals, booking check-ins, and walk-in bookings.
         </p>
       </div>
 
       {/* 2. Tab Navigation Pills */}
-      <div className="flex items-center gap-4 border-b border-white/5 pb-2">
+      <div className="flex items-center gap-4 border-b border-border pb-2">
         <button
           onClick={() => setActiveTab("CHECK_IN")}
-          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all cursor-pointer ${
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all cursor-pointer border ${
             activeTab === "CHECK_IN"
-              ? "bg-blue-500/10 text-blue-400 border-2 border-blue-500/40 shadow-lg shadow-blue-500/10"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              ? "bg-primary/10 text-primary border-primary/40 shadow-lg shadow-primary/10"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
           }`}
         >
-          <QrCode className="h-4 w-4 text-blue-400" />
+          <QrCode className="h-4 w-4 text-primary" />
           <span>[ Check-In ]</span>
         </button>
 
@@ -81,13 +77,13 @@ export default function ManagerCheckInPage() {
             setActiveTab("WALK_IN")
             navigate("/manager/walk-ins")
           }}
-          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all cursor-pointer ${
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all cursor-pointer border ${
             activeTab === "WALK_IN"
-              ? "bg-blue-500/10 text-blue-400 border-2 border-blue-500/40"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              ? "bg-primary/10 text-primary border-primary/40"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
           }`}
         >
-          <PlusCircle className="h-4 w-4 text-slate-400" />
+          <PlusCircle className="h-4 w-4 text-muted-foreground" />
           <span>[ Walk-In Booking ]</span>
         </button>
       </div>
@@ -96,186 +92,136 @@ export default function ManagerCheckInPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         
         {/* Left Card: Digital Check-In / QR Scanner */}
-        <div className="rounded-3xl bg-[#191F31] border border-white/5 p-6 sm:p-8 space-y-8 relative overflow-hidden flex flex-col justify-between shadow-2xl">
+        <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 relative overflow-hidden flex flex-col justify-between shadow-md text-card-foreground">
           
-          {/* Subtle background glow */}
-          <div className="absolute -top-20 -left-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <span className="text-xs font-black tracking-widest uppercase text-blue-400">
-                DIGITAL CHECK-IN
-              </span>
-              <p className="text-xs text-slate-400">
-                Align the customer's QR pass within the camera viewfinder to auto check-in.
-              </p>
+          <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="flex items-center gap-3">
+              <QrCode className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-bold text-foreground">Digital Check-In</h2>
             </div>
-
-            {/* QR Scanner Viewfinder Simulation Box */}
-            <div className="relative aspect-square max-w-[320px] mx-auto rounded-2xl border-2 border-slate-700 bg-black overflow-hidden flex flex-col items-center justify-center p-6 group">
-              
-              {/* Corner Target Markers */}
-              <div className="absolute top-4 left-4 w-10 h-10 border-t-4 border-l-4 border-blue-400 rounded-tl-lg" />
-              <div className="absolute top-4 right-4 w-10 h-10 border-t-4 border-r-4 border-blue-400 rounded-tr-lg" />
-              <div className="absolute bottom-4 left-4 w-10 h-10 border-b-4 border-l-4 border-blue-400 rounded-bl-lg" />
-              <div className="absolute bottom-4 right-4 w-10 h-10 border-b-4 border-r-4 border-blue-400 rounded-br-lg" />
-
-              {/* Animated Scanning Line */}
-              <div className="absolute inset-x-2 top-1/2 h-0.5 bg-blue-400 shadow-[0_0_15px_#60A5FA] animate-pulse" />
-
-              {/* Scanner Icon & Instructions */}
-              <QrCode className="h-28 w-28 text-slate-700 group-hover:text-blue-500/60 transition-colors" />
-              <p className="text-xs font-medium text-slate-400 text-center mt-4 px-2">
-                Place customer QR code in front of camera
-              </p>
-            </div>
+            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
+              AUTO-GATE SCANNER
+            </span>
           </div>
 
-          {/* Bottom Status Indicators */}
-          <div className="grid grid-cols-3 gap-4 border-t border-slate-800/80 pt-6 text-center">
+          {/* Scanner Viewfinder Box */}
+          <div className="relative aspect-[4/3] rounded-3xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center p-6 space-y-4 group hover:border-primary transition-colors overflow-hidden">
             
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#4AE176]" />
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-1">
+            {/* Status Pills */}
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-primary text-primary-foreground flex items-center gap-1">
                 <Camera className="h-3 w-3" /> CAMERA
               </span>
-            </div>
-
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#4AE176]" />
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-1">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500 text-slate-950 flex items-center gap-1">
                 <Focus className="h-3 w-3" /> FOCUS
               </span>
-            </div>
-
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#4AE176]" />
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-1">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-500 text-white flex items-center gap-1">
                 <Zap className="h-3 w-3" /> SCANNER
               </span>
             </div>
 
+            {/* Scan Reticle Graphic */}
+            <div className="h-40 w-40 rounded-3xl border-2 border-primary/40 border-t-primary animate-spin-slow flex items-center justify-center relative">
+              <QrCode className="h-16 w-16 text-primary opacity-80" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <p className="text-sm font-bold text-foreground">Position QR Code in viewfinder</p>
+              <p className="text-xs text-muted-foreground">Scanner automatically captures customer pass token</p>
+            </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground flex items-center gap-2 pt-2">
+            <Sparkles className="h-4 w-4 text-primary shrink-0" />
+            <span>Scanning automatically registers vehicle arrival in FIFO queue.</span>
           </div>
 
         </div>
 
-        {/* Right Card: Manual Check-In */}
-        <div className="rounded-3xl bg-[#23293C] border border-white/5 p-6 sm:p-8 space-y-8 flex flex-col justify-between shadow-2xl">
+        {/* Right Card: Manual Check-In Form */}
+        <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 flex flex-col justify-between shadow-md text-card-foreground">
           
-          <form onSubmit={handleManualCheckIn} className="space-y-6">
-            
-            <div className="flex items-center gap-3 border-b border-slate-700/60 pb-4">
-              <Keyboard className="h-6 w-6 text-blue-400" />
-              <h2 className="text-xl font-bold text-white">Manual Check-In</h2>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <Keyboard className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-bold text-foreground">Manual Entry</h2>
+              </div>
+              <span className="text-xs text-muted-foreground font-medium">FALLBACK MODE</span>
             </div>
 
-            <div className="space-y-3">
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-300">
-                BOOKING ID
-              </label>
-
-              <input
-                type="text"
-                value={bookingIdInput}
-                onChange={(e) => setBookingIdInput(e.target.value)}
-                placeholder="e.g. WQ-8829-XJ"
-                className="w-full px-6 py-4 rounded-xl bg-[#2E3447] text-white font-mono text-lg font-bold placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-blue-400 transition-colors shadow-inner"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-4 rounded-2xl bg-[#ADC6FF] hover:bg-blue-300 text-[#002E6A] font-extrabold text-base transition-all shadow-lg shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <CheckCircle2 className="h-5 w-5" />
-              <span>{isSubmitting ? "Processing..." : "Check-In"}</span>
-            </button>
-
-          </form>
-
-          {/* Quick Help Accordion */}
-          <div className="space-y-3 border-t border-slate-700/60 pt-6">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-              QUICK HELP
-            </span>
-
-            <div className="space-y-3 text-xs text-slate-300">
-              <div className="flex items-start gap-3">
-                <HelpCircle className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p>
-                  If scanner fails, enter the 8-digit Booking ID found in the customer's confirmation email.
-                </p>
+            <form onSubmit={handleManualCheckIn} className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  ENTER BOOKING ID / QR TOKEN
+                </label>
+                <input
+                  type="text"
+                  value={bookingIdInput}
+                  onChange={(e) => setBookingIdInput(e.target.value)}
+                  placeholder="e.g. WQ-28472 or token_..."
+                  className="w-full px-5 py-4 rounded-2xl bg-muted border border-border text-foreground font-mono text-base font-bold focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
+                />
               </div>
 
-              <div className="flex items-start gap-3">
-                <HelpCircle className="h-4 w-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p>
-                  Check-in is only available within 30 mins of the scheduled slot.
-                </p>
-              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>{isSubmitting ? "Verifying..." : "Verify & Complete Check-In"}</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+
+          {/* Assistance Box */}
+          <div className="p-5 rounded-2xl bg-muted/50 border border-border space-y-2 text-xs">
+            <div className="flex items-center gap-2 font-bold text-primary">
+              <HelpCircle className="h-4 w-4" />
+              <span>Need Assistance?</span>
             </div>
+            <p className="text-muted-foreground leading-relaxed">
+              If the customer lost their QR pass, ask for their 10-digit phone number or registration number to search active booking records.
+            </p>
           </div>
 
         </div>
 
       </div>
 
-      {/* Confirmed Booking Modal */}
+      {/* Confirmation Modal */}
       {confirmedBooking && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-slate-800 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
-            
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Checked-In Successfully</h3>
-                  <p className="text-xs text-slate-400">
-                    Booking #{confirmedBooking.bookingNumber}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setConfirmedBooking(null)}
-                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
+          <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 text-center shadow-2xl animate-in zoom-in-95">
+            <div className="h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="h-10 w-10" />
             </div>
 
-            <div className="space-y-4 bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
-                  <User className="h-4 w-4 text-blue-400" /> Customer:
-                </span>
-                <span className="font-bold text-white">
-                  {confirmedBooking.customerDetails?.name || confirmedBooking.walkInCustomer?.name || "Customer"}
+            <div>
+              <h3 className="text-2xl font-bold text-foreground">Customer Checked In!</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Booking #{confirmedBooking.bookingNumber} • Vehicle added to Queue
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-muted text-left text-xs space-y-2 border border-border">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Vehicle:</span>
+                <span className="font-bold text-foreground">
+                  {confirmedBooking.vehicleDetails?.brand || "Car"} {confirmedBooking.vehicleDetails?.model || ""}
                 </span>
               </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
-                  <Car className="h-4 w-4 text-blue-400" /> Vehicle:
-                </span>
-                <span className="font-bold text-white">
-                  {confirmedBooking.vehicleDetails?.brand || ""} {confirmedBooking.vehicleDetails?.model || "Vehicle"} ({confirmedBooking.vehicleDetails?.registrationNumber || ""})
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Reg No:</span>
+                <span className="font-mono font-bold text-primary">
+                  {confirmedBooking.vehicleDetails?.registrationNumber || confirmedBooking.walkInVehicle?.registrationNumber || "MH 12 AB 1234"}
                 </span>
               </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-blue-400" /> Package:
-                </span>
-                <span className="font-bold text-blue-300">
-                  {confirmedBooking.serviceType} WASH
-                </span>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Wash Package:</span>
+                <span className="font-bold text-foreground">{confirmedBooking.serviceType} WASH</span>
               </div>
-
             </div>
 
             <div className="flex items-center gap-3 pt-2">
@@ -284,20 +230,18 @@ export default function ManagerCheckInPage() {
                   setConfirmedBooking(null)
                   navigate("/manager/queues")
                 }}
-                className="flex-1 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-lg shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer"
               >
-                <span>View Queue Board</span>
-                <ArrowRight className="h-4 w-4" />
+                Go to Queue Board
               </button>
 
               <button
                 onClick={() => setConfirmedBooking(null)}
-                className="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition-colors cursor-pointer"
+                className="px-5 py-3.5 rounded-xl bg-muted text-foreground font-bold text-sm hover:bg-muted/80 transition-colors cursor-pointer border border-border"
               >
-                Done
+                Close
               </button>
             </div>
-
           </div>
         </div>
       )}
