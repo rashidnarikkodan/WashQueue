@@ -1,77 +1,351 @@
 import redis from "@/infrastructure/cache/redis.client"
 import logger from "@/configs/logger.config"
-import { Booking } from "../../domain/entities/Booking"
+import { Booking, BookingStatus } from "../../domain/entities/Booking"
 import { IBookingQueueService } from "../../application/interfaces/booking-queue.interface"
+import { OperationalQueueItemDTO, OperationalStationQueueDTO } from "../../application/dtos/operational-queue.dto"
+import { BookingModel } from "../models/booking.model"
+import { StationModel } from "@/modules/station/infrastructure/models/station.model"
+import { BookingMapper } from "../mappers/booking.mapper"
 
 export class BookingRedisQueueService implements IBookingQueueService {
   /**
-   * Pushes checked-in booking into the station queue in Redis.
+   * Deterministic queue ordering score computation:
+   * For Scheduled Bookings: min(windowStart, checkedInAt) timestamp
+   * For Walk-In Bookings: checkedInAt timestamp
+   */
+  private computeOrderScore(booking: Booking): number {
+    const checkedInTs = booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : Date.now()
+    if (!booking.isWalkIn && booking.scheduling && booking.scheduling.windowStart) {
+      const windowStartTs = new Date(booking.scheduling.windowStart).getTime()
+      return Math.min(windowStartTs, checkedInTs)
+    }
+    return checkedInTs
+  }
+
+  /**
+   * Pushes checked-in booking into the Redis station queue cleanly.
    */
   async pushToStationQueue(booking: Booking): Promise<void> {
     try {
       const stationId = booking.stationId
       const bookingId = booking.id
-      const queueKey = `queue:${stationId}`
+      const queueKey = `queue:station:${stationId}:waiting`
+      const activeKey = `queue:station:${stationId}:active`
       const bookingKey = `queue:booking:${bookingId}`
-      const stationLiveKey = `station:live:${stationId}`
+      const metaKey = `queue:station:${stationId}:meta`
 
-      const timestamp = Date.now()
+      const score = this.computeOrderScore(booking)
+      const now = Date.now()
 
-      // 1. Add to station queue sorted set (score = timestamp of check-in)
-      await redis.zadd(queueKey, timestamp, bookingId)
+      // 1. Add to sorted waiting set (score = deterministic score)
+      await redis.zadd(queueKey, score, bookingId)
 
-      // 2. Set hash metadata for this booking
+      // 2. Ensure removed from active set if re-queueing
+      await redis.srem(activeKey, bookingId)
+
+      // 3. Store Redis Hash metadata
       await redis.hset(bookingKey, {
         bookingId,
         bookingNumber: booking.bookingNumber,
         stationId,
         status: booking.status,
         serviceType: booking.serviceType,
-        checkedInAt: timestamp.toString(),
+        isWalkIn: booking.isWalkIn ? "true" : "false",
+        checkedInAt: (booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : now).toString(),
+        windowStart: booking.scheduling?.windowStart ? new Date(booking.scheduling.windowStart).toISOString() : "",
+        windowEnd: booking.scheduling?.windowEnd ? new Date(booking.scheduling.windowEnd).toISOString() : "",
       })
 
-      // 3. Increment station live queue counter
-      await redis.hincrby(stationLiveKey, "queueDepth", 1)
+      // 4. Update station metadata
+      const queueDepth = await redis.zcard(queueKey)
+      const activeCount = await redis.scard(activeKey)
+      await redis.hset(metaKey, {
+        queueDepth: queueDepth.toString(),
+        activeCount: activeCount.toString(),
+        updatedAt: now.toString(),
+      })
 
-      logger.info({ bookingId, stationId }, "[RedisQueue] Booking added to station queue")
+      logger.info({ bookingId, stationId, score }, "[RedisQueue] Booking pushed to waiting queue")
     } catch (error) {
-      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Failed to push to Redis queue")
+      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Redis failure during pushToStationQueue")
     }
   }
 
   /**
-   * Updates Redis queue progress when status advances or booking is completed/cancelled.
+   * Updates Redis state when booking status changes (IN_SERVICE, SERVICE_COMPLETED, COMPLETED, CANCELLED, NO_SHOW).
    */
   async updateQueueStatus(booking: Booking): Promise<void> {
     try {
       const stationId = booking.stationId
       const bookingId = booking.id
-      const queueKey = `queue:${stationId}`
+      const queueKey = `queue:station:${stationId}:waiting`
+      const activeKey = `queue:station:${stationId}:active`
       const bookingKey = `queue:booking:${bookingId}`
-      const stationLiveKey = `station:live:${stationId}`
+      const metaKey = `queue:station:${stationId}:meta`
 
-      await redis.hset(bookingKey, "status", booking.status)
+      const now = Date.now()
 
-      // If status reaches terminal state (COMPLETED, CANCELLED, NO_SHOW), remove from active queue
-      if (["COMPLETED", "CANCELLED", "NO_SHOW"].includes(booking.status)) {
+      if (booking.status === BookingStatus.IN_SERVICE) {
+        // Vehicle enters active bay: remove from waiting set, add to active set
         await redis.zrem(queueKey, bookingId)
+        await redis.sadd(activeKey, bookingId)
+        await redis.hset(bookingKey, {
+          status: booking.status,
+          serviceStartedAt: (booking.serviceStartedAt ? new Date(booking.serviceStartedAt).getTime() : now).toString(),
+        })
+      } else if ([BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER].includes(booking.status)) {
+        // Service finished: update status hash (remains in active set until final handover/completion)
+        await redis.hset(bookingKey, "status", booking.status)
+      } else if ([BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(booking.status)) {
+        // Terminal state: remove from waiting set, active set, and delete hash
+        await redis.zrem(queueKey, bookingId)
+        await redis.srem(activeKey, bookingId)
         await redis.del(bookingKey)
-
-        const currentDepth = await redis.hget(stationLiveKey, "queueDepth")
-        if (currentDepth && parseInt(currentDepth, 10) > 0) {
-          await redis.hincrby(stationLiveKey, "queueDepth", -1)
-        }
-
-        logger.info(
-          { bookingId, status: booking.status },
-          "[RedisQueue] Booking removed from active Redis queue"
-        )
+      } else {
+        await redis.hset(bookingKey, "status", booking.status)
       }
+
+      // Refresh meta counters
+      const queueDepth = await redis.zcard(queueKey)
+      const activeCount = await redis.scard(activeKey)
+      await redis.hset(metaKey, {
+        queueDepth: queueDepth.toString(),
+        activeCount: activeCount.toString(),
+        updatedAt: now.toString(),
+      })
+
+      logger.info({ bookingId, status: booking.status }, "[RedisQueue] Updated booking queue status in Redis")
     } catch (error) {
-      logger.error(
-        { error, bookingId: booking.id },
-        "[RedisQueue] Failed to update Redis queue status"
-      )
+      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Redis failure during updateQueueStatus")
+    }
+  }
+
+  /**
+   * Fetches operational queue from Redis, or triggers MongoDB reconciliation if cold/corrupted.
+   */
+  async getOperationalQueue(stationId: string, totalBays: number): Promise<OperationalStationQueueDTO | null> {
+    try {
+      const queueKey = `queue:station:${stationId}:waiting`
+      const activeKey = `queue:station:${stationId}:active`
+
+      const exists = await redis.exists(queueKey)
+      if (!exists) {
+        // Cold start or missing Redis key -> Trigger Reconciliation from Mongo
+        return await this.reconcileStationQueue(stationId)
+      }
+
+      // Fetch waiting booking IDs ordered deterministically by score
+      const waitingBookingIds = await redis.zrange(queueKey, 0, -1)
+      const activeBookingIds = await redis.smembers(activeKey)
+
+      const totalActiveAndWaiting = waitingBookingIds.length + activeBookingIds.length
+      if (totalActiveAndWaiting === 0) {
+        // Empty queue
+        return {
+          stationId,
+          stationName: "",
+          totalBays,
+          activeServicesCount: 0,
+          availableBays: totalBays,
+          queueDepth: 0,
+          totalActiveAndWaiting: 0,
+          averageWashDurationMinutes: 25,
+          waitingQueue: [],
+          activeServices: [],
+          reconciledWithMongo: false,
+        }
+      }
+
+      // Reconcile with Mongo to fetch full domain DTOs reliably
+      return await this.reconcileStationQueue(stationId)
+    } catch (error) {
+      logger.error({ error, stationId }, "[RedisQueue] Failed to read queue from Redis; falling back to MongoDB reconciliation")
+      return await this.reconcileStationQueue(stationId)
+    }
+  }
+
+  /**
+   * Reconciles Redis operational queue against MongoDB persistent source of truth.
+   */
+  async reconcileStationQueue(stationId: string): Promise<OperationalStationQueueDTO> {
+    const queueKey = `queue:station:${stationId}:waiting`
+    const activeKey = `queue:station:${stationId}:active`
+    const metaKey = `queue:station:${stationId}:meta`
+
+    // 1. Fetch Station configuration for total bays
+    let totalBays = 1
+    const stationDoc = await StationModel.findById(stationId).exec()
+    if (stationDoc && stationDoc.slotConfig && typeof stationDoc.slotConfig.bays === "number") {
+      totalBays = Math.max(1, stationDoc.slotConfig.bays)
+    }
+
+    // 2. Fetch active operational bookings from MongoDB
+    const activeDocs = await BookingModel.find({
+      stationId,
+      status: {
+        $in: [
+          BookingStatus.CHECKED_IN,
+          BookingStatus.IN_SERVICE,
+          BookingStatus.SERVICE_COMPLETED,
+          BookingStatus.AWAITING_HANDOVER,
+        ],
+      },
+    })
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+      .exec()
+
+    const domainBookings = activeDocs.map((doc) => BookingMapper.toDomain(doc))
+
+    // 3. Separate Active (IN_SERVICE / COMPLETED_SERVICE / HANDOVER) vs Waiting (CHECKED_IN)
+    const activeServicesList: Booking[] = []
+    const waitingList: Booking[] = []
+
+    for (const b of domainBookings) {
+      if (b.status === BookingStatus.CHECKED_IN) {
+        waitingList.push(b)
+      } else {
+        activeServicesList.push(b)
+      }
+    }
+
+    // 4. Sort waitingList deterministically by score
+    waitingList.sort((a, b) => this.computeOrderScore(a) - this.computeOrderScore(b))
+
+    const activeServicesCount = activeServicesList.length
+    const availableBays = Math.max(0, totalBays - activeServicesCount)
+    const queueDepth = waitingList.length
+    const avgDuration = 25 // Average wash duration in minutes
+
+    // 5. Build Authoritative Server-Calculated DTOs
+    const activeItems: OperationalQueueItemDTO[] = activeServicesList.map((b, idx) => {
+      const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
+      const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
+      const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
+
+      return {
+        bookingId: b.id,
+        bookingNumber: b.bookingNumber,
+        stationId: b.stationId,
+        status: b.status,
+        serviceType: b.serviceType,
+        isWalkIn: b.isWalkIn,
+        customerName,
+        customerPhone: phone,
+        registrationNumber: reg,
+        vehicleModel: b.vehicleDetails?.model || "Standard Vehicle",
+        windowStart: b.scheduling?.windowStart ? new Date(b.scheduling.windowStart).toISOString() : undefined,
+        windowEnd: b.scheduling?.windowEnd ? new Date(b.scheduling.windowEnd).toISOString() : undefined,
+        checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toISOString() : undefined,
+        serviceStartedAt: b.serviceStartedAt ? new Date(b.serviceStartedAt).toISOString() : undefined,
+        completedAt: b.completedAt ? new Date(b.completedAt).toISOString() : undefined,
+        queuePosition: 0, // 0 for active in bay
+        isBayActive: true,
+        assignedBayNumber: (idx % totalBays) + 1,
+        estimatedWaitMinutes: 0,
+      }
+    })
+
+    const waitingItems: OperationalQueueItemDTO[] = waitingList.map((b, idx) => {
+      const position = idx + 1 // 1-indexed queue position
+      const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
+      const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
+      const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
+
+      // Calculate estimated wait:
+      // If position <= availableBays -> estimated wait = 0
+      // Else -> ceil((position - availableBays) / totalBays) * avgDuration
+      let estimatedWaitMinutes = 0
+      if (position > availableBays) {
+        const rounds = Math.ceil((position - availableBays) / totalBays)
+        estimatedWaitMinutes = rounds * avgDuration
+      }
+
+      return {
+        bookingId: b.id,
+        bookingNumber: b.bookingNumber,
+        stationId: b.stationId,
+        status: b.status,
+        serviceType: b.serviceType,
+        isWalkIn: b.isWalkIn,
+        customerName,
+        customerPhone: phone,
+        registrationNumber: reg,
+        vehicleModel: b.vehicleDetails?.model || "Standard Vehicle",
+        windowStart: b.scheduling?.windowStart ? new Date(b.scheduling.windowStart).toISOString() : undefined,
+        windowEnd: b.scheduling?.windowEnd ? new Date(b.scheduling.windowEnd).toISOString() : undefined,
+        checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toISOString() : undefined,
+        queuePosition: position,
+        isBayActive: false,
+        estimatedWaitMinutes,
+      }
+    })
+
+    // 6. Resynchronize Redis in background (Atomic refresh)
+    try {
+      await redis.del(queueKey)
+      await redis.del(activeKey)
+
+      for (const b of waitingList) {
+        const score = this.computeOrderScore(b)
+        await redis.zadd(queueKey, score, b.id)
+      }
+
+      for (const b of activeServicesList) {
+        await redis.sadd(activeKey, b.id)
+      }
+
+      await redis.hset(metaKey, {
+        queueDepth: queueDepth.toString(),
+        activeCount: activeServicesCount.toString(),
+        reconciledAt: Date.now().toString(),
+      })
+    } catch (err) {
+      logger.warn({ error: err, stationId }, "[RedisQueue] Redis resync failed during reconciliation (non-critical)")
+    }
+
+    return {
+      stationId,
+      stationName: stationDoc?.name || "Station Queue",
+      totalBays,
+      activeServicesCount,
+      availableBays,
+      queueDepth,
+      totalActiveAndWaiting: activeServicesCount + queueDepth,
+      averageWashDurationMinutes: avgDuration,
+      waitingQueue: waitingItems,
+      activeServices: activeItems,
+      reconciledWithMongo: true,
+    }
+  }
+
+  /**
+   * Cleans stale queue entries (>24 hours checked-in without progression).
+   */
+  async cleanStaleQueueEntries(stationId: string): Promise<number> {
+    try {
+      const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const staleDocs = await BookingModel.find({
+        stationId,
+        status: BookingStatus.CHECKED_IN,
+        updatedAt: { $lt: cutoff },
+      }).exec()
+
+      if (staleDocs.length === 0) return 0
+
+      for (const doc of staleDocs) {
+        doc.status = BookingStatus.NO_SHOW as any
+        doc.updatedAt = new Date()
+        await doc.save()
+        await this.updateQueueStatus(BookingMapper.toDomain(doc))
+      }
+
+      logger.info({ count: staleDocs.length, stationId }, "[RedisQueue] Cleaned stale queue entries")
+      return staleDocs.length
+    } catch (error) {
+      logger.error({ error, stationId }, "[RedisQueue] Failed to clean stale queue entries")
+      return 0
     }
   }
 }

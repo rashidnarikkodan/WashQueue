@@ -46,7 +46,34 @@ export default function ManagerQueuePage() {
     return new Date(b.updatedAt || b.createdAt).getTime()
   }, [])
 
-  // 1. Fetch Manager Station & Queue
+  const [liveQueueData, setLiveQueueData] = useState<{
+    stationId: string
+    stationName: string
+    totalBays: number
+    activeServicesCount: number
+    availableBays: number
+    queueDepth: number
+    totalActiveAndWaiting: number
+    averageWashDurationMinutes: number
+    waitingQueue: Array<{
+      bookingId: string
+      bookingNumber: string
+      queuePosition: number
+      isBayActive: boolean
+      assignedBayNumber?: number
+      estimatedWaitMinutes: number
+    }>
+    activeServices: Array<{
+      bookingId: string
+      bookingNumber: string
+      queuePosition: number
+      isBayActive: boolean
+      assignedBayNumber?: number
+      estimatedWaitMinutes: number
+    }>
+  } | null>(null)
+
+  // 1. Fetch Manager Station & Authoritative Live Queue
   const fetchStationAndQueue = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -57,6 +84,14 @@ export default function ManagerQueuePage() {
           stationId: activeStation.stationId,
           stationName: activeStation.stationName,
         })
+
+        // Fetch authoritative server-computed operational queue
+        try {
+          const liveQ = await bookingApi.getLiveQueue(activeStation.stationId)
+          setLiveQueueData(liveQ)
+        } catch {
+          // Ignore live queue fallback if not available
+        }
 
         // Fetch bookings for this station
         const res = await bookingApi.getUserBookings({
@@ -151,17 +186,35 @@ export default function ManagerQueuePage() {
     return checkedInWaiting[0] || null
   }, [bookings, getCheckInTime])
 
-  // Handle Advance Booking Status
+  // Handle Advance Booking Status (Start Service, Post-Inspection, or Separate Handover)
   const handleAdvanceStatus = async (targetStatus: string) => {
     if (!selectedBooking) return
+
+    // If manager clicks Complete Service on an IN_SERVICE vehicle -> open Post-Inspection workflow!
+    if (targetStatus === "SERVICE_COMPLETED" || (selectedBooking.status === "IN_SERVICE" && targetStatus === "COMPLETED")) {
+      navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
+      return
+    }
+
     setIsAdvancing(true)
     try {
-      const updated = await bookingApi.advanceStatus(selectedBooking.id, targetStatus)
-      toast.success(`Booking status updated to ${targetStatus.replace("_", " ")}`)
+      let updated: BookingResponse
+      if (targetStatus === "IN_SERVICE") {
+        updated = await bookingApi.startService(selectedBooking.id)
+        toast.success("✓ Wash service started successfully!")
+      } else if (targetStatus === "COMPLETED") {
+        updated = await bookingApi.completeHandover(selectedBooking.id)
+        toast.success("✓ Vehicle handover completed & booking closed!")
+      } else {
+        updated = await bookingApi.advanceStatus(selectedBooking.id, targetStatus)
+        toast.success(`Booking status updated to ${targetStatus.replace("_", " ")}`)
+      }
       setBookings((prev) => prev.map((b) => (b.id === updated.id ? updated : b)))
-    } catch (err) {
+      fetchStationAndQueue()
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
       console.error("Status update error:", err)
-      toast.error("Failed to update booking status")
+      toast.error(errorObj?.message || "Failed to update booking status")
     } finally {
       setIsAdvancing(false)
     }
@@ -239,25 +292,32 @@ export default function ManagerQueuePage() {
         {/* Card 2: Active Queue */}
         <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            ACTIVE QUEUE
+            ACTIVE QUEUE DEPTH
           </span>
           <div className="text-4xl font-extrabold text-primary">
-            {isLoading ? "..." : activeQueueCount}
+            {isLoading ? "..." : (liveQueueData ? liveQueueData.queueDepth : activeQueueCount)}
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-            <span>Est. Wait: {estimatedWaitMinutes}m</span>
+            <span>
+              Est. Wait:{" "}
+              {liveQueueData
+                ? `${Math.ceil((liveQueueData.queueDepth / (liveQueueData.totalBays || 1)) * liveQueueData.averageWashDurationMinutes)}m`
+                : `${estimatedWaitMinutes}m`}
+            </span>
           </p>
         </div>
 
-        {/* Card 3: Avg Service Time */}
+        {/* Card 3: Station Bay Capacity */}
         <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            AVG SERVICE TIME
+            STATION BAYS
           </span>
-          <div className="text-4xl font-extrabold text-primary">18m</div>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <span>Target: 20m</span>
+          <div className="text-4xl font-extrabold text-primary">
+            {liveQueueData ? `${liveQueueData.activeServicesCount}/${liveQueueData.totalBays}` : "1/1"}
+          </div>
+          <p className="text-xs text-emerald-500 font-semibold flex items-center gap-1">
+            <span>{liveQueueData ? `${liveQueueData.availableBays} bays available` : "Capacity Ok"}</span>
           </p>
         </div>
 
