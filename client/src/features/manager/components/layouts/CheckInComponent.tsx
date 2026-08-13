@@ -19,24 +19,25 @@ export default function CheckInComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
 
-  // Handle Automatic QR Code Scan Check-In
+  // Handle Automatic QR Code Scan Validation & Pre-Inspection Navigation
   const handleQrScanSuccess = async (scannedValue: string) => {
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
-      const res = await bookingApi.checkIn(scannedValue)
-      toast.success("Customer checked in successfully via QR Scan!")
-      setConfirmedBooking(res)
+      const res = await bookingApi.validateQr(scannedValue)
+      toast.success("✓ QR Verified! Navigating to Pre-Service Inspection...")
       setBookingIdInput("")
-    } catch (err: any) {
-      console.error("Check-in error:", err)
-      toast.error(err?.message || "Failed to check in. Please verify QR token or Booking ID.")
+      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
+      console.error("QR Validation error:", err)
+      toast.error(errorObj?.message || "Invalid or ineligible QR Admit Pass.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Handle Manual Check-In
+  // Handle Manual Check-In Entry Validation
   const handleManualCheckIn = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     if (!bookingIdInput.trim()) {
@@ -46,13 +47,14 @@ export default function CheckInComponent() {
 
     setIsSubmitting(true)
     try {
-      const res = await bookingApi.checkIn(bookingIdInput.trim())
-      toast.success("Customer checked in successfully!")
-      setConfirmedBooking(res)
+      const res = await bookingApi.validateQr(bookingIdInput.trim())
+      toast.success("✓ Booking Verified! Opening Pre-Service Inspection...")
       setBookingIdInput("")
-    } catch (err: any) {
-      console.error("Check-in error:", err)
-      toast.error(err?.message || "Failed to check in. Please verify Booking ID.")
+      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
+      console.error("Validation error:", err)
+      toast.error(errorObj?.message || "Failed to verify Booking ID or QR pass.")
     } finally {
       setIsSubmitting(false)
     }

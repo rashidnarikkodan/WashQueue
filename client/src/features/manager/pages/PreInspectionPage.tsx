@@ -48,25 +48,31 @@ export default function ManagerPreInspectionPage() {
     toast.success(`${slotKey.toUpperCase()} photo captured!`)
   }
 
-  // Complete Inspection
+  // Complete Pre-Service Inspection & Perform Atomic Check-In
   const handleSaveInspection = async () => {
     if (!booking) return
     setIsSubmitting(true)
     try {
-      await bookingApi.advanceStatus(booking.id, "IN_SERVICE")
-      toast.success("Pre-service inspection saved & wash service started!")
+      const photosArray = Object.values(capturedPhotos).filter(Boolean)
+      await bookingApi.savePreInspection(booking.id, {
+        photos: photosArray,
+        notes: notes || "Pre-service inspection verified",
+      })
+      toast.success("Pre-service inspection saved & vehicle checked in to queue!")
       navigate("/manager/queues")
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
       console.error("Inspection save error:", err)
-      toast.error(err?.message || "Failed to save inspection")
+      toast.error(errorObj?.message || "Failed to save pre-service inspection")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const customerName = booking?.customerDetails?.name || booking?.walkInCustomer?.name || "Rashid Narikkodan"
-  const phone = booking?.customerDetails?.phone || booking?.walkInCustomer?.phone || "+91 98450 •••• 12"
-  const registrationNumber = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "KA 01 MR 7829"
+  const customerName = booking?.customerDetails?.name || booking?.walkInCustomer?.name || (booking?.isWalkIn ? "Walk-In Customer" : "Customer")
+  const phone = booking?.customerDetails?.phone || booking?.walkInCustomer?.phone || "N/A"
+  const registrationNumber = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "N/A"
+  const initials = customerName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "CU"
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
@@ -117,7 +123,7 @@ export default function ManagerPreInspectionPage() {
             <div className="p-6 rounded-2xl border border-border bg-muted/50 flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary font-black text-2xl flex items-center justify-center">
-                  RN
+                  {initials}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground flex items-center gap-2">

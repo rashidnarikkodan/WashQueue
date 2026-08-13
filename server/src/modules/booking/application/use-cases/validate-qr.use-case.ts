@@ -1,0 +1,138 @@
+import { AppError } from "@/common/errors/app-error"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { QRTokenService } from "../../domain/services/QRTokenService"
+import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
+import { CheckInBookingInput } from "../dtos/checkin-booking.dto"
+import { BookingResponseDTO } from "../dtos/booking-response.dto"
+import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+
+export class ValidateQRForCheckInUseCase {
+  constructor(
+    private readonly bookingRepository: IBookingRepository,
+    private readonly managerAssignmentRepository: IManagerAssignmentRepository,
+    private readonly stationRepository: IStationRepository
+  ) {}
+
+  async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
+    let searchStr = (input.qrToken || input.bookingId || "").trim()
+
+    if (!searchStr) {
+      throw new AppError("QR token or Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // 1. Safe JSON parsing if scanned payload is JSON string
+    if (searchStr.startsWith("{") && searchStr.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(searchStr)
+        if (parsed.rawQrToken) {
+          searchStr = parsed.rawQrToken
+        } else if (parsed.bookingNumber) {
+          searchStr = parsed.bookingNumber
+        } else if (parsed.id) {
+          searchStr = parsed.id
+        }
+      } catch {
+        // Proceed with raw string if JSON parsing fails
+      }
+    }
+
+    let booking = null
+
+    // 2. Locate booking by QR token hash, booking number, or ObjectId
+    try {
+      const qrHash = QRTokenService.hashToken(searchStr)
+      booking = await this.bookingRepository.findByQrTokenHash(qrHash)
+    } catch {
+      // Ignore hash error and fall back
+    }
+
+    if (!booking) {
+      booking = await this.bookingRepository.findByBookingNumber(searchStr)
+    }
+
+    if (!booking && !searchStr.toUpperCase().startsWith("WQ-")) {
+      booking = await this.bookingRepository.findByBookingNumber(`WQ-${searchStr}`)
+    }
+
+    if (!booking && /^[0-9a-fA-F]{24}$/.test(searchStr)) {
+      booking = await this.bookingRepository.findById(searchStr)
+    }
+
+    // Rule 1: QR and Booking Existence
+    if (!booking) {
+      throw new AppError(`Invalid or unknown QR pass / Booking ID (${searchStr})`, HTTP_STATUS.NOT_FOUND)
+    }
+
+    // Rule 2: QR Expiration Check
+    const now = new Date()
+    if (booking.qr && booking.qr.qrExpiresAt && new Date(booking.qr.qrExpiresAt) < now) {
+      throw new AppError("This QR check-in admit pass has expired", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Rule 3: QR Consumption / Check-in State Check
+    if (booking.status === BookingStatus.CHECKED_IN || booking.checkedInAt) {
+      throw new AppError("This booking QR pass has already been used and checked in", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (booking.status === BookingStatus.IN_SERVICE || booking.status === BookingStatus.COMPLETED) {
+      throw new AppError(`Vehicle is already ${booking.status.replace("_", " ")}`, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Rule 4: Booking Status Eligibility (Must be strictly CONFIRMED)
+    if (booking.status === BookingStatus.CANCELLED || booking.cancellation) {
+      throw new AppError("This booking has been cancelled and cannot be checked in", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new AppError(
+        `Check-in is only allowed for CONFIRMED bookings. Current status is ${booking.status}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    // Rule 5: Station Belonging & Manager Authorization Check
+    const station = await this.stationRepository.findById(booking.stationId)
+    if (!station) {
+      throw new AppError("Booking station not found", HTTP_STATUS.NOT_FOUND)
+    }
+
+    const isOwner = station.ownerId === managerUserId
+    let isAuthorizedManager = isOwner
+
+    if (!isAuthorizedManager) {
+      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
+        managerUserId,
+        booking.stationId
+      )
+      if (assignment && assignment.status === "ACTIVE") {
+        isAuthorizedManager = true
+      }
+    }
+
+    if (!isAuthorizedManager) {
+      throw new AppError(
+        "You are not authorized to check in bookings for this station",
+        HTTP_STATUS.FORBIDDEN
+      )
+    }
+
+    // Rule 6: Payment Condition Check
+    const isPaymentSatisfied =
+      booking.paymentStatus === PaymentStatus.PAID ||
+      booking.paymentType === "DEPOSIT_PLUS_CASH" ||
+      booking.paymentType === "CASH_WALKIN"
+
+    if (!isPaymentSatisfied) {
+      throw new AppError(
+        "Required payment conditions are not satisfied for this booking",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    // Return DTO for UI navigation (status remains CONFIRMED until inspection is completed)
+    return BookingDTOMapper.toDTO(booking)
+  }
+}
