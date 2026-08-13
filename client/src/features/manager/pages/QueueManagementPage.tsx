@@ -469,6 +469,7 @@ export default function ManagerQueuePage() {
               { id: "ALL", label: "All Queue" },
               { id: "QUEUED", label: "Waiting" },
               { id: "IN_SERVICE", label: "In Service" },
+              { id: "STALLED", label: "Stalled Exceptions" },
               { id: "COMPLETED", label: "Completed" },
             ].map((t) => (
               <button
@@ -505,6 +506,8 @@ export default function ManagerQueuePage() {
                     className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 ${
                       isSelected
                         ? "bg-card border-primary shadow-md shadow-primary/10"
+                        : item.status === "STALLED"
+                        ? "bg-destructive/5 border-destructive/30 hover:border-destructive/60"
                         : "bg-card/50 border-border hover:border-border/80"
                     }`}
                   >
@@ -514,7 +517,9 @@ export default function ManagerQueuePage() {
                       </span>
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                          item.status === "IN_SERVICE"
+                          item.status === "STALLED"
+                            ? "bg-destructive/15 text-destructive border border-destructive/30"
+                            : item.status === "IN_SERVICE"
                             ? "bg-amber-500/10 text-amber-500 border border-amber-500/30"
                             : item.status === "CHECKED_IN"
                             ? "bg-blue-500/10 text-blue-500 border border-blue-500/30"
