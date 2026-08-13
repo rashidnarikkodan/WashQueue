@@ -173,6 +173,17 @@ export class BookingMapper {
           }
         : null,
       status: doc.status as BookingStatus,
+      stalledInfo: doc.stalledInfo
+        ? {
+            stalledReason: doc.stalledInfo.stalledReason,
+            stalledBy: doc.stalledInfo.stalledBy ? doc.stalledInfo.stalledBy.toString() : "",
+            stalledAt: doc.stalledInfo.stalledAt || new Date(),
+            previousStatus: doc.stalledInfo.previousStatus,
+            resolution: doc.stalledInfo.resolution,
+            resolvedBy: doc.stalledInfo.resolvedBy ? doc.stalledInfo.resolvedBy.toString() : undefined,
+            resolvedAt: doc.stalledInfo.resolvedAt,
+          }
+        : null,
       checkedInAt: doc.checkedInAt || null,
       checkedInBy: doc.checkedInBy ? doc.checkedInBy.toString() : null,
       serviceStartedAt: doc.serviceStartedAt || null,

@@ -20,6 +20,8 @@ export interface OperationalQueueItemDTO {
   isBayActive: boolean // true if IN_SERVICE
   assignedBayNumber?: number // Bay # (1..totalBays)
   estimatedWaitMinutes: number
+  estimatedServiceStart?: string
+  stalledReason?: string
 }
 
 export interface OperationalStationQueueDTO {

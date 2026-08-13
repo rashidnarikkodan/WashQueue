@@ -218,7 +218,34 @@ export const bookingApi = {
       )
       return response.data.data
     } catch (error) {
-      throw handleApiError(error, "Failed to complete post-service inspection")
+      throw handleApiError(error, "Failed to submit post-service inspection")
+    }
+  },
+
+  stallBooking: async (bookingId: string, reason: string): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/stall`, {
+        reason,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to stall booking")
+    }
+  },
+
+  resolveStalled: async (
+    bookingId: string,
+    resolution: string,
+    targetStatus?: "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
+  ): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/resolve-stalled`, {
+        resolution,
+        targetStatus,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to resolve stalled booking")
     }
   },
 

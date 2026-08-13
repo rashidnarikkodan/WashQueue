@@ -63,6 +63,16 @@ export const createBookingRouter = (bookingController: BookingController): Route
   )
 
   router.post(
+    "/:bookingId/stall",
+    asyncHandler(bookingController.stallBooking)
+  )
+
+  router.post(
+    "/:bookingId/resolve-stalled",
+    asyncHandler(bookingController.resolveStalled)
+  )
+
+  router.post(
     "/walk-in",
     validateRequest(createWalkInBookingSchema),
     asyncHandler(bookingController.createWalkIn)

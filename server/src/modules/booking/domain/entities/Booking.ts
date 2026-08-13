@@ -8,6 +8,7 @@ export enum BookingStatus {
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   NO_SHOW = "NO_SHOW",
+  STALLED = "STALLED",
 }
 
 export enum ServiceType {
@@ -108,6 +109,16 @@ export interface CustomerDetails {
   phone?: string
 }
 
+export interface StalledDetails {
+  stalledReason: string
+  stalledBy: string
+  stalledAt: Date
+  previousStatus: "CHECKED_IN" | "IN_SERVICE"
+  resolution?: string
+  resolvedBy?: string
+  resolvedAt?: Date
+}
+
 export interface BookingProps {
   id: string
   bookingNumber: string
@@ -134,6 +145,7 @@ export interface BookingProps {
   preServiceInspection?: InspectionRecord | null
   postServiceInspection?: InspectionRecord | null
   status: BookingStatus
+  stalledInfo?: StalledDetails | null
   checkedInAt?: Date | null
   checkedInBy?: string | null
   serviceStartedAt?: Date | null
@@ -250,6 +262,10 @@ export class Booking {
 
   get status(): BookingStatus {
     return this.props.status
+  }
+
+  get stalledInfo(): StalledDetails | null | undefined {
+    return this.props.stalledInfo
   }
 
   get checkedInAt(): Date | null | undefined {

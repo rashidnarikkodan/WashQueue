@@ -25,6 +25,8 @@ import { GetOperationalQueueUseCase } from "../application/use-cases/get-operati
 import { StartServiceUseCase } from "../application/use-cases/start-service.use-case"
 import { SavePostInspectionUseCase } from "../application/use-cases/save-post-inspection.use-case"
 import { CompleteHandoverUseCase } from "../application/use-cases/complete-handover.use-case"
+import { StallBookingUseCase } from "../application/use-cases/stall-booking.use-case"
+import { ResolveStalledBookingUseCase } from "../application/use-cases/resolve-stalled-booking.use-case"
 
 export class BookingController {
   constructor(
@@ -41,7 +43,9 @@ export class BookingController {
     private readonly getOperationalQueueUseCase?: GetOperationalQueueUseCase,
     private readonly startServiceUseCase?: StartServiceUseCase,
     private readonly savePostInspectionUseCase?: SavePostInspectionUseCase,
-    private readonly completeHandoverUseCase?: CompleteHandoverUseCase
+    private readonly completeHandoverUseCase?: CompleteHandoverUseCase,
+    private readonly stallBookingUseCase?: StallBookingUseCase,
+    private readonly resolveStalledBookingUseCase?: ResolveStalledBookingUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -304,5 +308,50 @@ export class BookingController {
     )
     res.setHeader("Content-Length", pdfBuffer.length)
     res.status(200).send(pdfBuffer)
+  }
+
+  stallBooking = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.stallBookingUseCase) {
+      throw new AppError("Stall booking service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.stallBookingUseCase.execute(managerUserId, {
+      bookingId,
+      reason: req.body.reason,
+    })
+    success(res, booking, HTTP_STATUS.OK, "Booking transitioned to STALLED state successfully")
+  }
+
+  resolveStalled = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.resolveStalledBookingUseCase) {
+      throw new AppError("Resolve stalled booking service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.resolveStalledBookingUseCase.execute(managerUserId, {
+      bookingId,
+      resolution: req.body.resolution,
+      targetStatus: req.body.targetStatus,
+    })
+    success(res, booking, HTTP_STATUS.OK, "Stalled booking resolved successfully")
   }
 }

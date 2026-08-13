@@ -31,7 +31,12 @@ export default function ManagerQueuePage() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAdvancing, setIsAdvancing] = useState(false)
-  const [filterType, setFilterType] = useState<"ALL" | "QUEUED" | "IN_SERVICE" | "COMPLETED">("ALL")
+  const [filterType, setFilterType] = useState<"ALL" | "QUEUED" | "IN_SERVICE" | "STALLED" | "COMPLETED">("ALL")
+  const [stallingBookingId, setStallingBookingId] = useState<string | null>(null)
+  const [stallReasonInput, setStallReasonInput] = useState("")
+  const [resolvingBookingId, setResolvingBookingId] = useState<string | null>(null)
+  const [resolutionInput, setResolutionInput] = useState("")
+  const [targetStatusInput, setTargetStatusInput] = useState<"CHECKED_IN" | "IN_SERVICE" | "CANCELLED">("CHECKED_IN")
 
   // Check-In Modal state
   const [isCheckInOpen, setIsCheckInOpen] = useState(false)
@@ -173,20 +178,20 @@ export default function ManagerQueuePage() {
   // Filtered & Sorted Queue List (First Checked-In Vehicle First)
   const queueList = useMemo(() => {
     const filtered = bookings.filter((b) => {
-      // ONLY show bookings that have been checked in at the desk or beyond in service
-      // Strictly exclude PENDING, CONFIRMED (not yet arrived), NO_SHOW, CANCELLED, and STALLED
       const isCheckedInOrBeyond =
         b.status === "CHECK_IN" ||
         b.status === "CHECKED_IN" ||
         b.status === "IN_SERVICE" ||
         b.status === "SERVICE_COMPLETED" ||
         b.status === "AWAITING_CONFIRMATION" ||
-        b.status === "COMPLETED"
+        b.status === "COMPLETED" ||
+        b.status === "STALLED"
 
       if (!isCheckedInOrBeyond) return false
 
       if (filterType === "QUEUED") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
       if (filterType === "IN_SERVICE") return b.status === "IN_SERVICE"
+      if (filterType === "STALLED") return b.status === "STALLED"
       if (filterType === "COMPLETED")
         return (
           b.status === "SERVICE_COMPLETED" ||
@@ -199,6 +204,48 @@ export default function ManagerQueuePage() {
     // Sort strictly by check-in arrival time (First Checked-In First - FIFO)
     return filtered.sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
   }, [bookings, filterType, getCheckInTime])
+
+  const handleConfirmStall = async () => {
+    if (!stallingBookingId || !stallReasonInput.trim()) {
+      toast.error("Please provide a valid reason for stalling the booking")
+      return
+    }
+
+    try {
+      setIsAdvancing(true)
+      await bookingApi.stallBooking(stallingBookingId, stallReasonInput.trim())
+      toast.warning("Booking moved to STALLED state")
+      setStallingBookingId(null)
+      setStallReasonInput("")
+      await fetchStationAndQueue()
+    } catch (err) {
+      console.error("Failed to stall booking:", err)
+      toast.error("Failed to stall booking")
+    } finally {
+      setIsAdvancing(false)
+    }
+  }
+
+  const handleConfirmResolveStalled = async () => {
+    if (!resolvingBookingId || !resolutionInput.trim()) {
+      toast.error("Please provide resolution notes")
+      return
+    }
+
+    try {
+      setIsAdvancing(true)
+      await bookingApi.resolveStalled(resolvingBookingId, resolutionInput.trim(), targetStatusInput)
+      toast.success(`Stalled booking recovered to ${targetStatusInput}`)
+      setResolvingBookingId(null)
+      setResolutionInput("")
+      await fetchStationAndQueue()
+    } catch (err) {
+      console.error("Failed to resolve stalled booking:", err)
+      toast.error("Failed to resolve stalled booking")
+    } finally {
+      setIsAdvancing(false)
+    }
+  }
 
   // Active Selected Booking
   const selectedBooking = useMemo(() => {
@@ -625,19 +672,48 @@ export default function ManagerQueuePage() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="pt-4 border-t border-border flex items-center justify-between">
+                <div className="pt-4 border-t border-border flex items-center justify-between gap-3 flex-wrap">
                   <span className="text-xs text-muted-foreground font-medium">
-                    Payment Status: <strong className="text-emerald-500 font-bold uppercase">{selectedBooking.paymentStatus}</strong>
+                    Payment: <strong className="text-emerald-500 font-bold uppercase">{selectedBooking.paymentStatus}</strong>
                   </span>
 
-                  <button
-                    type="button"
-                    onClick={() => handleAdvanceStatus("COMPLETED")}
-                    disabled={isAdvancing || selectedBooking.status === "COMPLETED"}
-                    className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-extrabold text-xs hover:opacity-90 transition-all shadow-md cursor-pointer disabled:opacity-50"
-                  >
-                    Mark Handover Complete
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {selectedBooking.status === "STALLED" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setResolvingBookingId(selectedBooking.id)
+                          setResolutionInput("")
+                          setTargetStatusInput("CHECKED_IN")
+                        }}
+                        className="px-4 py-2.5 rounded-2xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-all shadow-md cursor-pointer"
+                      >
+                        ⚡ Resolve Stalled Issue
+                      </button>
+                    ) : (
+                      (selectedBooking.status === "CHECKED_IN" || selectedBooking.status === "IN_SERVICE") && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStallingBookingId(selectedBooking.id)
+                            setStallReasonInput("")
+                          }}
+                          className="px-4 py-2.5 rounded-2xl bg-destructive/20 text-destructive border border-destructive/30 font-extrabold text-xs hover:bg-destructive/30 transition-all cursor-pointer"
+                        >
+                          Mark Stalled
+                        </button>
+                      )
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleAdvanceStatus("COMPLETED")}
+                      disabled={isAdvancing || selectedBooking.status === "COMPLETED"}
+                      className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-extrabold text-xs hover:opacity-90 transition-all shadow-md cursor-pointer disabled:opacity-50"
+                    >
+                      Mark Handover Complete
+                    </button>
+                  </div>
                 </div>
               </>
             )}
@@ -678,6 +754,98 @@ export default function ManagerQueuePage() {
                 className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
               >
                 {isCheckInSubmitting ? "Processing..." : "Complete Check-In"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mark Stalled Modal */}
+      {stallingBookingId && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card text-card-foreground border border-destructive/40 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-xl font-bold text-destructive">Stall Booking</h3>
+              <button onClick={() => setStallingBookingId(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground font-medium">
+                Marking a booking as STALLED retains it in the operational queue dashboard while indicating an exception (e.g. payment issue, inspection dispute, vehicle problem).
+              </p>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  STALL REASON / EXCEPTION DETAILS
+                </label>
+                <textarea
+                  value={stallReasonInput}
+                  onChange={(e) => setStallReasonInput(e.target.value)}
+                  placeholder="Describe the operational exception..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground text-sm focus:outline-none focus:border-destructive transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                onClick={handleConfirmStall}
+                disabled={isAdvancing || !stallReasonInput.trim()}
+                className="w-full py-3.5 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isAdvancing ? "Stalling..." : "Confirm Move to STALLED"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resolve Stalled Modal */}
+      {resolvingBookingId && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card text-card-foreground border border-amber-500/40 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-xl font-bold text-amber-500">Resolve Stalled Issue</h3>
+              <button onClick={() => setResolvingBookingId(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  RECOVERY TARGET ACTION
+                </label>
+                <select
+                  value={targetStatusInput}
+                  onChange={(e) => setTargetStatusInput(e.target.value as any)}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-bold text-sm focus:outline-none focus:border-amber-500"
+                >
+                  <option value="CHECKED_IN">Re-enter Waiting Queue (CHECKED_IN)</option>
+                  <option value="IN_SERVICE">Resume Wash Service (IN_SERVICE)</option>
+                  <option value="CANCELLED">Cancel Booking & Process Refund</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  RESOLUTION NOTES
+                </label>
+                <textarea
+                  value={resolutionInput}
+                  onChange={(e) => setResolutionInput(e.target.value)}
+                  placeholder="Enter resolution notes..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground text-sm focus:outline-none focus:border-amber-500 transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                onClick={handleConfirmResolveStalled}
+                disabled={isAdvancing || !resolutionInput.trim()}
+                className="w-full py-3.5 rounded-2xl bg-amber-500 text-black font-bold text-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isAdvancing ? "Resolving..." : "Complete Recovery Action"}
               </button>
             </div>
           </div>

@@ -102,6 +102,17 @@ export interface IBookingDocument extends Document {
     | "COMPLETED"
     | "CANCELLED"
     | "NO_SHOW"
+    | "STALLED"
+
+  stalledInfo?: {
+    stalledReason: string
+    stalledBy: Types.ObjectId
+    stalledAt: Date
+    previousStatus: "CHECKED_IN" | "IN_SERVICE"
+    resolution?: string
+    resolvedBy?: Types.ObjectId
+    resolvedAt?: Date
+  } | null
 
   checkedInAt?: Date | null
   checkedInBy?: Types.ObjectId | null
@@ -253,9 +264,20 @@ const bookingSchema = new Schema<IBookingDocument>(
         "COMPLETED",
         "CANCELLED",
         "NO_SHOW",
+        "STALLED",
       ],
       default: "CONFIRMED",
       index: true,
+    },
+
+    stalledInfo: {
+      stalledReason: { type: String },
+      stalledBy: { type: Schema.Types.ObjectId, ref: "User" },
+      stalledAt: { type: Date },
+      previousStatus: { type: String, enum: ["CHECKED_IN", "IN_SERVICE"] },
+      resolution: { type: String },
+      resolvedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      resolvedAt: { type: Date },
     },
 
     checkedInAt: { type: Date, default: null },

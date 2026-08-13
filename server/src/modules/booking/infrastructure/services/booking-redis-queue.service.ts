@@ -247,20 +247,37 @@ export class BookingRedisQueueService implements IBookingQueueService {
       }
     })
 
+    // Calculate remaining minutes on active bays & simulate multi-bay queue timeline
+    const nowMs = Date.now()
+    const bayFinishMinutes: number[] = []
+
+    for (let i = 0; i < totalBays; i++) {
+      const activeB = activeServicesList[i]
+      if (activeB) {
+        const duration = (activeB.serviceType === "FULL" ? 40 : 20) + ((activeB.extraServices?.length || 0) * 5)
+        const startMs = activeB.serviceStartedAt ? new Date(activeB.serviceStartedAt).getTime() : nowMs
+        const elapsedMinutes = Math.max(0, (nowMs - startMs) / (1000 * 60))
+        const remainingMinutes = Math.max(1, Math.round(duration - elapsedMinutes))
+        bayFinishMinutes.push(remainingMinutes)
+      } else {
+        bayFinishMinutes.push(0) // Empty bay immediately available
+      }
+    }
+
     const waitingItems: OperationalQueueItemDTO[] = waitingList.map((b, idx) => {
       const position = idx + 1 // 1-indexed queue position
       const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
       const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
       const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
 
-      // Calculate estimated wait:
-      // If position <= availableBays -> estimated wait = 0
-      // Else -> ceil((position - availableBays) / totalBays) * avgDuration
-      let estimatedWaitMinutes = 0
-      if (position > availableBays) {
-        const rounds = Math.ceil((position - availableBays) / totalBays)
-        estimatedWaitMinutes = rounds * avgDuration
-      }
+      // Sort bays to find earliest available bay for vehicle
+      bayFinishMinutes.sort((x, y) => x - y)
+      const estimatedWaitMinutes = bayFinishMinutes[0] ?? 0
+      const estimatedServiceStart = new Date(nowMs + estimatedWaitMinutes * 60 * 1000).toISOString()
+
+      // Update earliest bay's finish timeline with this vehicle's service duration
+      const duration = (b.serviceType === "FULL" ? 40 : 20) + ((b.extraServices?.length || 0) * 5)
+      bayFinishMinutes[0] = (bayFinishMinutes[0] ?? 0) + duration
 
       return {
         bookingId: b.id,
@@ -279,6 +296,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
         queuePosition: position,
         isBayActive: false,
         estimatedWaitMinutes,
+        estimatedServiceStart,
       }
     })
 

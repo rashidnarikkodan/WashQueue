@@ -203,6 +203,24 @@ const completeHandoverUseCase = new CompleteHandoverUseCase(
   bookingNotificationService
 )
 
+import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-case"
+import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
+
+export const stallBookingUseCase = new StallBookingUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  bookingRedisQueueService,
+  bookingNotificationService
+)
+
+export const resolveStalledBookingUseCase = new ResolveStalledBookingUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  bookingRedisQueueService,
+  bookingNotificationService,
+  evaluateAndProcessRefundUseCase
+)
+
 const pdfInvoiceService = new PDFInvoiceService()
 
 // Instantiate controller
@@ -220,7 +238,9 @@ const bookingController = new BookingController(
   getOperationalQueueUseCase,
   startServiceUseCase,
   savePostInspectionUseCase,
-  completeHandoverUseCase
+  completeHandoverUseCase,
+  stallBookingUseCase,
+  resolveStalledBookingUseCase
 )
 
 // Create router
