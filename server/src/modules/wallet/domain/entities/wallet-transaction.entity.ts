@@ -1,6 +1,6 @@
 import { Money } from "../value-objects/money.vo"
 
-export type TransactionType = "CREDIT" | "DEBIT"
+export type TransactionType = "CREDIT" | "DEBIT" | "REFUND"
 
 export type TransactionCategory =
   | "TOP_UP"

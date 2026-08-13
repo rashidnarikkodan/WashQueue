@@ -94,6 +94,29 @@ export class WalletMongoRepository implements IWalletRepository {
       const domainWallet = WalletPersistenceMapper.toDomainWallet(walletDoc)
       const { updatedWallet, transaction } = operation(domainWallet)
 
+      // Idempotency Guard: Check if transaction with referenceId has already completed
+      if (transaction.referenceId) {
+        const existingTxDoc = await WalletTransactionModel.findOne(
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            referenceId: transaction.referenceId,
+            type: transaction.type,
+            status: "COMPLETED",
+          },
+          null,
+          opts
+        )
+        if (existingTxDoc) {
+          if (useTransaction) {
+            await session.commitTransaction()
+          }
+          return {
+            wallet: domainWallet,
+            transaction: WalletPersistenceMapper.toDomainTransaction(existingTxDoc),
+          }
+        }
+      }
+
       // Update wallet balance in database
       const savedWalletDoc = await WalletModel.findByIdAndUpdate(
         domainWallet.id,
@@ -106,6 +129,19 @@ export class WalletMongoRepository implements IWalletRepository {
 
       if (!savedWalletDoc) {
         throw new AppError("Failed to update wallet balance", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      }
+
+      // Synchronize cached walletBalance on User model atomically
+      try {
+        const { User: UserModel } = await import("@/modules/user/infrastructure/model/user.model")
+        await UserModel.findByIdAndUpdate(
+          userId,
+          { $set: { walletBalance: updatedWallet.balance.amount } },
+          opts
+        )
+      } catch (userSyncErr) {
+        // Log sync warning but proceed
+        console.warn(`[Wallet] Failed to sync user walletBalance for ${userId}:`, userSyncErr)
       }
 
       // Create transaction ledger record in database

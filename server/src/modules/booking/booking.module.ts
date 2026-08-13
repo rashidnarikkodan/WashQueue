@@ -97,6 +97,7 @@ const createWalkInBookingUseCase = new CreateWalkInBookingUseCase(
   stationPricingRepository,
   extraServiceRepository,
   timeWindowRepository,
+  bookingRedisQueueService,
   bookingNotificationService
 )
 
@@ -121,12 +122,85 @@ const advanceBookingStatusUseCase = new AdvanceBookingStatusUseCase(
   bookingNotificationService
 )
 
+import { refundWalletUseCase } from "@/modules/wallet/wallet.module"
+import { EvaluateAndProcessRefundUseCase } from "./application/use-cases/evaluate-and-process-refund.use-case"
+
+export const evaluateAndProcessRefundUseCase = new EvaluateAndProcessRefundUseCase(
+  bookingRepository,
+  creditWalletUseCase,
+  bookingNotificationService,
+  refundWalletUseCase
+)
+
 const cancelBookingUseCase = new CancelBookingUseCase(
   bookingRepository,
   bookingStatusLogRepository,
   bookingRedisQueueService,
   bookingNotificationService,
-  creditWalletUseCase
+  creditWalletUseCase,
+  evaluateAndProcessRefundUseCase
+)
+
+import { ValidateQRForCheckInUseCase } from "./application/use-cases/validate-qr.use-case"
+import { SavePreInspectionAndCheckInUseCase } from "./application/use-cases/save-pre-inspection.use-case"
+import { GetOperationalQueueUseCase } from "./application/use-cases/get-operational-queue.use-case"
+import { StartServiceUseCase } from "./application/use-cases/start-service.use-case"
+
+const validateQRUseCase = new ValidateQRForCheckInUseCase(
+  bookingRepository,
+  managerAssignmentRepository,
+  stationRepository
+)
+
+const savePreInspectionUseCase = new SavePreInspectionAndCheckInUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  bookingRedisQueueService,
+  bookingNotificationService
+)
+
+export const getOperationalQueueUseCase = new GetOperationalQueueUseCase(
+  bookingRedisQueueService,
+  stationRepository
+)
+
+import { ProcessNoShowBookingsUseCase } from "./application/use-cases/process-no-show-bookings.use-case"
+
+export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
+  bookingStatusLogRepository,
+  bookingRedisQueueService,
+  bookingNotificationService,
+  evaluateAndProcessRefundUseCase
+)
+
+const startServiceUseCase = new StartServiceUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  stationRepository,
+  managerAssignmentRepository,
+  bookingRedisQueueService,
+  bookingNotificationService
+)
+
+import { SavePostInspectionUseCase } from "./application/use-cases/save-post-inspection.use-case"
+import { CompleteHandoverUseCase } from "./application/use-cases/complete-handover.use-case"
+
+const savePostInspectionUseCase = new SavePostInspectionUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  stationRepository,
+  managerAssignmentRepository,
+  bookingRedisQueueService,
+  bookingNotificationService
+)
+
+const completeHandoverUseCase = new CompleteHandoverUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  stationRepository,
+  managerAssignmentRepository,
+  bookingRedisQueueService,
+  bookingNotificationService
 )
 
 const pdfInvoiceService = new PDFInvoiceService()
@@ -140,7 +214,13 @@ const bookingController = new BookingController(
   checkInBookingUseCase,
   advanceBookingStatusUseCase,
   cancelBookingUseCase,
-  pdfInvoiceService
+  pdfInvoiceService,
+  validateQRUseCase,
+  savePreInspectionUseCase,
+  getOperationalQueueUseCase,
+  startServiceUseCase,
+  savePostInspectionUseCase,
+  completeHandoverUseCase
 )
 
 // Create router

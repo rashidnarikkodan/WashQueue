@@ -39,5 +39,5 @@ export interface IAdvanceBookingStatusUseCase {
 }
 
 export interface ICancelBookingUseCase {
-  execute(userId: string, input: CancelBookingInput): Promise<BookingResponseDTO>
+  execute(userId: string, input: CancelBookingInput, userRole?: string): Promise<BookingResponseDTO>
 }

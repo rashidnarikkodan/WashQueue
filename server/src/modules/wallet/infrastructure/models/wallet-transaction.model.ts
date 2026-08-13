@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose"
 export interface IWalletTransactionDocument extends Document {
   walletId: mongoose.Types.ObjectId
   userId: mongoose.Types.ObjectId
-  type: "CREDIT" | "DEBIT"
+  type: "CREDIT" | "DEBIT" | "REFUND"
   category: "TOP_UP" | "BOOKING_PAYMENT" | "REFUND" | "CASHBACK" | "ADMIN_ADJUSTMENT"
   amount: number
   balanceBefore: number
@@ -31,7 +31,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
     },
     type: {
       type: String,
-      enum: ["CREDIT", "DEBIT"],
+      enum: ["CREDIT", "DEBIT", "REFUND"],
       required: true,
     },
     category: {

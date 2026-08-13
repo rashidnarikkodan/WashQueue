@@ -63,6 +63,16 @@ export interface IBookingDocument extends Document {
   cashAmount: number
   refundAmount: number
 
+  refundDetails?: {
+    refundType?: string
+    refundMethod?: string
+    status?: string
+    amount?: number
+    reason?: string
+    processedAt?: Date
+    transactionId?: string
+  }
+
   settlement: {
     platformCommission: number
     stationSettlement: number
@@ -189,6 +199,28 @@ const bookingSchema = new Schema<IBookingDocument>(
     depositAmount: { type: Number, required: true, default: 0 },
     cashAmount: { type: Number, required: true, default: 0 },
     refundAmount: { type: Number, required: true, default: 0 },
+
+    refundDetails: {
+      refundType: {
+        type: String,
+        enum: ["FULL_REFUND", "PARTIAL_REFUND", "NO_REFUND"],
+        default: null,
+      },
+      refundMethod: {
+        type: String,
+        enum: ["WALLET_REFUND", "ORIGINAL_PAYMENT_REFUND", "NONE"],
+        default: null,
+      },
+      status: {
+        type: String,
+        enum: ["NONE", "PENDING", "PROCESSED", "FAILED"],
+        default: "NONE",
+      },
+      amount: { type: Number, default: 0 },
+      reason: { type: String, default: null },
+      processedAt: { type: Date, default: null },
+      transactionId: { type: String, default: null },
+    },
 
     settlement: {
       platformCommission: { type: Number, required: true, default: 0 },

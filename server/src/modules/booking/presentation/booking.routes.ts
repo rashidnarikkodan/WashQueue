@@ -31,7 +31,37 @@ export const createBookingRouter = (bookingController: BookingController): Route
     asyncHandler(bookingController.cancel)
   )
 
+  // Operational Queue Routes
+  router.get("/queue/live", asyncHandler(bookingController.getLiveQueue))
+  router.get("/stations/:stationId/queue", asyncHandler(bookingController.getLiveQueue))
+
   // Manager / Staff Routes
+  router.post(
+    "/validate-qr",
+    validateRequest(checkInBookingSchema),
+    asyncHandler(bookingController.validateQr)
+  )
+
+  router.post(
+    "/:bookingId/pre-inspection",
+    asyncHandler(bookingController.submitPreInspection)
+  )
+
+  router.post(
+    "/:bookingId/post-inspection",
+    asyncHandler(bookingController.submitPostInspection)
+  )
+
+  router.post(
+    "/:bookingId/handover",
+    asyncHandler(bookingController.completeHandover)
+  )
+
+  router.post(
+    "/:bookingId/start-service",
+    asyncHandler(bookingController.startService)
+  )
+
   router.post(
     "/walk-in",
     validateRequest(createWalkInBookingSchema),

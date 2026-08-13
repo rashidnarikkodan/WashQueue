@@ -170,6 +170,45 @@ export class Wallet {
     }
   }
 
+  public refund(
+    amount: Money,
+    category: TransactionCategory,
+    description: string,
+    referenceId?: string,
+    metadata?: Record<string, unknown>
+  ): WalletOperationResult {
+    this.ensureActive()
+
+    if (amount.isNegative() || amount.isZero()) {
+      throw new AppError("Refund amount must be greater than zero", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const balanceBefore = this._balance
+    const balanceAfter = this._balance.add(amount)
+
+    this._balance = balanceAfter
+    this._updatedAt = new Date()
+
+    const transaction = new WalletTransaction({
+      walletId: this._id || "",
+      userId: this._userId,
+      type: "REFUND",
+      category,
+      amount,
+      balanceBefore,
+      balanceAfter,
+      referenceId,
+      description,
+      status: "COMPLETED",
+      metadata,
+    })
+
+    return {
+      updatedWallet: this,
+      transaction,
+    }
+  }
+
   private ensureActive(): void {
     if (this._status !== "ACTIVE") {
       throw new AppError(

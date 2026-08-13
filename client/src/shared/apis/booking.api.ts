@@ -71,6 +71,16 @@ export interface BookingResponse {
     name: string
     price: number
   }>
+  isWalkIn?: boolean
+  checkedInAt?: string | null
+  serviceStartedAt?: string | null
+  serviceCompletedAt?: string | null
+  completedAt?: string | null
+  cancellation?: {
+    cancellationReason?: string
+    cancelledBy?: string
+    cancelledAt?: string
+  } | null
   rawQrToken?: string
   status: string
   paymentStatus: string
@@ -171,6 +181,128 @@ export const bookingApi = {
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to update booking status")
+    }
+  },
+
+  validateQr: async (inputVal: string): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/validate-qr`, {
+        qrToken: inputVal,
+        bookingId: inputVal,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "QR pass validation failed")
+    }
+  },
+
+  completeHandover: async (bookingId: string, notes?: string): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/handover`, {
+        notes,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to complete vehicle handover")
+    }
+  },
+
+  savePostInspection: async (
+    bookingId: string,
+    data: { photos?: string[]; notes?: string }
+  ): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(
+        `${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/post-inspection`,
+        data
+      )
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to complete post-service inspection")
+    }
+  },
+
+  savePreInspection: async (
+    bookingId: string,
+    data: { photos?: string[]; notes?: string }
+  ): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(
+        `${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/pre-inspection`,
+        data
+      )
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to complete pre-service inspection")
+    }
+  },
+
+  getLiveQueue: async (stationId: string): Promise<{
+    stationId: string
+    stationName: string
+    totalBays: number
+    activeServicesCount: number
+    availableBays: number
+    queueDepth: number
+    totalActiveAndWaiting: number
+    averageWashDurationMinutes: number
+    waitingQueue: Array<{
+      bookingId: string
+      bookingNumber: string
+      stationId: string
+      status: string
+      serviceType: string
+      isWalkIn: boolean
+      customerName: string
+      customerPhone: string
+      registrationNumber: string
+      vehicleModel?: string
+      windowStart?: string
+      windowEnd?: string
+      checkedInAt?: string
+      serviceStartedAt?: string
+      queuePosition: number
+      isBayActive: boolean
+      assignedBayNumber?: number
+      estimatedWaitMinutes: number
+    }>
+    activeServices: Array<{
+      bookingId: string
+      bookingNumber: string
+      stationId: string
+      status: string
+      serviceType: string
+      isWalkIn: boolean
+      customerName: string
+      customerPhone: string
+      registrationNumber: string
+      vehicleModel?: string
+      windowStart?: string
+      windowEnd?: string
+      checkedInAt?: string
+      serviceStartedAt?: string
+      queuePosition: number
+      isBayActive: boolean
+      assignedBayNumber?: number
+      estimatedWaitMinutes: number
+    }>
+  }> => {
+    try {
+      const response = await api.get(`${API_ROUTES.BOOKINGS.ROOT}/queue/live`, {
+        params: { stationId },
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to load live station queue")
+    }
+  },
+
+  startService: async (bookingId: string): Promise<BookingResponse> => {
+    try {
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/start-service`)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to start wash service")
     }
   },
 

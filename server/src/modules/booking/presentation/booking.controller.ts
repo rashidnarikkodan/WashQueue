@@ -18,6 +18,13 @@ import { IPDFInvoiceService } from "../application/interfaces/pdf-invoice.interf
 
 import { getBookingListQuerySchema } from "./schema/booking.schema"
 import { BookingStatus } from "../domain/entities/Booking"
+import { ValidateQRForCheckInUseCase } from "../application/use-cases/validate-qr.use-case"
+import { SavePreInspectionAndCheckInUseCase } from "../application/use-cases/save-pre-inspection.use-case"
+
+import { GetOperationalQueueUseCase } from "../application/use-cases/get-operational-queue.use-case"
+import { StartServiceUseCase } from "../application/use-cases/start-service.use-case"
+import { SavePostInspectionUseCase } from "../application/use-cases/save-post-inspection.use-case"
+import { CompleteHandoverUseCase } from "../application/use-cases/complete-handover.use-case"
 
 export class BookingController {
   constructor(
@@ -28,7 +35,13 @@ export class BookingController {
     private readonly checkInBookingUseCase: ICheckInBookingUseCase,
     private readonly advanceBookingStatusUseCase: IAdvanceBookingStatusUseCase,
     private readonly cancelBookingUseCase: ICancelBookingUseCase,
-    private readonly pdfInvoiceService: IPDFInvoiceService
+    private readonly pdfInvoiceService: IPDFInvoiceService,
+    private readonly validateQrUseCase?: ValidateQRForCheckInUseCase,
+    private readonly savePreInspectionUseCase?: SavePreInspectionAndCheckInUseCase,
+    private readonly getOperationalQueueUseCase?: GetOperationalQueueUseCase,
+    private readonly startServiceUseCase?: StartServiceUseCase,
+    private readonly savePostInspectionUseCase?: SavePostInspectionUseCase,
+    private readonly completeHandoverUseCase?: CompleteHandoverUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -114,6 +127,116 @@ export class BookingController {
     success(res, result, HTTP_STATUS.OK, "Booking history retrieved successfully")
   }
 
+  validateQr = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    if (!this.validateQrUseCase) {
+      throw new AppError("QR validation service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.validateQrUseCase.execute(managerUserId, req.body)
+    success(res, booking, HTTP_STATUS.OK, "QR Code validated successfully")
+  }
+
+  submitPreInspection = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.savePreInspectionUseCase) {
+      throw new AppError("Inspection service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.savePreInspectionUseCase.execute(managerUserId, {
+      bookingId,
+      ...req.body,
+    })
+    success(res, booking, HTTP_STATUS.OK, "Pre-service inspection completed and vehicle checked in")
+  }
+
+  submitPostInspection = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.savePostInspectionUseCase) {
+      throw new AppError("Post-inspection service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.savePostInspectionUseCase.execute(managerUserId, {
+      bookingId,
+      ...req.body,
+    })
+    success(res, booking, HTTP_STATUS.OK, "Post-service inspection completed successfully")
+  }
+
+  completeHandover = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.completeHandoverUseCase) {
+      throw new AppError("Handover service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.completeHandoverUseCase.execute(managerUserId, bookingId, req.body?.notes)
+    success(res, booking, HTTP_STATUS.OK, "Vehicle handover completed & booking closed successfully")
+  }
+
+  startService = async (req: AuthenticatedRequest, res: Response) => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params
+    if (!bookingId) {
+      throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.startServiceUseCase) {
+      throw new AppError("Start service execution unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.startServiceUseCase.execute(managerUserId, bookingId)
+    success(res, booking, HTTP_STATUS.OK, "Wash service started successfully")
+  }
+
+  getLiveQueue = async (req: AuthenticatedRequest, res: Response) => {
+    const stationId = (req.query.stationId || req.params.stationId) as string
+    if (!stationId) {
+      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (!this.getOperationalQueueUseCase) {
+      throw new AppError("Operational queue service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const queueData = await this.getOperationalQueueUseCase.execute(stationId)
+    success(res, queueData, HTTP_STATUS.OK, "Operational queue retrieved successfully")
+  }
+
   checkIn = async (req: AuthenticatedRequest, res: Response) => {
     const managerUserId = req.user?.userId
     if (!managerUserId) {
@@ -153,10 +276,15 @@ export class BookingController {
       throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const booking = await this.cancelBookingUseCase.execute(userId, {
-      bookingId,
-      reason: req.body.reason,
-    })
+    const role = req.user?.role
+    const booking = await this.cancelBookingUseCase.execute(
+      userId,
+      {
+        bookingId,
+        reason: req.body.reason,
+      },
+      role
+    )
     success(res, booking, HTTP_STATUS.OK, "Booking cancelled successfully")
   }
 

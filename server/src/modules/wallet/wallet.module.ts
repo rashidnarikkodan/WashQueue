@@ -18,10 +18,13 @@ export const walletRepository = new WalletMongoRepository()
 export const walletTransactionRepository = new WalletTransactionMongoRepository()
 export const walletPaymentGateway = new RazorpayWalletPaymentService()
 
+import { RefundWalletUseCase } from "./application/use-cases/refund-wallet.use-case"
+
 // Instantiate use cases
 export const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository)
 export const creditWalletUseCase = new CreditWalletUseCase(walletRepository)
 export const debitWalletUseCase = new DebitWalletUseCase(walletRepository)
+export const refundWalletUseCase = new RefundWalletUseCase(walletRepository)
 export const getTransactionLedgerUseCase = new GetTransactionLedgerUseCase(
   walletTransactionRepository
 )
