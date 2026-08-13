@@ -1,5 +1,5 @@
 import { Check, AlertCircle, Ban } from "lucide-react"
-import DatePicker from "@/shared/components/ui/DatePicker"
+import DatePicker from "@/shared/components/form/DatePicker"
 
 export interface TimeSlotOption {
   id: string

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Clock, Calendar, Info, ArrowRight, X, Plus, Coffee, Trash2 } from "lucide-react"
 import FormInput from "@/shared/components/form/FormInput"
 import FormSwitch from "@/shared/components/form/FormSwitch"
-import DatePicker from "@/shared/components/ui/DatePicker"
+import DatePicker from "@/shared/components/form/DatePicker"
 import { availabilitySchema, type AvailabilityFormData } from "../../schemas/station.schema"
 import type { OperatingBreak } from "../../types"
 
@@ -460,7 +460,7 @@ export default function AvailabilityForm({
             placeholder="7"
             value={
               formData.maxAdvanceBookingDays === 0 ||
-              (formData.maxAdvanceBookingDays as unknown) === ""
+                (formData.maxAdvanceBookingDays as unknown) === ""
                 ? ""
                 : formData.maxAdvanceBookingDays
             }

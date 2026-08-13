@@ -9,7 +9,7 @@ import FormInput from "../../../shared/components/form/FormInput"
 import { toast } from "sonner"
 import PasswordStrength from "@/shared/components/ui/PasswordStrength"
 import { isStrongPassword } from "@/shared/utils/validation"
-import OtpInput from "../../../shared/components/ui/OtpInput"
+import OtpInput from "../../../shared/components/form/OtpInput"
 import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer"
 
 export default function ResetPasswordPage() {

@@ -5,7 +5,7 @@ import Loading from "../../../shared/components/ui/Loading"
 import { useAuthStore } from "../store/auth.store"
 import { useAuthFormStore } from "../store/auth-form.store"
 import { toast } from "sonner"
-import OtpInput from "../../../shared/components/ui/OtpInput"
+import OtpInput from "../../../shared/components/form/OtpInput"
 import { useCountdownTimer } from "../../../shared/hooks/useCountdownTimer"
 
 export default function OTPPage() {
