@@ -12,6 +12,7 @@ import { BookingNumberService } from "../../domain/services/BookingNumberService
 import { QRTokenService } from "../../domain/services/QRTokenService"
 import { BookingPricingService } from "../../domain/services/BookingPricingService"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
@@ -26,6 +27,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     private readonly stationPricingRepository: IStationPricingRepository,
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
+    private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService
   ) {}
 
@@ -77,14 +79,19 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       }
     }
 
-    // 4. Validate Time Window & Walk-in Slot
+    // 4. Validate Time Window & Reserve Walk-In Capacity Atomically
     const timeWindow = await this.timeWindowRepository.findById(input.timeWindowId)
     if (!timeWindow || timeWindow.stationId !== station.id) {
       throw new AppError("Selected time window not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    timeWindow.reserveWalkInSlot()
-    await this.timeWindowRepository.save(timeWindow)
+    const reservedWindow = await this.timeWindowRepository.reserveWalkInCapacityAtomically(timeWindow.id)
+    if (!reservedWindow) {
+      throw new AppError(
+        "Walk-in slot capacity is fully occupied for this time window. Please select another time window.",
+        HTTP_STATUS.CONFLICT
+      )
+    }
 
     // 5. Calculate Pricing
     const paymentType = input.paymentType || PaymentType.CASH_WALKIN
@@ -98,7 +105,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     const bookingNumber = BookingNumberService.generate()
     const qrResult = QRTokenService.generateToken(timeWindow.windowEnd)
 
-    // 7. Create Walk-in Booking Aggregate
+    // 7. Create Walk-in Booking Aggregate (Initial status is CONFIRMED, ready for pre-service inspection)
     const now = new Date()
     const booking = new Booking({
       id: "",
@@ -145,9 +152,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,
       settlement: pricingResult.settlement,
-      status: BookingStatus.CHECKED_IN,
-      checkedInAt: now,
-      checkedInBy: managerUserId,
+      status: BookingStatus.CONFIRMED,
       createdAt: now,
       updatedAt: now,
     })
@@ -159,14 +164,14 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       id: "",
       bookingId: savedBooking.id,
       fromStatus: null,
-      toStatus: BookingStatus.CHECKED_IN,
+      toStatus: BookingStatus.CONFIRMED,
       changedBy: managerUserId,
-      reason: "Manager created walk-in booking",
+      reason: "Manager created walk-in booking (Pending Pre-Service Inspection)",
       createdAt: now,
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 9. Dispatch Notification
+    // 10. Dispatch Notification
     await this.notificationService.notify("BOOKING_CREATED", savedBooking)
 
     return BookingDTOMapper.toDTO(savedBooking, qrResult.rawToken)

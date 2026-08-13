@@ -17,6 +17,7 @@ export interface ITimeWindowRepository {
   saveMany(windows: TimeWindowInstance[]): Promise<TimeWindowInstance[]>
   save(window: TimeWindowInstance): Promise<TimeWindowInstance>
   reserveCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null>
+  reserveWalkInCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null>
   releaseCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null>
   deleteByStationId(stationId: string): Promise<boolean>
   deleteUnbookedFutureWindows(stationId: string, fromDate?: Date): Promise<number>

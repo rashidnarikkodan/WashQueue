@@ -140,6 +140,37 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
     return TimeWindowMapper.toDomain(doc)
   }
 
+  async reserveWalkInCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null> {
+    if (!Types.ObjectId.isValid(windowId)) return null
+
+    // Atomic update condition: walk-in count < reserved walk-in slots OR total booked < total capacity
+    const doc = await TimeWindowModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(windowId),
+        status: { $in: ["OPEN", "FULL"] },
+        $expr: {
+          $or: [
+            { $lt: ["$walkInCount", "$walkInReservedSlots"] },
+            { $lt: [{ $add: ["$advanceBookedCount", "$walkInCount"] }, "$capacityTotal"] },
+          ],
+        },
+      },
+      {
+        $inc: { walkInCount: 1 },
+      },
+      { new: true }
+    )
+
+    if (!doc) return null
+
+    if (doc.advanceBookedCount + doc.walkInCount >= doc.capacityTotal) {
+      doc.status = "FULL"
+      await doc.save()
+    }
+
+    return TimeWindowMapper.toDomain(doc)
+  }
+
   async releaseCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null> {
     if (!Types.ObjectId.isValid(windowId)) return null
 

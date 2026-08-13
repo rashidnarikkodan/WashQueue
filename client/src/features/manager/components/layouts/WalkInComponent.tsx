@@ -216,11 +216,13 @@ export default function WalkInComponent() {
         extraServiceIds: selectedExtras,
       })
 
-      toast.success(`Walk-In booking created! Number: ${res.bookingNumber}`)
+      toast.success(`✓ Walk-In Booking Created! (${res.bookingNumber}) Navigating to Pre-Service Inspection...`)
       setCreatedBooking(res)
-    } catch (err: any) {
+      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string }
       console.error("Failed to create walk-in booking:", err)
-      toast.error(err?.message || "Failed to create walk-in booking.")
+      toast.error(errorObj?.message || "Failed to create walk-in booking.")
     } finally {
       setIsSubmitting(false)
     }
