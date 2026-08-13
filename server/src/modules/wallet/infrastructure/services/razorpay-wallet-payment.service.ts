@@ -69,7 +69,13 @@ export class RazorpayWalletPaymentService implements IWalletPaymentGateway {
         .update(`${orderId}|${paymentId}`)
         .digest("hex")
 
-      return generatedSignature === signature
+      const bufGenerated = Buffer.from(generatedSignature, "utf-8")
+      const bufSignature = Buffer.from(signature, "utf-8")
+
+      return (
+        bufGenerated.length === bufSignature.length &&
+        crypto.timingSafeEqual(bufGenerated, bufSignature)
+      )
     } catch (error) {
       console.error("Razorpay signature verification error:", error)
       return false

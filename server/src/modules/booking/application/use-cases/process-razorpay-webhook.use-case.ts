@@ -43,10 +43,12 @@ export class ProcessRazorpayWebhookUseCase {
       .update(rawBody)
       .digest("hex")
 
-    const isMatch = crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, "utf-8"),
-      Buffer.from(signature, "utf-8")
-    )
+    const bufExpected = Buffer.from(expectedSignature, "utf-8")
+    const bufSignature = Buffer.from(signature || "", "utf-8")
+
+    const isMatch =
+      bufExpected.length === bufSignature.length &&
+      crypto.timingSafeEqual(bufExpected, bufSignature)
 
     if (!isMatch) {
       return { success: false, message: "Invalid webhook signature" }

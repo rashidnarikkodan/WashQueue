@@ -47,10 +47,12 @@ export class ConfirmBookingReservationUseCase {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex")
 
-    const isMatch = crypto.timingSafeEqual(
-      Buffer.from(generatedSignature, "utf-8"),
-      Buffer.from(razorpay_signature, "utf-8")
-    )
+    const bufGenerated = Buffer.from(generatedSignature, "utf-8")
+    const bufProvided = Buffer.from(razorpay_signature || "", "utf-8")
+
+    const isMatch =
+      bufGenerated.length === bufProvided.length &&
+      crypto.timingSafeEqual(bufGenerated, bufProvided)
 
     if (!isMatch) {
       throw new AppError("Payment signature mismatch. Verification failed.", HTTP_STATUS.BAD_REQUEST)
