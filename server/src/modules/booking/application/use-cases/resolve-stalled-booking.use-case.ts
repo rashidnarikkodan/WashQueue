@@ -11,6 +11,7 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { BookingModel } from "../../infrastructure/models/booking.model"
 import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
+import { IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 
 export interface ResolveStalledBookingInput {
   bookingId: string
@@ -24,7 +25,7 @@ export class ResolveStalledBookingUseCase {
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
-    private readonly evaluateAndProcessRefundUseCase?: EvaluateAndProcessRefundUseCase
+    private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
   ) {}
 
   /**

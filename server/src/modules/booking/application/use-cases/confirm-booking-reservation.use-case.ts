@@ -25,7 +25,9 @@ export interface ConfirmBookingReservationInput {
   razorpay_signature: string
 }
 
-export class ConfirmBookingReservationUseCase {
+import { IConfirmBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
+
+export class ConfirmBookingReservationUseCase implements IConfirmBookingReservationUseCase {
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
     private readonly bookingRepository: IBookingRepository,

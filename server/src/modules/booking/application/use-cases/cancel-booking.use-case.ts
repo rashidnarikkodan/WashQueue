@@ -9,7 +9,7 @@ import { IBookingNotificationService } from "../interfaces/booking-notification.
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { ICancelBookingUseCase } from "../interfaces/booking-usecases.interface"
+import { ICancelBookingUseCase, IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { BookingModel } from "../../infrastructure/models/booking.model"
 import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
@@ -23,16 +23,10 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
     private readonly creditWalletUseCase?: CreditWalletUseCase,
-    private readonly evaluateAndProcessRefundUseCase?: EvaluateAndProcessRefundUseCase
+    private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
   ) {}
 
-  /**
-   * Domain Refund Calculation Engine:
-   * - Manager / Owner cancellation -> 100% Full Refund
-   * - Customer >24h before windowStart -> 100% Full Refund
-   * - Customer 2h-24h before windowStart -> 50% Partial Refund
-   * - Customer <2h before windowStart -> 0% Non-refundable late cancellation
-   */
+
   private calculateRefundAmount(
     booking: any,
     isStaffCancellation: boolean,

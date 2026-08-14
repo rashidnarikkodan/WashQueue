@@ -3,6 +3,13 @@ import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { IMailService } from "../../../modules/auth/application/interfaces"
 import transporter from "@/configs/nodemailer.config"
+import {
+  getVerificationEmailHtml,
+  getForgotPasswordEmailHtml,
+  getOwnerApprovalEmailHtml,
+  getOwnerRejectionEmailHtml,
+  getManagerInvitationEmailHtml,
+} from "../templates"
 
 export class MailService implements IMailService {
   private transporter: nodemailer.Transporter | null = null
@@ -18,16 +25,7 @@ export class MailService implements IMailService {
   async sendVerificationEmail(email: string, otp: string): Promise<void> {
     const subject = "WashQueue - Verify Your Account"
     const text = `Welcome to WashQueue! Your verification OTP code is: ${otp}. It will expire in 5 minutes.`
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333;">
-        <h2>Welcome to WashQueue!</h2>
-        <p>Thank you for registering. Please verify your account using the OTP code below:</p>
-        <div style="font-size: 24px; font-weight: bold; padding: 10px; background-color: #f0f0f0; display: inline-block; border-radius: 4px; letter-spacing: 2px; color: #007bff;">
-          ${otp}
-        </div>
-        <p>This code will expire in 5 minutes. If you did not request this code, please ignore this email.</p>
-      </div>
-    `
+    const html = getVerificationEmailHtml(otp)
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {
@@ -51,16 +49,7 @@ export class MailService implements IMailService {
   async sendForgotPasswordEmail(email: string, otp: string): Promise<void> {
     const subject = "WashQueue - Reset Your Password"
     const text = `You requested a password reset. Your verification OTP code is: ${otp}. It will expire in 5 minutes.`
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333;">
-        <h2>Reset Your Password</h2>
-        <p>Please use the OTP code below to reset your password:</p>
-        <div style="font-size: 24px; font-weight: bold; padding: 10px; background-color: #f0f0f0; display: inline-block; border-radius: 4px; letter-spacing: 2px; color: #007bff;">
-          ${otp}
-        </div>
-        <p>This code will expire in 5 minutes. If you did not request this code, please ignore this email.</p>
-      </div>
-    `
+    const html = getForgotPasswordEmailHtml(otp)
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {
@@ -84,17 +73,7 @@ export class MailService implements IMailService {
   async sendOwnerApprovalEmail(email: string, fullName: string): Promise<void> {
     const subject = "WashQueue - Owner Onboarding Application Approved 🎉"
     const text = `Dear ${fullName},\n\nCongratulations! Your application to become a WashQueue Station Owner has been approved and activated by the administrator. You can now log into your dashboard and list your stations.\n\nBest regards,\nThe WashQueue Team`
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.5;">
-        <h2 style="color: #2e7d32;">Application Approved! 🎉</h2>
-        <p>Dear <strong>${fullName}</strong>,</p>
-        <p>Congratulations! We are pleased to inform you that your application to become a <strong>WashQueue Station Owner</strong> has been approved and activated by the administrator.</p>
-        <p>You can now log in to the WashQueue Owner Portal to configure and list your car wash stations, manage bookings, and view payouts.</p>
-        <br />
-        <p>Best regards,</p>
-        <p><strong>The WashQueue Team</strong></p>
-      </div>
-    `
+    const html = getOwnerApprovalEmailHtml(fullName)
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {
@@ -118,21 +97,7 @@ export class MailService implements IMailService {
   async sendOwnerRejectionEmail(email: string, fullName: string, reason: string): Promise<void> {
     const subject = "WashQueue - Owner Onboarding Application Update"
     const text = `Dear ${fullName},\n\nThank you for your interest in joining WashQueue as a partner. Unfortunately, your application could not be approved at this time.\n\nReason for rejection:\n${reason}\n\nPlease log back into your portal, update your application details, and resubmit.\n\nBest regards,\nThe WashQueue Team`
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.5;">
-        <h2 style="color: #c62828;">Owner Onboarding Application Update</h2>
-        <p>Dear <strong>${fullName}</strong>,</p>
-        <p>Thank you for your interest in joining WashQueue as a partner.</p>
-        <p>Unfortunately, your application to become a WashQueue Station Owner could not be approved at this time for the following reason:</p>
-        <div style="padding: 15px; border-left: 4px solid #c62828; bg-color: #ffebee; margin: 15px 0; font-style: italic; color: #555;">
-          ${reason}
-        </div>
-        <p>Please log back into the Owner Portal to correct the issues, re-upload documents if necessary, and resubmit your application for review.</p>
-        <br />
-        <p>Best regards,</p>
-        <p><strong>The WashQueue Team</strong></p>
-      </div>
-    `
+    const html = getOwnerRejectionEmailHtml(fullName, reason)
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {
@@ -163,21 +128,7 @@ export class MailService implements IMailService {
     const subject = `WashQueue - Station Manager Invitation for ${data.stationName}`
     const greeting = data.managerName ? `Dear ${data.managerName},` : "Hello,"
     const text = `${greeting}\n\nYou have been invited to manage ${data.stationName} on WashQueue!\n\nPlease accept your invitation by clicking this link: ${inviteUrl}\n\nThis invitation will expire in 7 days.\n\nBest regards,\nThe WashQueue Team`
-    const html = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.6;">
-        <h2 style="color: #007bff;">Station Manager Invitation</h2>
-        <p>${greeting}</p>
-        <p>You have been invited to join WashQueue as the manager for <strong>${data.stationName}</strong>.</p>
-        <p>Click the button below to review and accept your manager invitation:</p>
-        <div style="margin: 25px 0;">
-          <a href="${inviteUrl}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Accept Invitation</a>
-        </div>
-        <p style="font-size: 13px; color: #666;">Or copy and paste this link in your browser: <br/><a href="${inviteUrl}" style="color: #007bff;">${inviteUrl}</a></p>
-        <br />
-        <p style="font-size: 12px; color: #999;">This invitation link will expire in 7 days.</p>
-        <p>Best regards,<br/><strong>The WashQueue Team</strong></p>
-      </div>
-    `
+    const html = getManagerInvitationEmailHtml({ greeting, stationName: data.stationName, inviteUrl })
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {

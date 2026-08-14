@@ -43,3 +43,18 @@ export interface BookingFilterParams {
   endDate?: string
   paymentStatus?: string
 }
+
+export type Window = {
+  windowId: string
+  start: string
+  end: string
+  bookedCount: number
+  remainingCapacity: number
+  status: "OPEN" | "FULL" | "CLOSED" | "PAST"
+}
+
+export type Calender = {
+    minDate: string
+    maxDate: string
+    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
+  } 

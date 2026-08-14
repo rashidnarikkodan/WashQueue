@@ -42,8 +42,9 @@ export const API_ROUTES = {
     HISTORY: "/bookings/history",
   },
   PAYMENT: {
-    CREATE_ORDER: "/create-order",
-    VERIFY_PAYMENT: "/verify-payment",
+    ROOT:'/payment',
+    CREATE_ORDER: "/payment/create-order",
+    VERIFY_PAYMENT: "/payment/verify-payment",
   },
   WALLET: {
     BALANCE: "/wallet",

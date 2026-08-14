@@ -89,6 +89,8 @@ export const API_ROUTES = {
     ROOT: "/api/payment",
     CREATE_ORDER: "/create-order",
     VERIFY_PAYMENT: "/verify-payment",
+    CANCEL_RESERVATION: "/reservations/:id/cancel",
+    WEBHOOK: "/webhook",
   },
   WALLET: {
     ROOT: "/api/wallet",

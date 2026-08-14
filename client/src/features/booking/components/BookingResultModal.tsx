@@ -11,6 +11,8 @@ import {
   RotateCcw,
   Home,
   ShieldAlert,
+  AlertTriangle,
+  RotateCcw as RefreshIcon,
 } from "lucide-react"
 
 interface BookingResultModalProps {
@@ -48,6 +50,26 @@ export default function BookingResultModal({
 
   const isSuccess = type === "success"
 
+  const isSlotUnavailable =
+    !isSuccess &&
+    (errorMessage === "SLOT_UNAVAILABLE" ||
+      errorMessage?.includes("SLOT_UNAVAILABLE") ||
+      errorMessage?.toLowerCase().includes("slot is no longer available") ||
+      errorMessage?.toLowerCase().includes("time window is no longer available") ||
+      errorMessage?.toLowerCase().includes("full"))
+
+  const isRefundInitiated =
+    !isSuccess &&
+    (errorMessage === "RESERVATION_EXPIRED_REFUND_INITIATED" ||
+      errorMessage?.includes("RESERVATION_EXPIRED_REFUND_INITIATED") ||
+      errorMessage?.toLowerCase().includes("refund"))
+
+  const displayErrorMessage = isSlotUnavailable
+    ? "This time slot just filled up or is no longer available. Please choose another time slot."
+    : isRefundInitiated
+    ? "Your payment succeeded, but the 10-minute hold window expired before confirmation. A full refund has been automatically initiated to your account."
+    : errorMessage || "The payment transaction was cancelled or declined. No charges were made."
+
   const handleViewDetails = () => {
     onClose()
     if (bookingId) {
@@ -67,7 +89,13 @@ export default function BookingResultModal({
       {/* Glow Effect Backdrop */}
       <div
         className={`absolute w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none -z-10 ${
-          isSuccess ? "bg-emerald-500" : "bg-red-500"
+          isSuccess
+            ? "bg-emerald-500"
+            : isSlotUnavailable
+            ? "bg-amber-500"
+            : isRefundInitiated
+            ? "bg-blue-500"
+            : "bg-red-500"
         }`}
       />
 
@@ -76,6 +104,10 @@ export default function BookingResultModal({
         className={`w-full max-w-lg rounded-[32px] p-6 sm:p-10 border shadow-2xl text-center space-y-6 relative overflow-hidden text-slate-100 animate-in zoom-in-95 duration-200 ${
           isSuccess
             ? "bg-[#0d121f]/95 border-emerald-500/30 shadow-emerald-950/40"
+            : isSlotUnavailable
+            ? "bg-[#0d121f]/95 border-amber-500/30 shadow-amber-950/40"
+            : isRefundInitiated
+            ? "bg-[#0d121f]/95 border-blue-500/30 shadow-blue-950/40"
             : "bg-[#0d121f]/95 border-red-500/30 shadow-red-950/40"
         }`}
       >
@@ -85,11 +117,19 @@ export default function BookingResultModal({
             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all animate-pulse shadow-lg ${
               isSuccess
                 ? "bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-400 ring-8 ring-emerald-500/10 shadow-emerald-500/20"
+                : isSlotUnavailable
+                ? "bg-amber-500/15 border-2 border-amber-500/40 text-amber-400 ring-8 ring-amber-500/10 shadow-amber-500/20"
+                : isRefundInitiated
+                ? "bg-blue-500/15 border-2 border-blue-500/40 text-blue-400 ring-8 ring-blue-500/10 shadow-blue-500/20"
                 : "bg-red-500/15 border-2 border-red-500/40 text-red-400 ring-8 ring-red-500/10 shadow-red-500/20"
             }`}
           >
             {isSuccess ? (
               <CheckCircle2 size={44} className="text-emerald-400 stroke-[2.5]" />
+            ) : isSlotUnavailable ? (
+              <Clock size={44} className="text-amber-400 stroke-[2.5]" />
+            ) : isRefundInitiated ? (
+              <RefreshIcon size={44} className="text-blue-400 stroke-[2.5]" />
             ) : (
               <XCircle size={44} className="text-red-400 stroke-[2.5]" />
             )}
@@ -99,7 +139,13 @@ export default function BookingResultModal({
         {/* Title & Booking ID Pill */}
         <div className="space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
-            {isSuccess ? "Payment Successful" : "Payment Failed"}
+            {isSuccess
+              ? "Payment Successful"
+              : isSlotUnavailable
+              ? "Slot Unavailable"
+              : isRefundInitiated
+              ? "Refund Initiated"
+              : "Payment Failed"}
           </h2>
 
           <div className="flex items-center justify-center">
@@ -107,6 +153,10 @@ export default function BookingResultModal({
               className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-mono font-bold tracking-wider ${
                 isSuccess
                   ? "bg-slate-800/90 border-slate-700/80 text-blue-300"
+                  : isSlotUnavailable
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                  : isRefundInitiated
+                  ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
                   : "bg-red-500/10 border-red-500/30 text-red-300"
               }`}
             >
@@ -114,6 +164,16 @@ export default function BookingResultModal({
                 <>
                   <Ticket size={14} className="text-blue-400" />
                   <span>BOOKING ID: {bookingNumber}</span>
+                </>
+              ) : isSlotUnavailable ? (
+                <>
+                  <AlertTriangle size={14} className="text-amber-400" />
+                  <span>SLOT NO LONGER AVAILABLE</span>
+                </>
+              ) : isRefundInitiated ? (
+                <>
+                  <RefreshIcon size={14} className="text-blue-400" />
+                  <span>AUTO REFUND PROCESSING</span>
                 </>
               ) : (
                 <>
@@ -185,9 +245,13 @@ export default function BookingResultModal({
           ) : (
             <div className="space-y-1.5 text-center sm:text-left">
               <span className="text-[10px] font-bold text-slate-400 uppercase block">
-                Failure Reason
+                {isSlotUnavailable
+                  ? "Availability Notice"
+                  : isRefundInitiated
+                  ? "Refund Notice"
+                  : "Failure Reason"}
               </span>
-              <p className="text-slate-300 leading-relaxed text-xs">{errorMessage}</p>
+              <p className="text-slate-300 leading-relaxed text-xs">{displayErrorMessage}</p>
             </div>
           )}
         </div>
@@ -214,9 +278,20 @@ export default function BookingResultModal({
                 <span>Back to Home</span>
               </button>
             </>
+          ) : isSlotUnavailable ? (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+              >
+                <Calendar size={16} />
+                <span>Choose Another Time Slot</span>
+              </button>
+            </>
           ) : (
             <>
-              {onRetryPayment && (
+              {onRetryPayment && !isRefundInitiated && (
                 <button
                   type="button"
                   onClick={onRetryPayment}

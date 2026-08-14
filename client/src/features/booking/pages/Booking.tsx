@@ -10,7 +10,6 @@ import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
-
 import VehicleSelectionStep from "../components/VehicleSelectionStep"
 import ServiceSelectionStep, {
   type ServicePlanOption,
@@ -19,6 +18,7 @@ import ServiceSelectionStep, {
 import TimeSlotSelectionStep, { type TimeSlotOption } from "../components/TimeSlotSelectionStep"
 import BookingSummaryCard from "../components/BookingSummaryCard"
 import BookingResultModal from "../components/BookingResultModal"
+import type { Calender, Window } from "../types/booking.types"
 
 export default function Booking() {
   const [urlQuery] = useSearchParams()
@@ -54,7 +54,7 @@ export default function Booking() {
   const [isAddVehicleModalOpen, setIsAddVehicleModalOpen] = useState(false)
   const [isAddingVehicle, setIsAddingVehicle] = useState(false)
 
-  // Service Selection State
+  // Service Selection StatesetIsAddVehicleModalOpen
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>("HALF_WASH")
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([])
 
@@ -64,21 +64,8 @@ export default function Booking() {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
 
   // Real Calendar & Time Window API State
-  const [bookingCalendar, setBookingCalendar] = useState<{
-    minDate: string
-    maxDate: string
-    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
-  } | null>(null)
-  const [serverWindows, setServerWindows] = useState<
-    {
-      windowId: string
-      start: string
-      end: string
-      bookedCount: number
-      remainingCapacity: number
-      status: "OPEN" | "FULL" | "CLOSED" | "PAST"
-    }[]
-  >([])
+  const [bookingCalendar, setBookingCalendar] = useState<Calender | null>(null)
+  const [serverWindows, setServerWindows] = useState<Window[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
   // Booking Submit & Result Modal State
@@ -101,19 +88,22 @@ export default function Booking() {
       .then((data) => {
         setBookingCalendar(data)
         if (data.dates.length > 0) {
-          const currentValid = data.dates.find(
-            (d) => d.date === selectedDate && d.status === "AVAILABLE"
-          )
-          if (!currentValid) {
-            const firstAvailable = data.dates.find((d) => d.status === "AVAILABLE")
-            if (firstAvailable) {
-              setSelectedDate(firstAvailable.date)
+          setSelectedDate((prevDate) => {
+            const currentValid = data.dates.find(
+              (d) => d.date === prevDate && d.status === "AVAILABLE"
+            )
+
+            // If currently selected date is not valid, pick the first available date
+            if (!currentValid) {
+              const firstAvailable = data.dates.find((d) => d.status === "AVAILABLE")
+              return firstAvailable ? firstAvailable.date : prevDate
             }
-          }
+            return prevDate
+          })
         }
       })
       .catch(() => {})
-  }, [stationId, selectedDate])
+  }, [stationId])
 
   // Fetch Available Time Windows for selectedDate
   useEffect(() => {
@@ -190,41 +180,36 @@ export default function Booking() {
     return []
   }, [serverWindows])
 
-  // Fetch Station details & Catalog data on mount
+  // Fetch Station details when stationId changes
   useEffect(() => {
     if (stationId) {
       fetchStationById(stationId)
     }
+  }, [stationId, fetchStationById])
+
+  // Fetch Catalog data on mount if empty
+  useEffect(() => {
     if (categories.length === 0 || classes.length === 0) {
       loadCatalogData()
     }
-  }, [stationId, fetchStationById, categories.length, classes.length, loadCatalogData])
+  }, [loadCatalogData])
 
   // Fetch User Vehicles from API
   const loadUserVehicles = useCallback(async () => {
+    setIsVehiclesLoading(true)
     try {
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
     } catch {
       // Ignore API errors gracefully
+    } finally {
+      setIsVehiclesLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    let isMounted = true
-    vehicleApi
-      .getVehicles()
-      .then((data) => {
-        if (isMounted) setVehicles(data)
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (isMounted) setIsVehiclesLoading(false)
-      })
-    return () => {
-      isMounted = false
-    }
-  }, [])
+    loadUserVehicles()
+  }, [loadUserVehicles])
 
   // Station Supported Class IDs Set
   const stationClassIds = useMemo(() => {
@@ -281,7 +266,11 @@ export default function Booking() {
     setIsAddingVehicle(true)
     try {
       const created = await vehicleApi.createVehicle(input)
-      await loadUserVehicles()
+      // await loadUserVehicles()
+      setVehicles((data)=>([
+        ...data,
+        created
+      ]))
       setSelectedVehicleId(created.id)
       setIsAddVehicleModalOpen(false)
       return true
@@ -325,7 +314,7 @@ export default function Booking() {
     if (selectedStation?.extraServices && selectedStation.extraServices.length > 0) {
       return selectedStation.extraServices.map((e) => {
         const classPricing = e.pricing?.find((p) => p.vehicleClassId === selectedVehicle?.classId)
-        const price = classPricing ? classPricing.price : e.pricing?.[0]?.price || 150
+        const price = classPricing ? classPricing.price : e.pricing?.[0]?.price | 0
         return {
           id: e.id,
           name: e.name,
@@ -424,7 +413,8 @@ export default function Booking() {
           type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-        >
+        >      
+
           <ArrowLeft size={16} />
           <span>Back to Stations</span>
         </button>
@@ -443,7 +433,8 @@ export default function Booking() {
               if (!isAuthenticated || !user) {
                 setAuthModalConfig({
                   title: "Sign in to Register Vehicle",
-                  message: "You must be logged in to add vehicles to your digital garage for booking.",
+                  message:
+                    "You must be logged in to add vehicles to your digital garage for booking.",
                   actionName: "add a vehicle",
                 })
                 setIsAuthModalOpen(true)

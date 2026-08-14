@@ -1,7 +1,6 @@
 import crypto from "crypto"
 import env from "@/configs/env.config"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { ConfirmBookingReservationUseCase } from "./confirm-booking-reservation.use-case"
 
 export interface RazorpayWebhookPayload {
   event: string
@@ -24,10 +23,12 @@ export interface RazorpayWebhookPayload {
   }
 }
 
-export class ProcessRazorpayWebhookUseCase {
+import { IConfirmBookingReservationUseCase, IProcessRazorpayWebhookUseCase } from "../interfaces/booking-usecases.interface"
+
+export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUseCase {
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
-    private readonly confirmReservationUseCase: ConfirmBookingReservationUseCase
+    private readonly confirmReservationUseCase: IConfirmBookingReservationUseCase
   ) {}
 
   async execute(rawBody: string, signature: string): Promise<{ success: boolean; message: string }> {

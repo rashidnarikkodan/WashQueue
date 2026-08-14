@@ -243,7 +243,21 @@ const bookingController = new BookingController(
   resolveStalledBookingUseCase
 )
 
+import { PaymentController } from "./presentation/payment.controller"
+import { createPaymentRouter } from "./presentation/payment.routes"
+
+const paymentController = new PaymentController(
+  createBookingReservationUseCase,
+  confirmBookingReservationUseCase,
+  cancelBookingReservationUseCase,
+  processRazorpayWebhookUseCase,
+  cleanupExpiredReservationsUseCase
+)
+
+export const paymentRouter = createPaymentRouter(paymentController)
+
 // Create router
 const bookingRouter = createBookingRouter(bookingController)
 
+export { bookingRouter }
 export default bookingRouter

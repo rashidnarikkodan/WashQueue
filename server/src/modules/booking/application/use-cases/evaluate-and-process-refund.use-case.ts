@@ -19,8 +19,9 @@ export interface ProcessRefundInput {
 }
 
 import { RefundWalletUseCase } from "@/modules/wallet/application/use-cases/refund-wallet.use-case"
+import { IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 
-export class EvaluateAndProcessRefundUseCase {
+export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefundUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly creditWalletUseCase?: CreditWalletUseCase,

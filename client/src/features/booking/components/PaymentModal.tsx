@@ -1,19 +1,18 @@
 import { useState } from "react"
-import { X, ShieldCheck, ArrowRight, Wallet, Smartphone } from "lucide-react"
+import { X, Smartphone, Wallet, ArrowRight, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 import { paymentApi } from "@/shared/apis/payment.api"
 import { walletApi } from "@/shared/apis/wallet.api"
+import type { BookingResponse } from "@/shared/apis/booking.api"
 
 declare global {
   interface Window {
-    Razorpay: new (options: Record<string, unknown>) => {
-      on: (event: string, cb: (res: { error?: { description?: string } }) => void) => void
+    Razorpay: new (options: unknown) => {
       open: () => void
+      on: (event: string, handler: (response: { error?: { description?: string } }) => void) => void
     }
   }
 }
-
-import type { BookingResponse } from "@/shared/apis/booking.api"
 
 interface PaymentModalProps {
   isOpen: boolean
@@ -24,9 +23,9 @@ interface PaymentModalProps {
     stationId: string
     vehicleId: string
     timeWindowId: string
-    serviceType: "HALF" | "FULL"
+    serviceType: "HALF" | "FULL" | string
     extraServiceIds?: string[]
-    paymentType?: "ONLINE_FULL" | "PAY_AT_STATION"
+    paymentType?: string
   }
   onSuccess: (paymentData: {
     razorpay_payment_id: string
@@ -42,7 +41,7 @@ export default function PaymentModal({
   isOpen,
   onClose,
   amountInRupees,
-  serviceName,
+  serviceName = "Car Wash Booking",
   bookingIntentData,
   onSuccess,
   onError,
@@ -54,14 +53,12 @@ export default function PaymentModal({
 
   if (!isOpen) return null
 
-  // Financial calculations
-  const subtotal = Math.round(amountInRupees * 0.92 * 100) / 100
-  const taxesAndFees = Math.round((amountInRupees - subtotal) * 100) / 100
-  const totalAmount = amountInRupees
-  const amountInPaise = Math.round(totalAmount * 100)
+  const totalAmount = amountInRupees || 0
+  const subtotal = Math.max(0, totalAmount * 0.82)
+  const taxesAndFees = Math.max(0, totalAmount - subtotal)
 
   const handlePaySecurely = async () => {
-    if (amountInPaise < 100) {
+    if (totalAmount < 1) {
       toast.error("Minimum payment amount is ₹1.00 (100 paise)")
       return
     }
@@ -69,13 +66,23 @@ export default function PaymentModal({
     setIsProcessing(true)
 
     try {
-      // Step 1: Create Order & Reserve Capacity on Backend
-      const order = await paymentApi.createOrder({
-        amount: amountInPaise,
+      // Step 1: Create Order & Atomic Slot Reservation on Backend
+      const orderPayload = {
+        amount: Math.round(totalAmount * 100),
         currency: "INR",
-        receipt: `booking_${Date.now()}`,
-        ...(bookingIntentData || {}),
-      })
+        ...(bookingIntentData
+          ? {
+              stationId: bookingIntentData.stationId,
+              vehicleId: bookingIntentData.vehicleId,
+              timeWindowId: bookingIntentData.timeWindowId,
+              serviceType: (bookingIntentData.serviceType === "FULL_WASH" || bookingIntentData.serviceType === "full" ? "FULL" : bookingIntentData.serviceType) as "HALF" | "FULL",
+              extraServiceIds: bookingIntentData.extraServiceIds,
+              paymentType: (bookingIntentData.paymentType || "ONLINE_FULL") as "ONLINE_FULL" | "PAY_AT_STATION",
+            }
+          : {}),
+      }
+
+      const order = await paymentApi.createOrder(orderPayload)
 
       if (order.reservation_id) {
         setActiveReservationId(order.reservation_id)
@@ -126,10 +133,11 @@ export default function PaymentModal({
           onClose()
         } catch (walletErr: unknown) {
           const wErr = walletErr as { message?: string }
-          toast.error(wErr.message || "Failed to process payment using wallet balance")
           if (order.reservation_id) {
             paymentApi.cancelReservation(order.reservation_id)
           }
+          onError?.(wErr.message || "Failed to process payment using wallet balance")
+          onClose()
         } finally {
           setIsProcessing(false)
         }
@@ -173,28 +181,23 @@ export default function PaymentModal({
               })
               onClose()
             } else {
-              toast.error(verification.message || "Payment verification failed")
               onError?.(verification.message || "Payment verification failed")
+              onClose()
             }
           } catch (err: unknown) {
             const errorObj = err as { code?: string; message?: string }
             if (errorObj.code === "RESERVATION_EXPIRED_REFUND_INITIATED" || errorObj.message?.includes("refund")) {
-              toast.error(
-                "Your payment succeeded, but the 10-minute hold expired. A refund has been automatically initiated.",
-                { duration: 8000 }
-              )
               onError?.("RESERVATION_EXPIRED_REFUND_INITIATED")
             } else {
-              toast.error(errorObj.message || "Failed to verify payment signature")
-              onError?.(errorObj.message || "Verification failed")
+              onError?.(errorObj.message || "Failed to verify payment signature")
             }
+            onClose()
           } finally {
             setIsProcessing(false)
           }
         },
         modal: {
           ondismiss: function () {
-            toast.info("Payment process cancelled")
             setIsProcessing(false)
             if (activeReservationId || order.reservation_id) {
               paymentApi.cancelReservation(activeReservationId || order.reservation_id!)
@@ -211,12 +214,12 @@ export default function PaymentModal({
 
       rzp.on("payment.failed", function (response: { error?: { description?: string } }) {
         console.error("Razorpay Payment Failed:", response.error)
-        toast.error(response.error?.description || "Payment failed. Please try again.")
         setIsProcessing(false)
         if (order.reservation_id) {
           paymentApi.cancelReservation(order.reservation_id)
         }
         onError?.(response.error?.description || "Payment failed")
+        onClose()
       })
 
       rzp.open()
@@ -226,15 +229,13 @@ export default function PaymentModal({
       setIsProcessing(false)
 
       if (errorObj.code === "SLOT_UNAVAILABLE" || errorObj.message?.includes("SLOT_UNAVAILABLE") || errorObj.message?.includes("available")) {
-        toast.error("This time slot just filled up or is no longer available. Please choose another time slot.", {
-          duration: 6000,
-        })
         onError?.("SLOT_UNAVAILABLE")
         onClose()
         return
       }
 
-      toast.error(errorObj.message || "Could not initiate payment. Please try again.")
+      onError?.(errorObj.message || "Could not initiate payment. Please try again.")
+      onClose()
     }
   }
 

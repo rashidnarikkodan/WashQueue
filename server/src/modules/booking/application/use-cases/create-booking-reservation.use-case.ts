@@ -30,7 +30,9 @@ export interface BookingReservationResponseDTO {
   expiresAt: string
 }
 
-export class CreateBookingReservationUseCase {
+import { ICreateBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
+
+export class CreateBookingReservationUseCase implements ICreateBookingReservationUseCase {
   private razorpay: Razorpay
 
   constructor(

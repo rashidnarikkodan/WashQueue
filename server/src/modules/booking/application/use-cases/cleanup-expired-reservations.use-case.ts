@@ -1,7 +1,9 @@
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 
-export class CleanupExpiredReservationsUseCase {
+import { ICleanupExpiredReservationsUseCase } from "../interfaces/booking-usecases.interface"
+
+export class CleanupExpiredReservationsUseCase implements ICleanupExpiredReservationsUseCase {
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
     private readonly timeWindowRepository: ITimeWindowRepository
