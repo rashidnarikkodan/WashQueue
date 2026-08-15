@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
-import { QrCameraScanner } from "../QrCameraScanner"
+import { QrCameraScanner } from "../ui/QrCameraScanner"
 
 export default function CheckInComponent() {
   const navigate = useNavigate()

@@ -4,18 +4,40 @@ import {
   CheckCircle2,
   Camera,
   Check,
-  Plus,
   ArrowRight,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
+
+interface PhotoSlotConfig {
+  key: "front" | "rear" | "left" | "right"
+  title: string
+  subtitle: string
+}
+
+const PHOTO_SLOTS: PhotoSlotConfig[] = [
+  { key: "front", title: "FRONT ANGLE", subtitle: "Front bumper & windshield" },
+  { key: "rear", title: "REAR ANGLE", subtitle: "Rear bumper & trunk" },
+  { key: "left", title: "LEFT SIDE", subtitle: "Driver side doors & wheels" },
+  { key: "right", title: "RIGHT SIDE", subtitle: "Passenger side doors & wheels" },
+]
 
 export default function ManagerPostInspectionPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   
+  // Photo Evidence State for 4 angles
+  const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
+    front: "",
+    rear: "",
+    left: "",
+    right: "",
+  })
+  const [activeCameraSlot, setActiveCameraSlot] = useState<string | null>(null)
+
   // Checklist State
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     paintGloss: true,
@@ -36,14 +58,53 @@ export default function ManagerPostInspectionPage() {
     try {
       const res = await bookingApi.getBookingById(id)
       setBooking(res)
+      if (res.postServiceInspection?.photos && res.postServiceInspection.photos.length > 0) {
+        const [f, r, l, rg] = res.postServiceInspection.photos
+        setCapturedPhotos({
+          front: f || "",
+          rear: r || "",
+          left: l || "",
+          right: rg || "",
+        })
+      }
     } catch (err) {
       console.error("Failed to fetch booking:", err)
       toast.error("Failed to load booking details")
     }
   }, [id])
 
+  // Open the in-app live camera for a given slot
+  const triggerCamera = (slotKey: string) => {
+    setActiveCameraSlot(slotKey)
+  }
+
+  // Handle a photo captured on the spot from PhotoCaptureCamera
+  const handlePhotoCaptured = (slotKey: string, dataUrl: string) => {
+    setCapturedPhotos((prev) => ({
+      ...prev,
+      [slotKey]: dataUrl,
+    }))
+    setActiveCameraSlot(null)
+    toast.success(`✓ ${slotKey.toUpperCase()} photo captured!`)
+  }
+
+  // Remove Photo from Slot
+  const handleRemovePhoto = (slotKey: string) => {
+    setCapturedPhotos((prev) => ({
+      ...prev,
+      [slotKey]: "",
+    }))
+  }
+
   useEffect(() => {
-    fetchBooking()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchBooking()
+    })
+    return () => {
+      ignore = true
+    }
   }, [fetchBooking])
 
   // Toggle Checklist item
@@ -60,12 +121,25 @@ export default function ManagerPostInspectionPage() {
     }
   }
 
+  const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
+  const allPhotosCaptured = missingPhotoSlots.length === 0
+
   // Save Post-Service Inspection (IN_SERVICE -> SERVICE_COMPLETED / AWAITING_HANDOVER)
   const handleSavePostInspection = async () => {
     if (!booking) return
+    if (!allPhotosCaptured) {
+      toast.error(
+        `Capture all 4 angle photos before completing inspection (missing: ${missingPhotoSlots
+          .map((s) => s.title)
+          .join(", ")})`
+      )
+      return
+    }
     setIsSubmitting(true)
     try {
+      const photosArray = Object.values(capturedPhotos).filter(Boolean)
       await bookingApi.savePostInspection(booking.id, {
+        photos: photosArray,
         notes: handoverNotes || "Post-service vehicle quality inspection verified",
       })
       toast.success("✓ Post-service inspection saved! Vehicle is ready for customer handover.")
@@ -306,41 +380,67 @@ export default function ManagerPostInspectionPage() {
         {/* Right Column (30% width / 5 Cols): Evidence & Actions */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Photo Evidence Hub Card */}
+          {/* Photo Evidence Hub Card (4 Spot Camera Boxes) */}
           <div className="rounded-3xl bg-card border border-border p-6 space-y-4 text-card-foreground shadow-md">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <Camera className="h-5 w-5 text-primary" />
-                <h3 className="text-base font-bold text-foreground">Photo Evidence</h3>
+                <h3 className="text-base font-bold text-foreground">Post-Service Photos (4 Angles)</h3>
               </div>
               <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                4 / 5 COMPLETE
+                {Object.values(capturedPhotos).filter(Boolean).length} / 4 CAPTURED
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { title: "RETAKE FRONT", img: "https://api.builder.io/api/v1/image/assets/TEMP/bcc46719a4f9037c08ace4050a896720a33a7a28?width=635" },
-                { title: "RETAKE REAR", img: "https://api.builder.io/api/v1/image/assets/TEMP/a7601f720acbfe8f0cac773fb1d501c72cb1d0fc?width=635" },
-                { title: "RETAKE LEFT", img: "https://api.builder.io/api/v1/image/assets/TEMP/93b31d3821af229e7a649b2f6ecf696ebfc80ae9?width=635" },
-              ].map((p, i) => (
-                <div key={i} className="relative rounded-xl overflow-hidden aspect-video border border-border group">
-                  <img src={p.img} alt={p.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
-                    <span className="px-2.5 py-1 rounded-full bg-primary/20 text-white font-bold text-[10px] uppercase border border-white/20">
-                      {p.title}
-                    </span>
+              {PHOTO_SLOTS.map((slot) => {
+                const photoUrl = capturedPhotos[slot.key]
+                return (
+                  <div key={slot.key} className="space-y-1">
+                    <div
+                      onClick={() => !photoUrl && triggerCamera(slot.key)}
+                      className={`relative rounded-xl overflow-hidden aspect-video border transition-all flex flex-col items-center justify-center p-2 text-center ${
+                        photoUrl
+                          ? "border-emerald-500/40 bg-black"
+                          : "border-dashed border-border bg-muted/40 hover:border-primary hover:bg-muted/70 cursor-pointer"
+                      }`}
+                    >
+                      {photoUrl ? (
+                        <>
+                          <img src={photoUrl} alt={slot.title} className="w-full h-full object-cover rounded-lg" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                triggerCamera(slot.key)
+                              }}
+                              className="px-2 py-1 rounded bg-white/20 hover:bg-white/30 text-white font-bold text-[10px] backdrop-blur-md cursor-pointer"
+                            >
+                              Retake
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRemovePhoto(slot.key)
+                              }}
+                              className="p-1 rounded bg-rose-500/80 hover:bg-rose-600 text-white text-[10px] backdrop-blur-md cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-1">
+                          <Camera className="h-4 w-4 text-primary mx-auto" />
+                          <span className="text-[10px] font-bold text-foreground block uppercase">{slot.key} PHOTO</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-
-              <div className="rounded-xl border-2 border-dashed border-border bg-muted p-4 flex flex-col items-center justify-center text-center space-y-1">
-                <Plus className="h-5 w-5 text-primary" />
-                <span className="text-[10px] font-bold text-foreground uppercase">RIGHT PROFILE</span>
-                <div className="w-full bg-border h-1.5 rounded-full overflow-hidden mt-1">
-                  <div className="bg-primary h-full w-3/4" />
-                </div>
-              </div>
+                )
+              })}
             </div>
           </div>
 
@@ -386,12 +486,19 @@ export default function ManagerPostInspectionPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex flex-col items-stretch gap-2 pt-2">
+              {booking?.status === "IN_SERVICE" && !allPhotosCaptured && (
+                <p className="text-xs font-semibold text-amber-500 text-right">
+                  {missingPhotoSlots.length} angle photo{missingPhotoSlots.length > 1 ? "s" : ""} still needed:{" "}
+                  {missingPhotoSlots.map((s) => s.title).join(", ")}
+                </p>
+              )}
+              <div className="flex items-center gap-3">
               {booking?.status === "IN_SERVICE" ? (
                 <button
                   type="button"
                   onClick={handleSavePostInspection}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !allPhotosCaptured}
                   className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <span>{isSubmitting ? "Saving..." : "Save Post-Inspection & Ready for Handover"}</span>
@@ -408,12 +515,22 @@ export default function ManagerPostInspectionPage() {
                   <Check className="h-4 w-4 stroke-[3]" />
                 </button>
               )}
+              </div>
             </div>
           </div>
 
         </div>
 
       </div>
+
+      {activeCameraSlot && (
+        <PhotoCaptureCamera
+          title={`Capture ${PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.title || activeCameraSlot}`}
+          subtitle={PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.subtitle}
+          onCapture={(dataUrl) => handlePhotoCaptured(activeCameraSlot, dataUrl)}
+          onClose={() => setActiveCameraSlot(null)}
+        />
+      )}
 
     </div>
   )

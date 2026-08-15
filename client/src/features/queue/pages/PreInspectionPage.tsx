@@ -6,11 +6,26 @@ import {
   Camera,
   ArrowRight,
   FileText,
-  Upload,
+  Trash2,
+  RotateCcw,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
+
+interface PhotoSlotConfig {
+  key: "front" | "rear" | "left" | "right"
+  title: string
+  subtitle: string
+}
+
+const PHOTO_SLOTS: PhotoSlotConfig[] = [
+  { key: "front", title: "FRONT ANGLE", subtitle: "Front bumper & windshield" },
+  { key: "rear", title: "REAR ANGLE", subtitle: "Rear bumper & trunk" },
+  { key: "left", title: "LEFT SIDE", subtitle: "Driver side doors & wheels" },
+  { key: "right", title: "RIGHT SIDE", subtitle: "Passenger side doors & wheels" },
+]
 
 export default function ManagerPreInspectionPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,10 +33,13 @@ export default function ManagerPreInspectionPage() {
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   const [notes, setNotes] = useState("")
   const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
-    front: "https://api.builder.io/api/v1/image/assets/TEMP/f269f08bc693f082ff57cdb031fb2aae3eca130c?width=609",
-    rear: "https://api.builder.io/api/v1/image/assets/TEMP/9255820032f47f5963dae1b893acf2e6c1f6238d?width=609",
+    front: "",
+    rear: "",
+    left: "",
+    right: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeCameraSlot, setActiveCameraSlot] = useState<string | null>(null)
 
   // Fetch Booking details
   const fetchBooking = useCallback(async () => {
@@ -29,6 +47,18 @@ export default function ManagerPreInspectionPage() {
     try {
       const res = await bookingApi.getBookingById(id)
       setBooking(res)
+      if (res.preServiceInspection?.photos && res.preServiceInspection.photos.length > 0) {
+        const [f, r, l, rg] = res.preServiceInspection.photos
+        setCapturedPhotos({
+          front: f || "",
+          rear: r || "",
+          left: l || "",
+          right: rg || "",
+        })
+      }
+      if (res.preServiceInspection?.notes) {
+        setNotes(res.preServiceInspection.notes)
+      }
     } catch (err) {
       console.error("Failed to load booking for inspection:", err)
       toast.error("Failed to load booking details")
@@ -36,21 +66,53 @@ export default function ManagerPreInspectionPage() {
   }, [id])
 
   useEffect(() => {
-    fetchBooking()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchBooking()
+    })
+    return () => {
+      ignore = true
+    }
   }, [fetchBooking])
 
-  // Mock Photo Capture
-  const handleCapture = (slotKey: string) => {
+  // Open the in-app live camera for a given slot
+  const triggerCamera = (slotKey: string) => {
+    setActiveCameraSlot(slotKey)
+  }
+
+  // Handle a photo captured on the spot from PhotoCaptureCamera
+  const handlePhotoCaptured = (slotKey: string, dataUrl: string) => {
     setCapturedPhotos((prev) => ({
       ...prev,
-      [slotKey]: "https://api.builder.io/api/v1/image/assets/TEMP/f269f08bc693f082ff57cdb031fb2aae3eca130c?width=609",
+      [slotKey]: dataUrl,
     }))
-    toast.success(`${slotKey.toUpperCase()} photo captured!`)
+    setActiveCameraSlot(null)
+    toast.success(`✓ ${slotKey.toUpperCase()} photo captured!`)
   }
+
+  // Remove Photo from Slot
+  const handleRemovePhoto = (slotKey: string) => {
+    setCapturedPhotos((prev) => ({
+      ...prev,
+      [slotKey]: "",
+    }))
+  }
+
+  const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
+  const allPhotosCaptured = missingPhotoSlots.length === 0
 
   // Complete Pre-Service Inspection & Perform Atomic Check-In
   const handleSaveInspection = async () => {
     if (!booking) return
+    if (!allPhotosCaptured) {
+      toast.error(
+        `Capture all 4 angle photos before checking in (missing: ${missingPhotoSlots
+          .map((s) => s.title)
+          .join(", ")})`
+      )
+      return
+    }
     setIsSubmitting(true)
     try {
       const photosArray = Object.values(capturedPhotos).filter(Boolean)
@@ -80,10 +142,10 @@ export default function ManagerPreInspectionPage() {
       {/* Page Header */}
       <div className="space-y-2 border-b border-border pb-6">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-          Customer Check-in
+          Customer Check-in & Pre-Inspection
         </h1>
         <p className="text-base text-muted-foreground font-medium max-w-2xl">
-          Track and manage booking activity across all stations in the Sentinel network.
+          Capture 4-angle vehicle condition photos on the spot before starting wash service.
         </p>
       </div>
 
@@ -109,9 +171,9 @@ export default function ManagerPreInspectionPage() {
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-emerald-500">Check-In Successful</h3>
+              <h3 className="text-base font-bold text-emerald-500">Check-In Active</h3>
               <p className="text-xs text-emerald-500/80 font-medium">
-                Ticket #{booking?.bookingNumber || "WQ-28472"} scanned at 10:03 AM by Auto-Gate 02
+                Ticket #{booking?.bookingNumber || "WQ-..."} verified for station queue.
               </p>
             </div>
           </div>
@@ -136,10 +198,10 @@ export default function ManagerPreInspectionPage() {
 
               <button
                 type="button"
-                onClick={() => toast.info("Viewing customer profile")}
+                onClick={() => toast.info("Viewing customer details")}
                 className="px-4 py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs transition-colors border border-border cursor-pointer"
               >
-                View Profile
+                Verified Customer
               </button>
             </div>
 
@@ -150,188 +212,155 @@ export default function ManagerPreInspectionPage() {
                   BOOKING ID
                 </span>
                 <span className="font-bold text-foreground text-sm">
-                  {booking?.bookingNumber || "WQ-28472"}
+                  {booking?.bookingNumber || "N/A"}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
-                  TIME WINDOW
+                  SERVICE TYPE
                 </span>
-                <span className="font-bold text-foreground text-sm">10:00 AM - 11:00 AM</span>
+                <span className="font-bold text-foreground text-sm">{booking?.serviceType || "FULL"} WASH</span>
               </div>
 
               <div>
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
-                  VEHICLE TYPE
+                  VEHICLE PLATE
                 </span>
-                <span className="font-bold text-primary text-sm">
-                  {booking?.vehicleDetails?.model || "SEDAN"}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
-                  WASH TYPE
-                </span>
-                <span className="font-bold text-foreground">
-                  {booking?.serviceType || "FULL"} WASH
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
-                  EXTRA SERVICES
-                </span>
-                <span className="font-bold text-foreground">TYRE POLISH</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
-                  PAYMENT STATUS
-                </span>
-                <span className="font-bold text-emerald-500 uppercase">
-                  {booking?.paymentStatus || "PAID"}
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Vehicle Snapshot & Assistance */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-            
-            <div className="p-6 rounded-2xl bg-muted/40 border border-border space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-lg bg-card text-foreground font-mono font-black text-sm tracking-widest border border-border">
+                <span className="font-bold text-primary text-sm font-mono">
                   {registrationNumber}
                 </span>
-                <span className="text-xs text-muted-foreground font-medium">Registered 2021</span>
               </div>
-              <h3 className="text-xl font-bold text-foreground">
-                {booking?.vehicleDetails?.brand || "Silver"} {booking?.vehicleDetails?.model || "BMW 3 Series"}
-              </h3>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 space-y-3">
-              <h4 className="text-sm font-bold text-primary">Need Assistance?</h4>
-              <p className="text-xs text-muted-foreground">
-                If customer profile doesn't match the vehicle, trigger a Manager Override.
-              </p>
-              <button
-                type="button"
-                onClick={() => toast.info("Admin assistance requested")}
-                className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-primary font-bold text-xs transition-colors border border-border cursor-pointer"
-              >
-                Request Admin Assistance
-              </button>
             </div>
 
           </div>
-
         </div>
 
-        {/* Phase 2: Pre-Service Inspection Card */}
+        {/* Phase 2: Pre-Service Inspection Card (4 Spot Camera Boxes) */}
         <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 text-card-foreground shadow-md">
           
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <Camera className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground tracking-tight">Pre-Service Inspection</h2>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground tracking-tight">Spot Photo Capture (4 Angles)</h2>
+                <p className="text-xs text-muted-foreground">Tap any box to take a photo directly on the spot using camera.</p>
+              </div>
             </div>
             <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-primary/10 text-primary border border-primary/20 uppercase tracking-widest">
               PHASE 02
             </span>
           </div>
 
-          {/* Photo Capture Grid (4 Slots) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            
-            {/* Front Photo */}
-            <div className="relative rounded-2xl overflow-hidden border border-border bg-muted group aspect-[16/10] flex items-center justify-center">
-              {capturedPhotos.front ? (
-                <>
-                  <img src={capturedPhotos.front} alt="Front" className="w-full h-full object-cover" />
-                  <div className="absolute top-3 left-3 bg-emerald-500 text-slate-950 font-black text-[10px] uppercase px-2.5 py-1 rounded-full">
-                    FRONT CAPTURED
+          {/* Photo Capture Grid (4 Interactive Spot Camera Boxes) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {PHOTO_SLOTS.map((slot) => {
+              const photoUrl = capturedPhotos[slot.key]
+              return (
+                <div key={slot.key} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-foreground">
+                    <span>{slot.title}</span>
+                    {photoUrl && (
+                      <span className="text-[10px] text-emerald-500 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> CAPTURED
+                      </span>
+                    )}
                   </div>
-                </>
-              ) : (
-                <button onClick={() => handleCapture("front")} className="text-center space-y-2 cursor-pointer">
-                  <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <span className="text-xs font-bold text-muted-foreground block uppercase">FRONT SIDE</span>
-                </button>
-              )}
-            </div>
 
-            {/* Rear Photo */}
-            <div className="relative rounded-2xl overflow-hidden border border-border bg-muted group aspect-[16/10] flex items-center justify-center">
-              {capturedPhotos.rear ? (
-                <>
-                  <img src={capturedPhotos.rear} alt="Rear" className="w-full h-full object-cover" />
-                  <div className="absolute top-3 left-3 bg-emerald-500 text-slate-950 font-black text-[10px] uppercase px-2.5 py-1 rounded-full">
-                    REAR CAPTURED
+                  {/* Spot Photo Box Container */}
+                  <div
+                    onClick={() => !photoUrl && triggerCamera(slot.key)}
+                    className={`relative rounded-2xl overflow-hidden border-2 transition-all aspect-[4/3] flex flex-col items-center justify-center p-4 text-center ${
+                      photoUrl
+                        ? "border-emerald-500/50 bg-black shadow-md"
+                        : "border-dashed border-border bg-muted/40 hover:border-primary hover:bg-muted/70 cursor-pointer"
+                    }`}
+                  >
+                    {photoUrl ? (
+                      <>
+                        <img
+                          src={photoUrl}
+                          alt={slot.title}
+                          className="w-full h-full object-cover rounded-xl"
+                        />
+
+                        {/* Photo Action Overlay */}
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-xs opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              triggerCamera(slot.key)
+                            }}
+                            className="px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs backdrop-blur-md flex items-center gap-1.5 cursor-pointer border border-white/20"
+                            title="Retake photo on spot"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" /> Retake
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRemovePhoto(slot.key)
+                            }}
+                            className="p-2 rounded-xl bg-rose-500/80 hover:bg-rose-600 text-white font-bold text-xs backdrop-blur-md cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto border border-primary/20">
+                          <Camera className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-foreground block uppercase">
+                            TAKE {slot.key} PHOTO
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block mt-0.5">
+                            {slot.subtitle}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </>
-              ) : (
-                <button onClick={() => handleCapture("rear")} className="text-center space-y-2 cursor-pointer">
-                  <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <span className="text-xs font-bold text-muted-foreground block uppercase">REAR SIDE</span>
-                </button>
-              )}
-            </div>
-
-            {/* Left Side Photo */}
-            <div className="relative rounded-2xl overflow-hidden border-2 border-dashed border-border bg-muted/40 hover:border-primary transition-colors group aspect-[16/10] flex items-center justify-center">
-              {capturedPhotos.left ? (
-                <img src={capturedPhotos.left} alt="Left" className="w-full h-full object-cover" />
-              ) : (
-                <button onClick={() => handleCapture("left")} className="text-center space-y-2 cursor-pointer">
-                  <Camera className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <span className="text-xs font-bold text-foreground block uppercase">LEFT SIDE</span>
-                  <span className="text-[10px] text-muted-foreground block">Pending Capture</span>
-                </button>
-              )}
-            </div>
-
-            {/* Right Side Photo */}
-            <div className="relative rounded-2xl overflow-hidden border-2 border-dashed border-border bg-muted/40 hover:border-primary transition-colors group aspect-[16/10] flex items-center justify-center">
-              {capturedPhotos.right ? (
-                <img src={capturedPhotos.right} alt="Right" className="w-full h-full object-cover" />
-              ) : (
-                <button onClick={() => handleCapture("right")} className="text-center space-y-2 cursor-pointer">
-                  <Camera className="h-6 w-6 text-muted-foreground mx-auto" />
-                  <span className="text-xs font-bold text-foreground block uppercase">RIGHT SIDE</span>
-                  <span className="text-[10px] text-muted-foreground block">Pending Capture</span>
-                </button>
-              )}
-            </div>
-
+                </div>
+              )
+            })}
           </div>
 
           {/* Internal Notes Textarea */}
           <div className="space-y-3">
             <span className="block text-xs font-extrabold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" /> INTERNAL NOTES
+              <FileText className="h-4 w-4 text-primary" /> INSPECTION FINDINGS & NOTES
             </span>
 
             <textarea
               rows={4}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Enter notes and inspection findings regarding scratches, pre-existing dents, or special requests..."
+              placeholder="Enter notes regarding existing scratches, dents, or customer instructions..."
               className="w-full p-4 rounded-2xl bg-muted text-foreground text-sm font-medium border border-border focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
             />
           </div>
 
           {/* Action Button */}
-          <div className="pt-2 flex justify-end">
+          <div className="pt-2 flex flex-col items-end gap-2">
+            {!allPhotosCaptured && (
+              <p className="text-xs font-semibold text-amber-500">
+                {missingPhotoSlots.length} angle photo{missingPhotoSlots.length > 1 ? "s" : ""} still needed:{" "}
+                {missingPhotoSlots.map((s) => s.title).join(", ")}
+              </p>
+            )}
             <button
               onClick={handleSaveInspection}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !allPhotosCaptured}
               className="px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all shadow-md cursor-pointer flex items-center gap-2"
             >
-              <span>{isSubmitting ? "Saving..." : "Save & Complete Inspection"}</span>
+              <span>{isSubmitting ? "Saving Inspection..." : "Save Inspection & Check-In Vehicle"}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -339,6 +368,15 @@ export default function ManagerPreInspectionPage() {
         </div>
 
       </div>
+
+      {activeCameraSlot && (
+        <PhotoCaptureCamera
+          title={`Capture ${PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.title || activeCameraSlot}`}
+          subtitle={PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.subtitle}
+          onCapture={(dataUrl) => handlePhotoCaptured(activeCameraSlot, dataUrl)}
+          onClose={() => setActiveCameraSlot(null)}
+        />
+      )}
 
     </div>
   )

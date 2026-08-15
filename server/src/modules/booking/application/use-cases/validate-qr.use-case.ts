@@ -17,7 +17,7 @@ export class ValidateQRForCheckInUseCase {
   ) {}
 
   async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
-    let searchStr = (input.qrToken || input.bookingId || "").trim()
+    let searchStr = (input.qrToken || input.bookingId || "").trim().replace(/^#+\s*/, "")
 
     if (!searchStr) {
       throw new AppError("QR token or Booking ID is required", HTTP_STATUS.BAD_REQUEST)
@@ -82,8 +82,12 @@ export class ValidateQRForCheckInUseCase {
     }
 
     // Rule 4: Booking Status Eligibility (Must be strictly CONFIRMED)
-    if (booking.status === BookingStatus.CANCELLED || booking.cancellation) {
+    if (booking.status === BookingStatus.CANCELLED || Boolean(booking.cancellation?.cancelledAt)) {
       throw new AppError("This booking has been cancelled and cannot be checked in", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    if (booking.status === BookingStatus.NO_SHOW) {
+      throw new AppError("This booking was marked NO_SHOW as customer missed their time window", HTTP_STATUS.BAD_REQUEST)
     }
 
     if (booking.status !== BookingStatus.CONFIRMED) {
@@ -91,6 +95,47 @@ export class ValidateQRForCheckInUseCase {
         `Check-in is only allowed for CONFIRMED bookings. Current status is ${booking.status}`,
         HTTP_STATUS.BAD_REQUEST
       )
+    }
+
+    // Rule 5: Booking Time Window Match & NO_SHOW Enforcement
+    if (booking.scheduling?.windowStart && booking.scheduling?.windowEnd) {
+      const windowStart = new Date(booking.scheduling.windowStart)
+      const windowEnd = new Date(booking.scheduling.windowEnd)
+      const nowMs = now.getTime()
+
+      const formatWindowTime = (d: Date) =>
+        d.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+
+      if (nowMs < windowStart.getTime()) {
+        const startTimeFormatted = formatWindowTime(windowStart)
+        const endTimeFormatted = formatWindowTime(windowEnd)
+        throw new AppError(
+          `Early Arrival Warning: Customer arrived before their booked time window (${startTimeFormatted} - ${endTimeFormatted}). Check-in is not allowed until ${startTimeFormatted}.`,
+          HTTP_STATUS.BAD_REQUEST
+        )
+      }
+
+      if (nowMs > windowEnd.getTime()) {
+        const startTimeFormatted = formatWindowTime(windowStart)
+        const endTimeFormatted = formatWindowTime(windowEnd)
+
+        // Mark booking as NO_SHOW in database
+        try {
+          booking.markNoShow()
+          await this.bookingRepository.save(booking)
+        } catch (err) {
+          console.warn(`[ValidateQR] Failed to mark booking ${booking.id} as NO_SHOW:`, err)
+        }
+
+        throw new AppError(
+          `Time Window Expired: The booking time window (${startTimeFormatted} - ${endTimeFormatted}) has passed. Customer missed their window and the booking is marked as NO_SHOW.`,
+          HTTP_STATUS.BAD_REQUEST
+        )
+      }
     }
 
     // Rule 5: Station Belonging & Manager Authorization Check

@@ -17,6 +17,9 @@ export interface SavePreInspectionInput {
   notes?: string
 }
 
+// Front, rear, left, right — the same 4 angles PreInspectionPage.tsx captures on the client.
+const REQUIRED_INSPECTION_PHOTO_COUNT = 4
+
 export class SavePreInspectionAndCheckInUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
@@ -48,6 +51,52 @@ export class SavePreInspectionAndCheckInUseCase {
     }
 
     const now = new Date()
+
+    if (existing.scheduling?.windowStart && existing.scheduling?.windowEnd) {
+      const windowStart = new Date(existing.scheduling.windowStart)
+      const windowEnd = new Date(existing.scheduling.windowEnd)
+      const nowMs = now.getTime()
+
+      const formatWindowTime = (d: Date) =>
+        d.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+
+      if (nowMs < windowStart.getTime()) {
+        const startTimeFormatted = formatWindowTime(windowStart)
+        const endTimeFormatted = formatWindowTime(windowEnd)
+        throw new AppError(
+          `Early Arrival Warning: Customer arrived before their booked time window (${startTimeFormatted} - ${endTimeFormatted}). Check-in is not allowed until ${startTimeFormatted}.`,
+          HTTP_STATUS.BAD_REQUEST
+        )
+      }
+
+      if (nowMs > windowEnd.getTime()) {
+        const startTimeFormatted = formatWindowTime(windowStart)
+        const endTimeFormatted = formatWindowTime(windowEnd)
+
+        try {
+          existing.markNoShow()
+          await this.bookingRepository.save(existing)
+        } catch (err) {
+          console.warn(`[SavePreInspection] Failed to mark booking ${existing.id} as NO_SHOW:`, err)
+        }
+
+        throw new AppError(
+          `Time Window Expired: The booking time window (${startTimeFormatted} - ${endTimeFormatted}) has passed. Customer missed their window and the booking is marked as NO_SHOW.`,
+          HTTP_STATUS.BAD_REQUEST
+        )
+      }
+    }
+
+    if (photos.filter(Boolean).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
+      throw new AppError(
+        `Pre-service inspection requires all ${REQUIRED_INSPECTION_PHOTO_COUNT} vehicle angle photos (front, rear, left, right) before check-in`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
     const inspectionRecord = {
       photos,
       notes: notes.trim() || "Pre-service inspection completed",

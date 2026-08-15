@@ -17,6 +17,7 @@ import { vehicleCatelogApi, stationApi } from "@/shared/apis"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import type { StationDetail } from "@/features/station/types"
+import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
 
 export default function WalkInComponent() {
   const navigate = useNavigate()
@@ -32,13 +33,18 @@ export default function WalkInComponent() {
   const [isLoadingCategories, setIsLoadingCategories] = useState<boolean>(true)
   const [isLoadingClasses, setIsLoadingClasses] = useState<boolean>(false)
 
+  // Time Windows / Slots State (today's live availability for this station)
+  const [timeWindows, setTimeWindows] = useState<TimeWindowSlot[]>([])
+  const [selectedTimeWindowId, setSelectedTimeWindowId] = useState<string>("")
+  const [isLoadingSlots, setIsLoadingSlots] = useState<boolean>(false)
+
   // Form State
   const [registrationNumber, setRegistrationNumber] = useState("")
   const [category, setCategory] = useState("")
   const [vehicleClass, setVehicleClass] = useState("")
   const [serviceType, setServiceType] = useState<"HALF" | "FULL">("FULL")
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
-  
+
   // Customer Details State
   const [phone, setPhone] = useState("")
   const [fullName, setFullName] = useState("")
@@ -111,7 +117,7 @@ export default function WalkInComponent() {
     setCategory(newCategoryId)
   }
 
-  // Fetch Station & Station Details
+  // Fetch Station & Station Details & Today's Time Windows
   const fetchStation = useCallback(async () => {
     try {
       const stations = await managerApi.getManagedStations()
@@ -126,6 +132,30 @@ export default function WalkInComponent() {
           setStationDetail(detail)
         } catch (e) {
           console.error("Failed to load station pricing details:", e)
+        }
+
+        try {
+          setIsLoadingSlots(true)
+          const todayStr = new Date().toISOString().split("T")[0]
+          const slotsData = await stationApi.getAvailableTimeWindows(sId, todayStr)
+          const windowsList = slotsData?.windows || []
+          setTimeWindows(windowsList)
+
+          if (windowsList.length > 0) {
+            const nowMs = Date.now()
+            const activeWin = windowsList.find(
+              (w) =>
+                w.status === "OPEN" &&
+                new Date(w.start).getTime() <= nowMs &&
+                new Date(w.end).getTime() > nowMs
+            )
+            const firstOpen = windowsList.find((w) => w.status === "OPEN")
+            setSelectedTimeWindowId((activeWin || firstOpen || windowsList[0]).windowId)
+          }
+        } catch (e) {
+          console.error("Failed to load time windows:", e)
+        } finally {
+          setIsLoadingSlots(false)
         }
       }
     } catch (err) {
@@ -188,6 +218,18 @@ export default function WalkInComponent() {
   }, 0)
   const grandTotal = basePrice + extrasTotal
 
+  // Time Window / Live Availability Helpers
+  const selectedSlot = timeWindows.find((w) => w.windowId === selectedTimeWindowId) || timeWindows[0]
+  const formatSlotTime = (w?: TimeWindowSlot) => {
+    if (!w) return "Auto-Assigned"
+    const start = new Date(w.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    const end = new Date(w.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    return `${start} - ${end}`
+  }
+  const nextWindow = timeWindows.find(
+    (w) => w.status === "OPEN" && w.windowId !== selectedSlot?.windowId && new Date(w.start).getTime() > Date.now()
+  )
+  const slotCapacity = selectedSlot ? selectedSlot.bookedCount + selectedSlot.remainingCapacity : 0
 
   // Submit Walk-In Booking
   const handleCreateWalkIn = async () => {
@@ -204,6 +246,7 @@ export default function WalkInComponent() {
     try {
       const res = await bookingApi.createWalkIn({
         stationId: stationInfo.stationId,
+        timeWindowId: selectedTimeWindowId || undefined,
         serviceType,
         walkInVehicle: {
           registrationNumber: registrationNumber.trim().toUpperCase(),
@@ -341,7 +384,7 @@ export default function WalkInComponent() {
                   ].map((w) => (
                     <div
                       key={w.type}
-                      onClick={() => setServiceType(w.type as any)}
+                      onClick={() => setServiceType(w.type as "HALF" | "FULL")}
                       className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         serviceType === w.type
                           ? "bg-card border-primary shadow-md shadow-primary/10"
@@ -481,48 +524,79 @@ export default function WalkInComponent() {
 
         {/* Right Column (30% width / 4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Card 1: Live Queue Status */}
+          {/* Card 1: Live Queue Availability & Time Slot Picker */}
           <div className="rounded-3xl bg-card border border-border overflow-hidden space-y-6 text-card-foreground shadow-md">
             <div className="p-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-500 flex items-center gap-2">
                 <Clock className="h-4 w-4" /> LIVE QUEUE AVAILABILITY
               </span>
-              <span className="px-2.5 py-0.5 rounded bg-emerald-500 text-slate-950 text-[10px] font-black uppercase">
-                AVAILABLE
+              <span
+                className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                  selectedSlot?.status === "FULL"
+                    ? "bg-amber-500 text-slate-950"
+                    : "bg-emerald-500 text-slate-950"
+                }`}
+              >
+                {selectedSlot?.status === "FULL" ? "FULL" : timeWindows.length > 0 ? "AVAILABLE" : "AUTO"}
               </span>
             </div>
 
             <div className="p-6 space-y-6">
-              <div>
+              <div className="space-y-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                  CURRENT WINDOW
+                  {timeWindows.length > 0 ? "CHOOSE SLOT WINDOW" : "CURRENT WINDOW"}
                 </span>
-                <h3 className="text-2xl font-black text-foreground">09:00 AM - 09:30 AM</h3>
+
+                {isLoadingSlots ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading today's slots...
+                  </div>
+                ) : timeWindows.length > 0 ? (
+                  <select
+                    value={selectedTimeWindowId}
+                    onChange={(e) => setSelectedTimeWindowId(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-bold text-sm focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                  >
+                    {timeWindows.map((w) => (
+                      <option key={w.windowId} value={w.windowId} disabled={w.status !== "OPEN"}>
+                        {formatSlotTime(w)} {w.status !== "OPEN" ? `(${w.status})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <h3 className="text-xl font-black text-foreground">
+                    Vehicle will be auto-assigned to the current window
+                  </h3>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">QUEUE LENGTH</span>
-                  <p className="text-xl font-bold text-foreground">8</p>
+              {selectedSlot && (
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">QUEUE LENGTH</span>
+                    <p className="text-xl font-bold text-foreground">{selectedSlot.bookedCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">CAPACITY</span>
+                    <p className="text-xl font-bold text-emerald-500">{slotCapacity} Slots</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">REMAINING</span>
+                    <p className="text-xl font-bold text-primary">{selectedSlot.remainingCapacity} Open</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">STATUS</span>
+                    <p className="text-xl font-bold text-foreground">{selectedSlot.status}</p>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">CAPACITY</span>
-                  <p className="text-xl font-bold text-emerald-500">2 Slots</p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">REMAINING</span>
-                  <p className="text-xl font-bold text-primary">1 Walk-In</p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">WAIT TIME</span>
-                  <p className="text-xl font-bold text-foreground">22m</p>
-                </div>
-              </div>
+              )}
 
-              <div className="pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground font-medium">
-                <span>Next Window</span>
-                <span className="font-bold text-foreground">09:30 AM</span>
-              </div>
+              {nextWindow && (
+                <div className="pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground font-medium">
+                  <span>Next Window</span>
+                  <span className="font-bold text-foreground">{formatSlotTime(nextWindow)}</span>
+                </div>
+              )}
             </div>
           </div>
 

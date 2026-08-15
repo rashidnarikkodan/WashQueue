@@ -130,8 +130,9 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
       const exists = await redis.exists(queueKey)
       if (!exists) {
-        // Cold start or missing Redis key -> Trigger Reconciliation from Mongo
-        return await this.reconcileStationQueue(stationId)
+        // Cold start or missing Redis key -> compute from Mongo AND (re)persist the
+        // ordering keys, since nothing is maintaining them yet.
+        return await this.reconcileStationQueue(stationId, { syncRedis: true })
       }
 
       // Fetch waiting booking IDs ordered deterministically by score
@@ -156,11 +157,16 @@ export class BookingRedisQueueService implements IBookingQueueService {
         }
       }
 
-      // Reconcile with Mongo to fetch full domain DTOs reliably
-      return await this.reconcileStationQueue(stationId)
+      // Redis already holds a valid, incrementally-maintained ordering (kept in sync by
+      // pushToStationQueue/updateQueueStatus/cleanStaleQueueEntries on state transitions).
+      // Recompute the live position/wait-time DTOs from Mongo (they're inherently
+      // time-dependent), but don't blow away and rewrite the Redis keys on every read —
+      // that turned every read into a write storm with no caching benefit and raced with
+      // concurrent readers doing the same delete+rebuild.
+      return await this.reconcileStationQueue(stationId, { syncRedis: false })
     } catch (error) {
       logger.error({ error, stationId }, "[RedisQueue] Failed to read queue from Redis; falling back to MongoDB reconciliation")
-      return await this.reconcileStationQueue(stationId)
+      return await this.reconcileStationQueue(stationId, { syncRedis: true })
     }
   }
 
@@ -192,7 +198,11 @@ export class BookingRedisQueueService implements IBookingQueueService {
   /**
    * Reconciles Redis operational queue against MongoDB persistent source of truth.
    */
-  async reconcileStationQueue(stationId: string): Promise<OperationalStationQueueDTO> {
+  async reconcileStationQueue(
+    stationId: string,
+    options: { syncRedis?: boolean } = {}
+  ): Promise<OperationalStationQueueDTO> {
+    const syncRedis = options.syncRedis ?? true
     const queueKey = `queue:station:${stationId}:waiting`
     const activeKey = `queue:station:${stationId}:active`
     const metaKey = `queue:station:${stationId}:meta`
@@ -351,27 +361,30 @@ export class BookingRedisQueueService implements IBookingQueueService {
       }
     })
 
-    // 6. Resynchronize Redis in background (Atomic refresh)
-    try {
-      await redis.del(queueKey)
-      await redis.del(activeKey)
+    // 6. Resynchronize Redis ordering keys — only when actually needed (cold start /
+    // explicit forced resync), not on every read; see getOperationalQueue.
+    if (syncRedis) {
+      try {
+        await redis.del(queueKey)
+        await redis.del(activeKey)
 
-      for (const b of waitingList) {
-        const score = this.computeOrderScore(b)
-        await redis.zadd(queueKey, score, b.id)
+        for (const b of waitingList) {
+          const score = this.computeOrderScore(b)
+          await redis.zadd(queueKey, score, b.id)
+        }
+
+        for (const b of activeServicesList) {
+          await redis.sadd(activeKey, b.id)
+        }
+
+        await redis.hset(metaKey, {
+          queueDepth: queueDepth.toString(),
+          activeCount: activeServicesCount.toString(),
+          reconciledAt: Date.now().toString(),
+        })
+      } catch (err) {
+        logger.warn({ error: err, stationId }, "[RedisQueue] Redis resync failed during reconciliation (non-critical)")
       }
-
-      for (const b of activeServicesList) {
-        await redis.sadd(activeKey, b.id)
-      }
-
-      await redis.hset(metaKey, {
-        queueDepth: queueDepth.toString(),
-        activeCount: activeServicesCount.toString(),
-        reconciledAt: Date.now().toString(),
-      })
-    } catch (err) {
-      logger.warn({ error: err, stationId }, "[RedisQueue] Redis resync failed during reconciliation (non-critical)")
     }
 
     return {
@@ -404,7 +417,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
       if (staleDocs.length === 0) return 0
 
       for (const doc of staleDocs) {
-        doc.status = BookingStatus.NO_SHOW as any
+        doc.status = BookingStatus.NO_SHOW
         doc.updatedAt = new Date()
         await doc.save()
         await this.updateQueueStatus(BookingMapper.toDomain(doc))

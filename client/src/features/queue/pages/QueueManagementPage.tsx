@@ -7,9 +7,10 @@ import {
   QrCode,
   ArrowRight,
   Play,
-  CheckCheck,
+  Check,
   Building2,
   X,
+  AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
@@ -150,45 +151,41 @@ export default function ManagerQueuePage() {
       fetchStationAndQueue()
     }
 
+    // Matches the exact event names BookingNotificationService.notify() actually emits
+    // (see the use-cases' notify(...) calls) — QUEUE_UPDATED is emitted alongside every one
+    // of these as a catch-all, but listening for the specific names too keeps this list
+    // self-documenting and resilient if the catch-all is ever removed.
     const realTimeEvents = [
       "QUEUE_UPDATED",
-      "BOOKING_CHECKED_IN",
-      "SERVICE_STARTED",
-      "SERVICE_COMPLETED",
-      "POST_INSPECTION_COMPLETED",
-      "HANDOVER_READY",
-      "BOOKING_COMPLETED",
-      "BOOKING_NO_SHOW",
+      "CHECKIN_SUCCESS",
+      "WASH_STARTED",
+      "WASH_COMPLETED",
+      "BOOKING_CREATED",
       "BOOKING_CANCELLED",
       "BOOKING_STALLED",
+      "REFUND_COMPLETED",
     ]
 
     realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
     socket.on("connect", handleRealTimeUpdate)
     socket.on("reconnect", handleRealTimeUpdate)
 
+    // Fallback poll: if a socket event is ever missed or the connection drops silently
+    // without firing "disconnect"/"reconnect", the board still refreshes on its own.
+    const pollId = setInterval(() => fetchStationAndQueue(), 30000)
+
     return () => {
       realTimeEvents.forEach((evt) => socket.off(evt, handleRealTimeUpdate))
       socket.off("connect", handleRealTimeUpdate)
       socket.off("reconnect", handleRealTimeUpdate)
       unsubscribeFromStation(stationInfo.stationId)
+      clearInterval(pollId)
     }
   }, [stationInfo?.stationId, fetchStationAndQueue])
 
   // Filtered & Sorted Queue List (First Checked-In Vehicle First)
   const queueList = useMemo(() => {
     const filtered = bookings.filter((b) => {
-      const isCheckedInOrBeyond =
-        b.status === "CHECK_IN" ||
-        b.status === "CHECKED_IN" ||
-        b.status === "IN_SERVICE" ||
-        b.status === "SERVICE_COMPLETED" ||
-        b.status === "AWAITING_CONFIRMATION" ||
-        b.status === "COMPLETED" ||
-        b.status === "STALLED"
-
-      if (!isCheckedInOrBeyond) return false
-
       if (filterType === "QUEUED") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
       if (filterType === "IN_SERVICE") return b.status === "IN_SERVICE"
       if (filterType === "STALLED") return b.status === "STALLED"
@@ -198,7 +195,16 @@ export default function ManagerQueuePage() {
           b.status === "AWAITING_CONFIRMATION" ||
           b.status === "COMPLETED"
         )
-      return true
+
+      // Default "ALL" (Active Operational Queue View):
+      // Only show vehicles currently in active queue or being serviced.
+      // Completed, Service Completed, and Cancelled bookings are excluded from active queue.
+      return (
+        b.status === "CHECK_IN" ||
+        b.status === "CHECKED_IN" ||
+        b.status === "IN_SERVICE" ||
+        b.status === "STALLED"
+      )
     })
 
     // Sort strictly by check-in arrival time (First Checked-In First - FIFO)
@@ -253,6 +259,35 @@ export default function ManagerQueuePage() {
     return bookings.find((b) => b.id === selectedBookingId) || queueList[0] || null
   }, [bookings, queueList, selectedBookingId])
 
+  // Live "In Progress" Session Timer (ticks while the selected vehicle is being washed)
+  const isSelectedBookingInService =
+    !!selectedBooking && selectedBooking.status === "IN_SERVICE" && !!selectedBooking.serviceStartedAt
+  const [nowTick, setNowTick] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!isSelectedBookingInService) return
+    setNowTick(Date.now())
+    const timerId = setInterval(() => setNowTick(Date.now()), 1000)
+    return () => clearInterval(timerId)
+  }, [isSelectedBookingInService, selectedBooking?.id])
+
+  const elapsedSeconds = useMemo(() => {
+    if (!isSelectedBookingInService || !selectedBooking?.serviceStartedAt) return 0
+    const startTime = new Date(selectedBooking.serviceStartedAt).getTime()
+    return Math.max(0, Math.floor((nowTick - startTime) / 1000))
+  }, [isSelectedBookingInService, selectedBooking?.serviceStartedAt, nowTick])
+
+  const formattedSessionTimer = useMemo(() => {
+    const mins = Math.floor(elapsedSeconds / 60)
+    const secs = elapsedSeconds % 60
+    const hrs = Math.floor(mins / 60)
+    const remMins = mins % 60
+    if (hrs > 0) {
+      return `${String(hrs).padStart(2, "0")}:${String(remMins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+    }
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  }, [elapsedSeconds])
+
   // KPI Calculations (Only count checked-in or in-service vehicles)
   const todayBookingsCount = bookings.length
   const activeQueueCount = useMemo(() => {
@@ -264,6 +299,20 @@ export default function ManagerQueuePage() {
     ).length
   }, [bookings])
   const estimatedWaitMinutes = activeQueueCount * 15
+
+  // Real per-vehicle queue position / wait estimate / bay assignment computed server-side,
+  // instead of falling back to the crude activeQueueCount * 15 heuristic per item.
+  const getQueueMeta = useCallback(
+    (bookingId: string) => {
+      if (!liveQueueData) return null
+      return (
+        liveQueueData.waitingQueue.find((w) => w.bookingId === bookingId) ||
+        liveQueueData.activeServices.find((a) => a.bookingId === bookingId) ||
+        null
+      )
+    },
+    [liveQueueData]
+  )
 
   // Next Up Booking (Earliest checked-in vehicle waiting for bay)
   const nextUpBooking = useMemo(() => {
@@ -308,7 +357,8 @@ export default function ManagerQueuePage() {
     }
   }
 
-  // Handle QR / Booking ID Check-In
+  // Handle QR / Booking ID Check-In — validates the pass, then routes to the mandatory
+  // photo-based pre-inspection flow rather than checking the vehicle in blind.
   const handleCheckInSubmit = async () => {
     if (!qrInput.trim()) {
       toast.error("Please enter a valid Booking ID or QR Token")
@@ -317,11 +367,10 @@ export default function ManagerQueuePage() {
 
     setIsCheckInSubmitting(true)
     try {
-      await bookingApi.checkIn(qrInput.trim())
-      toast.success("Customer checked in successfully!")
+      const validated = await bookingApi.validateQr(qrInput.trim())
       setIsCheckInOpen(false)
       setQrInput("")
-      fetchStationAndQueue()
+      navigate(`/manager/bookings/${validated.id}/pre-inspection`)
     } catch (err) {
       console.error("Check in error:", err)
       toast.error("Failed to check in customer. Verify QR Token / Booking ID.")
@@ -466,11 +515,11 @@ export default function ManagerQueuePage() {
           {/* Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { id: "ALL", label: "All Queue" },
+              { id: "ALL", label: "Active Queue" },
               { id: "QUEUED", label: "Waiting" },
               { id: "IN_SERVICE", label: "In Service" },
               { id: "STALLED", label: "Stalled Exceptions" },
-              { id: "COMPLETED", label: "Completed" },
+              { id: "COMPLETED", label: "Completed History" },
             ].map((t) => (
               <button
                 key={t.id}
@@ -499,6 +548,7 @@ export default function ManagerQueuePage() {
             ) : (
               queueList.map((item, index) => {
                 const isSelected = item.id === selectedBookingId
+                const queueMeta = getQueueMeta(item.id)
                 return (
                   <div
                     key={item.id}
@@ -544,11 +594,26 @@ export default function ManagerQueuePage() {
 
                       <div className="text-right">
                         <span className="text-xs font-extrabold text-foreground block">
-                          ₹{item.pricingSnapshot?.totalPrice || (item as any).totalAmount || 450}
+                          ₹{item.pricingSnapshot?.totalPrice || 450}
                         </span>
                         <span className="text-[10px] text-muted-foreground">{item.serviceType} Wash</span>
                       </div>
                     </div>
+
+                    {queueMeta && (
+                      <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground pt-1 border-t border-border/60">
+                        {queueMeta.isBayActive ? (
+                          <span className="text-amber-500">
+                            Bay {queueMeta.assignedBayNumber ?? "—"} • In Service
+                          </span>
+                        ) : (
+                          <>
+                            <span className="text-primary">Position #{queueMeta.queuePosition}</span>
+                            <span>~{queueMeta.estimatedWaitMinutes}m wait</span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })
@@ -556,10 +621,37 @@ export default function ManagerQueuePage() {
           </div>
         </div>
 
-        {/* Right Panel: Active Session Inspector (60% width / 7 Cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 shadow-md">
-            
+        {/* Right Panel: Active Session (60% width / 7 Cols) */}
+        <div className="lg:col-span-7 flex flex-col space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-foreground">Active Session</h2>
+            <div className="flex items-center gap-2">
+              {selectedBooking?.status === "IN_SERVICE" && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    IN PROGRESS:
+                  </span>
+                  <span className="font-mono text-lg font-bold text-primary">{formattedSessionTimer}</span>
+                </div>
+              )}
+              {selectedBooking &&
+                (selectedBooking.status === "CHECKED_IN" || selectedBooking.status === "IN_SERVICE") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStallingBookingId(selectedBooking.id)
+                      setStallReasonInput("")
+                    }}
+                    title="Report an operational issue and mark this booking stalled"
+                    className="p-2.5 rounded-xl bg-muted text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all cursor-pointer"
+                  >
+                    <AlertTriangle className="h-4 w-4" />
+                  </button>
+                )}
+            </div>
+          </div>
+
+          <div className="flex-1 rounded-3xl bg-card border border-border overflow-hidden shadow-md flex flex-col">
             {!selectedBooking ? (
               <div className="py-24 text-center text-muted-foreground space-y-2">
                 <Car className="h-12 w-12 text-muted-foreground mx-auto" />
@@ -567,162 +659,151 @@ export default function ManagerQueuePage() {
               </div>
             ) : (
               <>
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-extrabold text-primary uppercase tracking-widest">
-                      ACTIVE BAY INSPECTOR
+                <div className="p-6 sm:p-8 space-y-8">
+                  {/* Vehicle Placeholder + Customer & Vehicle */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="aspect-[16/9] rounded-2xl border border-border bg-muted/50 flex items-center justify-center">
+                      <Car className="h-14 w-14 text-muted-foreground" />
+                    </div>
+
+                    <div className="space-y-5">
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                        CUSTOMER &amp; VEHICLE
+                      </span>
+
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <span className="text-base font-bold text-foreground">
+                            {(
+                              selectedBooking.customerDetails?.name ||
+                              selectedBooking.walkInCustomer?.name ||
+                              "Customer"
+                            )
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-foreground">
+                            {selectedBooking.customerDetails?.name || selectedBooking.walkInCustomer?.name || "Customer"}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedBooking.customerDetails?.phone || selectedBooking.walkInCustomer?.phone || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+                        <div>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                            MODEL
+                          </span>
+                          <p className="text-base font-bold text-foreground">
+                            {selectedBooking.vehicleDetails?.brand || "Vehicle"}{" "}
+                            {selectedBooking.vehicleDetails?.model || ""}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                            LICENSE PLATE
+                          </span>
+                          <p className="font-mono text-base font-bold text-primary">
+                            {selectedBooking.vehicleDetails?.registrationNumber ||
+                              selectedBooking.walkInVehicle?.registrationNumber ||
+                              "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-2xl bg-muted/50 space-y-0.5">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                            SERVICE TYPE
+                          </span>
+                          <p className="text-sm font-semibold text-foreground">{selectedBooking.serviceType} Wash</p>
+                        </div>
+                        <div className="p-3 rounded-2xl bg-muted/50 space-y-0.5">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
+                            PAYMENT
+                          </span>
+                          <p className="text-sm font-semibold text-foreground">{selectedBooking.paymentStatus}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Service Details */}
+                  <div className="p-5 rounded-2xl bg-muted/40 border-l-4 border-primary space-y-3">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                      SERVICE DETAILS
                     </span>
-                    <h3 className="text-2xl font-bold text-foreground">
-                      Booking #{selectedBooking.bookingNumber}
-                    </h3>
-                  </div>
-
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
-                      selectedBooking.status === "IN_SERVICE"
-                        ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
-                        : selectedBooking.status === "CHECKED_IN"
-                        ? "bg-blue-500/15 text-blue-500 border border-blue-500/30"
-                        : "bg-muted text-muted-foreground border border-border"
-                    }`}
-                  >
-                    {selectedBooking.status.replace("_", " ")}
-                  </span>
-                </div>
-
-                {/* Grid Vehicle Details */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 p-5 rounded-2xl bg-muted/40 border border-border text-xs">
-                  <div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">VEHICLE</span>
-                    <p className="text-sm font-bold text-foreground">
-                      {selectedBooking.vehicleDetails?.brand || "Silver"} {selectedBooking.vehicleDetails?.model || "Sedan"}
-                    </p>
-                    <p className="font-mono text-muted-foreground">
-                      {selectedBooking.vehicleDetails?.registrationNumber || selectedBooking.walkInVehicle?.registrationNumber || "KA 01 MR 7829"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">CUSTOMER</span>
-                    <p className="text-sm font-bold text-foreground">
-                      {selectedBooking.customerDetails?.name || selectedBooking.walkInCustomer?.name || "Rashid N."}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {selectedBooking.customerDetails?.phone || selectedBooking.walkInCustomer?.phone || "+91 98450••••12"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">SERVICE TYPE</span>
-                    <p className="text-sm font-bold text-primary">
-                      {selectedBooking.serviceType} WASH
-                    </p>
-                    <p className="text-muted-foreground">₹{selectedBooking.pricingSnapshot?.totalPrice || (selectedBooking as any).totalAmount || 450}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold">
+                        {selectedBooking.serviceType === "FULL" ? "Full" : "Half"} Wash
+                      </span>
+                      {(selectedBooking.extraServices || []).map((extra) => (
+                        <span
+                          key={extra.serviceId}
+                          className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold"
+                        >
+                          {extra.name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Workflow Phase Stepper */}
-                <div className="space-y-3 pt-2">
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
-                    BAY WORKFLOW PROGRESSION
-                  </span>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    
-                    {/* Step 1: Pre-Service Inspection */}
+                {/* Sticky Action Footer — exactly two CTAs */}
+                <div className="mt-auto border-t border-border bg-muted/20 p-4 sm:p-6 grid grid-cols-2 gap-4">
+                  {selectedBooking.status === "STALLED" ? (
                     <button
                       type="button"
-                      onClick={() => navigate(`/manager/bookings/${selectedBooking.id}/inspection`)}
-                      className="p-4 rounded-2xl bg-card border border-border hover:border-primary transition-all text-left space-y-2 cursor-pointer group"
+                      onClick={() => {
+                        setResolvingBookingId(selectedBooking.id)
+                        setResolutionInput("")
+                        setTargetStatusInput("CHECKED_IN")
+                      }}
+                      disabled={isAdvancing}
+                      className="py-3.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs uppercase tracking-wide hover:bg-amber-400 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-primary uppercase">PHASE 01</span>
-                        <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-                      </div>
-                      <h4 className="text-sm font-bold text-foreground">Pre-Inspection</h4>
-                      <p className="text-[11px] text-muted-foreground">Capture dents, scratches & photos</p>
+                      <Clock className="h-4 w-4" /> Resolve Stalled
                     </button>
-
-                    {/* Step 2: Wash In-Service */}
+                  ) : (
                     <button
                       type="button"
                       onClick={() => handleAdvanceStatus("IN_SERVICE")}
-                      disabled={isAdvancing || selectedBooking.status === "IN_SERVICE"}
-                      className="p-4 rounded-2xl bg-card border border-border hover:border-primary transition-all text-left space-y-2 cursor-pointer disabled:opacity-50 group"
+                      disabled={isAdvancing || selectedBooking.status !== "CHECKED_IN"}
+                      className="py-3.5 rounded-xl bg-muted text-muted-foreground font-extrabold text-xs uppercase tracking-wide hover:bg-muted/70 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-amber-500 uppercase">PHASE 02</span>
-                        <Play className="h-4 w-4 text-amber-500" />
-                      </div>
-                      <h4 className="text-sm font-bold text-foreground">Start Washing</h4>
-                      <p className="text-[11px] text-muted-foreground">Move vehicle into wash bay</p>
+                      <Play className="h-4 w-4" /> Start Service
                     </button>
+                  )}
 
-                    {/* Step 3: Post-Service Inspection */}
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)}
-                      className="p-4 rounded-2xl bg-card border border-border hover:border-primary transition-all text-left space-y-2 cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-emerald-500 uppercase">PHASE 03</span>
-                        <CheckCheck className="h-4 w-4 text-emerald-500" />
-                      </div>
-                      <h4 className="text-sm font-bold text-foreground">Post-Inspection</h4>
-                      <p className="text-[11px] text-muted-foreground">Final quality checklist & handover</p>
-                    </button>
-
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="pt-4 border-t border-border flex items-center justify-between gap-3 flex-wrap">
-                  <span className="text-xs text-muted-foreground font-medium">
-                    Payment: <strong className="text-emerald-500 font-bold uppercase">{selectedBooking.paymentStatus}</strong>
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    {selectedBooking.status === "STALLED" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setResolvingBookingId(selectedBooking.id)
-                          setResolutionInput("")
-                          setTargetStatusInput("CHECKED_IN")
-                        }}
-                        className="px-4 py-2.5 rounded-2xl bg-amber-500 text-black font-extrabold text-xs hover:bg-amber-400 transition-all shadow-md cursor-pointer"
-                      >
-                        ⚡ Resolve Stalled Issue
-                      </button>
-                    ) : (
-                      (selectedBooking.status === "CHECKED_IN" || selectedBooking.status === "IN_SERVICE") && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setStallingBookingId(selectedBooking.id)
-                            setStallReasonInput("")
-                          }}
-                          className="px-4 py-2.5 rounded-2xl bg-destructive/20 text-destructive border border-destructive/30 font-extrabold text-xs hover:bg-destructive/30 transition-all cursor-pointer"
-                        >
-                          Mark Stalled
-                        </button>
-                      )
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleAdvanceStatus("COMPLETED")}
-                      disabled={isAdvancing || selectedBooking.status === "COMPLETED"}
-                      className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-extrabold text-xs hover:opacity-90 transition-all shadow-md cursor-pointer disabled:opacity-50"
-                    >
-                      Mark Handover Complete
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedBooking.status === "IN_SERVICE") {
+                        navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
+                      } else {
+                        handleAdvanceStatus("COMPLETED")
+                      }
+                    }}
+                    disabled={
+                      isAdvancing ||
+                      selectedBooking.status === "COMPLETED" ||
+                      selectedBooking.status === "STALLED" ||
+                      selectedBooking.status === "CHECKED_IN"
+                    }
+                    className="py-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wide hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                    <Check className="h-4 w-4 stroke-[3]" /> Mark Completed
+                  </button>
                 </div>
               </>
             )}
-
           </div>
         </div>
 

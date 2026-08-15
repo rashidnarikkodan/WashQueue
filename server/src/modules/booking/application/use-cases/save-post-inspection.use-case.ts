@@ -19,6 +19,9 @@ export interface SavePostInspectionInput {
   notes?: string
 }
 
+// Front, rear, left, right — the same 4 angles PostInspectionPage.tsx captures on the client.
+const REQUIRED_INSPECTION_PHOTO_COUNT = 4
+
 export class SavePostInspectionUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
@@ -74,6 +77,13 @@ export class SavePostInspectionUseCase {
     if (booking.status !== BookingStatus.IN_SERVICE) {
       throw new AppError(
         `Post-service inspection requires IN_SERVICE status. Current status is ${booking.status}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    if (photos.filter(Boolean).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
+      throw new AppError(
+        `Post-service inspection requires all ${REQUIRED_INSPECTION_PHOTO_COUNT} vehicle angle photos (front, rear, left, right) before handover`,
         HTTP_STATUS.BAD_REQUEST
       )
     }
