@@ -84,6 +84,7 @@ export interface StationProps {
 
   status: StationStatus
   isActive: boolean
+  isFavorite?: boolean
 
   createdAt: Date
   updatedAt: Date
@@ -106,6 +107,14 @@ export class Station {
 
   get status() {
     return this.props.status
+  }
+
+  get isFavorite(): boolean {
+    return this.props.isFavorite ?? false
+  }
+
+  setFavorite(isFav: boolean): void {
+    this.props.isFavorite = isFav
   }
 
   get operatingHours() {

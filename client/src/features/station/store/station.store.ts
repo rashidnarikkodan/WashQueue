@@ -44,6 +44,10 @@ interface StationStore {
   clearSelected: () => void
 }
 
+// Guards fetchStations against out-of-order responses: rapid filter/search/page changes can
+// otherwise let a slower, stale request resolve after a newer one and overwrite fresh state.
+let latestFetchStationsRequestId = 0
+
 export const useStationStore = create<StationStore>((set) => ({
   stations: [],
   pagination: null,
@@ -54,9 +58,11 @@ export const useStationStore = create<StationStore>((set) => ({
   error: null,
 
   fetchStations: async (query = {}) => {
+    const requestId = ++latestFetchStationsRequestId
     set({ isLoading: true, error: null, stations: [] })
     try {
       const response = await stationApi.getStations(query)
+      if (latestFetchStationsRequestId !== requestId) return
       set({
         stations: response.stations,
         pagination: response.pagination,
@@ -64,6 +70,7 @@ export const useStationStore = create<StationStore>((set) => ({
         isLoading: false,
       })
     } catch (err) {
+      if (latestFetchStationsRequestId !== requestId) return
       const msg = getErrorMessage(err, "Failed to load stations")
       set({ error: msg, isLoading: false })
     }

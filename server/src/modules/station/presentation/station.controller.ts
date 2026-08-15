@@ -6,10 +6,6 @@ import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { AppError } from "@/common/errors/app-error"
-import redis from "@/infrastructure/cache/redis.client"
-import { VehicleCategoryModel } from "@/modules/vehicle-catelog/infrastructure/models/category.model"
-import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
-import { StationPricingModel } from "../infrastructure/models/station-pricing.model"
 import {
   ICreateStationUseCase,
   IUpdateStationUseCase,
@@ -20,6 +16,7 @@ import {
   IDeleteStationUseCase,
   IToggleActiveStationUseCase,
   IAssignManagerUseCase,
+  IGetStationFilterOptionsUseCase,
 } from "../application/interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationRequestMapper } from "./mappers/station.mapper"
@@ -49,7 +46,8 @@ export class StationController {
     private readonly configureSlotConfigUseCase: ConfigureSlotConfigUseCase,
     private readonly getSlotConfigUseCase: GetSlotConfigUseCase,
     private readonly getBookingCalendarUseCase: GetBookingCalendarUseCase,
-    private readonly getAvailableTimeWindowsUseCase: GetAvailableTimeWindowsUseCase
+    private readonly getAvailableTimeWindowsUseCase: GetAvailableTimeWindowsUseCase,
+    private readonly getStationFilterOptionsUseCase: IGetStationFilterOptionsUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
@@ -90,81 +88,7 @@ export class StationController {
   }
 
   getFilterOptions = async (_req: Request, res: Response) => {
-    // Check Redis cache first
-    try {
-      const cached = await redis.get("cache:stations:filter_options")
-      if (cached) {
-        success(res, JSON.parse(cached), HTTP_STATUS.OK, "Filter options retrieved successfully")
-        return
-      }
-    } catch {
-      // Ignore redis read error fallback to DB
-    }
-
-    const categories = await VehicleCategoryModel.find({ isActive: true }).sort({ order: 1 }).exec()
-    const classes = await VehicleClassModel.find({ isActive: true }).sort({ order: 1 }).exec()
-    const priceAggregation = await StationPricingModel.aggregate([
-      { $match: { isActive: true } },
-      {
-        $group: {
-          _id: null,
-          minHalf: { $min: "$halfWashPrice" },
-          maxHalf: { $max: "$halfWashPrice" },
-          minFull: { $min: "$fullWashPrice" },
-          maxFull: { $max: "$fullWashPrice" },
-        },
-      },
-    ]).exec()
-
-    const priceStats = priceAggregation[0] || {
-      minHalf: 10,
-      maxHalf: 200,
-      minFull: 20,
-      maxFull: 300,
-    }
-    const minPrice = Math.min(priceStats.minHalf || 10, priceStats.minFull || 20)
-    const maxPrice = Math.max(priceStats.maxHalf || 200, priceStats.maxFull || 300)
-
-    const payload = {
-      vehicleCategories: categories.map((c) => ({
-        id: c._id.toString(),
-        slug: c.slug,
-        name: c.name,
-      })),
-      vehicleClasses: classes.map((c) => ({
-        id: c._id.toString(),
-        categoryId: c.categoryId.toString(),
-        slug: c.slug,
-        name: c.name,
-      })),
-      amenities: [
-        { slug: "wifi", name: "Free Wi-Fi", icon: "wifi" },
-        { slug: "waiting_lounge", name: "AC Waiting Lounge", icon: "sofa" },
-        { slug: "cafe", name: "Café / Coffee", icon: "coffee" },
-        { slug: "ev_charging", name: "EV Charging", icon: "zap" },
-        { slug: "restroom", name: "Clean Restrooms", icon: "bath" },
-      ],
-      priceBounds: {
-        minPrice,
-        maxPrice,
-        currency: "USD",
-      },
-      sortOptions: [
-        { value: "RECOMMENDED", label: "Recommended" },
-        { value: "DISTANCE", label: "Nearest" },
-        { value: "RATING", label: "Highest Rated" },
-        { value: "WAIT_TIME", label: "Shortest Wait Time" },
-        { value: "PRICE_LOW_TO_HIGH", label: "Price: Low to High" },
-        { value: "PRICE_HIGH_TO_LOW", label: "Price: High to Low" },
-      ],
-    }
-
-    try {
-      await redis.set("cache:stations:filter_options", JSON.stringify(payload), "EX", 86400) // 24h
-    } catch {
-      // Ignore cache write error
-    }
-
+    const payload = await this.getStationFilterOptionsUseCase.execute()
     success(res, payload, HTTP_STATUS.OK, "Filter options retrieved successfully")
   }
 
@@ -208,8 +132,9 @@ export class StationController {
       openNow: String(query.openNow) === "true",
       verifiedOnly: String(query.verifiedOnly) === "true",
     }
+    const userId = req.user?.userId || ''
 
-    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery)
+    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery,userId)
 
     const page = Math.max(1, parsedQuery.page || 1)
     const limit = Math.max(1, parsedQuery.limit || 10)
@@ -224,6 +149,7 @@ export class StationController {
       estimatedWaitMins: (station as unknown as Record<string, unknown>).estimatedWaitMins,
       queueDepth: (station as unknown as Record<string, unknown>).queueDepth,
       isOpen: (station as unknown as Record<string, unknown>).isOpen,
+      isFavorite: station.isFavorite,
     }))
 
     success(

@@ -28,10 +28,17 @@ import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repo
 import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
 import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
 import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
+import { GetStationFilterOptionsUseCase } from "./application/use-cases/get-station-filter-options.usecase"
+import { VehicleCategoryMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-category.mongo.repository"
+import { VehicleClassMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-class.mongo.repository"
+import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
+
+import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
 
 // Instantiate repositories & services
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
+export const userRepository = new UserRepository()
 export const stationPricingRepository = new StationPricingMongoRepository()
 export const extraServiceRepository = new ExtraServiceMongoRepository()
 export const slotConfigRepository = new SlotConfigMongoRepository()
@@ -107,7 +114,7 @@ const getStationUseCase = new GetStationUseCase(
   stationPricingRepository,
   extraServiceRepository
 )
-const getStationsUseCase = new GetStationsUseCase(stationRepository)
+const getStationsUseCase = new GetStationsUseCase(stationRepository, userRepository)
 const submitStationUseCase = new SubmitStationUseCase(
   stationRepository,
   ownerRepository,
@@ -126,6 +133,16 @@ const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
 )
 const assignManagerUseCase = new AssignManagerUseCase(stationRepository, ownerRepository)
 
+const vehicleCategoryRepository = new VehicleCategoryMongoRepository()
+const vehicleClassRepository = new VehicleClassMongoRepository()
+const filterOptionsCacheService = new RedisCacheService()
+const getStationFilterOptionsUseCase = new GetStationFilterOptionsUseCase(
+  vehicleCategoryRepository,
+  vehicleClassRepository,
+  stationPricingRepository,
+  filterOptionsCacheService
+)
+
 // Instantiate controller
 const stationController = new StationController(
   createStationUseCase,
@@ -142,7 +159,8 @@ const stationController = new StationController(
   configureSlotConfigUseCase,
   getSlotConfigUseCase,
   getBookingCalendarUseCase,
-  getAvailableTimeWindowsUseCase
+  getAvailableTimeWindowsUseCase,
+  getStationFilterOptionsUseCase
 )
 
 // Create router

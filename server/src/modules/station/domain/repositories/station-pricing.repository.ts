@@ -1,5 +1,12 @@
 import { StationPricing } from "../entities/StationPricing"
 
+export interface StationPriceBounds {
+  minHalf: number
+  maxHalf: number
+  minFull: number
+  maxFull: number
+}
+
 export interface IStationPricingRepository {
   findByStationId(stationId: string, session?: unknown): Promise<StationPricing[]>
 
@@ -11,4 +18,7 @@ export interface IStationPricingRepository {
   ): Promise<StationPricing>
 
   deleteByStationId(stationId: string, session?: unknown): Promise<void>
+
+  /** Min/max half- and full-wash prices across all active pricing rows, or null if none exist. */
+  getActivePriceBounds(): Promise<StationPriceBounds | null>
 }

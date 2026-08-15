@@ -166,7 +166,7 @@ const StationDiscovery = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 sm:pt-28 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
+    <div className="min-h-screen pt-4 sm:pt-8 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
       {/* Top Header Section aligned to layout */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/60 pb-6">
         <div>
@@ -538,6 +538,7 @@ const StationDiscovery = () => {
               fullWashPrice={station.fullWashPrice}
               selectedVehicleName={selectedVehicleName}
               primaryActionLabel="View Details"
+              isFavorite={station.isFavorite}
               showFavoriteButton={user.isAuthenticated}
               onClick={() => navigate(`/stations/${station.id}`)}
             />

@@ -1,6 +1,9 @@
 import { ClientSession, Types } from "mongoose"
 import { StationPricing } from "../../domain/entities/StationPricing"
-import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
+import {
+  IStationPricingRepository,
+  StationPriceBounds,
+} from "../../domain/repositories/station-pricing.repository"
 import { StationPricingModel } from "../models/station-pricing.model"
 import { StationPricingMapper } from "../mappers/station-pricing.mapper"
 
@@ -45,5 +48,29 @@ export class StationPricingMongoRepository implements IStationPricingRepository 
     await StationPricingModel.deleteMany({ stationId: new Types.ObjectId(stationId) })
       .session(session || null)
       .exec()
+  }
+
+  async getActivePriceBounds(): Promise<StationPriceBounds | null> {
+    const [stats] = await StationPricingModel.aggregate([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: null,
+          minHalf: { $min: "$halfWashPrice" },
+          maxHalf: { $max: "$halfWashPrice" },
+          minFull: { $min: "$fullWashPrice" },
+          maxFull: { $max: "$fullWashPrice" },
+        },
+      },
+    ]).exec()
+
+    if (!stats) return null
+
+    return {
+      minHalf: stats.minHalf,
+      maxHalf: stats.maxHalf,
+      minFull: stats.minFull,
+      maxFull: stats.maxFull,
+    }
   }
 }

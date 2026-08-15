@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { StationController } from "./station.controller"
 import asyncHandler from "@/common/utils/async-handler"
-import { authenticate } from "@/infrastructure/http/middleware/authenticate"
+import { authenticate, optionalAuthenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { createStationSchema, patchStationSchema } from "./schema/station.schema"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
@@ -11,10 +11,8 @@ import { API_ROUTES } from "@/common/constants/route.constants"
 export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
-  /**
-   * Public routes
-   */
-  router.get(API_ROUTES.STATIONS.LIST, asyncHandler(stationController.getStations))
+
+  router.get(API_ROUTES.STATIONS.LIST, optionalAuthenticate, asyncHandler(stationController.getStations))
 
   router.get(API_ROUTES.STATIONS.FILTER_OPTIONS, asyncHandler(stationController.getFilterOptions))
 
@@ -26,9 +24,7 @@ export const createRouter = (stationController: StationController): Router => {
 
   router.get(API_ROUTES.STATIONS.BY_ID, asyncHandler(stationController.getById))
 
-  /**
-   * Protected routes
-   */
+
   router.use(authenticate)
 
   router.put("/:stationId/slot-config", asyncHandler(stationController.configureSlotConfig))

@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Bookmark, MapPin, Loader2, ArrowRight } from "lucide-react"
+import { toast } from "sonner"
 import StationCard from "@/shared/components/cards/StationCard"
+import { Pagination } from "@/shared/components/ui/Pagination"
 import { usersApi } from "@/shared/apis/users.api"
 import type { Station } from "@/features/station/types"
+
+const PAGE_SIZE = 9
 
 export default function BookmarksPage() {
   const navigate = useNavigate()
   const [stations, setStations] = useState<Station[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -29,28 +34,35 @@ export default function BookmarksPage() {
     fetchBookmarks()
   }, [])
 
-  const handleToggleBookmark = async (stationId: string) => {
+  const handleToggleBookmark = async (stationId: string): Promise<boolean> => {
     // Optimistically remove from list
+    const previousStations = stations
     setStations((prev) => prev.filter((s) => s.id !== stationId))
     try {
       await usersApi.toggleBookmark(stationId)
+      return true
     } catch (err) {
       console.error("Failed to update bookmark:", err)
-      // Refetch if toggle failed
-      const data = (await usersApi.getBookmarks()) as Station[]
-      setStations(data || [])
+      toast.error("Failed to update bookmark")
+      // Refetch if toggle failed; fall back to the pre-toggle list if the refetch also fails
+      // rather than leaving the station permanently (and silently) missing from the page.
+      try {
+        const data = (await usersApi.getBookmarks()) as Station[]
+        setStations(data || [])
+      } catch (refetchErr) {
+        console.error("Failed to refresh bookmarks after a failed toggle:", refetchErr)
+        setStations(previousStations)
+      }
+      return false
     }
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-24 pb-16 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground pb-16 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 sm:py-4 rounded-3xl  shadow-lg">
           <div className="flex items-center gap-4">
-            <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/20 text-primary">
-              <Bookmark className="w-7 h-7" />
-            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">My Bookmarks</h1>
               <p className="text-sm text-muted-foreground mt-1">
@@ -119,10 +131,12 @@ export default function BookmarksPage() {
 
         {/* Station Cards Grid */}
         {!isLoading && !error && stations.length > 0 && (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stations.map((station, index) => {
+            {stations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((station, pageIndex) => {
+              const globalIndex = (currentPage - 1) * PAGE_SIZE + pageIndex
               const stationId =
-                station.id || (station as unknown as { _id?: string })._id || `station-${index}`
+                station.id || (station as unknown as { _id?: string })._id || `station-${globalIndex}`
               const primaryImage =
                 station.images?.find((img) => img.isPrimary)?.url || station.images?.[0]?.url || ""
               const formattedAddress = station.address
@@ -141,7 +155,7 @@ export default function BookmarksPage() {
                   status={station.status}
                   rating={station.rating || 0}
                   reviewCount={station.reviewCount || 0}
-                  queueCount={0}
+                  queueCount={station.queueDepth ?? 0}
                   baysCount={station.slotConfig?.bays || 0}
                   services={station.amenities || []}
                   distanceKm={station.distanceKm}
@@ -152,6 +166,18 @@ export default function BookmarksPage() {
               )
             })}
           </div>
+          <Pagination
+            meta={{
+              total: stations.length,
+              page: currentPage,
+              limit: PAGE_SIZE,
+              totalPages: Math.max(1, Math.ceil(stations.length / PAGE_SIZE)),
+              hasNextPage: currentPage * PAGE_SIZE < stations.length,
+              hasPrevPage: currentPage > 1,
+            }}
+            onPageChange={setCurrentPage}
+          />
+          </>
         )}
       </div>
     </div>

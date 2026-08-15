@@ -13,7 +13,7 @@ import type {
 } from "@/features/station/types"
 
 import type { ApiResponse } from "../types/ApiResponse"
-import type { Window } from "@/features/booking/types/booking.types"
+import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
 
 export const stationApi = {
   getFilterOptions: async (): Promise<FilterMetadata> => {
@@ -213,7 +213,7 @@ export const stationApi = {
   ): Promise<{
     stationId: string
     date: string
-    windows: Window[]
+    windows: TimeWindowSlot[]
   }> => {
     try {
       const response = await api.get(`/stations/${stationId}/time-windows`, {

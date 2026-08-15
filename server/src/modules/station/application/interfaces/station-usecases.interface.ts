@@ -3,6 +3,7 @@ import { CreateStationInput } from "../dtos/create-station.dto"
 import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { GetStationsQuery, StationStatusCounts } from "../dtos/get-stations.dto"
+import { StationFilterOptionsDTO } from "../dtos/station-filter-options.dto"
 
 export interface ICreateStationUseCase {
   execute(userId: string, input: CreateStationInput): Promise<Station>
@@ -22,7 +23,8 @@ export interface IGetStationUseCase {
 
 export interface IGetStationsUseCase {
   execute(
-    query: GetStationsQuery
+    query: GetStationsQuery,
+    userId?:string
   ): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }>
 }
 
@@ -52,4 +54,8 @@ export interface IAssignManagerUseCase {
     userId: string,
     input: import("../use-cases/assign-manager.usecase").AssignManagerInput
   ): Promise<import("../../domain/entities/Station").StationProps>
+}
+
+export interface IGetStationFilterOptionsUseCase {
+  execute(): Promise<StationFilterOptionsDTO>
 }

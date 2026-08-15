@@ -27,7 +27,9 @@ export interface StationCardProps {
   onClick?: () => void
   onPrimaryAction?: () => void
   onSecondaryAction?: () => void
-  onFavoriteToggle?: (id: string) => void
+  // Return `false` (or reject) to tell the card its optimistic toggle failed and should
+  // revert; returning `true`/`undefined` is treated as success.
+  onFavoriteToggle?: (id: string) => void | boolean | Promise<void | boolean>
 }
 
 const STATUS_CONFIG: Record<
@@ -98,21 +100,29 @@ const StationCard: React.FC<StationCardProps> = ({
 }) => {
   const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG["DRAFT"]
   const [imgError, setImgError] = useState(false)
-  const [favorite, setFavorite] = useState(isFavorite)
+  const [favoriteOverride, setFavoriteOverride] = useState<boolean | null>(null)
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
+  const favorite = favoriteOverride ?? isFavorite
 
   const hasValidImage = image && !image.includes("placehold") && image !== "No Image" && !imgError
 
   const handleFavClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    setFavorite((prev) => !prev)
-    if (onFavoriteToggle) {
-      onFavoriteToggle(id)
-    } else {
-      try {
+    if (isTogglingFavorite) return // guard against double-click firing overlapping requests
+    const nextVal = !favorite
+    setFavoriteOverride(nextVal)
+    setIsTogglingFavorite(true)
+    try {
+      if (onFavoriteToggle) {
+        const result = await onFavoriteToggle(id)
+        if (result === false) setFavoriteOverride(!nextVal)
+      } else {
         await usersApi.toggleBookmark(id)
-      } catch {
-        setFavorite((prev) => !prev)
       }
+    } catch {
+      setFavoriteOverride(!nextVal)
+    } finally {
+      setIsTogglingFavorite(false)
     }
   }
 
@@ -189,7 +199,8 @@ const StationCard: React.FC<StationCardProps> = ({
         {showFavoriteButton && (
           <button
             onClick={handleFavClick}
-            className={`absolute top-3.5 right-3.5 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 ${
+            disabled={isTogglingFavorite}
+            className={`absolute top-3.5 right-3.5 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 disabled:opacity-60 disabled:cursor-not-allowed ${
               favorite
                 ? "bg-rose-500/20 border-rose-500/40 text-rose-500"
                 : "bg-card/70 border-border text-muted-foreground hover:text-foreground hover:bg-card"
