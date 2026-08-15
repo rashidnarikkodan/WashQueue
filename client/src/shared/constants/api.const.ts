@@ -49,6 +49,7 @@ export const API_ROUTES = {
   WALLET: {
     BALANCE: "/wallet",
     TRANSACTIONS: "/wallet/transactions",
+    EXPORT: "/wallet/export",
     TOPUP_ORDER: "/wallet/topup/order",
     TOPUP_VERIFY: "/wallet/topup/verify",
     PAY: "/wallet/pay",

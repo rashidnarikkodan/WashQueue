@@ -1,10 +1,7 @@
-import { AppError } from "@/common/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { Otp } from "../../domain/entities/otp.entity"
 import { IResendOtpUseCase, IMailService, IOtpService } from "../interfaces"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 export class ResendOtpUseCase implements IResendOtpUseCase {
   constructor(
@@ -17,8 +14,10 @@ export class ResendOtpUseCase implements IResendOtpUseCase {
   async execute(data: { email: string }): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
 
+    // Respond the same way whether or not the account exists, matching forgot-password's
+    // anti-enumeration behavior — only actually send an OTP if a user was found.
     if (!user) {
-      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
+      return
     }
 
     // Generate numeric OTP

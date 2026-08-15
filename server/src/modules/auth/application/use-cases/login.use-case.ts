@@ -42,10 +42,6 @@ export class LoginUseCase implements ILoginUseCase {
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
-    if (user.isBlocked) {
-      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
-    }
-
     if (!user.password) {
       await this.hashService.verify(DUMMY_HASH, data.password).catch(() => {})
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
@@ -55,6 +51,11 @@ export class LoginUseCase implements ILoginUseCase {
 
     if (!isPasswordValid) {
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
+    }
+
+    // Checked only after password verification so a wrong password never reveals blocked status.
+    if (user.isBlocked) {
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
     if (!user.isVerified) {

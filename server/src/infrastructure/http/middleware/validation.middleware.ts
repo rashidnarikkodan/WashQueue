@@ -17,7 +17,17 @@ export const validateRequest = (schema: z.ZodSchema, target: SchemaTarget = "bod
       throw new ValidationError("Validation failed", details)
     }
 
-    req[target] = result.data
+    if (target === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      })
+    } else {
+      req[target] = result.data
+    }
+
     next()
   }
 }

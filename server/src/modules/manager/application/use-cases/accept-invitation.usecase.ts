@@ -1,6 +1,7 @@
 import argon2 from "argon2"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { BadRequestError } from "@/common/errors/bad-request-error"
+import { ConflictError } from "@/common/errors/conflict-error"
 import { ROLE } from "@/common/constants/role.constants"
 import { User } from "@/modules/user/domain/entities/User"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
@@ -8,10 +9,14 @@ import { IManagerAssignmentRepository } from "../../domain/repositories/manager-
 import { IManagerInvitationRepository } from "../../domain/repositories/manager-invitation.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ManagerAssignment, ManagerAssignmentStatus } from "../../domain/entities/ManagerAssignment"
+import { ManagerInvitation, ManagerInvitationStatus } from "../../domain/entities/ManagerInvitation"
 import {
   IAcceptInvitationUseCase,
   AcceptInvitationInput,
 } from "../interfaces/manager-usecases.interface"
+
+const isDuplicateKeyError = (error: unknown): boolean =>
+  typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
 
 export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
   constructor(
@@ -89,20 +94,45 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       invitation.stationId
     )
 
-    if (assignment) {
-      assignment.reactivate()
-      assignment.updatePermissions(invitation.permissions)
-      await this.managerAssignmentRepository.update(assignment)
-    } else {
-      assignment = new ManagerAssignment({
-        managerUserId: userId,
-        stationId: invitation.stationId,
-        ownerId: invitation.ownerId,
-        permissions: invitation.permissions,
-        status: ManagerAssignmentStatus.ACTIVE,
-        assignedAt: new Date(),
-      })
-      await this.managerAssignmentRepository.create(assignment)
+    try {
+      if (assignment) {
+        assignment.reactivate()
+        assignment.updatePermissions(invitation.permissions)
+        await this.managerAssignmentRepository.update(assignment)
+      } else {
+        assignment = new ManagerAssignment({
+          managerUserId: userId,
+          stationId: invitation.stationId,
+          ownerId: invitation.ownerId,
+          permissions: invitation.permissions,
+          status: ManagerAssignmentStatus.ACTIVE,
+          assignedAt: new Date(),
+        })
+        await this.managerAssignmentRepository.create(assignment)
+      }
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        // The invitation was already marked ACCEPTED above, but the assignment write lost the
+        // race — roll the invitation back to PENDING so the token isn't burned on a failed accept.
+        await this.managerInvitationRepository.update(
+          new ManagerInvitation({
+            id: invitation.id,
+            email: invitation.email,
+            name: invitation.name,
+            stationId: invitation.stationId,
+            ownerId: invitation.ownerId,
+            permissions: invitation.permissions,
+            token: invitation.token,
+            status: ManagerInvitationStatus.PENDING,
+            expiresAt: invitation.expiresAt,
+            createdAt: invitation.createdAt,
+          })
+        )
+        throw new ConflictError(
+          "This station or manager already has an active assignment (accepted concurrently by another request)"
+        )
+      }
+      throw error
     }
 
     // Sync managerId directly onto the Station entity via repository interface

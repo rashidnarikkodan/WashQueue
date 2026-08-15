@@ -12,11 +12,7 @@ const Sidebar = ({ items }: Props) => {
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const [isOpenMobile, setIsOpenMobile] = useState(false)
 
-  // Auto-close mobile sidebar when user navigates
-  useEffect(() => {
-    setIsOpenMobile(false)
-  }, [location.pathname])
-
+  // Mobile keyboard accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if user is typing in an editable field

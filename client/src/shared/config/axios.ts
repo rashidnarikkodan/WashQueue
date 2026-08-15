@@ -19,7 +19,7 @@ export const api = axios.create({
   headers: {
     Accept: "application/json",
   },
-  timeout: 10000,
+  timeout: 30000,
 })
 
 let isRefreshing = false
@@ -93,6 +93,10 @@ api.interceptors.response.use(
           failedQueue.push({ resolve, reject })
         })
           .then(() => {
+            // Mark as retried before replaying — otherwise a request that still comes back
+            // 401 after the refresh (e.g. the new token hasn't propagated yet) would re-enter
+            // this branch and could trigger another refresh cycle.
+            originalRequest._retry = true
             return api(originalRequest)
           })
           .catch((err) => {
@@ -126,6 +130,10 @@ api.interceptors.response.use(
             const msg = err.response?.data?.message
             if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
               toast.error(msg, { id: "suspension-toast" })
+            } else {
+              // Plain session expiry (refresh token invalid/expired) — otherwise the user is
+              // logged out with zero feedback and just sees a blank/redirected screen.
+              toast.error("Your session has expired. Please log in again.", { id: "session-expired-toast" })
             }
 
             reject(err)

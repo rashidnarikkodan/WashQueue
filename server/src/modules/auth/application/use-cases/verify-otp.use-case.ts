@@ -33,6 +33,10 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
+    if (user.isBlocked) {
+      throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
+    }
+
     // Generate JWT tokens using the payload mapper
     const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 

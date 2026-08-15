@@ -18,6 +18,9 @@ import {
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
 
+const isDuplicateKeyError = (error: unknown): boolean =>
+  typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
+
 export class InviteManagerUseCase implements IInviteManagerUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
@@ -96,11 +99,20 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
           // Reactivate assignment with updated permissions
           existingAssignment.reactivate()
           existingAssignment.updatePermissions(input.permissions)
-          const updated = await this.managerAssignmentRepository.update(existingAssignment)
-          return {
-            type: "ASSIGNED",
-            assignment: updated,
-            message: "Reactivated manager assignment for existing user",
+          try {
+            const updated = await this.managerAssignmentRepository.update(existingAssignment)
+            return {
+              type: "ASSIGNED",
+              assignment: updated,
+              message: "Reactivated manager assignment for existing user",
+            }
+          } catch (error) {
+            if (isDuplicateKeyError(error)) {
+              throw new ConflictError(
+                "This station or manager already has an active assignment (assigned concurrently by another request)"
+              )
+            }
+            throw error
           }
         }
       }
@@ -119,12 +131,21 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         assignedAt: new Date(),
       })
 
-      const createdAssignment = await this.managerAssignmentRepository.create(newAssignment)
+      try {
+        const createdAssignment = await this.managerAssignmentRepository.create(newAssignment)
 
-      return {
-        type: "ASSIGNED",
-        assignment: createdAssignment,
-        message: "Manager assignment created successfully for existing user",
+        return {
+          type: "ASSIGNED",
+          assignment: createdAssignment,
+          message: "Manager assignment created successfully for existing user",
+        }
+      } catch (error) {
+        if (isDuplicateKeyError(error)) {
+          throw new ConflictError(
+            "This station or manager already has an active assignment (assigned concurrently by another request)"
+          )
+        }
+        throw error
       }
     }
 

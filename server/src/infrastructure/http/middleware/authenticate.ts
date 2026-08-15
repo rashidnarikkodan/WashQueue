@@ -62,3 +62,37 @@ export const authenticate = async (
     next(error)
   }
 }
+
+export const optionalAuthenticate = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    let token: string | undefined
+
+    const authHeader = req.headers.authorization
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1]
+    }
+
+    if (!token && req.cookies) {
+      token = req.cookies.accessToken
+    }
+
+    if (token) {
+      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as {
+        userId: string
+        role: string
+        email: string
+      }
+      const isBlacklisted = await redis.get(`blocked:${decoded.userId}`)
+      if (!isBlacklisted) {
+        req.user = decoded
+      }
+    }
+  } catch {
+    // Ignore invalid/missing token for optional authentication
+  }
+  next()
+}

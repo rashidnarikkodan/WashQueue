@@ -3,6 +3,7 @@ import { UserRepository } from "@/modules/user/infrastructure/repository/user.mo
 import { StationMongoRepository } from "@/modules/station/infrastructure/repositories/station.mongo.repository"
 import { MongoManagerAssignmentRepository } from "./infrastructure/repositories/manager-assignment.mongo.repository"
 import { MongoManagerInvitationRepository } from "./infrastructure/repositories/manager-invitation.mongo.repository"
+import { IManagerAssignmentRepository } from "./domain/repositories/manager-assignment.repository"
 
 import { InviteManagerUseCase } from "./application/use-cases/invite-manager.usecase"
 import { AcceptInvitationUseCase } from "./application/use-cases/accept-invitation.usecase"
@@ -28,7 +29,8 @@ import { mailService } from "@/modules/auth/auth.module"
 // Repositories
 const userRepository = new UserRepository()
 const stationRepository = new StationMongoRepository()
-const managerAssignmentRepository = new MongoManagerAssignmentRepository()
+export const managerAssignmentRepository: IManagerAssignmentRepository =
+  new MongoManagerAssignmentRepository()
 const managerInvitationRepository = new MongoManagerInvitationRepository()
 const ownerRepository = new OwnerMongoRepository()
 

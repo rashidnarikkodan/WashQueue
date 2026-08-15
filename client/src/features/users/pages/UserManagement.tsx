@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import UserStats from "../components/ui/UserStats"
@@ -40,14 +40,15 @@ const UserManagement = () => {
   const roleFilter = searchParams.get("role") || "all"
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL
   const activeTab = roleFilter === "customer" || roleFilter === "owner" || roleFilter === 'manager' ? roleFilter : "all"
-  const highCancellation = searchParams.get("cancellation") === "true"
-  const fraudFlag = searchParams.get("fraud") === "true"
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 5
 
   // ─── Data fetching ──────────────────────────────────────────────────────────
+  // Guards against out-of-order responses: if filters change quickly, a slower older
+  // request can otherwise resolve after a newer one and clobber the current state.
+  const latestRequestRef = useRef(0)
   const fetchUsers = useCallback(async () => {
-    setIsLoading(true)
+    const requestId = ++latestRequestRef.current
     setErrorMsg(null)
     try {
       const response = await usersApi.getUsers({
@@ -59,22 +60,27 @@ const UserManagement = () => {
           statusFilter === FILTER_STATUS.ALL ? undefined : statusFilter === FILTER_STATUS.BLOCKED,
       })
 
-      let processedUsers = response.users
-      if (highCancellation) processedUsers = processedUsers.filter(() => false)
-      if (fraudFlag) processedUsers = processedUsers.filter(() => false)
-
-      setUsers(processedUsers)
+      if (latestRequestRef.current !== requestId) return
+      setUsers(response.users)
       setPaginationMeta(response.pagination)
       if (response.stats) setStats(response.stats)
     } catch (err: unknown) {
+      if (latestRequestRef.current !== requestId) return
       setErrorMsg(getErrorMessage(err, "Failed to retrieve users"))
     } finally {
-      setIsLoading(false)
+      if (latestRequestRef.current === requestId) setIsLoading(false)
     }
-  }, [currentPage, searchQuery, roleFilter, statusFilter, highCancellation, fraudFlag])
+  }, [currentPage, searchQuery, roleFilter, statusFilter])
 
   useEffect(() => {
-    fetchUsers()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchUsers()
+    })
+    return () => {
+      ignore = true
+    }
   }, [fetchUsers])
 
   // ─── URL param helpers ──────────────────────────────────────────────────────
@@ -96,8 +102,6 @@ const UserManagement = () => {
   const setSearchQuery = (q: string) => updateParams({ q })
   const setRoleFilter = (role: string) => updateParams({ role })
   const setStatusFilter = (status: string) => updateParams({ status })
-  const setHighCancellation = (cancellation: boolean) => updateParams({ cancellation })
-  const setFraudFlag = (fraud: boolean) => updateParams({ fraud })
   const setCurrentPage = (page: number) => updateParams({ page })
 
   // ─── Actions ────────────────────────────────────────────────────────────────
@@ -109,9 +113,19 @@ const UserManagement = () => {
       setUsers((prev) =>
         prev.map((u) => (u.id === targetId ? { ...u, isBlocked: targetNewBlocked } : u))
       )
+      setStats((prev) => ({
+        ...prev,
+        active: prev.active + (targetNewBlocked ? -1 : 1),
+        blocked: prev.blocked + (targetNewBlocked ? 1 : -1),
+      }))
       await usersApi.updateUser(targetId, { isBlocked: targetNewBlocked })
       toast.success(`User ${targetNewBlocked ? "blocked" : "unblocked"} successfully`)
     } catch (err: unknown) {
+      setStats((prev) => ({
+        ...prev,
+        active: prev.active + (targetNewBlocked ? 1 : -1),
+        blocked: prev.blocked + (targetNewBlocked ? -1 : 1),
+      }))
       setUsers((prev) =>
         prev.map((u) => (u.id === targetId ? { ...u, isBlocked: !targetNewBlocked } : u))
       )
@@ -149,13 +163,9 @@ const UserManagement = () => {
 
   // ─── Table configuration (built each render — cheap) ───────────────────────
   const columns = getUserColumns((user) => setPendingToggleUser(user))
-  const { selectFilters, toggleFilters } = buildUserFilters({
+  const { selectFilters } = buildUserFilters({
     statusFilter,
     setStatusFilter,
-    highCancellation,
-    setHighCancellation,
-    fraudFlag,
-    setFraudFlag,
   })
 
   const isBlocking = pendingToggleUser ? !pendingToggleUser.isBlocked : false
@@ -202,7 +212,6 @@ const UserManagement = () => {
         activeTab={activeTab}
         onTabChange={(tab) => setRoleFilter(tab)}
         selectFilters={selectFilters}
-        toggleFilters={toggleFilters}
       />
 
       {/* User Directory DataTable */}

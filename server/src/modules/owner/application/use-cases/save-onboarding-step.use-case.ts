@@ -11,6 +11,7 @@ import {
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { User } from "@/modules/user/domain/entities/User"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
@@ -41,7 +42,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       owner = new Owner({
         userId,
         phone: userDoc.phone,
-        onboardingStep: 1,
+        onboardingStep: ONBOARDING_STEP.FIRST_STEP,
         isVerified: false,
       })
     }

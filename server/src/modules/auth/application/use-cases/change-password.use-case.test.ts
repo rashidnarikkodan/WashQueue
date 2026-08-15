@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 import { ChangePasswordUseCase } from "./change-password.use-case"
 import { User } from "@/modules/user/domain/entities/User"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { GetUsersResponse } from "@/modules/user/application/dto/get-users.dto"
 import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { IHashService } from "../interfaces"
@@ -42,8 +43,11 @@ class MockUserRepository implements IUserRepository {
   }
 
   async updateRole(): Promise<void> {}
-  async getAllUsers(): Promise<any> {
-    return {}
+  async getAllUsers(): Promise<GetUsersResponse> {
+    return {
+      users: [],
+      pagination: { total: 0, page: 1, limit: 10, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+    }
   }
   async toggleBookmark(): Promise<User | null> {
     return null
@@ -51,10 +55,10 @@ class MockUserRepository implements IUserRepository {
   async save(user: User): Promise<User> {
     return user
   }
-  async update(id: string, updates: Partial<User>): Promise<User | null> {
+  async update(_id: string, _updates: Partial<User>): Promise<User | null> {
     return null
   }
-  async delete(id: string): Promise<void> {}
+  async delete(_id: string): Promise<void> {}
 }
 
 class MockRefreshTokenRepository implements IRefreshTokenRepository {

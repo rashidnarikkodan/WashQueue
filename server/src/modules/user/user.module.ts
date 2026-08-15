@@ -7,6 +7,7 @@ import { UserRepository } from "./infrastructure/repository/user.mongo.repositor
 import { UserController } from "./presentation/user.controller"
 import { createUsersRouter } from "./presentation/user.routes"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
+import { OwnerVerificationStatusService } from "../owner/application/use-cases/owner-verification-status.service"
 import { stationRepository } from "../station/station.module"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 import { MailService } from "../../core/application/services/mail.service"
@@ -16,6 +17,10 @@ export const userRepository = new UserRepository()
 const ownerRepository = new OwnerMongoRepository()
 const cacheService = new RedisCacheService()
 const mailService = new MailService()
+const ownerVerificationStatusService = new OwnerVerificationStatusService(
+  ownerRepository,
+  mailService
+)
 
 // use cases
 const getUsersUseCase = new GetUsersUseCase(userRepository)
@@ -23,8 +28,7 @@ const getUserUseCase = new GetUserUseCase(userRepository, ownerRepository)
 const updateUserUseCase = new UpdateUserUseCase(
   userRepository,
   cacheService,
-  ownerRepository,
-  mailService
+  ownerVerificationStatusService
 )
 const getBookmarksUseCase = new GetBookmarksUseCase(userRepository, stationRepository)
 const toggleBookmarkUseCase = new ToggleBookmarkUseCase(userRepository)

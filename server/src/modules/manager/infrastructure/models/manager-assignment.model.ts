@@ -31,6 +31,19 @@ const managerAssignmentSchema = new Schema<IManagerAssignment>(
 
 managerAssignmentSchema.index({ managerUserId: 1, stationId: 1 }, { unique: true })
 
+// Business rules enforced at the DB layer (not just in application code) so concurrent
+// invite/accept requests can't both succeed and violate them:
+// Rule 1 — a station can have at most one ACTIVE manager assignment at a time.
+managerAssignmentSchema.index(
+  { stationId: 1 },
+  { unique: true, partialFilterExpression: { status: ManagerAssignmentStatus.ACTIVE } }
+)
+// Rule 2 — a manager can have at most one ACTIVE assignment (one station) at a time.
+managerAssignmentSchema.index(
+  { managerUserId: 1 },
+  { unique: true, partialFilterExpression: { status: ManagerAssignmentStatus.ACTIVE } }
+)
+
 export const ManagerAssignmentModel = model<IManagerAssignment>(
   "ManagerAssignment",
   managerAssignmentSchema

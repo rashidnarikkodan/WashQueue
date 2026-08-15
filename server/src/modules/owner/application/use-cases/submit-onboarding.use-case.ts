@@ -6,6 +6,7 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
@@ -29,7 +30,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       owner = new Owner({
         userId,
         phone: userDoc.phone,
-        onboardingStep: 4,
+        onboardingStep: ONBOARDING_STEP.IN_REVIEW,
         isVerified: false,
       })
     } else {
@@ -37,7 +38,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
         id: owner.id,
         userId,
         phone: owner.phone,
-        onboardingStep: 4,
+        onboardingStep: ONBOARDING_STEP.IN_REVIEW,
         legalFullName: owner.legalFullName,
         businessName: owner.businessName,
         gstNumber: owner.gstNumber,

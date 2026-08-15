@@ -17,6 +17,8 @@ import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authentic
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
+const ADMIN_ONLY_UPDATE_FIELDS = ["isBlocked", "isVerified", "onboardingStep", "rejectionReason"] as const
+
 interface ExportUserRecord {
   id?: string
   _id?: string
@@ -62,7 +64,14 @@ export class UserController {
       throw new ForbiddenError("You are not authorized to update this profile")
     }
 
-    const user = await this.updateUserUseCase.execute(id, req.body)
+    const updates = { ...req.body }
+    if (currentUserRole !== ROLE.ADMIN) {
+      for (const field of ADMIN_ONLY_UPDATE_FIELDS) {
+        delete updates[field]
+      }
+    }
+
+    const user = await this.updateUserUseCase.execute(id, updates)
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
     }

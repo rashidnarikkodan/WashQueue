@@ -1,11 +1,8 @@
-import { AppError } from "@/common/errors/app-error"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { Otp } from "../../domain/entities/otp.entity"
 import { ForgotPasswordInput } from "../dto"
 import { IForgotPasswordUseCase, IMailService, IOtpService } from "../interfaces"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   constructor(
@@ -18,8 +15,10 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
   async execute(data: ForgotPasswordInput): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
 
+    // Respond the same way whether or not the account exists, so this endpoint can't be used
+    // to enumerate registered emails — only actually send anything if a user was found.
     if (!user) {
-      throw new AppError(ERROR_MESSAGES.NO_ACCOUNT_WITH_EMAIL, HTTP_STATUS.NOT_FOUND)
+      return
     }
 
     // Generate numeric OTP
