@@ -32,6 +32,7 @@ export interface VerifyPaymentInput {
   razorpay_order_id: string
   razorpay_payment_id: string
   razorpay_signature: string
+  paymentMethod?: "RAZORPAY" | "WALLET"
 }
 
 export interface VerifyPaymentResponse {

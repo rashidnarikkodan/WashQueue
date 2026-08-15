@@ -191,15 +191,16 @@ export class BookingMapper {
       handoverInitiatedAt: doc.handoverInitiatedAt || null,
       completedAt: doc.completedAt || null,
       noShowAt: doc.noShowAt || null,
-      cancellation: doc.cancellation
-        ? {
-            cancellationReason: doc.cancellation.cancellationReason || "",
-            cancelledBy: doc.cancellation.cancelledBy
-              ? doc.cancellation.cancelledBy.toString()
-              : "",
-            cancelledAt: doc.cancellation.cancelledAt || new Date(),
-          }
-        : null,
+      cancellation:
+        doc.cancellation && (doc.cancellation.cancelledAt || doc.cancellation.cancellationReason)
+          ? {
+              cancellationReason: doc.cancellation.cancellationReason || "",
+              cancelledBy: doc.cancellation.cancelledBy
+                ? doc.cancellation.cancelledBy.toString()
+                : "",
+              cancelledAt: doc.cancellation.cancelledAt || new Date(),
+            }
+          : null,
       createdAt: doc.createdAt || new Date(),
       updatedAt: doc.updatedAt || new Date(),
     }

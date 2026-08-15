@@ -1,8 +1,27 @@
 import { useState } from "react"
 import { AlertTriangle, Trash2, CheckCircle2, DollarSign, X } from "lucide-react"
 
+// Accepts either the full BookingResponse (booking detail page) or the flatter
+// table-row Booking summary (bookings list page) — only the fields actually
+// rendered below are declared, all optional except `id`, so both shapes fit.
+export interface CancellableBooking {
+  id?: string
+  bookingNumber?: string
+  serviceType?: string
+  pricingSnapshot?: { totalPrice?: number }
+  totalAmount?: number
+  totalPrice?: number
+  scheduling?: { windowStart?: string }
+  slotTime?: string
+  stationDetails?: { name?: string }
+  stationName?: string
+  vehicleDetails?: { brand?: string; model?: string }
+  vehicleModel?: string
+  [key: string]: unknown
+}
+
 interface CancellationModalProps {
-  booking: any
+  booking: CancellableBooking
   isOpen: boolean
   onClose: () => void
   onConfirmCancel: (reason: string) => Promise<void>
@@ -33,7 +52,7 @@ export function CancellationModal({
   if (!isOpen || !booking) return null
 
   // Pricing calculations
-  const totalAmount = booking?.pricingSnapshot?.totalPrice || booking?.totalAmount || booking?.totalPrice || 450
+  const totalAmount = booking?.pricingSnapshot?.totalPrice || 450
   const cancellationFee = totalAmount > 0 ? 50 : 0
   const refundAmount = Math.max(0, totalAmount - cancellationFee)
 
@@ -94,7 +113,7 @@ export function CancellationModal({
                     STATION
                   </span>
                   <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.stationDetails?.name || booking.stationName || "LuxeWash Terminal 4"}
+                    {booking.stationDetails?.name || "LuxeWash Terminal 4"}
                   </span>
                 </div>
 
@@ -103,7 +122,7 @@ export function CancellationModal({
                     VEHICLE
                   </span>
                   <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.vehicleDetails?.brand || "Vehicle"} {booking.vehicleDetails?.model || booking.vehicleModel || ""}
+                    {booking.vehicleDetails?.brand || "Vehicle"} {booking.vehicleDetails?.model || ""}
                   </span>
                 </div>
 
@@ -126,7 +145,7 @@ export function CancellationModal({
                           hour: "2-digit",
                           minute: "2-digit",
                         })
-                      : booking.slotTime || "11:15 AM"}
+                      : "11:15 AM"}
                   </span>
                 </div>
               </div>

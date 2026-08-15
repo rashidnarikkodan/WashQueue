@@ -1,6 +1,5 @@
-import crypto from "crypto"
-import env from "@/configs/env.config"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
+import { IPaymentSignatureVerifier } from "../interfaces/payment-signature-verifier.interface"
 
 export interface RazorpayWebhookPayload {
   event: string
@@ -28,30 +27,12 @@ import { IConfirmBookingReservationUseCase, IProcessRazorpayWebhookUseCase } fro
 export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUseCase {
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
-    private readonly confirmReservationUseCase: IConfirmBookingReservationUseCase
+    private readonly confirmReservationUseCase: IConfirmBookingReservationUseCase,
+    private readonly signatureVerifier: IPaymentSignatureVerifier
   ) {}
 
   async execute(rawBody: string, signature: string): Promise<{ success: boolean; message: string }> {
-    const webhookSecret = env.RAZORPAY_KEY_SECRET
-
-    if (!webhookSecret || !signature) {
-      return { success: false, message: "Missing webhook signature configuration" }
-    }
-
-    // 1. Verify Webhook Signature
-    const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(rawBody)
-      .digest("hex")
-
-    const bufExpected = Buffer.from(expectedSignature, "utf-8")
-    const bufSignature = Buffer.from(signature || "", "utf-8")
-
-    const isMatch =
-      bufExpected.length === bufSignature.length &&
-      crypto.timingSafeEqual(bufExpected, bufSignature)
-
-    if (!isMatch) {
+    if (!this.signatureVerifier.verifyWebhookSignature(rawBody, signature)) {
       return { success: false, message: "Invalid webhook signature" }
     }
 

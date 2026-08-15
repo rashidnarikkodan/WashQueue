@@ -74,6 +74,22 @@ export class BookingDTOMapper {
       stationDetails: props.stationDetails,
       vehicleDetails: props.vehicleDetails,
       customerDetails: props.customerDetails,
+      preServiceInspection: props.preServiceInspection
+        ? {
+            photos: props.preServiceInspection.photos,
+            notes: props.preServiceInspection.notes,
+            capturedBy: props.preServiceInspection.capturedBy,
+            capturedAt: props.preServiceInspection.capturedAt.toISOString(),
+          }
+        : null,
+      postServiceInspection: props.postServiceInspection
+        ? {
+            photos: props.postServiceInspection.photos,
+            notes: props.postServiceInspection.notes,
+            capturedBy: props.postServiceInspection.capturedBy,
+            capturedAt: props.postServiceInspection.capturedAt.toISOString(),
+          }
+        : null,
       statusHistory: mappedHistory,
       createdAt: props.createdAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),

@@ -73,21 +73,20 @@ export default function ProviderBookingDetailsView({
 
     const startTime = new Date(startTimeStr).getTime()
 
-    if (booking.completedAt || booking.status === "COMPLETED") {
-      const endTime = booking.completedAt
-        ? new Date(booking.completedAt).getTime()
-        : new Date(booking.updatedAt).getTime()
-      setElapsedSeconds(Math.max(0, Math.floor((endTime - startTime) / 1000)))
-      return
-    }
-
     const updateTimer = () => {
+      if (booking.completedAt || booking.status === "COMPLETED") {
+        const endTime = booking.completedAt
+          ? new Date(booking.completedAt).getTime()
+          : new Date(booking.updatedAt).getTime()
+        setElapsedSeconds(Math.max(0, Math.floor((endTime - startTime) / 1000)))
+        return
+      }
       const now = Date.now()
       setElapsedSeconds(Math.max(0, Math.floor((now - startTime) / 1000)))
     }
 
-    updateTimer()
     const interval = setInterval(updateTimer, 1000)
+    void Promise.resolve().then(updateTimer)
     return () => clearInterval(interval)
   }, [
     booking.serviceStartedAt,

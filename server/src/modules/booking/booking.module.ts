@@ -1,11 +1,12 @@
 import { BookingMongoRepository } from "./infrastructure/repositories/booking.mongo.repository"
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
 import { BookingReservationMongoRepository } from "./infrastructure/repositories/booking-reservation.mongo.repository"
-import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
+import { managerAssignmentRepository } from "../manager/manager.module"
 
 import { BookingRedisQueueService } from "./infrastructure/services/booking-redis-queue.service"
 import { BookingNotificationService } from "./infrastructure/services/booking-notification.service"
 import { PDFInvoiceService } from "./infrastructure/services/pdf-invoice.service"
+import { RazorpaySignatureVerifier } from "./infrastructure/services/razorpay-signature-verifier.service"
 
 import {
   stationRepository,
@@ -49,12 +50,12 @@ import { createPaymentRouter } from "./presentation/payment.routes"
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
 export const bookingReservationRepository = new BookingReservationMongoRepository()
-const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
 // Instantiate Services
 const bookingRedisQueueService = new BookingRedisQueueService()
 const bookingNotificationService = new BookingNotificationService()
 const pdfInvoiceService = new PDFInvoiceService()
+const razorpaySignatureVerifier = new RazorpaySignatureVerifier()
 
 // Payment & Reservation Use Cases
 export const createBookingReservationUseCase = new CreateBookingReservationUseCase(
@@ -75,7 +76,8 @@ export const confirmBookingReservationUseCase = new ConfirmBookingReservationUse
   extraServiceRepository,
   timeWindowRepository,
   vehicleRepository,
-  bookingNotificationService
+  bookingNotificationService,
+  razorpaySignatureVerifier
 )
 
 export const cancelBookingReservationUseCase = new CancelBookingReservationUseCase(
@@ -85,7 +87,8 @@ export const cancelBookingReservationUseCase = new CancelBookingReservationUseCa
 
 export const processRazorpayWebhookUseCase = new ProcessRazorpayWebhookUseCase(
   bookingReservationRepository,
-  confirmBookingReservationUseCase
+  confirmBookingReservationUseCase,
+  razorpaySignatureVerifier
 )
 
 export const cleanupExpiredReservationsUseCase = new CleanupExpiredReservationsUseCase(

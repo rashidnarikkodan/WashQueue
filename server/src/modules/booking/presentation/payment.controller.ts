@@ -58,13 +58,14 @@ export class PaymentController {
   }
 
   verifyPayment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentMethod } = req.body
 
     try {
       const bookingDto = await this.confirmBookingReservationUseCase.execute({
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
+        paymentMethod,
       })
 
       res.status(HTTP_STATUS.OK).json({

@@ -184,7 +184,7 @@ export default function BookingDetails() {
         : "/bookings"
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-20 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-24 sm:pt-28 pb-20 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
       {/* Top Breadcrumb & Navigation Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Breadcrumbs

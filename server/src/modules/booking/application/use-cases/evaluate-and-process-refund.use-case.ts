@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { PaymentStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
@@ -45,8 +45,8 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
     if (doc.refundDetails && doc.refundDetails.status === "PROCESSED") {
       const existingAmount = doc.refundDetails.amount || 0
       return {
-        refundType: doc.refundDetails.refundType as any,
-        refundMethod: doc.refundDetails.refundMethod as any,
+        refundType: (doc.refundDetails.refundType || "NONE") as RefundPolicyResult["refundType"],
+        refundMethod: (doc.refundDetails.refundMethod || "WALLET") as RefundPolicyResult["refundMethod"],
         refundAmount: existingAmount,
         percentage: existingAmount > 0 ? (doc.depositAmount > 0 ? Math.round((existingAmount / doc.depositAmount) * 100) : 100) : 0,
         reason: doc.refundDetails.reason || "Refund previously processed (Idempotent replay)",

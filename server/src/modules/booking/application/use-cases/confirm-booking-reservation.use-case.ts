@@ -1,7 +1,5 @@
-import crypto from "crypto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import env from "@/configs/env.config"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IStationPricingRepository } from "@/modules/station/domain/repositories/station-pricing.repository"
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
@@ -18,16 +16,21 @@ import { IBookingNotificationService } from "../interfaces/booking-notification.
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
+import { IPaymentSignatureVerifier } from "../interfaces/payment-signature-verifier.interface"
 
 export interface ConfirmBookingReservationInput {
   razorpay_order_id: string
   razorpay_payment_id: string
   razorpay_signature: string
+  paymentMethod?: "RAZORPAY" | "WALLET"
 }
 
 import { IConfirmBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
+import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
 
 export class ConfirmBookingReservationUseCase implements IConfirmBookingReservationUseCase {
+  private readonly pricingResolutionService: BookingPricingResolutionService
+
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
     private readonly bookingRepository: IBookingRepository,
@@ -37,29 +40,27 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
-    private readonly notificationService: IBookingNotificationService
-  ) {}
+    private readonly notificationService: IBookingNotificationService,
+    private readonly signatureVerifier: IPaymentSignatureVerifier
+  ) {
+    this.pricingResolutionService = new BookingPricingResolutionService(
+      stationPricingRepository,
+      extraServiceRepository
+    )
+  }
 
   async execute(input: ConfirmBookingReservationInput): Promise<BookingResponseDTO> {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = input
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentMethod } = input
 
-    const isWalletPayment =
-      razorpay_signature === "wallet_payment_verified" ||
-      razorpay_payment_id.startsWith("wallet_pay_")
+    const isWalletPayment = paymentMethod === "WALLET"
 
     if (!isWalletPayment) {
-      // 1. Verify Razorpay HMAC Signature for online card/UPI payments
-      const generatedSignature = crypto
-        .createHmac("sha256", env.RAZORPAY_KEY_SECRET)
-        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-        .digest("hex")
-
-      const bufGenerated = Buffer.from(generatedSignature, "utf-8")
-      const bufProvided = Buffer.from(razorpay_signature || "", "utf-8")
-
-      const isMatch =
-        bufGenerated.length === bufProvided.length &&
-        crypto.timingSafeEqual(bufGenerated, bufProvided)
+      // Verify Razorpay HMAC Signature for online card/UPI payments
+      const isMatch = this.signatureVerifier.verifyPaymentSignature(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+      )
 
       if (!isMatch) {
         throw new AppError("Payment signature mismatch. Verification failed.", HTTP_STATUS.BAD_REQUEST)
@@ -106,28 +107,15 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       )
     }
 
-    const pricings = await this.stationPricingRepository.findByStationId(station.id)
-    const pricing = pricings.find((p) => p.vehicleClassId === vehicle.data.classId && p.isActive)
-    const basePrice = pricing
-      ? reservation.serviceType === "FULL"
-        ? pricing.fullWashPrice
-        : pricing.halfWashPrice
-      : 0
-
-    const availableExtras = await this.extraServiceRepository.findByStationId(station.id)
-    const selectedExtraServices: Array<{ serviceId: string; name: string; price: number }> = []
-
-    for (const extraId of reservation.extraServiceIds) {
-      const extra = availableExtras.find((e) => e.id === extraId && e.isActive)
-      if (extra) {
-        const classPricing = extra.pricing.find((p) => p.vehicleClassId === vehicle.data.classId)
-        selectedExtraServices.push({
-          serviceId: extra.id,
-          name: extra.name,
-          price: classPricing ? classPricing.price : 0,
-        })
-      }
-    }
+    // strict=false: extras were already validated when the reservation was created, so a
+    // since-removed/deactivated extra is silently dropped here rather than blocking confirmation.
+    const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
+      station.id,
+      vehicle.data.classId,
+      reservation.serviceType,
+      reservation.extraServiceIds,
+      false
+    )
 
     const pricingResult = BookingPricingService.calculate({
       basePrice,

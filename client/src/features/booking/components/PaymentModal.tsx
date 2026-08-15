@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Smartphone, Wallet, ArrowRight, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 import { paymentApi } from "@/shared/apis/payment.api"
@@ -50,6 +50,20 @@ export default function PaymentModal({
   const [selectedMethod, setSelectedMethod] = useState<"upi" | "wallet">("upi")
   const [isProcessing, setIsProcessing] = useState(false)
   const [activeReservationId, setActiveReservationId] = useState<string | null>(null)
+  const [walletBalance, setWalletBalance] = useState<number | null>(null)
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false)
+
+  // Fetch wallet balance upfront when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoadingWallet(true)
+      walletApi
+        .getBalance()
+        .then((w) => setWalletBalance(w.balance))
+        .catch(() => setWalletBalance(null))
+        .finally(() => setIsLoadingWallet(false))
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -66,6 +80,36 @@ export default function PaymentModal({
     setIsProcessing(true)
 
     try {
+      // Pre-check Wallet Balance BEFORE creating order if Wallet method is selected
+      if (selectedMethod === "wallet") {
+        let currentBalance = walletBalance
+        if (currentBalance === null) {
+          try {
+            const userWallet = await walletApi.getBalance()
+            currentBalance = userWallet.balance
+            setWalletBalance(currentBalance)
+          } catch {
+            toast.error("Failed to check wallet balance. Please try again.")
+            setIsProcessing(false)
+            return
+          }
+        }
+
+        if (currentBalance < totalAmount) {
+          toast.error(
+            `Insufficient wallet balance (₹${currentBalance.toFixed(2)}). Please top up your wallet.`,
+            {
+              action: {
+                label: "Go to Wallet",
+                onClick: () => window.location.assign("/wallet"),
+              },
+            }
+          )
+          setIsProcessing(false)
+          return
+        }
+      }
+
       // Step 1: Create Order & Atomic Slot Reservation on Backend
       const orderPayload = {
         amount: Math.round(totalAmount * 100),
@@ -88,27 +132,9 @@ export default function PaymentModal({
         setActiveReservationId(order.reservation_id)
       }
 
-      // Handle Direct Wallet Payment Flow
+      // Handle Direct Wallet Payment Flow (Balance already verified upfront)
       if (selectedMethod === "wallet") {
         try {
-          const userWallet = await walletApi.getBalance()
-          if (userWallet.balance < totalAmount) {
-            toast.error(
-              `Insufficient wallet balance (₹${userWallet.balance.toFixed(2)}). Please top up your wallet.`,
-              {
-                action: {
-                  label: "Go to Wallet",
-                  onClick: () => window.location.assign("/wallet"),
-                },
-              }
-            )
-            setIsProcessing(false)
-            if (order.reservation_id) {
-              paymentApi.cancelReservation(order.reservation_id)
-            }
-            return
-          }
-
           // Debit wallet for booking
           await walletApi.payWithWallet({
             amount: totalAmount,
@@ -116,17 +142,20 @@ export default function PaymentModal({
             description: serviceName || "Wash Booking Payment",
           })
 
-          // Verify & confirm booking with wallet transaction ID as payment reference
+          // Verify & confirm booking; paymentMethod tells the server this was already
+          // settled via wallet debit above, so it skips Razorpay signature verification.
+          const walletPaymentId = `wallet_pay_${Date.now()}`
           const verification = await paymentApi.verifyPayment({
             razorpay_order_id: order.order_id,
-            razorpay_payment_id: `wallet_pay_${Date.now()}`,
+            razorpay_payment_id: walletPaymentId,
             razorpay_signature: "wallet_payment_verified",
+            paymentMethod: "WALLET",
           })
 
           toast.success("Paid successfully using your Wallet balance!")
           onSuccess({
             razorpay_order_id: order.order_id,
-            razorpay_payment_id: `wallet_pay_${Date.now()}`,
+            razorpay_payment_id: walletPaymentId,
             razorpay_signature: "wallet_payment_verified",
             booking: verification.booking,
           })
@@ -136,7 +165,9 @@ export default function PaymentModal({
           if (order.reservation_id) {
             paymentApi.cancelReservation(order.reservation_id)
           }
-          onError?.(wErr.message || "Failed to process payment using wallet balance")
+          const errMsg = wErr.message || "Failed to process payment using wallet balance"
+          toast.error(errMsg)
+          onError?.(errMsg)
           onClose()
         } finally {
           setIsProcessing(false)
@@ -312,8 +343,27 @@ export default function PaymentModal({
               <Wallet size={20} />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-slate-100">Wallet</h3>
-              <p className="text-xs text-slate-400">Direct transfer from your app wallet</p>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-100">Wallet</h3>
+                {isLoadingWallet ? (
+                  <span className="text-[10px] text-slate-400 animate-pulse">Checking...</span>
+                ) : walletBalance !== null ? (
+                  <span
+                    className={`text-xs font-bold ${
+                      walletBalance < totalAmount ? "text-rose-400" : "text-emerald-400"
+                    }`}
+                  >
+                    Bal: ₹{walletBalance.toFixed(2)}
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {walletBalance !== null && walletBalance < totalAmount ? (
+                  <span className="text-rose-400 font-medium">Insufficient balance for this booking</span>
+                ) : (
+                  "Direct transfer from your app wallet"
+                )}
+              </p>
             </div>
             <div
               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${

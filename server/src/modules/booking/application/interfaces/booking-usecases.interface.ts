@@ -4,7 +4,6 @@ import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { CheckInBookingInput } from "../dtos/checkin-booking.dto"
-import { AdvanceStatusInput } from "../dtos/advance-status.dto"
 import {
   CreateBookingReservationInput,
   BookingReservationResponseDTO,
@@ -44,10 +43,6 @@ export interface IGetUserBookingsUseCase {
 
 export interface ICheckInBookingUseCase {
   execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO>
-}
-
-export interface IAdvanceBookingStatusUseCase {
-  execute(managerUserId: string, input: AdvanceStatusInput): Promise<BookingResponseDTO>
 }
 
 export interface ICancelBookingUseCase {

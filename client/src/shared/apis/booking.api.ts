@@ -29,6 +29,10 @@ export interface BookingResponse {
   providerId: string
   stationId: string
   vehicleId?: string | null
+  vehicleSnapshot?: {
+    vehicleCategoryId: string
+    vehicleClassId: string
+  }
   serviceType: "HALF" | "FULL"
   pricingSnapshot: {
     basePrice: number
@@ -82,6 +86,18 @@ export interface BookingResponse {
     cancelledAt?: string
   } | null
   rawQrToken?: string
+  preServiceInspection?: {
+    photos: string[]
+    notes?: string
+    capturedBy: string
+    capturedAt: string
+  } | null
+  postServiceInspection?: {
+    photos: string[]
+    notes?: string
+    capturedBy: string
+    capturedAt: string
+  } | null
   status: string
   paymentStatus: string
   paymentType: string
@@ -186,9 +202,10 @@ export const bookingApi = {
 
   validateQr: async (inputVal: string): Promise<BookingResponse> => {
     try {
+      const cleanVal = inputVal.trim().replace(/^#+\s*/, "")
       const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/validate-qr`, {
-        qrToken: inputVal,
-        bookingId: inputVal,
+        qrToken: cleanVal,
+        bookingId: cleanVal,
       })
       return response.data.data
     } catch (error) {
@@ -347,13 +364,25 @@ export const bookingApi = {
 
   createWalkIn: async (input: {
     stationId: string
+    timeWindowId?: string
     serviceType: "HALF" | "FULL"
+    customer?: { userId?: string; name: string; phone: string }
     walkInCustomer?: { name: string; phone: string }
-    walkInVehicle: { registrationNumber: string; categoryId: string; classId: string }
+    vehicle?: { vehicleId?: string; registrationNumber: string; categoryId: string; classId: string }
+    walkInVehicle?: { registrationNumber: string; categoryId: string; classId: string }
     extraServiceIds?: string[]
   }): Promise<BookingResponse> => {
     try {
-      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/walk-in`, input)
+      const payload = {
+        stationId: input.stationId,
+        timeWindowId: input.timeWindowId,
+        serviceType: input.serviceType,
+        paymentType: "CASH_WALKIN",
+        extraServiceIds: input.extraServiceIds || [],
+        customer: input.customer || (input.walkInCustomer ? { name: input.walkInCustomer.name, phone: input.walkInCustomer.phone } : undefined),
+        vehicle: input.vehicle || (input.walkInVehicle ? { registrationNumber: input.walkInVehicle.registrationNumber, categoryId: input.walkInVehicle.categoryId, classId: input.walkInVehicle.classId } : undefined),
+      }
+      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/walk-in`, payload)
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to create walk-in booking")

@@ -18,7 +18,7 @@ export const createBookingSchema = z.object({
 
 export const createWalkInBookingSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),
-  timeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID"),
+  timeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID").optional(),
   serviceType: z.enum(["HALF", "FULL"]),
   paymentType: z
     .enum(["ONLINE_FULL", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"])
@@ -127,6 +127,7 @@ export const verifyPaymentSchema = z.object({
   razorpay_order_id: z.string().min(1, "Razorpay order ID is required"),
   razorpay_payment_id: z.string().min(1, "Razorpay payment ID is required"),
   razorpay_signature: z.string().min(1, "Razorpay signature is required"),
+  paymentMethod: z.enum(["RAZORPAY", "WALLET"]).optional().default("RAZORPAY"),
 })
 
 export const reservationIdParamSchema = z.object({

@@ -18,8 +18,11 @@ import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { ICreateBookingUseCase } from "../interfaces/booking-usecases.interface"
+import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
 
 export class CreateBookingUseCase implements ICreateBookingUseCase {
+  private readonly pricingResolutionService: BookingPricingResolutionService
+
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
@@ -29,7 +32,12 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
     private readonly notificationService: IBookingNotificationService
-  ) {}
+  ) {
+    this.pricingResolutionService = new BookingPricingResolutionService(
+      stationPricingRepository,
+      extraServiceRepository
+    )
+  }
 
   async execute(userId: string, input: CreateBookingInput): Promise<BookingResponseDTO> {
     // 1. Validate Station
@@ -48,42 +56,13 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       throw new AppError("Vehicle not found or does not belong to user", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 3. Validate Station pricing for vehicle class
-    const pricings = await this.stationPricingRepository.findByStationId(station.id)
-    const pricing = pricings.find((p) => p.vehicleClassId === vehicle.data.classId && p.isActive)
-    if (!pricing) {
-      throw new AppError(
-        "Station does not support or have active pricing for this vehicle class",
-        HTTP_STATUS.BAD_REQUEST
-      )
-    }
-
-    const basePrice = input.serviceType === "FULL" ? pricing.fullWashPrice : pricing.halfWashPrice
-
-    // 4. Validate Extra Services
-    const availableExtras = await this.extraServiceRepository.findByStationId(station.id)
-    const selectedExtraServices: Array<{ serviceId: string; name: string; price: number }> = []
-
-    if (input.extraServiceIds && input.extraServiceIds.length > 0) {
-      for (const extraId of input.extraServiceIds) {
-        const extra = availableExtras.find((e) => e.id === extraId && e.isActive)
-        if (!extra) {
-          throw new AppError(
-            `Extra service ${extraId} is invalid or inactive for this station`,
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const classPricing = extra.pricing.find((p) => p.vehicleClassId === vehicle.data.classId)
-        const price = classPricing ? classPricing.price : 0
-
-        selectedExtraServices.push({
-          serviceId: extra.id,
-          name: extra.name,
-          price,
-        })
-      }
-    }
+    // 3 & 4. Resolve pricing for vehicle class and validate/price extra services
+    const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
+      station.id,
+      vehicle.data.classId,
+      input.serviceType,
+      input.extraServiceIds
+    )
 
     // 5. Validate Time Window
     const timeWindow = await this.timeWindowRepository.findById(input.timeWindowId)

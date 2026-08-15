@@ -43,7 +43,7 @@ export default function Booking() {
   // Prompt unauthenticated users upon landing on Booking page
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      setIsAuthModalOpen(true)
+      queueMicrotask(() => setIsAuthModalOpen(true))
     }
   }, [isAuthenticated, user])
 
@@ -192,11 +192,10 @@ export default function Booking() {
     if (categories.length === 0 || classes.length === 0) {
       loadCatalogData()
     }
-  }, [loadCatalogData])
+  }, [categories.length, classes.length, loadCatalogData])
 
   // Fetch User Vehicles from API
   const loadUserVehicles = useCallback(async () => {
-    setIsVehiclesLoading(true)
     try {
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
@@ -208,7 +207,14 @@ export default function Booking() {
   }, [])
 
   useEffect(() => {
-    loadUserVehicles()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await loadUserVehicles()
+    })
+    return () => {
+      ignore = true
+    }
   }, [loadUserVehicles])
 
   // Station Supported Class IDs Set

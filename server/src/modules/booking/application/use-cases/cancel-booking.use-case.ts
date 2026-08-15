@@ -9,11 +9,10 @@ import { IBookingNotificationService } from "../interfaces/booking-notification.
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
+import { Booking } from "../../domain/entities/Booking"
 import { ICancelBookingUseCase, IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { BookingModel } from "../../infrastructure/models/booking.model"
-import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
-
 import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -26,9 +25,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
   ) {}
 
-
   private calculateRefundAmount(
-    booking: any,
+    booking: Booking,
     isStaffCancellation: boolean,
     now: Date
   ): number {
@@ -119,15 +117,12 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     const domainBooking = BookingMapper.toDomain(updatedDoc)
 
     const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
-    let processedRefundAmount = 0
-
     if (this.evaluateAndProcessRefundUseCase) {
-      const refundResult = await this.evaluateAndProcessRefundUseCase.execute({
+      await this.evaluateAndProcessRefundUseCase.execute({
         bookingId: domainBooking.id,
         responsibility,
         reason: cancellationData.cancellationReason,
       })
-      processedRefundAmount = refundResult.refundAmount
     }
 
     // Rule 5: Audit log

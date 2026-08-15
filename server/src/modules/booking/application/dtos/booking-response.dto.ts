@@ -98,6 +98,18 @@ export interface BookingResponseDTO {
     email?: string
     phone?: string
   }
+  preServiceInspection?: {
+    photos: string[]
+    notes?: string
+    capturedBy: string
+    capturedAt: string
+  } | null
+  postServiceInspection?: {
+    photos: string[]
+    notes?: string
+    capturedBy: string
+    capturedAt: string
+  } | null
   statusHistory?: BookingStatusLogDTO[]
   createdAt: string
   updatedAt: string

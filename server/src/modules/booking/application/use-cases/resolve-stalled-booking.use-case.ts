@@ -10,7 +10,6 @@ import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { BookingModel } from "../../infrastructure/models/booking.model"
 import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
-import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
 import { IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 
 export interface ResolveStalledBookingInput {
