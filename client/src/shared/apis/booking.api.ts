@@ -315,9 +315,9 @@ export const bookingApi = {
     }>
   }> => {
     try {
-      const response = await api.get(`${API_ROUTES.BOOKINGS.ROOT}/queue/live`, {
-        params: { stationId },
-      })
+      const response = await api.get(
+        `${API_ROUTES.BOOKINGS.ROOT}/stations/${stationId}/queue`
+      )
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to load live station queue")

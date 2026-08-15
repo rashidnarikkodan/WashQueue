@@ -12,6 +12,11 @@ import {
 import { ConfirmBookingReservationInput } from "../use-cases/confirm-booking-reservation.use-case"
 import { RefundPolicyResult } from "../../domain/services/RefundPolicyEngine"
 import { ProcessRefundInput } from "../use-cases/evaluate-and-process-refund.use-case"
+import { SavePreInspectionInput } from "../use-cases/save-pre-inspection.use-case"
+import { OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
+import { SavePostInspectionInput } from "../use-cases/save-post-inspection.use-case"
+import { StallBookingInput } from "../use-cases/stall-booking.use-case"
+import { ResolveStalledBookingInput } from "../use-cases/resolve-stalled-booking.use-case"
 
 export interface ICreateBookingUseCase {
   execute(userId: string, input: CreateBookingInput): Promise<BookingResponseDTO>
@@ -71,6 +76,39 @@ export interface IProcessRazorpayWebhookUseCase {
 export interface ICleanupExpiredReservationsUseCase {
   execute(now?: Date): Promise<number>
 }
-export interface IEvaluateAndProcessRefundUseCase{
+
+export interface IEvaluateAndProcessRefundUseCase {
   execute(input: ProcessRefundInput): Promise<RefundPolicyResult>
+}
+
+export interface IValidateQRForCheckInUseCase {
+  execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO>
+}
+
+export interface ISavePreInspectionAndCheckInUseCase {
+  execute(managerUserId: string, input: SavePreInspectionInput): Promise<BookingResponseDTO>
+}
+
+export interface IGetOperationalQueueUseCase {
+  execute(stationId: string): Promise<OperationalStationQueueDTO>
+}
+
+export interface IStartServiceUseCase {
+  execute(managerUserId: string, bookingId: string): Promise<BookingResponseDTO>
+}
+
+export interface ISavePostInspectionUseCase {
+  execute(managerUserId: string, input: SavePostInspectionInput): Promise<BookingResponseDTO>
+}
+
+export interface ICompleteHandoverUseCase {
+  execute(managerUserId: string, bookingId: string, notes?: string): Promise<BookingResponseDTO>
+}
+
+export interface IStallBookingUseCase {
+  execute(managerUserId: string, input: StallBookingInput): Promise<BookingResponseDTO>
+}
+
+export interface IResolveStalledBookingUseCase {
+  execute(managerUserId: string, input: ResolveStalledBookingInput): Promise<BookingResponseDTO>
 }

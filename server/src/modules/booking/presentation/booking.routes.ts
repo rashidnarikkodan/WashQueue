@@ -2,13 +2,23 @@ import { Router } from "express"
 import { BookingController } from "./booking.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
+import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
+import { ROLE } from "@/common/constants/role.constants"
 import {
-  advanceStatusSchema,
   cancelBookingSchema,
   checkInBookingSchema,
   createBookingSchema,
   createWalkInBookingSchema,
+  getBookingListQuerySchema,
+  bookingIdParamSchema,
+  stationIdParamSchema,
+  validateQrSchema,
+  preInspectionSchema,
+  postInspectionSchema,
+  completeHandoverSchema,
+  stallBookingSchema,
+  resolveStalledSchema,
 } from "./schema/booking.schema"
 
 export const createBookingRouter = (bookingController: BookingController): Router => {
@@ -16,78 +26,95 @@ export const createBookingRouter = (bookingController: BookingController): Route
 
   router.use(authenticate)
 
-  // Customer Routes
+  // Customer Operations
   router.post("/", validateRequest(createBookingSchema), asyncHandler(bookingController.create))
-
-  router.get("/", asyncHandler(bookingController.getUserBookings))
-  router.get("/upcoming", asyncHandler(bookingController.getUpcoming))
-  router.get("/history", asyncHandler(bookingController.getHistory))
-  router.get("/:bookingId", asyncHandler(bookingController.getById))
-  router.get("/:bookingId/invoice", asyncHandler(bookingController.downloadInvoice))
-
+  router.get("/", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getUserBookings))
+  router.get("/upcoming", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getUpcoming))
+  router.get("/history", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getHistory))
+  router.get("/:bookingId", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.getById))
+  router.get("/:bookingId/invoice", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.downloadInvoice))
   router.patch(
     "/:bookingId/cancel",
+    validateRequest(bookingIdParamSchema, "params"),
     validateRequest(cancelBookingSchema),
     asyncHandler(bookingController.cancel)
   )
 
-  // Operational Queue Routes
-  router.get("/queue/live", asyncHandler(bookingController.getLiveQueue))
-  router.get("/stations/:stationId/queue", asyncHandler(bookingController.getLiveQueue))
+  // Operational Queue Operations (Manager / Owner / Admin)
+  router.get(
+    "/stations/:stationId/queue",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(stationIdParamSchema, "params"),
+    asyncHandler(bookingController.getOperationalQueue)
+  )
 
-  // Manager / Staff Routes
+  // Manager / Staff Operations
   router.post(
     "/validate-qr",
-    validateRequest(checkInBookingSchema),
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(validateQrSchema),
     asyncHandler(bookingController.validateQr)
   )
 
   router.post(
-    "/:bookingId/pre-inspection",
-    asyncHandler(bookingController.submitPreInspection)
-  )
-
-  router.post(
-    "/:bookingId/post-inspection",
-    asyncHandler(bookingController.submitPostInspection)
-  )
-
-  router.post(
-    "/:bookingId/handover",
-    asyncHandler(bookingController.completeHandover)
-  )
-
-  router.post(
-    "/:bookingId/start-service",
-    asyncHandler(bookingController.startService)
-  )
-
-  router.post(
-    "/:bookingId/stall",
-    asyncHandler(bookingController.stallBooking)
-  )
-
-  router.post(
-    "/:bookingId/resolve-stalled",
-    asyncHandler(bookingController.resolveStalled)
+    "/check-in",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(checkInBookingSchema),
+    asyncHandler(bookingController.checkIn)
   )
 
   router.post(
     "/walk-in",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(createWalkInBookingSchema),
     asyncHandler(bookingController.createWalkIn)
   )
 
   router.post(
-    "/check-in",
-    validateRequest(checkInBookingSchema),
-    asyncHandler(bookingController.checkIn)
+    "/:bookingId/pre-inspection",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(preInspectionSchema),
+    asyncHandler(bookingController.submitPreInspection)
   )
 
-  router.patch(
-    "/:bookingId/status",
-    validateRequest(advanceStatusSchema),
-    asyncHandler(bookingController.advanceStatus)
+  router.post(
+    "/:bookingId/start-service",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    asyncHandler(bookingController.startService)
+  )
+
+  router.post(
+    "/:bookingId/post-inspection",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(postInspectionSchema),
+    asyncHandler(bookingController.submitPostInspection)
+  )
+
+  router.post(
+    "/:bookingId/handover",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(completeHandoverSchema),
+    asyncHandler(bookingController.completeHandover)
+  )
+
+  router.post(
+    "/:bookingId/stall",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(stallBookingSchema),
+    asyncHandler(bookingController.stallBooking)
+  )
+
+  router.post(
+    "/:bookingId/resolve-stalled",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(resolveStalledSchema),
+    asyncHandler(bookingController.resolveStalled)
   )
 
   return router

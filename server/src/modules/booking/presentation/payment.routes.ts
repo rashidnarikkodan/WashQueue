@@ -1,19 +1,40 @@
 import { Router } from "express"
 import { PaymentController } from "./payment.controller"
-import { API_ROUTES } from "@/common/constants/route.constants"
+import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
+import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
+import {
+  createPaymentOrderSchema,
+  verifyPaymentSchema,
+  reservationIdParamSchema,
+} from "./schema/booking.schema"
 
 export const createPaymentRouter = (paymentController: PaymentController): Router => {
-  const paymentRouter = Router()
+  const router = Router()
 
-  paymentRouter.post(API_ROUTES.PAYMENT.CREATE_ORDER, authenticate, paymentController.createOrder)
-  paymentRouter.post(API_ROUTES.PAYMENT.VERIFY_PAYMENT, authenticate, paymentController.verifyPayment)
-  paymentRouter.post(API_ROUTES.PAYMENT.CANCEL_RESERVATION, authenticate, paymentController.cancelReservation)
-  paymentRouter.post(API_ROUTES.PAYMENT.WEBHOOK, paymentController.handleWebhook)
+  // Webhook endpoint (unauthenticated)
+  router.post("/webhook", asyncHandler(paymentController.handleWebhook))
 
-  // Direct fallback paths when router is attached at /api base level
-  paymentRouter.post(API_ROUTES.PAYMENT.CREATE_ORDER, authenticate, paymentController.createOrder)
-  paymentRouter.post(API_ROUTES.PAYMENT.VERIFY_PAYMENT, authenticate, paymentController.verifyPayment)
+  // Authenticated endpoints
+  router.use(authenticate)
 
-  return paymentRouter
+  router.post(
+    "/create-order",
+    validateRequest(createPaymentOrderSchema),
+    asyncHandler(paymentController.createOrder)
+  )
+
+  router.post(
+    "/verify-payment",
+    validateRequest(verifyPaymentSchema),
+    asyncHandler(paymentController.verifyPayment)
+  )
+
+  router.post(
+    "/reservations/:id/cancel",
+    validateRequest(reservationIdParamSchema, "params"),
+    asyncHandler(paymentController.cancelReservation)
+  )
+
+  return router
 }
