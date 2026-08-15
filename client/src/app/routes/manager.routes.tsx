@@ -6,10 +6,10 @@ import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
-const ManagerQueuePage = lazy(() => import("@/features/manager/pages/QueueManagementPage"))
-const CheckInPage = lazy(() => import("@/features/manager/pages/CheckInPage"))
-const ManagerPreInspectionPage = lazy(() => import("@/features/manager/pages/PreInspectionPage"))
-const ManagerPostInspectionPage = lazy(() => import("@/features/manager/pages/PostInspectionPage"))
+const ManagerQueuePage = lazy(() => import("@/features/queue/pages/QueueManagementPage"))
+const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
+const ManagerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
+const ManagerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
 import AddEditStation from "@/features/station/pages/AddEditStation"
 
 export const managerRoutes = {
