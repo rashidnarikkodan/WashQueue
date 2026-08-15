@@ -137,7 +137,14 @@ export default function ManagerQueuePage() {
   }, [getCheckInTime])
 
   useEffect(() => {
-    fetchStationAndQueue()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchStationAndQueue()
+    })
+    return () => {
+      ignore = true
+    }
   }, [fetchStationAndQueue])
 
   // Real-Time Socket.IO Subscriptions & Reconnection Handling
@@ -151,10 +158,6 @@ export default function ManagerQueuePage() {
       fetchStationAndQueue()
     }
 
-    // Matches the exact event names BookingNotificationService.notify() actually emits
-    // (see the use-cases' notify(...) calls) — QUEUE_UPDATED is emitted alongside every one
-    // of these as a catch-all, but listening for the specific names too keeps this list
-    // self-documenting and resilient if the catch-all is ever removed.
     const realTimeEvents = [
       "QUEUE_UPDATED",
       "CHECKIN_SUCCESS",
@@ -170,8 +173,6 @@ export default function ManagerQueuePage() {
     socket.on("connect", handleRealTimeUpdate)
     socket.on("reconnect", handleRealTimeUpdate)
 
-    // Fallback poll: if a socket event is ever missed or the connection drops silently
-    // without firing "disconnect"/"reconnect", the board still refreshes on its own.
     const pollId = setInterval(() => fetchStationAndQueue(), 30000)
 
     return () => {
@@ -196,9 +197,6 @@ export default function ManagerQueuePage() {
           b.status === "COMPLETED"
         )
 
-      // Default "ALL" (Active Operational Queue View):
-      // Only show vehicles currently in active queue or being serviced.
-      // Completed, Service Completed, and Cancelled bookings are excluded from active queue.
       return (
         b.status === "CHECK_IN" ||
         b.status === "CHECKED_IN" ||
@@ -207,7 +205,6 @@ export default function ManagerQueuePage() {
       )
     })
 
-    // Sort strictly by check-in arrival time (First Checked-In First - FIFO)
     return filtered.sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
   }, [bookings, filterType, getCheckInTime])
 
@@ -253,29 +250,29 @@ export default function ManagerQueuePage() {
     }
   }
 
-  // Active Selected Booking
+  // Active Selected Booking Details
   const selectedBooking = useMemo(() => {
-    if (!selectedBookingId) return queueList[0] || null
-    return bookings.find((b) => b.id === selectedBookingId) || queueList[0] || null
-  }, [bookings, queueList, selectedBookingId])
+    if (!selectedBookingId) return null
+    return bookings.find((b) => b.id === selectedBookingId) || null
+  }, [bookings, selectedBookingId])
 
   // Live "In Progress" Session Timer (ticks while the selected vehicle is being washed)
+  const serviceStartedAt = selectedBooking?.serviceStartedAt
   const isSelectedBookingInService =
-    !!selectedBooking && selectedBooking.status === "IN_SERVICE" && !!selectedBooking.serviceStartedAt
+    !!selectedBooking && selectedBooking.status === "IN_SERVICE" && !!serviceStartedAt
   const [nowTick, setNowTick] = useState(() => Date.now())
 
   useEffect(() => {
     if (!isSelectedBookingInService) return
-    setNowTick(Date.now())
     const timerId = setInterval(() => setNowTick(Date.now()), 1000)
     return () => clearInterval(timerId)
-  }, [isSelectedBookingInService, selectedBooking?.id])
+  }, [isSelectedBookingInService])
 
   const elapsedSeconds = useMemo(() => {
-    if (!isSelectedBookingInService || !selectedBooking?.serviceStartedAt) return 0
-    const startTime = new Date(selectedBooking.serviceStartedAt).getTime()
+    if (!isSelectedBookingInService || !serviceStartedAt) return 0
+    const startTime = new Date(serviceStartedAt).getTime()
     return Math.max(0, Math.floor((nowTick - startTime) / 1000))
-  }, [isSelectedBookingInService, selectedBooking?.serviceStartedAt, nowTick])
+  }, [isSelectedBookingInService, serviceStartedAt, nowTick])
 
   const formattedSessionTimer = useMemo(() => {
     const mins = Math.floor(elapsedSeconds / 60)
@@ -523,7 +520,7 @@ export default function ManagerQueuePage() {
             ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => setFilterType(t.id as any)}
+                onClick={() => setFilterType(t.id as "ALL" | "QUEUED" | "IN_SERVICE" | "STALLED" | "COMPLETED")}
                 className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
                   filterType === t.id
                     ? "bg-primary text-primary-foreground border-primary"
@@ -904,7 +901,7 @@ export default function ManagerQueuePage() {
                 </label>
                 <select
                   value={targetStatusInput}
-                  onChange={(e) => setTargetStatusInput(e.target.value as any)}
+                  onChange={(e) => setTargetStatusInput(e.target.value as "CHECKED_IN" | "IN_SERVICE" | "CANCELLED")}
                   className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-bold text-sm focus:outline-none focus:border-amber-500"
                 >
                   <option value="CHECKED_IN">Re-enter Waiting Queue (CHECKED_IN)</option>

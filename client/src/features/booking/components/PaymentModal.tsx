@@ -55,13 +55,23 @@ export default function PaymentModal({
 
   // Fetch wallet balance upfront when modal opens
   useEffect(() => {
+    let ignore = false
     if (isOpen) {
-      setIsLoadingWallet(true)
-      walletApi
-        .getBalance()
-        .then((w) => setWalletBalance(w.balance))
-        .catch(() => setWalletBalance(null))
-        .finally(() => setIsLoadingWallet(false))
+      void Promise.resolve().then(async () => {
+        if (ignore) return
+        setIsLoadingWallet(true)
+        try {
+          const w = await walletApi.getBalance()
+          if (!ignore) setWalletBalance(w.balance)
+        } catch {
+          if (!ignore) setWalletBalance(null)
+        } finally {
+          if (!ignore) setIsLoadingWallet(false)
+        }
+      })
+    }
+    return () => {
+      ignore = true
     }
   }, [isOpen])
 

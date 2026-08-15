@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import {
-  Camera,
   SwitchCamera,
   Zap,
   ZapOff,
@@ -8,7 +7,6 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle2,
-  Scan,
   Sparkles,
   Volume2,
   VolumeX,
@@ -26,6 +24,19 @@ interface CameraDevice {
   label: string
 }
 
+interface Html5QrcodeInstance {
+  stop: () => Promise<void>
+  getRunningTrackCapabilities: () => Record<string, unknown>
+  applyVideoConstraints: (constraints: Record<string, unknown>) => Promise<void>
+  start: (
+    cameraConstraint: string | { facingMode: string },
+    config: Record<string, unknown>,
+    onSuccess: (decodedText: string) => void,
+    onError: (errorMessage: string) => void
+  ) => Promise<void>
+  scanFile: (imageFile: File, showImage?: boolean) => Promise<string>
+}
+
 export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   onScanSuccess,
   onScanError,
@@ -33,7 +44,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
-  const html5ScannerRef = useRef<any>(null)
+  const html5ScannerRef = useRef<Html5QrcodeInstance | null>(null)
   const animFrameIdRef = useRef<number | null>(null)
   const isScanningRef = useRef<boolean>(false)
   const lastScannedTextRef = useRef<string>("")
@@ -56,7 +67,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   const playScanBeep = useCallback(() => {
     if (!isAudioEnabled) return
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       if (!AudioCtx) return
       const ctx = new AudioCtx()
       const osc = ctx.createOscillator()
@@ -74,7 +85,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
       osc.start()
       osc.stop(ctx.currentTime + 0.12)
-    } catch (e) {
+    } catch {
       // Audio playback failed or blocked by browser policy
     }
   }, [isAudioEnabled])
@@ -92,7 +103,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         const bookingIdParam = url.searchParams.get("bookingId") || url.searchParams.get("id")
         if (tokenParam) return tokenParam
         if (bookingIdParam) return bookingIdParam
-      } catch (e) {
+      } catch {
         // Fallback to raw string
       }
     }
@@ -104,7 +115,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (parsed.qrToken) return String(parsed.qrToken)
         if (parsed.token) return String(parsed.token)
         if (parsed.bookingId) return String(parsed.bookingId)
-      } catch (e) {
+      } catch {
         // Fallback to raw string
       }
     }
@@ -158,7 +169,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     if (html5ScannerRef.current) {
       try {
         await html5ScannerRef.current.stop()
-      } catch (e) {
+      } catch {
         // Ignore html5scanner stop errors
       }
       html5ScannerRef.current = null
@@ -172,14 +183,18 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   // Native Frame Detection Loop using window.BarcodeDetector or Canvas
   const startNativeFrameDetection = useCallback(
     (videoEl: HTMLVideoElement) => {
-      let barcodeDetector: any = null
+      interface BarcodeResult {
+        rawValue?: string
+      }
+      let barcodeDetector: { detect: (target: HTMLVideoElement) => Promise<BarcodeResult[]> } | null = null
       if ("BarcodeDetector" in window) {
         try {
-          barcodeDetector = new (window as any).BarcodeDetector({
+          const DetectorClass = (window as unknown as { BarcodeDetector: new (opts: Record<string, unknown>) => { detect: (target: HTMLVideoElement) => Promise<BarcodeResult[]> } }).BarcodeDetector
+          barcodeDetector = new DetectorClass({
             formats: ["qr_code"],
           })
-        } catch (e) {
-          console.warn("BarcodeDetector initialization error:", e)
+        } catch (err) {
+          console.warn("BarcodeDetector initialization error:", err)
         }
       }
 
@@ -196,7 +211,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
               handleDecodedText(barcodes[0].rawValue)
             }
           }
-        } catch (e) {
+        } catch {
           // Detection frame error ignored
         }
 
@@ -223,7 +238,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         html5ScannerRef.current = new Html5Qrcode("qr-camera-viewfinder", {
           formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
           verbose: false,
-        })
+        }) as unknown as Html5QrcodeInstance
       }
 
       const config = {
@@ -255,16 +270,16 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       // Check Torch capabilities
       try {
         const capabilities = html5ScannerRef.current.getRunningTrackCapabilities()
-        if (capabilities && (capabilities as any).torch !== undefined) {
+        if (capabilities && capabilities.torch !== undefined) {
           setIsTorchSupported(true)
         }
-      } catch (e) {
+      } catch {
         setIsTorchSupported(false)
       }
 
       setIsInitializing(false)
       return
-    } catch (err: any) {
+    } catch (err) {
       console.warn("Html5Qrcode engine initialization failed/fallback to Native MediaStream:", err)
     }
 
@@ -288,7 +303,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       // Check torch support on track
       const track = stream.getVideoTracks()[0]
       if (track) {
-        const capabilities = track.getCapabilities() as any
+        const capabilities = track.getCapabilities() as Record<string, unknown>
         if (capabilities && capabilities.torch) {
           setIsTorchSupported(true)
         }
@@ -300,21 +315,20 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       if (videoRef.current) {
         startNativeFrameDetection(videoRef.current)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Native camera stream error:", err)
       isScanningRef.current = false
       setIsCameraActive(false)
-      let msg = "Failed to start camera."
-      if (err?.name === "NotAllowedError" || String(err).includes("Permission")) {
-        msg = "Camera access permission was denied. Please allow camera access in browser settings."
-      } else if (err?.name === "NotFoundError" || String(err).includes("NotFound")) {
-        msg = "No camera hardware detected on this device."
-      } else if (err?.name === "NotReadableError") {
-        msg = "Camera is currently being used by another application."
+      const errorObj = err as { name?: string; message?: string }
+      if (errorObj?.name === "NotAllowedError" || String(err).includes("Permission")) {
+        setCameraError("Camera access permission was denied. Please allow camera access in browser settings.")
+      } else if (errorObj?.name === "NotFoundError" || String(err).includes("NotFound")) {
+        setCameraError("No camera hardware detected on this device.")
+      } else if (errorObj?.name === "NotReadableError") {
+        setCameraError("Camera is currently being used by another application.")
       } else {
-        msg = err?.message || String(err) || "Failed to initialize camera scanner."
+        setCameraError(errorObj?.message || String(err) || "Failed to initialize camera scanner.")
       }
-      setCameraError(msg)
     } finally {
       setIsInitializing(false)
     }
@@ -335,6 +349,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
               id: d.deviceId,
               label: d.label || `Camera ${index + 1}`,
             }))
+
           setCameras(videoDevices)
 
           if (videoDevices.length > 0 && !selectedCameraId) {
@@ -347,7 +362,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             setSelectedCameraId(backCam ? backCam.id : videoDevices[0].id)
           }
         })
-        .catch((e) => console.warn("enumerateDevices error:", e))
+        .catch((err) => console.warn("enumerateDevices error:", err))
     }
 
     return () => {
@@ -358,7 +373,14 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
   // Auto-start camera when selectedCameraId or facingMode changes
   useEffect(() => {
-    startCamera()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await startCamera()
+    })
+    return () => {
+      ignore = true
+    }
   }, [selectedCameraId, facingMode, startCamera])
 
   // Toggle Facing Mode
@@ -375,12 +397,12 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       const nextState = !isTorchOn
       if (html5ScannerRef.current) {
         await html5ScannerRef.current.applyVideoConstraints({
-          advanced: [{ torch: nextState }] as any,
+          advanced: [{ torch: nextState }],
         })
       } else if (mediaStreamRef.current) {
         const track = mediaStreamRef.current.getVideoTracks()[0]
-        if (track && (track as any).applyConstraints) {
-          await (track as any).applyConstraints({
+        if (track && "applyConstraints" in track) {
+          await (track as unknown as { applyConstraints: (c: Record<string, unknown>) => Promise<void> }).applyConstraints({
             advanced: [{ torch: nextState }],
           })
         }
@@ -404,7 +426,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       const result = await html5QrCode.scanFile(file, true)
       handleDecodedText(result)
       toast.success("QR code decoded successfully from image!")
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to scan QR image:", err)
       toast.error("Could not find a valid QR code in the uploaded image")
     } finally {
@@ -418,160 +440,117 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       {/* Scanner Viewfinder Box */}
       <div className="relative aspect-[4/3] rounded-3xl bg-slate-950 border-2 border-border overflow-hidden flex flex-col items-center justify-center shadow-inner group">
         {/* Container for Html5Qrcode Viewfinder */}
-        <div
-          id="qr-camera-viewfinder"
-          className="w-full h-full object-cover [&_video]:w-full [&_video]:h-full [&_video]:object-cover"
-        />
+        <div id="qr-camera-viewfinder" className="absolute inset-0 w-full h-full object-cover" />
 
-        {/* Native HTML5 Video Element Fallback */}
+        {/* Hidden Fallback Video Element for Native Stream */}
         <video
           ref={videoRef}
           playsInline
           muted
-          className="w-full h-full object-cover absolute inset-0 hidden border-0"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-0"
         />
 
-        {/* Temporary element for file scanner */}
+        {/* Hidden Temp Container for File Image Scanning */}
         <div id="qr-file-temp-element" className="hidden" />
 
-        {/* Reticle Overlay Graphic when active */}
-        {isCameraActive && !cameraError && (
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-8 z-10">
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl border-2 border-dashed border-primary/50 flex items-center justify-center">
-              {/* Corner Reticle Accents */}
-              <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-primary rounded-tl-lg" />
-              <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-primary rounded-tr-lg" />
-              <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-primary rounded-bl-lg" />
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-primary rounded-br-lg" />
+        {/* Viewfinder Target Reticle Animation */}
+        {isCameraActive && !isInitializing && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-64 h-64 sm:w-72 sm:h-72 border-2 border-primary/60 rounded-3xl relative flex items-center justify-center animate-pulse">
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-2xl" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-2xl" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-2xl" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-2xl" />
 
-              {/* Scanning Laser Beam Effect */}
-              <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse shadow-[0_0_12px_#3b82f6]" />
+              <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent absolute shadow-lg shadow-primary/50 animate-bounce" />
             </div>
           </div>
         )}
 
-        {/* Floating Top Controls Overlay */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 gap-2">
-          {/* Active Status Pill */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold">
-            <span className={`h-2 w-2 rounded-full ${isCameraActive ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
-            <span>{isCameraActive ? "LIVE CAMERA" : isInitializing ? "STARTING..." : "STOPPED"}</span>
+        {/* Status Overlay Badges */}
+        {isInitializing && (
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xs flex flex-col items-center justify-center space-y-3 z-20">
+            <RefreshCw className="h-8 w-8 text-primary animate-spin" />
+            <p className="text-xs font-semibold text-slate-300">Initializing High-Speed Camera...</p>
           </div>
+        )}
 
-          <div className="flex items-center gap-2">
-            {/* Audio Toggle */}
+        {cameraError && (
+          <div className="absolute inset-0 bg-slate-950/95 p-6 flex flex-col items-center justify-center text-center space-y-3 z-20">
+            <AlertTriangle className="h-10 w-10 text-amber-500" />
+            <p className="text-xs font-medium text-slate-300 max-w-xs">{cameraError}</p>
             <button
               type="button"
-              onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-              className="p-2 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
-              title={isAudioEnabled ? "Mute scan sound" : "Enable scan sound"}
+              onClick={() => startCamera()}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer shadow-md"
             >
-              {isAudioEnabled ? <Volume2 className="h-4 w-4 text-emerald-400" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
+              <RefreshCw className="h-3.5 w-3.5" />
+              Retry Camera Connection
             </button>
-
-            {/* Torch / Flash Button */}
-            {isTorchSupported && (
-              <button
-                type="button"
-                onClick={toggleTorch}
-                className="p-2 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
-                title="Toggle Torch/Flash"
-              >
-                {isTorchOn ? <Zap className="h-4 w-4 text-amber-300 fill-amber-300" /> : <ZapOff className="h-4 w-4 text-slate-400" />}
-              </button>
-            )}
-
-            {/* Switch Front/Back Camera */}
-            {cameras.length > 1 && (
-              <button
-                type="button"
-                onClick={toggleFacingMode}
-                className="p-2 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
-                title="Switch Camera"
-              >
-                <SwitchCamera className="h-4 w-4 text-primary" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Processing / Scan Overlay */}
-        {(isProcessing || isInitializing) && (
-          <div className="absolute inset-0 z-30 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center text-white space-y-3 p-6 text-center">
-            <RefreshCw className="h-10 w-10 text-primary animate-spin" />
-            <p className="text-sm font-bold">
-              {isProcessing ? "Verifying Check-In..." : "Initializing Camera Stream..."}
-            </p>
           </div>
         )}
 
-        {/* Error Fallback View */}
-        {cameraError && (
-          <div className="absolute inset-0 z-30 bg-slate-950 p-6 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="h-12 w-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div className="space-y-1 max-w-xs">
-              <p className="text-sm font-bold text-white">Camera Unavailable</p>
-              <p className="text-xs text-slate-400 leading-relaxed">{cameraError}</p>
-            </div>
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => startCamera()}
-                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2"
-              >
-                <RefreshCw className="h-3.5 w-3.5" /> Retry Camera
-              </button>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-bold hover:bg-slate-700 transition-all flex items-center gap-2 border border-slate-700"
-              >
-                <Upload className="h-3.5 w-3.5" /> Upload Image
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Last Scanned Instant Notification Toast Overlay */}
         {lastScannedResult && (
-          <div className="absolute bottom-4 left-4 right-4 z-20 bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-2xl shadow-xl font-mono text-xs font-bold flex items-center justify-between animate-in slide-in-from-bottom-4">
-            <div className="flex items-center gap-2 truncate">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span className="truncate">Scanned: {lastScannedResult}</span>
+          <div className="absolute top-4 left-4 right-4 z-30 animate-in slide-in-from-top-4 duration-200">
+            <div className="bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-xl flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                Scanned: {lastScannedResult}
+              </span>
+              <Sparkles className="h-4 w-4" />
             </div>
-            <Sparkles className="h-4 w-4 shrink-0 animate-spin-slow" />
+          </div>
+        )}
+
+        {isProcessing && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center space-y-2 z-30">
+            <RefreshCw className="h-8 w-8 text-primary animate-spin" />
+            <span className="text-xs font-bold text-slate-200">Validating Admit Pass...</span>
           </div>
         )}
       </div>
 
-      {/* Control Toolbar Below Viewfinder */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-2xl border border-border/60 text-xs">
-        {/* Camera Selector Dropdown if multiple devices */}
-        {cameras.length > 0 ? (
-          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-            <Camera className="h-4 w-4 text-muted-foreground shrink-0" />
-            <select
-              value={selectedCameraId}
-              onChange={(e) => setSelectedCameraId(e.target.value)}
-              className="w-full bg-background border border-border rounded-xl px-3 py-1.5 text-xs font-medium text-foreground focus:outline-none focus:border-primary"
+      {/* Control Actions & Toolbar */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          {cameras.length > 1 && (
+            <button
+              type="button"
+              onClick={toggleFacingMode}
+              className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
+              title="Switch Front/Back Camera"
             >
-              {cameras.map((cam) => (
-                <option key={cam.id} value={cam.id}>
-                  {cam.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Scan className="h-4 w-4 text-primary" />
-            <span>Scanning active • Auto reticle targeting</span>
-          </div>
-        )}
+              <SwitchCamera className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Flip Camera</span>
+            </button>
+          )}
 
-        {/* File Scan Action */}
+          {isTorchSupported && (
+            <button
+              type="button"
+              onClick={toggleTorch}
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors ${
+                isTorchOn
+                  ? "bg-amber-500/20 text-amber-500 border-amber-500/40"
+                  : "bg-muted hover:bg-muted/80 text-foreground border-border"
+              }`}
+              title="Toggle Flashlight"
+            >
+              {isTorchOn ? <Zap className="h-4 w-4 text-amber-500 fill-amber-500" /> : <ZapOff className="h-4 w-4" />}
+              <span className="hidden sm:inline">Flash</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsAudioEnabled((prev) => !prev)}
+            className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
+            title="Toggle Scan Beep Sound"
+          >
+            {isAudioEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
           <input
             type="file"
@@ -583,11 +562,10 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-1.5 rounded-xl bg-muted hover:bg-muted/80 border border-border text-foreground font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Scan QR Code from saved image file"
+            className="px-3.5 py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
           >
-            <Upload className="h-3.5 w-3.5 text-primary" />
-            <span>Upload QR Image</span>
+            <Upload className="h-4 w-4 text-primary" />
+            <span>Upload Image</span>
           </button>
         </div>
       </div>

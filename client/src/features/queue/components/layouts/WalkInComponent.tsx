@@ -58,23 +58,23 @@ export default function WalkInComponent() {
   // Fetch Categories on Mount
   useEffect(() => {
     let isMounted = true
-    setIsLoadingCategories(true)
-    vehicleCatelogApi
-      .getCategories()
-      .then((data) => {
+    void Promise.resolve().then(async () => {
+      if (!isMounted) return
+      setIsLoadingCategories(true)
+      try {
+        const data = await vehicleCatelogApi.getCategories()
         if (!isMounted) return
         const active = (data ?? []).filter((c) => c.isActive)
         setCategories(active)
         if (active.length > 0) {
           setCategory(active[0].id)
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to load vehicle categories:", err)
-      })
-      .finally(() => {
+      } finally {
         if (isMounted) setIsLoadingCategories(false)
-      })
+      }
+    })
     return () => {
       isMounted = false
     }
@@ -107,8 +107,15 @@ export default function WalkInComponent() {
   }, [])
 
   useEffect(() => {
+    let ignore = false
     if (category) {
-      fetchClassesForCategory(category)
+      void Promise.resolve().then(async () => {
+        if (ignore) return
+        await fetchClassesForCategory(category)
+      })
+    }
+    return () => {
+      ignore = true
     }
   }, [category, fetchClassesForCategory])
 
@@ -164,7 +171,14 @@ export default function WalkInComponent() {
   }, [])
 
   useEffect(() => {
-    fetchStation()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchStation()
+    })
+    return () => {
+      ignore = true
+    }
   }, [fetchStation])
 
   // Customer Lookup Search
@@ -226,9 +240,12 @@ export default function WalkInComponent() {
     const end = new Date(w.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     return `${start} - ${end}`
   }
-  const nextWindow = timeWindows.find(
-    (w) => w.status === "OPEN" && w.windowId !== selectedSlot?.windowId && new Date(w.start).getTime() > Date.now()
-  )
+  const nextWindow = useMemo(() => {
+    const currentNow = new Date().getTime()
+    return timeWindows.find(
+      (w) => w.status === "OPEN" && w.windowId !== selectedSlot?.windowId && new Date(w.start).getTime() > currentNow
+    )
+  }, [timeWindows, selectedSlot])
   const slotCapacity = selectedSlot ? selectedSlot.bookedCount + selectedSlot.remainingCapacity : 0
 
   // Submit Walk-In Booking
