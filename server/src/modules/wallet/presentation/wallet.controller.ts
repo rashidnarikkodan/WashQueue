@@ -183,4 +183,38 @@ export class WalletController {
       data: transaction,
     })
   }
+
+  public exportTransactions = async (req: Request, res: Response): Promise<void> => {
+    const authReq = req as AuthenticatedRequest
+    const userId = authReq.user?.userId || authReq.user?.id
+
+    if (!userId) {
+      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+    }
+
+    const { type, category, startDate, endDate } = req.query
+
+    const result = await this.getTransactionLedgerUseCase.execute(userId, {
+      page: 1,
+      limit: 1000,
+      type: type as TransactionType,
+      category: category as TransactionCategory,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
+    })
+
+    const BOM = "\uFEFF"
+    let csv = BOM + "Transaction ID,Date & Time,Description,Type,Category,Amount (INR),Status,Reference ID\n"
+
+    result.transactions.forEach((tx) => {
+      const dateStr = new Date(tx.createdAt).toLocaleString("en-IN")
+      const desc = `"${(tx.description || "").replace(/"/g, '""')}"`
+      const refId = `"${(tx.referenceId || "").replace(/"/g, '""')}"`
+      csv += `${tx.id},"${dateStr}",${desc},${tx.type},${tx.category},${tx.amount.toFixed(2)},${tx.status},${refId}\n`
+    })
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8")
+    res.setHeader("Content-Disposition", `attachment; filename="wallet-transactions-${Date.now()}.csv"`)
+    res.status(HTTP_STATUS.OK).send(csv)
+  }
 }

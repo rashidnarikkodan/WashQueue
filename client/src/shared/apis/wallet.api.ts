@@ -136,4 +136,16 @@ export const walletApi = {
       throw handleApiError(error, "Failed to process wallet payment")
     }
   },
+
+  async exportTransactions(query?: GetTransactionsQuery): Promise<Blob> {
+    try {
+      const response = await api.get(API_ROUTES.WALLET.EXPORT, {
+        params: query,
+        responseType: "blob",
+      })
+      return response.data as Blob
+    } catch (error) {
+      throw handleApiError(error, "Failed to export transaction history")
+    }
+  },
 }

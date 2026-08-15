@@ -5,9 +5,11 @@ import { WalletTransaction } from "../../domain/entities/wallet-transaction.enti
 import { WalletModel } from "../models/wallet.model"
 import { WalletTransactionModel } from "../models/wallet-transaction.model"
 import { WalletPersistenceMapper } from "../mappers/wallet.persistence.mapper"
-import { Money } from "../../domain/value-objects/money.vo"
 import { AppError } from "@/common/errors/app-error"
+import { ConflictError } from "@/common/errors/conflict-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+
+const MAX_CONCURRENCY_RETRIES = 5
 
 export class WalletMongoRepository implements IWalletRepository {
   public async findByUserId(userId: string): Promise<Wallet | null> {
@@ -54,6 +56,25 @@ export class WalletMongoRepository implements IWalletRepository {
   }
 
   public async executeAtomicOperation(
+    userId: string,
+    operation: (wallet: Wallet) => { updatedWallet: Wallet; transaction: WalletTransaction }
+  ): Promise<{ wallet: Wallet; transaction: WalletTransaction }> {
+    for (let attempt = 1; attempt <= MAX_CONCURRENCY_RETRIES; attempt++) {
+      try {
+        return await this.attemptAtomicOperation(userId, operation)
+      } catch (error) {
+        const isLastAttempt = attempt === MAX_CONCURRENCY_RETRIES
+        if (error instanceof ConflictError && !isLastAttempt) {
+          continue
+        }
+        throw error
+      }
+    }
+    // Unreachable: loop always returns or throws, but keeps TS happy.
+    throw new ConflictError("Wallet update failed due to concurrent modification")
+  }
+
+  private async attemptAtomicOperation(
     userId: string,
     operation: (wallet: Wallet) => { updatedWallet: Wallet; transaction: WalletTransaction }
   ): Promise<{ wallet: Wallet; transaction: WalletTransaction }> {
@@ -117,9 +138,11 @@ export class WalletMongoRepository implements IWalletRepository {
         }
       }
 
-      // Update wallet balance in database
-      const savedWalletDoc = await WalletModel.findByIdAndUpdate(
-        domainWallet.id,
+      // Optimistic-concurrency write: the filter only matches if `balance` is still what we
+      // read above, so a concurrent credit/debit that lands between our read and this write
+      // causes this to match nothing (rather than silently overwriting the other update).
+      const savedWalletDoc = await WalletModel.findOneAndUpdate(
+        { _id: walletDoc._id, balance: walletDoc.balance },
         {
           balance: updatedWallet.balance.amount,
           status: updatedWallet.status,
@@ -128,7 +151,7 @@ export class WalletMongoRepository implements IWalletRepository {
       )
 
       if (!savedWalletDoc) {
-        throw new AppError("Failed to update wallet balance", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+        throw new ConflictError("Wallet balance changed concurrently, retry required")
       }
 
       // Synchronize cached walletBalance on User model atomically
@@ -145,24 +168,53 @@ export class WalletMongoRepository implements IWalletRepository {
       }
 
       // Create transaction ledger record in database
-      const txDocs = await WalletTransactionModel.create(
-        [
-          {
-            walletId: domainWallet.id,
-            userId,
-            type: transaction.type,
-            category: transaction.category,
-            amount: transaction.amount.amount,
-            balanceBefore: transaction.balanceBefore.amount,
-            balanceAfter: transaction.balanceAfter.amount,
+      let txDocs
+      try {
+        txDocs = await WalletTransactionModel.create(
+          [
+            {
+              walletId: domainWallet.id,
+              userId,
+              type: transaction.type,
+              category: transaction.category,
+              amount: transaction.amount.amount,
+              balanceBefore: transaction.balanceBefore.amount,
+              balanceAfter: transaction.balanceAfter.amount,
+              referenceId: transaction.referenceId,
+              description: transaction.description,
+              status: transaction.status,
+              metadata: transaction.metadata,
+            },
+          ],
+          opts
+        )
+      } catch (createError) {
+        const isDuplicateKeyError =
+          typeof createError === "object" &&
+          createError !== null &&
+          (createError as { code?: number }).code === 11000
+
+        if (isDuplicateKeyError && transaction.referenceId) {
+          // Another concurrent request already recorded this same (userId, referenceId, type)
+          // transaction — the DB unique index caught what the earlier app-level check missed.
+          if (useTransaction) {
+            await session.abortTransaction()
+          }
+          const existingTxDoc = await WalletTransactionModel.findOne({
+            userId: new mongoose.Types.ObjectId(userId),
             referenceId: transaction.referenceId,
-            description: transaction.description,
-            status: transaction.status,
-            metadata: transaction.metadata,
-          },
-        ],
-        opts
-      )
+            type: transaction.type,
+            status: "COMPLETED",
+          })
+          if (existingTxDoc) {
+            return {
+              wallet: domainWallet,
+              transaction: WalletPersistenceMapper.toDomainTransaction(existingTxDoc),
+            }
+          }
+        }
+        throw createError
+      }
 
       if (!txDocs || !txDocs[0]) {
         throw new AppError("Failed to record wallet transaction", HTTP_STATUS.INTERNAL_SERVER_ERROR)
