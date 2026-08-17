@@ -8,10 +8,10 @@ interface AccountDetailsCardProps {
 export default function AccountDetailsCard({ profile }: AccountDetailsCardProps) {
   const formattedMemberSince = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    })
     : "Jan 04, 2026"
 
   const getAuthProviderDetails = (provider?: string) => {
@@ -50,9 +50,9 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
       return {
         label: "Phone & OTP Verified",
         badge: "SMS OTP",
-        badgeColor: "bg-[#00A74B]/10 text-[#4AE176] border-[#4AE176]/20",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
         description: "Authenticated via Mobile Phone SMS Verification Code",
-        icon: <Smartphone className="w-5 h-5 text-[#4AE176] shrink-0" />,
+        icon: <Smartphone className="w-5 h-5 text-emerald-500 shrink-0" />,
       }
     }
 
@@ -60,72 +60,63 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
     return {
       label: "Email & Password Auth",
       badge: "Password Protected",
-      badgeColor: "bg-[#ADC6FF]/10 text-[#ADC6FF] border-[#ADC6FF]/20",
+      badgeColor: "bg-primary/10 text-primary border-primary/20",
       description: "Encrypted password credentials with session JWT tokens",
-      icon: <Lock className="w-5 h-5 text-[#ADC6FF] shrink-0" />,
+      icon: <Lock className="w-5 h-5 text-primary shrink-0" />,
     }
   }
 
   const authDetails = getAuthProviderDetails(profile.authProvider)
 
   return (
-    <div className="bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl">
+    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl text-card-foreground">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-[#ADC6FF]/10 flex items-center justify-center text-[#ADC6FF]">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
           <Settings className="w-5 h-5" />
         </div>
-        <h2 className="text-2xl font-bold text-[#F8FAFC]">Account Information</h2>
+        <h2 className="text-2xl font-bold text-foreground">Account Information</h2>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Current Status Card */}
-        <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
-            CURRENT STATUS
-          </span>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#00A74B]/10 border border-[#4AE176]/20 w-fit">
-            <span className="w-2 h-2 rounded-full bg-[#4AE176] animate-pulse" />
-            <span className="text-xs font-extrabold uppercase tracking-wider text-[#4AE176]">
-              {profile.isVerified ? "ACCOUNT ACTIVE" : "PENDING VERIFICATION"}
-            </span>
-          </div>
-        </div>
 
+      <div className="w-full">
         {/* Dynamic Authentication Provider Card */}
-        <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+        <div className="w-full bg-muted/50 border border-border/80 p-5 rounded-xl space-y-3">
+          <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               AUTHENTICATION METHOD
             </span>
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${authDetails.badgeColor}`}
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${authDetails.badgeColor}`}
             >
               {authDetails.badge}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700/40">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+            <div className="p-2 rounded-lg bg-background border border-border w-fit shrink-0">
               {authDetails.icon}
             </div>
-            <div>
-              <p className="text-base font-bold text-[#F8FAFC] leading-tight">
+            <div className="min-w-0">
+              <p className="text-base font-bold text-foreground leading-tight">
                 {authDetails.label}
               </p>
-              <p className="text-xs text-[#94A3B8] mt-0.5">{authDetails.description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 break-words">{authDetails.description}</p>
             </div>
           </div>
         </div>
+      </div>
 
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Last Updated */}
-        <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-1">
-          <div className="flex items-center gap-2 text-[#94A3B8] mb-1">
+        <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-xs font-bold uppercase tracking-wider">LAST UPDATED</span>
           </div>
-          <p className="text-lg font-semibold text-[#F8FAFC]">
+          <p className="text-lg font-semibold text-foreground">
             {new Date().toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
@@ -135,12 +126,12 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         </div>
 
         {/* Member Since */}
-        <div className="bg-[#020617] border border-slate-800/60 p-5 rounded-xl space-y-1">
-          <div className="flex items-center gap-2 text-[#94A3B8] mb-1">
+        <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Calendar className="w-3.5 h-3.5" />
             <span className="text-xs font-bold uppercase tracking-wider">MEMBER SINCE</span>
           </div>
-          <p className="text-lg font-semibold text-[#F8FAFC]">{formattedMemberSince}</p>
+          <p className="text-lg font-semibold text-foreground">{formattedMemberSince}</p>
         </div>
       </div>
     </div>

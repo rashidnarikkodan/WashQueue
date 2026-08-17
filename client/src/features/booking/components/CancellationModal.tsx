@@ -17,7 +17,6 @@ export interface CancellableBooking {
   stationName?: string
   vehicleDetails?: { brand?: string; model?: string }
   vehicleModel?: string
-  [key: string]: unknown
 }
 
 interface CancellationModalProps {
@@ -72,7 +71,7 @@ export function CancellationModal({
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       {!isSuccess ? (
         /* ================= 1. CONFIRMATION MODAL STATE ================= */
-        <div className="w-full max-w-[672px] bg-[#191F31] text-[#DCE1FB] border border-[#8C909F]/10 rounded-[24px] shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
+        <div className="w-full max-w-[672px] bg-[#191F31] text-[#DCE1FB] border border-[#8C909F]/10 rounded-[24px] shadow-xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
           {/* Top Warning Header */}
           <div className="flex flex-col items-center gap-2 p-8 pb-4 relative">
             <button

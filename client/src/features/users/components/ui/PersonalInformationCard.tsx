@@ -1,4 +1,4 @@
-import { MapPin, CheckCircle, User as UserIcon } from "lucide-react"
+import { CheckCircle, User as UserIcon } from "lucide-react"
 import type { User } from "../../types"
 
 interface PersonalInformationCardProps {
@@ -56,16 +56,6 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
             Phone Number
           </p>
           <p className="font-semibold text-foreground">{phone}</p>
-        </div>
-
-        <div className="md:col-span-2">
-          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
-            Registered Address
-          </p>
-          <p className="text-muted-foreground leading-relaxed flex items-start gap-1.5">
-            <MapPin size={14} className="text-muted-foreground shrink-0 mt-0.5" />
-            <span>Not Registered</span>
-          </p>
         </div>
       </div>
 

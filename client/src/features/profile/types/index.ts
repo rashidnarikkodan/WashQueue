@@ -9,14 +9,6 @@ export interface UserProfile {
   createdAt: string
   updatedAt?: string
   authProvider?: string
-  address?: string
-  building?: string
-  street?: string
-  city?: string
-  district?: string
-  state?: string
-  pincode?: string
-  country?: string
   businessName?: string
   businessEmail?: string
   whatsapp?: string
@@ -26,14 +18,6 @@ export interface UserProfile {
 export interface UpdateProfileInput {
   name?: string
   phone?: string
-  address?: string
-  building?: string
-  street?: string
-  city?: string
-  district?: string
-  state?: string
-  pincode?: string
-  country?: string
   businessName?: string
   businessEmail?: string
   whatsapp?: string

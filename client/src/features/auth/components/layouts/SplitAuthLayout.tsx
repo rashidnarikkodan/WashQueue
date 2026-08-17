@@ -30,7 +30,7 @@ export default function SplitAuthLayout({
 
   const brandingPanel = (
     <div
-      className={`flex flex-col justify-between p-8 md:p-16 bg-primary text-primary-foreground shadow-2xl relative overflow-hidden h-[300px] md:h-full min-h-[300px] md:min-h-screen ${
+      className={`flex flex-col justify-between p-8 md:p-16 bg-primary text-primary-foreground shadow-xl relative overflow-hidden h-[300px] md:h-full min-h-[300px] md:min-h-screen ${
         isBlueOnLeft
           ? "md:rounded-r-[100px] rounded-b-[40px] md:rounded-bl-none order-1 md:order-1"
           : "md:rounded-l-[100px] rounded-b-[40px] md:rounded-br-none order-1 md:order-2"

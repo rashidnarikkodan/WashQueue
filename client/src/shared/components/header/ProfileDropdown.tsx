@@ -171,27 +171,25 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             </div>
           </div>
 
-          {/* 2. Role Switcher Banner (Owner / Manager) */}
-          {(user.role === ROLE.OWNER || user.role === ROLE.MANAGER) && (
-            <div className="p-3 border-b border-border/40 bg-primary/5">
-              <button
-                type="button"
-                onClick={handleRoleSwitch}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                    <Wrench className="h-4.5 w-4.5" />
-                  </div>
-                  <div className="text-left">
-                    <span className="block text-xs font-extrabold text-foreground">{cta.title}</span>
-                    <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
-                  </div>
+          {/* 2. Role Switcher / CTA Banner */}
+          <div className="p-3 border-b border-border/40 bg-primary/5">
+            <button
+              type="button"
+              onClick={handleRoleSwitch}
+              className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                  <Wrench className="h-4.5 w-4.5" />
                 </div>
-                <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          )}
+                <div className="text-left">
+                  <span className="block text-xs font-extrabold text-foreground">{cta.title}</span>
+                  <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
 
           {/* 3. Vertical Navigation List (Pure vertical list, no grid!) */}
           <div className="p-2 space-y-1">

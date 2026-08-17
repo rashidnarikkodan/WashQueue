@@ -46,15 +46,15 @@ export default function ProfilePage() {
 
   if (isLoading || !profile) {
     return (
-      <div className="min-h-screen bg-[#020617] text-[#F8FAFC] flex flex-col justify-center items-center gap-4 pt-24 pb-16">
-        <Loader2 className="w-10 h-10 animate-spin text-[#ADC6FF]" />
-        <p className="text-sm text-[#94A3B8] font-medium">Loading profile information...</p>
+      <div className="min-h-screen bg-background text-foreground flex flex-col justify-center items-center gap-4 pt-24 pb-16">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground font-medium">Loading profile information...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-[#F8FAFC] font-sans pt-24 pb-16 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground font-sans pt-10 pb-16 transition-colors duration-300">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header Section */}
         <ProfileHeader profile={profile} onEditClick={() => setEditModalOpen(true)} />

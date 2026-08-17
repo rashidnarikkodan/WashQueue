@@ -14,9 +14,6 @@ export const profileApi = {
 
       let businessName: string | undefined
       let whatsapp: string | undefined
-      let address: string | undefined
-      let city: string | undefined
-      let state: string | undefined
       let headquarters: string | undefined
 
       // If user is owner, fetch onboarding details from server
@@ -27,9 +24,6 @@ export const profileApi = {
             businessName = onboarding.details.businessName
             whatsapp = onboarding.details.whatsapp
             const detailsObj = onboarding.details as Record<string, string | undefined>
-            address = detailsObj.address
-            city = detailsObj.city
-            state = detailsObj.state
             headquarters = detailsObj.headquarters
             if (onboarding.details.phone && !authUser.phone) {
               authUser.phone = onboarding.details.phone
@@ -50,9 +44,6 @@ export const profileApi = {
         isVerified: authUser.isVerified ?? false,
         createdAt: "2026-01-04T00:00:00.000Z",
         authProvider: authUser.authProvider || "local",
-        address,
-        city,
-        state,
         businessName,
         businessEmail: authUser.email,
         whatsapp,
@@ -80,9 +71,6 @@ export const profileApi = {
         isVerified: updatedUser.isVerified,
         createdAt: updatedUser.createdAt || new Date().toISOString(),
         authProvider: updatedUser.authProvider || "local",
-        address: input.address,
-        city: input.city,
-        state: input.state,
         businessName: input.businessName,
         businessEmail: input.businessEmail || updatedUser.email,
         whatsapp: input.whatsapp,

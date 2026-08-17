@@ -168,7 +168,7 @@ api.interceptors.response.use(
 
     // Only display error toast if it wasn't a standard 401 or auth exempt request
     if (status !== 401 && !isExemptFromToast && !skipToast) {
-      toast.error(message)
+      toast.error(message, { duration: 4500 })
     }
 
     return Promise.reject(error)

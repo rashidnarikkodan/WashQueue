@@ -7,13 +7,13 @@ interface PersonalDetailsCardProps {
 
 export default function PersonalDetailsCard({ profile }: PersonalDetailsCardProps) {
   return (
-    <div className="bg-[#0F172A] border border-slate-700/20 rounded-2xl p-6 sm:p-8 space-y-8 shadow-2xl h-full flex flex-col justify-between">
+    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-8 shadow-xl h-full flex flex-col justify-between text-card-foreground">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-[#ADC6FF]/10 flex items-center justify-center text-[#ADC6FF]">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
           <UserIcon className="w-5 h-5" />
         </div>
-        <h2 className="text-2xl font-bold text-[#F8FAFC]">Personal Details</h2>
+        <h2 className="text-2xl font-bold text-foreground">Personal Details</h2>
       </div>
 
       {/* Grid of Fields */}
@@ -21,51 +21,36 @@ export default function PersonalDetailsCard({ profile }: PersonalDetailsCardProp
         {/* Row 1: Full Name & Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
               FULL NAME
             </span>
-            <p className="text-lg font-medium text-[#F8FAFC]">{profile.name || "N/A"}</p>
+            <p className="text-lg font-medium text-foreground">{profile.name || "N/A"}</p>
           </div>
 
           <div className="space-y-1 overflow-hidden">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
               EMAIL
             </span>
-            <p className="text-lg font-medium text-[#F8FAFC] truncate">{profile.email || "N/A"}</p>
+            <p className="text-lg font-medium text-foreground truncate">{profile.email || "N/A"}</p>
           </div>
         </div>
 
-        {/* Row 2: Phone & Address */}
+        {/* Row 2: Phone & Verification Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
               PHONE
             </span>
-            <p className="text-lg font-medium text-[#F8FAFC]">{profile.phone || "N/A"}</p>
+            <p className="text-lg font-medium text-foreground">{profile.phone || "N/A"}</p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
-              ADDRESS
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+              ACCOUNT STATUS
             </span>
-            <p className="text-lg font-medium text-[#F8FAFC]">{profile.address || "N/A"}</p>
-          </div>
-        </div>
-
-        {/* Row 3: City & State */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
-              CITY
-            </span>
-            <p className="text-lg font-medium text-[#F8FAFC]">{profile.city || "N/A"}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] block">
-              STATE
-            </span>
-            <p className="text-lg font-medium text-[#F8FAFC]">{profile.state || "N/A"}</p>
+            <p className="text-lg font-medium text-foreground capitalize">
+              {profile.isVerified ? "Verified Account" : "Unverified"}
+            </p>
           </div>
         </div>
       </div>

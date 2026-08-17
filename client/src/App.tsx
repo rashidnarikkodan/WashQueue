@@ -28,7 +28,10 @@ function App() {
         <Toaster
           position="top-right"
           theme="system"
+          duration={2500}
+          closeButton
           toastOptions={{
+            duration: 2500,
             classNames: {
               toast:
                 "group-[.toaster]:bg-white/90 dark:group-[.toaster]:bg-[#151B2D]/85 group-[.toaster]:text-slate-900 dark:group-[.toaster]:text-[#DCE1FB] group-[.toaster]:border-slate-200/80 dark:group-[.toaster]:border-slate-800/80 group-[.toaster]:shadow-2xl group-[.toaster]:rounded-2xl group-[.toaster]:border group-[.toaster]:p-4 group-[.toaster]:font-sans group-[.toaster]:backdrop-blur-md transition-all duration-200",
