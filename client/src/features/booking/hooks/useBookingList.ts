@@ -50,7 +50,7 @@ export function useBookingList({
 
   // Fetch station list for station filter dropdown when Admin or Owner
   useEffect(() => {
-    if (isAdmin || isOwner) {
+    if (isAdmin) {
       import("@/shared/apis/station.api")
         .then(({ stationApi }) => stationApi.getStations({ limit: 100 }))
         .then((res) => {
@@ -65,8 +65,28 @@ export function useBookingList({
         .catch(() => {
           // Ignore error fallback
         })
+    } else if (isOwner) {
+      const ownerUserId = user?.ownerId || user?.id
+      if (ownerUserId) {
+        import("@/shared/apis/station.api")
+          .then(({ stationApi }) =>
+            stationApi.getStations({ ownerId: ownerUserId, limit: 100 })
+          )
+          .then((res) => {
+            if (res && res.stations) {
+              const list = res.stations.map((st) => ({
+                id: st.id,
+                name: st.name || "Wash Station",
+              }))
+              setFilterStations(list)
+            }
+          })
+          .catch(() => {
+            // Ignore error fallback
+          })
+      }
     }
-  }, [isAdmin, isOwner])
+  }, [isAdmin, isOwner, user?.ownerId, user?.id])
 
   // Derive unique stations fallback if filterStations empty
   const ownerStations = useMemo(() => {

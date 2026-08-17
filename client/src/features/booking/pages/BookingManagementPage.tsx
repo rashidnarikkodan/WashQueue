@@ -292,67 +292,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         pagination={paginationMeta}
         onPageChange={(p: number) => updateParams({ page: p })}
       />
-
-      {/* Operational Cancel Modal */}
-      {/* {selectedBookingForCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl text-left">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <h3 className="text-lg font-extrabold text-foreground flex items-center gap-2">
-                <XCircle className="text-red-400" size={20} />
-                <span>Cancel Booking</span>
-              </h3>
-              <button
-                onClick={() => setSelectedBookingForCancel(null)}
-                className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted"
-              >
-                <XCircle size={18} />
-              </button>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Are you sure you want to cancel booking{" "}
-              <strong className="text-foreground">{selectedBookingForCancel.bookingNumber}</strong>{" "}
-              for{" "}
-              <span className="font-bold text-foreground">
-                {selectedBookingForCancel.customerName}
-              </span>
-              ?
-            </p>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                Staff Cancellation Note
-              </label>
-              <textarea
-                value={cancellationReason}
-                onChange={(e) => setCancellationReason(e.target.value)}
-                placeholder="Reason for staff cancellation..."
-                rows={3}
-                className="w-full p-3 rounded-xl bg-muted/50 border border-border text-foreground text-xs focus:outline-none focus:border-primary resize-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedBookingForCancel(null)}
-                className="px-4 py-2 rounded-xl border border-border bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-bold transition-all"
-              >
-                Keep Booking
-              </button>
-              <button
-                type="button"
-                disabled={isSubmittingCancel}
-                onClick={handleConfirmCancel}
-                className="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-extrabold transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
-              >
-                {isSubmittingCancel ? "Cancelling..." : "Confirm Cancellation"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   )
 }

@@ -5,7 +5,6 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
 import { DataTable, DataTableToolbar, type Column, type TabConfig } from "@/shared/components/data-table"
 import Pagination from "@/shared/components/ui/Pagination"
-import ScrollableTabs from "@/shared/components/ui/ScrollableTabs"
 import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { STATION_STATUS, type Station } from "../types"
@@ -84,6 +83,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
       if (ownerUserId) {
         await fetchStations({
           ownerId: ownerUserId,
+          search: searchQuery || undefined,
           status: statusFilter,
           page: currentPage,
           limit,
@@ -321,25 +321,25 @@ export default function StationManagement({ role: explicitRole }: StationManagem
               ? "Account pending admin approval"
               : "Create Station"
           }
-          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
-            !isAdmin && user && !user.isVerified
+          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${!isAdmin && user && !user.isVerified
               ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
               : "bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          }`}
+            }`}
         >
           <Plus className="w-4 h-4" />
           <span>Create Station</span>
         </button>
       </div>
-
-      {/* Status Filter Tabs */}
-      <div className="border-b border-border/40 pb-2">
-        <ScrollableTabs
-          tabs={OWNER_TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => updateParams({ tab: tabId })}
-        />
-      </div>
+      {/* DataTable Toolbar (Search & Tabs) */}
+      <DataTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(q) => updateParams({ q })}
+        searchLabel="Search Stations"
+        searchPlaceholder="Name or city..."
+        tabs={OWNER_TABS}
+        activeTab={activeTab}
+        onTabChange={(tab) => updateParams({ tab })}
+      />
 
       {/* Error Alert */}
       {error && (

@@ -130,10 +130,6 @@ api.interceptors.response.use(
             const msg = err.response?.data?.message
             if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
               toast.error(msg, { id: "suspension-toast" })
-            } else {
-              // Plain session expiry (refresh token invalid/expired) — otherwise the user is
-              // logged out with zero feedback and just sees a blank/redirected screen.
-              toast.error("Your session has expired. Please log in again.", { id: "session-expired-toast" })
             }
 
             reject(err)
