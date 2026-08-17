@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Menu, X, Search, Heart } from "lucide-react"
+import { Menu, X, Heart } from "lucide-react"
 import ThemeToggle from "../header/ThemeToggle"
-// import LocationSelector from "../header/LocationSelector"
-import SearchPill from "../header/SearchPill"
 import NotificationDropdown from "../header/NotificationDropdown"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
@@ -22,13 +20,11 @@ export default function Header({ role }: { role?: string }) {
 
   // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
   // Close menus on route change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false)
-    setIsSearchExpanded(false)
   }, [pathname])
 
   // Dynamic Navigation Configurations
@@ -83,10 +79,7 @@ export default function Header({ role }: { role?: string }) {
 
         {/* Center Section: Navigation Links OR Toggleable Search Box */}
         <div className="col-span-1 flex justify-center max-w-lg mx-auto w-full">
-          {isSearchExpanded ? (
-            <SearchPill onClose={() => setIsSearchExpanded(false)} />
-          ) : (
-            activeLinks.length > 0 && (
+
               <nav className="hidden md:flex items-center gap-6">
                 {activeLinks.map((link) => {
                   const isActive = pathname === link.path
@@ -106,25 +99,11 @@ export default function Header({ role }: { role?: string }) {
                   )
                 })}
               </nav>
-            )
-          )}
+            
         </div>
 
         {/* Right Side: Utilities, Profile & Hamburger Menu */}
-        <div className="col-span-1 flex justify-end items-center gap-3">
-          {/* Location Selector (Consumer-only) */}
-          {/* {!isSearchExpanded && isCustomer && <LocationSelector className="hidden lg:flex" />} */}
-
-          {/* Search Trigger Button (Consumer-only) */}
-          {!isSearchExpanded && isCustomer && (
-            <button
-              onClick={() => setIsSearchExpanded(true)}
-              className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted/50 rounded-full transition-all cursor-pointer"
-              aria-label="Toggle Search"
-            >
-              <Search className="h-4.5 w-4.5" />
-            </button>
-          )}
+        <div className="col-span-1 flex justify-end items-center gap-3">        
 
           {/* Favorites Heart Icon (Consumer-only & Authenticated) */}
           {isAuthenticated && isCustomer && (
@@ -155,7 +134,7 @@ export default function Header({ role }: { role?: string }) {
           )}
 
           {/* Mobile Menu Toggle Button */}
-          {activeLinks.length > 0 && !isSearchExpanded && (
+          {activeLinks.length > 0 && (
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors md:hidden text-muted-foreground hover:text-foreground cursor-pointer"
