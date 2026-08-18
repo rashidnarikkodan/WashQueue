@@ -6,7 +6,7 @@ import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { useBookingVehicles } from "./useBookingVehicles"
 import { useBookingServices } from "./useBookingServices"
 import { useBookingSlots } from "./useBookingSlots"
-import { useBookingPayment, type PaymentSuccessResult } from "./useBookingPayment"
+import { useBookingPayment } from "./useBookingPayment"
 
 export function useBookingFlow(stationId: string | null) {
   const { isAuthenticated, user } = useAuthStore()
@@ -83,76 +83,82 @@ export function useBookingFlow(stationId: string | null) {
     slotState.selectedSlotId
   )
 
-  // Finalize / Confirm Booking with backend
-  const handleConfirmBooking = useCallback(
-    async (paymentData?: PaymentSuccessResult) => {
-      if (!isAuthenticated || !user) {
-        setAuthModalConfig({
-          title: "Sign in to Book a Wash",
-          message: "You must be logged in to complete booking reservations.",
-          actionName: "book a wash",
-        })
-        setIsAuthModalOpen(true)
-        return
-      }
+  // Online Payment Success Handler (Reservation already verified and confirmed into Booking by backend)
+  const handleOnlinePaymentSuccess = useCallback((booking?: BookingResponse) => {
+    setIsPaymentModalOpen(false)
+    if (booking) {
+      setCreatedBooking(booking)
+      setResultModalState({ isOpen: true, type: "success" })
+    } else {
+      setResultModalState({
+        isOpen: true,
+        type: "error",
+        errorMessage: "Payment succeeded but booking details could not be retrieved.",
+      })
+    }
+  }, [])
 
-      if (
-        !canSubmit ||
-        !stationId ||
-        !slotState.selectedSlotId ||
-        !vehicleState.selectedVehicleId ||
-        !serviceState.selectedPlanId
-      ) {
-        return
-      }
+  // Pay at Station / Cash Booking Submission
+  const handleCashBooking = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setAuthModalConfig({
+        title: "Sign in to Book a Wash",
+        message: "You must be logged in to complete booking reservations.",
+        actionName: "book a wash",
+      })
+      setIsAuthModalOpen(true)
+      return
+    }
 
-      setIsSubmittingBooking(true)
-      try {
-        if (paymentData?.booking) {
-          setCreatedBooking(paymentData.booking)
-          setResultModalState({ isOpen: true, type: "success" })
-          return
-        }
+    if (
+      !canSubmit ||
+      !stationId ||
+      !slotState.selectedSlotId ||
+      !vehicleState.selectedVehicleId ||
+      !serviceState.selectedPlanId
+    ) {
+      return
+    }
 
-        const serviceType =
-          serviceState.selectedPlanId === "FULL_WASH" || serviceState.selectedPlanId === "full"
-            ? "FULL"
-            : "HALF"
+    setIsSubmittingBooking(true)
+    try {
+      const serviceType =
+        serviceState.selectedPlanId === "FULL_WASH" || serviceState.selectedPlanId === "full"
+          ? "FULL"
+          : "HALF"
 
-        const created = await bookingApi.createBooking({
-          stationId,
-          vehicleId: vehicleState.selectedVehicleId,
-          timeWindowId: slotState.selectedSlotId,
-          serviceType,
-          extraServiceIds: serviceState.selectedExtraIds,
-          paymentType: "ONLINE_FULL",
-        })
+      const created = await bookingApi.createBooking({
+        stationId,
+        vehicleId: vehicleState.selectedVehicleId,
+        timeWindowId: slotState.selectedSlotId,
+        serviceType,
+        extraServiceIds: serviceState.selectedExtraIds,
+        paymentType: "PAY_AT_STATION",
+      })
 
-        setCreatedBooking(created)
-        setResultModalState({ isOpen: true, type: "success" })
-      } catch (err: unknown) {
-        const errorObj = err as Error
-        console.error("Booking submission error:", err)
-        setResultModalState({
-          isOpen: true,
-          type: "error",
-          errorMessage: errorObj?.message || "Failed to finalize booking reservation.",
-        })
-      } finally {
-        setIsSubmittingBooking(false)
-      }
-    },
-    [
-      isAuthenticated,
-      user,
-      canSubmit,
-      stationId,
-      slotState.selectedSlotId,
-      vehicleState.selectedVehicleId,
-      serviceState.selectedPlanId,
-      serviceState.selectedExtraIds,
-    ]
-  )
+      setCreatedBooking(created)
+      setResultModalState({ isOpen: true, type: "success" })
+    } catch (err: unknown) {
+      const errorObj = err as Error
+      console.error("Cash booking submission error:", err)
+      setResultModalState({
+        isOpen: true,
+        type: "error",
+        errorMessage: errorObj?.message || "Failed to finalize booking reservation.",
+      })
+    } finally {
+      setIsSubmittingBooking(false)
+    }
+  }, [
+    isAuthenticated,
+    user,
+    canSubmit,
+    stationId,
+    slotState.selectedSlotId,
+    vehicleState.selectedVehicleId,
+    serviceState.selectedPlanId,
+    serviceState.selectedExtraIds,
+  ])
 
   // Handle CTA Click from Summary Card
   const handleProceedBooking = (method: "ONLINE" | "CASH") => {
@@ -169,7 +175,7 @@ export function useBookingFlow(stationId: string | null) {
     if (method === "ONLINE") {
       setIsPaymentModalOpen(true)
     } else {
-      void handleConfirmBooking()
+      void handleCashBooking()
     }
   }
 
@@ -199,8 +205,7 @@ export function useBookingFlow(stationId: string | null) {
         paymentType: "ONLINE_FULL",
       },
       onSuccess: (paymentData) => {
-        setIsPaymentModalOpen(false)
-        void handleConfirmBooking(paymentData)
+        handleOnlinePaymentSuccess(paymentData.booking)
       },
       onError: (errMsg) => {
         setIsPaymentModalOpen(false)

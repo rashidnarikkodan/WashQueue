@@ -40,6 +40,7 @@ export interface InitiatePaymentParams {
 
 export function useBookingPayment(isModalOpen = false) {
   const [selectedMethod, setSelectedMethod] = useState<"upi" | "wallet">("upi")
+  const [useWalletWithUpi, setUseWalletWithUpi] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const [isLoadingWallet, setIsLoadingWallet] = useState(false)
@@ -118,9 +119,12 @@ export function useBookingPayment(isModalOpen = false) {
         }
 
         // --- 2. CREATE ORDER & ATOMIC SLOT RESERVATION ---
+        const shouldUseWallet = selectedMethod === "upi" && useWalletWithUpi
+
         const orderPayload = {
           amount: Math.round(totalAmount * 100),
           currency: "INR",
+          useWallet: shouldUseWallet,
           ...(bookingIntentData
             ? {
               stationId: bookingIntentData.stationId,
@@ -144,14 +148,16 @@ export function useBookingPayment(isModalOpen = false) {
           setActiveReservationId(order.reservation_id)
         }
 
-        // --- 3. EXECUTE DIRECT WALLET PAYMENT ---
-        if (selectedMethod === "wallet") {
+        // --- 3. EXECUTE DIRECT WALLET PAYMENT (100% from wallet) ---
+        if (selectedMethod === "wallet" || order.amount === 0) {
           try {
-            await walletApi.payWithWallet({
-              amount: totalAmount,
-              referenceId: order.reservation_id || order.order_id,
-              description: serviceName || "Wash Booking Payment",
-            })
+            if (selectedMethod === "wallet") {
+              await walletApi.payWithWallet({
+                amount: totalAmount,
+                referenceId: order.reservation_id || order.id,
+                description: serviceName || "Wash Booking Payment",
+              })
+            }
 
             const walletPaymentId = `wallet_pay_${Date.now()}`
             const verification = await paymentApi.verifyPayment({
@@ -182,7 +188,7 @@ export function useBookingPayment(isModalOpen = false) {
           return
         }
 
-        // --- 4. EXECUTE RAZORPAY PAYMENT ---
+        // --- 4. EXECUTE RAZORPAY PAYMENT (For remaining or full UPI amount) ---
         const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"
 
         if (typeof window.Razorpay === "undefined") {
@@ -276,12 +282,14 @@ export function useBookingPayment(isModalOpen = false) {
         onError?.(errorObj.message || "Could not initiate payment. Please try again.")
       }
     },
-    [selectedMethod, walletBalance, fetchWalletBalance, activeReservationId]
+    [selectedMethod, useWalletWithUpi, walletBalance, fetchWalletBalance, activeReservationId]
   )
 
   return {
     selectedMethod,
     setSelectedMethod,
+    useWalletWithUpi,
+    setUseWalletWithUpi,
     isProcessing,
     walletBalance,
     isLoadingWallet,

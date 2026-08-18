@@ -26,6 +26,7 @@ export enum PaymentStatus {
 
 export enum PaymentType {
   ONLINE_FULL = "ONLINE_FULL",
+  PAY_AT_STATION = "PAY_AT_STATION",
   DEPOSIT_PLUS_CASH = "DEPOSIT_PLUS_CASH",
   CASH_WALKIN = "CASH_WALKIN",
 }

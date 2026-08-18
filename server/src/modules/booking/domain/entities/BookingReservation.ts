@@ -14,9 +14,10 @@ export interface BookingReservationProps {
   depositAmount: number
   cashAmount: number
   totalAmount: number
-  razorpayOrderId: string
-  razorpayPaymentId?: string
-  razorpaySignature?: string
+  walletAmount?: number
+  paymentOrderId: string
+  paymentId?: string
+  paymentSignature?: string
   bookingId?: string
   status: ReservationStatus
   expiresAt: Date
@@ -30,6 +31,7 @@ export class BookingReservation {
   constructor(props: BookingReservationProps) {
     this.props = {
       ...props,
+      walletAmount: props.walletAmount || 0,
       createdAt: props.createdAt || new Date(),
       updatedAt: props.updatedAt || new Date(),
     }
@@ -79,16 +81,20 @@ export class BookingReservation {
     return this.props.totalAmount
   }
 
-  get razorpayOrderId(): string {
-    return this.props.razorpayOrderId
+  get walletAmount(): number {
+    return this.props.walletAmount || 0
   }
 
-  get razorpayPaymentId(): string | undefined {
-    return this.props.razorpayPaymentId
+  get gatewayOrderId(): string {
+    return this.props.paymentOrderId
   }
 
-  get razorpaySignature(): string | undefined {
-    return this.props.razorpaySignature
+  get paymentId(): string | undefined {
+    return this.props.paymentId
+  }
+
+  get paymentSignature(): string | undefined {
+    return this.props.paymentSignature
   }
 
   get bookingId(): string | undefined {
@@ -122,8 +128,8 @@ export class BookingReservation {
   confirm(bookingId: string, paymentId?: string, signature?: string): void {
     this.props.status = "CONFIRMED"
     this.props.bookingId = bookingId
-    if (paymentId) this.props.razorpayPaymentId = paymentId
-    if (signature) this.props.razorpaySignature = signature
+    if (paymentId) this.props.paymentId = paymentId
+    if (signature) this.props.paymentSignature = signature
     this.props.updatedAt = new Date()
   }
 
@@ -134,7 +140,7 @@ export class BookingReservation {
 
   markExpiredRefund(paymentId?: string): void {
     this.props.status = "EXPIRED_REFUND_NEEDED"
-    if (paymentId) this.props.razorpayPaymentId = paymentId
+    if (paymentId) this.props.paymentId = paymentId
     this.props.updatedAt = new Date()
   }
 

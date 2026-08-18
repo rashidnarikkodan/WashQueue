@@ -121,6 +121,7 @@ export const createPaymentOrderSchema = z.object({
     .optional()
     .default([]),
   paymentType: z.enum(["ONLINE_FULL", "PAY_AT_STATION"]).default("ONLINE_FULL"),
+  useWallet: z.boolean().optional().default(false),
 })
 
 export const verifyPaymentSchema = z.object({

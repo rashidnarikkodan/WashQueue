@@ -157,6 +157,8 @@ export default function Booking() {
         amountInRupees={totalPrice}
         selectedMethod={paymentState.selectedMethod}
         onSelectMethod={paymentState.setSelectedMethod}
+        useWalletWithUpi={paymentState.useWalletWithUpi}
+        onToggleUseWalletWithUpi={paymentState.setUseWalletWithUpi}
         walletBalance={paymentState.walletBalance}
         isLoadingWallet={paymentState.isLoadingWallet}
         isProcessing={paymentState.isProcessing}

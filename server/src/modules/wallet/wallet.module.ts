@@ -1,6 +1,6 @@
 import { WalletMongoRepository } from "./infrastructure/repositories/wallet.mongo.repository"
 import { WalletTransactionMongoRepository } from "./infrastructure/repositories/wallet-transaction.mongo.repository"
-import { RazorpayWalletPaymentService } from "./infrastructure/services/razorpay-wallet-payment.service"
+import { sharedRazorpayService } from "@/infrastructure/payment/razorpay.service"
 
 import { GetWalletBalanceUseCase } from "./application/use-cases/get-wallet-balance.use-case"
 import { CreditWalletUseCase } from "./application/use-cases/credit-wallet.use-case"
@@ -16,7 +16,7 @@ import { createWalletRouter } from "./presentation/wallet.routes"
 // Instantiate repositories & services
 export const walletRepository = new WalletMongoRepository()
 export const walletTransactionRepository = new WalletTransactionMongoRepository()
-export const walletPaymentGateway = new RazorpayWalletPaymentService()
+export const walletPaymentGateway = sharedRazorpayService
 
 import { RefundWalletUseCase } from "./application/use-cases/refund-wallet.use-case"
 

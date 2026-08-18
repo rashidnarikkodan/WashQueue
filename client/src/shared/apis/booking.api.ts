@@ -8,7 +8,7 @@ export interface CreateBookingInput {
   timeWindowId: string
   serviceType: "HALF" | "FULL"
   extraServiceIds?: string[]
-  paymentType?: "ONLINE_FULL" | "DEPOSIT_PLUS_CASH" | "CASH_WALKIN"
+  paymentType?: "ONLINE_FULL" | "PAY_AT_STATION" | "CASH_WALKIN"
 }
 
 export interface BookingStatusHistoryItem {

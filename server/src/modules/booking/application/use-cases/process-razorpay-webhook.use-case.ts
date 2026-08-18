@@ -1,5 +1,5 @@
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { IPaymentSignatureVerifier } from "../interfaces/payment-signature-verifier.interface"
+import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
 
 export interface RazorpayWebhookPayload {
   event: string
@@ -28,11 +28,11 @@ export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUse
   constructor(
     private readonly reservationRepository: IBookingReservationRepository,
     private readonly confirmReservationUseCase: IConfirmBookingReservationUseCase,
-    private readonly signatureVerifier: IPaymentSignatureVerifier
+    private readonly paymentGateway: IPaymentGatewayService
   ) {}
 
   async execute(rawBody: string, signature: string): Promise<{ success: boolean; message: string }> {
-    if (!this.signatureVerifier.verifyWebhookSignature(rawBody, signature)) {
+    if (!this.paymentGateway.verifyWebhookSignature(rawBody, signature)) {
       return { success: false, message: "Invalid webhook signature" }
     }
 

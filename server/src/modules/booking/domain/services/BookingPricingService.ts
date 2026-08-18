@@ -28,7 +28,7 @@ export class BookingPricingService {
     if (input.paymentType === PaymentType.ONLINE_FULL) {
       depositAmount = totalPrice
       cashAmount = 0
-    } else if (input.paymentType === PaymentType.DEPOSIT_PLUS_CASH) {
+    } else if (input.paymentType === PaymentType.PAY_AT_STATION) {
       const rate = input.depositPercentage ?? 0.2
       depositAmount = Number((totalPrice * rate).toFixed(2))
       cashAmount = Number((totalPrice - depositAmount).toFixed(2))

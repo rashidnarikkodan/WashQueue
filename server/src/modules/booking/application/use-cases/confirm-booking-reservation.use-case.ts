@@ -16,7 +16,8 @@ import { IBookingNotificationService } from "../interfaces/booking-notification.
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { IPaymentSignatureVerifier } from "../interfaces/payment-signature-verifier.interface"
+import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
+import { DebitWalletUseCase } from "@/modules/wallet/application/use-cases/debit-wallet.use-case"
 
 export interface ConfirmBookingReservationInput {
   razorpay_order_id: string
@@ -41,7 +42,8 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
     private readonly notificationService: IBookingNotificationService,
-    private readonly signatureVerifier: IPaymentSignatureVerifier
+    private readonly paymentGateway: IPaymentGatewayService,
+    private readonly debitWalletUseCase: DebitWalletUseCase
   ) {
     this.pricingResolutionService = new BookingPricingResolutionService(
       stationPricingRepository,
@@ -56,7 +58,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
 
     if (!isWalletPayment) {
       // Verify Razorpay HMAC Signature for online card/UPI payments
-      const isMatch = this.signatureVerifier.verifyPaymentSignature(
+      const isMatch = this.paymentGateway.verifyPaymentSignature(
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature
@@ -165,6 +167,26 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     })
 
     const savedBooking = await this.bookingRepository.save(booking)
+
+    // Deduct wallet balance if split payment was used
+    if (reservation.walletAmount > 0) {
+      try {
+        await this.debitWalletUseCase.execute({
+          userId: reservation.userId,
+          amount: reservation.walletAmount,
+          category: "BOOKING_PAYMENT",
+          description: `Partial wallet payment for booking ${bookingNumber}`,
+          referenceId: savedBooking.id,
+          metadata: {
+            bookingId: savedBooking.id,
+            reservationId: reservation.id,
+            razorpayOrderId: razorpay_order_id,
+          },
+        })
+      } catch (walletErr) {
+        console.error("Failed to debit wallet on booking confirmation:", walletErr)
+      }
+    }
 
     const statusLog = new BookingStatusLog({
       id: "",

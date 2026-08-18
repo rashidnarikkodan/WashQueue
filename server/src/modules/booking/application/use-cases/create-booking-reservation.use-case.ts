@@ -1,17 +1,19 @@
-import Razorpay from "razorpay"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import env from "@/configs/env.config"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IStationPricingRepository } from "@/modules/station/domain/repositories/station-pricing.repository"
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
+import { IWalletRepository } from "@/modules/wallet/domain/repositories/wallet.repository.interface"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
 import { ServiceType, PaymentType } from "../../domain/entities/Booking"
 import { BookingPricingService } from "../../domain/services/BookingPricingService"
 import { BookingReservation } from "../../domain/entities/BookingReservation"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
+import { ICreateBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
+import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
+import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
 
 export interface CreateBookingReservationInput {
   stationId: string
@@ -20,21 +22,19 @@ export interface CreateBookingReservationInput {
   serviceType: "HALF" | "FULL"
   extraServiceIds?: string[]
   paymentType: "ONLINE_FULL" | "PAY_AT_STATION"
+  useWallet?: boolean
 }
 
 export interface BookingReservationResponseDTO {
   reservationId: string
-  razorpayOrderId: string
+  paymentOrderId: string
   amount: number
+  walletAmount?: number
   currency: string
   expiresAt: string
 }
 
-import { ICreateBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
-import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
-
 export class CreateBookingReservationUseCase implements ICreateBookingReservationUseCase {
-  private razorpay: Razorpay
   private readonly pricingResolutionService: BookingPricingResolutionService
 
   constructor(
@@ -43,12 +43,10 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
     private readonly extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
-    private readonly reservationRepository: IBookingReservationRepository
+    private readonly reservationRepository: IBookingReservationRepository,
+    private readonly paymentGateway: IPaymentGatewayService,
+    private readonly walletRepository: IWalletRepository
   ) {
-    this.razorpay = new Razorpay({
-      key_id: env.RAZORPAY_KEY_ID,
-      key_secret: env.RAZORPAY_KEY_SECRET,
-    })
     this.pricingResolutionService = new BookingPricingResolutionService(
       stationPricingRepository,
       extraServiceRepository
@@ -91,19 +89,13 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
 
     timeWindow.updateStatusBasedOnTimeAndCapacity()
     if (!timeWindow.isBookable) {
-      throw new AppError(
-        "SLOT_UNAVAILABLE",
-        HTTP_STATUS.CONFLICT
-      )
+      throw new AppError("SLOT_UNAVAILABLE", HTTP_STATUS.CONFLICT)
     }
 
-    // 6. ATOMICALLY Reserve Slot Capacity BEFORE creating Razorpay Order
+    // 6. ATOMICALLY Reserve Slot Capacity BEFORE creating Payment Order
     const reservedWindow = await this.timeWindowRepository.reserveCapacityAtomically(timeWindow.id)
     if (!reservedWindow) {
-      throw new AppError(
-        "SLOT_UNAVAILABLE",
-        HTTP_STATUS.CONFLICT
-      )
+      throw new AppError("SLOT_UNAVAILABLE", HTTP_STATUS.CONFLICT)
     }
 
     // 7. Calculate Pricing & Settlement
@@ -112,29 +104,40 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       extraServices: selectedExtraServices,
       paymentType:
         input.paymentType === "PAY_AT_STATION"
-          ? PaymentType.DEPOSIT_PLUS_CASH
+          ? PaymentType.PAY_AT_STATION
           : PaymentType.ONLINE_FULL,
     })
 
-    const payableAmountRupees =
+    const fullPayableAmountRupees =
       input.paymentType === "ONLINE_FULL"
         ? pricingResult.pricingSnapshot.totalPrice
         : pricingResult.depositAmount
 
+    // Check if wallet balance should be applied
+    let walletAmountToDeduct = 0
+    let payableAmountRupees = fullPayableAmountRupees
+
+    if (input.useWallet && input.paymentType === "ONLINE_FULL") {
+      const userWallet = await this.walletRepository.findByUserId(userId)
+      if (userWallet && userWallet.balance.amount > 0) {
+        walletAmountToDeduct = Math.min(userWallet.balance.amount, fullPayableAmountRupees)
+        payableAmountRupees = Math.max(0, fullPayableAmountRupees - walletAmountToDeduct)
+      }
+    }
+
     const payableAmountPaise = Math.round(payableAmountRupees * 100)
 
-    // 8. Create Razorpay Order
-    let razorpayOrderId = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+    // 8. Create Payment Order via abstracted payment gateway
+    let paymentOrderId = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`
     if (payableAmountPaise >= 100) {
       try {
-        const order = await this.razorpay.orders.create({
-          amount: payableAmountPaise,
+        const order = await this.paymentGateway.createOrder({
+          amountInPaise: payableAmountPaise,
           currency: "INR",
-          receipt: `rcpt_${Date.now()}`,
         })
-        razorpayOrderId = order.id
+        paymentOrderId = order.orderId
       } catch (err: unknown) {
-        // Rollback capacity if Razorpay order creation fails
+        // Rollback capacity if payment order creation fails
         await this.timeWindowRepository.releaseCapacityAtomically(timeWindow.id)
         const message = err instanceof Error ? err.message : "Failed to create payment order"
         throw new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
@@ -153,12 +156,13 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       extraServiceIds: input.extraServiceIds || [],
       paymentType:
         input.paymentType === "PAY_AT_STATION"
-          ? PaymentType.DEPOSIT_PLUS_CASH
+          ? PaymentType.PAY_AT_STATION
           : PaymentType.ONLINE_FULL,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       totalAmount: pricingResult.pricingSnapshot.totalPrice,
-      razorpayOrderId,
+      walletAmount: walletAmountToDeduct,
+      paymentOrderId,
       status: "HELD",
       expiresAt,
     })
@@ -167,8 +171,9 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
 
     return {
       reservationId: savedReservation.id,
-      razorpayOrderId,
+      paymentOrderId,
       amount: payableAmountPaise,
+      walletAmount: walletAmountToDeduct,
       currency: "INR",
       expiresAt: expiresAt.toISOString(),
     }

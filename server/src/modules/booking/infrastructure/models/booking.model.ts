@@ -57,7 +57,7 @@ export interface IBookingDocument extends Document {
   }
 
   paymentStatus: "PENDING" | "PARTIAL" | "PAID" | "REFUNDED" | "FAILED"
-  paymentType: "ONLINE_FULL" | "DEPOSIT_PLUS_CASH" | "CASH_WALKIN"
+  paymentType: "ONLINE_FULL" | "PAY_AT_STATION" | "DEPOSIT_PLUS_CASH" | "CASH_WALKIN"
 
   depositAmount: number
   cashAmount: number
@@ -203,7 +203,7 @@ const bookingSchema = new Schema<IBookingDocument>(
 
     paymentType: {
       type: String,
-      enum: ["ONLINE_FULL", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"],
+      enum: ["ONLINE_FULL", "PAY_AT_STATION", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"],
       required: true,
     },
 

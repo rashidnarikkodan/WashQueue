@@ -1,4 +1,4 @@
-import { X, Smartphone, Wallet, ArrowRight, ShieldCheck } from "lucide-react"
+import { X, Smartphone, Wallet, ArrowRight, ShieldCheck, Check, Sparkles } from "lucide-react"
 
 interface PaymentModalProps {
   isOpen: boolean
@@ -6,6 +6,8 @@ interface PaymentModalProps {
   amountInRupees: number
   selectedMethod: "upi" | "wallet"
   onSelectMethod: (method: "upi" | "wallet") => void
+  useWalletWithUpi: boolean
+  onToggleUseWalletWithUpi: (val: boolean) => void
   walletBalance: number | null
   isLoadingWallet: boolean
   isProcessing: boolean
@@ -18,6 +20,8 @@ export default function PaymentModal({
   amountInRupees,
   selectedMethod,
   onSelectMethod,
+  useWalletWithUpi,
+  onToggleUseWalletWithUpi,
   walletBalance,
   isLoadingWallet,
   isProcessing,
@@ -29,9 +33,16 @@ export default function PaymentModal({
   const subtotal = Math.max(0, totalAmount * 0.82)
   const taxesAndFees = Math.max(0, totalAmount - subtotal)
 
+  // Wallet deduction calculation when UPI is selected
+  const availableWallet = walletBalance && walletBalance > 0 ? walletBalance : 0
+  const isWalletEligibleForUpi = selectedMethod === "upi" && availableWallet > 0
+  const walletDeduction =
+    isWalletEligibleForUpi && useWalletWithUpi ? Math.min(availableWallet, totalAmount) : 0
+  const netPayableViaUpi = Math.max(0, totalAmount - walletDeduction)
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="w-full max-w-[560px] rounded-3xl border border-border/40 bg-slate-900/95 text-slate-100 shadow-2xl overflow-hidden flex flex-col my-8 border-slate-700/50">
+      <div className="w-full max-w-[560px] rounded-3xl border border-slate-700/60 bg-slate-900/95 text-slate-100 shadow-2xl overflow-hidden flex flex-col my-8">
         {/* Header */}
         <div className="flex items-start justify-between p-6 sm:p-8 pb-4 border-b border-slate-800">
           <div>
@@ -52,38 +63,127 @@ export default function PaymentModal({
 
         {/* Payment Methods */}
         <div className="p-6 sm:p-8 space-y-4">
-          {/* Option 1: UPI Payment */}
+          {/* Option 1: UPI Payment Card */}
           <div
-            onClick={() => !isProcessing && onSelectMethod("upi")}
-            className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
+            className={`rounded-2xl transition-all border overflow-hidden ${
               selectedMethod === "upi"
                 ? "bg-slate-800/90 border-blue-400/80 shadow-[0_0_20px_rgba(77,142,255,0.15)]"
                 : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
             } ${isProcessing ? "opacity-60 pointer-events-none" : ""}`}
           >
+            {/* Main Selection Area */}
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                selectedMethod === "upi"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : "bg-slate-800 text-slate-400"
-              }`}
+              onClick={() => !isProcessing && onSelectMethod("upi")}
+              className="flex items-center gap-4 p-4 cursor-pointer"
             >
-              <Smartphone size={20} />
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                  selectedMethod === "upi"
+                    ? "bg-blue-500/20 text-blue-400"
+                    : "bg-slate-800 text-slate-400"
+                }`}
+              >
+                <Smartphone size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-slate-100">UPI Payment</h3>
+                <p className="text-xs text-slate-400">Pay using GPay, PhonePe, Paytm, or BHIM</p>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  selectedMethod === "upi" ? "border-blue-400 bg-blue-400" : "border-slate-600"
+                }`}
+              >
+                {selectedMethod === "upi" && <div className="w-2 h-2 rounded-full bg-slate-950" />}
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-slate-100">UPI Payment</h3>
-              <p className="text-xs text-slate-400">Pay using GPay, PhonePe, or BHIM</p>
-            </div>
-            <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                selectedMethod === "upi" ? "border-blue-400 bg-blue-400" : "border-slate-600"
-              }`}
-            >
-              {selectedMethod === "upi" && <div className="w-2 h-2 rounded-full bg-slate-950" />}
-            </div>
+
+            {/* Wallet Deduct Toggle for UPI */}
+            {selectedMethod === "upi" && (
+              <div className="px-4 pb-4 pt-1">
+                {isLoadingWallet ? (
+                  <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/80 flex items-center gap-2 text-xs text-slate-400 animate-pulse">
+                    <Wallet size={14} />
+                    <span>Checking wallet balance for discount...</span>
+                  </div>
+                ) : availableWallet > 0 ? (
+                  <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col gap-2.5 transition-all">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                          <Wallet size={15} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-slate-200">
+                              Use Wallet Balance
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              ₹{availableWallet.toFixed(2)} Available
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {useWalletWithUpi
+                              ? `Deducting ₹${Math.min(availableWallet, totalAmount).toFixed(2)} from wallet`
+                              : "Apply wallet money to reduce UPI payable amount"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Animated Toggle Switch */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (!isProcessing) {
+                            onToggleUseWalletWithUpi(!useWalletWithUpi)
+                          }
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                          useWalletWithUpi
+                            ? "bg-emerald-500"
+                            : "bg-slate-700 hover:bg-slate-600"
+                        }`}
+                        role="switch"
+                        aria-checked={useWalletWithUpi}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out flex items-center justify-center ${
+                            useWalletWithUpi ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        >
+                          {useWalletWithUpi && <Check size={10} className="text-emerald-700 stroke-[3]" />}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Split Details Pill */}
+                    {useWalletWithUpi && (
+                      <div className="flex items-center justify-between text-[11px] px-3 py-1.5 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-300">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles size={12} className="text-emerald-400" />
+                          <span>Split Payment Applied</span>
+                        </div>
+                        <span className="font-semibold">
+                          ₹{walletDeduction.toFixed(2)} Wallet + ₹{netPayableViaUpi.toFixed(2)} UPI
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-slate-950/30 border border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <Wallet size={13} />
+                      <span>Wallet balance is ₹0.00</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500">Top-up from profile to save</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Option 2: Wallet */}
+          {/* Option 2: Full Wallet Payment */}
           <div
             onClick={() => !isProcessing && onSelectMethod("wallet")}
             className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
@@ -93,7 +193,7 @@ export default function PaymentModal({
             } ${isProcessing ? "opacity-60 pointer-events-none" : ""}`}
           >
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                 selectedMethod === "wallet"
                   ? "bg-blue-500/20 text-blue-400"
                   : "bg-slate-800 text-slate-400"
@@ -103,7 +203,7 @@ export default function PaymentModal({
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-100">Wallet</h3>
+                <h3 className="text-sm font-semibold text-slate-100">Wallet Direct</h3>
                 {isLoadingWallet ? (
                   <span className="text-[10px] text-slate-400 animate-pulse">Checking...</span>
                 ) : walletBalance !== null ? (
@@ -118,14 +218,14 @@ export default function PaymentModal({
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
                 {walletBalance !== null && walletBalance < totalAmount ? (
-                  <span className="text-rose-400 font-medium">Insufficient balance for this booking</span>
+                  <span className="text-rose-400 font-medium">Insufficient full balance (use UPI split above)</span>
                 ) : (
-                  "Direct transfer from your app wallet"
+                  "Direct 100% payment from your app wallet"
                 )}
               </p>
             </div>
             <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                 selectedMethod === "wallet" ? "border-blue-400 bg-blue-400" : "border-slate-600"
               }`}
             >
@@ -145,16 +245,40 @@ export default function PaymentModal({
               <span>Taxes & Fees</span>
               <span className="text-slate-200 font-medium">₹{taxesAndFees.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between items-center pt-2 text-slate-100">
+            <div className="flex justify-between text-slate-400">
+              <span>Total Booking Amount</span>
+              <span className="text-slate-200 font-semibold">₹{totalAmount.toFixed(2)}</span>
+            </div>
+
+            {/* Split Breakdown Details */}
+            {selectedMethod === "upi" && useWalletWithUpi && walletDeduction > 0 && (
+              <div className="flex justify-between text-emerald-400 pt-1 font-medium">
+                <span className="flex items-center gap-1">
+                  <Wallet size={13} />
+                  <span>Wallet Balance Applied</span>
+                </span>
+                <span className="font-bold">-₹{walletDeduction.toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center pt-2.5 border-t border-slate-800/80 text-slate-100">
               <div>
-                <span className="text-base font-bold">Total Amount</span>
+                <span className="text-base font-bold">
+                  {selectedMethod === "upi" && useWalletWithUpi && walletDeduction > 0
+                    ? "Payable via UPI"
+                    : "Final Amount"}
+                </span>
                 <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">
                   <ShieldCheck size={12} />
                   <span>Secure Transaction</span>
                 </div>
               </div>
               <span className="text-2xl font-extrabold text-blue-400">
-                ₹{totalAmount.toFixed(2)}
+                ₹
+                {(selectedMethod === "upi" && useWalletWithUpi && walletDeduction > 0
+                  ? netPayableViaUpi
+                  : totalAmount
+                ).toFixed(2)}
               </span>
             </div>
           </div>
@@ -165,7 +289,17 @@ export default function PaymentModal({
             disabled={isProcessing}
             className="w-full py-4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-slate-950 font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
           >
-            <span>{isProcessing ? "Initiating Payment..." : "Pay Securely"}</span>
+            <span>
+              {isProcessing
+                ? "Initiating Payment..."
+                : selectedMethod === "upi" && useWalletWithUpi && walletDeduction > 0
+                  ? netPayableViaUpi > 0
+                    ? `Pay ₹${netPayableViaUpi.toFixed(2)} via UPI`
+                    : `Pay ₹${totalAmount.toFixed(2)} from Wallet`
+                  : selectedMethod === "wallet"
+                    ? `Pay ₹${totalAmount.toFixed(2)} from Wallet`
+                    : `Pay ₹${totalAmount.toFixed(2)} via UPI`}
+            </span>
             {!isProcessing && <ArrowRight size={18} />}
           </button>
 

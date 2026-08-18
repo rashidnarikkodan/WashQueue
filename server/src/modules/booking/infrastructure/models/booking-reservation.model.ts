@@ -12,6 +12,7 @@ export interface IBookingReservationDocument {
   depositAmount: number
   cashAmount: number
   totalAmount: number
+  walletAmount?: number
   razorpayOrderId: string
   razorpayPaymentId?: string
   razorpaySignature?: string
@@ -34,6 +35,7 @@ const bookingReservationSchema = new Schema<IBookingReservationDocument>(
     depositAmount: { type: Number, required: true },
     cashAmount: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
+    walletAmount: { type: Number, default: 0 },
     razorpayOrderId: { type: String, required: true, unique: true, index: true },
     razorpayPaymentId: { type: String },
     razorpaySignature: { type: String },
