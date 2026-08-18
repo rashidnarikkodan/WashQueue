@@ -106,11 +106,13 @@ export interface ExtraService {
   updatedAt: string
 }
 
-export interface StationDetail {
+export interface StationDetails {
   station: Station
   pricing: StationPricing[]
   extraServices: ExtraService[]
 }
+
+export type StationDetail = StationDetails
 
 export const StationSortBy = {
   RECOMMENDED: "RECOMMENDED",
