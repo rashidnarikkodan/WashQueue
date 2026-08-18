@@ -1,15 +1,15 @@
+import { toast } from "sonner"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react"
-import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import Loading from "@/shared/components/ui/Loading"
-import { useAuthStore } from "@/features/auth/store/auth.store"
 import { ROLE, VIEW_MODE, type RoleType } from "@/shared/constants/role.const"
+import { useAuthStore } from "@/features/auth/store/auth.store"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
+import CancellationModal from "../components/CancellationModal"
 import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
-import { CancellationModal } from "../components/CancellationModal"
-import { toast } from "sonner"
+import Loading from "@/shared/components/ui/Loading"
 
 export default function BookingDetails() {
   const { id } = useParams<{ id: string }>()
@@ -39,6 +39,7 @@ export default function BookingDetails() {
   const isManager = currentRole === ROLE.MANAGER
   const isOwner = currentRole === ROLE.OWNER
   const isAdmin = currentRole === ROLE.ADMIN
+
 
   // Load Booking Details helper
   const fetchBookingDetails = useCallback(async () => {
@@ -184,7 +185,7 @@ export default function BookingDetails() {
         : "/bookings"
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-24 sm:pt-28 pb-20 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
       {/* Top Breadcrumb & Navigation Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Breadcrumbs

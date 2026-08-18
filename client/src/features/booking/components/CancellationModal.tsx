@@ -36,7 +36,7 @@ const CANCELLATION_REASONS = [
   "Other",
 ]
 
-export function CancellationModal({
+export default function CancellationModal({
   booking,
   isOpen,
   onClose,

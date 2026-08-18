@@ -57,7 +57,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
             className={`h-10 w-10 rounded-full flex items-center justify-center border shrink-0 ${
               isCredit
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                : "bg-muted border-border text-muted-foreground"
+                : "bg-rose-500/10 border-rose-500/20 text-rose-500"
             }`}
           >
             {isCredit ? (
@@ -87,7 +87,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         <div className="text-right">
           <p
             className={`text-sm font-bold ${
-              isCredit ? "text-emerald-500" : "text-foreground"
+              isCredit ? "text-emerald-500" : "text-rose-500"
             }`}
           >
             {isCredit ? "+" : "-"}₹{tx.amount.toFixed(2)}
