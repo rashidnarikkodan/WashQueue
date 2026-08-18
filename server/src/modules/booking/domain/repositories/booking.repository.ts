@@ -5,6 +5,7 @@ export interface FindUserBookingsFilter {
   status?: BookingStatus | BookingStatus[]
   upcomingOnly?: boolean
   historyOnly?: boolean
+  noShowOnly?: boolean
 }
 
 export interface FindBookingsFilter {
@@ -20,6 +21,7 @@ export interface FindBookingsFilter {
   limit?: number
   upcomingOnly?: boolean
   historyOnly?: boolean
+  noShowOnly?: boolean
 }
 
 export interface FindBookingsResult {

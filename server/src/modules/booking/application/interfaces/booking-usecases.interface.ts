@@ -30,7 +30,7 @@ export interface IGetBookingUseCase {
 }
 
 export interface GetBookingsFilterInput extends FindBookingsFilter {
-  type?: "upcoming" | "history" | "all"
+  type?: "upcoming" | "history" | "all" | "noshow"
 }
 
 export interface IGetUserBookingsUseCase {

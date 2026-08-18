@@ -40,6 +40,8 @@ export const API_ROUTES = {
     UPDATE_STATUS: (id: string) => `/bookings/${id}/status`,
     UPCOMING: "/bookings/upcoming",
     HISTORY: "/bookings/history",
+    VALIDATE_QR: "/bookings/validate-qr",
+    HANDOVER_BY_ID: (id: string) => `/bookings/${id}/handover`,
   },
   PAYMENT: {
     ROOT:'/payment',

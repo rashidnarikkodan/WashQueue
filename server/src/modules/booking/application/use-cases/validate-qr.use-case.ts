@@ -109,10 +109,10 @@ export class ValidateQRForCheckInUseCase {
           minute: "2-digit",
           hour12: true,
         })
-
-      if (nowMs < windowStart.getTime()) {
+        
         const startTimeFormatted = formatWindowTime(windowStart)
         const endTimeFormatted = formatWindowTime(windowEnd)
+      if (nowMs < windowStart.getTime()) {
         throw new AppError(
           `Early Arrival Warning: Customer arrived before their booked time window (${startTimeFormatted} - ${endTimeFormatted}). Check-in is not allowed until ${startTimeFormatted}.`,
           HTTP_STATUS.BAD_REQUEST
@@ -120,9 +120,6 @@ export class ValidateQRForCheckInUseCase {
       }
 
       if (nowMs > windowEnd.getTime()) {
-        const startTimeFormatted = formatWindowTime(windowStart)
-        const endTimeFormatted = formatWindowTime(windowEnd)
-
         // Mark booking as NO_SHOW in database
         try {
           booking.markNoShow()

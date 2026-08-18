@@ -90,38 +90,6 @@ export class BookingController {
     success(res, result, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }
 
-  getUpcoming = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.user?.userId
-    const role = req.user?.role
-    if (!userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
-    }
-
-    const query = getBookingListQuerySchema.parse(req.query)
-    const result = await this.getUserBookingsUseCase.execute(
-      userId,
-      { ...query, type: "upcoming" },
-      role
-    )
-    success(res, result, HTTP_STATUS.OK, "Upcoming bookings retrieved successfully")
-  }
-
-  getHistory = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.user?.userId
-    const role = req.user?.role
-    if (!userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
-    }
-
-    const query = getBookingListQuerySchema.parse(req.query)
-    const result = await this.getUserBookingsUseCase.execute(
-      userId,
-      { ...query, type: "history" },
-      role
-    )
-    success(res, result, HTTP_STATUS.OK, "Booking history retrieved successfully")
-  }
-
   cancel = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.user?.userId
     if (!userId) {

@@ -26,6 +26,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
 
     const upcomingOnly = type === "upcoming" || filterInput?.upcomingOnly
     const historyOnly = type === "history" || filterInput?.historyOnly
+    const noShowOnly = type === "noshow" || filterInput?.noShowOnly
 
     const queryFilter: FindBookingsFilter = {
       ...filterInput,
@@ -33,6 +34,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       limit,
       upcomingOnly,
       historyOnly,
+      noShowOnly,
     }
 
     // 1. ADMIN Role: Unrestricted listing across all stations/providers with filters & pagination

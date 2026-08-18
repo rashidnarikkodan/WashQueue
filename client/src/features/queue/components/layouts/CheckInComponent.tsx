@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
@@ -8,10 +9,9 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react"
-import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
-import type { BookingResponse } from "@/shared/apis/booking.api"
 import { QrCameraScanner } from "../ui/QrCameraScanner"
+import type { BookingResponse } from "@/shared/apis/booking.api"
 
 export default function CheckInComponent() {
   const navigate = useNavigate()
@@ -25,7 +25,7 @@ export default function CheckInComponent() {
     setIsSubmitting(true)
     try {
       const res = await bookingApi.validateQr(scannedValue)
-      toast.success("✓ QR Verified! Navigating to Pre-Service Inspection...")
+      toast.success("QR Verified! Navigating to Pre-Service Inspection...")
       setBookingIdInput("")
       navigate(`/manager/bookings/${res.id}/pre-inspection`)
     } catch (err: unknown) {
@@ -48,7 +48,7 @@ export default function CheckInComponent() {
     setIsSubmitting(true)
     try {
       const res = await bookingApi.validateQr(bookingIdInput.trim())
-      toast.success("✓ Booking Verified! Opening Pre-Service Inspection...")
+      toast.success("Booking Verified! Opening Pre-Service Inspection...")
       setBookingIdInput("")
       navigate(`/manager/bookings/${res.id}/pre-inspection`)
     } catch (err: unknown) {

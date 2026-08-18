@@ -109,7 +109,7 @@ export interface BookingResponse {
 }
 
 export interface GetUserBookingsParams {
-  type?: "upcoming" | "history" | "all"
+  type?: "upcoming" | "history" | "all" | "noshow"
   page?: number
   limit?: number
   status?: string
@@ -150,7 +150,7 @@ export const bookingApi = {
   },
 
   getUserBookings: async (
-    params: "upcoming" | "history" | "all" | GetUserBookingsParams = "all"
+    params: "upcoming" | "history" | "all" | "noshow" | GetUserBookingsParams = "all"
   ): Promise<BookingListApiResponse> => {
     try {
       const queryParams = typeof params === "string" ? { type: params } : params
@@ -203,7 +203,7 @@ export const bookingApi = {
   validateQr: async (inputVal: string): Promise<BookingResponse> => {
     try {
       const cleanVal = inputVal.trim().replace(/^#+\s*/, "")
-      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/validate-qr`, {
+      const response = await api.post(API_ROUTES.BOOKINGS.VALIDATE_QR, {
         qrToken: cleanVal,
         bookingId: cleanVal,
       })
@@ -215,8 +215,9 @@ export const bookingApi = {
 
   completeHandover: async (bookingId: string, notes?: string): Promise<BookingResponse> => {
     try {
-      const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/handover`, {
+      const response = await api.post(API_ROUTES.BOOKINGS.HANDOVER_BY_ID(bookingId), {
         notes,
+        bookingId
       })
       return response.data.data
     } catch (error) {

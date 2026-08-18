@@ -6,6 +6,7 @@ export const CUSTOMER_BOOKING_TABS: TabConfig[] = [
   { id: "IN_PROGRESS", label: "In Progress" },
   { id: "COMPLETED", label: "Completed" },
   { id: "CANCELLED", label: "Cancelled" },
+  { id: "NO_SHOW", label: "No Show" },
 ]
 
 export const MANAGEMENT_BOOKING_TABS: TabConfig[] = [

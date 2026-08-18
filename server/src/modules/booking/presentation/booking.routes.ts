@@ -26,11 +26,9 @@ export const createBookingRouter = (bookingController: BookingController): Route
 
   router.use(authenticate)
 
-  // Customer Operations
+  // Customer & Role-Scoped Operations
   router.post("/", validateRequest(createBookingSchema), asyncHandler(bookingController.create))
   router.get("/", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getUserBookings))
-  router.get("/upcoming", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getUpcoming))
-  router.get("/history", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getHistory))
   router.get("/:bookingId", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.getById))
   router.get("/:bookingId/invoice", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.downloadInvoice))
   router.patch(

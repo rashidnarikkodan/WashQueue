@@ -51,9 +51,9 @@ export class BookingMongoRepository implements IBookingRepository {
       } else {
         query.status = filter.status
       }
-    }
-
-    if (filter.upcomingOnly) {
+    } else if (filter.noShowOnly) {
+      query.status = BookingStatus.NO_SHOW
+    } else if (filter.upcomingOnly) {
       query.status = {
         $in: [
           BookingStatus.PENDING,
@@ -129,6 +129,8 @@ export class BookingMongoRepository implements IBookingRepository {
       } else {
         query.status = filter.status
       }
+    } else if (filter.noShowOnly) {
+      query.status = BookingStatus.NO_SHOW
     } else if (filter.upcomingOnly) {
       query.status = {
         $in: [

@@ -57,7 +57,7 @@ export interface IBookingDocument extends Document {
   }
 
   paymentStatus: "PENDING" | "PARTIAL" | "PAID" | "REFUNDED" | "FAILED"
-  paymentType: "ONLINE_FULL" | "PAY_AT_STATION" | "DEPOSIT_PLUS_CASH" | "CASH_WALKIN"
+  paymentType: "ONLINE_FULL" | "PAY_AT_STATION" | "WALLET_AND_ONLINE" | "CASH_WALKIN"
 
   depositAmount: number
   cashAmount: number

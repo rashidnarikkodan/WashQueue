@@ -111,6 +111,7 @@ export const useBookingStore = create<BookingStore>((set) => ({
         } else if (activeTab === "CANCELLED") {
           apiParams.status = "CANCELLED"
         } else if (activeTab === "NO_SHOW") {
+          apiParams.type = "noshow"
           apiParams.status = "NO_SHOW"
         } else if (activeTab === "IN_PROGRESS") {
           apiParams.type = "upcoming"

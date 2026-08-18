@@ -102,6 +102,7 @@ export function getCustomerColumns({ onNavigate }: CustomerColumnHandlers): Colu
         if (b.status === "CONFIRMED")
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
         if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === "NO_SHOW") badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span
@@ -242,6 +243,7 @@ export function getManagementColumns({
         if (b.status === "CONFIRMED")
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
         if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === "NO_SHOW") badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span
