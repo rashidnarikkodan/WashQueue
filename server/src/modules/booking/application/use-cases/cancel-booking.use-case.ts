@@ -12,8 +12,7 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { Booking } from "../../domain/entities/Booking"
 import { ICancelBookingUseCase, IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
+import { ITransactionRunner } from "@/core/domain/transaction.interface"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
@@ -22,7 +21,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
     private readonly creditWalletUseCase?: CreditWalletUseCase,
-    private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
+    private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase,
+    private readonly transactionRunner?: ITransactionRunner
   ) {}
 
   private calculateRefundAmount(
@@ -82,60 +82,57 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     const now = new Date()
     const fromStatus = booking.status
 
-    const cancellationData = {
-      cancellationReason: input.reason || (isStaffCancellation ? "Cancelled by station manager" : "Cancelled by customer"),
-      cancelledBy: userId,
-      cancelledAt: now,
+    const cancellationReason =
+      input.reason || (isStaffCancellation ? "Cancelled by station manager" : "Cancelled by customer")
+
+    booking.cancel(cancellationReason, userId)
+
+    // The status transition and its audit log are one atomic unit — a cancelled booking
+    // should never exist without the log entry explaining why, or vice versa.
+    const runCancellationWork = async (session?: unknown) => {
+      const updated = await this.bookingRepository.updateWithStatusGuard(
+        booking,
+        [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN],
+        session
+      )
+      if (!updated) return null
+
+      const statusLog = new BookingStatusLog({
+        id: "",
+        bookingId: updated.id,
+        fromStatus,
+        toStatus: BookingStatus.CANCELLED,
+        changedBy: userId,
+        reason: cancellationReason,
+        createdAt: now,
+      })
+      await this.bookingStatusLogRepository.save(statusLog, session)
+
+      return updated
     }
 
-    // Rule 2: Atomic MongoDB Transition (PENDING/CONFIRMED/CHECKED_IN -> CANCELLED) to prevent duplicate cancellations
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      {
-        _id: input.bookingId,
-        status: { $in: [BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN] },
-      },
-      {
-        $set: {
-          status: BookingStatus.CANCELLED,
-          cancellation: cancellationData,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
+    const domainBooking = this.transactionRunner
+      ? await this.transactionRunner.runInTransaction(runCancellationWork)
+      : await runCancellationWork()
 
-    if (!updatedDoc) {
+    if (!domainBooking) {
       throw new AppError(
         "Cancellation failed. Booking may have already been cancelled or in service.",
         HTTP_STATUS.CONFLICT
       )
     }
 
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
-
+    // Refund evaluation runs after the cancellation is committed — it's a best-effort wallet
+    // side-effect (the wallet module manages its own transaction) that must not block or
+    // undo an already-committed cancellation.
     const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
     if (this.evaluateAndProcessRefundUseCase) {
       await this.evaluateAndProcessRefundUseCase.execute({
         bookingId: domainBooking.id,
         responsibility,
-        reason: cancellationData.cancellationReason,
+        reason: cancellationReason,
       })
     }
-
-    // Rule 5: Audit log
-    const statusLog = new BookingStatusLog({
-      id: "",
-      bookingId: domainBooking.id,
-      fromStatus,
-      toStatus: BookingStatus.CANCELLED,
-      changedBy: userId,
-      reason: cancellationData.cancellationReason,
-      createdAt: now,
-    })
-    await this.bookingStatusLogRepository.save(statusLog)
 
     // Rule 6: Synchronize Redis operational queue
     await this.redisQueueService.updateQueueStatus(domainBooking)

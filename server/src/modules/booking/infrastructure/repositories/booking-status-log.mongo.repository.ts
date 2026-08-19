@@ -1,13 +1,13 @@
-import { Types } from "mongoose"
+import { Types, ClientSession } from "mongoose"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLogModel } from "../models/booking-status-log.model"
 import { BookingStatusLogMapper } from "../mappers/booking-status-log.mapper"
 
 export class BookingStatusLogMongoRepository implements IBookingStatusLogRepository {
-  async save(log: BookingStatusLog): Promise<BookingStatusLog> {
+  async save(log: BookingStatusLog, session?: unknown): Promise<BookingStatusLog> {
     const raw = BookingStatusLogMapper.toPersistence(log)
-    const doc = await BookingStatusLogModel.create(raw)
+    const doc = (await BookingStatusLogModel.create([raw], { session: session as ClientSession }))[0]!
     return BookingStatusLogMapper.toDomain(doc)
   }
 

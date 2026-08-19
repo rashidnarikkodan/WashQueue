@@ -1,22 +1,22 @@
-import { Types } from "mongoose"
+import { Types, ClientSession } from "mongoose"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
 import { BookingReservation, ReservationStatus } from "../../domain/entities/BookingReservation"
 import { BookingReservationModel } from "../models/booking-reservation.model"
 import { BookingReservationMapper } from "../mappers/booking-reservation.mapper"
 
 export class BookingReservationMongoRepository implements IBookingReservationRepository {
-  async save(reservation: BookingReservation): Promise<BookingReservation> {
+  async save(reservation: BookingReservation, session?: unknown): Promise<BookingReservation> {
     const raw = BookingReservationMapper.toPersistence(reservation)
     if (reservation.id && Types.ObjectId.isValid(reservation.id)) {
       const updated = await BookingReservationModel.findByIdAndUpdate(
         reservation.id,
         { $set: raw },
-        { new: true, upsert: true }
+        { new: true, upsert: true, session: session as ClientSession }
       )
       return BookingReservationMapper.toDomain(updated!)
     }
 
-    const doc = await BookingReservationModel.create(raw)
+    const doc = (await BookingReservationModel.create([raw], { session: session as ClientSession }))[0]!
     return BookingReservationMapper.toDomain(doc)
   }
 

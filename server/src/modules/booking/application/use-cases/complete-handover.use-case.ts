@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
@@ -8,8 +8,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
@@ -79,8 +77,8 @@ export class CompleteHandoverUseCase {
     // 4. Payment Settlement Verification
     const isPaymentSettled =
       booking.paymentStatus === PaymentStatus.PAID ||
-      booking.paymentType === "DEPOSIT_PLUS_CASH" ||
-      booking.paymentType === "CASH_WALKIN"
+      booking.paymentType === PaymentType.DEPOSIT_PLUS_CASH ||
+      booking.paymentType === PaymentType.CASH_WALKIN
 
     if (!isPaymentSettled) {
       throw new AppError(
@@ -89,47 +87,32 @@ export class CompleteHandoverUseCase {
       )
     }
 
-    const now = new Date()
+    const fromStatus = booking.status
 
-    // 5. Atomic MongoDB State Transition (AWAITING_HANDOVER -> COMPLETED) to prevent duplicate handover submissions
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      {
-        _id: bookingId,
-        status: { $in: [BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER] },
-      },
-      {
-        $set: {
-          status: BookingStatus.COMPLETED,
-          paymentStatus: PaymentStatus.PAID,
-          handoverInitiatedAt: now,
-          completedAt: now,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
+    booking.complete()
 
-    if (!updatedDoc) {
+    // Optimistic-concurrency guard to prevent duplicate handover submissions
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, [
+      BookingStatus.SERVICE_COMPLETED,
+      BookingStatus.AWAITING_HANDOVER,
+    ])
+
+    if (!domainBooking) {
       throw new AppError(
         "Failed to finalize vehicle handover. Handover may have already been completed by another manager.",
         HTTP_STATUS.CONFLICT
       )
     }
 
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
-
     // 6. Save Status Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
-      fromStatus: booking.status,
+      fromStatus,
       toStatus: BookingStatus.COMPLETED,
       changedBy: managerUserId,
       reason: notes || "Vehicle handed over to customer & booking closed",
-      createdAt: now,
+      createdAt: domainBooking.completedAt || new Date(),
     })
     await this.bookingStatusLogRepository.save(statusLog)
 

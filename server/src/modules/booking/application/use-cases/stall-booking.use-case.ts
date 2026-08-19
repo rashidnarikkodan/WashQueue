@@ -8,8 +8,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 
 export interface StallBookingInput {
   bookingId: string
@@ -49,40 +47,18 @@ export class StallBookingUseCase {
       )
     }
 
-    const now = new Date()
     const previousStatus = booking.status
 
-    const stalledData = {
-      stalledReason: reason.trim(),
-      stalledBy: managerUserId,
-      stalledAt: now,
-      previousStatus: previousStatus as "CHECKED_IN" | "IN_SERVICE",
-    }
+    booking.stall(reason.trim(), managerUserId)
 
-    // Atomic MongoDB Transition (CHECKED_IN/IN_SERVICE -> STALLED)
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      {
-        _id: bookingId,
-        status: { $in: allowedEntryStatuses },
-      },
-      {
-        $set: {
-          status: BookingStatus.STALLED,
-          stalledInfo: stalledData,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
+    // Optimistic-concurrency guard (CHECKED_IN/IN_SERVICE -> STALLED)
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, allowedEntryStatuses)
 
-    if (!updatedDoc) {
+    if (!domainBooking) {
       throw new AppError("Failed to transition booking to STALLED state", HTTP_STATUS.CONFLICT)
     }
 
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
+    const now = domainBooking.stalledInfo?.stalledAt || new Date()
 
     // Save Audit Log
     const statusLog = new BookingStatusLog({

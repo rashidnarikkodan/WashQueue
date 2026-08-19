@@ -1,5 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import logger from "@/configs/logger.config"
 import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { QRTokenService } from "../../domain/services/QRTokenService"
@@ -140,7 +141,7 @@ export class ValidateQRForCheckInUseCase {
             })
           )
         } catch (err) {
-          console.warn(`[ValidateQR] Failed to mark booking ${booking.id} as NO_SHOW:`, err)
+          logger.warn({ error: err, bookingId: booking.id }, "[ValidateQR] Failed to mark booking as NO_SHOW")
         }
 
         throw new AppError(

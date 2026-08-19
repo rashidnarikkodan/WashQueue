@@ -1,7 +1,9 @@
-import { BOOKING, BookingStatus } from "@/common/constants/booking.constants"
-import { PAYMENT, PaymentStatusType } from "@/common/constants/payment.constants"
 import { Schema, model, Document, Types } from "mongoose"
-import { PaymentType } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+
+// Persistence-only field (no domain behavior hangs off it), so its own small vocabulary
+// lives here rather than in the domain layer — see RefundDetailsSnapshot at the repository boundary.
+const REFUND_STATUS_VALUES = ["NONE", "PENDING", "PROCESSED", "FAILED"] as const
 
 export interface IBookingDocument extends Document {
   _id: Types.ObjectId
@@ -59,7 +61,7 @@ export interface IBookingDocument extends Document {
     qrExpiresAt: Date
   }
 
-  paymentStatus: PaymentStatusType
+  paymentStatus: PaymentStatus
   paymentType: PaymentType
   depositAmount: number
   cashAmount: number
@@ -189,8 +191,8 @@ const bookingSchema = new Schema<IBookingDocument>(
 
     paymentStatus: {
       type: String,
-      enum: Object.values(PAYMENT.STATUS),
-      default: PAYMENT.STATUS.PENDING,
+      enum: Object.values(PaymentStatus),
+      default: PaymentStatus.PENDING,
     },
 
     paymentType: {
@@ -216,7 +218,7 @@ const bookingSchema = new Schema<IBookingDocument>(
       },
       status: {
         type: String,
-        enum:Object.values(PAYMENT.REFUND.STATUS),
+        enum: REFUND_STATUS_VALUES,
         default: "NONE",
       },
       amount: { type: Number, default: 0 },
@@ -246,8 +248,8 @@ const bookingSchema = new Schema<IBookingDocument>(
 
     status: {
       type: String,
-      enum: Object.values(BOOKING.STATUS),
-      default: BOOKING.STATUS.CONFIRMED,
+      enum: Object.values(BookingStatus),
+      default: BookingStatus.CONFIRMED,
       index: true,
     },
 
@@ -255,7 +257,7 @@ const bookingSchema = new Schema<IBookingDocument>(
       stalledReason: { type: String },
       stalledBy: { type: Schema.Types.ObjectId, ref: "User" },
       stalledAt: { type: Date },
-      previousStatus: { type: String, enum: [BOOKING.STATUS.CHECKED_IN, BOOKING.STATUS.IN_SERVICE] },
+      previousStatus: { type: String, enum: [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE] },
       resolution: { type: String },
       resolvedBy: { type: Schema.Types.ObjectId, ref: "User" },
       resolvedAt: { type: Date },

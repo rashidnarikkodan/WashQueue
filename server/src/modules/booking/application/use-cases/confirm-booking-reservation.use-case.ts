@@ -5,7 +5,7 @@ import { IStationPricingRepository } from "@/modules/station/domain/repositories
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
-import { Booking, BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { Booking, BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -18,6 +18,8 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
 import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
 import { DebitWalletUseCase } from "@/modules/wallet/application/use-cases/debit-wallet.use-case"
+import { ITransactionRunner } from "@/core/domain/transaction.interface"
+import logger from "@/configs/logger.config"
 
 export interface ConfirmBookingReservationInput {
   razorpay_order_id: string
@@ -49,7 +51,8 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     private readonly vehicleRepository: IVehicleRepository,
     private readonly notificationService: IBookingNotificationService,
     private readonly paymentGateway: IPaymentGatewayService,
-    private readonly debitWalletUseCase: DebitWalletUseCase
+    private readonly debitWalletUseCase: DebitWalletUseCase,
+    private readonly transactionRunner?: ITransactionRunner
   ) {
     this.pricingResolutionService = new BookingPricingResolutionService(
       stationPricingRepository,
@@ -161,7 +164,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
         qrExpiresAt: qrResult.qrExpiresAt,
       },
       paymentStatus:
-        reservation.paymentType === "ONLINE_FULL" ? PaymentStatus.PAID : PaymentStatus.PENDING,
+        reservation.paymentType === PaymentType.ONLINE_FULL ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType: reservation.paymentType,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
@@ -172,9 +175,37 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       updatedAt: now,
     })
 
-    const savedBooking = await this.bookingRepository.save(booking)
+    // Booking creation, its audit log, and the reservation's CONFIRMED transition are one
+    // atomic unit — a manager should never see a half-confirmed reservation with no booking,
+    // or a booking with no audit trail, because one write in the sequence failed.
+    const runConfirmationWork = async (session?: unknown) => {
+      const savedBooking = await this.bookingRepository.save(booking, session)
 
-    // Deduct wallet balance if split payment was used
+      const statusLog = new BookingStatusLog({
+        id: "",
+        bookingId: savedBooking.id,
+        fromStatus: null,
+        toStatus: BookingStatus.CONFIRMED,
+        changedBy: reservation.userId,
+        reason: "Customer confirmed booking after payment verification",
+        createdAt: now,
+      })
+      await this.bookingStatusLogRepository.save(statusLog, session)
+
+      reservation.confirm(savedBooking.id, razorpay_payment_id, razorpay_signature)
+      await this.reservationRepository.save(reservation, session)
+
+      return savedBooking
+    }
+
+    const savedBooking = this.transactionRunner
+      ? await this.transactionRunner.runInTransaction(runConfirmationWork)
+      : await runConfirmationWork()
+
+    // Deduct wallet balance if split payment was used. This is a best-effort side payment on
+    // top of an already-committed booking (the wallet module manages its own transaction and
+    // can't join the one above), so a failure here must not undo the confirmed booking — it's
+    // logged for manual reconciliation instead of being silently swallowed.
     if (reservation.walletAmount > 0) {
       try {
         await this.debitWalletUseCase.execute({
@@ -190,24 +221,17 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
           },
         })
       } catch (walletErr) {
-        console.error("Failed to debit wallet on booking confirmation:", walletErr)
+        logger.error(
+          {
+            error: walletErr,
+            bookingId: savedBooking.id,
+            reservationId: reservation.id,
+            walletAmount: reservation.walletAmount,
+          },
+          "[ConfirmBookingReservation] Wallet debit failed after booking was confirmed — needs manual reconciliation"
+        )
       }
     }
-
-    const statusLog = new BookingStatusLog({
-      id: "",
-      bookingId: savedBooking.id,
-      fromStatus: null,
-      toStatus: BookingStatus.CONFIRMED,
-      changedBy: reservation.userId,
-      reason: "Customer confirmed booking after payment verification",
-      createdAt: now,
-    })
-    await this.bookingStatusLogRepository.save(statusLog)
-
-    // Update reservation status to CONFIRMED
-    reservation.confirm(savedBooking.id, razorpay_payment_id, razorpay_signature)
-    await this.reservationRepository.save(reservation)
 
     // Notify
     await this.notificationService.notify("BOOKING_CREATED", savedBooking)

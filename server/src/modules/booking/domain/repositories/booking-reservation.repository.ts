@@ -1,7 +1,7 @@
 import { BookingReservation } from "../entities/BookingReservation"
 
 export interface IBookingReservationRepository {
-  save(reservation: BookingReservation): Promise<BookingReservation>
+  save(reservation: BookingReservation, session?: unknown): Promise<BookingReservation>
   findById(id: string): Promise<BookingReservation | null>
   findByRazorpayOrderId(orderId: string): Promise<BookingReservation | null>
   findExpiredHeldReservations(now?: Date): Promise<BookingReservation[]>

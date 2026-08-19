@@ -1,4 +1,5 @@
 import { Response } from "express"
+import { z } from "zod"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
@@ -84,9 +85,9 @@ export class OwnerController {
       throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
-    const validatedBody = createOwnerSchema.parse(req.body)
+    // req.body is already validated/coerced by validateRequest(createOwnerSchema) on the route
     const data = await this.createOwnerUseCase.execute({
-      ...validatedBody,
+      ...(req.body as z.infer<typeof createOwnerSchema>),
       userId,
     })
 
@@ -115,8 +116,8 @@ export class OwnerController {
       throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
-    const validatedBody = updateOwnerSchema.parse(req.body)
-    const data = await this.updateOwnerUseCase.execute(userId, validatedBody)
+    // req.body is already validated/coerced by validateRequest(updateOwnerSchema) on the route
+    const data = await this.updateOwnerUseCase.execute(userId, req.body as z.infer<typeof updateOwnerSchema>)
 
     if (!data) {
       throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)

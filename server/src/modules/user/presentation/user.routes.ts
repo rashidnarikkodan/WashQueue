@@ -7,6 +7,7 @@ import { ROLE } from "@/common/constants/role.constants"
 import { API_ROUTES } from "@/common/constants/route.constants"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { updateUserSchema } from "./schema/update-user.schema"
+import { usersQuerySchema } from "./schema/get-users.schema"
 
 export const createUsersRouter = (userController: UserController): Router => {
   const router = Router()
@@ -15,6 +16,7 @@ export const createUsersRouter = (userController: UserController): Router => {
     API_ROUTES.USERS.GET_ALL,
     authenticate,
     authorize(ROLE.ADMIN),
+    validateRequest(usersQuerySchema, "query"),
     asyncHandler(userController.getUsers)
   )
   router.get(API_ROUTES.USERS.BOOKMARKS, authenticate, asyncHandler(userController.getBookmarks))
@@ -22,6 +24,7 @@ export const createUsersRouter = (userController: UserController): Router => {
     API_ROUTES.USERS.EXPORT,
     authenticate,
     authorize(ROLE.ADMIN),
+    validateRequest(usersQuerySchema, "query"),
     asyncHandler(userController.exportUsers)
   )
   router.post(

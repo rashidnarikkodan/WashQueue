@@ -8,8 +8,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
@@ -82,10 +80,10 @@ export class StartServiceUseCase {
 
     // 5. Bay Capacity Validation
     const totalBays = station.getProps().slotConfig?.bays || 1
-    const activeCount = await BookingModel.countDocuments({
-      stationId: booking.stationId,
-      status: BookingStatus.IN_SERVICE,
-    }).exec()
+    const activeCount = await this.bookingRepository.countByStationAndStatus(
+      booking.stationId,
+      BookingStatus.IN_SERVICE
+    )
 
     if (activeCount >= totalBays) {
       throw new AppError(
@@ -95,34 +93,23 @@ export class StartServiceUseCase {
     }
 
     const assignedBayNumber = activeCount + 1
-    const now = new Date()
 
-    // 6. Atomic MongoDB Transition (CHECKED_IN -> IN_SERVICE) to prevent double-start race conditions
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      { _id: bookingId, status: BookingStatus.CHECKED_IN },
-      {
-        $set: {
-          status: BookingStatus.IN_SERVICE,
-          serviceStartedAt: now,
-          serviceStartedBy: managerUserId,
-          assignedBayNumber,
-          updatedAt: now,
-        },
-      },
-      { new: true }
+    booking.startService()
+
+    // Optimistic-concurrency guard (CHECKED_IN -> IN_SERVICE) to prevent double-start race conditions
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+      booking,
+      BookingStatus.CHECKED_IN
     )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
 
-    if (!updatedDoc) {
+    if (!domainBooking) {
       throw new AppError(
         "Failed to start service. Booking status may have been updated simultaneously by another manager.",
         HTTP_STATUS.CONFLICT
       )
     }
 
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
+    const now = domainBooking.serviceStartedAt || new Date()
 
     // 7. Write Audit Log
     const statusLog = new BookingStatusLog({

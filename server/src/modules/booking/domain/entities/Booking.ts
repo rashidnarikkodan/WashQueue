@@ -340,7 +340,11 @@ export class Booking {
           targetStatus
         )
       case BookingStatus.IN_SERVICE:
-        return [BookingStatus.SERVICE_COMPLETED, BookingStatus.CANCELLED].includes(targetStatus)
+        return [
+          BookingStatus.SERVICE_COMPLETED,
+          BookingStatus.AWAITING_HANDOVER,
+          BookingStatus.CANCELLED,
+        ].includes(targetStatus)
       case BookingStatus.SERVICE_COMPLETED:
         return [BookingStatus.AWAITING_HANDOVER, BookingStatus.COMPLETED].includes(targetStatus)
       case BookingStatus.AWAITING_HANDOVER:
@@ -362,6 +366,18 @@ export class Booking {
     this.props.status = BookingStatus.CHECKED_IN
     this.props.checkedInAt = now
     this.props.checkedInBy = byUserId
+    this.props.updatedAt = now
+  }
+
+  completePreInspection(inspection: InspectionRecord, byUserId: string): void {
+    if (!this.canTransitionTo(BookingStatus.CHECKED_IN)) {
+      throw new Error(`Cannot complete pre-service inspection for booking in status ${this.props.status}`)
+    }
+    const now = new Date()
+    this.props.status = BookingStatus.CHECKED_IN
+    this.props.checkedInAt = now
+    this.props.checkedInBy = byUserId
+    this.props.preServiceInspection = inspection
     this.props.updatedAt = now
   }
 
@@ -395,12 +411,26 @@ export class Booking {
     this.props.updatedAt = now
   }
 
+  // Post-inspection doubles as the "service work is done" signal, so it moves the
+  // booking straight to AWAITING_HANDOVER without a separate SERVICE_COMPLETED step.
+  completePostInspection(inspection: InspectionRecord): void {
+    if (!this.canTransitionTo(BookingStatus.AWAITING_HANDOVER)) {
+      throw new Error(`Cannot complete post-service inspection for booking in status ${this.props.status}`)
+    }
+    const now = new Date()
+    this.props.status = BookingStatus.AWAITING_HANDOVER
+    this.props.serviceCompletedAt = now
+    this.props.postServiceInspection = inspection
+    this.props.updatedAt = now
+  }
+
   complete(): void {
     if (!this.canTransitionTo(BookingStatus.COMPLETED)) {
       throw new Error(`Cannot complete booking in status ${this.props.status}`)
     }
     const now = new Date()
     this.props.status = BookingStatus.COMPLETED
+    this.props.handoverInitiatedAt = this.props.handoverInitiatedAt ?? now
     this.props.completedAt = now
     this.props.paymentStatus = PaymentStatus.PAID
     this.props.updatedAt = now
@@ -431,6 +461,47 @@ export class Booking {
     const now = new Date()
     this.props.status = BookingStatus.NO_SHOW
     this.props.noShowAt = now
+    this.props.updatedAt = now
+  }
+
+  // STALLED is an exceptional side-channel (equipment failure, payment dispute, etc.), not
+  // part of the linear happy-path state machine — deliberately bypasses canTransitionTo.
+  stall(reason: string, byUserId: string): void {
+    const allowedEntryStatuses = [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE]
+    if (!allowedEntryStatuses.includes(this.props.status)) {
+      throw new Error(
+        `Only CHECKED_IN or IN_SERVICE bookings can enter STALLED state. Current status is ${this.props.status}`
+      )
+    }
+    const now = new Date()
+    this.props.stalledInfo = {
+      stalledReason: reason,
+      stalledBy: byUserId,
+      stalledAt: now,
+      previousStatus: this.props.status as "CHECKED_IN" | "IN_SERVICE",
+    }
+    this.props.status = BookingStatus.STALLED
+    this.props.updatedAt = now
+  }
+
+  resolveStall(resolution: string, resolvedBy: string, targetStatus: BookingStatus): void {
+    if (this.props.status !== BookingStatus.STALLED) {
+      throw new Error(`Only STALLED bookings can be resolved. Current status is ${this.props.status}`)
+    }
+    const allowedTargets = [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE, BookingStatus.CANCELLED]
+    if (!allowedTargets.includes(targetStatus)) {
+      throw new Error(
+        "Invalid recovery target status. Allowed target recovery statuses are CHECKED_IN, IN_SERVICE, or CANCELLED"
+      )
+    }
+    const now = new Date()
+    this.props.stalledInfo = {
+      ...(this.props.stalledInfo as StalledDetails),
+      resolution,
+      resolvedBy,
+      resolvedAt: now,
+    }
+    this.props.status = targetStatus
     this.props.updatedAt = now
   }
 }

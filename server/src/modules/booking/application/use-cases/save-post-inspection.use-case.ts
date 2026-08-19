@@ -8,8 +8,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
@@ -96,31 +94,20 @@ export class SavePostInspectionUseCase {
       capturedAt: now,
     }
 
-    // 3. Atomic MongoDB Transition (IN_SERVICE -> AWAITING_HANDOVER) to prevent duplicate completion submissions
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      { _id: bookingId, status: BookingStatus.IN_SERVICE },
-      {
-        $set: {
-          status: BookingStatus.AWAITING_HANDOVER,
-          serviceCompletedAt: now,
-          postServiceInspection: inspectionRecord,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
+    booking.completePostInspection(inspectionRecord)
 
-    if (!updatedDoc) {
+    // Optimistic-concurrency guard (IN_SERVICE -> AWAITING_HANDOVER) to prevent duplicate completion submissions
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+      booking,
+      BookingStatus.IN_SERVICE
+    )
+
+    if (!domainBooking) {
       throw new AppError(
         "Failed to save post-service inspection. Service completion may have already been submitted.",
         HTTP_STATUS.CONFLICT
       )
     }
-
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
 
     // 4. Save Status Log
     const statusLog = new BookingStatusLog({

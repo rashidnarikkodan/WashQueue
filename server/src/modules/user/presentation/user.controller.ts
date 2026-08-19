@@ -7,6 +7,7 @@ import {
   IToggleBookmarkUseCase,
 } from "../application/interfaces/user-usecases.interfaces"
 import { usersQuerySchema } from "./schema/get-users.schema"
+import { z } from "zod"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
@@ -39,7 +40,8 @@ export class UserController {
   ) {}
 
   getUsers = async (req: Request, res: Response) => {
-    const query = usersQuerySchema.parse(req.query)
+    // req.query is already validated/coerced by validateRequest(usersQuerySchema) on the route
+    const query = req.query as unknown as z.infer<typeof usersQuerySchema>
     const data = await this.getUsersUseCase.execute(query)
     success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.USERS_RETRIEVED_SUCCESS)
   }
@@ -95,7 +97,10 @@ export class UserController {
   }
 
   exportUsers = async (req: Request, res: Response) => {
-    const query = usersQuerySchema.parse({ ...req.query, page: 1, limit: 10000 })
+    // req.query is already validated/coerced by validateRequest(usersQuerySchema) on the route;
+    // page/limit are forced here to export the full result set regardless of what was requested.
+    const validatedQuery = req.query as unknown as z.infer<typeof usersQuerySchema>
+    const query = { ...validatedQuery, page: 1, limit: 10000 }
     const data = await this.getUsersUseCase.execute(query)
     const users = data.users || []
 

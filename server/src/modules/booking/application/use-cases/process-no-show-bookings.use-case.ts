@@ -1,11 +1,10 @@
 import logger from "@/configs/logger.config"
 import { BookingStatus } from "../../domain/entities/Booking"
+import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 
 import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
 
@@ -16,6 +15,7 @@ export interface ProcessNoShowResult {
 
 export class ProcessNoShowBookingsUseCase {
   constructor(
+    private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
@@ -31,52 +31,35 @@ export class ProcessNoShowBookingsUseCase {
     const graceCutoff = new Date(now.getTime() - gracePeriodMinutes * 60 * 1000)
 
     // 1. Query only eligible CONFIRMED bookings past grace cutoff using indexed fields
-    const eligibleDocs = await BookingModel.find({
-      status: BookingStatus.CONFIRMED,
-      noShowAt: null,
-      "scheduling.windowStart": { $lt: graceCutoff },
-    })
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
-      .exec()
+    const eligibleBookings = await this.bookingRepository.findNoShowCandidates(graceCutoff)
 
-    if (eligibleDocs.length === 0) {
+    if (eligibleBookings.length === 0) {
       return { processedCount: 0, noShowBookingIds: [] }
     }
 
     const processedBookingIds: string[] = []
 
-    for (const doc of eligibleDocs) {
-      const bookingId = doc._id.toString()
+    for (const booking of eligibleBookings) {
+      const bookingId = booking.id
 
-      // 2. Atomic findOneAndUpdate ensuring status is still CONFIRMED & noShowAt is null (Idempotency guarantee)
-      const updatedDoc = await BookingModel.findOneAndUpdate(
-        {
-          _id: doc._id,
-          status: BookingStatus.CONFIRMED,
-          noShowAt: null,
-        },
-        {
-          $set: {
-            status: BookingStatus.NO_SHOW,
-            noShowAt: now,
-            updatedAt: now,
-          },
-        },
-        { new: true }
+      try {
+        booking.markNoShow()
+      } catch (err) {
+        logger.warn({ error: err, bookingId }, "[NoShowJob] Booking is no longer eligible for NO_SHOW; skipping")
+        continue
+      }
+
+      // 2. Optimistic-concurrency guard ensures status is still CONFIRMED (Idempotency guarantee)
+      const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+        booking,
+        BookingStatus.CONFIRMED
       )
-        .populate("stationId")
-        .populate("vehicleId")
-        .populate("userId")
-        .exec()
 
-      if (!updatedDoc) {
+      if (!domainBooking) {
         // Already processed by another worker or checked in simultaneously
         continue
       }
 
-      const domainBooking = BookingMapper.toDomain(updatedDoc)
       processedBookingIds.push(domainBooking.id)
 
       // 3. Create Audit Log

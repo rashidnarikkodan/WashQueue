@@ -5,6 +5,8 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { ROLE } from "@/common/constants/role.constants"
+import { requireManagerPermission } from "@/modules/manager/manager.module"
+import { ManagerPermission } from "@/modules/manager/domain/entities/ManagerAssignment"
 import {
   cancelBookingSchema,
   createBookingSchema,
@@ -54,6 +56,7 @@ export const createBookingRouter = (bookingController: BookingController): Route
     "/stations/:stationId/queue",
     authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(stationIdParamSchema, "params"),
+    requireManagerPermission(ManagerPermission.QUEUE_MANAGEMENT),
     asyncHandler(bookingController.getOperationalQueue)
   )
 

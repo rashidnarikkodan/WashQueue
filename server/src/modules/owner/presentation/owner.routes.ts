@@ -5,6 +5,7 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { onboardingUpload } from "@/infrastructure/multer/multer.middleware"
 import { saveOnboardingStepSchema } from "./schema/save-onboarding-step.schema"
+import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 export const createOwnerRouter = (ownerController: OwnerController): Router => {
@@ -24,11 +25,19 @@ export const createOwnerRouter = (ownerController: OwnerController): Router => {
 
   router.post(API_ROUTES.OWNER.ONBOARDING_SUBMIT, asyncHandler(ownerController.submitOnboarding))
 
-  router.post(API_ROUTES.OWNER.CREATE, asyncHandler(ownerController.createOwner))
+  router.post(
+    API_ROUTES.OWNER.CREATE,
+    validateRequest(createOwnerSchema),
+    asyncHandler(ownerController.createOwner)
+  )
 
   router.get(API_ROUTES.OWNER.GET_PROFILE, asyncHandler(ownerController.getOwnerProfile))
 
-  router.patch(API_ROUTES.OWNER.UPDATE_PROFILE, asyncHandler(ownerController.updateOwnerProfile))
+  router.patch(
+    API_ROUTES.OWNER.UPDATE_PROFILE,
+    validateRequest(updateOwnerSchema),
+    asyncHandler(ownerController.updateOwnerProfile)
+  )
 
   return router
 }

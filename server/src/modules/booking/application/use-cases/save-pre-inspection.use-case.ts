@@ -1,5 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import logger from "@/configs/logger.config"
 import { BookingStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
@@ -8,8 +9,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
@@ -123,7 +122,7 @@ export class SavePreInspectionAndCheckInUseCase {
             })
           )
         } catch (err) {
-          console.warn(`[SavePreInspection] Failed to mark booking ${existing.id} as NO_SHOW:`, err)
+          logger.warn({ error: err, bookingId: existing.id }, "[SavePreInspection] Failed to mark booking as NO_SHOW")
         }
 
         throw new AppError(
@@ -146,32 +145,20 @@ export class SavePreInspectionAndCheckInUseCase {
       capturedAt: now,
     }
 
-    // Atomic findOneAndUpdate with status: CONFIRMED to prevent race conditions & duplicate check-ins
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      { _id: bookingId, status: BookingStatus.CONFIRMED },
-      {
-        $set: {
-          status: BookingStatus.CHECKED_IN,
-          checkedInAt: now,
-          checkedInBy: managerUserId,
-          preServiceInspection: inspectionRecord,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
+    existing.completePreInspection(inspectionRecord, managerUserId)
 
-    if (!updatedDoc) {
+    // Optimistic-concurrency guard prevents race conditions & duplicate check-ins
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+      existing,
+      BookingStatus.CONFIRMED
+    )
+
+    if (!domainBooking) {
       throw new AppError(
         "Check-in failed. Booking may have already been checked in or status changed.",
         HTTP_STATUS.CONFLICT
       )
     }
-
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
 
     // Save audit log
     const statusLog = new BookingStatusLog({

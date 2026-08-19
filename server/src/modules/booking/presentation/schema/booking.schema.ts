@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { PaymentType } from "../../domain/entities/Booking"
 
 export const objectIdRegex = /^[0-9a-fA-F]{24}$/
 
@@ -111,7 +112,9 @@ export const createPaymentOrderSchema = z.object({
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
     .default([]),
-  paymentType: z.enum(["ONLINE_FULL", "PAY_AT_STATION"]).default("ONLINE_FULL"),
+  paymentType: z
+    .enum([PaymentType.ONLINE_FULL, PaymentType.PAY_AT_STATION])
+    .default(PaymentType.ONLINE_FULL),
   useWallet: z.boolean().optional().default(false),
 })
 

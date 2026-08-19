@@ -1,6 +1,7 @@
 import { BookingMongoRepository } from "./infrastructure/repositories/booking.mongo.repository"
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
 import { BookingReservationMongoRepository } from "./infrastructure/repositories/booking-reservation.mongo.repository"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
 import { managerAssignmentRepository } from "../manager/manager.module"
 
 import { BookingRedisQueueService } from "./infrastructure/services/booking-redis-queue.service"
@@ -54,6 +55,7 @@ import { createPaymentRouter } from "./presentation/payment.routes"
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
 export const bookingReservationRepository = new BookingReservationMongoRepository()
+const transactionRunner = new MongooseTransactionRunner()
 
 // Instantiate Services
 const bookingRedisQueueService = new BookingRedisQueueService(bookingStatusLogRepository)
@@ -83,7 +85,8 @@ export const confirmBookingReservationUseCase = new ConfirmBookingReservationUse
   vehicleRepository,
   bookingNotificationService,
   sharedRazorpayService,
-  debitWalletUseCase
+  debitWalletUseCase,
+  transactionRunner
 )
 
 export const cancelBookingReservationUseCase = new CancelBookingReservationUseCase(
@@ -145,7 +148,8 @@ const cancelBookingUseCase = new CancelBookingUseCase(
   bookingRedisQueueService,
   bookingNotificationService,
   creditWalletUseCase,
-  evaluateAndProcessRefundUseCase
+  evaluateAndProcessRefundUseCase,
+  transactionRunner
 )
 
 const validateQRUseCase = new ValidateQRForCheckInUseCase(
@@ -171,6 +175,7 @@ export const getOperationalQueueUseCase = new GetOperationalQueueUseCase(
 )
 
 export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
+  bookingRepository,
   bookingStatusLogRepository,
   bookingRedisQueueService,
   bookingNotificationService,

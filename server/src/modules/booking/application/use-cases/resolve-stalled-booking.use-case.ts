@@ -8,8 +8,6 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { BookingModel } from "../../infrastructure/models/booking.model"
-import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
 import { IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
 
 export interface ResolveStalledBookingInput {
@@ -60,40 +58,16 @@ export class ResolveStalledBookingUseCase {
       )
     }
 
-    const now = new Date()
+    booking.resolveStall(resolution.trim(), managerUserId, finalTargetStatus)
 
-    // Update stalledInfo with resolution details
-    const updatedStalledInfo = {
-      ...booking.stalledInfo,
-      resolution: resolution.trim(),
-      resolvedBy: managerUserId,
-      resolvedAt: now,
-    }
+    // Optimistic-concurrency guard (STALLED -> target status)
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, BookingStatus.STALLED)
 
-    // Atomic MongoDB Transition (STALLED -> Target Status)
-    const updatedDoc = await BookingModel.findOneAndUpdate(
-      {
-        _id: bookingId,
-        status: BookingStatus.STALLED,
-      },
-      {
-        $set: {
-          status: finalTargetStatus,
-          stalledInfo: updatedStalledInfo,
-          updatedAt: now,
-        },
-      },
-      { new: true }
-    )
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
-
-    if (!updatedDoc) {
+    if (!domainBooking) {
       throw new AppError("Failed to resolve stalled booking", HTTP_STATUS.CONFLICT)
     }
 
-    const domainBooking = BookingMapper.toDomain(updatedDoc)
+    const now = domainBooking.stalledInfo?.resolvedAt || new Date()
 
     // If resolved via cancellation, evaluate domain refund policy
     if (finalTargetStatus === BookingStatus.CANCELLED && this.evaluateAndProcessRefundUseCase) {

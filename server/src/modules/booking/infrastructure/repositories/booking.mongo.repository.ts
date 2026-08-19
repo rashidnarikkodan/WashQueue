@@ -1,10 +1,11 @@
-import { Types } from "mongoose"
-import { Booking, BookingStatus } from "../../domain/entities/Booking"
+import { Types, ClientSession } from "mongoose"
+import { Booking, BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
 import {
   FindBookingsFilter,
   FindBookingsResult,
   FindUserBookingsFilter,
   IBookingRepository,
+  RefundDetailsSnapshot,
 } from "../../domain/repositories/booking.repository"
 import { BookingModel } from "../models/booking.model"
 import { BookingMapper } from "../mappers/booking.mapper"
@@ -229,10 +230,11 @@ export class BookingMongoRepository implements IBookingRepository {
     }
   }
 
-  async save(booking: Booking): Promise<Booking> {
+  async save(booking: Booking, session?: unknown): Promise<Booking> {
     const raw = BookingMapper.toPersistence(booking)
-    const created = await BookingModel.create(raw)
+    const created = (await BookingModel.create([raw], { session: session as ClientSession }))[0]!
     const doc = await BookingModel.findById(created._id)
+      .session((session as ClientSession) || null)
       .populate("stationId")
       .populate("vehicleId")
       .populate("userId")
@@ -254,6 +256,108 @@ export class BookingMongoRepository implements IBookingRepository {
       throw new Error(`Booking ${booking.id} not found for update`)
     }
 
+    return BookingMapper.toDomain(updated)
+  }
+
+  async updateWithStatusGuard(
+    booking: Booking,
+    expectedCurrentStatus: BookingStatus | BookingStatus[],
+    session?: unknown
+  ): Promise<Booking | null> {
+    if (!Types.ObjectId.isValid(booking.id)) {
+      throw new Error("Invalid Booking ID for update")
+    }
+
+    const statusFilter = Array.isArray(expectedCurrentStatus)
+      ? { $in: expectedCurrentStatus }
+      : expectedCurrentStatus
+
+    const raw = BookingMapper.toPersistence(booking)
+    const updated = await BookingModel.findOneAndUpdate(
+      { _id: booking.id, status: statusFilter },
+      { $set: raw },
+      { new: true, session: session as ClientSession }
+    )
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+
+    if (!updated) return null
+    return BookingMapper.toDomain(updated)
+  }
+
+  async countByStationAndStatus(stationId: string, status: BookingStatus): Promise<number> {
+    if (!Types.ObjectId.isValid(stationId)) return 0
+    return BookingModel.countDocuments({
+      stationId: new Types.ObjectId(stationId),
+      status,
+    }).exec()
+  }
+
+  async findNoShowCandidates(graceCutoff: Date): Promise<Booking[]> {
+    const docs = await BookingModel.find({
+      status: BookingStatus.CONFIRMED,
+      noShowAt: null,
+      "scheduling.windowStart": { $lt: graceCutoff },
+    })
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+      .exec()
+    return docs.map(BookingMapper.toDomain)
+  }
+
+  async getRefundDetails(bookingId: string): Promise<RefundDetailsSnapshot | null> {
+    if (!Types.ObjectId.isValid(bookingId)) return null
+    const doc = await BookingModel.findById(bookingId).select("refundDetails").exec()
+    if (!doc?.refundDetails) return null
+
+    return {
+      refundType: doc.refundDetails.refundType || "NONE",
+      refundMethod: doc.refundDetails.refundMethod || "WALLET",
+      status: (doc.refundDetails.status as RefundDetailsSnapshot["status"]) || "NONE",
+      amount: doc.refundDetails.amount || 0,
+      reason: doc.refundDetails.reason || "",
+      transactionId: doc.refundDetails.transactionId || null,
+    }
+  }
+
+  async applyRefund(
+    bookingId: string,
+    refund: RefundDetailsSnapshot,
+    newPaymentStatus: PaymentStatus
+  ): Promise<Booking | null> {
+    if (!Types.ObjectId.isValid(bookingId)) return null
+
+    const now = new Date()
+    const updated = await BookingModel.findOneAndUpdate(
+      {
+        _id: bookingId,
+        "refundDetails.status": { $ne: "PROCESSED" },
+      },
+      {
+        $set: {
+          refundAmount: refund.amount,
+          paymentStatus: newPaymentStatus,
+          refundDetails: {
+            refundType: refund.refundType,
+            refundMethod: refund.refundMethod,
+            status: refund.status,
+            amount: refund.amount,
+            reason: refund.reason,
+            processedAt: now,
+            transactionId: refund.transactionId,
+          },
+          updatedAt: now,
+        },
+      },
+      { new: true }
+    )
+      .populate("stationId")
+      .populate("vehicleId")
+      .populate("userId")
+
+    if (!updated) return null
     return BookingMapper.toDomain(updated)
   }
 }
