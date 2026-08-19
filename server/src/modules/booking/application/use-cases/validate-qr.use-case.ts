@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { QRTokenService } from "../../domain/services/QRTokenService"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
@@ -8,12 +8,15 @@ import { CheckInBookingInput } from "../dtos/checkin-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
+import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 
 export class ValidateQRForCheckInUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
-    private readonly stationRepository: IStationRepository
+    private readonly stationRepository: IStationRepository,
+    private readonly bookingStatusLogRepository: IBookingStatusLogRepository
   ) {}
 
   async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
@@ -122,8 +125,20 @@ export class ValidateQRForCheckInUseCase {
       if (nowMs > windowEnd.getTime()) {
         // Mark booking as NO_SHOW in database
         try {
+          const fromStatus = booking.status
           booking.markNoShow()
           await this.bookingRepository.save(booking)
+          await this.bookingStatusLogRepository.save(
+            new BookingStatusLog({
+              id: "",
+              bookingId: booking.id,
+              fromStatus,
+              toStatus: BookingStatus.NO_SHOW,
+              changedBy: managerUserId,
+              reason: "Auto-marked NO_SHOW: customer's time window expired before QR check-in was scanned",
+              createdAt: now,
+            })
+          )
         } catch (err) {
           console.warn(`[ValidateQR] Failed to mark booking ${booking.id} as NO_SHOW:`, err)
         }
@@ -164,8 +179,8 @@ export class ValidateQRForCheckInUseCase {
     // Rule 6: Payment Condition Check
     const isPaymentSatisfied =
       booking.paymentStatus === PaymentStatus.PAID ||
-      booking.paymentType === "DEPOSIT_PLUS_CASH" ||
-      booking.paymentType === "CASH_WALKIN"
+      booking.paymentType === PaymentType.DEPOSIT_PLUS_CASH ||
+      booking.paymentType === PaymentType.CASH_WALKIN
 
     if (!isPaymentSatisfied) {
       throw new AppError(

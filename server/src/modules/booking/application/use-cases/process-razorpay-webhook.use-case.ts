@@ -66,6 +66,9 @@ export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUse
             razorpay_order_id: orderId,
             razorpay_payment_id: paymentId,
             razorpay_signature: signature,
+            // The webhook payload's own HMAC was already verified above; it is not
+            // the same signature the checkout flow's verifyPaymentSignature expects.
+            skipSignatureVerification: true,
           })
           return { success: true, message: "Booking confirmed via webhook" }
         } catch {

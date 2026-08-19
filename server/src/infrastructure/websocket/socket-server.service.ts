@@ -9,6 +9,19 @@ export interface SocketUserPayload {
   role?: string
 }
 
+function readCookie(cookieHeader: string | undefined, name: string): string {
+  if (!cookieHeader) return ""
+  for (const pair of cookieHeader.split(";")) {
+    const separatorIndex = pair.indexOf("=")
+    if (separatorIndex === -1) continue
+    const key = pair.slice(0, separatorIndex).trim()
+    if (key === name) {
+      return decodeURIComponent(pair.slice(separatorIndex + 1).trim())
+    }
+  }
+  return ""
+}
+
 export class SocketServerService {
   private static instance: SocketServerService
   private io: SocketIOServer | null = null
@@ -25,7 +38,7 @@ export class SocketServerService {
   public init(httpServer: HttpServer): SocketIOServer {
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: "*",
+        origin: env.CLIENT_URL,
         methods: ["GET", "POST"],
         credentials: true,
       },
@@ -39,7 +52,8 @@ export class SocketServerService {
         const token =
           (socket.handshake.auth?.token as string) ||
           (socket.handshake.headers?.authorization?.replace("Bearer ", "") as string) ||
-          (socket.handshake.query?.token as string)
+          (socket.handshake.query?.token as string) ||
+          readCookie(socket.handshake.headers?.cookie, "accessToken")
 
         if (token) {
           try {

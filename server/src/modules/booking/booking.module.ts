@@ -33,7 +33,6 @@ import { CreateBookingUseCase } from "./application/use-cases/create-booking.use
 import { CreateWalkInBookingUseCase } from "./application/use-cases/create-walkin-booking.use-case"
 import { GetBookingUseCase } from "./application/use-cases/get-booking.use-case"
 import { GetUserBookingsUseCase } from "./application/use-cases/get-user-bookings.use-case"
-import { CheckInBookingUseCase } from "./application/use-cases/check-in-booking.use-case"
 import { CancelBookingUseCase } from "./application/use-cases/cancel-booking.use-case"
 import { ValidateQRForCheckInUseCase } from "./application/use-cases/validate-qr.use-case"
 import { SavePreInspectionAndCheckInUseCase } from "./application/use-cases/save-pre-inspection.use-case"
@@ -57,7 +56,7 @@ export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
 export const bookingReservationRepository = new BookingReservationMongoRepository()
 
 // Instantiate Services
-const bookingRedisQueueService = new BookingRedisQueueService()
+const bookingRedisQueueService = new BookingRedisQueueService(bookingStatusLogRepository)
 const bookingNotificationService = new BookingNotificationService()
 const pdfInvoiceService = new PDFInvoiceService()
 
@@ -140,13 +139,6 @@ const getUserBookingsUseCase = new GetUserBookingsUseCase(
   stationRepository
 )
 
-const checkInBookingUseCase = new CheckInBookingUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
 const cancelBookingUseCase = new CancelBookingUseCase(
   bookingRepository,
   bookingStatusLogRepository,
@@ -159,19 +151,23 @@ const cancelBookingUseCase = new CancelBookingUseCase(
 const validateQRUseCase = new ValidateQRForCheckInUseCase(
   bookingRepository,
   managerAssignmentRepository,
-  stationRepository
+  stationRepository,
+  bookingStatusLogRepository
 )
 
 const savePreInspectionUseCase = new SavePreInspectionAndCheckInUseCase(
   bookingRepository,
   bookingStatusLogRepository,
   bookingRedisQueueService,
-  bookingNotificationService
+  bookingNotificationService,
+  stationRepository,
+  managerAssignmentRepository
 )
 
 export const getOperationalQueueUseCase = new GetOperationalQueueUseCase(
   bookingRedisQueueService,
-  stationRepository
+  stationRepository,
+  managerAssignmentRepository
 )
 
 export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
@@ -229,7 +225,6 @@ const bookingController = new BookingController(
   createWalkInBookingUseCase,
   getBookingUseCase,
   getUserBookingsUseCase,
-  checkInBookingUseCase,
   cancelBookingUseCase,
   pdfInvoiceService,
   validateQRUseCase,

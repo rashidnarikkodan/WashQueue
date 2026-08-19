@@ -24,6 +24,12 @@ export interface ConfirmBookingReservationInput {
   razorpay_payment_id: string
   razorpay_signature: string
   paymentMethod?: "RAZORPAY" | "WALLET"
+  /**
+   * Set only by the Razorpay webhook flow, which has already authenticated the
+   * request via its own x-razorpay-signature payload HMAC (a different signature
+   * than the checkout-flow order/payment HMAC checked below).
+   */
+  skipSignatureVerification?: boolean
 }
 
 import { IConfirmBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
@@ -56,7 +62,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
 
     const isWalletPayment = paymentMethod === "WALLET"
 
-    if (!isWalletPayment) {
+    if (!isWalletPayment && !input.skipSignatureVerification) {
       // Verify Razorpay HMAC Signature for online card/UPI payments
       const isMatch = this.paymentGateway.verifyPaymentSignature(
         razorpay_order_id,

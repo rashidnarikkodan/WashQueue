@@ -6,7 +6,6 @@ import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import {
   ICancelBookingUseCase,
-  ICheckInBookingUseCase,
   ICompleteHandoverUseCase,
   ICreateBookingUseCase,
   ICreateWalkInBookingUseCase,
@@ -30,7 +29,6 @@ export class BookingController {
     private readonly createWalkInBookingUseCase: ICreateWalkInBookingUseCase,
     private readonly getBookingUseCase: IGetBookingUseCase,
     private readonly getUserBookingsUseCase: IGetUserBookingsUseCase,
-    private readonly checkInBookingUseCase: ICheckInBookingUseCase,
     private readonly cancelBookingUseCase: ICancelBookingUseCase,
     private readonly pdfInvoiceService: IPDFInvoiceService,
     private readonly validateQrUseCase: IValidateQRForCheckInUseCase,
@@ -124,8 +122,13 @@ export class BookingController {
   }
 
   getOperationalQueue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
     const { stationId } = req.params as { stationId: string }
-    const queueData = await this.getOperationalQueueUseCase.execute(stationId)
+    const queueData = await this.getOperationalQueueUseCase.execute(managerUserId, stationId)
     success(res, queueData, HTTP_STATUS.OK, "Operational queue retrieved successfully")
   }
 
@@ -137,16 +140,6 @@ export class BookingController {
 
     const booking = await this.validateQrUseCase.execute(managerUserId, req.body)
     success(res, booking, HTTP_STATUS.OK, "QR Code validated successfully")
-  }
-
-  checkIn = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const managerUserId = req.user?.userId
-    if (!managerUserId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
-    }
-
-    const booking = await this.checkInBookingUseCase.execute(managerUserId, req.body)
-    success(res, booking, HTTP_STATUS.OK, "Booking checked in successfully")
   }
 
   submitPreInspection = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

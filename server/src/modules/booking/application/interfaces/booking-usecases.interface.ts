@@ -41,10 +41,6 @@ export interface IGetUserBookingsUseCase {
   ): Promise<BookingListResponseDTO>
 }
 
-export interface ICheckInBookingUseCase {
-  execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO>
-}
-
 export interface ICancelBookingUseCase {
   execute(userId: string, input: CancelBookingInput, userRole?: string): Promise<BookingResponseDTO>
 }
@@ -85,7 +81,7 @@ export interface ISavePreInspectionAndCheckInUseCase {
 }
 
 export interface IGetOperationalQueueUseCase {
-  execute(stationId: string): Promise<OperationalStationQueueDTO>
+  execute(managerUserId: string, stationId: string): Promise<OperationalStationQueueDTO>
 }
 
 export interface IStartServiceUseCase {

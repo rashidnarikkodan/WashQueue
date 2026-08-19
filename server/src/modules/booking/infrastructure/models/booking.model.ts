@@ -1,4 +1,7 @@
+import { BOOKING, BookingStatus } from "@/common/constants/booking.constants"
+import { PAYMENT, PaymentStatusType } from "@/common/constants/payment.constants"
 import { Schema, model, Document, Types } from "mongoose"
+import { PaymentType } from "../../domain/entities/Booking"
 
 export interface IBookingDocument extends Document {
   _id: Types.ObjectId
@@ -56,9 +59,8 @@ export interface IBookingDocument extends Document {
     qrExpiresAt: Date
   }
 
-  paymentStatus: "PENDING" | "PARTIAL" | "PAID" | "REFUNDED" | "FAILED"
-  paymentType: "ONLINE_FULL" | "PAY_AT_STATION" | "WALLET_AND_ONLINE" | "CASH_WALKIN"
-
+  paymentStatus: PaymentStatusType
+  paymentType: PaymentType
   depositAmount: number
   cashAmount: number
   refundAmount: number
@@ -92,17 +94,7 @@ export interface IBookingDocument extends Document {
     capturedAt: Date
   } | null
 
-  status:
-    | "PENDING"
-    | "CONFIRMED"
-    | "CHECKED_IN"
-    | "IN_SERVICE"
-    | "SERVICE_COMPLETED"
-    | "AWAITING_HANDOVER"
-    | "COMPLETED"
-    | "CANCELLED"
-    | "NO_SHOW"
-    | "STALLED"
+  status: BookingStatus
 
   stalledInfo?: {
     stalledReason: string
@@ -197,13 +189,13 @@ const bookingSchema = new Schema<IBookingDocument>(
 
     paymentStatus: {
       type: String,
-      enum: ["PENDING", "PARTIAL", "PAID", "REFUNDED", "FAILED"],
-      default: "PENDING",
+      enum: Object.values(PAYMENT.STATUS),
+      default: PAYMENT.STATUS.PENDING,
     },
 
     paymentType: {
       type: String,
-      enum: ["ONLINE_FULL", "PAY_AT_STATION", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"],
+      enum: Object.values(PaymentType),
       required: true,
     },
 
@@ -224,7 +216,7 @@ const bookingSchema = new Schema<IBookingDocument>(
       },
       status: {
         type: String,
-        enum: ["NONE", "PENDING", "PROCESSED", "FAILED"],
+        enum:Object.values(PAYMENT.REFUND.STATUS),
         default: "NONE",
       },
       amount: { type: Number, default: 0 },
@@ -254,19 +246,8 @@ const bookingSchema = new Schema<IBookingDocument>(
 
     status: {
       type: String,
-      enum: [
-        "PENDING",
-        "CONFIRMED",
-        "CHECKED_IN",
-        "IN_SERVICE",
-        "SERVICE_COMPLETED",
-        "AWAITING_HANDOVER",
-        "COMPLETED",
-        "CANCELLED",
-        "NO_SHOW",
-        "STALLED",
-      ],
-      default: "CONFIRMED",
+      enum: Object.values(BOOKING.STATUS),
+      default: BOOKING.STATUS.CONFIRMED,
       index: true,
     },
 
@@ -274,7 +255,7 @@ const bookingSchema = new Schema<IBookingDocument>(
       stalledReason: { type: String },
       stalledBy: { type: Schema.Types.ObjectId, ref: "User" },
       stalledAt: { type: Date },
-      previousStatus: { type: String, enum: ["CHECKED_IN", "IN_SERVICE"] },
+      previousStatus: { type: String, enum: [BOOKING.STATUS.CHECKED_IN, BOOKING.STATUS.IN_SERVICE] },
       resolution: { type: String },
       resolvedBy: { type: Schema.Types.ObjectId, ref: "User" },
       resolvedAt: { type: Date },

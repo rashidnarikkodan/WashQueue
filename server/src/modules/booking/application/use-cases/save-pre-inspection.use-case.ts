@@ -10,6 +10,8 @@ import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { BookingModel } from "../../infrastructure/models/booking.model"
 import { BookingMapper } from "../../infrastructure/mappers/booking.mapper"
+import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
 export interface SavePreInspectionInput {
   bookingId: string
@@ -25,7 +27,9 @@ export class SavePreInspectionAndCheckInUseCase {
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
-    private readonly notificationService: IBookingNotificationService
+    private readonly notificationService: IBookingNotificationService,
+    private readonly stationRepository: IStationRepository,
+    private readonly managerAssignmentRepository: IManagerAssignmentRepository
   ) {}
 
   async execute(
@@ -47,6 +51,32 @@ export class SavePreInspectionAndCheckInUseCase {
       throw new AppError(
         `Pre-service inspection and check-in requires CONFIRMED status. Current status is ${existing.status}`,
         HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    // Manager Authorization Check — ensure the caller runs this booking's station
+    const station = await this.stationRepository.findById(existing.stationId)
+    if (!station) {
+      throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
+    }
+
+    const isOwner = station.ownerId === managerUserId
+    let isAuthorizedManager = isOwner
+
+    if (!isAuthorizedManager) {
+      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
+        managerUserId,
+        existing.stationId
+      )
+      if (assignment && assignment.status === "ACTIVE") {
+        isAuthorizedManager = true
+      }
+    }
+
+    if (!isAuthorizedManager) {
+      throw new AppError(
+        "You are not authorized to complete pre-service inspection for this station",
+        HTTP_STATUS.FORBIDDEN
       )
     }
 
@@ -78,8 +108,20 @@ export class SavePreInspectionAndCheckInUseCase {
         const endTimeFormatted = formatWindowTime(windowEnd)
 
         try {
+          const fromStatus = existing.status
           existing.markNoShow()
           await this.bookingRepository.save(existing)
+          await this.bookingStatusLogRepository.save(
+            new BookingStatusLog({
+              id: "",
+              bookingId: existing.id,
+              fromStatus,
+              toStatus: BookingStatus.NO_SHOW,
+              changedBy: managerUserId,
+              reason: "Auto-marked NO_SHOW: customer's time window expired before pre-service inspection was submitted",
+              createdAt: now,
+            })
+          )
         } catch (err) {
           console.warn(`[SavePreInspection] Failed to mark booking ${existing.id} as NO_SHOW:`, err)
         }

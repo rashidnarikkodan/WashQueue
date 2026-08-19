@@ -8,15 +8,15 @@ let socketInstance: Socket | null = null
 
 export function getSocketClient(): Socket {
   if (!socketInstance) {
-    const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || ""
-
+    // Auth runs on httpOnly cookies (see shared/config/axios.ts), so the JWT is never
+    // readable from JS. Send it via withCredentials so the server can read it off the
+    // handshake's cookie header instead of a token the client can't actually provide.
     socketInstance = io(SOCKET_URL, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 2000,
-      auth: { token },
-      query: { token },
+      withCredentials: true,
     })
 
     socketInstance.on("connect", () => {

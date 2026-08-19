@@ -43,15 +43,6 @@ export const createWalkInBookingSchema = z.object({
   }),
 })
 
-export const checkInBookingSchema = z
-  .object({
-    bookingId: z.string().optional(),
-    qrToken: z.string().optional(),
-  })
-  .refine((data) => Boolean(data.bookingId?.trim() || data.qrToken?.trim()), {
-    message: "Either bookingId or qrToken is required",
-  })
-
 export const validateQrSchema = z
   .object({
     bookingId: z.string().optional(),

@@ -6,8 +6,12 @@ import { OperationalQueueItemDTO, OperationalStationQueueDTO } from "../../appli
 import { BookingModel } from "../models/booking.model"
 import { StationModel } from "@/modules/station/infrastructure/models/station.model"
 import { BookingMapper } from "../mappers/booking.mapper"
+import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
+import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 
 export class BookingRedisQueueService implements IBookingQueueService {
+  constructor(private readonly bookingStatusLogRepository: IBookingStatusLogRepository) {}
+
   /**
    * Deterministic queue ordering score computation:
    * For Scheduled Bookings: min(windowStart, checkedInAt) timestamp
@@ -416,15 +420,53 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
       if (staleDocs.length === 0) return 0
 
+      let processedCount = 0
+
       for (const doc of staleDocs) {
-        doc.status = BookingStatus.NO_SHOW
-        doc.updatedAt = new Date()
-        await doc.save()
-        await this.updateQueueStatus(BookingMapper.toDomain(doc))
+        const domainBooking = BookingMapper.toDomain(doc)
+        try {
+          domainBooking.markNoShow()
+        } catch (err) {
+          logger.warn(
+            { error: err, bookingId: doc._id.toString() },
+            "[RedisQueue] Stale booking is no longer eligible for NO_SHOW transition; skipping"
+          )
+          continue
+        }
+
+        // Atomic guard: only transition if still CHECKED_IN (avoids racing a concurrent start-service call)
+        const updatedDoc = await BookingModel.findOneAndUpdate(
+          { _id: doc._id, status: BookingStatus.CHECKED_IN },
+          {
+            $set: {
+              status: BookingStatus.NO_SHOW,
+              noShowAt: domainBooking.noShowAt,
+              updatedAt: domainBooking.updatedAt,
+            },
+          },
+          { new: true }
+        ).exec()
+
+        if (!updatedDoc) continue
+
+        await this.bookingStatusLogRepository.save(
+          new BookingStatusLog({
+            id: "",
+            bookingId: doc._id.toString(),
+            fromStatus: BookingStatus.CHECKED_IN,
+            toStatus: BookingStatus.NO_SHOW,
+            changedBy: "SYSTEM_BACKGROUND_JOB",
+            reason: "Auto-marked NO_SHOW: vehicle stayed CHECKED_IN for over 24 hours without progressing to service",
+            createdAt: domainBooking.updatedAt,
+          })
+        )
+
+        await this.updateQueueStatus(BookingMapper.toDomain(updatedDoc))
+        processedCount++
       }
 
-      logger.info({ count: staleDocs.length, stationId }, "[RedisQueue] Cleaned stale queue entries")
-      return staleDocs.length
+      logger.info({ count: processedCount, stationId }, "[RedisQueue] Cleaned stale queue entries")
+      return processedCount
     } catch (error) {
       logger.error({ error, stationId }, "[RedisQueue] Failed to clean stale queue entries")
       return 0

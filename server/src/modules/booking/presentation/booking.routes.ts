@@ -7,7 +7,6 @@ import { validateRequest } from "@/infrastructure/http/middleware/validation.mid
 import { ROLE } from "@/common/constants/role.constants"
 import {
   cancelBookingSchema,
-  checkInBookingSchema,
   createBookingSchema,
   createWalkInBookingSchema,
   getBookingListQuerySchema,
@@ -28,9 +27,21 @@ export const createBookingRouter = (bookingController: BookingController): Route
 
   // Customer & Role-Scoped Operations
   router.post("/", validateRequest(createBookingSchema), asyncHandler(bookingController.create))
-  router.get("/", validateRequest(getBookingListQuerySchema, "query"), asyncHandler(bookingController.getUserBookings))
-  router.get("/:bookingId", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.getById))
-  router.get("/:bookingId/invoice", validateRequest(bookingIdParamSchema, "params"), asyncHandler(bookingController.downloadInvoice))
+  router.get(
+    "/",
+    validateRequest(getBookingListQuerySchema, "query"),
+    asyncHandler(bookingController.getUserBookings)
+  )
+  router.get(
+    "/:bookingId",
+    validateRequest(bookingIdParamSchema, "params"),
+    asyncHandler(bookingController.getById)
+  )
+  router.get(
+    "/:bookingId/invoice",
+    validateRequest(bookingIdParamSchema, "params"),
+    asyncHandler(bookingController.downloadInvoice)
+  )
   router.patch(
     "/:bookingId/cancel",
     validateRequest(bookingIdParamSchema, "params"),
@@ -52,13 +63,6 @@ export const createBookingRouter = (bookingController: BookingController): Route
     authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(validateQrSchema),
     asyncHandler(bookingController.validateQr)
-  )
-
-  router.post(
-    "/check-in",
-    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
-    validateRequest(checkInBookingSchema),
-    asyncHandler(bookingController.checkIn)
   )
 
   router.post(

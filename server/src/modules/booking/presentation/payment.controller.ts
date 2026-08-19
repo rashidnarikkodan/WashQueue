@@ -84,7 +84,13 @@ export class PaymentController {
       throw new BadRequestError("Missing x-razorpay-signature header")
     }
 
-    const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body)
+    const capturedRawBody = (req as Request & { rawBody?: Buffer }).rawBody
+    const rawBody =
+      typeof req.body === "string"
+        ? req.body
+        : capturedRawBody
+          ? capturedRawBody.toString("utf-8")
+          : JSON.stringify(req.body)
     const result = await this.processRazorpayWebhookUseCase.execute(rawBody, signature)
 
     if (!result.success) {
