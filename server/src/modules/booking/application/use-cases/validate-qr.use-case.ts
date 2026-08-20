@@ -101,8 +101,8 @@ export class ValidateQRForCheckInUseCase {
       )
     }
 
-    // Rule 5: Booking Time Window Match & NO_SHOW Enforcement
-    if (booking.scheduling?.windowStart && booking.scheduling?.windowEnd) {
+    // Rule 5: Booking Time Window Match (Skipped for Walk-In bookings)
+    if (!booking.isWalkIn && booking.scheduling?.windowStart && booking.scheduling?.windowEnd) {
       const windowStart = new Date(booking.scheduling.windowStart)
       const windowEnd = new Date(booking.scheduling.windowEnd)
       const nowMs = now.getTime()
@@ -113,17 +113,22 @@ export class ValidateQRForCheckInUseCase {
           minute: "2-digit",
           hour12: true,
         })
-        
-        const startTimeFormatted = formatWindowTime(windowStart)
-        const endTimeFormatted = formatWindowTime(windowEnd)
-      if (nowMs < windowStart.getTime()) {
+
+      const startTimeFormatted = formatWindowTime(windowStart)
+      const endTimeFormatted = formatWindowTime(windowEnd)
+
+      // Allow early check-in up to 10 minutes before windowStart
+      const earlyBufferMs = 10 * 60 * 1000
+      if (nowMs < windowStart.getTime() - earlyBufferMs) {
         throw new AppError(
-          `Early Arrival Warning: Customer arrived before their booked time window (${startTimeFormatted} - ${endTimeFormatted}). Check-in is not allowed until ${startTimeFormatted}.`,
+          `Early Arrival Warning: Customer arrived earlier than their booked time window (${startTimeFormatted} - ${endTimeFormatted}). Check-in is only allowed starting 10 minutes before ${startTimeFormatted}.`,
           HTTP_STATUS.BAD_REQUEST
         )
       }
 
-      if (nowMs > windowEnd.getTime()) {
+      // Allow 10 minutes grace period after windowEnd before marking NO_SHOW
+      const gracePeriodMs = 10 * 60 * 1000
+      if (nowMs > windowEnd.getTime() + gracePeriodMs) {
         // Mark booking as NO_SHOW in database
         try {
           const fromStatus = booking.status
@@ -136,7 +141,7 @@ export class ValidateQRForCheckInUseCase {
               fromStatus,
               toStatus: BookingStatus.NO_SHOW,
               changedBy: managerUserId,
-              reason: "Auto-marked NO_SHOW: customer's time window expired before QR check-in was scanned",
+              reason: "Auto-marked NO_SHOW: customer's time window expired (+10m grace period) before QR check-in was scanned",
               createdAt: now,
             })
           )
@@ -145,7 +150,7 @@ export class ValidateQRForCheckInUseCase {
         }
 
         throw new AppError(
-          `Time Window Expired: The booking time window (${startTimeFormatted} - ${endTimeFormatted}) has passed. Customer missed their window and the booking is marked as NO_SHOW.`,
+          `Time Window Expired: The booking time window (${startTimeFormatted} - ${endTimeFormatted}) has passed (+10m grace period). Customer missed their window and the booking is marked as NO_SHOW.`,
           HTTP_STATUS.BAD_REQUEST
         )
       }

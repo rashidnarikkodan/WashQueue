@@ -23,8 +23,8 @@ export class ProcessNoShowBookingsUseCase {
   ) {}
 
   /**
-   * Idempotent background processing for past CONFIRMED bookings beyond allowed grace period.
-   * Grace Period Policy: 15 minutes past windowStart.
+   * Idempotent background processing for past CONFIRMED online bookings beyond allowed grace period.
+   * Grace Period Policy: 15 minutes past windowEnd.
    */
   async execute(gracePeriodMinutes: number = 15): Promise<ProcessNoShowResult> {
     const now = new Date()
@@ -69,7 +69,7 @@ export class ProcessNoShowBookingsUseCase {
         fromStatus: BookingStatus.CONFIRMED,
         toStatus: BookingStatus.NO_SHOW,
         changedBy: "SYSTEM_BACKGROUND_JOB",
-        reason: `Auto-marked NO_SHOW: Customer missed arrival window (+${gracePeriodMinutes}m grace period elapsed)`,
+        reason: `Auto-marked NO_SHOW: Customer missed arrival window (+${gracePeriodMinutes}m grace period after window end elapsed)`,
         createdAt: now,
       })
       await this.bookingStatusLogRepository.save(statusLog)

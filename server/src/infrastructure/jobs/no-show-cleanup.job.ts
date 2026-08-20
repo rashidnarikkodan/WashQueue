@@ -10,7 +10,7 @@ export function startNoShowCleanupJob(intervalMs: number = 300000): void {
 
   intervalId = setInterval(async () => {
     try {
-      await processNoShowBookingsUseCase.execute(15)
+      await processNoShowBookingsUseCase.execute(10)
     } catch (error) {
       logger.error({ error }, "[BackgroundJob] Error during No-Show cleanup worker execution")
     }

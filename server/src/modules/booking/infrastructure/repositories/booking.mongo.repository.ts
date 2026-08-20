@@ -297,8 +297,9 @@ export class BookingMongoRepository implements IBookingRepository {
   async findNoShowCandidates(graceCutoff: Date): Promise<Booking[]> {
     const docs = await BookingModel.find({
       status: BookingStatus.CONFIRMED,
+      isWalkIn: { $ne: true },
       noShowAt: null,
-      "scheduling.windowStart": { $lt: graceCutoff },
+      "scheduling.windowEnd": { $lt: graceCutoff },
     })
       .populate("stationId")
       .populate("vehicleId")

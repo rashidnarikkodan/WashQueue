@@ -387,7 +387,19 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   const toggleFacingMode = () => {
     const nextMode = facingMode === "environment" ? "user" : "environment"
     setFacingMode(nextMode)
-    setSelectedCameraId("")
+    if (cameras.length > 1) {
+      const match = cameras.find((c) => {
+        const lbl = c.label.toLowerCase()
+        if (nextMode === "environment") {
+          return lbl.includes("back") || lbl.includes("environment") || lbl.includes("rear")
+        } else {
+          return lbl.includes("front") || lbl.includes("user") || lbl.includes("selfie") || lbl.includes("facetime")
+        }
+      })
+      setSelectedCameraId(match ? match.id : (cameras.find((c) => c.id !== selectedCameraId)?.id || ""))
+    } else {
+      setSelectedCameraId("")
+    }
   }
 
   // Toggle Torch/Flash
@@ -440,14 +452,17 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       {/* Scanner Viewfinder Box */}
       <div className="relative aspect-[4/3] rounded-3xl bg-slate-950 border-2 border-border overflow-hidden flex flex-col items-center justify-center shadow-inner group">
         {/* Container for Html5Qrcode Viewfinder */}
-        <div id="qr-camera-viewfinder" className="absolute inset-0 w-full h-full object-cover" />
+        <div
+          id="qr-camera-viewfinder"
+          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+        />
 
         {/* Hidden Fallback Video Element for Native Stream */}
         <video
           ref={videoRef}
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-0"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-0 -scale-x-100"
         />
 
         {/* Hidden Temp Container for File Image Scanning */}
@@ -513,17 +528,15 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       {/* Control Actions & Toolbar */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          {cameras.length > 1 && (
-            <button
-              type="button"
-              onClick={toggleFacingMode}
-              className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
-              title="Switch Front/Back Camera"
-            >
-              <SwitchCamera className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Flip Camera</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={toggleFacingMode}
+            className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
+            title="Switch Front/Back Camera"
+          >
+            <SwitchCamera className="h-4 w-4 text-primary" />
+            <span className="hidden sm:inline">Switch Camera</span>
+          </button>
 
           {isTorchSupported && (
             <button

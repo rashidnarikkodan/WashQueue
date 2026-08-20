@@ -188,8 +188,21 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
   }, [selectedCameraId, facingMode])
 
   const toggleFacingMode = () => {
-    setFacingMode((prev) => (prev === "environment" ? "user" : "environment"))
-    setSelectedCameraId("")
+    const nextMode = facingMode === "environment" ? "user" : "environment"
+    setFacingMode(nextMode)
+    if (cameras.length > 1) {
+      const match = cameras.find((c) => {
+        const lbl = c.label.toLowerCase()
+        if (nextMode === "environment") {
+          return lbl.includes("back") || lbl.includes("environment") || lbl.includes("rear")
+        } else {
+          return lbl.includes("front") || lbl.includes("user") || lbl.includes("selfie") || lbl.includes("facetime")
+        }
+      })
+      setSelectedCameraId(match ? match.id : (cameras.find((c) => c.id !== selectedCameraId)?.id || ""))
+    } else {
+      setSelectedCameraId("")
+    }
   }
 
   const toggleTorch = async () => {
@@ -237,7 +250,12 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
       toast.error("Failed to capture photo")
       return
     }
-    ctx.drawImage(video, 0, 0, width, height)
+
+    ctx.save()
+    ctx.scale(-1, 1)
+    ctx.drawImage(video, -width, 0, width, height)
+    ctx.restore()
+
     setPreviewDataUrl(canvas.toDataURL("image/jpeg", JPEG_QUALITY))
   }
 
@@ -281,7 +299,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
                 ref={videoRef}
                 playsInline
                 muted
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover -scale-x-100"
               />
             )}
 
@@ -313,16 +331,14 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
                     )}
                   </button>
                 )}
-                {cameras.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={toggleFacingMode}
-                    className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-all border border-white/10 cursor-pointer"
-                    title="Switch camera"
-                  >
-                    <SwitchCamera className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={toggleFacingMode}
+                  className="p-2.5 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-all border border-white/10 cursor-pointer"
+                  title="Switch camera"
+                >
+                  <SwitchCamera className="h-4 w-4" />
+                </button>
               </div>
             )}
 
