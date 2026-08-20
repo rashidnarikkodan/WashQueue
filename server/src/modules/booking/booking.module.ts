@@ -156,7 +156,8 @@ const validateQRUseCase = new ValidateQRForCheckInUseCase(
   bookingRepository,
   managerAssignmentRepository,
   stationRepository,
-  bookingStatusLogRepository
+  bookingStatusLogRepository,
+  bookingNotificationService
 )
 
 const savePreInspectionUseCase = new SavePreInspectionAndCheckInUseCase(

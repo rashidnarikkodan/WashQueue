@@ -11,13 +11,15 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 
 export class ValidateQRForCheckInUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly stationRepository: IStationRepository,
-    private readonly bookingStatusLogRepository: IBookingStatusLogRepository
+    private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
+    private readonly notificationService: IBookingNotificationService
   ) {}
 
   async execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO> {
@@ -145,6 +147,9 @@ export class ValidateQRForCheckInUseCase {
               createdAt: now,
             })
           )
+          await this.notificationService.notify("BOOKING_NO_SHOW", booking, {
+            reason: "Auto-marked NO_SHOW: time window expired (+10m grace period) before QR check-in",
+          })
         } catch (err) {
           logger.warn({ error: err, bookingId: booking.id }, "[ValidateQR] Failed to mark booking as NO_SHOW")
         }

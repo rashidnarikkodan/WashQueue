@@ -71,7 +71,18 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     setIsTorchOn(false)
   }, [])
 
+  const isMountedRef = useRef<boolean>(true)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      stopAllMediaTracks()
+    }
+  }, [stopAllMediaTracks])
+
   const startCamera = useCallback(async () => {
+    if (!isMountedRef.current) return
     setCameraError(null)
     setIsInitializing(true)
     stopAllMediaTracks()
@@ -85,11 +96,21 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
       }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
+
+      // If closed while getUserMedia was resolving, terminate stream immediately
+      if (!isMountedRef.current) {
+        stream.getTracks().forEach((track) => {
+          track.stop()
+          track.enabled = false
+        })
+        return
+      }
+
       mediaStreamRef.current = stream
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        await videoRef.current.play()
+        await videoRef.current.play().catch(() => {})
       }
 
       const track = stream.getVideoTracks()[0]

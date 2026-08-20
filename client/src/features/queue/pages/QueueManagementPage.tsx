@@ -11,6 +11,10 @@ import {
   Building2,
   X,
   AlertTriangle,
+  Sparkles,
+  Droplets,
+  Wrench,
+  CheckCircle2,
 } from "lucide-react"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
@@ -22,6 +26,20 @@ import {
   unsubscribeFromStation,
 } from "@/shared/services/socket.client"
 
+type QueueFilter = "ALL" | "WAITING" | "IN_SERVICE" | "AWAITING_HANDOVER" | "STALLED"
+
+const isActiveQueueStatus = (status: string) => {
+  return (
+    status === "CHECK_IN" ||
+    status === "CHECKED_IN" ||
+    status === "IN_SERVICE" ||
+    status === "SERVICE_COMPLETED" ||
+    status === "AWAITING_HANDOVER" ||
+    status === "AWAITING_CONFIRMATION" ||
+    status === "STALLED"
+  )
+}
+
 export default function ManagerQueuePage() {
   const navigate = useNavigate()
   const [stationInfo, setStationInfo] = useState<{
@@ -32,17 +50,14 @@ export default function ManagerQueuePage() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAdvancing, setIsAdvancing] = useState(false)
-  const [filterType, setFilterType] = useState<"ALL" | "QUEUED" | "IN_SERVICE" | "STALLED" | "COMPLETED">("ALL")
+  const [filterType, setFilterType] = useState<QueueFilter>("ALL")
+  
+  // Exception handling state
   const [stallingBookingId, setStallingBookingId] = useState<string | null>(null)
   const [stallReasonInput, setStallReasonInput] = useState("")
   const [resolvingBookingId, setResolvingBookingId] = useState<string | null>(null)
   const [resolutionInput, setResolutionInput] = useState("")
   const [targetStatusInput, setTargetStatusInput] = useState<"CHECKED_IN" | "IN_SERVICE" | "CANCELLED">("CHECKED_IN")
-
-  // Check-In Modal state
-  const [isCheckInOpen, setIsCheckInOpen] = useState(false)
-  const [qrInput, setQrInput] = useState("")
-  const [isCheckInSubmitting, setIsCheckInSubmitting] = useState(false)
 
   // Helper to resolve check-in arrival timestamp
   const getCheckInTime = useCallback((b: BookingResponse): number => {
@@ -85,8 +100,10 @@ export default function ManagerQueuePage() {
   } | null>(null)
 
   // 1. Fetch Manager Station & Authoritative Live Queue
-  const fetchStationAndQueue = useCallback(async () => {
-    setIsLoading(true)
+  // `silent` skips the isLoading toggle so real-time refreshes patch data in place
+  // instead of blanking the list with the "Loading queue list..." state.
+  const fetchStationAndQueue = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true)
     try {
       const stations = await managerApi.getManagedStations()
       if (stations && stations.length > 0) {
@@ -107,32 +124,37 @@ export default function ManagerQueuePage() {
         // Fetch bookings for this station
         const res = await bookingApi.getUserBookings({
           stationId: activeStation.stationId,
-          limit: 50,
+          limit: 100,
         })
-        const bList = res.bookings || []
-        setBookings(bList)
+        const allBookings = res.bookings || []
+        
+        // Filter strictly for ACTIVE operational queue items (NO COMPLETED / CANCELLED / NO_SHOW)
+        const activeList = allBookings.filter((b: BookingResponse) => isActiveQueueStatus(b.status))
+        setBookings(activeList)
 
-        // Select the first checked-in or in-service booking ordered by arrival time
-        const checkedInList = bList
-          .filter(
-            (b: BookingResponse) =>
-              b.status === "IN_SERVICE" || b.status === "CHECK_IN" || b.status === "CHECKED_IN"
-          )
-          .sort((a: BookingResponse, b: BookingResponse) => getCheckInTime(a) - getCheckInTime(b))
-
-        if (checkedInList.length > 0) {
-          setSelectedBookingId(checkedInList[0].id)
-        } else {
-          setSelectedBookingId(null)
-        }
+        // Select the first in-service or checked-in booking
+        setSelectedBookingId((prev) => {
+          if (prev && activeList.some((b) => b.id === prev)) {
+            return prev
+          }
+          if (activeList.length > 0) {
+            const inService = activeList.find((b) => b.status === "IN_SERVICE")
+            if (inService) return inService.id
+            const sortedWaiting = [...activeList].sort(
+              (a, b) => getCheckInTime(a) - getCheckInTime(b)
+            )
+            return sortedWaiting[0]?.id || null
+          }
+          return null
+        })
       } else {
         toast.error("No active station assignment found for your manager account.")
       }
     } catch (err) {
       console.error("Failed to load queue data:", err)
-      toast.error("Failed to load queue data")
+      if (!silent) toast.error("Failed to load queue data")
     } finally {
-      setIsLoading(false)
+      if (!silent) setIsLoading(false)
     }
   }, [getCheckInTime])
 
@@ -147,108 +169,123 @@ export default function ManagerQueuePage() {
     }
   }, [fetchStationAndQueue])
 
-  // Real-Time Socket.IO Subscriptions & Reconnection Handling
+  // Patch a single booking (and the live queue meta) in place from a real-time payload,
+  // instead of refetching the whole station queue and blanking the UI.
+  const applyRealtimeBookingUpdate = useCallback(
+    async (bookingId?: string) => {
+      if (!stationInfo?.stationId) return
+
+      try {
+        const liveQ = await bookingApi.getLiveQueue(stationInfo.stationId)
+        setLiveQueueData(liveQ)
+      } catch {
+        // Ignore transient live-queue refresh failures; next event will retry
+      }
+
+      if (!bookingId) return
+
+      try {
+        const updated = await bookingApi.getBookingById(bookingId)
+        setBookings((prev) => {
+          const exists = prev.some((b) => b.id === updated.id)
+          if (!isActiveQueueStatus(updated.status)) {
+            return exists ? prev.filter((b) => b.id !== updated.id) : prev
+          }
+          return exists
+            ? prev.map((b) => (b.id === updated.id ? updated : b))
+            : [...prev, updated]
+        })
+      } catch (err) {
+        console.error("Failed to sync booking from real-time event:", err)
+      }
+    },
+    [stationInfo?.stationId]
+  )
+
+  // 2. Real-Time Socket.IO Subscriptions (Event-driven without polling interval)
   useEffect(() => {
     if (!stationInfo?.stationId) return
 
     subscribeToStation(stationInfo.stationId)
     const socket = getSocketClient()
 
-    const handleRealTimeUpdate = () => {
-      fetchStationAndQueue()
+    const handleRealTimeUpdate = (payload?: { bookingId?: string }) => {
+      void applyRealtimeBookingUpdate(payload?.bookingId)
+    }
+
+    // Only a genuine reconnect (after a dropped connection) warrants a full silent resync;
+    // routine events are patched in place above.
+    const handleReconnect = () => {
+      void fetchStationAndQueue(true)
     }
 
     const realTimeEvents = [
       "QUEUE_UPDATED",
+      "QUEUE_POSITION_CHANGED",
       "CHECKIN_SUCCESS",
+      "BOOKING_CHECKED_IN",
       "WASH_STARTED",
+      "SERVICE_STARTED",
       "WASH_COMPLETED",
+      "SERVICE_COMPLETED",
+      "POST_INSPECTION_COMPLETED",
+      "HANDOVER_READY",
+      "BOOKING_COMPLETED",
       "BOOKING_CREATED",
       "BOOKING_CANCELLED",
+      "BOOKING_NO_SHOW",
       "BOOKING_STALLED",
       "REFUND_COMPLETED",
     ]
 
     realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
-    socket.on("connect", handleRealTimeUpdate)
-    socket.on("reconnect", handleRealTimeUpdate)
-
-    const pollId = setInterval(() => fetchStationAndQueue(), 30000)
+    socket.on("reconnect", handleReconnect)
 
     return () => {
       realTimeEvents.forEach((evt) => socket.off(evt, handleRealTimeUpdate))
-      socket.off("connect", handleRealTimeUpdate)
-      socket.off("reconnect", handleRealTimeUpdate)
+      socket.off("reconnect", handleReconnect)
       unsubscribeFromStation(stationInfo.stationId)
-      clearInterval(pollId)
     }
-  }, [stationInfo?.stationId, fetchStationAndQueue])
+  }, [stationInfo?.stationId, applyRealtimeBookingUpdate, fetchStationAndQueue])
 
-  // Filtered & Sorted Queue List (First Checked-In Vehicle First)
+  // 3. Operational Filtered Queue List
   const queueList = useMemo(() => {
     const filtered = bookings.filter((b) => {
-      if (filterType === "QUEUED") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
+      if (filterType === "WAITING") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
       if (filterType === "IN_SERVICE") return b.status === "IN_SERVICE"
-      if (filterType === "STALLED") return b.status === "STALLED"
-      if (filterType === "COMPLETED")
+      if (filterType === "AWAITING_HANDOVER")
         return (
           b.status === "SERVICE_COMPLETED" ||
-          b.status === "AWAITING_CONFIRMATION" ||
-          b.status === "COMPLETED"
+          b.status === "AWAITING_HANDOVER" ||
+          b.status === "AWAITING_CONFIRMATION"
         )
-
-      return (
-        b.status === "CHECK_IN" ||
-        b.status === "CHECKED_IN" ||
-        b.status === "IN_SERVICE" ||
-        b.status === "STALLED"
-      )
+      if (filterType === "STALLED") return b.status === "STALLED"
+      return true
     })
 
-    return filtered.sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
+    // Sort order: IN_SERVICE first, then earliest checked-in arrival
+    return filtered.sort((a, b) => {
+      if (a.status === "IN_SERVICE" && b.status !== "IN_SERVICE") return -1
+      if (b.status === "IN_SERVICE" && a.status !== "IN_SERVICE") return 1
+      return getCheckInTime(a) - getCheckInTime(b)
+    })
   }, [bookings, filterType, getCheckInTime])
 
-  const handleConfirmStall = async () => {
-    if (!stallingBookingId || !stallReasonInput.trim()) {
-      toast.error("Please provide a valid reason for stalling the booking")
-      return
+  // Counts for operational filter tabs
+  const filterCounts = useMemo(() => {
+    return {
+      all: bookings.length,
+      waiting: bookings.filter((b) => b.status === "CHECK_IN" || b.status === "CHECKED_IN").length,
+      inService: bookings.filter((b) => b.status === "IN_SERVICE").length,
+      handover: bookings.filter(
+        (b) =>
+          b.status === "SERVICE_COMPLETED" ||
+          b.status === "AWAITING_HANDOVER" ||
+          b.status === "AWAITING_CONFIRMATION"
+      ).length,
+      stalled: bookings.filter((b) => b.status === "STALLED").length,
     }
-
-    try {
-      setIsAdvancing(true)
-      await bookingApi.stallBooking(stallingBookingId, stallReasonInput.trim())
-      toast.warning("Booking moved to STALLED state")
-      setStallingBookingId(null)
-      setStallReasonInput("")
-      await fetchStationAndQueue()
-    } catch (err) {
-      console.error("Failed to stall booking:", err)
-      toast.error("Failed to stall booking")
-    } finally {
-      setIsAdvancing(false)
-    }
-  }
-
-  const handleConfirmResolveStalled = async () => {
-    if (!resolvingBookingId || !resolutionInput.trim()) {
-      toast.error("Please provide resolution notes")
-      return
-    }
-
-    try {
-      setIsAdvancing(true)
-      await bookingApi.resolveStalled(resolvingBookingId, resolutionInput.trim(), targetStatusInput)
-      toast.success(`Stalled booking recovered to ${targetStatusInput}`)
-      setResolvingBookingId(null)
-      setResolutionInput("")
-      await fetchStationAndQueue()
-    } catch (err) {
-      console.error("Failed to resolve stalled booking:", err)
-      toast.error("Failed to resolve stalled booking")
-    } finally {
-      setIsAdvancing(false)
-    }
-  }
+  }, [bookings])
 
   // Active Selected Booking Details
   const selectedBooking = useMemo(() => {
@@ -256,7 +293,7 @@ export default function ManagerQueuePage() {
     return bookings.find((b) => b.id === selectedBookingId) || null
   }, [bookings, selectedBookingId])
 
-  // Live "In Progress" Session Timer (ticks while the selected vehicle is being washed)
+  // Live "In Progress" Session Timer for IN_SERVICE vehicle
   const serviceStartedAt = selectedBooking?.serviceStartedAt
   const isSelectedBookingInService =
     !!selectedBooking && selectedBooking.status === "IN_SERVICE" && !!serviceStartedAt
@@ -285,8 +322,7 @@ export default function ManagerQueuePage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
   }, [elapsedSeconds])
 
-  // KPI Calculations (Only count checked-in or in-service vehicles)
-  const todayBookingsCount = bookings.length
+  // KPI Calculations
   const activeQueueCount = useMemo(() => {
     return bookings.filter(
       (b) =>
@@ -297,8 +333,7 @@ export default function ManagerQueuePage() {
   }, [bookings])
   const estimatedWaitMinutes = activeQueueCount * 15
 
-  // Real per-vehicle queue position / wait estimate / bay assignment computed server-side,
-  // instead of falling back to the crude activeQueueCount * 15 heuristic per item.
+  // Real per-vehicle queue position / wait estimate / bay assignment
   const getQueueMeta = useCallback(
     (bookingId: string) => {
       if (!liveQueueData) return null
@@ -311,21 +346,15 @@ export default function ManagerQueuePage() {
     [liveQueueData]
   )
 
-  // Next Up Booking (Earliest checked-in vehicle waiting for bay)
-  const nextUpBooking = useMemo(() => {
-    const checkedInWaiting = bookings
-      .filter((b) => b.status === "CHECK_IN" || b.status === "CHECKED_IN")
-      .sort((a, b) => getCheckInTime(a) - getCheckInTime(b))
-
-    return checkedInWaiting[0] || null
-  }, [bookings, getCheckInTime])
-
-  // Handle Advance Booking Status (Start Service, Post-Inspection, or Separate Handover)
+  // Handle Advance Booking Status
   const handleAdvanceStatus = async (targetStatus: string) => {
     if (!selectedBooking) return
 
-    // If manager clicks Complete Service on an IN_SERVICE vehicle -> open Post-Inspection workflow!
-    if (targetStatus === "SERVICE_COMPLETED" || (selectedBooking.status === "IN_SERVICE" && targetStatus === "COMPLETED")) {
+    // If manager clicks Complete Service on an IN_SERVICE vehicle -> open Post-Inspection workflow
+    if (
+      targetStatus === "SERVICE_COMPLETED" ||
+      (selectedBooking.status === "IN_SERVICE" && targetStatus === "COMPLETED")
+    ) {
       navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
       return
     }
@@ -335,7 +364,7 @@ export default function ManagerQueuePage() {
       let updated: BookingResponse
       if (targetStatus === "IN_SERVICE") {
         updated = await bookingApi.startService(selectedBooking.id)
-        toast.success("✓ Wash service started successfully!")
+        toast.success("✓ Wash service started! Vehicle moved to Bay.")
       } else if (targetStatus === "COMPLETED") {
         updated = await bookingApi.completeHandover(selectedBooking.id)
         toast.success("✓ Vehicle handover completed & booking closed!")
@@ -344,7 +373,7 @@ export default function ManagerQueuePage() {
         toast.success(`Booking status updated to ${targetStatus.replace("_", " ")}`)
       }
       setBookings((prev) => prev.map((b) => (b.id === updated.id ? updated : b)))
-      fetchStationAndQueue()
+      fetchStationAndQueue(true)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("Status update error:", err)
@@ -354,25 +383,59 @@ export default function ManagerQueuePage() {
     }
   }
 
-  // Handle QR / Booking ID Check-In — validates the pass, then routes to the mandatory
-  // photo-based pre-inspection flow rather than checking the vehicle in blind.
-  const handleCheckInSubmit = async () => {
-    if (!qrInput.trim()) {
-      toast.error("Please enter a valid Booking ID or QR Token")
+  // Handle Stalling
+  const handleConfirmStall = async () => {
+    if (!stallingBookingId || !stallReasonInput.trim()) {
+      toast.error("Please provide a reason for stalling the booking")
       return
     }
 
-    setIsCheckInSubmitting(true)
     try {
-      const validated = await bookingApi.validateQr(qrInput.trim())
-      setIsCheckInOpen(false)
-      setQrInput("")
-      navigate(`/manager/bookings/${validated.id}/pre-inspection`)
+      setIsAdvancing(true)
+      const updated = await bookingApi.stallBooking(stallingBookingId, stallReasonInput.trim())
+      toast.warning("Booking moved to STALLED state")
+      setStallingBookingId(null)
+      setStallReasonInput("")
+      setBookings((prev) => prev.map((b) => (b.id === updated.id ? updated : b)))
+      fetchStationAndQueue(true)
     } catch (err) {
-      console.error("Check in error:", err)
-      toast.error("Failed to check in customer. Verify QR Token / Booking ID.")
+      console.error("Failed to stall booking:", err)
+      toast.error("Failed to stall booking")
     } finally {
-      setIsCheckInSubmitting(false)
+      setIsAdvancing(false)
+    }
+  }
+
+  // Handle Resolving Stalled
+  const handleConfirmResolveStalled = async () => {
+    if (!resolvingBookingId || !resolutionInput.trim()) {
+      toast.error("Please provide resolution notes")
+      return
+    }
+
+    try {
+      setIsAdvancing(true)
+      const updated = await bookingApi.resolveStalled(
+        resolvingBookingId,
+        resolutionInput.trim(),
+        targetStatusInput
+      )
+      toast.success(`Stalled booking recovered to ${targetStatusInput}`)
+      setResolvingBookingId(null)
+      setResolutionInput("")
+      setBookings((prev) => {
+        const exists = prev.some((b) => b.id === updated.id)
+        if (!isActiveQueueStatus(updated.status)) {
+          return exists ? prev.filter((b) => b.id !== updated.id) : prev
+        }
+        return exists ? prev.map((b) => (b.id === updated.id ? updated : b)) : [...prev, updated]
+      })
+      fetchStationAndQueue(true)
+    } catch (err) {
+      console.error("Failed to resolve stalled booking:", err)
+      toast.error("Failed to resolve stalled booking")
+    } finally {
+      setIsAdvancing(false)
     }
   }
 
@@ -383,16 +446,28 @@ export default function ManagerQueuePage() {
     year: "numeric",
   })
 
+  // Determine vehicle image source (pre-inspection photo, vehicle image, or null)
+  const selectedVehicleImage = useMemo(() => {
+    if (!selectedBooking) return null
+    if (
+      selectedBooking.preServiceInspection?.photos &&
+      selectedBooking.preServiceInspection.photos.length > 0
+    ) {
+      return selectedBooking.preServiceInspection.photos[0]
+    }
+    const vDetails = selectedBooking.vehicleDetails as { image?: string } | undefined
+    return vDetails?.image || null
+  }, [selectedBooking])
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 space-y-8">
-      
       {/* 1. Top Summary Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl sm:text-4xl font-black italic text-foreground tracking-tight">
-              {stationInfo?.stationName || "Station Manager Queue"}
+            <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+              {stationInfo?.stationName || "Airport Express Auto Care"}
             </h1>
           </div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 uppercase tracking-widest">
@@ -409,14 +484,13 @@ export default function ManagerQueuePage() {
 
       {/* KPI Cards Grid (4 Cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
         {/* Card 1: Today's Bookings */}
         <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            TODAY'S BOOKINGS
+            TODAY&apos;S BOOKINGS
           </span>
           <div className="text-4xl font-extrabold text-primary">
-            {isLoading ? "..." : todayBookingsCount}
+            {isLoading ? "..." : bookings.length}
           </div>
           <p className="text-xs text-emerald-500 font-semibold flex items-center gap-1">
             <span>+12% from yesterday</span>
@@ -429,7 +503,7 @@ export default function ManagerQueuePage() {
             ACTIVE QUEUE DEPTH
           </span>
           <div className="text-4xl font-extrabold text-primary">
-            {isLoading ? "..." : (liveQueueData ? liveQueueData.queueDepth : activeQueueCount)}
+            {isLoading ? "..." : liveQueueData ? liveQueueData.queueDepth : activeQueueCount}
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -455,7 +529,7 @@ export default function ManagerQueuePage() {
           </p>
         </div>
 
-        {/* Card 4: New Check-in Action */}
+        {/* Card 4: New Check-in Action (Navigates to /manager/check-in without extra modals) */}
         <div
           onClick={() => navigate("/manager/check-in")}
           className="rounded-3xl bg-card text-card-foreground p-6 border border-primary/40 hover:border-primary transition-all cursor-pointer space-y-3 flex flex-col justify-between group shadow-md shadow-primary/5"
@@ -473,14 +547,12 @@ export default function ManagerQueuePage() {
             Scan / Check-in <ArrowRight className="h-3.5 w-3.5" />
           </span>
         </div>
-
       </div>
 
       {/* 2. Main Operational Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[600px]">
-        
-        {/* Left Panel: Queue List (40% width / 5 Cols) */}
-        <div className="lg:col-span-5 space-y-5 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Panel: Single Unified Booking Queue List (5 Cols) */}
+        <div className="lg:col-span-5 space-y-4 flex flex-col">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Car className="h-5 w-5 text-primary" />
@@ -491,71 +563,87 @@ export default function ManagerQueuePage() {
             </span>
           </div>
 
-          {/* Next Up Highlight Card */}
-          {nextUpBooking && (
-            <div className="rounded-3xl bg-primary/10 border-2 border-primary/30 p-5 space-y-2 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold tracking-widest text-primary uppercase">
-                  NEXT UP
-                </span>
-                <h3 className="text-lg font-bold text-foreground">
-                  {nextUpBooking.vehicleDetails?.brand || "Vehicle"} {nextUpBooking.vehicleDetails?.model || ""}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {nextUpBooking.serviceType} Wash • {nextUpBooking.vehicleDetails?.registrationNumber || "Reg No"}
-                </p>
-              </div>
-              <span className="text-2xl font-black text-primary/40">#01</span>
-            </div>
-          )}
-
-          {/* Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {/* Operational Stage Filter Pills (No Completed History) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { id: "ALL", label: "Active Queue" },
-              { id: "QUEUED", label: "Waiting" },
-              { id: "IN_SERVICE", label: "In Service" },
-              { id: "STALLED", label: "Stalled Exceptions" },
-              { id: "COMPLETED", label: "Completed History" },
+              { id: "ALL", label: "Active Queue", count: filterCounts.all },
+              { id: "WAITING", label: "Waiting", count: filterCounts.waiting },
+              { id: "IN_SERVICE", label: "In Service", count: filterCounts.inService },
+              { id: "AWAITING_HANDOVER", label: "Ready", count: filterCounts.handover },
+              ...(filterCounts.stalled > 0
+                ? [{ id: "STALLED", label: "Stalled", count: filterCounts.stalled }]
+                : []),
             ].map((t) => (
               <button
                 key={t.id}
-                onClick={() => setFilterType(t.id as "ALL" | "QUEUED" | "IN_SERVICE" | "STALLED" | "COMPLETED")}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                onClick={() => setFilterType(t.id as QueueFilter)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap border flex items-center gap-1.5 ${
                   filterType === t.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-card text-muted-foreground border-border hover:bg-muted/80"
                 }`}
               >
-                {t.label}
+                <span>{t.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                    filterType === t.id
+                      ? "bg-primary-foreground/20 text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {t.count}
+                </span>
               </button>
             ))}
           </div>
 
-          {/* Queue List Items */}
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
+          {/* Single Unified Queue List Items */}
+          <div className="space-y-3 flex-1 overflow-y-auto max-h-[560px] pr-1">
             {isLoading ? (
-              <div className="py-12 text-center text-muted-foreground text-sm">
+              <div className="py-12 text-center text-muted-foreground text-sm rounded-3xl bg-card border border-border">
                 Loading queue list...
               </div>
             ) : queueList.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground text-sm rounded-3xl bg-card border border-border">
-                No bookings in this queue view.
+              /* Enhanced Empty State for Queue List */
+              <div className="p-8 sm:p-12 text-center rounded-3xl bg-card border border-dashed border-border/80 flex flex-col items-center justify-center space-y-4 shadow-sm">
+                <div className="h-16 w-16 rounded-3xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shadow-inner">
+                  <Car className="h-8 w-8" />
+                </div>
+                <div className="space-y-1 max-w-xs">
+                  <h3 className="text-base font-bold text-foreground">
+                    {filterType === "ALL"
+                      ? "No Vehicles in Live Queue"
+                      : `No Vehicles in "${filterType.replace("_", " ")}"`}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    All arriving customers have been served or no active sessions are currently in progress.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/manager/check-in")}
+                  className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+                >
+                  <QrCode className="h-3.5 w-3.5" /> Check-In Customer
+                </button>
               </div>
             ) : (
               queueList.map((item, index) => {
                 const isSelected = item.id === selectedBookingId
                 const queueMeta = getQueueMeta(item.id)
+
                 return (
                   <div
                     key={item.id}
                     onClick={() => setSelectedBookingId(item.id)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 relative overflow-hidden ${
                       isSelected
-                        ? "bg-card border-primary shadow-md shadow-primary/10"
+                        ? "bg-card border-primary shadow-md shadow-primary/10 ring-1 ring-primary/30"
                         : item.status === "STALLED"
                         ? "bg-destructive/5 border-destructive/30 hover:border-destructive/60"
-                        : "bg-card/50 border-border hover:border-border/80"
+                        : item.status === "IN_SERVICE"
+                        ? "bg-amber-500/5 border-amber-500/30 hover:border-amber-500/60"
+                        : "bg-card/60 border-border hover:border-border/80"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -567,12 +655,10 @@ export default function ManagerQueuePage() {
                           item.status === "STALLED"
                             ? "bg-destructive/15 text-destructive border border-destructive/30"
                             : item.status === "IN_SERVICE"
-                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/30"
-                            : item.status === "CHECKED_IN"
-                            ? "bg-blue-500/10 text-blue-500 border border-blue-500/30"
-                            : item.status === "COMPLETED" || item.status === "SERVICE_COMPLETED"
-                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/30"
-                            : "bg-muted text-muted-foreground border border-border"
+                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                            : item.status === "CHECKED_IN" || item.status === "CHECK_IN"
+                            ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                         }`}
                       >
                         {item.status.replace("_", " ")}
@@ -582,10 +668,13 @@ export default function ManagerQueuePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-sm font-bold text-foreground">
-                          {item.vehicleDetails?.brand || "Car"} {item.vehicleDetails?.model || ""}
+                          {item.vehicleDetails?.brand || "Vehicle"}{" "}
+                          {item.vehicleDetails?.model || ""}
                         </h4>
                         <p className="text-xs text-muted-foreground font-mono">
-                          {item.vehicleDetails?.registrationNumber || item.walkInVehicle?.registrationNumber || "MH 12 AB 1234"}
+                          {item.vehicleDetails?.registrationNumber ||
+                            item.walkInVehicle?.registrationNumber ||
+                            "N/A"}
                         </p>
                       </div>
 
@@ -593,15 +682,18 @@ export default function ManagerQueuePage() {
                         <span className="text-xs font-extrabold text-foreground block">
                           ₹{item.pricingSnapshot?.totalPrice || 450}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">{item.serviceType} Wash</span>
+                        <span className="text-[10px] text-muted-foreground uppercase">
+                          {item.serviceType} Wash
+                        </span>
                       </div>
                     </div>
 
-                    {queueMeta && (
+                    {queueMeta ? (
                       <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground pt-1 border-t border-border/60">
                         {queueMeta.isBayActive ? (
-                          <span className="text-amber-500">
-                            Bay {queueMeta.assignedBayNumber ?? "—"} • In Service
+                          <span className="text-amber-400 flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
+                            Bay {queueMeta.assignedBayNumber ?? "1"} • In Service
                           </span>
                         ) : (
                           <>
@@ -609,6 +701,10 @@ export default function ManagerQueuePage() {
                             <span>~{queueMeta.estimatedWaitMinutes}m wait</span>
                           </>
                         )}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] font-bold text-muted-foreground pt-1 border-t border-border/60">
+                        Position #{index + 1}
                       </div>
                     )}
                   </div>
@@ -618,21 +714,24 @@ export default function ManagerQueuePage() {
           </div>
         </div>
 
-        {/* Right Panel: Active Session (60% width / 7 Cols) */}
+        {/* Right Panel: Active Session (Designed Cleanly Matching Image 2 Reference) */}
         <div className="lg:col-span-7 flex flex-col space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground">Active Session</h2>
             <div className="flex items-center gap-2">
               {selectedBooking?.status === "IN_SERVICE" && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted">
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-muted border border-border">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     IN PROGRESS:
                   </span>
-                  <span className="font-mono text-lg font-bold text-primary">{formattedSessionTimer}</span>
+                  <span className="font-mono text-base font-bold text-primary">
+                    {formattedSessionTimer}
+                  </span>
                 </div>
               )}
               {selectedBooking &&
-                (selectedBooking.status === "CHECKED_IN" || selectedBooking.status === "IN_SERVICE") && (
+                (selectedBooking.status === "CHECKED_IN" ||
+                  selectedBooking.status === "IN_SERVICE") && (
                   <button
                     type="button"
                     onClick={() => {
@@ -648,104 +747,142 @@ export default function ManagerQueuePage() {
             </div>
           </div>
 
-          <div className="flex-1 rounded-3xl bg-card border border-border overflow-hidden shadow-md flex flex-col">
+          <div className="rounded-3xl bg-card border border-border overflow-hidden shadow-md min-h-[480px] flex flex-col justify-between">
             {!selectedBooking ? (
-              <div className="py-24 text-center text-muted-foreground space-y-2">
-                <Car className="h-12 w-12 text-muted-foreground mx-auto" />
-                <p className="text-base font-bold text-foreground">Select a booking to view active bay session</p>
+              /* Enhanced Empty State for Active Session */
+              <div className="p-8 sm:p-16 my-auto text-center flex flex-col items-center justify-center space-y-4">
+                <div className="h-20 w-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-inner">
+                  <Sparkles className="h-10 w-10 animate-pulse" />
+                </div>
+                <div className="space-y-1.5 max-w-sm">
+                  <h3 className="text-lg font-bold text-foreground">
+                    Select a Vehicle from the Queue
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Click any vehicle in the live queue on the left to control the wash session, inspect photos, or complete handover.
+                  </p>
+                </div>
               </div>
             ) : (
-              <>
-                <div className="p-6 sm:p-8 space-y-8">
-                  {/* Vehicle Placeholder + Customer & Vehicle */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <div className="aspect-[16/9] rounded-2xl border border-border bg-muted/50 flex items-center justify-center">
-                      <Car className="h-14 w-14 text-muted-foreground" />
-                    </div>
+              <div className="p-6 sm:p-8 space-y-6 flex-1 flex flex-col justify-between">
+                {/* Top Section: Vehicle Image (Left) + Customer & Vehicle Details (Right) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  {/* Left: Vehicle Image Preview */}
+                  <div className="aspect-[16/10] w-full rounded-2xl border border-border overflow-hidden bg-black/40 flex items-center justify-center relative shadow-sm">
+                    {selectedVehicleImage ? (
+                      <img
+                        src={selectedVehicleImage}
+                        alt="Vehicle"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-muted-foreground space-y-2">
+                        <Car className="h-12 w-12 text-muted-foreground/60" />
+                        <span className="text-[11px] font-semibold text-muted-foreground/70">
+                          {selectedBooking.vehicleDetails?.brand || "Vehicle"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                    <div className="space-y-5">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                  {/* Right: Clean, Flat Customer & Vehicle Specs */}
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block mb-2">
                         CUSTOMER &amp; VEHICLE
                       </span>
-
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-base font-bold text-foreground">
-                            {(
-                              selectedBooking.customerDetails?.name ||
+                      <div className="flex items-center gap-3">
+                        <div className="h-11 w-11 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground">
+                          {(
+                            selectedBooking.customerDetails?.name ||
+                            selectedBooking.walkInCustomer?.name ||
+                            "Customer"
+                          )
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-foreground">
+                            {selectedBooking.customerDetails?.name ||
                               selectedBooking.walkInCustomer?.name ||
-                              "Customer"
-                            )
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .slice(0, 2)
-                              .toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-foreground">
-                            {selectedBooking.customerDetails?.name || selectedBooking.walkInCustomer?.name || "Customer"}
+                              "Customer"}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedBooking.customerDetails?.phone || selectedBooking.walkInCustomer?.phone || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-                        <div>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-                            MODEL
-                          </span>
-                          <p className="text-base font-bold text-foreground">
-                            {selectedBooking.vehicleDetails?.brand || "Vehicle"}{" "}
-                            {selectedBooking.vehicleDetails?.model || ""}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-                            LICENSE PLATE
-                          </span>
-                          <p className="font-mono text-base font-bold text-primary">
-                            {selectedBooking.vehicleDetails?.registrationNumber ||
-                              selectedBooking.walkInVehicle?.registrationNumber ||
+                          <p className="text-xs text-muted-foreground">
+                            {selectedBooking.customerDetails?.phone ||
+                              selectedBooking.walkInCustomer?.phone ||
                               "N/A"}
                           </p>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 rounded-2xl bg-muted/50 space-y-0.5">
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-                            SERVICE TYPE
+                    {/* 2-Column Minimal Specs */}
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-4 pt-2">
+                      <div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          MODEL
+                        </span>
+                        <p className="text-sm font-bold text-foreground">
+                          {selectedBooking.vehicleDetails?.brand || "Vehicle"}{" "}
+                          {selectedBooking.vehicleDetails?.model || ""}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          LICENSE PLATE
+                        </span>
+                        <p className="font-mono text-sm font-black text-primary">
+                          {selectedBooking.vehicleDetails?.registrationNumber ||
+                            selectedBooking.walkInVehicle?.registrationNumber ||
+                            "N/A"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          PAYMENT
+                        </span>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                          <span className="text-xs font-bold text-emerald-500">
+                            {selectedBooking.paymentStatus}
                           </span>
-                          <p className="text-sm font-semibold text-foreground">{selectedBooking.serviceType} Wash</p>
                         </div>
-                        <div className="p-3 rounded-2xl bg-muted/50 space-y-0.5">
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-                            PAYMENT
-                          </span>
-                          <p className="text-sm font-semibold text-foreground">{selectedBooking.paymentStatus}</p>
-                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          PACKAGE
+                        </span>
+                        <p className="text-xs font-bold text-foreground">
+                          {selectedBooking.serviceType === "FULL" ? "Full Wash" : "Half Wash"}
+                        </p>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Service Details */}
-                  <div className="p-5 rounded-2xl bg-muted/40 border-l-4 border-primary space-y-3">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                {/* Middle Section: Service Details (Horizontal Pill Chips) */}
+                <div className="pt-3">
+                  <div className="p-4 rounded-2xl bg-muted/40 border-l-4 border-primary space-y-2">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block">
                       SERVICE DETAILS
                     </span>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold">
-                        {selectedBooking.serviceType === "FULL" ? "Full" : "Half"} Wash
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/15 text-primary text-xs font-bold">
+                        <Droplets className="h-3.5 w-3.5" />
+                        {selectedBooking.serviceType === "FULL" ? "Full Premium Wash" : "Express Half Wash"}
                       </span>
                       {(selectedBooking.extraServices || []).map((extra) => (
                         <span
                           key={extra.serviceId}
-                          className="px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-bold"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted text-foreground border border-border text-xs font-bold"
                         >
+                          <Wrench className="h-3.5 w-3.5 text-primary" />
                           {extra.name}
                         </span>
                       ))}
@@ -753,8 +890,8 @@ export default function ManagerQueuePage() {
                   </div>
                 </div>
 
-                {/* Sticky Action Footer — exactly two CTAs */}
-                <div className="mt-auto border-t border-border bg-muted/20 p-4 sm:p-6 grid grid-cols-2 gap-4">
+                {/* Bottom Section: Primary Action Buttons */}
+                <div className="pt-4 border-t border-border grid grid-cols-2 gap-4">
                   {selectedBooking.status === "STALLED" ? (
                     <button
                       type="button"
@@ -764,84 +901,59 @@ export default function ManagerQueuePage() {
                         setTargetStatusInput("CHECKED_IN")
                       }}
                       disabled={isAdvancing}
-                      className="py-3.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs uppercase tracking-wide hover:bg-amber-400 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="col-span-2 py-3.5 rounded-xl bg-amber-500 text-black font-extrabold text-xs uppercase tracking-wide hover:bg-amber-400 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      <Clock className="h-4 w-4" /> Resolve Stalled
+                      <Clock className="h-4 w-4" /> Resolve Stalled Issue
                     </button>
-                  ) : (
+                  ) : selectedBooking.status === "SERVICE_COMPLETED" ||
+                    selectedBooking.status === "AWAITING_HANDOVER" ||
+                    selectedBooking.status === "AWAITING_CONFIRMATION" ? (
                     <button
                       type="button"
-                      onClick={() => handleAdvanceStatus("IN_SERVICE")}
-                      disabled={isAdvancing || selectedBooking.status !== "CHECKED_IN"}
-                      className="py-3.5 rounded-xl bg-muted text-muted-foreground font-extrabold text-xs uppercase tracking-wide hover:bg-muted/70 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
+                      onClick={() => handleAdvanceStatus("COMPLETED")}
+                      disabled={isAdvancing}
+                      className="col-span-2 py-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wide hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2 shadow-md"
                     >
-                      <Play className="h-4 w-4" /> Start Service
+                      <CheckCircle2 className="h-4 w-4" /> Handover Vehicle &amp; Close Booking
                     </button>
-                  )}
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleAdvanceStatus("IN_SERVICE")}
+                        disabled={isAdvancing || selectedBooking.status !== "CHECKED_IN"}
+                        className="py-3.5 rounded-xl bg-muted text-muted-foreground font-extrabold text-xs uppercase tracking-wide hover:bg-muted/70 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
+                      >
+                        <Play className="h-4 w-4 fill-current" /> Start Service
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (selectedBooking.status === "IN_SERVICE") {
-                        navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
-                      } else {
-                        handleAdvanceStatus("COMPLETED")
-                      }
-                    }}
-                    disabled={
-                      isAdvancing ||
-                      selectedBooking.status === "COMPLETED" ||
-                      selectedBooking.status === "STALLED" ||
-                      selectedBooking.status === "CHECKED_IN"
-                    }
-                    className="py-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wide hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
-                  >
-                    <Check className="h-4 w-4 stroke-[3]" /> Mark Completed
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedBooking.status === "IN_SERVICE") {
+                            navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
+                          } else {
+                            handleAdvanceStatus("COMPLETED")
+                          }
+                        }}
+                        disabled={
+                          isAdvancing ||
+                          selectedBooking.status === "COMPLETED" ||
+                          selectedBooking.status === "STALLED" ||
+                          selectedBooking.status === "CHECKED_IN"
+                        }
+                        className="py-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wide hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <Check className="h-4 w-4 stroke-[3]" /> Mark Completed
+                      </button>
+                    </>
+                  )}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
-
       </div>
-
-      {/* Check-In Quick Modal */}
-      {isCheckInOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-xl font-bold text-foreground">Customer Quick Check-In</h3>
-              <button onClick={() => setIsCheckInOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  SCAN QR TOKEN OR BOOKING ID
-                </label>
-                <input
-                  type="text"
-                  value={qrInput}
-                  onChange={(e) => setQrInput(e.target.value)}
-                  placeholder="e.g. WQ-28472 or qr_token_..."
-                  className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-mono text-sm focus:outline-none focus:border-primary transition-colors"
-                />
-              </div>
-
-              <button
-                onClick={handleCheckInSubmit}
-                disabled={isCheckInSubmitting}
-                className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isCheckInSubmitting ? "Processing..." : "Complete Check-In"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Mark Stalled Modal */}
       {stallingBookingId && (
@@ -849,7 +961,10 @@ export default function ManagerQueuePage() {
           <div className="bg-card text-card-foreground border border-destructive/40 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-xl font-bold text-destructive">Stall Booking</h3>
-              <button onClick={() => setStallingBookingId(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setStallingBookingId(null)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -889,7 +1004,10 @@ export default function ManagerQueuePage() {
           <div className="bg-card text-card-foreground border border-amber-500/40 rounded-3xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-xl font-bold text-amber-500">Resolve Stalled Issue</h3>
-              <button onClick={() => setResolvingBookingId(null)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => setResolvingBookingId(null)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -901,12 +1019,16 @@ export default function ManagerQueuePage() {
                 </label>
                 <select
                   value={targetStatusInput}
-                  onChange={(e) => setTargetStatusInput(e.target.value as "CHECKED_IN" | "IN_SERVICE" | "CANCELLED")}
+                  onChange={(e) =>
+                    setTargetStatusInput(
+                      e.target.value as "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
+                    )
+                  }
                   className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-bold text-sm focus:outline-none focus:border-amber-500"
                 >
                   <option value="CHECKED_IN">Re-enter Waiting Queue (CHECKED_IN)</option>
                   <option value="IN_SERVICE">Resume Wash Service (IN_SERVICE)</option>
-                  <option value="CANCELLED">Cancel Booking & Process Refund</option>
+                  <option value="CANCELLED">Cancel Booking &amp; Process Refund</option>
                 </select>
               </div>
 
@@ -934,7 +1056,6 @@ export default function ManagerQueuePage() {
           </div>
         </div>
       )}
-
     </div>
   )
 }

@@ -71,10 +71,15 @@ export class SavePostInspectionUseCase {
       )
     }
 
-    // 2. Status Eligibility Check (Must be IN_SERVICE)
-    if (booking.status !== BookingStatus.IN_SERVICE) {
+    // 2. Status Eligibility Check (Must be IN_SERVICE, SERVICE_COMPLETED, or AWAITING_HANDOVER)
+    const allowedStatuses = [
+      BookingStatus.IN_SERVICE,
+      BookingStatus.SERVICE_COMPLETED,
+      BookingStatus.AWAITING_HANDOVER,
+    ]
+    if (!allowedStatuses.includes(booking.status)) {
       throw new AppError(
-        `Post-service inspection requires IN_SERVICE status. Current status is ${booking.status}`,
+        `Post-service inspection and handover requires an active service status. Current status is ${booking.status}`,
         HTTP_STATUS.BAD_REQUEST
       )
     }
@@ -86,6 +91,7 @@ export class SavePostInspectionUseCase {
       )
     }
 
+    const fromStatus = booking.status
     const now = new Date()
     const inspectionRecord = {
       photos,
@@ -96,15 +102,15 @@ export class SavePostInspectionUseCase {
 
     booking.completePostInspection(inspectionRecord)
 
-    // Optimistic-concurrency guard (IN_SERVICE -> AWAITING_HANDOVER) to prevent duplicate completion submissions
+    // Optimistic-concurrency guard to prevent duplicate completion submissions
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(
       booking,
-      BookingStatus.IN_SERVICE
+      allowedStatuses
     )
 
     if (!domainBooking) {
       throw new AppError(
-        "Failed to save post-service inspection. Service completion may have already been submitted.",
+        "Failed to save post-service inspection. Handover may have already been completed.",
         HTTP_STATUS.CONFLICT
       )
     }
@@ -113,15 +119,15 @@ export class SavePostInspectionUseCase {
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
-      fromStatus: BookingStatus.IN_SERVICE,
-      toStatus: BookingStatus.AWAITING_HANDOVER,
+      fromStatus,
+      toStatus: BookingStatus.COMPLETED,
       changedBy: managerUserId,
-      reason: notes ? `Post-inspection completed: ${notes}` : "Wash service completed & post-inspection verified",
+      reason: notes ? `Post-inspection & vehicle handover completed: ${notes}` : "Post-service inspection verified & vehicle handed over to customer",
       createdAt: now,
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 5. Update Redis Queue State (Frees active bay capacity)
+    // 5. Update Redis Queue State (Frees active bay capacity & removes from queue)
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
     // 6. Dispatch Notification Event

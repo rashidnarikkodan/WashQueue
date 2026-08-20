@@ -10,6 +10,7 @@ import CustomerBookingDetailsView from "../components/details/CustomerBookingDet
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
 import Loading from "@/shared/components/ui/Loading"
+import { getSocketClient } from "@/shared/services/socket.client"
 
 export default function BookingDetails() {
   const { id } = useParams<{ id: string }>()
@@ -84,7 +85,46 @@ export default function BookingDetails() {
     }
   }, [id])
 
+  // Real-Time Socket.IO Subscription — keep this booking's status/progress live
+  // without a full reload; the manager side emits every status change into this room.
+  useEffect(() => {
+    if (!id) return
+    const socket = getSocketClient()
+    socket.emit("join_booking", { bookingId: id })
 
+    const handleRealTimeUpdate = () => {
+      bookingApi
+        .getBookingById(id)
+        .then((data) => setBooking(data))
+        .catch((err) => console.error("Failed to sync booking from real-time event:", err))
+    }
+
+    const realTimeEvents = [
+      "CHECKIN_SUCCESS",
+      "BOOKING_CHECKED_IN",
+      "WASH_STARTED",
+      "SERVICE_STARTED",
+      "WASH_COMPLETED",
+      "SERVICE_COMPLETED",
+      "POST_INSPECTION_COMPLETED",
+      "HANDOVER_READY",
+      "BOOKING_COMPLETED",
+      "BOOKING_CANCELLED",
+      "BOOKING_NO_SHOW",
+      "BOOKING_STALLED",
+      "QUEUE_POSITION_CHANGED",
+      "PAYMENT_UPDATED",
+      "REFUND_PROCESSED",
+    ]
+
+    realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
+    socket.on("reconnect", handleRealTimeUpdate)
+
+    return () => {
+      realTimeEvents.forEach((evt) => socket.off(evt, handleRealTimeUpdate))
+      socket.off("reconnect", handleRealTimeUpdate)
+    }
+  }, [id])
 
   // Handle Status Transition for Staff/Manager/Owner/Admin
   const handleAdvanceStatus = async (targetStatus: string) => {

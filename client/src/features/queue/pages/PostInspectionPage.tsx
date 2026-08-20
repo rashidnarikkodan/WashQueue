@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Camera,
   Check,
-  ArrowRight,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
@@ -124,8 +123,8 @@ export default function ManagerPostInspectionPage() {
   const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
   const allPhotosCaptured = missingPhotoSlots.length === 0
 
-  // Save Post-Service Inspection (IN_SERVICE -> SERVICE_COMPLETED / AWAITING_HANDOVER)
-  const handleSavePostInspection = async () => {
+  // Single-Step Complete Inspection & Customer Handover
+  const handleCompleteInspectionAndHandover = async () => {
     if (!booking) return
     if (!allPhotosCaptured) {
       toast.error(
@@ -140,31 +139,14 @@ export default function ManagerPostInspectionPage() {
       const photosArray = Object.values(capturedPhotos).filter(Boolean)
       await bookingApi.savePostInspection(booking.id, {
         photos: photosArray,
-        notes: handoverNotes || "Post-service vehicle quality inspection verified",
+        notes: handoverNotes || "Post-service vehicle quality inspection verified & handed over to customer",
       })
-      toast.success("✓ Post-service inspection saved! Vehicle is ready for customer handover.")
-      fetchBooking()
-    } catch (err: unknown) {
-      const errorObj = err as { message?: string }
-      console.error("Post inspection error:", err)
-      toast.error(errorObj?.message || "Failed to save post-service inspection")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Finalize Separate Vehicle Handover to Customer (AWAITING_HANDOVER -> COMPLETED)
-  const handleHandover = async () => {
-    if (!booking) return
-    setIsSubmitting(true)
-    try {
-      await bookingApi.completeHandover(booking.id, handoverNotes)
-      toast.success("✓ Vehicle handover completed & booking closed!")
+      toast.success("✓ Inspection verified & vehicle handover completed!")
       navigate("/manager/queues")
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
-      console.error("Handover error:", err)
-      toast.error(errorObj?.message || "Failed to complete vehicle handover")
+      console.error("Post inspection error:", err)
+      toast.error(errorObj?.message || "Failed to complete post-service inspection and handover")
     } finally {
       setIsSubmitting(false)
     }
@@ -494,27 +476,15 @@ export default function ManagerPostInspectionPage() {
                 </p>
               )}
               <div className="flex items-center gap-3">
-              {booking?.status === "IN_SERVICE" ? (
                 <button
                   type="button"
-                  onClick={handleSavePostInspection}
+                  onClick={handleCompleteInspectionAndHandover}
                   disabled={isSubmitting || !allPhotosCaptured}
-                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>{isSubmitting ? "Saving..." : "Save Post-Inspection & Ready for Handover"}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleHandover}
-                  disabled={isSubmitting}
-                  className="flex-1 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 font-extrabold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  <span>{isSubmitting ? "Handing Over..." : "Finalize Handover & Close Booking"}</span>
                   <Check className="h-4 w-4 stroke-[3]" />
+                  <span>{isSubmitting ? "Completing Handover..." : "Complete Inspection & Handover"}</span>
                 </button>
-              )}
               </div>
             </div>
           </div>

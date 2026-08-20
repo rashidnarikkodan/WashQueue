@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react"
+import jsQR from "jsqr"
 import {
   SwitchCamera,
   Zap,
@@ -24,31 +25,18 @@ interface CameraDevice {
   label: string
 }
 
-interface Html5QrcodeInstance {
-  stop: () => Promise<void>
-  getRunningTrackCapabilities: () => Record<string, unknown>
-  applyVideoConstraints: (constraints: Record<string, unknown>) => Promise<void>
-  start: (
-    cameraConstraint: string | { facingMode: string },
-    config: Record<string, unknown>,
-    onSuccess: (decodedText: string) => void,
-    onError: (errorMessage: string) => void
-  ) => Promise<void>
-  scanFile: (imageFile: File, showImage?: boolean) => Promise<string>
-}
-
 export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   onScanSuccess,
-  onScanError,
   isProcessing = false,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
-  const html5ScannerRef = useRef<Html5QrcodeInstance | null>(null)
   const animFrameIdRef = useRef<number | null>(null)
   const isScanningRef = useRef<boolean>(false)
   const lastScannedTextRef = useRef<string>("")
   const lastScannedTimeRef = useRef<number>(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [cameras, setCameras] = useState<CameraDevice[]>([])
   const [selectedCameraId, setSelectedCameraId] = useState<string>("")
@@ -61,13 +49,13 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true)
   const [lastScannedResult, setLastScannedResult] = useState<string | null>(null)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
   // Web Audio Synthesizer Beep for Instant Scan Feedback
   const playScanBeep = useCallback(() => {
     if (!isAudioEnabled) return
     try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       if (!AudioCtx) return
       const ctx = new AudioCtx()
       const osc = ctx.createOscillator()
@@ -127,6 +115,11 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   // Handle successful QR detection
   const handleDecodedText = useCallback(
     (decodedText: string) => {
+      console.log("🎯 [QR Scanner] QR Code Detected in Camera Feed:", {
+        rawPayload: decodedText,
+        detectedAt: new Date().toISOString(),
+      })
+
       const parsedText = parseQrContent(decodedText)
       if (!parsedText) return
 
@@ -139,10 +132,18 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         return
       }
 
+      console.log("✓ [QR Scanner] Processed Token / Booking ID:", parsedText)
+
       lastScannedTextRef.current = parsedText
       lastScannedTimeRef.current = now
 
       playScanBeep()
+      try {
+        if (navigator.vibrate) navigator.vibrate(80)
+      } catch {
+        // Vibration not supported
+      }
+
       setLastScannedResult(parsedText)
       onScanSuccess(parsedText)
 
@@ -154,236 +155,276 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     [onScanSuccess, parseQrContent, playScanBeep]
   )
 
+  const isMountedRef = useRef<boolean>(true)
+
+  // Track mounted lifecycle
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   // Stop Camera Stream
   const stopCamera = useCallback(async () => {
+    isScanningRef.current = false
+
     if (animFrameIdRef.current) {
       cancelAnimationFrame(animFrameIdRef.current)
       animFrameIdRef.current = null
     }
 
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop())
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        track.stop()
+        track.enabled = false
+      })
       mediaStreamRef.current = null
     }
 
-    if (html5ScannerRef.current) {
-      try {
-        await html5ScannerRef.current.stop()
-      } catch {
-        // Ignore html5scanner stop errors
+    if (videoRef.current) {
+      if (videoRef.current.srcObject) {
+        try {
+          const stream = videoRef.current.srcObject as MediaStream
+          stream.getTracks().forEach((track) => {
+            track.stop()
+            track.enabled = false
+          })
+        } catch {
+          // ignore
+        }
       }
-      html5ScannerRef.current = null
+      videoRef.current.srcObject = null
     }
 
-    isScanningRef.current = false
     setIsCameraActive(false)
     setIsTorchOn(false)
   }, [])
 
-  // Native Frame Detection Loop using window.BarcodeDetector or Canvas
-  const startNativeFrameDetection = useCallback(
-    (videoEl: HTMLVideoElement) => {
-      interface BarcodeResult {
-        rawValue?: string
-      }
-      let barcodeDetector: { detect: (target: HTMLVideoElement) => Promise<BarcodeResult[]> } | null = null
-      if ("BarcodeDetector" in window) {
-        try {
-          const DetectorClass = (window as unknown as { BarcodeDetector: new (opts: Record<string, unknown>) => { detect: (target: HTMLVideoElement) => Promise<BarcodeResult[]> } }).BarcodeDetector
-          barcodeDetector = new DetectorClass({
-            formats: ["qr_code"],
-          })
-        } catch (err) {
-          console.warn("BarcodeDetector initialization error:", err)
-        }
-      }
+  // Dual-Orientation High-Speed Frame Detection Loop (jsQR + BarcodeDetector)
+  const startScanningLoop = useCallback(() => {
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement("canvas")
+    }
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })
+    if (!ctx) return
 
-      const detectFrame = async () => {
-        if (!isScanningRef.current || !videoEl || videoEl.readyState < 2) {
-          animFrameIdRef.current = requestAnimationFrame(detectFrame)
-          return
-        }
-
-        try {
-          if (barcodeDetector) {
-            const barcodes = await barcodeDetector.detect(videoEl)
-            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-              handleDecodedText(barcodes[0].rawValue)
+    // Initialize BarcodeDetector API if available in browser
+    interface BarcodeResult {
+      rawValue?: string
+    }
+    let nativeDetector: { detect: (target: ImageBitmapSource) => Promise<BarcodeResult[]> } | null = null
+    if ("BarcodeDetector" in window) {
+      try {
+        const DetectorClass = (
+          window as unknown as {
+            BarcodeDetector: new (opts: Record<string, unknown>) => {
+              detect: (target: ImageBitmapSource) => Promise<BarcodeResult[]>
             }
           }
-        } catch {
-          // Detection frame error ignored
+        ).BarcodeDetector
+        nativeDetector = new DetectorClass({ formats: ["qr_code"] })
+      } catch {
+        // Fallback to jsQR
+      }
+    }
+
+    const scanFrame = async () => {
+      if (!isScanningRef.current) return
+
+      const video = videoRef.current
+      if (video && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0) {
+        const vWidth = video.videoWidth
+        const vHeight = video.videoHeight
+
+        if (canvas.width !== vWidth || canvas.height !== vHeight) {
+          canvas.width = vWidth
+          canvas.height = vHeight
         }
 
-        if (isScanningRef.current) {
-          animFrameIdRef.current = requestAnimationFrame(detectFrame)
+        try {
+          // Pass 1: Try Native Hardware BarcodeDetector if available (instant C++ decode)
+          if (nativeDetector) {
+            try {
+              const barcodes = await nativeDetector.detect(video)
+              if (barcodes && barcodes.length > 0 && barcodes[0]?.rawValue) {
+                handleDecodedText(barcodes[0].rawValue)
+                animFrameIdRef.current = requestAnimationFrame(scanFrame)
+                return
+              }
+            } catch {
+              // Ignore native detector frame error and proceed to jsQR
+            }
+          }
+
+          // Pass 2: Draw Standard Video Frame to Canvas
+          ctx.drawImage(video, 0, 0, vWidth, vHeight)
+          let imageData = ctx.getImageData(0, 0, vWidth, vHeight)
+          let code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          })
+
+          if (code && code.data) {
+            handleDecodedText(code.data)
+            animFrameIdRef.current = requestAnimationFrame(scanFrame)
+            return
+          }
+
+          // Pass 3: Horizontally Mirrored Frame Scan (for mirrored cameras/selfie screens)
+          ctx.save()
+          ctx.scale(-1, 1)
+          ctx.drawImage(video, -vWidth, 0, vWidth, vHeight)
+          ctx.restore()
+
+          const mirroredData = ctx.getImageData(0, 0, vWidth, vHeight)
+          code = jsQR(mirroredData.data, mirroredData.width, mirroredData.height, {
+            inversionAttempts: "attemptBoth",
+          })
+
+          if (code && code.data) {
+            handleDecodedText(code.data)
+            animFrameIdRef.current = requestAnimationFrame(scanFrame)
+            return
+          }
+        } catch {
+          // Catch frame reading exception
         }
       }
 
-      animFrameIdRef.current = requestAnimationFrame(detectFrame)
-    },
-    [handleDecodedText]
-  )
+      if (isScanningRef.current) {
+        animFrameIdRef.current = requestAnimationFrame(scanFrame)
+      }
+    }
 
-  // Start Camera Stream (dual engine: Html5Qrcode or Native MediaDevices)
+    animFrameIdRef.current = requestAnimationFrame(scanFrame)
+  }, [handleDecodedText])
+
+  // Start Camera Stream
   const startCamera = useCallback(async () => {
+    if (!isMountedRef.current) return
     setCameraError(null)
     setIsInitializing(true)
     await stopCamera()
 
-    // Engine 1: Try Html5Qrcode library
-    try {
-      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode")
-      if (!html5ScannerRef.current) {
-        html5ScannerRef.current = new Html5Qrcode("qr-camera-viewfinder", {
-          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-          verbose: false,
-        }) as unknown as Html5QrcodeInstance
-      }
-
-      const config = {
-        fps: 15,
-        qrbox: (w: number, h: number) => {
-          const minDim = Math.min(w, h)
-          const boxSize = Math.floor(minDim * 0.7)
-          return { width: boxSize, height: boxSize }
-        },
-        aspectRatio: 1.333333,
-      }
-
-      const cameraConstraint = selectedCameraId
-        ? selectedCameraId
-        : { facingMode: facingMode }
-
-      await html5ScannerRef.current.start(
-        cameraConstraint,
-        config,
-        (decodedText: string) => handleDecodedText(decodedText),
-        (errorMessage: string) => {
-          if (onScanError) onScanError(errorMessage)
-        }
-      )
-
-      isScanningRef.current = true
-      setIsCameraActive(true)
-
-      // Check Torch capabilities
-      try {
-        const capabilities = html5ScannerRef.current.getRunningTrackCapabilities()
-        if (capabilities && capabilities.torch !== undefined) {
-          setIsTorchSupported(true)
-        }
-      } catch {
-        setIsTorchSupported(false)
-      }
-
-      setIsInitializing(false)
-      return
-    } catch (err) {
-      console.warn("Html5Qrcode engine initialization failed/fallback to Native MediaStream:", err)
-    }
-
-    // Engine 2: Fallback to Native MediaStream API
     try {
       const constraints: MediaStreamConstraints = {
         video: selectedCameraId
-          ? { deviceId: { exact: selectedCameraId } }
+          ? { deviceId: { exact: selectedCameraId }, width: { ideal: 1280 }, height: { ideal: 720 } }
           : { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
+
+      // If component unmounted while waiting for getUserMedia, immediately terminate stream tracks
+      if (!isMountedRef.current) {
+        stream.getTracks().forEach((track) => {
+          track.stop()
+          track.enabled = false
+        })
+        return
+      }
+
       mediaStreamRef.current = stream
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        await videoRef.current.play()
+        await videoRef.current.play().catch(() => {})
       }
 
-      // Check torch support on track
+      // Check torch support on video track
       const track = stream.getVideoTracks()[0]
       if (track) {
-        const capabilities = track.getCapabilities() as Record<string, unknown>
+        const capabilities = track.getCapabilities?.() as Record<string, unknown> | undefined
         if (capabilities && capabilities.torch) {
           setIsTorchSupported(true)
+        } else {
+          setIsTorchSupported(false)
         }
       }
 
       isScanningRef.current = true
       setIsCameraActive(true)
+      setIsInitializing(false)
 
-      if (videoRef.current) {
-        startNativeFrameDetection(videoRef.current)
-      }
+      // Start Dual-Orientation Frame Detection Loop
+      startScanningLoop()
     } catch (err: unknown) {
-      console.error("Native camera stream error:", err)
+      console.error("Camera stream error:", err)
       isScanningRef.current = false
       setIsCameraActive(false)
-      const errorObj = err as { name?: string; message?: string }
-      if (errorObj?.name === "NotAllowedError" || String(err).includes("Permission")) {
-        setCameraError("Camera access permission was denied. Please allow camera access in browser settings.")
-      } else if (errorObj?.name === "NotFoundError" || String(err).includes("NotFound")) {
-        setCameraError("No camera hardware detected on this device.")
-      } else if (errorObj?.name === "NotReadableError") {
-        setCameraError("Camera is currently being used by another application.")
-      } else {
-        setCameraError(errorObj?.message || String(err) || "Failed to initialize camera scanner.")
-      }
-    } finally {
       setIsInitializing(false)
-    }
-  }, [facingMode, handleDecodedText, onScanError, selectedCameraId, startNativeFrameDetection, stopCamera])
 
-  // Fetch available camera devices on mount
+      const errorObj = err as { name?: string; message?: string }
+      if (errorObj?.name === "NotAllowedError" || errorObj?.name === "PermissionDeniedError") {
+        setCameraError("Camera permission denied. Please allow camera access in your browser settings.")
+      } else if (errorObj?.name === "NotFoundError" || errorObj?.name === "DevicesNotFoundError") {
+        setCameraError("No camera hardware found on this system.")
+      } else if (errorObj?.name === "NotReadableError" || errorObj?.name === "TrackStartError") {
+        setCameraError("Camera is currently in use by another application or tab.")
+      } else {
+        setCameraError("Unable to initialize camera video stream.")
+      }
+    }
+  }, [facingMode, selectedCameraId, startScanningLoop, stopCamera])
+
+  // Enumerate Connected Camera Devices
   useEffect(() => {
-    let isMounted = true
+    const listCameras = async () => {
+      try {
+        if (!navigator.mediaDevices?.enumerateDevices) return
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        const videoDevices = devices
+          .filter((d) => d.kind === "videoinput")
+          .map((d, index) => ({
+            id: d.deviceId,
+            label: d.label || `Camera ${index + 1}`,
+          }))
 
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-      navigator.mediaDevices
-        .enumerateDevices()
-        .then((devices) => {
-          if (!isMounted) return
-          const videoDevices = devices
-            .filter((d) => d.kind === "videoinput")
-            .map((d, index) => ({
-              id: d.deviceId,
-              label: d.label || `Camera ${index + 1}`,
-            }))
-
-          setCameras(videoDevices)
-
-          if (videoDevices.length > 0 && !selectedCameraId) {
-            const backCam = videoDevices.find(
-              (c) =>
-                c.label.toLowerCase().includes("back") ||
-                c.label.toLowerCase().includes("environment") ||
-                c.label.toLowerCase().includes("rear")
-            )
-            setSelectedCameraId(backCam ? backCam.id : videoDevices[0].id)
-          }
-        })
-        .catch((err) => console.warn("enumerateDevices error:", err))
+        setCameras(videoDevices)
+      } catch (err) {
+        console.warn("Failed to enumerate video devices:", err)
+      }
     }
 
+    listCameras()
+  }, [])
+
+  // Auto-start camera when component mounts or dependencies change
+  useEffect(() => {
+    startCamera()
     return () => {
-      isMounted = false
       stopCamera()
     }
-  }, [selectedCameraId, stopCamera])
+  }, [startCamera, stopCamera])
 
-  // Auto-start camera when selectedCameraId or facingMode changes
+  // Instant camera hardware teardown on tab switch, window blur, or page navigation
   useEffect(() => {
-    let ignore = false
-    void Promise.resolve().then(async () => {
-      if (ignore) return
-      await startCamera()
-    })
-    return () => {
-      ignore = true
+    const handlePageHide = () => {
+      stopCamera()
     }
-  }, [selectedCameraId, facingMode, startCamera])
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handlePageHide()
+      } else if (isScanningRef.current) {
+        startCamera()
+      }
+    }
 
-  // Toggle Facing Mode
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("beforeunload", handlePageHide)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("beforeunload", handlePageHide)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      stopCamera()
+    }
+  }, [startCamera, stopCamera])
+
+  // Switch Facing Mode
   const toggleFacingMode = () => {
     const nextMode = facingMode === "environment" ? "user" : "environment"
     setFacingMode(nextMode)
@@ -396,7 +437,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           return lbl.includes("front") || lbl.includes("user") || lbl.includes("selfie") || lbl.includes("facetime")
         }
       })
-      setSelectedCameraId(match ? match.id : (cameras.find((c) => c.id !== selectedCameraId)?.id || ""))
+      setSelectedCameraId(match ? match.id : cameras.find((c) => c.id !== selectedCameraId)?.id || "")
     } else {
       setSelectedCameraId("")
     }
@@ -404,43 +445,79 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
   // Toggle Torch/Flash
   const toggleTorch = async () => {
-    if (!isTorchSupported) return
+    if (!isTorchSupported || !mediaStreamRef.current) return
     try {
       const nextState = !isTorchOn
-      if (html5ScannerRef.current) {
-        await html5ScannerRef.current.applyVideoConstraints({
+      const track = mediaStreamRef.current.getVideoTracks()[0]
+      if (track && "applyConstraints" in track) {
+        await (
+          track as unknown as { applyConstraints: (c: Record<string, unknown>) => Promise<void> }
+        ).applyConstraints({
           advanced: [{ torch: nextState }],
         })
-      } else if (mediaStreamRef.current) {
-        const track = mediaStreamRef.current.getVideoTracks()[0]
-        if (track && "applyConstraints" in track) {
-          await (track as unknown as { applyConstraints: (c: Record<string, unknown>) => Promise<void> }).applyConstraints({
-            advanced: [{ torch: nextState }],
-          })
-        }
+        setIsTorchOn(nextState)
       }
-      setIsTorchOn(nextState)
     } catch (err) {
       console.error("Failed to toggle torch:", err)
       toast.error("Torch control is not supported by your camera hardware")
     }
   }
 
-  // Scan QR Code from uploaded Image File
+  // Scan QR Code from uploaded Image File (supporting normal and mirrored scans)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     try {
       setIsInitializing(true)
-      const { Html5Qrcode } = await import("html5-qrcode")
-      const html5QrCode = new Html5Qrcode("qr-file-temp-element")
-      const result = await html5QrCode.scanFile(file, true)
-      handleDecodedText(result)
-      toast.success("QR code decoded successfully from image!")
+      const img = new Image()
+      const objectUrl = URL.createObjectURL(file)
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error("Failed to load image file"))
+        img.src = objectUrl
+      })
+
+      const tempCanvas = document.createElement("canvas")
+      tempCanvas.width = img.naturalWidth || img.width
+      tempCanvas.height = img.naturalHeight || img.height
+      const tempCtx = tempCanvas.getContext("2d")
+
+      if (!tempCtx) {
+        throw new Error("Could not initialize 2D context")
+      }
+
+      tempCtx.drawImage(img, 0, 0)
+      const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height)
+      let code = jsQR(imgData.data, imgData.width, imgData.height, {
+        inversionAttempts: "attemptBoth",
+      })
+
+      if (!code) {
+        // Try horizontally flipped
+        tempCtx.save()
+        tempCtx.scale(-1, 1)
+        tempCtx.drawImage(img, -tempCanvas.width, 0, tempCanvas.width, tempCanvas.height)
+        tempCtx.restore()
+
+        const flippedData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height)
+        code = jsQR(flippedData.data, flippedData.width, flippedData.height, {
+          inversionAttempts: "attemptBoth",
+        })
+      }
+
+      URL.revokeObjectURL(objectUrl)
+
+      if (code && code.data) {
+        handleDecodedText(code.data)
+        toast.success("✓ QR code detected and decoded successfully from image!")
+      } else {
+        toast.error("Could not find a valid QR code in the uploaded image")
+      }
     } catch (err) {
       console.error("Failed to scan QR image:", err)
-      toast.error("Could not find a valid QR code in the uploaded image")
+      toast.error("Could not process the uploaded image")
     } finally {
       setIsInitializing(false)
       if (fileInputRef.current) fileInputRef.current.value = ""
@@ -451,22 +528,14 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     <div className="w-full flex flex-col space-y-4">
       {/* Scanner Viewfinder Box */}
       <div className="relative aspect-[4/3] rounded-3xl bg-slate-950 border-2 border-border overflow-hidden flex flex-col items-center justify-center shadow-inner group">
-        {/* Container for Html5Qrcode Viewfinder */}
-        <div
-          id="qr-camera-viewfinder"
-          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
-        />
-
-        {/* Hidden Fallback Video Element for Native Stream */}
+        {/* Live Camera Video Feed (Mirrored Viewfinder for natural UX) */}
         <video
           ref={videoRef}
           playsInline
+          autoPlay
           muted
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-0 -scale-x-100"
+          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
         />
-
-        {/* Hidden Temp Container for File Image Scanning */}
-        <div id="qr-file-temp-element" className="hidden" />
 
         {/* Viewfinder Target Reticle Animation */}
         {isCameraActive && !isInitializing && (
@@ -549,7 +618,11 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
               }`}
               title="Toggle Flashlight"
             >
-              {isTorchOn ? <Zap className="h-4 w-4 text-amber-500 fill-amber-500" /> : <ZapOff className="h-4 w-4" />}
+              {isTorchOn ? (
+                <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
+              ) : (
+                <ZapOff className="h-4 w-4" />
+              )}
               <span className="hidden sm:inline">Flash</span>
             </button>
           )}
@@ -560,7 +633,11 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
             title="Toggle Scan Beep Sound"
           >
-            {isAudioEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
+            {isAudioEnabled ? (
+              <Volume2 className="h-4 w-4 text-primary" />
+            ) : (
+              <VolumeX className="h-4 w-4 text-muted-foreground" />
+            )}
           </button>
         </div>
 

@@ -343,6 +343,7 @@ export class Booking {
         return [
           BookingStatus.SERVICE_COMPLETED,
           BookingStatus.AWAITING_HANDOVER,
+          BookingStatus.COMPLETED,
           BookingStatus.CANCELLED,
         ].includes(targetStatus)
       case BookingStatus.SERVICE_COMPLETED:
@@ -411,15 +412,14 @@ export class Booking {
     this.props.updatedAt = now
   }
 
-  // Post-inspection doubles as the "service work is done" signal, so it moves the
-  // booking straight to AWAITING_HANDOVER without a separate SERVICE_COMPLETED step.
+  // Post-inspection completes both inspection verification and customer handover in a single action
   completePostInspection(inspection: InspectionRecord): void {
-    if (!this.canTransitionTo(BookingStatus.AWAITING_HANDOVER)) {
-      throw new Error(`Cannot complete post-service inspection for booking in status ${this.props.status}`)
-    }
     const now = new Date()
-    this.props.status = BookingStatus.AWAITING_HANDOVER
-    this.props.serviceCompletedAt = now
+    this.props.status = BookingStatus.COMPLETED
+    this.props.serviceCompletedAt = this.props.serviceCompletedAt ?? now
+    this.props.handoverInitiatedAt = this.props.handoverInitiatedAt ?? now
+    this.props.completedAt = now
+    this.props.paymentStatus = PaymentStatus.PAID
     this.props.postServiceInspection = inspection
     this.props.updatedAt = now
   }
