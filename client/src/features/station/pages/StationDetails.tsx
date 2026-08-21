@@ -135,7 +135,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
   if (noManagedStation) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+        <div className="w-16 h-16 rounded-full bg-warning/10 border border-warning/20 flex items-center justify-center text-warning">
           <AlertTriangle size={32} />
         </div>
         <div className="space-y-1 max-w-md">
@@ -159,7 +159,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[65vh] gap-4">
         <Loading size="lg" />
-        <p className="text-sm text-[#8c909f] font-medium animate-pulse">
+        <p className="text-sm text-muted-foreground font-medium animate-pulse">
           Loading Station Details &amp; Live Status…
         </p>
       </div>
@@ -294,11 +294,11 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
       {/* Rejection Alert Banner */}
       {isRejected && station.rejectionReason && (
-        <div className="p-5 border border-red-500/30 bg-red-500/10 rounded-2xl flex items-start gap-4 shadow-xl">
-          <AlertTriangle className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
+        <div className="p-5 border border-destructive/30 bg-destructive/10 rounded-2xl flex items-start gap-4 shadow-xl">
+          <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="text-base font-extrabold text-red-300">Application Status: Rejected</h3>
-            <p className="text-xs text-red-200/90 leading-relaxed">
+            <h3 className="text-base font-extrabold text-destructive">Application Status: Rejected</h3>
+            <p className="text-xs text-destructive/90 leading-relaxed">
               <strong>Reason:</strong> {station.rejectionReason}
             </p>
           </div>
@@ -307,12 +307,12 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
       {/* Suspended Alert Banner */}
       {isSuspended && (
-        <div className="p-5 border border-amber-500/30 bg-amber-500/10 rounded-2xl flex items-center justify-between gap-4 shadow-xl">
+        <div className="p-5 border border-warning/30 bg-warning/10 rounded-2xl flex items-center justify-between gap-4 shadow-xl">
           <div className="flex items-start gap-4">
-            <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-warning shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-amber-300">Station Status: Suspended</h3>
-              <p className="text-xs text-amber-200/90 leading-relaxed">
+              <h3 className="text-base font-extrabold text-warning">Station Status: Suspended</h3>
+              <p className="text-xs text-warning/90 leading-relaxed">
                 This station has been suspended by an administrator.
                 {station.rejectionReason && (
                   <>
@@ -327,7 +327,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
             <button
               onClick={handleApprove}
               disabled={isSubmittingAction}
-              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-50 shrink-0"
+              className="px-5 py-2.5 rounded-xl bg-success hover:opacity-90 text-success-foreground font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-success/20 disabled:opacity-50 shrink-0"
             >
               Reactivate Station
             </button>
@@ -342,6 +342,26 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           <StationHeroGallery images={station.images} stationName={station.name} />
 
           <StationAboutSection stationName={station.name} description={station.description} />
+
+          {/* Mobile-Only Summary & Booking Card (Right after Station Overview) */}
+          <div className="block lg:hidden">
+            <StationSidebarCard
+              station={station}
+              role={currentRole}
+              managerPermissions={managerPermissions}
+              onApprove={handleApprove}
+              onReject={() => setRejecting(true)}
+              onSuspend={() => setSuspending(true)}
+              onToggleActive={handleToggleActive}
+              onDelete={handleDeleteDraft}
+              onBookNow={handleBookNow}
+              onOpenAssignManager={() => {
+                const el = document.getElementById("station-manager-section")
+                if (el) el.scrollIntoView({ behavior: "smooth" })
+              }}
+              isSubmittingAction={isSubmittingAction}
+            />
+          </div>
 
           {currentRole === ROLE.OWNER && (
             <div id="station-manager-section">
@@ -374,8 +394,8 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           )}
         </div>
 
-        {/* Right Column (30%) - Sticky Sidebar */}
-        <div className="lg:col-span-4 lg:sticky lg:top-24">
+        {/* Right Column (30%) - Desktop Sticky Sidebar */}
+        <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24">
           <StationSidebarCard
             station={station}
             role={currentRole}
@@ -398,44 +418,44 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       {/* Custom Rejection Reason Input Modal */}
       {rejecting && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
+          <div className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center shrink-0">
                 <AlertTriangle size={18} />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-100 uppercase tracking-wider">
+                <h3 className="text-base font-black text-foreground uppercase tracking-wider">
                   Reject Station Registration
                 </h3>
-                <p className="text-[11px] text-slate-500 font-semibold">
+                <p className="text-[11px] text-muted-foreground font-semibold">
                   Specify feedback for the car wash partner
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider pl-1">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                 Reason for Rejection
               </label>
               <textarea
                 value={rejectionReasonInput}
                 onChange={(e) => setRejectionReasonInput(e.target.value)}
                 placeholder="e.g. Operating hours are invalid, or pricing entries contain negative figures. Please rectify..."
-                className="w-full h-32 bg-slate-950 text-slate-100 border border-slate-800 rounded-xl p-4 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/80 transition-all resize-none"
+                className="w-full h-32 bg-background text-foreground border border-border rounded-xl p-4 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-destructive/20 focus:border-destructive/80 transition-all resize-none"
               />
             </div>
 
             <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={() => setRejecting(false)}
-                className="flex-1 py-3 border border-slate-800 hover:bg-slate-800 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+                className="flex-1 py-3 border border-border hover:bg-muted rounded-xl text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 disabled={!rejectionReasonInput.trim() || isSubmittingAction}
                 onClick={handleReject}
-                className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-slate-950 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-red-500/10"
+                className="flex-1 py-3 bg-destructive hover:opacity-90 text-destructive-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-destructive/10"
               >
                 Reject Station
               </button>
@@ -447,44 +467,44 @@ export function StationDetails({ role }: CommonStationDetailProps) {
       {/* Custom Suspension Reason Input Modal */}
       {suspending && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
+          <div className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-warning/10 border border-warning/20 text-warning flex items-center justify-center shrink-0">
                 <AlertTriangle size={18} />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-100 uppercase tracking-wider">
+                <h3 className="text-base font-black text-foreground uppercase tracking-wider">
                   Suspend Station Operations
                 </h3>
-                <p className="text-[11px] text-slate-500 font-semibold">
+                <p className="text-[11px] text-muted-foreground font-semibold">
                   Provide reason for suspending this station
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider pl-1">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                 Reason for Suspension
               </label>
               <textarea
                 value={suspensionReasonInput}
                 onChange={(e) => setSuspensionReasonInput(e.target.value)}
                 placeholder="e.g. Policy violation, maintenance compliance, or customer safety investigation..."
-                className="w-full h-32 bg-slate-950 text-slate-100 border border-slate-800 rounded-xl p-4 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500/80 transition-all resize-none"
+                className="w-full h-32 bg-background text-foreground border border-border rounded-xl p-4 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-warning/20 focus:border-warning/80 transition-all resize-none"
               />
             </div>
 
             <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={() => setSuspending(false)}
-                className="flex-1 py-3 border border-slate-800 hover:bg-slate-800 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+                className="flex-1 py-3 border border-border hover:bg-muted rounded-xl text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 disabled={isSubmittingAction}
                 onClick={handleSuspend}
-                className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-amber-500/10"
+                className="flex-1 py-3 bg-warning hover:opacity-90 text-warning-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-warning/10"
               >
                 Suspend Station
               </button>
