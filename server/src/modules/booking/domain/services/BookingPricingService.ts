@@ -23,8 +23,8 @@ export class BookingPricingService {
     const extraPrice = input.extraServices.reduce((sum, item) => sum + item.price, 0)
     const totalPrice = Number((input.basePrice + extraPrice).toFixed(2))
 
-    let depositAmount = 0
-    let cashAmount = 0
+    let depositAmount: number
+    let cashAmount: number
 
     if (input.paymentMethod === PaymentMethod.NO_PAYMENT) {
       depositAmount = 0

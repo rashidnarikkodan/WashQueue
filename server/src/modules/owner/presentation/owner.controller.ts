@@ -29,7 +29,7 @@ export class OwnerController {
     private readonly getOwnerUseCase: IGetOwnerUseCase,
     private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
     private readonly onboardingStepMapper: OnboardingStepRequestMapper
-  ) {}
+  ) { }
 
   getOnboardingStatus = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId

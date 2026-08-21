@@ -7,9 +7,10 @@ import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
-import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/booking-usecases.interface"
+import { BookingResponseDTO } from "../dtos/booking-response.dto"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
   constructor(

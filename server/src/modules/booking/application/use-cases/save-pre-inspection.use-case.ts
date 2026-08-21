@@ -1,7 +1,6 @@
 import { ISavePreInspectionAndCheckInUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import logger from "@/configs/logger.config"
 import { BookingStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"

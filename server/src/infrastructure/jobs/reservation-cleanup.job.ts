@@ -1,26 +1,27 @@
+import cron, { ScheduledTask } from "node-cron"
 import logger from "@/configs/logger.config"
 import { cleanupExpiredReservationsUseCase } from "@/modules/booking/booking.module"
 
-let intervalId: NodeJS.Timeout | null = null
+let task: ScheduledTask | null = null
 
-export function startReservationCleanupJob(intervalMs: number = 60000): void {
-  if (intervalId) return
+export function startReservationCleanupJob(cronExpression: string = "* * * * *"): void {
+  if (task) return
 
-  logger.info("[BackgroundJob] Starting reservation cleanup background job...")
+  logger.info(`[BackgroundJob] Starting reservation cleanup cron job with schedule: ${cronExpression}`)
 
-  intervalId = setInterval(async () => {
+  task = cron.schedule(cronExpression, async () => {
     try {
       await cleanupExpiredReservationsUseCase.execute()
     } catch (error) {
       logger.error({ error }, "[BackgroundJob] Error during reservation cleanup job")
     }
-  }, intervalMs)
+  })
 }
 
 export function stopReservationCleanupJob(): void {
-  if (intervalId) {
-    clearInterval(intervalId)
-    intervalId = null
+  if (task) {
+    task.stop()
+    task = null
     logger.info("[BackgroundJob] Reservation cleanup job stopped.")
   }
 }

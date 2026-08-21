@@ -11,7 +11,6 @@ import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { Booking } from "../../domain/entities/Booking"
 import { ICancelBookingUseCase, IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
-import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {

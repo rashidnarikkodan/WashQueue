@@ -16,8 +16,8 @@ async function startServer() {
 
     await redis.ping()
 
-    startReservationCleanupJob(60000)
-    startNoShowCleanupJob(300000)
+    startReservationCleanupJob()
+    startNoShowCleanupJob()
 
     const httpServer = createServer(app)
     SocketServerService.getInstance().init(httpServer)

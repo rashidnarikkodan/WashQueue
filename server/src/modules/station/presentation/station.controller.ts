@@ -47,7 +47,7 @@ export class StationController {
     private readonly getBookingCalendarUseCase: IGetBookingCalendarUseCase,
     private readonly getAvailableTimeWindowsUseCase: IGetAvailableTimeWindowsUseCase,
     private readonly getStationFilterOptionsUseCase: IGetStationFilterOptionsUseCase
-  ) {}
+  ) { }
 
   create = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
@@ -133,7 +133,7 @@ export class StationController {
     }
     const userId = req.user?.userId || ''
 
-    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery,userId)
+    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery, userId)
 
     const page = Math.max(1, parsedQuery.page || 1)
     const limit = Math.max(1, parsedQuery.limit || 10)
