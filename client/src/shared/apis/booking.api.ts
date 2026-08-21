@@ -1,6 +1,7 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
+import { PAYMENT_TYPE, type PaymentType } from "@/shared/constants/payment.constants"
 
 export interface CreateBookingInput {
   stationId: string
@@ -8,7 +9,7 @@ export interface CreateBookingInput {
   timeWindowId: string
   serviceType: "HALF" | "FULL"
   extraServiceIds?: string[]
-  paymentType?: "ONLINE_FULL" | "PAY_AT_STATION" | "CASH_WALKIN"
+  paymentType?: PaymentType
 }
 
 export interface BookingStatusHistoryItem {
@@ -76,6 +77,7 @@ export interface BookingResponse {
     price: number
   }>
   isWalkIn?: boolean
+  rescheduleCount?: number
   checkedInAt?: string | null
   serviceStartedAt?: string | null
   serviceCompletedAt?: string | null
@@ -186,6 +188,20 @@ export const bookingApi = {
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to cancel booking")
+    }
+  },
+
+  rescheduleBooking: async (
+    bookingId: string,
+    newTimeWindowId: string
+  ): Promise<BookingResponse> => {
+    try {
+      const response = await api.patch(API_ROUTES.BOOKINGS.RESCHEDULE(bookingId), {
+        newTimeWindowId,
+      })
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to reschedule booking")
     }
   },
 
@@ -366,7 +382,7 @@ export const bookingApi = {
         stationId: input.stationId,
         timeWindowId: input.timeWindowId,
         serviceType: input.serviceType,
-        paymentType: "CASH_WALKIN",
+        paymentType: PAYMENT_TYPE.CASH_WALKIN,
         extraServiceIds: input.extraServiceIds || [],
         customer: input.customer || (input.walkInCustomer ? { name: input.walkInCustomer.name, phone: input.walkInCustomer.phone } : undefined),
         vehicle: input.vehicle || (input.walkInVehicle ? { registrationNumber: input.walkInVehicle.registrationNumber, categoryId: input.walkInVehicle.categoryId, classId: input.walkInVehicle.classId } : undefined),

@@ -1,21 +1,26 @@
 import { BookingStatus, ServiceType } from "@/common/constants/booking.constants"
-import { PaymentStatus, PaymentType, PaymentMethod } from "@/common/constants/payment.constants"
+import { PaymentStatus, PaymentMethod } from "@/common/constants/payment.constants"
 
-export { BookingStatus, ServiceType, PaymentStatus, PaymentType, PaymentMethod }
+export { BookingStatus, ServiceType, PaymentStatus, PaymentMethod }
 
-// Single source of truth for "how was this paid" — PAY_AT_STATION covers every non-online
-// paymentType (PAY_AT_STATION, CASH_WALKIN, DEPOSIT_PLUS_CASH) since none of them involve an
-// online/wallet transaction at booking time. ONLINE_FULL branches on the actual settlement.
-export function derivePaymentMethod(
-  paymentType: PaymentType,
+// Called once the caller already knows the payment is an online settlement (as opposed to
+// PAY_AT_STATION/NO_PAYMENT) — picks the exact instrument based on wallet usage.
+export function deriveOnlinePaymentMethod(
   opts: { isWalletPayment?: boolean; walletAmount?: number } = {}
 ): PaymentMethod {
-  if (paymentType === PaymentType.ONLINE_FULL) {
-    if (opts.isWalletPayment) return PaymentMethod.WALLET
-    if (opts.walletAmount && opts.walletAmount > 0) return PaymentMethod.WALLET_AND_ONLINE
-    return PaymentMethod.ONLINE
+  if (opts.isWalletPayment) return PaymentMethod.WALLET
+  if (opts.walletAmount && opts.walletAmount > 0) return PaymentMethod.WALLET_AND_ONLINE
+  return PaymentMethod.ONLINE
+}
+
+// Single source of truth for whether a booking's payment is considered settled at creation.
+// PAY_AT_STATION always defers to the station: settled immediately for a walk-in (cash handed
+// over on the spot) but left PENDING for a pre-booked slot (cash due later at check-in).
+export function derivePaymentStatus(paymentMethod: PaymentMethod, isWalkIn: boolean): PaymentStatus {
+  if (paymentMethod === PaymentMethod.PAY_AT_STATION) {
+    return isWalkIn ? PaymentStatus.PAID : PaymentStatus.PENDING
   }
-  return PaymentMethod.PAY_AT_STATION
+  return PaymentStatus.PAID
 }
 
 export interface VehicleSnapshot {
@@ -125,7 +130,6 @@ export interface BookingProps {
   createdByUserId: string
   qr: QRDetails
   paymentStatus: PaymentStatus
-  paymentType: PaymentType
   paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number
@@ -220,10 +224,6 @@ export class Booking {
 
   get paymentStatus(): PaymentStatus {
     return this.props.paymentStatus
-  }
-
-  get paymentType(): PaymentType {
-    return this.props.paymentType
   }
 
   get paymentMethod(): PaymentMethod {

@@ -6,6 +6,7 @@ import { ROLE, VIEW_MODE, type RoleType } from "@/shared/constants/role.const"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import CancellationModal from "../components/CancellationModal"
+import RescheduleModal from "../components/RescheduleModal"
 import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
@@ -21,8 +22,9 @@ export default function BookingDetails() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Cancellation Modal state
+  // Cancellation & Reschedule Modal states
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false)
 
   // Status Advance state
   const [isAdvancingStatus, setIsAdvancingStatus] = useState(false)
@@ -110,6 +112,7 @@ export default function BookingDetails() {
       "HANDOVER_READY",
       "BOOKING_COMPLETED",
       "BOOKING_CANCELLED",
+      "BOOKING_RESCHEDULED",
       "BOOKING_NO_SHOW",
       "BOOKING_STALLED",
       "QUEUE_POSITION_CHANGED",
@@ -267,6 +270,7 @@ export default function BookingDetails() {
           currentStageIndex={currentStageIndex}
           stages={stages}
           onOpenCancelModal={() => setIsCancelModalOpen(true)}
+          onOpenRescheduleModal={() => setIsRescheduleModalOpen(true)}
         />
       ) : (
         <ProviderBookingDetailsView
@@ -276,6 +280,16 @@ export default function BookingDetails() {
           onOpenCancelModal={() => setIsCancelModalOpen(true)}
           onAdvanceStatus={handleAdvanceStatus}
           isAdvancingStatus={isAdvancingStatus}
+        />
+      )}
+
+      {/* Reschedule Booking Modal */}
+      {isRescheduleModalOpen && booking && (
+        <RescheduleModal
+          booking={booking}
+          isOpen={isRescheduleModalOpen}
+          onClose={() => setIsRescheduleModalOpen(false)}
+          onSuccess={(updated) => setBooking(updated)}
         />
       )}
 

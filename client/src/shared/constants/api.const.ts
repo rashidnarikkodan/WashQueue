@@ -35,6 +35,7 @@ export const API_ROUTES = {
     ROOT: "/bookings",
     BY_ID: (id: string) => `/bookings/${id}`,
     CANCEL: (id: string) => `/bookings/${id}/cancel`,
+    RESCHEDULE: (id: string) => `/bookings/${id}/reschedule`,
     WALK_IN: "/bookings/walk-in",
     CHECK_IN: "/bookings/check-in",
     UPDATE_STATUS: (id: string) => `/bookings/${id}/status`,

@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import { paymentApi } from "@/shared/apis/payment.api"
 import { walletApi } from "@/shared/apis/wallet.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import { PAYMENT_METHOD } from "@/shared/constants/payment.constants"
 
 declare global {
   interface Window {
@@ -164,7 +165,7 @@ export function useBookingPayment(isModalOpen = false) {
               razorpay_order_id: order.order_id,
               razorpay_payment_id: walletPaymentId,
               razorpay_signature: "wallet_payment_verified",
-              paymentMethod: "WALLET",
+              paymentMethod: PAYMENT_METHOD.WALLET,
             })
 
             toast.success("Paid successfully using your Wallet balance!")
@@ -214,6 +215,10 @@ export function useBookingPayment(isModalOpen = false) {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                paymentMethod:
+                  order.wallet_amount && order.wallet_amount > 0
+                    ? PAYMENT_METHOD.WALLET_AND_ONLINE
+                    : PAYMENT_METHOD.ONLINE,
               })
 
               if (verification.success) {
