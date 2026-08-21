@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse, InspectionChecklistItem } from "@/shared/apis/booking.api"
 import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
+import PromptModal from "@/shared/components/ui/PromptModal"
 import { readImageFileAsResizedDataUrl } from "@/shared/utils/imageFile"
 
 interface PhotoSlotConfig {
@@ -71,6 +72,10 @@ export default function ManagerPostInspectionPage() {
   })
   
   const [remarks, setRemarks] = useState<Record<string, string>>({})
+  const [remarkModalItem, setRemarkModalItem] = useState<{
+    key: string
+    label: string
+  } | null>(null)
   const [handoverNotes, setHandoverNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -162,13 +167,30 @@ export default function ManagerPostInspectionPage() {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // Handle Add Remark (keyed by the item's short key, not its display label)
-  const handleAddRemark = (itemKey: string, itemLabel: string) => {
-    const remark = prompt(`Enter remark for ${itemLabel}:`, remarks[itemKey] || "")
-    if (remark !== null) {
-      setRemarks((prev) => ({ ...prev, [itemKey]: remark }))
-      if (remark.trim()) toast.success("Remark saved")
+  // Handle Add/Edit Remark Modal
+  const handleOpenRemarkModal = (itemKey: string, itemLabel: string) => {
+    setRemarkModalItem({ key: itemKey, label: itemLabel })
+  }
+
+  const handleSaveRemark = (value: string) => {
+    if (!remarkModalItem) return
+    const itemKey = remarkModalItem.key
+    const trimmed = value.trim()
+    setRemarks((prev) => {
+      const updated = { ...prev }
+      if (trimmed) {
+        updated[itemKey] = trimmed
+      } else {
+        delete updated[itemKey]
+      }
+      return updated
+    })
+    if (trimmed) {
+      toast.success("Remark saved")
+    } else {
+      toast.info("Remark cleared")
     }
+    setRemarkModalItem(null)
   }
 
   const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
@@ -346,7 +368,7 @@ export default function ManagerPostInspectionPage() {
 
                         <button
                           type="button"
-                          onClick={() => handleAddRemark(item.key, item.label)}
+                          onClick={() => handleOpenRemarkModal(item.key, item.label)}
                           className="shrink-0 text-xs font-bold text-primary hover:underline transition-colors uppercase tracking-wider cursor-pointer"
                         >
                           {remarks[item.key] ? "Edit Remark" : "Add Remark"}
@@ -551,6 +573,30 @@ export default function ManagerPostInspectionPage() {
           onClose={() => setActiveCameraSlot(null)}
         />
       )}
+
+      <PromptModal
+        isOpen={Boolean(remarkModalItem)}
+        onClose={() => setRemarkModalItem(null)}
+        onSubmit={handleSaveRemark}
+        title={
+          remarkModalItem
+            ? remarks[remarkModalItem.key]
+              ? "Edit Inspection Remark"
+              : "Add Inspection Remark"
+            : "Checklist Remark"
+        }
+        description={
+          remarkModalItem
+            ? `Add observation or condition details for "${remarkModalItem.label}"`
+            : undefined
+        }
+        defaultValue={remarkModalItem ? remarks[remarkModalItem.key] || "" : ""}
+        placeholder="Enter your observation or issue details..."
+        inputType="textarea"
+        rows={3}
+        confirmText="Save Remark"
+        cancelText="Cancel"
+      />
 
       <input
         ref={fileInputRef}

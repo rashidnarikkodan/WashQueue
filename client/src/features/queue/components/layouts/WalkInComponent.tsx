@@ -335,7 +335,7 @@ export default function WalkInComponent() {
                   value={registrationNumber}
                   onChange={(e) => setRegistrationNumber(e.target.value)}
                   placeholder="e.g. MH 12 AB 1234"
-                  className="w-full px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-mono text-base font-bold focus:outline-none focus:border-primary transition-colors"
+                  className="w-full uppercase px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-mono text-base font-bold focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
 
