@@ -23,20 +23,20 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Community Q&amp;A</h2>
+      <h2 className="text-2xl font-bold text-foreground tracking-tight">Community Q&amp;A</h2>
 
       {/* Ask Question Input Box */}
-      <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-xl space-y-4">
+      <div className="p-6 rounded-2xl border border-border bg-card/90 shadow-xl space-y-4">
         <div className="relative">
           <textarea
             value={questionInput}
             onChange={(e) => setQuestionInput(e.target.value)}
             placeholder={`Ask a question about ${stationName}...`}
-            className="w-full h-24 bg-slate-950 text-slate-100 border border-slate-800 rounded-xl p-4 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/80 transition-all resize-none"
+            className="w-full h-24 bg-background text-foreground border border-border rounded-xl p-4 text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/80 transition-all resize-none"
           />
           <button
             disabled={!questionInput.trim()}
-            className="absolute bottom-3 right-3 px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-400 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-blue-500/20 flex items-center gap-1.5"
+            className="absolute bottom-3 right-3 px-6 py-2 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-primary/20 flex items-center gap-1.5"
           >
             <Send size={12} />
             Post Question
@@ -50,34 +50,34 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
           {questions.map((item) => (
             <div
               key={item.id}
-              className="p-6 rounded-2xl border-l-4 border-l-blue-500 border border-slate-800 bg-slate-900/50 space-y-4 shadow-xl"
+              className="p-6 rounded-2xl border-l-4 border-l-primary border border-border bg-card/50 space-y-4 shadow-xl"
             >
               <div>
-                <h4 className="text-base font-bold text-slate-100">{item.question}</h4>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1">
+                <h4 className="text-base font-bold text-foreground">{item.question}</h4>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-1">
                   Posted by {item.askedBy} • {item.askedAt}
                 </p>
               </div>
 
               {item.answer && (
-                <div className="p-5 rounded-xl border border-slate-800 bg-slate-900 space-y-2 relative">
+                <div className="p-5 rounded-xl border border-border bg-card space-y-2 relative">
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/20 text-emerald-400 font-black text-[9px] uppercase tracking-widest">
+                    <span className="px-2.5 py-0.5 rounded-full border border-success/30 bg-success/20 text-success font-black text-[9px] uppercase tracking-widest">
                       Owner
                     </span>
-                    <span className="text-xs font-bold text-slate-200">
+                    <span className="text-xs font-bold text-foreground">
                       {item.answer.answeredBy}
                     </span>
-                    <span className="text-xs text-slate-500">{item.answer.answeredAt}</span>
+                    <span className="text-xs text-muted-foreground">{item.answer.answeredAt}</span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">{item.answer.text}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.answer.text}</p>
                 </div>
               )}
             </div>
           ))}
         </div>
       ) : (
-        <div className="p-8 text-center text-slate-400 text-sm border border-slate-800 rounded-2xl bg-slate-900/60">
+        <div className="p-8 text-center text-muted-foreground text-sm border border-border rounded-2xl bg-card/60">
           No questions asked yet for this station.
         </div>
       )}

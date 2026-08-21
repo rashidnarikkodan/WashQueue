@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react"
+import { useTheme } from "next-themes"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
@@ -102,7 +103,12 @@ export default function LocationPickerMap({
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markerRef = useRef<maplibregl.Marker | null>(null)
 
-  const [currentMode, setCurrentMode] = useState<MapStyleMode>("dark")
+  const { resolvedTheme } = useTheme()
+  const themeMapStyle: MapStyleMode = resolvedTheme === "light" ? "streets" : "dark"
+  // Once the user manually picks a style from the menu, stop auto-following the app theme.
+  const hasUserOverriddenStyleRef = useRef(false)
+
+  const [currentMode, setCurrentMode] = useState<MapStyleMode>(themeMapStyle)
   const [showStyleMenu, setShowStyleMenu] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -177,7 +183,7 @@ export default function LocationPickerMap({
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: MAP_STYLES.dark,
+      style: MAP_STYLES[themeMapStyle],
       center: [validLng, validLat],
       zoom: latitude !== 0 && longitude !== 0 ? 15 : 6,
       attributionControl: false,
@@ -191,8 +197,8 @@ export default function LocationPickerMap({
     markerEl.className = `location-picker-marker relative group ${readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`
     markerEl.innerHTML = `
       <div class="relative flex items-center justify-center">
-        <div class="absolute -inset-2 bg-blue-500/40 rounded-full blur-sm animate-pulse"></div>
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 border-2 border-white shadow-2xl flex items-center justify-center text-white transform transition-transform group-hover:scale-110">
+        <div class="absolute -inset-2 bg-primary/40 rounded-full blur-sm animate-pulse"></div>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-primary/70 border-2 border-primary-foreground shadow-2xl flex items-center justify-center text-primary-foreground transform transition-transform group-hover:scale-110">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         </div>
       </div>
@@ -207,7 +213,7 @@ export default function LocationPickerMap({
 
     if (stationName) {
       const popup = new maplibregl.Popup({ offset: 25, closeButton: false }).setHTML(
-        `<div style="font-weight:bold; font-size:13px; padding:2px 4px; color:#0f172a;">${stationName}</div>`
+        `<div style="font-weight:bold; font-size:13px; padding:2px 4px; color:rgb(var(--foreground));">${stationName}</div>`
       )
       marker.setPopup(popup)
     }
@@ -246,6 +252,7 @@ export default function LocationPickerMap({
   // Handle switching map style (Dark / Satellite / Streets)
   const handleStyleChange = (mode: MapStyleMode) => {
     if (!mapRef.current) return
+    hasUserOverriddenStyleRef.current = true
     setCurrentMode(mode)
     setShowStyleMenu(false)
 
@@ -261,6 +268,23 @@ export default function LocationPickerMap({
       }
     })
   }
+
+  // Follow the app's light/dark theme (streets = light basemap, dark = dark vector basemap)
+  // unless the user has explicitly picked a style from the menu (satellite included).
+  useEffect(() => {
+    if (!mapRef.current || hasUserOverriddenStyleRef.current) return
+    if (themeMapStyle === currentMode) return
+
+    setCurrentMode(themeMapStyle)
+    const map = mapRef.current
+    map.setStyle(MAP_STYLES[themeMapStyle])
+    map.once("style.load", () => {
+      if (markerRef.current) {
+        markerRef.current.addTo(map)
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [themeMapStyle])
 
   // Sync marker position & map center when props change from external updates
   useEffect(() => {
@@ -369,15 +393,15 @@ export default function LocationPickerMap({
 
   return (
     <div
-      className={`relative w-full rounded-2xl overflow-hidden border border-slate-800 bg-[#070D1F] ${className}`}
+      className={`relative w-full rounded-2xl overflow-hidden border border-border bg-background ${className}`}
     >
       {/* Search Overlay Bar (If enabled) */}
       {showSearch && (
         <div className="absolute top-3 left-3 right-14 sm:right-auto sm:w-80 md:w-96 z-20 flex flex-col gap-1.5">
-          <div className="relative flex items-center w-full bg-[#0c1324]/90 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-lg shadow-black/40 text-slate-200">
-            <div className="pl-3.5 pr-2 text-slate-400">
+          <div className="relative flex items-center w-full bg-background/90 backdrop-blur-md border border-border/80 rounded-xl shadow-lg shadow-black/40 text-foreground">
+            <div className="pl-3.5 pr-2 text-muted-foreground">
               {isSearching ? (
-                <Loader2 size={16} className="animate-spin text-blue-400" />
+                <Loader2 size={16} className="animate-spin text-primary" />
               ) : (
                 <Search size={16} />
               )}
@@ -388,7 +412,7 @@ export default function LocationPickerMap({
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Search city, neighborhood, or place..."
-              className="w-full bg-transparent py-2.5 pr-4 text-xs sm:text-sm placeholder-slate-400 text-slate-100 focus:outline-none"
+              className="w-full bg-transparent py-2.5 pr-4 text-xs sm:text-sm placeholder-muted-foreground text-foreground focus:outline-none"
             />
             {searchQuery && (
               <button
@@ -398,7 +422,7 @@ export default function LocationPickerMap({
                   setSuggestions([])
                   setShowSuggestions(false)
                 }}
-                className="pr-3 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+                className="pr-3 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 Clear
               </button>
@@ -407,23 +431,23 @@ export default function LocationPickerMap({
 
           {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="w-full bg-[#0c1324]/95 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-2xl overflow-hidden z-30 max-h-60 overflow-y-auto">
+            <div className="w-full bg-background/95 backdrop-blur-md border border-border/80 rounded-xl shadow-2xl overflow-hidden z-30 max-h-60 overflow-y-auto">
               {suggestions.map((item) => (
                 <button
                   key={item.place_id}
                   type="button"
                   onClick={() => handleSelectSuggestion(item)}
-                  className="w-full text-left px-3.5 py-2.5 border-b border-slate-800/60 last:border-none hover:bg-blue-600/20 transition-colors flex items-start gap-2.5 cursor-pointer group"
+                  className="w-full text-left px-3.5 py-2.5 border-b border-border/60 last:border-none hover:bg-primary/20 transition-colors flex items-start gap-2.5 cursor-pointer group"
                 >
                   <MapPin
                     size={16}
-                    className="text-blue-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform"
+                    className="text-primary shrink-0 mt-0.5 group-hover:scale-110 transition-transform"
                   />
                   <div className="flex flex-col overflow-hidden">
-                    <span className="text-xs sm:text-sm font-semibold text-slate-100 truncate">
+                    <span className="text-xs sm:text-sm font-semibold text-foreground truncate">
                       {item.display_name.split(",")[0]}
                     </span>
-                    <span className="text-[11px] text-slate-400 truncate">
+                    <span className="text-[11px] text-muted-foreground truncate">
                       {item.display_name.split(",").slice(1).join(",")}
                     </span>
                   </div>
@@ -440,26 +464,26 @@ export default function LocationPickerMap({
           <button
             type="button"
             onClick={() => setShowStyleMenu((prev) => !prev)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0c1324]/90 backdrop-blur-md border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800 transition-all shadow-xl cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-background/90 backdrop-blur-md border border-border/80 text-xs font-semibold text-foreground hover:text-foreground hover:bg-muted transition-all shadow-xl cursor-pointer"
             title="Switch Map View"
           >
-            <Layers size={15} className="text-blue-400" />
+            <Layers size={15} className="text-primary" />
             <span className="capitalize hidden sm:inline">{currentMode} View</span>
           </button>
 
           {/* Style Options Menu */}
           {showStyleMenu && (
-            <div className="absolute right-0 mt-2 w-44 bg-[#0c1324]/95 backdrop-blur-xl border border-slate-700/80 rounded-xl shadow-2xl overflow-hidden p-1.5 z-40 flex flex-col gap-1">
+            <div className="absolute right-0 mt-2 w-44 bg-background/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl overflow-hidden p-1.5 z-40 flex flex-col gap-1">
               <button
                 type="button"
                 onClick={() => handleStyleChange("dark")}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
                   currentMode === "dark"
-                    ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                    : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                    ? "bg-primary/30 text-primary border border-primary/40"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
               >
-                <Moon size={14} className="text-blue-400" />
+                <Moon size={14} className="text-primary" />
                 <span>Dark Vector</span>
               </button>
 
@@ -468,11 +492,11 @@ export default function LocationPickerMap({
                 onClick={() => handleStyleChange("satellite")}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
                   currentMode === "satellite"
-                    ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                    : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                    ? "bg-primary/30 text-primary border border-primary/40"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
               >
-                <Globe size={14} className="text-emerald-400" />
+                <Globe size={14} className="text-success" />
                 <span>Satellite Imagery</span>
               </button>
 
@@ -481,11 +505,11 @@ export default function LocationPickerMap({
                 onClick={() => handleStyleChange("streets")}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
                   currentMode === "streets"
-                    ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                    : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                    ? "bg-primary/30 text-primary border border-primary/40"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
               >
-                <Sun size={14} className="text-amber-400" />
+                <Sun size={14} className="text-warning" />
                 <span>Streets Light</span>
               </button>
             </div>
@@ -498,22 +522,22 @@ export default function LocationPickerMap({
         type="button"
         onClick={handleRecenterPin}
         title="Center map on pin"
-        className="absolute bottom-3 left-3 z-20 p-2.5 rounded-xl bg-[#0c1324]/90 backdrop-blur-md border border-slate-700/80 text-slate-300 hover:text-white hover:bg-slate-800 transition-all shadow-lg cursor-pointer"
+        className="absolute bottom-3 left-3 z-20 p-2.5 rounded-xl bg-background/90 backdrop-blur-md border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted transition-all shadow-lg cursor-pointer"
       >
         <Crosshair size={18} />
       </button>
 
       {/* Status / Reverse Geocoding Banner */}
       {(isReverseGeocoding || statusMessage) && (
-        <div className="absolute bottom-3 left-14 right-16 z-20 flex items-center gap-2 bg-[#0c1324]/90 backdrop-blur-md border border-blue-500/30 rounded-xl px-3 py-1.5 text-xs text-blue-300 shadow-lg animate-fade-in truncate">
+        <div className="absolute bottom-3 left-14 right-16 z-20 flex items-center gap-2 bg-background/90 backdrop-blur-md border border-primary/30 rounded-xl px-3 py-1.5 text-xs text-primary shadow-lg animate-fade-in truncate">
           {isReverseGeocoding ? (
             <>
-              <Loader2 size={14} className="animate-spin text-blue-400 shrink-0" />
+              <Loader2 size={14} className="animate-spin text-primary shrink-0" />
               <span className="truncate">Fetching address details...</span>
             </>
           ) : (
             <>
-              <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+              <CheckCircle2 size={14} className="text-success shrink-0" />
               <span className="truncate">{statusMessage}</span>
             </>
           )}
@@ -525,8 +549,8 @@ export default function LocationPickerMap({
 
       {/* Map Instructions Badge */}
       {!readOnly && (
-        <div className="absolute bottom-3 right-14 z-10 hidden md:flex items-center gap-1.5 bg-[#0c1324]/80 backdrop-blur-md border border-slate-800 rounded-lg px-2.5 py-1 text-[11px] font-medium text-slate-300 pointer-events-none">
-          <Navigation size={12} className="text-blue-400" />
+        <div className="absolute bottom-3 right-14 z-10 hidden md:flex items-center gap-1.5 bg-background/80 backdrop-blur-md border border-border rounded-lg px-2.5 py-1 text-[11px] font-medium text-muted-foreground pointer-events-none">
+          <Navigation size={12} className="text-primary" />
           <span>Click or drag pin to select station</span>
         </div>
       )}

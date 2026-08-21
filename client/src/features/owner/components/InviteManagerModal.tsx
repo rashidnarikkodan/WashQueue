@@ -164,7 +164,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               {isSuccessState ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <CheckCircle2 className="w-5 h-5 text-success" />
               ) : (
                 <UserPlus className="w-5 h-5" />
               )}
@@ -194,10 +194,10 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
           /* SUCCESS STATE MODAL */
           <div className="px-6 sm:px-8 py-8 flex flex-col items-center text-center gap-6 my-auto overflow-y-auto">
             <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-emerald-500/15 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/20 animate-bounce-short">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-success/15 border-2 border-success flex items-center justify-center text-success shadow-xl shadow-success/20 animate-bounce-short">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
-              <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-card border border-emerald-500/40 text-emerald-400">
+              <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-card border border-success/40 text-success">
                 <Sparkles className="w-4 h-4" />
               </div>
             </div>
@@ -221,7 +221,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground font-medium">Permissions</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/30">
                   {selectedPermissions.length} Granted
                 </span>
               </div>
@@ -235,7 +235,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                   navigator.clipboard.writeText(link)
                   toast.success("Invitation link copied to clipboard!")
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-[#2E3447] hover:bg-slate-700 text-blue-300 font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-blue-500/30"
+                className="w-full py-3 px-4 rounded-xl bg-muted hover:bg-muted/70 text-primary font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-primary/30"
               >
                 <span>Copy Direct Invitation Link</span>
               </button>

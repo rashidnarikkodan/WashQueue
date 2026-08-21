@@ -109,9 +109,9 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3.5">
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Live Queue</h2>
-          <div className="px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+          <div className="px-3 py-1 rounded-full border border-success/20 bg-success/10 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-ping" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-success">
               Live Station Feed
             </span>
           </div>
@@ -144,14 +144,14 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           <p className="text-xs text-muted-foreground font-medium">Connecting to station live queue...</p>
         </div>
       ) : error ? (
-        <div className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 text-center space-y-2">
-          <AlertCircle size={20} className="text-red-400 mx-auto" />
-          <p className="text-xs text-red-400">{error}</p>
+        <div className="p-6 rounded-2xl border border-destructive/20 bg-destructive/5 text-center space-y-2">
+          <AlertCircle size={20} className="text-destructive mx-auto" />
+          <p className="text-xs text-destructive">{error}</p>
         </div>
       ) : totalLiveVehicles === 0 ? (
         /* Empty Live Queue State */
         <div className="p-8 rounded-2xl border border-border bg-card/80 text-center space-y-3 backdrop-blur-md shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto">
             <Sparkles size={22} />
           </div>
           <div className="space-y-1">
@@ -161,7 +161,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
             </p>
           </div>
           <div className="pt-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success border border-success/20 text-xs font-bold">
               ✓ 0 Min Estimated Wait Time
             </span>
           </div>
@@ -177,9 +177,9 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
             >
               <div className="flex items-center gap-4">
                 {/* Bay Token Badge */}
-                <div className="w-14 h-14 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 flex flex-col items-center justify-center shrink-0">
-                  <span className="text-[9px] font-black uppercase text-emerald-400">BAY</span>
-                  <span className="text-lg font-black text-emerald-400 font-mono">
+                <div className="w-14 h-14 rounded-2xl border border-success/30 bg-success/10 flex flex-col items-center justify-center shrink-0">
+                  <span className="text-[9px] font-black uppercase text-success">BAY</span>
+                  <span className="text-lg font-black text-success font-mono">
                     {item.bayNumber || 1}
                   </span>
                 </div>
@@ -188,7 +188,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-bold text-foreground flex items-center gap-1.5">
-                      <Car size={16} className="text-emerald-400" />
+                      <Car size={16} className="text-success" />
                       <span>{item.vehicle}</span>
                     </h4>
                     <span className="text-[10px] font-mono text-muted-foreground">
@@ -203,8 +203,8 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
 
               {/* Live Washing Status Pill */}
               <div className="flex items-center sm:self-center self-start">
-                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-emerald-500/15 text-emerald-400 border-emerald-500/30 flex items-center gap-2 shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-success/15 text-success border-success/30 flex items-center gap-2 shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-success animate-ping" />
                   <span>{item.status}</span>
                 </span>
               </div>
@@ -239,7 +239,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {item.package} •{" "}
-                    <strong className="text-amber-400 font-semibold">
+                    <strong className="text-warning font-semibold">
                       {item.estimatedWaitMinutes !== undefined && item.estimatedWaitMinutes > 0
                         ? `Est. wait ~${item.estimatedWaitMinutes}m`
                         : "Next in Line"}
@@ -250,8 +250,8 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
 
               {/* Waiting Status Tag */}
               <div className="flex items-center sm:self-center self-start">
-                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-amber-500/15 text-amber-400 border-amber-500/30 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-warning/15 text-warning border-warning/30 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
                   <span>In Queue</span>
                 </span>
               </div>

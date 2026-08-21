@@ -79,13 +79,13 @@ export default function ConfirmationModal({
     const iconSize = 22
     switch (confirmVariant) {
       case "danger":
-        return <AlertTriangle size={iconSize} className="text-red-400" />
+        return <AlertTriangle size={iconSize} className="text-destructive" />
       case "warning":
-        return <AlertCircle size={iconSize} className="text-amber-500" />
+        return <AlertCircle size={iconSize} className="text-warning" />
       case "success":
-        return <CheckCircle size={iconSize} className="text-emerald-400" />
+        return <CheckCircle size={iconSize} className="text-success" />
       default:
-        return <Info size={iconSize} className="text-blue-400" />
+        return <Info size={iconSize} className="text-primary" />
     }
   }
 
@@ -98,11 +98,11 @@ export default function ConfirmationModal({
     }
     switch (confirmVariant) {
       case "danger":
-        return `${base} bg-red-600 hover:bg-red-500 text-white hover:shadow-red-950/20 border border-red-500/20`
+        return `${base} bg-destructive hover:opacity-90 text-destructive-foreground hover:shadow-destructive/20 border border-destructive/20`
       case "warning":
-        return `${base} bg-amber-500 hover:bg-amber-400 text-slate-950 hover:shadow-amber-500/20 border border-amber-400/20`
+        return `${base} bg-warning hover:opacity-90 text-warning-foreground hover:shadow-warning/20 border border-warning/20`
       case "success":
-        return `${base} bg-emerald-600 hover:bg-emerald-500 text-white hover:shadow-emerald-950/20 border border-emerald-500/20`
+        return `${base} bg-success hover:opacity-90 text-success-foreground hover:shadow-success/20 border border-success/20`
       default:
         return `${base} bg-primary hover:opacity-90 text-primary-foreground border border-primary/20`
     }
@@ -120,12 +120,12 @@ export default function ConfirmationModal({
           <div
             className={`p-2.5 rounded-xl border shrink-0 ${
               confirmVariant === "danger"
-                ? "bg-red-500/10 border-red-500/20"
+                ? "bg-destructive/10 border-destructive/20"
                 : confirmVariant === "warning"
-                  ? "bg-amber-500/10 border-amber-500/20"
+                  ? "bg-warning/10 border-warning/20"
                   : confirmVariant === "success"
-                    ? "bg-emerald-500/10 border-emerald-500/20"
-                    : "bg-blue-500/10 border-blue-500/20"
+                    ? "bg-success/10 border-success/20"
+                    : "bg-primary/10 border-primary/20"
             }`}
           >
             {getIcon()}
@@ -165,7 +165,7 @@ export default function ConfirmationModal({
             className={getConfirmButtonClasses()}
           >
             {(isLoading || isSubmitting) && (
-              <Loader2 size={13} className="animate-spin text-slate-500" />
+              <Loader2 size={13} className="animate-spin text-muted-foreground" />
             )}
             <span>{confirmText}</span>
           </button>

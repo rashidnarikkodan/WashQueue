@@ -17,7 +17,7 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
   return (
     <div className="space-y-4">
       {/* Main Hero Container */}
-      <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-slate-900 border border-slate-800 shadow-2xl flex items-center justify-center group">
+      <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-card border border-border shadow-2xl flex items-center justify-center group">
         {hasImages ? (
           <>
             <img
@@ -25,17 +25,17 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
               alt={`${stationName} photo ${selectedIndex + 1}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
             <button
               onClick={() => setShowFullGallery(true)}
-              className="absolute bottom-4 right-4 bg-slate-950/80 backdrop-blur-md border border-white/10 text-white p-2.5 rounded-full hover:bg-slate-900 transition-all cursor-pointer shadow-lg z-10"
+              className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-md border border-white/10 text-foreground p-2.5 rounded-full hover:bg-card transition-all cursor-pointer shadow-lg z-10"
               title="View full gallery"
             >
               <Maximize2 size={18} />
             </button>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 text-slate-500 p-8 text-center">
+          <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground p-8 text-center">
             <ImageOff size={48} className="opacity-60" />
             <span className="text-xs font-bold tracking-wider uppercase">No Images Provided</span>
           </div>
@@ -53,8 +53,8 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
                 onClick={() => setSelectedIndex(idx)}
                 className={`relative w-44 h-24 rounded-xl overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
                   isSelected
-                    ? "border-blue-500 ring-4 ring-blue-500/10 shadow-lg"
-                    : "border-slate-800 opacity-70 hover:opacity-100"
+                    ? "border-primary ring-4 ring-primary/10 shadow-lg"
+                    : "border-border opacity-70 hover:opacity-100"
                 }`}
               >
                 <img
@@ -73,7 +73,7 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
         <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md p-6 flex flex-col justify-center items-center gap-4 animate-in fade-in duration-200">
           <button
             onClick={() => setShowFullGallery(false)}
-            className="absolute top-6 right-6 text-white text-xs font-bold bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl cursor-pointer"
+            className="absolute top-6 right-6 text-foreground text-xs font-bold bg-muted hover:bg-border px-4 py-2 rounded-xl cursor-pointer"
           >
             Close Gallery
           </button>
@@ -83,7 +83,7 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
                 key={idx}
                 src={img.url}
                 alt={`${stationName} gallery photo ${idx + 1}`}
-                className="w-full h-64 object-cover rounded-2xl border border-slate-800"
+                className="w-full h-64 object-cover rounded-2xl border border-border"
               />
             ))}
           </div>

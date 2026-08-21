@@ -44,7 +44,7 @@ export default function FormSelect({
               className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left flex items-center gap-1"
             >
               <span>{label}</span>
-              {required && <span className="text-red-400">*</span>}
+              {required && <span className="text-destructive">*</span>}
             </label>
           )}
           {labelRight}
@@ -66,7 +66,7 @@ export default function FormSelect({
             leftIcon ? "pl-11" : "pl-3.5"
           } ${
             error
-              ? "border-red-500/80 focus:ring-red-500/20"
+              ? "border-destructive/80 focus:ring-destructive/20"
               : "border-border/80 hover:border-border"
           }`}
         >
@@ -83,7 +83,7 @@ export default function FormSelect({
         </select>
       </div>
       {error && (
-        <span className="text-[11px] text-red-400 font-medium pl-1 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
+        <span className="text-[11px] text-destructive font-medium pl-1 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
           {error}
         </span>
       )}

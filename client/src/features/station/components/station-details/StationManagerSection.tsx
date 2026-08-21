@@ -302,7 +302,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                   {managerAssignment.managerName || "Station Manager"}
                 </span>
                 {isSelfManager && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-primary/20 text-primary border border-primary/30">
                     <Crown className="w-3 h-3" />
                     You (Owner)
                   </span>
@@ -310,8 +310,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
                     managerAssignment.status === "ACTIVE"
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                      : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      ? "bg-success/10 text-success border-success/30"
+                      : "bg-warning/10 text-warning border-warning/30"
                   }`}
                 >
                   {managerAssignment.status}
@@ -347,7 +347,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                   <button
                     onClick={handleToggleSuspend}
                     disabled={isSubmittingAction}
-                    className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-colors cursor-pointer disabled:opacity-50"
+                    className="p-2 rounded-xl bg-warning/10 hover:bg-warning/20 text-warning transition-colors cursor-pointer disabled:opacity-50"
                     title={
                       managerAssignment.status === "SUSPENDED"
                         ? "Reactivate Manager"
@@ -360,7 +360,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                   <button
                     onClick={handleRemoveManager}
                     disabled={isSubmittingAction}
-                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer disabled:opacity-50"
+                    className="p-2 rounded-xl bg-destructive/10 hover:bg-destructive/20 text-destructive transition-colors cursor-pointer disabled:opacity-50"
                     title="Remove Manager Assignment"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -392,16 +392,16 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         </div>
       ) : pendingInvitation ? (
         /* STATE 2: PENDING INVITATION */
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-4">
+        <div className="p-4 rounded-2xl bg-warning/10 border border-warning/30 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-amber-400 text-sm">Invitation Pending</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <span className="font-bold text-warning text-sm">Invitation Pending</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-warning/20 text-warning border border-warning/40">
                   Awaiting Acceptance
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-amber-300/80">
+              <div className="flex items-center gap-2 text-xs text-warning/80">
                 <Mail className="w-3.5 h-3.5" />
                 <span>
                   Invited: <strong>{pendingInvitation.email}</strong>
@@ -417,7 +417,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
                     navigator.clipboard.writeText(link)
                     toast.success("Invitation link copied to clipboard!")
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-primary/20 hover:bg-primary/30 text-primary font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>Copy Link</span>
                 </button>
@@ -426,7 +426,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               <button
                 onClick={handleResendInvitation}
                 disabled={isSubmittingAction}
-                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-3 py-1.5 rounded-xl bg-warning/20 hover:bg-warning/30 text-warning font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Resend Email</span>
@@ -435,7 +435,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               <button
                 onClick={handleCancelInvitation}
                 disabled={isSubmittingAction}
-                className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-3 py-1.5 rounded-xl bg-destructive/20 hover:bg-destructive/30 text-destructive font-semibold text-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <XCircle className="w-3.5 h-3.5" />
                 <span>Cancel</span>
@@ -447,7 +447,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         /* STATE 3: NO MANAGER ASSIGNED */
         <div className="p-6 rounded-2xl bg-muted/40 border border-border text-center space-y-4">
           <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mx-auto">
-            <AlertCircle className="w-6 h-6 text-amber-400" />
+            <AlertCircle className="w-6 h-6 text-warning" />
           </div>
 
           <div className="space-y-1 max-w-sm mx-auto">

@@ -24,9 +24,9 @@ export function StationReviewsSection({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Reviews &amp; Ratings</h2>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">Reviews &amp; Ratings</h2>
         {reviewCount > 0 && (
-          <span className="text-sm font-bold text-blue-400">
+          <span className="text-sm font-bold text-primary">
             {reviewCount} {reviewCount === 1 ? "Review" : "Reviews"}
           </span>
         )}
@@ -36,16 +36,16 @@ export function StationReviewsSection({
       {reviewCount > 0 || reviews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Average Rating Card (1 Column) */}
-          <div className="p-8 rounded-2xl border border-slate-800 bg-slate-900/90 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
-            <span className="text-6xl font-black text-blue-400 tracking-tighter">
+          <div className="p-8 rounded-2xl border border-border bg-card/90 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
+            <span className="text-6xl font-black text-primary tracking-tighter">
               {rating ? rating.toFixed(1) : "0.0"}
             </span>
-            <div className="flex items-center gap-1 text-emerald-400">
+            <div className="flex items-center gap-1 text-success">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={18} className="fill-emerald-400 text-emerald-400" />
+                <Star key={i} size={18} className="fill-success text-success" />
               ))}
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 pt-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pt-2">
               Average Rating
             </span>
           </div>
@@ -55,7 +55,7 @@ export function StationReviewsSection({
             {reviews.map((rev) => (
               <div
                 key={rev.id}
-                className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 space-y-4 shadow-xl"
+                className="p-6 rounded-2xl border border-border bg-card/90 space-y-4 shadow-xl"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
@@ -63,33 +63,33 @@ export function StationReviewsSection({
                       <img
                         src={rev.avatar}
                         alt={rev.name}
-                        className="w-12 h-12 rounded-full object-cover border border-blue-500/20"
+                        className="w-12 h-12 rounded-full object-cover border border-primary/20"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold">
+                      <div className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground font-bold">
                         {rev.name.charAt(0)}
                       </div>
                     )}
                     <div>
-                      <h4 className="text-base font-bold text-slate-100">{rev.name}</h4>
-                      <p className="text-xs text-slate-400">{rev.meta}</p>
+                      <h4 className="text-base font-bold text-foreground">{rev.name}</h4>
+                      <p className="text-xs text-muted-foreground">{rev.meta}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 text-emerald-400">
+                  <div className="flex items-center gap-1 text-success">
                     {[...Array(rev.stars)].map((_, i) => (
-                      <Star key={i} size={14} className="fill-emerald-400 text-emerald-400" />
+                      <Star key={i} size={14} className="fill-success text-success" />
                     ))}
                   </div>
                 </div>
 
-                <p className="text-sm italic text-slate-300 leading-relaxed">{rev.quote}</p>
+                <p className="text-sm italic text-muted-foreground leading-relaxed">{rev.quote}</p>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div className="p-8 text-center text-slate-400 text-sm border border-slate-800 rounded-2xl bg-slate-900/60">
+        <div className="p-8 text-center text-muted-foreground text-sm border border-border rounded-2xl bg-card/60">
           No reviews yet for this station.
         </div>
       )}
