@@ -13,6 +13,8 @@ import {
   ChevronRight,
   CalendarClock,
   Info,
+  Camera,
+  ClipboardCheck,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -430,6 +432,120 @@ export default function CustomerBookingDetailsView({
               </div>
             </div>
           </div>
+
+          {/* 2b. Vehicle Inspection Reports Card (Pre & Post Service) */}
+          {(booking.preServiceInspection || booking.postServiceInspection) && (
+            <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
+              <div className="flex items-center gap-2 border-b border-white/5 pb-4">
+                <Camera size={18} className="text-primary" />
+                <h3 className="text-lg font-bold text-foreground">Vehicle Inspection Reports</h3>
+              </div>
+
+              {booking.preServiceInspection && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
+                    Pre-Service Inspection
+                  </span>
+                  {booking.preServiceInspection.photos.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {booking.preServiceInspection.photos.map((photo, idx) => (
+                        <a
+                          key={idx}
+                          href={photo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                        >
+                          <img
+                            src={photo}
+                            alt={`Pre-inspection angle ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                    <p className="text-xs italic text-muted-foreground leading-relaxed">
+                      "{booking.preServiceInspection.notes || "No additional notes recorded"}"
+                    </p>
+                    <span className="text-[10px] text-muted-foreground block pt-1">
+                      Verified {new Date(booking.preServiceInspection.capturedAt).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {booking.postServiceInspection && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
+                    Post-Service Quality Inspection
+                  </span>
+                  {booking.postServiceInspection.photos.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {booking.postServiceInspection.photos.map((photo, idx) => (
+                        <a
+                          key={idx}
+                          href={photo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                        >
+                          <img
+                            src={photo}
+                            alt={`Post-inspection angle ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {booking.postServiceInspection.checklist &&
+                    booking.postServiceInspection.checklist.length > 0 && (
+                      <div className="space-y-1.5">
+                        {booking.postServiceInspection.checklist.map((item) => (
+                          <div
+                            key={item.key}
+                            className="p-3 rounded-xl border border-white/10 bg-[#070d1f] space-y-1"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="flex items-center gap-2 text-xs font-semibold text-foreground truncate">
+                                <ClipboardCheck size={13} className="text-primary shrink-0" />
+                                {item.label}
+                              </span>
+                              <span
+                                className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                                  item.passed
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                }`}
+                              >
+                                {item.passed ? "Passed" : "Issue Flagged"}
+                              </span>
+                            </div>
+                            {item.remark && (
+                              <p className="text-[11px] text-muted-foreground italic pl-5">
+                                "{item.remark}"
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                    <p className="text-xs italic text-muted-foreground leading-relaxed">
+                      "{booking.postServiceInspection.notes || "No additional notes recorded"}"
+                    </p>
+                    <span className="text-[10px] text-muted-foreground block pt-1">
+                      Handed over {new Date(booking.postServiceInspection.capturedAt).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 3. Booking Tier & Specifications Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">

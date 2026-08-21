@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus } from "../../domain/entities/Booking"
+import { BookingStatus, InspectionChecklistItem } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
@@ -15,10 +15,15 @@ export interface SavePostInspectionInput {
   bookingId: string
   photos?: string[]
   notes?: string
+  checklist?: InspectionChecklistItem[]
 }
 
 // Front, rear, left, right — the same 4 angles PostInspectionPage.tsx captures on the client.
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
+
+// Must match CHECKLIST_ITEMS in PostInspectionPage.tsx — every item must be reviewed
+// (ticked pass/fail) before a post-service inspection can be completed.
+const REQUIRED_CHECKLIST_KEYS = ["paintGloss", "wheels", "glass", "dashboard", "seats", "specialRequest"]
 
 export class SavePostInspectionUseCase {
   constructor(
@@ -34,7 +39,7 @@ export class SavePostInspectionUseCase {
     managerUserId: string,
     input: SavePostInspectionInput
   ): Promise<BookingResponseDTO> {
-    const { bookingId, photos = [], notes = "" } = input
+    const { bookingId, photos = [], notes = "", checklist = [] } = input
 
     if (!bookingId) {
       throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
@@ -91,6 +96,25 @@ export class SavePostInspectionUseCase {
       )
     }
 
+    const checklistKeys = new Set(checklist.map((c) => c.key))
+    const missingChecklistKeys = REQUIRED_CHECKLIST_KEYS.filter((key) => !checklistKeys.has(key))
+    if (missingChecklistKeys.length > 0) {
+      throw new AppError(
+        `Post-service inspection requires every checklist item to be reviewed (missing: ${missingChecklistKeys.join(", ")})`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    const failedItemsMissingRemark = checklist.filter((c) => !c.passed && !c.remark?.trim())
+    if (failedItemsMissingRemark.length > 0) {
+      throw new AppError(
+        `A remark is required for each failed checklist item (missing: ${failedItemsMissingRemark
+          .map((c) => c.label)
+          .join(", ")})`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
     const fromStatus = booking.status
     const now = new Date()
     const inspectionRecord = {
@@ -98,6 +122,7 @@ export class SavePostInspectionUseCase {
       notes: notes.trim() || "Post-service quality inspection verified",
       capturedBy: managerUserId,
       capturedAt: now,
+      checklist,
     }
 
     booking.completePostInspection(inspectionRecord)

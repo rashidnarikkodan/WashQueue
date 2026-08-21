@@ -413,7 +413,36 @@ export default function ProviderBookingDetailsView({
               </span>
             </div>
 
-            {inspectionLog?.notes ? (
+            {booking.preServiceInspection ? (
+              <div className="space-y-4">
+                {booking.preServiceInspection.photos.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {booking.preServiceInspection.photos.map((photo, idx) => (
+                      <a
+                        key={idx}
+                        href={photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                      >
+                        <img src={photo} alt={`Pre-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                    INSPECTION FINDINGS &amp; NOTES
+                  </span>
+                  <p className="text-xs italic text-slate-300 leading-relaxed">
+                    "{booking.preServiceInspection.notes || "No additional notes recorded"}"
+                  </p>
+                  <span className="text-[10px] text-muted-foreground block pt-1">
+                    Captured {new Date(booking.preServiceInspection.capturedAt).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ) : inspectionLog?.notes ? (
               <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
                   INSPECTION FINDINGS &amp; NOTES
@@ -470,11 +499,19 @@ export default function ProviderBookingDetailsView({
               </span>
             </div>
 
-            {booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED" ? (
-              <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+            {booking.postServiceInspection ? (
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-400">
-                    ✓ Quality Assurance Passed
+                  <span
+                    className={`text-xs font-bold ${
+                      booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
+                        ? "text-emerald-400"
+                        : "text-amber-400"
+                    }`}
+                  >
+                    {booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
+                      ? "✓ Quality Assurance Passed"
+                      : "⚠ Quality Assurance — Issues Flagged"}
                   </span>
                   <button
                     type="button"
@@ -483,6 +520,63 @@ export default function ProviderBookingDetailsView({
                   >
                     View Post-Inspection
                   </button>
+                </div>
+
+                {booking.postServiceInspection.photos.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {booking.postServiceInspection.photos.map((photo, idx) => (
+                      <a
+                        key={idx}
+                        href={photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                      >
+                        <img src={photo} alt={`Post-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {booking.postServiceInspection.checklist && booking.postServiceInspection.checklist.length > 0 && (
+                  <div className="space-y-1.5">
+                    {booking.postServiceInspection.checklist.map((item) => (
+                      <div
+                        key={item.key}
+                        className="p-3 rounded-lg border border-white/10 bg-[#070d1f] space-y-1"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-foreground truncate">
+                            {item.label}
+                          </span>
+                          <span
+                            className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                              item.passed
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                            }`}
+                          >
+                            {item.passed ? "Passed" : "Issue Flagged"}
+                          </span>
+                        </div>
+                        {item.remark && (
+                          <p className="text-[11px] text-slate-300 italic">"{item.remark}"</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                    HANDOVER NOTES
+                  </span>
+                  <p className="text-xs italic text-slate-300 leading-relaxed">
+                    "{booking.postServiceInspection.notes || "No additional notes recorded"}"
+                  </p>
+                  <span className="text-[10px] text-muted-foreground block pt-1">
+                    Captured {new Date(booking.postServiceInspection.capturedAt).toLocaleString()}
+                  </span>
                 </div>
               </div>
             ) : (

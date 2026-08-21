@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
   ShieldCheck,
@@ -8,11 +8,13 @@ import {
   FileText,
   Trash2,
   RotateCcw,
+  Upload,
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
+import { readImageFileAsResizedDataUrl } from "@/shared/utils/imageFile"
 
 interface PhotoSlotConfig {
   key: "front" | "rear" | "left" | "right"
@@ -40,6 +42,8 @@ export default function ManagerPreInspectionPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeCameraSlot, setActiveCameraSlot] = useState<string | null>(null)
+  const [uploadTargetSlot, setUploadTargetSlot] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Fetch Booking details
   const fetchBooking = useCallback(async () => {
@@ -97,6 +101,34 @@ export default function ManagerPreInspectionPage() {
       ...prev,
       [slotKey]: "",
     }))
+  }
+
+  // Open the OS file/gallery picker for a given slot
+  const triggerUpload = (slotKey: string) => {
+    setUploadTargetSlot(slotKey)
+    fileInputRef.current?.click()
+  }
+
+  // Handle a photo chosen manually from device storage/gallery
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file || !uploadTargetSlot) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    try {
+      const dataUrl = await readImageFileAsResizedDataUrl(file)
+      handlePhotoCaptured(uploadTargetSlot, dataUrl)
+    } catch (err) {
+      console.error("Failed to read uploaded photo:", err)
+      toast.error("Failed to read the selected photo")
+    } finally {
+      setUploadTargetSlot(null)
+    }
   }
 
   const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
@@ -302,6 +334,18 @@ export default function ManagerPreInspectionPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
+                              triggerUpload(slot.key)
+                            }}
+                            className="px-3 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs backdrop-blur-md flex items-center gap-1.5 cursor-pointer border border-white/20"
+                            title="Replace with an uploaded photo"
+                          >
+                            <Upload className="h-3.5 w-3.5" /> Upload
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
                               handleRemovePhoto(slot.key)
                             }}
                             className="p-2 rounded-xl bg-rose-500/80 hover:bg-rose-600 text-white font-bold text-xs backdrop-blur-md cursor-pointer"
@@ -324,6 +368,16 @@ export default function ManagerPreInspectionPage() {
                             {slot.subtitle}
                           </span>
                         </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            triggerUpload(slot.key)
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/70 text-foreground text-[10px] font-bold uppercase tracking-wide border border-border cursor-pointer"
+                        >
+                          <Upload className="h-3 w-3" /> Upload Instead
+                        </button>
                       </div>
                     )}
                   </div>
@@ -377,6 +431,14 @@ export default function ManagerPreInspectionPage() {
           onClose={() => setActiveCameraSlot(null)}
         />
       )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
 
     </div>
   )

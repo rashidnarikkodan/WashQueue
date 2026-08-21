@@ -60,11 +60,19 @@ export interface WalkInVehicle {
   classId: string
 }
 
+export interface InspectionChecklistItem {
+  key: string
+  label: string
+  passed: boolean
+  remark?: string
+}
+
 export interface InspectionRecord {
   photos: string[]
   notes?: string
   capturedBy: string
   capturedAt: Date
+  checklist?: InspectionChecklistItem[]
 }
 
 export interface SettlementSnapshot {

@@ -170,6 +170,7 @@ export class BookingMapper {
               ? doc.postServiceInspection.capturedBy.toString()
               : "",
             capturedAt: doc.postServiceInspection.capturedAt || new Date(),
+            checklist: doc.postServiceInspection.checklist || [],
           }
         : null,
       status: doc.status as BookingStatus,
@@ -275,6 +276,23 @@ export class BookingMapper {
         stationSettlement: props.settlement.stationSettlement,
       },
       status: props.status,
+      preServiceInspection: props.preServiceInspection
+        ? {
+            photos: props.preServiceInspection.photos,
+            notes: props.preServiceInspection.notes,
+            capturedBy: toObjectId(props.preServiceInspection.capturedBy) || new Types.ObjectId(),
+            capturedAt: props.preServiceInspection.capturedAt,
+          }
+        : null,
+      postServiceInspection: props.postServiceInspection
+        ? {
+            photos: props.postServiceInspection.photos,
+            notes: props.postServiceInspection.notes,
+            capturedBy: toObjectId(props.postServiceInspection.capturedBy) || new Types.ObjectId(),
+            capturedAt: props.postServiceInspection.capturedAt,
+            checklist: props.postServiceInspection.checklist || [],
+          }
+        : null,
       checkedInAt: props.checkedInAt || null,
       checkedInBy: toObjectId(props.checkedInBy),
       serviceStartedAt: props.serviceStartedAt || null,

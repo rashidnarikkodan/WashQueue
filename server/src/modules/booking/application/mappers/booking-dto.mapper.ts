@@ -88,6 +88,7 @@ export class BookingDTOMapper {
             notes: props.postServiceInspection.notes,
             capturedBy: props.postServiceInspection.capturedBy,
             capturedAt: props.postServiceInspection.capturedAt.toISOString(),
+            checklist: props.postServiceInspection.checklist || [],
           }
         : null,
       statusHistory: mappedHistory,

@@ -87,9 +87,17 @@ export const preInspectionSchema = z.object({
   notes: z.string().optional(),
 })
 
+export const inspectionChecklistItemSchema = z.object({
+  key: z.string().min(1),
+  label: z.string().min(1),
+  passed: z.boolean(),
+  remark: z.string().optional(),
+})
+
 export const postInspectionSchema = z.object({
   photos: z.array(z.string()).optional().default([]),
   notes: z.string().optional(),
+  checklist: z.array(inspectionChecklistItemSchema).optional().default([]),
 })
 
 export const completeHandoverSchema = z.object({

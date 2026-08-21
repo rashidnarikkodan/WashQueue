@@ -109,6 +109,12 @@ export interface BookingResponseDTO {
     notes?: string
     capturedBy: string
     capturedAt: string
+    checklist?: Array<{
+      key: string
+      label: string
+      passed: boolean
+      remark?: string
+    }>
   } | null
   statusHistory?: BookingStatusLogDTO[]
   rescheduleCount?: number

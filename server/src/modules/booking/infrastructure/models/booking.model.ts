@@ -94,6 +94,12 @@ export interface IBookingDocument extends Document {
     notes?: string
     capturedBy: Types.ObjectId
     capturedAt: Date
+    checklist?: Array<{
+      key: string
+      label: string
+      passed: boolean
+      remark?: string
+    }>
   } | null
 
   status: BookingStatus
@@ -246,6 +252,15 @@ const bookingSchema = new Schema<IBookingDocument>(
       notes: { type: String },
       capturedBy: { type: Schema.Types.ObjectId, ref: "User" },
       capturedAt: { type: Date },
+      checklist: [
+        {
+          _id: false,
+          key: { type: String, required: true },
+          label: { type: String, required: true },
+          passed: { type: Boolean, required: true },
+          remark: { type: String },
+        },
+      ],
     },
 
     status: {

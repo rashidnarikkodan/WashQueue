@@ -12,6 +12,13 @@ export interface CreateBookingInput {
   paymentMethod?: PaymentMethod
 }
 
+export interface InspectionChecklistItem {
+  key: string
+  label: string
+  passed: boolean
+  remark?: string
+}
+
 export interface BookingStatusHistoryItem {
   id: string
   bookingId: string
@@ -99,6 +106,7 @@ export interface BookingResponse {
     notes?: string
     capturedBy: string
     capturedAt: string
+    checklist?: InspectionChecklistItem[]
   } | null
   status: string
   paymentStatus: string
@@ -250,7 +258,7 @@ export const bookingApi = {
 
   savePostInspection: async (
     bookingId: string,
-    data: { photos?: string[]; notes?: string }
+    data: { photos?: string[]; notes?: string; checklist?: InspectionChecklistItem[] }
   ): Promise<BookingResponse> => {
     try {
       const response = await api.post(
