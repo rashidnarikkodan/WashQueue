@@ -4,6 +4,7 @@ import {
 } from "../../domain/repositories/wallet-transaction.repository.interface"
 import { WalletTransactionDTO } from "../dtos/wallet.dto"
 import { WalletMapper } from "../mappers/wallet.mapper"
+import { IGetTransactionLedgerUseCase } from "../interfaces/wallet.use-cases"
 
 export interface PaginatedLedgerDTO {
   transactions: WalletTransactionDTO[]
@@ -13,7 +14,7 @@ export interface PaginatedLedgerDTO {
   totalPages: number
 }
 
-export class GetTransactionLedgerUseCase {
+export class GetTransactionLedgerUseCase implements IGetTransactionLedgerUseCase {
   constructor(
     private readonly transactionRepository: IWalletTransactionRepository
   ) {}

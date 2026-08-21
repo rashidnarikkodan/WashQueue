@@ -2,8 +2,9 @@ import { IWalletRepository } from "../../domain/repositories/wallet.repository.i
 import { Money } from "../../domain/value-objects/money.vo"
 import { CreditWalletInputDTO, WalletTransactionDTO } from "../dtos/wallet.dto"
 import { WalletMapper } from "../mappers/wallet.mapper"
+import { IRefundWalletUseCase } from "../interfaces/wallet.use-cases"
 
-export class RefundWalletUseCase {
+export class RefundWalletUseCase implements IRefundWalletUseCase {
   constructor(private readonly walletRepository: IWalletRepository) {}
 
   public async execute(input: CreditWalletInputDTO): Promise<WalletTransactionDTO> {

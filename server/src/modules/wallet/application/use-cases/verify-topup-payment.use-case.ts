@@ -4,8 +4,9 @@ import { VerifyTopUpPaymentDTO, WalletTransactionDTO } from "../dtos/wallet.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { IWalletTransactionRepository } from "../../domain/repositories/wallet-transaction.repository.interface"
+import { IVerifyTopUpPaymentUseCase } from "../interfaces/wallet.use-cases"
 
-export class VerifyTopUpPaymentUseCase {
+export class VerifyTopUpPaymentUseCase implements IVerifyTopUpPaymentUseCase {
   constructor(
     private readonly paymentGateway: IWalletPaymentGateway,
     private readonly creditWalletUseCase: CreditWalletUseCase,

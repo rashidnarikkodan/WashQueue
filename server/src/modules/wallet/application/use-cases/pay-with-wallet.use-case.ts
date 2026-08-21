@@ -1,7 +1,8 @@
 import { DebitWalletUseCase } from "./debit-wallet.use-case"
 import { PayWithWalletInputDTO, WalletTransactionDTO } from "../dtos/wallet.dto"
+import { IPayWithWalletUseCase } from "../interfaces/wallet.use-cases"
 
-export class PayWithWalletUseCase {
+export class PayWithWalletUseCase implements IPayWithWalletUseCase {
   constructor(private readonly debitWalletUseCase: DebitWalletUseCase) {}
 
   public async execute(input: PayWithWalletInputDTO): Promise<WalletTransactionDTO> {

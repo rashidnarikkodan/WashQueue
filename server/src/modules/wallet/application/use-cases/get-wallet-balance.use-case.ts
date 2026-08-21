@@ -3,8 +3,9 @@ import { Wallet } from "../../domain/entities/wallet.entity"
 import { Money } from "../../domain/value-objects/money.vo"
 import { WalletDTO } from "../dtos/wallet.dto"
 import { WalletMapper } from "../mappers/wallet.mapper"
+import { IGetWalletBalanceUseCase } from "../interfaces/wallet.use-cases"
 
-export class GetWalletBalanceUseCase {
+export class GetWalletBalanceUseCase implements IGetWalletBalanceUseCase {
   constructor(private readonly walletRepository: IWalletRepository) {}
 
   public async execute(userId: string): Promise<WalletDTO> {

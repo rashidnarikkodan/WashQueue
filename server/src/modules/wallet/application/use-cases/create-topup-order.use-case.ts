@@ -2,8 +2,9 @@ import { IWalletPaymentGateway } from "../interfaces/wallet-payment-gateway.inte
 import { TopUpOrderDTO } from "../dtos/wallet.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { ICreateTopUpOrderUseCase } from "../interfaces/wallet.use-cases"
 
-export class CreateTopUpOrderUseCase {
+export class CreateTopUpOrderUseCase implements ICreateTopUpOrderUseCase {
   constructor(private readonly paymentGateway: IWalletPaymentGateway) {}
 
   public async execute(
