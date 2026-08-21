@@ -100,220 +100,200 @@ export default function CustomerBookingDetailsView({
         </p>
       </div>
 
-      {/* Hero 12-Column Grid Top Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left 8-Column Status Banner Card */}
-        <div className="lg:col-span-8 p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d]/80 backdrop-blur-md shadow-2xl space-y-8 relative overflow-hidden">
-          {/* Top Status & Station Name */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                    booking.status === "COMPLETED"
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                        ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 animate-pulse"
-                        : booking.status === "CANCELLED"
-                          ? "bg-red-500/15 text-red-400 border border-red-500/30"
-                          : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-current" />
-                  <span>{booking.status.replace("_", " ")}</span>
-                </span>
-                <span className="text-xs text-muted-foreground font-mono">
-                  {formattedDates.dateStr}
-                </span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                {stationName}
-              </h2>
-              <p className="text-xs text-primary font-medium flex items-center gap-1.5">
-                <Clock size={13} />
-                <span>Slot Window: {formattedDates.timeStr}</span>
-              </p>
-            </div>
-
-            <div className="text-left sm:text-right space-y-1 bg-background/40 p-4 rounded-2xl border border-white/5 sm:border-0 sm:p-0 sm:bg-transparent">
-              <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
-                Total Amount
-              </span>
-              <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
-                ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
-              </span>
-              <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                ✓ {booking.paymentStatus} via {booking.paymentMethod.replace("_", " ")}
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Progress Bar Tracker */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              <span>Service Progress</span>
-              <span className="text-primary font-semibold">
-                {currentStageIndex >= 0
-                  ? `${(currentStageIndex + 1) * 20}% Completed`
-                  : "Cancelled"}
-              </span>
-            </div>
-
-            {/* Stages Circles */}
-            <div className="relative flex justify-between items-center z-10 px-2">
-              <div className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 bg-white/10 -z-10 rounded-full" />
-              <div
-                className="absolute top-1/2 left-4 h-1 -translate-y-1/2 bg-gradient-to-r from-primary to-emerald-400 -z-10 rounded-full transition-all duration-500"
-                style={{
-                  width:
-                    currentStageIndex < 0
-                      ? "0%"
-                      : `${(currentStageIndex / (stages.length - 1)) * 100}%`,
-                }}
-              />
-
-              {stages.map((stg, idx) => {
-                const isPassed = currentStageIndex >= idx
-                const isCurrent = currentStageIndex === idx
-                return (
-                  <div key={stg.id} className="flex flex-col items-center gap-2 text-center">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-lg ${
-                        isCurrent
-                          ? "bg-primary text-primary-foreground ring-4 ring-primary/30 scale-110"
-                          : isPassed
-                            ? "bg-emerald-500 text-slate-950 font-black"
-                            : "bg-slate-800 text-slate-400 border border-white/10"
-                      }`}
-                    >
-                      {isPassed ? <CheckCircle2 size={18} /> : idx + 1}
-                    </div>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider ${
-                        isCurrent
-                          ? "text-primary"
-                          : isPassed
-                            ? "text-foreground"
-                            : "text-muted-foreground"
-                      }`}
-                    >
-                      {stg.label}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Action Control Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/5">
-            <div className="flex flex-wrap items-center gap-3">
-              {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
-                <>
-                  <button
-                    type="button"
-                    onClick={onOpenCancelModal}
-                    className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+      {/* Unified 12-Column Responsive Layout (Zero Vertical Gaps) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Left 8-Column Main Flow */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* 1. Status & Service Progress Card */}
+          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d]/80 backdrop-blur-md shadow-2xl space-y-8 relative overflow-hidden">
+            {/* Top Status & Station Name */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                      booking.status === "COMPLETED"
+                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
+                          ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 animate-pulse"
+                          : booking.status === "CANCELLED"
+                            ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                            : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                    }`}
                   >
-                    <XCircle size={15} />
-                    <span>Cancel Booking</span>
-                  </button>
+                    <span className="w-2 h-2 rounded-full bg-current" />
+                    <span>{booking.status.replace("_", " ")}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {formattedDates.dateStr}
+                  </span>
+                </div>
 
-                  {!booking.isWalkIn && onOpenRescheduleModal && (
-                    <div className="relative group inline-block">
-                      <button
-                        type="button"
-                        onClick={onOpenRescheduleModal}
-                        disabled={!canReschedule}
-                        className="px-5 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <CalendarClock size={15} />
-                        <span>
-                          Reschedule
-                          {rescheduleCount > 0 && ` (${rescheduleCount}/2)`}
-                        </span>
-                      </button>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                  {stationName}
+                </h2>
+                <p className="text-xs text-primary font-medium flex items-center gap-1.5">
+                  <Clock size={13} />
+                  <span>Slot Window: {formattedDates.timeStr}</span>
+                </p>
+              </div>
 
-                      {/* Floating Hover Tooltip */}
-                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[260px] opacity-0 group-hover:opacity-100 transition-all duration-200 z-30 transform group-hover:-translate-y-1">
-                        <div className="p-3 rounded-2xl bg-[#0f1422] border border-white/10 text-white shadow-2xl backdrop-blur-md text-left space-y-1">
-                          <div className="flex items-center gap-1.5 font-bold text-[11px]">
-                            {isMaxReschedulesReached ? (
-                              <>
-                                <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                                <span className="text-red-400">Limit Reached (2/2 Used)</span>
-                              </>
-                            ) : canReschedule ? (
-                              <>
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                                <span className="text-emerald-400">
-                                  {2 - rescheduleCount} Reschedule
-                                  {2 - rescheduleCount === 1 ? "" : "s"} Remaining
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                                <span className="text-amber-400">24h Cutoff Policy</span>
-                              </>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">
-                            {isMaxReschedulesReached
-                              ? "Maximum limit of 2 reschedules reached for this booking."
-                              : canReschedule
-                                ? `You can reschedule up to 2 times (${2 - rescheduleCount} left). Available at least 24h prior to window.`
-                                : "Rescheduling is only permitted at least 24 hours prior to the scheduled slot window start."}
-                          </p>
-                        </div>
-                        <div className="w-2 h-2 bg-[#0f1422] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
+              <div className="text-left sm:text-right space-y-1 bg-background/40 p-4 rounded-2xl border border-white/5 sm:border-0 sm:p-0 sm:bg-transparent">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
+                  Total Amount
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
+                  ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
+                </span>
+                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                  ✓ {booking.paymentStatus} via {booking.paymentMethod.replace("_", " ")}
+                </div>
+              </div>
             </div>
 
-            <button
-              type="button"
-              disabled={isDownloading}
-              onClick={handleDownloadInvoice}
-              className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isDownloading ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <Download size={15} />
-              )}
-              <span>{isDownloading ? "Downloading..." : "Download Invoice"}</span>
-            </button>
+            {/* Interactive Progress Bar Tracker */}
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                <span>Service Progress</span>
+                <span className="text-primary font-semibold">
+                  {currentStageIndex >= 0
+                    ? `${(currentStageIndex + 1) * 20}% Completed`
+                    : "Cancelled"}
+                </span>
+              </div>
+
+              {/* Stages Circles */}
+              <div className="relative flex justify-between items-center z-10 px-2">
+                <div className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 bg-white/10 -z-10 rounded-full" />
+                <div
+                  className="absolute top-1/2 left-4 h-1 -translate-y-1/2 bg-gradient-to-r from-primary to-emerald-400 -z-10 rounded-full transition-all duration-500"
+                  style={{
+                    width:
+                      currentStageIndex < 0
+                        ? "0%"
+                        : `${(currentStageIndex / (stages.length - 1)) * 100}%`,
+                  }}
+                />
+
+                {stages.map((stg, idx) => {
+                  const isPassed = currentStageIndex >= idx
+                  const isCurrent = currentStageIndex === idx
+                  return (
+                    <div key={stg.id} className="flex flex-col items-center gap-2 text-center">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-lg ${
+                          isCurrent
+                            ? "bg-primary text-primary-foreground ring-4 ring-primary/30 scale-110"
+                            : isPassed
+                              ? "bg-emerald-500 text-slate-950 font-black"
+                              : "bg-slate-800 text-slate-400 border border-white/10"
+                        }`}
+                      >
+                        {isPassed ? <CheckCircle2 size={18} /> : idx + 1}
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider ${
+                          isCurrent
+                            ? "text-primary"
+                            : isPassed
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {stg.label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Action Control Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/5">
+              <div className="flex flex-wrap items-center gap-3">
+                {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={onOpenCancelModal}
+                      className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                    >
+                      <XCircle size={15} />
+                      <span>Cancel Booking</span>
+                    </button>
+
+                    {!booking.isWalkIn && onOpenRescheduleModal && (
+                      <div className="relative group inline-block">
+                        <button
+                          type="button"
+                          onClick={onOpenRescheduleModal}
+                          disabled={!canReschedule}
+                          className="px-5 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <CalendarClock size={15} />
+                          <span>
+                            Reschedule
+                            {rescheduleCount > 0 && ` (${rescheduleCount}/2)`}
+                          </span>
+                        </button>
+
+                        {/* Floating Hover Tooltip */}
+                        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[260px] opacity-0 group-hover:opacity-100 transition-all duration-200 z-30 transform group-hover:-translate-y-1">
+                          <div className="p-3 rounded-2xl bg-[#0f1422] border border-white/10 text-white shadow-2xl backdrop-blur-md text-left space-y-1">
+                            <div className="flex items-center gap-1.5 font-bold text-[11px]">
+                              {isMaxReschedulesReached ? (
+                                <>
+                                  <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                                  <span className="text-red-400">Limit Reached (2/2 Used)</span>
+                                </>
+                              ) : canReschedule ? (
+                                <>
+                                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                                  <span className="text-emerald-400">
+                                    {2 - rescheduleCount} Reschedule
+                                    {2 - rescheduleCount === 1 ? "" : "s"} Remaining
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                                  <span className="text-amber-400">24h Cutoff Policy</span>
+                                </>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              {isMaxReschedulesReached
+                                ? "Maximum limit of 2 reschedules reached for this booking."
+                                : canReschedule
+                                  ? `You can reschedule up to 2 times (${2 - rescheduleCount} left). Available at least 24h prior to window.`
+                                  : "Rescheduling is only permitted at least 24 hours prior to the scheduled slot window start."}
+                            </p>
+                          </div>
+                          <div className="w-2 h-2 bg-[#0f1422] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <button
+                type="button"
+                disabled={isDownloading}
+                onClick={handleDownloadInvoice}
+                className="px-5 py-2.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDownloading ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Download size={15} />
+                )}
+                <span>{isDownloading ? "Downloading..." : "Download Invoice"}</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Right 4-Column Check-in QR & Quick Access Card */}
-        <div className="lg:col-span-4 space-y-6">
-          <QRCodePass
-            value={qrPayload}
-            bookingNumber={booking.bookingNumber}
-            stationName={stationName}
-            stationCity={stationLocation}
-            vehicleName={vehicleName}
-            plateNumber={plateNumber}
-            serviceName={serviceName}
-            scheduledDate={formattedDates.dateStr}
-            scheduledTime={formattedDates.timeStr}
-            totalPrice={booking.pricingSnapshot.totalPrice}
-            paymentStatus={booking.paymentStatus}
-          />
-        </div>
-      </div>
-
-      {/* Bottom 12-Column Grid Details Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left 8-Column Specifications & Breakdown */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Booking Tier & Specifications Card */}
+          {/* 2. Booking Tier & Specifications Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
             <div className="flex items-center gap-2 border-b border-white/5 pb-4">
               <ShieldCheck size={18} className="text-primary" />
@@ -374,7 +354,7 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* Payment Summary Breakdown */}
+          {/* 3. Payment Summary Breakdown */}
           <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
             <h3 className="text-lg font-bold text-foreground border-b border-white/5 pb-4">
               Payment Summary Breakdown
@@ -412,8 +392,22 @@ export default function CustomerBookingDetailsView({
           </div>
         </div>
 
-        {/* Right 4-Column Vehicle Info & Support Section */}
+        {/* Right 4-Column Check-in QR & Side Info */}
         <div className="lg:col-span-4 space-y-6">
+          <QRCodePass
+            value={qrPayload}
+            bookingNumber={booking.bookingNumber}
+            stationName={stationName}
+            stationCity={stationLocation}
+            vehicleName={vehicleName}
+            plateNumber={plateNumber}
+            serviceName={serviceName}
+            scheduledDate={formattedDates.dateStr}
+            scheduledTime={formattedDates.timeStr}
+            totalPrice={booking.pricingSnapshot.totalPrice}
+            paymentStatus={booking.paymentStatus}
+          />
+
           {/* Active Vehicle Info Card */}
           <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">

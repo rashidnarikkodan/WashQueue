@@ -1,7 +1,7 @@
 import { toast } from "sonner"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react"
+import { RefreshCw, AlertTriangle, ArrowLeft } from "lucide-react"
 import { ROLE, VIEW_MODE, type RoleType } from "@/shared/constants/role.const"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -219,7 +219,23 @@ export default function BookingDetails() {
     )
   }
 
-  const backPath = isAdmin
+  const rootPath = isAdmin
+    ? "/admin/dashboard"
+    : isOwner
+      ? "/owner/dashboard"
+      : isManager
+        ? "/manager/dashboard"
+        : "/"
+
+  const rootLabel = isAdmin
+    ? "Admin"
+    : isOwner
+      ? "Owner"
+      : isManager
+        ? "Manager"
+        : "Home"
+
+  const bookingsListPath = isAdmin
     ? "/admin/bookings"
     : isOwner
       ? "/owner/bookings"
@@ -227,39 +243,38 @@ export default function BookingDetails() {
         ? "/manager/bookings"
         : "/bookings"
 
+  const bookingsListLabel = isCustomer ? "My Bookings" : "Bookings"
+
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
-      {/* Top Breadcrumb & Navigation Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      {/* Universal Breadcrumbs & Top Header Bar */}
+      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
         <Breadcrumbs
           items={[
             {
-              label: isAdmin ? "Admin" : isOwner ? "Owner" : isManager ? "Manager" : "Home",
-              path: backPath,
+              label: rootLabel,
+              path: rootPath,
             },
-            { label: "Bookings", path: backPath },
+            {
+              label: bookingsListLabel,
+              path: bookingsListPath,
+            },
             { label: `#${booking.bookingNumber}` },
           ]}
         />
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(backPath)}
-            className="px-3.5 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
-          >
-            <ArrowLeft size={14} />
-            <span>Back to List</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => fetchBookingDetails()}
-            className="p-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer shadow-xs"
-            title="Refresh Details"
-          >
-            <RefreshCw size={14} className={isLoading ? "animate-spin text-primary" : ""} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => fetchBookingDetails()}
+          className="px-4 py-2 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
+          title="Refresh booking details"
+        >
+          <RefreshCw
+            size={14}
+            className={isLoading ? "animate-spin text-primary" : "text-primary"}
+          />
+          <span>Refresh</span>
+        </button>
       </div>
 
       {/* Role-Based Dynamic View Rendering */}

@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   Printer,
-  ChevronRight,
   Sparkles,
   Lock,
   FileText,
@@ -167,14 +166,12 @@ export default function ProviderBookingDetailsView({
       {/* Action Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-            <span>Bookings</span>
-            <ChevronRight size={12} />
-            <span className="text-primary font-bold">#{booking.bookingNumber}</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
             Booking Details Overview
           </h1>
+          <p className="text-xs text-muted-foreground">
+            Station bay queue monitoring, customer verification, and live service workflow controls
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
