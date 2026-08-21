@@ -50,10 +50,9 @@ export default function CancellationModal({
 
   if (!isOpen || !booking) return null
 
-  // Pricing calculations
+  // We don't charge a cancellation fee — the full amount is refunded.
   const totalAmount = booking?.pricingSnapshot?.totalPrice || 450
-  const cancellationFee = totalAmount > 0 ? 50 : 0
-  const refundAmount = Math.max(0, totalAmount - cancellationFee)
+  const refundAmount = totalAmount
 
   const handleConfirm = async () => {
     try {
@@ -160,11 +159,6 @@ export default function CancellationModal({
                 <div className="flex items-center justify-between">
                   <span className="text-[#C2C6D6]">Service Amount</span>
                   <span className="font-medium text-[#DCE1FB] text-base">₹{totalAmount}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[#C2C6D6]">Cancellation Fee</span>
-                  <span className="font-medium text-[#FFB4AB]">- ₹{cancellationFee}</span>
                 </div>
 
                 <div className="pt-3 border-t border-[#424754]/20 flex items-center justify-between">
