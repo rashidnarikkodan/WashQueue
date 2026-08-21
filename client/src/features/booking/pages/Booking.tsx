@@ -77,7 +77,6 @@ export default function Booking() {
 
   return (
     <div className="pt-24 pb-20 min-h-screen text-left w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 text-foreground animate-in fade-in duration-300">
-      {/* Back Navigation Bar */}
       <div className="flex items-center justify-between py-4 mb-4">
         <button
           type="button"
@@ -91,8 +90,10 @@ export default function Booking() {
 
       {/* Main 12-Column Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
         {/* Left Column: 8 Columns (Booking Steps Flow) */}
         <div className="lg:col-span-8 flex flex-col gap-10">
+          
           {/* Step 1: Vehicle Selection */}
           <VehicleSelectionStep
             vehicles={vehicles}
