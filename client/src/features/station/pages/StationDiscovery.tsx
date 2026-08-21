@@ -168,12 +168,12 @@ const StationDiscovery = () => {
   return (
     <div className="min-h-screen pt-4 sm:pt-8 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
       {/* Top Header Section aligned to layout */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/60 pb-6">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-border/60 pb-6 text-left">
+        <div className="shrink-0 space-y-1">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground whitespace-nowrap">
             Find Wash Stations
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base mt-1.5 font-medium">
+          <p className="text-muted-foreground text-sm sm:text-base font-medium">
             {pagination ? `${pagination.total} stations found` : `${stations.length} results`}
             {selectedVehicleName ? ` • Rate for ${selectedVehicleName}` : ""}
             {userLocation ? " • Nearby your location" : ` • ${filters.maxDistanceKm}km radius`}
@@ -181,9 +181,9 @@ const StationDiscovery = () => {
         </div>
 
         {/* Right Side Controls: Search Bar & View Mode Toggle */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 justify-start lg:justify-end">
           {/* Main Search Input */}
-          <div className="relative flex items-center min-w-[260px] sm:min-w-[320px]">
+          <div className="relative flex items-center w-full sm:w-[280px] lg:w-[320px]">
             <Search className="w-4.5 h-4.5 text-muted-foreground absolute left-4 pointer-events-none" />
             <input
               type="text"
