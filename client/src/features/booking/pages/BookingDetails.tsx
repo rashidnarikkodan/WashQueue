@@ -2,8 +2,7 @@ import { toast } from "sonner"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { RefreshCw, AlertTriangle, ArrowLeft } from "lucide-react"
-import { ROLE, VIEW_MODE, type RoleType } from "@/shared/constants/role.const"
-import { useAuthStore } from "@/features/auth/store/auth.store"
+import { ROLE, type RoleType } from "@/shared/constants/role.const"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import CancellationModal from "../components/CancellationModal"
 import RescheduleModal from "../components/RescheduleModal"
@@ -17,7 +16,6 @@ export default function BookingDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, activeViewMode } = useAuthStore()
 
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -30,38 +28,20 @@ export default function BookingDetails() {
   // Status Advance state
   const [isAdvancingStatus, setIsAdvancingStatus] = useState(false)
 
-  // Determine role context based on URL pathname first, then activeViewMode, then user.role
+  // Determine role context strictly based on the route being visited
   const currentRole: RoleType = useMemo(() => {
     if (location.pathname.startsWith("/admin")) return ROLE.ADMIN
     if (location.pathname.startsWith("/owner")) return ROLE.OWNER
     if (location.pathname.startsWith("/manager")) return ROLE.MANAGER
 
-    if (activeViewMode === VIEW_MODE.MANAGER) return ROLE.MANAGER
-    if (activeViewMode === VIEW_MODE.OWNER) return ROLE.OWNER
-
-    return user?.role ? (user.role as RoleType) : ROLE.CUSTOMER
-  }, [location.pathname, activeViewMode, user?.role])
+    // If on /bookings/:id (or any user route), always render the customer view
+    return ROLE.CUSTOMER
+  }, [location.pathname])
 
   const isCustomer = currentRole === ROLE.CUSTOMER
   const isManager = currentRole === ROLE.MANAGER
   const isOwner = currentRole === ROLE.OWNER
   const isAdmin = currentRole === ROLE.ADMIN
-
-  // Seamless redirection if a staff/owner/admin accesses generic /bookings/:id while in management mode
-  useEffect(() => {
-    if (!id) return
-    const isGenericBookingPath = location.pathname.startsWith("/bookings/")
-
-    if (isGenericBookingPath) {
-      if (isAdmin || (user?.role === ROLE.ADMIN && activeViewMode !== VIEW_MODE.CUSTOMER)) {
-        navigate(`/admin/bookings/${id}`, { replace: true })
-      } else if (isOwner || (user?.role === ROLE.OWNER && activeViewMode === VIEW_MODE.OWNER)) {
-        navigate(`/owner/bookings/${id}`, { replace: true })
-      } else if (isManager || (user?.role === ROLE.MANAGER && activeViewMode === VIEW_MODE.MANAGER)) {
-        navigate(`/manager/bookings/${id}`, { replace: true })
-      }
-    }
-  }, [id, location.pathname, isAdmin, isOwner, isManager, user?.role, activeViewMode, navigate])
 
 
   // Load Booking Details helper
