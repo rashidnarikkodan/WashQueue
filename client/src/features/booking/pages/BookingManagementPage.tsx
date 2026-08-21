@@ -136,14 +136,22 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     ]
   }, [bookings, pagination?.total, isManager, isOwner, managedStation])
 
+  const basePath = isAdmin
+    ? "/admin/bookings"
+    : isOwner
+      ? "/owner/bookings"
+      : isManager
+        ? "/manager/bookings"
+        : "/bookings"
+
   // Columns definition
   const columns = useMemo(
     () =>
       getManagementColumns({
-        onNavigate: (id) => navigate(`/bookings/${id}`),
+        onNavigate: (id) => navigate(`${basePath}/${id}`),
         isManager,
       }),
-    [navigate, isManager]
+    [navigate, basePath, isManager]
   )
 
   const paginationMeta = useMemo(() => {
