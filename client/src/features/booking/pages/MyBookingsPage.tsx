@@ -16,6 +16,7 @@ export default function MyBookingsPage() {
     searchQuery,
     activeTab,
     page,
+    pagination,
     bookings,
     filteredBookings,
     isLoading,
@@ -31,7 +32,7 @@ export default function MyBookingsPage() {
 
   // Customer HUD Stats
   const stats: StatItem[] = useMemo(() => {
-    const totalCount = bookings.length
+    const totalCount = pagination?.total ?? bookings.length
     const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length
     const completedCount = bookings.filter((b) => b.status === "COMPLETED").length
 
@@ -55,7 +56,7 @@ export default function MyBookingsPage() {
         color: "emerald",
       },
     ]
-  }, [bookings])
+  }, [bookings, pagination?.total])
 
   // Customer columns
   const columns = useMemo(
@@ -67,6 +68,7 @@ export default function MyBookingsPage() {
   )
 
   const paginationMeta = useMemo(() => {
+    if (pagination) return pagination
     const total = filteredBookings.length
     const limit = 10
     const totalPages = Math.max(1, Math.ceil(total / limit))
@@ -78,7 +80,7 @@ export default function MyBookingsPage() {
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
     }
-  }, [filteredBookings.length, page])
+  }, [pagination, filteredBookings.length, page])
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
