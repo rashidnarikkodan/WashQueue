@@ -143,7 +143,6 @@ const cancelBookingUseCase = new CancelBookingUseCase(
   bookingStatusLogRepository,
   bookingRedisQueueService,
   bookingNotificationService,
-  creditWalletUseCase,
   evaluateAndProcessRefundUseCase,
   transactionRunner
 )
@@ -184,7 +183,6 @@ export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
   bookingStatusLogRepository,
   bookingRedisQueueService,
   bookingNotificationService,
-  evaluateAndProcessRefundUseCase
 )
 
 const startServiceUseCase = new StartServiceUseCase(

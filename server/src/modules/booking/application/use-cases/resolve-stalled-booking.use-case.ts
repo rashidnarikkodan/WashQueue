@@ -1,3 +1,4 @@
+import { IResolveStalledBookingUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { BookingStatus } from "../../domain/entities/Booking"
@@ -16,7 +17,7 @@ export interface ResolveStalledBookingInput {
   targetStatus?: "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
 }
 
-export class ResolveStalledBookingUseCase {
+export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,

@@ -4,8 +4,9 @@ import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
+import { IGetOperationalQueueUseCase } from "../interfaces/booking-usecases.interface"
 
-export class GetOperationalQueueUseCase {
+export class GetOperationalQueueUseCase implements IGetOperationalQueueUseCase {
   constructor(
     private readonly redisQueueService: IBookingQueueService,
     private readonly stationRepository: IStationRepository,

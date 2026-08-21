@@ -1,3 +1,4 @@
+import { IProcessNoShowBookingsUseCase } from "../interfaces/booking-usecases.interface"
 import logger from "@/configs/logger.config"
 import { BookingStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
@@ -5,21 +6,17 @@ import { IBookingStatusLogRepository } from "../../domain/repositories/booking-s
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
-
-import { EvaluateAndProcessRefundUseCase } from "./evaluate-and-process-refund.use-case"
-
 export interface ProcessNoShowResult {
   processedCount: number
   noShowBookingIds: string[]
 }
 
-export class ProcessNoShowBookingsUseCase {
+export class ProcessNoShowBookingsUseCase implements IProcessNoShowBookingsUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
-    private readonly evaluateAndProcessRefundUseCase?: EvaluateAndProcessRefundUseCase
   ) {}
 
   async execute(gracePeriodMinutes: number = 15): Promise<ProcessNoShowResult> {

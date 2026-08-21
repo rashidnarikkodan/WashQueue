@@ -1,3 +1,4 @@
+import { IStartServiceUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { BookingStatus } from "../../domain/entities/Booking"
@@ -11,7 +12,7 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
-export class StartServiceUseCase {
+export class StartServiceUseCase implements IStartServiceUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,

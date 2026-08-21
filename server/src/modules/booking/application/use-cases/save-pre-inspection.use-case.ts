@@ -1,3 +1,4 @@
+import { ISavePreInspectionAndCheckInUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import logger from "@/configs/logger.config"
@@ -20,7 +21,7 @@ export interface SavePreInspectionInput {
 
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 
-export class SavePreInspectionAndCheckInUseCase {
+export class SavePreInspectionAndCheckInUseCase implements ISavePreInspectionAndCheckInUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,

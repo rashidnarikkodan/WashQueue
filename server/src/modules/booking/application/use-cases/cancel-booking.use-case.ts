@@ -20,7 +20,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
-    private readonly creditWalletUseCase?: CreditWalletUseCase,
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase,
     private readonly transactionRunner?: ITransactionRunner
   ) {}

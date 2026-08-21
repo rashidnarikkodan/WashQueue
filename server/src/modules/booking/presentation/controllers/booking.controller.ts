@@ -20,11 +20,12 @@ import {
   IStartServiceUseCase,
   IStallBookingUseCase,
   IValidateQRForCheckInUseCase,
+  IGetPublicStationQueueUseCase,
 } from "../../application/interfaces/booking-usecases.interface"
 import { IPDFInvoiceService } from "../../application/interfaces/pdf-invoice.interface"
 import { getBookingListQuerySchema } from "../schema/booking.schema"
 import { BookingStatus } from "../../domain/entities/Booking"
-import type { GetPublicStationQueueUseCase } from "../../application/use-cases/get-public-station-queue.use-case"
+
 
 export class BookingController {
   constructor(
@@ -43,7 +44,7 @@ export class BookingController {
     private readonly completeHandoverUseCase: ICompleteHandoverUseCase,
     private readonly stallBookingUseCase: IStallBookingUseCase,
     private readonly resolveStalledBookingUseCase: IResolveStalledBookingUseCase,
-    private readonly getPublicStationQueueUseCase?: GetPublicStationQueueUseCase
+    private readonly getPublicStationQueueUseCase?: IGetPublicStationQueueUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

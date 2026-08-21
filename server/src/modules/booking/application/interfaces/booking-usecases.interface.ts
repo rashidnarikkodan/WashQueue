@@ -17,6 +17,8 @@ import { OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
 import { SavePostInspectionInput } from "../use-cases/save-post-inspection.use-case"
 import { StallBookingInput } from "../use-cases/stall-booking.use-case"
 import { ResolveStalledBookingInput } from "../use-cases/resolve-stalled-booking.use-case"
+import { PublicStationQueueDTO } from "../use-cases/get-public-station-queue.use-case"
+import { ProcessNoShowResult } from "../use-cases/process-no-show-bookings.use-case"
 
 export interface ICreateBookingUseCase {
   execute(userId: string, input: CreateBookingInput): Promise<BookingResponseDTO>
@@ -111,4 +113,12 @@ export interface IStallBookingUseCase {
 
 export interface IResolveStalledBookingUseCase {
   execute(managerUserId: string, input: ResolveStalledBookingInput): Promise<BookingResponseDTO>
+}
+
+export interface IGetPublicStationQueueUseCase {
+  execute(stationId: string): Promise<PublicStationQueueDTO>
+}
+
+export interface IProcessNoShowBookingsUseCase {
+  execute(gracePeriodMinutes?: number): Promise<ProcessNoShowResult>
 }

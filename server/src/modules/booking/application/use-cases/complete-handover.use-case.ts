@@ -9,9 +9,9 @@ import { IBookingNotificationService } from "../interfaces/booking-notification.
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
-import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { ICompleteHandoverUseCase } from "../interfaces/booking-usecases.interface"
 
-export class CompleteHandoverUseCase {
+export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,

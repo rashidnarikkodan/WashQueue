@@ -1,3 +1,4 @@
+import { IValidateQRForCheckInUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import logger from "@/configs/logger.config"
@@ -13,7 +14,7 @@ import { IBookingStatusLogRepository } from "../../domain/repositories/booking-s
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
 
-export class ValidateQRForCheckInUseCase {
+export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,

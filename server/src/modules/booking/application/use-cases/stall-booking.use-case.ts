@@ -1,3 +1,4 @@
+import { IStallBookingUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { BookingStatus } from "../../domain/entities/Booking"
@@ -14,7 +15,7 @@ export interface StallBookingInput {
   reason: string
 }
 
-export class StallBookingUseCase {
+export class StallBookingUseCase implements IStallBookingUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,

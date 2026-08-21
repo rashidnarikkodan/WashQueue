@@ -1,3 +1,4 @@
+import { ISavePostInspectionUseCase } from "../interfaces/booking-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { BookingStatus, InspectionChecklistItem } from "../../domain/entities/Booking"
@@ -22,7 +23,7 @@ const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 
 const REQUIRED_CHECKLIST_KEYS = ["paintGloss", "wheels", "glass", "dashboard", "seats", "specialRequest"]
 
-export class SavePostInspectionUseCase {
+export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
