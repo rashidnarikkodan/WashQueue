@@ -20,6 +20,7 @@ import { useStationStore } from "@/features/station/store/station.store"
 import { useVehicleStore } from "@/features/vehicle/store/vehicle.store"
 import { StationFilterModal } from "../components/station-discovery/StationFilterModal"
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
+import LocationAutocomplete from "../components/station-discovery/LocationAutocomplete"
 import { DEFAULT_FILTERS, type FilterOptions, type Station } from "@/features/station/types"
 import { useDebounce } from "@/shared/hooks/useDebounce"
 import Pagination from "@/shared/components/ui/Pagination"
@@ -183,24 +184,16 @@ const StationDiscovery = () => {
         {/* Right Side Controls: Search Bar & View Mode Toggle */}
         <div className="flex flex-wrap items-center gap-3 justify-start lg:justify-end">
           {/* Main Search Input */}
-          <div className="relative flex items-center w-full sm:w-[280px] lg:w-[320px]">
-            <Search className="w-4.5 h-4.5 text-muted-foreground absolute left-4 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search station name, city, street..."
-              className="w-full pl-11 pr-10 py-2.5 rounded-full bg-card border border-border text-foreground placeholder:text-muted-foreground text-sm font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          <LocationAutocomplete
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onLocationSelect={(location) => {
+              setUserLocation(location)
+              setLocationError(null)
+              setPage(1)
+            }}
+            className="sm:w-[280px] lg:w-[320px]"
+          />
 
           {/* Location Trigger Button */}
           <button
@@ -371,8 +364,8 @@ const StationDiscovery = () => {
           </div>
         )}
 
-      {/* Active Filter Pills Tag Bar */}
-      {(activeFilterCount > 0 || searchQuery) && (
+      {/* {/* Active Filter Pills Tag Bar */}
+      {/* {(activeFilterCount > 0  || searchQuery) && (
         <div className="flex items-center flex-wrap gap-2 text-xs pt-1">
           <span className="text-muted-foreground font-medium mr-1">Active Filters:</span>
 
@@ -450,8 +443,8 @@ const StationDiscovery = () => {
           >
             Clear All
           </button>
-        </div>
-      )}
+        </div> 
+      )} */}
 
       {/* Error Alert */}
       {error && (
