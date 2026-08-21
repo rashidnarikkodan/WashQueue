@@ -214,13 +214,84 @@ export class BookingMongoRepository implements IBookingRepository {
     const skip = (page - 1) * limit
 
     const [docs, total] = await Promise.all([
-      BookingModel.find(query)
-        .populate("stationId")
-        .populate("vehicleId")
-        .populate("userId")
-        .sort({ "scheduling.windowStart": -1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
+      BookingModel.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            statusPriority: {
+              $switch: {
+                branches: [
+                  {
+                    case: {
+                      $in: ["$status", [BookingStatus.IN_SERVICE, BookingStatus.CHECKED_IN]],
+                    },
+                    then: 1,
+                  },
+                  {
+                    case: {
+                      $in: ["$status", [BookingStatus.CONFIRMED, BookingStatus.PENDING]],
+                    },
+                    then: 2,
+                  },
+                  {
+                    case: {
+                      $in: [
+                        "$status",
+                        [BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER],
+                      ],
+                    },
+                    then: 3,
+                  },
+                  { case: { $eq: ["$status", BookingStatus.COMPLETED] }, then: 4 },
+                  {
+                    case: {
+                      $in: ["$status", [BookingStatus.NO_SHOW, BookingStatus.CANCELLED]],
+                    },
+                    then: 5,
+                  },
+                ],
+                default: 6,
+              },
+            },
+          },
+        },
+        {
+          $sort: {
+            statusPriority: 1,
+            "scheduling.windowStart": 1,
+            createdAt: -1,
+          },
+        },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: "stations",
+            localField: "stationId",
+            foreignField: "_id",
+            as: "stationId",
+          },
+        },
+        { $unwind: { path: "$stationId", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "vehicleId",
+            foreignField: "_id",
+            as: "vehicleId",
+          },
+        },
+        { $unwind: { path: "$vehicleId", preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userId",
+          },
+        },
+        { $unwind: { path: "$userId", preserveNullAndEmptyArrays: true } },
+      ]),
       BookingModel.countDocuments(query),
     ])
 

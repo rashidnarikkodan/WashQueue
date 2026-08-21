@@ -165,6 +165,42 @@ export const useBookingStore = create<BookingStore>((set) => ({
         }
       })
 
+      // Prioritize active and confirmed bookings first, sorted by closest upcoming window
+      const getStatusPriority = (status?: string): number => {
+        switch (status) {
+          case "IN_SERVICE":
+          case "CHECKED_IN":
+            return 1
+          case "CONFIRMED":
+          case "PENDING":
+            return 2
+          case "SERVICE_COMPLETED":
+          case "AWAITING_HANDOVER":
+            return 3
+          case "COMPLETED":
+            return 4
+          case "NO_SHOW":
+          case "CANCELLED":
+            return 5
+          default:
+            return 6
+        }
+      }
+
+      mapped.sort((a, b) => {
+        const pA = getStatusPriority(a.status)
+        const pB = getStatusPriority(b.status)
+        if (pA !== pB) {
+          return pA - pB
+        }
+        const startA = a.windowStart ? new Date(a.windowStart).getTime() : 0
+        const startB = b.windowStart ? new Date(b.windowStart).getTime() : 0
+        if (pA <= 2) {
+          return startA - startB
+        }
+        return startB - startA
+      })
+
       const pagination = res.pagination || {
         total: mapped.length,
         page,
