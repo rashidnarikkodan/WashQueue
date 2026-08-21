@@ -1,9 +1,10 @@
-import { Response } from "express"
+import { Request, Response } from "express"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import { AppError } from "@/common/errors/app-error"
 import {
   ICancelBookingUseCase,
   IRescheduleBookingUseCase,
@@ -40,7 +41,8 @@ export class BookingController {
     private readonly savePostInspectionUseCase: ISavePostInspectionUseCase,
     private readonly completeHandoverUseCase: ICompleteHandoverUseCase,
     private readonly stallBookingUseCase: IStallBookingUseCase,
-    private readonly resolveStalledBookingUseCase: IResolveStalledBookingUseCase
+    private readonly resolveStalledBookingUseCase: IResolveStalledBookingUseCase,
+    private readonly getPublicStationQueueUseCase?: import("../application/use-cases/get-public-station-queue.use-case").GetPublicStationQueueUseCase
   ) {}
 
   create = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -141,6 +143,15 @@ export class BookingController {
     )
     res.setHeader("Content-Length", pdfBuffer.length)
     res.status(HTTP_STATUS.OK).send(pdfBuffer)
+  }
+
+  getPublicStationQueue = async (req: Request, res: Response): Promise<void> => {
+    const { stationId } = req.params as { stationId: string }
+    if (!this.getPublicStationQueueUseCase) {
+      throw new AppError("Public queue service unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+    const publicQueueData = await this.getPublicStationQueueUseCase.execute(stationId)
+    success(res, publicQueueData, HTTP_STATUS.OK, "Public station live queue retrieved successfully")
   }
 
   getOperationalQueue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

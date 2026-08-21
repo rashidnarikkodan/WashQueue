@@ -1,102 +1,264 @@
-import { useState, useEffect } from "react"
-import { Clock } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Sparkles, Car, AlertCircle, RefreshCw } from "lucide-react"
+import { stationApi } from "@/shared/apis/station.api"
+import { getSocketClient } from "@/shared/services/socket.client"
 
-export function StationLiveQueueSection() {
-  const [countdown, setCountdown] = useState(12)
+interface StationLiveQueueSectionProps {
+  stationId?: string
+}
 
+interface PublicQueueItem {
+  id: string
+  bookingNumber: string
+  position?: number
+  bayNumber?: number
+  vehicle: string
+  package: string
+  serviceType: string
+  status: string
+  serviceStartedAt?: string
+  estimatedWaitMinutes?: number
+  estimatedServiceStart?: string
+  isBayActive: boolean
+}
+
+interface PublicQueueData {
+  stationId: string
+  stationName: string
+  totalBays: number
+  activeServicesCount: number
+  availableBays: number
+  queueDepth: number
+  totalActiveAndWaiting: number
+  averageWashDurationMinutes: number
+  activeServices: PublicQueueItem[]
+  waitingQueue: PublicQueueItem[]
+}
+
+export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionProps) {
+  const [queueData, setQueueData] = useState<PublicQueueData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchLiveQueue = useCallback(async () => {
+    if (!stationId) return
+    try {
+      setError(null)
+      const data = await stationApi.getPublicLiveQueue(stationId)
+      setQueueData(data)
+    } catch (err: unknown) {
+      console.error("Failed to load live station queue:", err)
+      setError("Unable to sync live station queue.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [stationId])
+
+  // Initial load and Socket.IO real-time event subscription (Strictly Event-Driven, No Polling)
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev <= 1 ? 15 : prev - 1))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+    if (!stationId) return
 
-  const queueItems = [
-    {
-      position: "#12",
-      vehicle: "Tesla Model S - Silver",
-      package: "Elite Detail Package",
-      time: "10m elapsed",
-      status: "Washing",
-      statusColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    },
-    {
-      position: "#13",
-      vehicle: "BMW M4 - Matte Black",
-      package: "Exterior Pro",
-      time: "Est. wait 12m",
-      status: "Waiting",
-      statusColor: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    },
-    {
-      position: "#11",
-      vehicle: "Porsche 911 - Agate Grey",
-      package: "Full Ceramic Wash",
-      time: "Completed 12m ago",
-      status: "Done",
-      statusColor: "bg-slate-500/10 text-slate-400 border-slate-500/20",
-    },
-  ]
+    fetchLiveQueue()
+
+    const socket = getSocketClient()
+    socket.emit("join_station", { stationId })
+
+    const handleRealtimeQueueUpdate = () => {
+      fetchLiveQueue()
+    }
+
+    // Subscribe to live operational queue events
+    socket.on("QUEUE_UPDATED", handleRealtimeQueueUpdate)
+    socket.on("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
+    socket.on("SERVICE_STARTED", handleRealtimeQueueUpdate)
+    socket.on("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
+    socket.on("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
+    socket.on("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
+    socket.on("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+
+    return () => {
+      socket.emit("leave_station", { stationId })
+      socket.off("QUEUE_UPDATED", handleRealtimeQueueUpdate)
+      socket.off("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
+      socket.off("SERVICE_STARTED", handleRealtimeQueueUpdate)
+      socket.off("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
+      socket.off("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
+      socket.off("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
+      socket.off("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+    }
+  }, [stationId, fetchLiveQueue])
+
+  const activeServices = queueData?.activeServices || []
+  const waitingQueue = queueData?.waitingQueue || []
+  const totalLiveVehicles = activeServices.length + waitingQueue.length
+  const totalBays = queueData?.totalBays || 1
+
+  // Compute elapsed wash time for active bay vehicles
+  const getElapsedString = (serviceStartedAt?: string) => {
+    if (!serviceStartedAt) return "In Service"
+    const elapsedMinutes = Math.max(
+      1,
+      Math.floor((Date.now() - new Date(serviceStartedAt).getTime()) / (1000 * 60))
+    )
+    return `${elapsedMinutes}m elapsed`
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header & Live Pulse Timer */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Live Queue</h2>
+    <div className="space-y-6 text-left animate-in fade-in duration-300">
+      {/* Header & Live Stream Status */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex items-center gap-3.5">
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">Live Queue</h2>
           <div className="px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-              Live Monitoring
+              Live Station Feed
             </span>
           </div>
         </div>
 
-        <div className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-          <Clock size={13} className="text-slate-500" />
-          <span>
-            Refreshing in <strong className="text-blue-400">{countdown}s</strong>
-          </span>
+        {/* Live Operational Stats Pills */}
+        <div className="flex items-center gap-3">
+          <div className="px-3.5 py-1 rounded-xl bg-card border border-border text-xs font-semibold text-muted-foreground flex items-center gap-2">
+            <span>Bays:</span>
+            <strong className="text-foreground">
+              {activeServices.length} / {totalBays} Active
+            </strong>
+          </div>
+
+          <button
+            type="button"
+            onClick={fetchLiveQueue}
+            className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-all cursor-pointer shadow-xs"
+            title="Sync Live Queue"
+          >
+            <RefreshCw size={13} className={isLoading ? "animate-spin text-primary" : ""} />
+          </button>
         </div>
       </div>
 
-      {/* Queue Card Stack */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 divide-y divide-slate-800/60 overflow-hidden shadow-xl">
-        {queueItems.map((item, idx) => (
-          <div
-            key={idx}
-            className={`p-5 flex justify-between items-center transition-colors ${
-              item.status === "Done" ? "opacity-60 bg-slate-950/40" : "hover:bg-slate-950/30"
-            }`}
-          >
-            <div className="flex items-center gap-5">
-              {/* Token Position Badge */}
-              <div className="w-14 h-14 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center shrink-0">
-                <span
-                  className={`text-base font-black ${item.status === "Washing" ? "text-blue-400" : "text-slate-400"}`}
-                >
-                  {item.position}
+      {/* Queue View Container */}
+      {isLoading && !queueData ? (
+        <div className="p-8 rounded-2xl border border-border bg-card/60 text-center space-y-3">
+          <RefreshCw size={24} className="animate-spin text-primary mx-auto" />
+          <p className="text-xs text-muted-foreground font-medium">Connecting to station live queue...</p>
+        </div>
+      ) : error ? (
+        <div className="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 text-center space-y-2">
+          <AlertCircle size={20} className="text-red-400 mx-auto" />
+          <p className="text-xs text-red-400">{error}</p>
+        </div>
+      ) : totalLiveVehicles === 0 ? (
+        /* Empty Live Queue State */
+        <div className="p-8 rounded-2xl border border-border bg-card/80 text-center space-y-3 backdrop-blur-md shadow-lg">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+            <Sparkles size={22} />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-base font-bold text-foreground">All Washing Bays Available</h4>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              There are currently 0 vehicles waiting in queue. Drive in or book now for immediate service across {totalBays} service bay{totalBays > 1 ? "s" : ""}.
+            </p>
+          </div>
+          <div className="pt-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+              ✓ 0 Min Estimated Wait Time
+            </span>
+          </div>
+        </div>
+      ) : (
+        /* Active Operational Queue List (Bays Washing & Waiting Vehicles) */
+        <div className="rounded-2xl border border-border bg-card/90 divide-y divide-border/60 overflow-hidden shadow-xl backdrop-blur-md">
+          {/* A. Active Washing in Bays */}
+          {activeServices.map((item) => (
+            <div
+              key={item.id}
+              className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                {/* Bay Token Badge */}
+                <div className="w-14 h-14 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 flex flex-col items-center justify-center shrink-0">
+                  <span className="text-[9px] font-black uppercase text-emerald-400">BAY</span>
+                  <span className="text-lg font-black text-emerald-400 font-mono">
+                    {item.bayNumber || 1}
+                  </span>
+                </div>
+
+                {/* Vehicle & Package Details */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-bold text-foreground flex items-center gap-1.5">
+                      <Car size={16} className="text-emerald-400" />
+                      <span>{item.vehicle}</span>
+                    </h4>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      #{item.bookingNumber}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {item.package} • {getElapsedString(item.serviceStartedAt)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Washing Status Pill */}
+              <div className="flex items-center sm:self-center self-start">
+                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-emerald-500/15 text-emerald-400 border-emerald-500/30 flex items-center gap-2 shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>{item.status}</span>
                 </span>
               </div>
+            </div>
+          ))}
 
-              {/* Details */}
-              <div className="space-y-1">
-                <h4 className="text-lg font-bold text-slate-100">{item.vehicle}</h4>
-                <p className="text-xs text-slate-400">
-                  {item.package} • {item.time}
-                </p>
+          {/* B. Waiting in Line Queue */}
+          {waitingQueue.map((item, idx) => (
+            <div
+              key={item.id}
+              className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                {/* Queue Position Badge */}
+                <div className="w-14 h-14 rounded-2xl border border-border bg-background flex flex-col items-center justify-center shrink-0">
+                  <span className="text-[9px] font-black uppercase text-muted-foreground">POS</span>
+                  <span className="text-base font-black text-foreground font-mono">
+                    #{item.position || idx + 1}
+                  </span>
+                </div>
+
+                {/* Details */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-bold text-foreground flex items-center gap-1.5">
+                      <Car size={16} className="text-primary" />
+                      <span>{item.vehicle}</span>
+                    </h4>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      #{item.bookingNumber}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {item.package} •{" "}
+                    <strong className="text-amber-400 font-semibold">
+                      {item.estimatedWaitMinutes !== undefined && item.estimatedWaitMinutes > 0
+                        ? `Est. wait ~${item.estimatedWaitMinutes}m`
+                        : "Next in Line"}
+                    </strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Waiting Status Tag */}
+              <div className="flex items-center sm:self-center self-start">
+                <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-amber-500/15 text-amber-400 border-amber-500/30 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span>In Queue</span>
+                </span>
               </div>
             </div>
-
-            {/* Status Tag */}
-            <span
-              className={`px-5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${item.statusColor}`}
-            >
-              {item.status}
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

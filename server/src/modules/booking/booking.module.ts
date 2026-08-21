@@ -45,6 +45,7 @@ import { SavePostInspectionUseCase } from "./application/use-cases/save-post-ins
 import { CompleteHandoverUseCase } from "./application/use-cases/complete-handover.use-case"
 import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-case"
 import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
+import { GetPublicStationQueueUseCase } from "./application/use-cases/get-public-station-queue.use-case"
 
 // Presentation
 import { BookingController } from "./presentation/booking.controller"
@@ -234,6 +235,11 @@ export const resolveStalledBookingUseCase = new ResolveStalledBookingUseCase(
   evaluateAndProcessRefundUseCase
 )
 
+export const getPublicStationQueueUseCase = new GetPublicStationQueueUseCase(
+  bookingRedisQueueService,
+  stationRepository
+)
+
 // Presentation Composition
 const bookingController = new BookingController(
   createBookingUseCase,
@@ -250,7 +256,8 @@ const bookingController = new BookingController(
   savePostInspectionUseCase,
   completeHandoverUseCase,
   stallBookingUseCase,
-  resolveStalledBookingUseCase
+  resolveStalledBookingUseCase,
+  getPublicStationQueueUseCase
 )
 
 const paymentController = new PaymentController(

@@ -26,6 +26,13 @@ import {
 export const createBookingRouter = (bookingController: BookingController): Router => {
   const router = Router()
 
+  // Public Live Station Queue (accessible for station visitors)
+  router.get(
+    "/stations/:stationId/public-queue",
+    validateRequest(stationIdParamSchema, "params"),
+    asyncHandler(bookingController.getPublicStationQueue)
+  )
+
   router.use(authenticate)
 
   // Customer & Role-Scoped Operations

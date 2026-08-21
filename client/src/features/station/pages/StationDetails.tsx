@@ -357,7 +357,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
           <StationExtraServicesSection extraServices={extraServices} />
 
-          {currentRole !== ROLE.ADMIN && <StationLiveQueueSection />}
+          {currentRole !== ROLE.ADMIN && <StationLiveQueueSection stationId={station.id} />}
 
           {currentRole === ROLE.CUSTOMER && (
             <>

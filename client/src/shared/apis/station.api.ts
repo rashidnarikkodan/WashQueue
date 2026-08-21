@@ -224,4 +224,50 @@ export const stationApi = {
       throw handleApiError(error, "Failed to retrieve time windows")
     }
   },
+
+  /**
+   * Fetch live public queue for station details page.
+   */
+  getPublicLiveQueue: async (
+    stationId: string
+  ): Promise<{
+    stationId: string
+    stationName: string
+    totalBays: number
+    activeServicesCount: number
+    availableBays: number
+    queueDepth: number
+    totalActiveAndWaiting: number
+    averageWashDurationMinutes: number
+    activeServices: Array<{
+      id: string
+      bookingNumber: string
+      bayNumber: number
+      vehicle: string
+      package: string
+      serviceType: string
+      status: string
+      serviceStartedAt?: string
+      isBayActive: boolean
+    }>
+    waitingQueue: Array<{
+      id: string
+      bookingNumber: string
+      position: number
+      vehicle: string
+      package: string
+      serviceType: string
+      status: string
+      estimatedWaitMinutes?: number
+      estimatedServiceStart?: string
+      isBayActive: boolean
+    }>
+  }> => {
+    try {
+      const response = await api.get(`/bookings/stations/${stationId}/public-queue`)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to retrieve station live queue")
+    }
+  },
 }
