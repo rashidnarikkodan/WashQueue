@@ -186,7 +186,7 @@ export default function ProviderBookingDetailsView({
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
       {/* Action Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
             Booking Details Overview
@@ -201,7 +201,7 @@ export default function ProviderBookingDetailsView({
             <button
               type="button"
               onClick={onOpenCancelModal}
-              className="px-4 py-2.5 rounded-full border border-red-500/40 text-red-400 hover:bg-red-500/10 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-full border border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
             >
               <XCircle size={14} />
               <span>Cancel Booking</span>
@@ -213,7 +213,7 @@ export default function ProviderBookingDetailsView({
               type="button"
               onClick={() => onAdvanceStatus("IN_SERVICE")}
               disabled={isAdvancingStatus}
-              className="px-5 py-2.5 rounded-full bg-primary text-slate-950 font-black text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-primary/20"
+              className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-black text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-primary/20"
             >
               <Sparkles size={14} />
               <span>Start Washing</span>
@@ -225,7 +225,7 @@ export default function ProviderBookingDetailsView({
               type="button"
               onClick={() => onAdvanceStatus("COMPLETED")}
               disabled={isAdvancingStatus}
-              className="px-5 py-2.5 rounded-full bg-emerald-400 text-slate-950 font-black text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-emerald-400/20"
+              className="px-5 py-2.5 rounded-full bg-emerald-500 text-primary-foreground font-black text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg shadow-emerald-500/20"
             >
               <CheckCircle2 size={14} />
               <span>Mark Completed</span>
@@ -236,7 +236,7 @@ export default function ProviderBookingDetailsView({
             <button
               type="button"
               onClick={() => toast.info(`Calling ${customerPhone}...`)}
-              className="px-4 py-2.5 rounded-full bg-[#23293c] text-foreground hover:bg-slate-800 text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-full bg-card border border-border text-foreground hover:bg-muted text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Phone size={14} className="text-primary" />
               <span>Contact Customer</span>
@@ -246,7 +246,7 @@ export default function ProviderBookingDetailsView({
           <button
             type="button"
             onClick={() => window.print()}
-            className="p-2.5 rounded-full bg-[#23293c] text-foreground hover:bg-slate-800 transition-all cursor-pointer"
+            className="p-2.5 rounded-full bg-card border border-border text-foreground hover:bg-muted transition-all cursor-pointer"
             title="Print Summary"
           >
             <Printer size={15} />
@@ -259,7 +259,7 @@ export default function ProviderBookingDetailsView({
         {/* Left 8-Column Main Execution Feed */}
         <div className="lg:col-span-8 space-y-8">
           {/* 1. Booking Overview Bar (4 KPI Tiles) */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/10 bg-primary/5 backdrop-blur-md grid grid-cols-1 sm:grid-cols-4 gap-6 text-left">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl grid grid-cols-1 sm:grid-cols-4 gap-6 text-left">
             <div className="space-y-1">
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
                 Booking ID
@@ -277,23 +277,23 @@ export default function ProviderBookingDetailsView({
                 <span
                   className={`w-2 h-2 rounded-full ${
                     booking.status === "COMPLETED"
-                      ? "bg-emerald-400 shadow-xs shadow-emerald-400"
+                      ? "bg-emerald-500 shadow-xs shadow-emerald-500"
                       : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                        ? "bg-blue-400 animate-pulse shadow-xs shadow-blue-400"
+                        ? "bg-blue-500 animate-pulse shadow-xs shadow-blue-500"
                         : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                          ? "bg-red-400 shadow-xs shadow-red-400"
-                          : "bg-amber-400 shadow-xs shadow-amber-400"
+                          ? "bg-destructive shadow-xs shadow-destructive"
+                          : "bg-amber-500 shadow-xs shadow-amber-500"
                   }`}
                 />
                 <span
                   className={`text-base font-bold uppercase ${
                     booking.status === "COMPLETED"
-                      ? "text-emerald-400"
+                      ? "text-emerald-500"
                       : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                        ? "text-blue-400"
+                        ? "text-blue-500"
                         : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                          ? "text-red-400"
-                          : "text-amber-400"
+                          ? "text-destructive"
+                          : "text-amber-500"
                   }`}
                 >
                   {booking.status.replace("_", " ")}
@@ -329,8 +329,8 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* 2. Live Execution Timeline (Horizontal Stepper) */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d] space-y-6 text-left">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2">
                 <Clock size={18} className="text-primary" />
                 <h3 className="text-base font-bold text-foreground">Live Execution Timeline</h3>
@@ -338,7 +338,7 @@ export default function ProviderBookingDetailsView({
               <span
                 className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
                   booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                    ? "bg-destructive/10 text-destructive border border-destructive/20"
                     : "bg-primary/10 text-primary border border-primary/20"
                 }`}
               >
@@ -357,12 +357,12 @@ export default function ProviderBookingDetailsView({
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-md transition-all ${
                       step.isCancelled
-                        ? "bg-[#191f31] border border-red-500/20 text-red-400/50"
+                        ? "bg-muted border border-destructive/20 text-destructive/50"
                         : step.active
-                          ? "bg-[#151b2d] border-4 border-primary text-primary scale-110 shadow-primary/30"
+                          ? "bg-card border-4 border-primary text-primary scale-110 shadow-primary/30"
                           : step.done
-                            ? "bg-primary text-slate-950 font-black"
-                            : "bg-[#191f31] border border-white/10 text-muted-foreground"
+                            ? "bg-primary text-primary-foreground font-black"
+                            : "bg-muted border border-border text-muted-foreground"
                     }`}
                   >
                     {step.done ? <CheckCircle2 size={16} /> : idx + 1}
@@ -377,7 +377,7 @@ export default function ProviderBookingDetailsView({
                     </span>
                     <span
                       className={`text-[10px] block ${
-                        step.isCancelled ? "text-red-400/70" : "text-muted-foreground"
+                        step.isCancelled ? "text-destructive/70" : "text-muted-foreground"
                       }`}
                     >
                       {step.time}
@@ -389,18 +389,18 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* 3. Pre-Service Inspection Card */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d] space-y-6 text-left">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <h3 className="text-base font-bold text-foreground">Pre-Service Inspection</h3>
               <span
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
                   booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "bg-slate-800 text-slate-400 border border-white/10"
+                    ? "bg-muted text-muted-foreground border border-border"
                     : booking.status === "IN_SERVICE" ||
                         booking.status === "SERVICE_COMPLETED" ||
                         booking.status === "COMPLETED"
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
                 }`}
               >
                 {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
@@ -423,18 +423,18 @@ export default function ProviderBookingDetailsView({
                         href={photo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                        className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                       >
                         <img src={photo} alt={`Pre-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
                       </a>
                     ))}
                   </div>
                 )}
-                <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
+                <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
                   <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
                     INSPECTION FINDINGS &amp; NOTES
                   </span>
-                  <p className="text-xs italic text-slate-300 leading-relaxed">
+                  <p className="text-xs italic text-foreground leading-relaxed">
                     "{booking.preServiceInspection.notes || "No additional notes recorded"}"
                   </p>
                   <span className="text-[10px] text-muted-foreground block pt-1">
@@ -443,22 +443,22 @@ export default function ProviderBookingDetailsView({
                 </div>
               </div>
             ) : inspectionLog?.notes ? (
-              <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
+              <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
                 <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
                   INSPECTION FINDINGS &amp; NOTES
                 </span>
-                <p className="text-xs italic text-slate-300 leading-relaxed">
+                <p className="text-xs italic text-foreground leading-relaxed">
                   "{inspectionLog.notes}"
                 </p>
               </div>
             ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
-              <div className="p-4 rounded-xl border border-white/5 bg-[#070d1f]">
+              <div className="p-4 rounded-xl border border-border bg-muted/40">
                 <p className="text-xs text-muted-foreground">
                   Wash booking was cancelled before service was initiated. Pre-inspection was not required.
                 </p>
               </div>
             ) : (
-              <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-4 rounded-xl border border-border bg-muted/40 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-xs text-muted-foreground">
                   {booking.status === "IN_SERVICE" || booking.status === "COMPLETED"
                     ? "Vehicle received and checked in at station."
@@ -477,16 +477,16 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* 4. Post-Service Inspection */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d] space-y-4 text-left">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <h3 className="text-base font-bold text-foreground">Post-Service Quality Inspection</h3>
               <span
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
                   booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "bg-slate-800 text-slate-400 border border-white/10"
+                    ? "bg-muted text-muted-foreground border border-border"
                     : booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED"
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      : "bg-slate-800 text-slate-400 border border-white/10"
+                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      : "bg-muted text-muted-foreground border border-border"
                 }`}
               >
                 {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
@@ -505,8 +505,8 @@ export default function ProviderBookingDetailsView({
                   <span
                     className={`text-xs font-bold ${
                       booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
-                        ? "text-emerald-400"
-                        : "text-amber-400"
+                        ? "text-emerald-500"
+                        : "text-amber-500"
                     }`}
                   >
                     {booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
@@ -530,7 +530,7 @@ export default function ProviderBookingDetailsView({
                         href={photo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                        className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                       >
                         <img src={photo} alt={`Post-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
                       </a>
@@ -543,7 +543,7 @@ export default function ProviderBookingDetailsView({
                     {booking.postServiceInspection.checklist.map((item) => (
                       <div
                         key={item.key}
-                        className="p-3 rounded-lg border border-white/10 bg-[#070d1f] space-y-1"
+                        className="p-3 rounded-lg border border-border bg-muted/40 space-y-1"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs font-semibold text-foreground truncate">
@@ -552,26 +552,26 @@ export default function ProviderBookingDetailsView({
                           <span
                             className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
                               item.passed
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                : "bg-destructive/10 text-destructive border border-destructive/20"
                             }`}
                           >
                             {item.passed ? "Passed" : "Issue Flagged"}
                           </span>
                         </div>
                         {item.remark && (
-                          <p className="text-[11px] text-slate-300 italic">"{item.remark}"</p>
+                          <p className="text-[11px] text-muted-foreground italic">"{item.remark}"</p>
                         )}
                       </div>
                     ))}
                   </div>
                 )}
 
-                <div className="p-4 rounded-xl border border-white/10 bg-[#070d1f] space-y-1">
+                <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
                   <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
                     HANDOVER NOTES
                   </span>
-                  <p className="text-xs italic text-slate-300 leading-relaxed">
+                  <p className="text-xs italic text-foreground leading-relaxed">
                     "{booking.postServiceInspection.notes || "No additional notes recorded"}"
                   </p>
                   <span className="text-[10px] text-muted-foreground block pt-1">
@@ -580,7 +580,7 @@ export default function ProviderBookingDetailsView({
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-xl border border-dashed border-white/10 bg-[#070d1f] text-xs text-muted-foreground flex items-center gap-3">
+              <div className="p-4 rounded-xl border border-dashed border-border bg-muted/40 text-xs text-muted-foreground flex items-center gap-3">
                 <Lock size={16} className="shrink-0 text-muted-foreground/60" />
                 <span>
                   {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
@@ -593,16 +593,16 @@ export default function ProviderBookingDetailsView({
 
           {/* 5. Exception Handling / Log Details (Rendered if Cancellation or Status Log Notes exist) */}
           {(booking.status === "CANCELLED" || booking.cancellation || (booking.statusHistory && booking.statusHistory.some(l => l.reason || l.notes))) && (
-            <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d] space-y-4 text-left">
-              <div className="flex items-center gap-2 text-amber-400 border-b border-white/5 pb-3">
+            <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
+              <div className="flex items-center gap-2 text-amber-500 border-b border-border pb-3">
                 <AlertTriangle size={20} />
                 <h3 className="text-base font-bold text-foreground">Status Log &amp; Exceptions</h3>
               </div>
 
               {booking.status === "CANCELLED" && (
-                <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/10 space-y-1">
-                  <h4 className="text-sm font-bold text-red-400">Booking Cancelled</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                <div className="p-4 rounded-2xl border border-destructive/20 bg-destructive/10 space-y-1">
+                  <h4 className="text-sm font-bold text-destructive">Booking Cancelled</h4>
+                  <p className="text-xs text-foreground leading-relaxed">
                     Reason: {booking.cancellation?.cancellationReason || "No cancellation reason provided."}
                   </p>
                   {booking.cancellation?.cancelledAt && (
@@ -619,12 +619,12 @@ export default function ProviderBookingDetailsView({
                     Recorded Log Notes
                   </span>
                   {booking.statusHistory.filter(l => l.reason || l.notes).map((log) => (
-                    <div key={log.id} className="p-3 rounded-xl border border-white/5 bg-[#070d1f] text-xs space-y-0.5">
+                    <div key={log.id} className="p-3 rounded-xl border border-border bg-muted/40 text-xs space-y-0.5">
                       <div className="flex items-center justify-between text-muted-foreground text-[10px]">
                         <span className="font-bold text-foreground">Status: {log.toStatus ? log.toStatus.replace("_", " ") : "UPDATED"}</span>
                         <span>{new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                       </div>
-                      {log.reason && <p className="text-amber-300 font-medium">{log.reason}</p>}
+                      {log.reason && <p className="text-amber-500 font-medium">{log.reason}</p>}
                       {log.notes && <p className="text-muted-foreground italic">{log.notes}</p>}
                     </div>
                   ))}
@@ -637,15 +637,15 @@ export default function ProviderBookingDetailsView({
         {/* Right 4-Column Sticky Aside Management Panel */}
         <div className="lg:col-span-4 space-y-6">
           {/* A. Customer & Vehicle Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary text-slate-950 font-black text-xl flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground font-black text-xl flex items-center justify-center shrink-0">
                 {customerInitials}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h4 className="text-base font-bold text-foreground">{customerName}</h4>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-400">
+                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-500">
                     {customerBadge}
                   </span>
                 </div>
@@ -653,7 +653,7 @@ export default function ProviderBookingDetailsView({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl border border-white/10 bg-[#070d1f] space-y-3">
+            <div className="p-4 rounded-2xl border border-border bg-muted/40 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="text-[9px] font-black uppercase text-muted-foreground block">
@@ -668,7 +668,7 @@ export default function ProviderBookingDetailsView({
                         : "Vehicle Information"}
                   </p>
                 </div>
-                <span className="font-mono text-xs px-2.5 py-1 rounded bg-[#2e3447] text-foreground font-bold border border-white/10">
+                <span className="font-mono text-xs px-2.5 py-1 rounded bg-muted text-foreground font-bold border border-border">
                   {plateNumber}
                 </span>
               </div>
@@ -676,8 +676,8 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* B. Booking Schedule & Contextual Status / Timer Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
-            <div className="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
+            <div className="grid grid-cols-2 gap-4 border-b border-border pb-4">
               <div className="space-y-0.5">
                 <span className="text-[9px] font-black uppercase text-muted-foreground block">
                   SCHEDULED AT
@@ -700,7 +700,7 @@ export default function ProviderBookingDetailsView({
 
             {/* Contextual Status / Execution Timer Display */}
             {isServiceStarted && booking.status !== "CANCELLED" && booking.status !== "NO_SHOW" ? (
-              <div className="p-5 rounded-2xl border border-primary/20 bg-[#070d1f] text-center space-y-1">
+              <div className="p-5 rounded-2xl border border-primary/20 bg-muted/40 text-center space-y-1">
                 <span className="text-[9px] font-black uppercase text-muted-foreground block tracking-widest">
                   {booking.completedAt || booking.status === "COMPLETED"
                     ? "TOTAL SERVICE DURATION"
@@ -708,22 +708,22 @@ export default function ProviderBookingDetailsView({
                 </span>
                 <div className="flex items-center justify-center gap-2 text-primary font-mono text-3xl font-bold">
                   {(booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN") && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                   )}
                   <span>{formattedTimer}</span>
                 </div>
               </div>
             ) : booking.status === "CANCELLED" ? (
-              <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5 space-y-2 text-left">
+              <div className="p-4 rounded-2xl border border-destructive/20 bg-destructive/5 space-y-2 text-left">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-red-400">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-destructive">
                     Booking Cancelled
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-red-500/20 text-red-400">
+                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-destructive/20 text-destructive">
                     Inactive
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-foreground">
                   {booking.cancellation?.cancellationReason || "Cancelled by customer before service."}
                 </p>
                 {booking.cancellation?.cancelledAt && (
@@ -733,8 +733,8 @@ export default function ProviderBookingDetailsView({
                 )}
               </div>
             ) : booking.status === "NO_SHOW" ? (
-              <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 space-y-1 text-left">
-                <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 block">
+              <div className="p-4 rounded-2xl border border-destructive/20 bg-destructive/5 space-y-1 text-left">
+                <span className="text-[10px] font-black uppercase tracking-wider text-destructive block">
                   Customer No-Show
                 </span>
                 <p className="text-xs text-muted-foreground">
@@ -744,10 +744,10 @@ export default function ProviderBookingDetailsView({
             ) : (
               <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 space-y-1 text-left">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
                     Awaiting Arrival
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-400">
+                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-500">
                     Upcoming
                   </span>
                 </div>
@@ -759,8 +759,8 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* C. Financial Summary Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
-            <h4 className="text-xs font-black uppercase text-muted-foreground tracking-widest border-b border-white/5 pb-3">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
+            <h4 className="text-xs font-black uppercase text-muted-foreground tracking-widest border-b border-border pb-3">
               FINANCIAL SUMMARY
             </h4>
 
@@ -788,7 +788,7 @@ export default function ProviderBookingDetailsView({
                 </div>
               )}
 
-              <div className="flex justify-between items-center pt-3 border-t border-white/5">
+              <div className="flex justify-between items-center pt-3 border-t border-border">
                 <div>
                   <span className="text-[9px] font-black uppercase text-muted-foreground block">
                     TOTAL AMOUNT
@@ -800,8 +800,8 @@ export default function ProviderBookingDetailsView({
                 <span
                   className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${
                     booking.status === "CANCELLED"
-                      ? "bg-red-500/10 text-red-400 border-red-500/30"
-                      : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                      ? "bg-destructive/10 text-destructive border-destructive/30"
+                      : "bg-emerald-500/20 text-emerald-500 border-emerald-500/30"
                   }`}
                 >
                   {booking.status === "CANCELLED" ? "REFUNDED" : booking.paymentStatus}
@@ -811,13 +811,13 @@ export default function ProviderBookingDetailsView({
           </div>
 
           {/* D. Quick Management Action Buttons */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-3">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-3">
             {booking.status === "IN_SERVICE" && (
               <button
                 type="button"
                 onClick={() => onAdvanceStatus("COMPLETED")}
                 disabled={isAdvancingStatus}
-                className="w-full py-4 rounded-2xl bg-primary text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
               >
                 MARK SERVICE COMPLETE
               </button>
@@ -828,7 +828,7 @@ export default function ProviderBookingDetailsView({
                 type="button"
                 onClick={() => onAdvanceStatus("IN_SERVICE")}
                 disabled={isAdvancingStatus}
-                className="w-full py-4 rounded-2xl bg-primary text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
               >
                 START SERVICE
               </button>
@@ -839,7 +839,7 @@ export default function ProviderBookingDetailsView({
                 type="button"
                 onClick={() => onAdvanceStatus("COMPLETED")}
                 disabled={isAdvancingStatus}
-                className="w-full py-4 rounded-2xl bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-emerald-400/20"
+                className="w-full py-4 rounded-2xl bg-emerald-500 text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
               >
                 COMPLETE &amp; HANDOVER
               </button>
@@ -849,7 +849,7 @@ export default function ProviderBookingDetailsView({
               <button
                 type="button"
                 onClick={() => navigate("/manager/check-in")}
-                className="w-full py-4 rounded-2xl bg-primary text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
               >
                 CHECK-IN VEHICLE
               </button>
@@ -860,14 +860,14 @@ export default function ProviderBookingDetailsView({
                 type="button"
                 onClick={() => onAdvanceStatus("NO_SHOW")}
                 disabled={isAdvancingStatus}
-                className="w-full py-3 rounded-2xl border border-red-500/40 text-red-400/80 hover:text-red-400 text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                className="w-full py-3 rounded-2xl border border-destructive/40 text-destructive/80 hover:text-destructive text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
               >
                 MARK NO-SHOW
               </button>
             )}
 
             {(booking.status === "CANCELLED" || booking.status === "NO_SHOW") && (
-              <div className="p-3.5 rounded-2xl bg-[#151b2d] border border-white/5 text-center text-xs font-semibold text-muted-foreground">
+              <div className="p-3.5 rounded-2xl bg-muted/40 border border-border text-center text-xs font-semibold text-muted-foreground">
                 {booking.status === "CANCELLED"
                   ? "Booking is Cancelled & Closed"
                   : "Customer Marked No-Show"}
@@ -875,7 +875,7 @@ export default function ProviderBookingDetailsView({
             )}
 
             {booking.status === "COMPLETED" && (
-              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center text-xs font-bold text-emerald-500 flex items-center justify-center gap-2">
                 <CheckCircle2 size={16} />
                 <span>Service Completed &amp; Handed Over</span>
               </div>

@@ -110,9 +110,9 @@ export default function RescheduleModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl bg-[#191F31] text-[#DCE1FB] border border-[#8C909F]/20 rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8 text-left">
+      <div className="w-full max-w-2xl bg-card text-card-foreground border border-border rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8 text-left">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 sm:p-8 pb-4 border-b border-white/5 relative">
+        <div className="flex items-center justify-between p-6 sm:p-8 pb-4 border-b border-border relative">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
               <CalendarClock className="w-6 h-6" />
@@ -135,7 +135,7 @@ export default function RescheduleModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all cursor-pointer"
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -144,7 +144,7 @@ export default function RescheduleModal({
         {/* Modal Body */}
         <div className="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
           {/* Current Schedule Summary */}
-          <div className="p-4 rounded-2xl bg-[#151B2D] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
                 CURRENT SCHEDULED TIME
@@ -158,27 +158,27 @@ export default function RescheduleModal({
               </div>
             </div>
 
-            <span className="self-start sm:self-auto px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span className="self-start sm:self-auto px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-500 border border-amber-500/30">
               {booking.status}
             </span>
           </div>
 
           {isMaxLimitReached ? (
-            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               <div className="text-xs space-y-1">
-                <p className="font-bold text-red-300">Maximum Limit Reached (2 / 2)</p>
-                <p className="text-red-400/80">
+                <p className="font-bold text-destructive">Maximum Limit Reached (2 / 2)</p>
+                <p className="text-destructive/80">
                   This booking has already been rescheduled 2 times. Further rescheduling is not permitted.
                 </p>
               </div>
             </div>
           ) : !isEligible ? (
-            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               <div className="text-xs space-y-1">
-                <p className="font-bold text-red-300">24-Hour Policy Restriction</p>
-                <p className="text-red-400/80">
+                <p className="font-bold text-destructive">24-Hour Policy Restriction</p>
+                <p className="text-destructive/80">
                   Rescheduling is only permitted at least 24 hours prior to your scheduled time
                   window start.
                 </p>
@@ -241,8 +241,8 @@ export default function RescheduleModal({
                   if (isSelected) {
                     cardStyle =
                       "border-2 border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 scale-[1.01] cursor-pointer"
-                    timeStyle = "text-emerald-400 font-bold"
-                    subStyle = "text-emerald-400/90 font-medium"
+                    timeStyle = "text-emerald-500 font-bold"
+                    subStyle = "text-emerald-500/90 font-medium"
                   } else if (isCurrent) {
                     cardStyle =
                       "border-primary/40 bg-primary/10 opacity-70 cursor-not-allowed pointer-events-none"
@@ -257,26 +257,28 @@ export default function RescheduleModal({
                     cardStyle =
                       "border-border/50 bg-muted/40 opacity-50 cursor-not-allowed pointer-events-none"
                     timeStyle = "text-muted-foreground line-through"
-                    subStyle = "text-red-400 font-bold"
+                    subStyle = "text-destructive font-bold"
                   } else if (isLimited) {
                     cardStyle =
-                      "border-amber-500/40 bg-amber-500/10 hover:border-amber-500/80 cursor-pointer"
-                    subStyle = "text-amber-400 font-medium"
+                      "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60 cursor-pointer shadow-xs"
+                    timeStyle = "text-foreground font-bold"
+                    subStyle = "text-amber-500 font-bold"
                   }
 
                   return (
                     <div
                       key={slot.id}
-                      onClick={() => {
-                        if (!isDisabled) setSelectedSlotId(slot.id)
-                      }}
-                      className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${cardStyle}`}
+                      onClick={() => !isDisabled && setSelectedSlotId(slot.id)}
+                      className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${cardStyle}`}
                     >
-                      <div className="flex flex-col text-left">
-                        <span className={`text-sm font-bold ${timeStyle}`}>{slot.timeWindow}</span>
-                        <span className={`text-[11px] ${subStyle}`}>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={14} className="text-primary shrink-0" />
+                          <span className={`text-sm ${timeStyle}`}>{slot.timeWindow}</span>
+                        </div>
+                        <span className={`text-[11px] block ${subStyle}`}>
                           {isSelected
-                            ? "Selected for Reschedule"
+                            ? "Selected Window"
                             : isCurrent
                               ? "Current Time Window"
                               : isPast
@@ -288,15 +290,15 @@ export default function RescheduleModal({
                       </div>
 
                       {isSelected ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500 text-primary-foreground flex items-center justify-center shrink-0">
                           <Check size={13} className="stroke-[3]" />
                         </div>
                       ) : isPast ? (
                         <Ban size={15} className="text-muted-foreground/40 shrink-0" />
                       ) : isFull ? (
-                        <Ban size={15} className="text-red-400 shrink-0" />
+                        <Ban size={15} className="text-destructive shrink-0" />
                       ) : isLimited ? (
-                        <AlertCircle size={15} className="text-amber-400 shrink-0" />
+                        <AlertCircle size={15} className="text-amber-500 shrink-0" />
                       ) : null}
                     </div>
                   )
@@ -309,20 +311,20 @@ export default function RescheduleModal({
           {selectedSlot && !isSameAsCurrentSlot && (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase text-emerald-400 tracking-widest block">
+                <span className="text-[10px] font-black uppercase text-emerald-500 tracking-widest block">
                   NEW TIME WINDOW PREVIEW
                 </span>
                 <p className="text-xs font-bold text-foreground">
                   {formattedDate} • {selectedSlot.timeWindow}
                 </p>
               </div>
-              <span className="text-xs font-bold text-emerald-400">Ready to update</span>
+              <span className="text-xs font-bold text-emerald-500">Ready to update</span>
             </div>
           )}
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 sm:p-8 pt-4 border-t border-white/5 bg-[#151B2D]/50">
+        <div className="flex items-center justify-end gap-3 p-6 sm:p-8 pt-4 border-t border-border bg-muted/40">
           <button
             type="button"
             onClick={onClose}
@@ -341,7 +343,7 @@ export default function RescheduleModal({
               !isEligible ||
               isMaxLimitReached
             }
-            className="px-6 py-2.5 rounded-xl bg-primary text-slate-950 hover:opacity-90 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

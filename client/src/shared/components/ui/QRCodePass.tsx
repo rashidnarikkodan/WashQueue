@@ -95,54 +95,54 @@ export default function QRCodePass({
       {/* Ticket Pass Main Container */}
       <div
         ref={passRef}
-        className="w-full rounded-3xl border border-white/10 bg-[#191f31] text-slate-100 shadow-2xl overflow-hidden text-left select-none"
+        className="w-full rounded-3xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden text-left select-none"
       >
         {/* Header Bar */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 text-slate-950 flex items-center justify-between">
+        <div className="bg-primary p-4 text-primary-foreground flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-slate-950/20 flex items-center justify-center text-slate-950 font-bold">
+            <div className="w-7 h-7 rounded-lg bg-primary-foreground/20 flex items-center justify-center text-primary-foreground font-bold">
               <QrCode size={16} />
             </div>
             <div>
-              <div className="text-[9px] font-black uppercase tracking-widest text-blue-950/80">
+              <div className="text-[9px] font-black uppercase tracking-widest text-primary-foreground/80">
                 WASHQUEUE PASS
               </div>
-              <h4 className="text-xs font-extrabold text-slate-950 tracking-tight">{title}</h4>
+              <h4 className="text-xs font-extrabold text-primary-foreground tracking-tight">{title}</h4>
             </div>
           </div>
 
-          <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-950/20 text-slate-950 border border-slate-950/20">
+          <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30">
             ✓ {paymentStatus}
           </span>
         </div>
 
         {/* Ticket Details Grid */}
-        <div className="p-4 sm:p-5 space-y-3 bg-[#191f31]">
+        <div className="p-4 sm:p-5 space-y-3 bg-card">
           {/* Station & Vehicle Row */}
-          <div className="grid grid-cols-2 gap-3 pb-3 border-b border-white/10">
+          <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border">
             <div className="space-y-1">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
                 STATION
               </span>
-              <div className="font-bold text-slate-100 text-xs sm:text-sm truncate">
+              <div className="font-bold text-foreground text-xs sm:text-sm truncate">
                 {stationName}
               </div>
-              <p className="text-[11px] text-slate-400 flex items-center gap-1">
-                <MapPin size={11} className="text-blue-400 shrink-0" />
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <MapPin size={11} className="text-primary shrink-0" />
                 <span className="truncate">{stationCity}</span>
               </p>
             </div>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
                 VEHICLE
               </span>
-              <div className="font-bold text-slate-100 text-xs sm:text-sm truncate flex items-center gap-1.5">
-                <Car size={13} className="text-blue-400 shrink-0" />
+              <div className="font-bold text-foreground text-xs sm:text-sm truncate flex items-center gap-1.5">
+                <Car size={13} className="text-primary shrink-0" />
                 <span className="truncate">{vehicleName}</span>
               </div>
               {plateNumber && (
-                <span className="inline-block px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono font-bold text-blue-300">
+                <span className="inline-block px-2 py-0.5 rounded bg-muted text-[10px] font-mono font-bold text-primary">
                   {plateNumber}
                 </span>
               )}
@@ -152,34 +152,34 @@ export default function QRCodePass({
           {/* Service & Schedule Row */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
                 SERVICE
               </span>
-              <div className="font-bold text-slate-100 text-xs truncate flex items-center gap-1.5">
-                <ShieldCheck size={13} className="text-blue-400 shrink-0" />
+              <div className="font-bold text-foreground text-xs truncate flex items-center gap-1.5">
+                <ShieldCheck size={13} className="text-primary shrink-0" />
                 <span className="truncate">{serviceName}</span>
               </div>
               {totalPrice !== undefined && (
-                <p className="text-[11px] text-slate-400 font-medium">
+                <p className="text-[11px] text-muted-foreground font-medium">
                   Paid:{" "}
-                  <strong className="text-slate-100">₹{totalPrice.toLocaleString("en-IN")}</strong>
+                  <strong className="text-foreground">₹{totalPrice.toLocaleString("en-IN")}</strong>
                 </p>
               )}
             </div>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
                 SLOT TIME
               </span>
               {scheduledTime && (
-                <p className="font-bold text-slate-100 text-xs flex items-center gap-1">
-                  <Clock size={11} className="text-blue-400 shrink-0" />
+                <p className="font-bold text-foreground text-xs flex items-center gap-1">
+                  <Clock size={11} className="text-primary shrink-0" />
                   <span className="truncate">{scheduledTime}</span>
                 </p>
               )}
               {scheduledDate && (
-                <p className="text-[11px] text-slate-400 flex items-center gap-1">
-                  <Calendar size={11} className="text-slate-500 shrink-0" />
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <Calendar size={11} className="text-muted-foreground/70 shrink-0" />
                   <span className="truncate">{scheduledDate}</span>
                 </p>
               )}
@@ -188,16 +188,16 @@ export default function QRCodePass({
         </div>
 
         {/* Sleek Dashed Perforated Line */}
-        <div className="w-full border-t border-dashed border-slate-700/80 px-4 my-1" />
+        <div className="w-full border-t border-dashed border-border px-4 my-1" />
 
         {/* QR Code Entry Stub */}
-        <div className="p-4 sm:p-5 bg-slate-950 text-center space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="p-4 sm:p-5 bg-muted/40 text-center space-y-3">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="font-semibold uppercase tracking-wider text-[9px]">ENTRY QR PASS</span>
-            <span className="font-mono text-[10px] text-blue-400 font-bold">#{bookingNumber}</span>
+            <span className="font-mono text-[10px] text-primary font-bold">#{bookingNumber}</span>
           </div>
 
-          <div className="p-3 bg-white rounded-2xl border border-slate-700/60 inline-block shadow-lg mx-auto">
+          <div className="p-3 bg-white rounded-2xl border border-border inline-block shadow-md mx-auto">
             <QRCodeSVG
               id={`qr-code-${bookingNumber}`}
               value={value}
@@ -212,7 +212,7 @@ export default function QRCodePass({
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 leading-snug max-w-[280px] mx-auto">
+          <p className="text-[11px] text-muted-foreground leading-snug max-w-[280px] mx-auto">
             {subtitle}
           </p>
         </div>
@@ -225,7 +225,7 @@ export default function QRCodePass({
             type="button"
             onClick={handleDownloadImage}
             disabled={isDownloading}
-            className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-50"
+            className="py-3 px-4 rounded-xl bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-50"
           >
             <Download size={14} />
             <span>{isDownloading ? "Saving..." : "Download Pass"}</span>
@@ -234,9 +234,9 @@ export default function QRCodePass({
           <button
             type="button"
             onClick={handleCopyBookingNumber}
-            className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            className="py-3 px-4 rounded-xl bg-card hover:bg-muted border border-border text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
           >
-            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+            {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             <span>{copied ? "Copied!" : "Copy Code"}</span>
           </button>
         </div>
@@ -244,9 +244,9 @@ export default function QRCodePass({
         <button
           type="button"
           onClick={handleGetDirections}
-          className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+          className="w-full py-2.5 px-4 rounded-xl bg-muted/60 hover:bg-muted border border-border text-foreground font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
         >
-          <Navigation size={14} className="text-blue-400" />
+          <Navigation size={14} className="text-primary" />
           <span>Get Directions to Station</span>
         </button>
       </div>

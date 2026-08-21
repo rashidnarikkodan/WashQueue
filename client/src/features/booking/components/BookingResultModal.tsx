@@ -94,21 +94,21 @@ export default function BookingResultModal({
             : isSlotUnavailable
             ? "bg-amber-500"
             : isRefundInitiated
-            ? "bg-blue-500"
-            : "bg-red-500"
+            ? "bg-primary"
+            : "bg-destructive"
         }`}
       />
 
       {/* Main Full-Screen Modal Card */}
       <div
-        className={`w-full max-w-lg rounded-[32px] p-6 sm:p-10 border shadow-2xl text-center space-y-6 relative overflow-hidden text-slate-100 animate-in zoom-in-95 duration-200 ${
+        className={`w-full max-w-lg rounded-[32px] p-6 sm:p-10 border shadow-2xl text-center space-y-6 relative overflow-hidden bg-card text-card-foreground animate-in zoom-in-95 duration-200 ${
           isSuccess
-            ? "bg-[#0d121f]/95 border-emerald-500/30 shadow-emerald-950/40"
+            ? "border-emerald-500/30 shadow-emerald-950/20"
             : isSlotUnavailable
-            ? "bg-[#0d121f]/95 border-amber-500/30 shadow-amber-950/40"
+            ? "border-amber-500/30 shadow-amber-950/20"
             : isRefundInitiated
-            ? "bg-[#0d121f]/95 border-blue-500/30 shadow-blue-950/40"
-            : "bg-[#0d121f]/95 border-red-500/30 shadow-red-950/40"
+            ? "border-primary/30 shadow-primary/20"
+            : "border-destructive/30 shadow-destructive/20"
         }`}
       >
         {/* Animated Badge Icon Header */}
@@ -116,29 +116,29 @@ export default function BookingResultModal({
           <div
             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all animate-pulse shadow-lg ${
               isSuccess
-                ? "bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-400 ring-8 ring-emerald-500/10 shadow-emerald-500/20"
+                ? "bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-500 ring-8 ring-emerald-500/10 shadow-emerald-500/20"
                 : isSlotUnavailable
-                ? "bg-amber-500/15 border-2 border-amber-500/40 text-amber-400 ring-8 ring-amber-500/10 shadow-amber-500/20"
+                ? "bg-amber-500/15 border-2 border-amber-500/40 text-amber-500 ring-8 ring-amber-500/10 shadow-amber-500/20"
                 : isRefundInitiated
-                ? "bg-blue-500/15 border-2 border-blue-500/40 text-blue-400 ring-8 ring-blue-500/10 shadow-blue-500/20"
-                : "bg-red-500/15 border-2 border-red-500/40 text-red-400 ring-8 ring-red-500/10 shadow-red-500/20"
+                ? "bg-primary/15 border-2 border-primary/40 text-primary ring-8 ring-primary/10 shadow-primary/20"
+                : "bg-destructive/15 border-2 border-destructive/40 text-destructive ring-8 ring-destructive/10 shadow-destructive/20"
             }`}
           >
             {isSuccess ? (
-              <CheckCircle2 size={44} className="text-emerald-400 stroke-[2.5]" />
+              <CheckCircle2 size={44} className="text-emerald-500 stroke-[2.5]" />
             ) : isSlotUnavailable ? (
-              <Clock size={44} className="text-amber-400 stroke-[2.5]" />
+              <Clock size={44} className="text-amber-500 stroke-[2.5]" />
             ) : isRefundInitiated ? (
-              <RefreshIcon size={44} className="text-blue-400 stroke-[2.5]" />
+              <RefreshIcon size={44} className="text-primary stroke-[2.5]" />
             ) : (
-              <XCircle size={44} className="text-red-400 stroke-[2.5]" />
+              <XCircle size={44} className="text-destructive stroke-[2.5]" />
             )}
           </div>
         </div>
 
         {/* Title & Booking ID Pill */}
         <div className="space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground font-sans">
             {isSuccess
               ? "Payment Successful"
               : isSlotUnavailable
@@ -152,32 +152,32 @@ export default function BookingResultModal({
             <div
               className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-mono font-bold tracking-wider ${
                 isSuccess
-                  ? "bg-slate-800/90 border-slate-700/80 text-blue-300"
+                  ? "bg-primary/10 border-primary/20 text-primary"
                   : isSlotUnavailable
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
                   : isRefundInitiated
-                  ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
-                  : "bg-red-500/10 border-red-500/30 text-red-300"
+                  ? "bg-primary/10 border-primary/30 text-primary"
+                  : "bg-destructive/10 border-destructive/30 text-destructive"
               }`}
             >
               {isSuccess ? (
                 <>
-                  <Ticket size={14} className="text-blue-400" />
+                  <Ticket size={14} className="text-primary" />
                   <span>BOOKING ID: {bookingNumber}</span>
                 </>
               ) : isSlotUnavailable ? (
                 <>
-                  <AlertTriangle size={14} className="text-amber-400" />
+                  <AlertTriangle size={14} className="text-amber-500" />
                   <span>SLOT NO LONGER AVAILABLE</span>
                 </>
               ) : isRefundInitiated ? (
                 <>
-                  <RefreshIcon size={14} className="text-blue-400" />
+                  <RefreshIcon size={14} className="text-primary" />
                   <span>AUTO REFUND PROCESSING</span>
                 </>
               ) : (
                 <>
-                  <ShieldAlert size={14} className="text-red-400" />
+                  <ShieldAlert size={14} className="text-destructive" />
                   <span>TRANSACTION CANCELLED</span>
                 </>
               )}
@@ -186,26 +186,26 @@ export default function BookingResultModal({
         </div>
 
         {/* Details Card Summary */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800/80 space-y-3 text-left text-xs text-slate-300">
+        <div className="p-5 rounded-2xl bg-muted/40 border border-border space-y-3 text-left text-xs text-foreground">
           {isSuccess ? (
             <>
-              <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-800/80">
+              <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block">
                     Station
                   </span>
-                  <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
-                    <MapPin size={12} className="text-blue-400 shrink-0" />
+                  <p className="font-bold text-foreground flex items-center gap-1 mt-0.5">
+                    <MapPin size={12} className="text-primary shrink-0" />
                     <span className="truncate">{stationName}</span>
                   </p>
                 </div>
                 {vehicleName && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">
                       Vehicle
                     </span>
-                    <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
-                      <Car size={12} className="text-blue-400 shrink-0" />
+                    <p className="font-bold text-foreground flex items-center gap-1 mt-0.5">
+                      <Car size={12} className="text-primary shrink-0" />
                       <span className="truncate">{vehicleName}</span>
                     </p>
                   </div>
@@ -215,16 +215,16 @@ export default function BookingResultModal({
               <div className="grid grid-cols-2 gap-3">
                 {scheduledTime && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">
                       Time Window
                     </span>
-                    <p className="font-bold text-slate-100 flex items-center gap-1 mt-0.5">
-                      <Clock size={12} className="text-blue-400 shrink-0" />
+                    <p className="font-bold text-foreground flex items-center gap-1 mt-0.5">
+                      <Clock size={12} className="text-primary shrink-0" />
                       <span className="truncate">{scheduledTime}</span>
                     </p>
                     {scheduledDate && (
-                      <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                        <Calendar size={10} className="text-slate-500 shrink-0" />
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Calendar size={10} className="text-muted-foreground/70 shrink-0" />
                         <span className="truncate">{scheduledDate}</span>
                       </p>
                     )}
@@ -232,10 +232,10 @@ export default function BookingResultModal({
                 )}
                 {totalPrice !== undefined && (
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">
                       Amount Paid
                     </span>
-                    <p className="font-bold text-emerald-400 text-sm mt-0.5">
+                    <p className="font-bold text-emerald-500 text-sm mt-0.5 font-sans">
                       ₹{totalPrice.toLocaleString("en-IN")}
                     </p>
                   </div>
@@ -244,14 +244,14 @@ export default function BookingResultModal({
             </>
           ) : (
             <div className="space-y-1.5 text-center sm:text-left">
-              <span className="text-[10px] font-bold text-slate-400 uppercase block">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase block">
                 {isSlotUnavailable
                   ? "Availability Notice"
                   : isRefundInitiated
                   ? "Refund Notice"
                   : "Failure Reason"}
               </span>
-              <p className="text-slate-300 leading-relaxed text-xs">{displayErrorMessage}</p>
+              <p className="text-foreground leading-relaxed text-xs">{displayErrorMessage}</p>
             </div>
           )}
         </div>
@@ -263,7 +263,7 @@ export default function BookingResultModal({
               <button
                 type="button"
                 onClick={handleViewDetails}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+                className="w-full py-3.5 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-primary-foreground font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
               >
                 <span>View Booking Details &amp; QR Pass</span>
                 <ArrowRight size={16} />
@@ -272,7 +272,7 @@ export default function BookingResultModal({
               <button
                 type="button"
                 onClick={handleGoHome}
-                className="w-full py-3 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-3 px-6 rounded-2xl bg-card hover:bg-muted border border-border text-foreground font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
               >
                 <Home size={14} />
                 <span>Back to Home</span>
@@ -283,7 +283,7 @@ export default function BookingResultModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+                className="w-full py-3.5 px-6 rounded-2xl bg-primary text-primary-foreground font-extrabold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20 hover:opacity-90"
               >
                 <Calendar size={16} />
                 <span>Choose Another Time Slot</span>
@@ -295,7 +295,7 @@ export default function BookingResultModal({
                 <button
                   type="button"
                   onClick={onRetryPayment}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-500/20"
+                  className="w-full py-3.5 px-6 rounded-2xl bg-primary text-primary-foreground font-extrabold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20 hover:opacity-90"
                 >
                   <RotateCcw size={16} />
                   <span>Try Payment Again</span>
@@ -305,7 +305,7 @@ export default function BookingResultModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-3 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-3 px-6 rounded-2xl bg-card hover:bg-muted border border-border text-muted-foreground hover:text-foreground font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
               >
                 <span>Cancel &amp; Return to Booking</span>
               </button>

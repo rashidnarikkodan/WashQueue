@@ -15,6 +15,7 @@ import {
   Info,
   Camera,
   ClipboardCheck,
+  LifeBuoy,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -138,20 +139,20 @@ export default function CustomerBookingDetailsView({
         {/* Left 8-Column Main Flow */}
         <div className="lg:col-span-8 space-y-6">
           {/* 1. Status & Service Progress Card */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d]/80 backdrop-blur-md shadow-2xl space-y-8 relative overflow-hidden">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-8 relative overflow-hidden">
             {/* Top Status & Station Name */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
                       booking.status === "COMPLETED"
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
                         : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                          ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 animate-pulse"
+                          ? "bg-blue-500/15 text-blue-500 border border-blue-500/30 animate-pulse"
                           : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                            ? "bg-red-500/15 text-red-400 border border-red-500/30"
-                            : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                            ? "bg-destructive/15 text-destructive border border-destructive/30"
+                            : "bg-amber-500/15 text-amber-500 border border-amber-500/30"
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-current" />
@@ -171,14 +172,14 @@ export default function CustomerBookingDetailsView({
                 </p>
               </div>
 
-              <div className="text-left sm:text-right space-y-1 bg-background/40 p-4 rounded-2xl border border-white/5 sm:border-0 sm:p-0 sm:bg-transparent">
+              <div className="text-left sm:text-right space-y-1 bg-muted/40 p-4 rounded-2xl border border-border sm:border-0 sm:p-0 sm:bg-transparent">
                 <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
                   Total Amount
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
                   ₹{totalPrice.toLocaleString("en-IN")}
                 </span>
-                <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">
                   ✓ {paymentStatusStr} via {paymentMethodStr}
                 </div>
               </div>
@@ -197,7 +198,7 @@ export default function CustomerBookingDetailsView({
 
               {/* Stages Circles */}
               <div className="relative flex justify-between items-center z-10 px-2">
-                <div className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 bg-white/10 -z-10 rounded-full" />
+                <div className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 bg-muted -z-10 rounded-full" />
                 <div
                   className="absolute top-1/2 left-4 h-1 -translate-y-1/2 bg-gradient-to-r from-primary to-emerald-400 -z-10 rounded-full transition-all duration-500"
                   style={{
@@ -214,12 +215,12 @@ export default function CustomerBookingDetailsView({
                   return (
                     <div key={stg.id} className="flex flex-col items-center gap-2 text-center">
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-lg ${
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md ${
                           isCurrent
                             ? "bg-primary text-primary-foreground ring-4 ring-primary/30 scale-110"
                             : isPassed
-                              ? "bg-emerald-500 text-slate-950 font-black"
-                              : "bg-slate-800 text-slate-400 border border-white/10"
+                              ? "bg-emerald-500 text-primary-foreground font-black"
+                              : "bg-muted text-muted-foreground border border-border"
                         }`}
                       >
                         {isPassed ? <CheckCircle2 size={18} /> : idx + 1}
@@ -242,14 +243,14 @@ export default function CustomerBookingDetailsView({
             </div>
 
             {/* Action Control Buttons */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/5">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-border">
               <div className="flex flex-wrap items-center gap-3">
                 {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
                   <>
                     <button
                       type="button"
                       onClick={onOpenCancelModal}
-                      className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                      className="px-5 py-2.5 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
                     >
                       <XCircle size={15} />
                       <span>Cancel Booking</span>
@@ -272,25 +273,25 @@ export default function CustomerBookingDetailsView({
 
                         {/* Floating Hover Tooltip */}
                         <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[260px] opacity-0 group-hover:opacity-100 transition-all duration-200 z-30 transform group-hover:-translate-y-1">
-                          <div className="p-3 rounded-2xl bg-[#0f1422] border border-white/10 text-white shadow-2xl backdrop-blur-md text-left space-y-1">
+                          <div className="p-3 rounded-2xl bg-popover border border-border text-popover-foreground shadow-2xl backdrop-blur-md text-left space-y-1">
                             <div className="flex items-center gap-1.5 font-bold text-[11px]">
                               {isMaxReschedulesReached ? (
                                 <>
-                                  <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                                  <span className="text-red-400">Limit Reached (2/2 Used)</span>
+                                  <span className="w-2 h-2 rounded-full bg-destructive shrink-0" />
+                                  <span className="text-destructive">Limit Reached (2/2 Used)</span>
                                 </>
                               ) : canReschedule ? (
                                 <>
-                                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                                  <span className="text-emerald-400">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                  <span className="text-emerald-500">
                                     {2 - rescheduleCount} Reschedule
                                     {2 - rescheduleCount === 1 ? "" : "s"} Remaining
                                   </span>
                                 </>
                               ) : (
                                 <>
-                                  <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                                  <span className="text-amber-400">24h Cutoff Policy</span>
+                                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                                  <span className="text-amber-500">24h Cutoff Policy</span>
                                 </>
                               )}
                             </div>
@@ -302,7 +303,7 @@ export default function CustomerBookingDetailsView({
                                   : "Rescheduling is only permitted at least 24 hours prior to the scheduled slot window start."}
                             </p>
                           </div>
-                          <div className="w-2 h-2 bg-[#0f1422] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
+                          <div className="w-2 h-2 bg-popover border-r border-b border-border rotate-45 mx-auto -mt-1" />
                         </div>
                       </div>
                     )}
@@ -327,8 +328,8 @@ export default function CustomerBookingDetailsView({
           </div>
 
           {/* 2. Estimated Wash Time & Duration Breakdown Card */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d]/80 backdrop-blur-md shadow-2xl space-y-6 text-left relative overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
                   <Clock size={16} />
@@ -336,7 +337,7 @@ export default function CustomerBookingDetailsView({
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
                   <span>~{estimatedWashDuration} Mins</span>
-                  <span className="text-xs font-semibold text-muted-foreground font-sans bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                  <span className="text-xs font-semibold text-muted-foreground font-sans bg-muted px-3 py-1 rounded-full border border-border">
                     {serviceName}
                   </span>
                 </h3>
@@ -344,22 +345,22 @@ export default function CustomerBookingDetailsView({
 
               {/* Status Context Indicator */}
               {booking.status === "IN_SERVICE" ? (
-                <div className="px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping" />
+                <div className="px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-500 text-xs font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
                   <span>Wash In Progress (~{remainingServiceMinutes} mins remaining)</span>
                 </div>
               ) : booking.status === "CHECKED_IN" ? (
-                <div className="px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                <div className="px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
                   <span>Checked In · Bay Assignment in Queue</span>
                 </div>
               ) : booking.status === "COMPLETED" ? (
-                <div className="px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
+                <div className="px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-bold flex items-center gap-2">
                   <CheckCircle2 size={16} />
                   <span>Service Completed Cleanly</span>
                 </div>
               ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
-                <div className="px-4 py-2 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold flex items-center gap-2">
+                <div className="px-4 py-2 rounded-2xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-bold flex items-center gap-2">
                   <XCircle size={16} />
                   <span>{booking.status === "CANCELLED" ? "Booking Cancelled" : "Slot Expired"}</span>
                 </div>
@@ -373,7 +374,7 @@ export default function CustomerBookingDetailsView({
 
             {/* Time Breakdown Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
                   Base Wash Duration
                 </span>
@@ -385,7 +386,7 @@ export default function CustomerBookingDetailsView({
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
                   Add-On Treatments
                 </span>
@@ -397,7 +398,7 @@ export default function CustomerBookingDetailsView({
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
                   Vehicle Class Modifier
                 </span>
@@ -435,8 +436,8 @@ export default function CustomerBookingDetailsView({
 
           {/* 2b. Vehicle Inspection Reports Card (Pre & Post Service) */}
           {(booking.preServiceInspection || booking.postServiceInspection) && (
-            <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
-              <div className="flex items-center gap-2 border-b border-white/5 pb-4">
+            <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
+              <div className="flex items-center gap-2 border-b border-border pb-4">
                 <Camera size={18} className="text-primary" />
                 <h3 className="text-lg font-bold text-foreground">Vehicle Inspection Reports</h3>
               </div>
@@ -454,7 +455,7 @@ export default function CustomerBookingDetailsView({
                           href={photo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                          className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                         >
                           <img
                             src={photo}
@@ -465,7 +466,7 @@ export default function CustomerBookingDetailsView({
                       ))}
                     </div>
                   )}
-                  <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                  <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                     <p className="text-xs italic text-muted-foreground leading-relaxed">
                       "{booking.preServiceInspection.notes || "No additional notes recorded"}"
                     </p>
@@ -489,7 +490,7 @@ export default function CustomerBookingDetailsView({
                           href={photo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-primary/50 transition-colors"
+                          className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                         >
                           <img
                             src={photo}
@@ -507,7 +508,7 @@ export default function CustomerBookingDetailsView({
                         {booking.postServiceInspection.checklist.map((item) => (
                           <div
                             key={item.key}
-                            className="p-3 rounded-xl border border-white/10 bg-[#070d1f] space-y-1"
+                            className="p-3 rounded-xl border border-border bg-muted/40 space-y-1"
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span className="flex items-center gap-2 text-xs font-semibold text-foreground truncate">
@@ -517,8 +518,8 @@ export default function CustomerBookingDetailsView({
                               <span
                                 className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
                                   item.passed
-                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                    ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                    : "bg-destructive/10 text-destructive border border-destructive/20"
                                 }`}
                               >
                                 {item.passed ? "Passed" : "Issue Flagged"}
@@ -534,7 +535,7 @@ export default function CustomerBookingDetailsView({
                       </div>
                     )}
 
-                  <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                  <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                     <p className="text-xs italic text-muted-foreground leading-relaxed">
                       "{booking.postServiceInspection.notes || "No additional notes recorded"}"
                     </p>
@@ -548,8 +549,8 @@ export default function CustomerBookingDetailsView({
           )}
 
           {/* 3. Booking Tier & Specifications Card */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-4">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
+            <div className="flex items-center gap-2 border-b border-border pb-4">
               <ShieldCheck size={18} className="text-primary" />
               <h3 className="text-lg font-bold text-foreground">Booking Specifications</h3>
             </div>
@@ -574,7 +575,7 @@ export default function CustomerBookingDetailsView({
                     {booking.extraServices.map((es, idx) => (
                       <span
                         key={idx}
-                        className="px-2.5 py-1 rounded-lg bg-card border border-border text-[11px] font-semibold text-foreground"
+                        className="px-2.5 py-1 rounded-lg bg-muted border border-border text-[11px] font-semibold text-foreground"
                       >
                         {es.name} (+₹{es.price})
                       </span>
@@ -595,7 +596,7 @@ export default function CustomerBookingDetailsView({
                   <CreditCard size={16} className="text-primary" />
                   <span>{paymentMethodStr}</span>
                 </div>
-                <p className="text-xs text-emerald-400 font-medium">✓ {paymentStatusStr}</p>
+                <p className="text-xs text-emerald-500 font-medium">✓ {paymentStatusStr}</p>
               </div>
 
               <div className="space-y-1">
@@ -609,8 +610,8 @@ export default function CustomerBookingDetailsView({
           </div>
 
           {/* 3. Payment Summary Breakdown */}
-          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
-            <h3 className="text-lg font-bold text-foreground border-b border-white/5 pb-4">
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
+            <h3 className="text-lg font-bold text-foreground border-b border-border pb-4">
               Payment Summary Breakdown
             </h3>
 
@@ -636,7 +637,7 @@ export default function CustomerBookingDetailsView({
                 <span className="font-bold text-foreground">₹0</span>
               </div>
 
-              <div className="flex justify-between text-sm font-black text-foreground pt-3 border-t border-white/5">
+              <div className="flex justify-between text-sm font-black text-foreground pt-3 border-t border-border">
                 <span>Total Amount Paid</span>
                 <span className="text-primary font-sans text-base">
                   ₹{totalPrice.toLocaleString("en-IN")}
@@ -663,13 +664,13 @@ export default function CustomerBookingDetailsView({
           />
 
           {/* Active Vehicle Info Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
               Vehicle Information
             </h3>
 
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center text-primary shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center text-primary shrink-0">
                 <Car size={28} />
               </div>
               <div className="space-y-1">
@@ -684,7 +685,7 @@ export default function CustomerBookingDetailsView({
           </div>
 
           {/* Support & Contact Card */}
-          <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
               Support &amp; Assistance
             </h3>
@@ -694,7 +695,7 @@ export default function CustomerBookingDetailsView({
                 <button
                   type="button"
                   onClick={() => toast.info(`Calling station at ${booking.stationDetails?.phone}`)}
-                  className="w-full p-3.5 rounded-2xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
+                  className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <Phone size={16} className="text-primary" />
@@ -707,11 +708,23 @@ export default function CustomerBookingDetailsView({
               <button
                 type="button"
                 onClick={() => toast.info("Opening Live Support Chat...")}
-                className="w-full p-3.5 rounded-2xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
+                className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   <MessageSquare size={16} className="text-primary" />
                   <span>Live Chat Support</span>
+                </div>
+                <ChevronRight size={14} className="text-muted-foreground" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => toast.info("Support ticket module will open here.")}
+                className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <LifeBuoy size={16} className="text-amber-500 group-hover:rotate-45 transition-transform duration-300" />
+                  <span>Raise a Ticket / Issue</span>
                 </div>
                 <ChevronRight size={14} className="text-muted-foreground" />
               </button>

@@ -158,25 +158,25 @@ export default function CancellationModal({
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       {!isSuccess ? (
         /* ================= 1. CONFIRMATION MODAL STATE ================= */
-        <div className="w-full max-w-[672px] bg-[#191F31] text-[#DCE1FB] border border-[#8C909F]/10 rounded-[24px] shadow-xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
+        <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
           {/* Top Warning Header */}
           <div className="flex flex-col items-center gap-2 p-8 pb-4 relative">
             <button
               onClick={onClose}
-              className="absolute right-6 top-6 text-[#C2C6D6] hover:text-white transition-colors cursor-pointer"
+              className="absolute right-6 top-6 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <X className="h-6 w-6" />
             </button>
 
-            <div className="w-20 h-20 rounded-full bg-[#93000A]/30 flex items-center justify-center">
-              <AlertTriangle className="h-10 w-10 text-[#FFB4AB]" />
+            <div className="w-20 h-20 rounded-full bg-destructive/15 flex items-center justify-center border border-destructive/20">
+              <AlertTriangle className="h-10 w-10 text-destructive" />
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#DCE1FB] text-center tracking-tight pt-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground text-center tracking-tight pt-2">
               Cancel Booking?
             </h1>
 
-            <p className="text-[#C2C6D6] text-sm sm:text-base text-center max-w-[448px] leading-relaxed">
+            <p className="text-muted-foreground text-sm sm:text-base text-center max-w-[448px] leading-relaxed">
               This action may affect your queue position and refund eligibility. This cannot be undone.
             </p>
           </div>
@@ -184,8 +184,8 @@ export default function CancellationModal({
           {/* Scrollable Content Area */}
           <div className="p-6 sm:p-8 pt-0 space-y-6 max-h-[70vh] overflow-y-auto">
             {/* Booking Summary Bento Card */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-[#151B2D] border border-white/5 flex flex-col sm:flex-row items-center sm:items-start gap-5">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-[#2E3447] flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="p-5 sm:p-6 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center sm:items-start gap-5">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
                 <img
                   src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=300&auto=format&fit=crop"
                   alt="Vehicle"
@@ -195,37 +195,37 @@ export default function CancellationModal({
 
               <div className="grid grid-cols-2 gap-4 flex-1 text-xs sm:text-sm w-full">
                 <div>
-                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
                     STATION
                   </span>
-                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
+                  <span className="font-semibold text-foreground text-sm sm:text-base">
                     {stationName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
                     VEHICLE
                   </span>
-                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
+                  <span className="font-semibold text-foreground text-sm sm:text-base">
                     {vehicleName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
                     SERVICE
                   </span>
-                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
+                  <span className="font-semibold text-foreground text-sm sm:text-base">
                     {serviceName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
                     TIME
                   </span>
-                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base flex items-center gap-1">
+                  <span className="font-semibold text-foreground text-sm sm:text-base flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span>{formattedSlotTime}</span>
                   </span>
@@ -236,50 +236,50 @@ export default function CancellationModal({
             {/* Refund Breakdown Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-[#C2C6D6] uppercase tracking-wider block">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                   REFUND BREAKDOWN
                 </span>
                 <span
                   className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
                     policyTier === "FULL_REFUND"
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                       : policyTier === "PARTIAL_REFUND"
-                      ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                      : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                      : "bg-destructive/10 text-destructive border-destructive/20"
                   }`}
                 >
                   {refundPercentage}% Refund ({policyTier.replace("_", " ")})
                 </span>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#070D1F] border border-[#424754]/10 space-y-3.5 text-sm">
+              <div className="p-6 rounded-2xl bg-card border border-border space-y-3.5 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#C2C6D6]">Service Amount</span>
-                  <span className="font-medium text-[#DCE1FB] text-base">₹{totalAmount}</span>
+                  <span className="text-muted-foreground">Service Amount</span>
+                  <span className="font-medium text-foreground text-base">₹{totalAmount}</span>
                 </div>
 
                 {nonRefundableAmount > 0 ? (
                   <div className="flex items-center justify-between">
-                    <span className="text-[#C2C6D6]">{deductionLabel}</span>
-                    <span className="font-medium text-[#FFB4AB]">- ₹{nonRefundableAmount}</span>
+                    <span className="text-muted-foreground">{deductionLabel}</span>
+                    <span className="font-medium text-destructive">- ₹{nonRefundableAmount}</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between">
-                    <span className="text-[#C2C6D6]">{deductionLabel}</span>
-                    <span className="font-medium text-[#4AE176]">₹0 (Free Cancellation)</span>
+                    <span className="text-muted-foreground">{deductionLabel}</span>
+                    <span className="font-medium text-emerald-500">₹0 (Free Cancellation)</span>
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-[#424754]/20 flex items-center justify-between">
+                <div className="pt-3 border-t border-border flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-[#DCE1FB] text-base block">
+                    <span className="font-semibold text-foreground text-base block">
                       Total Refund Amount
                     </span>
-                    <span className="text-[11px] text-[#8C909F]">
+                    <span className="text-[11px] text-muted-foreground">
                       Credited directly to your wallet
                     </span>
                   </div>
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#ADC6FF] tracking-tight">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight font-sans">
                     ₹{refundAmount}
                   </span>
                 </div>
@@ -287,13 +287,13 @@ export default function CancellationModal({
             </div>
 
             {/* Clear Policy Rule Explanation Box */}
-            <div className="p-4.5 rounded-2xl bg-[#0B132B] border border-[#3B82F6]/20 flex items-start gap-3.5 text-left">
-              <Info className="h-5 w-5 text-[#60A5FA] flex-shrink-0 mt-0.5" />
+            <div className="p-4.5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-left">
+              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs">
-                <h4 className="font-bold text-[#93C5FD] text-xs sm:text-sm">
+                <h4 className="font-bold text-foreground text-xs sm:text-sm">
                   {policyTitle}
                 </h4>
-                <p className="text-[#C2C6D6] leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {policyExplanation}
                 </p>
               </div>
@@ -301,7 +301,7 @@ export default function CancellationModal({
 
             {/* Cancellation Reason Pills */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-[#C2C6D6] uppercase tracking-wider block px-1">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block px-1">
                 REASON FOR CANCELLATION
               </span>
 
@@ -315,8 +315,8 @@ export default function CancellationModal({
                       onClick={() => setSelectedReason(reason)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all border cursor-pointer ${
                         isSelected
-                          ? "bg-[#ADC6FF]/10 text-[#ADC6FF] border-[#ADC6FF]/30 font-semibold"
-                          : "bg-[#2E3447] text-[#DCE1FB] border-white/5 hover:bg-[#2E3447]/80"
+                          ? "bg-primary/15 text-primary border-primary/40 font-semibold"
+                          : "bg-muted text-foreground border-border hover:bg-muted/80"
                       }`}
                     >
                       {reason}
@@ -327,20 +327,20 @@ export default function CancellationModal({
             </div>
 
             {/* Warning Notice Box */}
-            <div className="p-4 rounded-2xl bg-[#93000A]/10 border border-[#FFB4AB]/20 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-[#FFB4AB] flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-[#FFB4AB] leading-relaxed font-medium">
+            <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+              <p className="text-xs text-destructive leading-relaxed font-medium">
                 Once cancelled, your queue position will be lost and cannot be restored. Other customers may take your slot immediately.
               </p>
             </div>
           </div>
 
           {/* Bottom Actions */}
-          <div className="p-6 sm:p-8 bg-[#191F31]/60 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-6 sm:p-8 bg-muted/40 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#3E495D] text-[#DCE1FB] font-semibold text-base hover:bg-[#3E495D]/80 transition-all cursor-pointer text-center"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-card border border-border text-foreground font-semibold text-base hover:bg-muted transition-all cursor-pointer text-center"
             >
               Keep Booking
             </button>
@@ -349,7 +349,7 @@ export default function CancellationModal({
               type="button"
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#93000A] text-[#FFDAD6] font-bold text-base hover:opacity-90 transition-all shadow-[0_0_20px_rgba(147,0,10,0.40)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-destructive text-destructive-foreground font-bold text-base hover:opacity-90 transition-all shadow-lg shadow-destructive/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Trash2 className="h-4 w-4" />
               <span>{isSubmitting ? "Cancelling..." : "Confirm Cancellation"}</span>
@@ -358,55 +358,55 @@ export default function CancellationModal({
         </div>
       ) : (
         /* ================= 2. SUCCESSFUL CANCELLATION MODAL STATE ================= */
-        <div className="w-full max-w-[672px] bg-[#191F31] text-[#DCE1FB] rounded-[24px] shadow-[0_0_50px_rgba(74,225,118,0.10)] overflow-hidden animate-in zoom-in-95 my-8 relative p-8 sm:p-12 flex flex-col items-center text-center space-y-8">
+        <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 my-8 relative p-8 sm:p-12 flex flex-col items-center text-center space-y-8">
           {/* Asymmetric Background Accents */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#4AE176]/5 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-[#ADC6FF]/5 blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
           {/* Success Visual & Status Badge */}
           <div className="flex flex-col items-center gap-4">
-            <div className="w-24 h-24 rounded-full bg-[#00A74B]/20 flex items-center justify-center p-2">
-              <div className="w-full h-full rounded-full bg-[#4AE176]/10 flex items-center justify-center">
-                <CheckCircle2 className="h-12 w-12 text-[#4AE176]" />
+            <div className="w-24 h-24 rounded-full bg-emerald-500/20 flex items-center justify-center p-2">
+              <div className="w-full h-full rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-12 w-12 text-emerald-500" />
               </div>
             </div>
 
-            <span className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest text-[#FFB4AB] bg-[#93000A]/20 border border-[#FFB4AB]/10">
+            <span className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest text-destructive bg-destructive/10 border border-destructive/20">
               CANCELLED
             </span>
           </div>
 
           {/* Hero Headline & Subtext */}
           <div className="space-y-3 max-w-[512px]">
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-[#DCE1FB] tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
               Your booking has been cancelled successfully.
             </h1>
 
-            <p className="text-[#C2C6D6] text-base sm:text-lg leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
               We’ve updated our schedule. Your reservation slot has been released back into the queue.
             </p>
           </div>
 
           {/* Refund Information Card (Editorial Sunken Feel) */}
-          <div className="w-full max-w-[544px] p-6 sm:p-8 rounded-2xl bg-[#070D1F] border border-white/5 flex items-center gap-5 text-left">
-            <div className="w-12 h-12 rounded-xl bg-[#4AE176]/10 flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-6 w-6 text-[#4AE176]" />
+          <div className="w-full max-w-[544px] p-6 sm:p-8 rounded-2xl bg-muted/40 border border-border flex items-center gap-5 text-left">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <DollarSign className="h-6 w-6 text-emerald-500" />
             </div>
 
             <div className="space-y-1 flex-1">
-              <h3 className="text-lg font-semibold text-[#DCE1FB]">
+              <h3 className="text-lg font-semibold text-foreground">
                 {refundAmount > 0 ? "Refund Processing" : "No Refund Due"}
               </h3>
-              <p className="text-sm text-[#C2C6D6] leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {refundAmount > 0 ? (
                   <>
                     {refundPercentage === 100 ? (
                       <>
-                        Full refund of <strong className="text-[#4AE176]">₹{refundAmount}</strong> (100% refund for cancelling &gt;24h in advance) is credited back to your wallet instantly.
+                        Full refund of <strong className="text-emerald-500">₹{refundAmount}</strong> (100% refund for cancelling &gt;24h in advance) is credited back to your wallet instantly.
                       </>
                     ) : (
                       <>
-                        50% partial refund of <strong className="text-[#4AE176]">₹{refundAmount}</strong> (₹{nonRefundableAmount} fee retained for cancelling 2–24h prior) is credited back to your wallet instantly.
+                        50% partial refund of <strong className="text-emerald-500">₹{refundAmount}</strong> (₹{nonRefundableAmount} fee retained for cancelling 2–24h prior) is credited back to your wallet instantly.
                       </>
                     )}
                   </>
@@ -422,7 +422,7 @@ export default function CancellationModal({
             <button
               type="button"
               onClick={onBookAgain || onClose}
-              className="w-full sm:w-1/2 py-4 rounded-xl bg-[#ADC6FF] text-[#002E6A] font-semibold text-base hover:opacity-90 transition-all shadow-[0_10px_15px_-3px_rgba(173,198,255,0.10)] cursor-pointer text-center"
+              className="w-full sm:w-1/2 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-all shadow-md cursor-pointer text-center"
             >
               Book Again
             </button>
@@ -430,14 +430,14 @@ export default function CancellationModal({
             <button
               type="button"
               onClick={onBackToHome || onClose}
-              className="w-full sm:w-1/2 py-4 rounded-xl bg-[#3E495D] text-[#AEB9D0] font-semibold text-base hover:bg-[#3E495D]/80 transition-all cursor-pointer text-center"
+              className="w-full sm:w-1/2 py-4 rounded-xl bg-muted hover:bg-muted/80 text-foreground font-semibold text-base transition-all cursor-pointer text-center border border-border"
             >
               Back to Home
             </button>
           </div>
 
           {/* Footer Metadata */}
-          <div className="w-full max-w-[544px] pt-6 border-t border-white/5 flex items-center justify-between text-[11px] font-semibold text-[#8C909F] uppercase tracking-widest">
+          <div className="w-full max-w-[544px] pt-6 border-t border-border flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
             <span>TRANSACTION ID: {booking.bookingNumber || "WQ-9823-X1"}</span>
             <span>ISSUED: {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()}</span>
           </div>
