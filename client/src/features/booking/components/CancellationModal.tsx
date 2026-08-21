@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AlertTriangle, Trash2, CheckCircle2, DollarSign, X } from "lucide-react"
+import { AlertTriangle, Trash2, CheckCircle2, DollarSign, X, Info, Clock } from "lucide-react"
 
 // Accepts either the full BookingResponse (booking detail page) or the flatter
 // table-row Booking summary (bookings list page) — only the fields actually
@@ -11,12 +11,19 @@ export interface CancellableBooking {
   pricingSnapshot?: { totalPrice?: number }
   totalAmount?: number
   totalPrice?: number
-  scheduling?: { windowStart?: string }
+  amount?: number
+  scheduling?: { windowStart?: string; windowEnd?: string }
+  windowStart?: string
+  slotDate?: string
   slotTime?: string
   stationDetails?: { name?: string }
   stationName?: string
   vehicleDetails?: { brand?: string; model?: string }
+  vehicleNumber?: string
+  vehicleType?: string
   vehicleModel?: string
+  paymentStatus?: string
+  paymentMethod?: string
 }
 
 interface CancellationModalProps {
@@ -50,9 +57,90 @@ export default function CancellationModal({
 
   if (!isOpen || !booking) return null
 
-  // We don't charge a cancellation fee — the full amount is refunded.
-  const totalAmount = booking?.pricingSnapshot?.totalPrice || 450
-  const refundAmount = totalAmount
+  // Pricing calculations
+  const totalAmount =
+    booking?.pricingSnapshot?.totalPrice ??
+    booking?.totalPrice ??
+    booking?.totalAmount ??
+    booking?.amount ??
+    450
+
+  const rawWindowStart = booking.scheduling?.windowStart || booking.windowStart
+  const windowStartMs = rawWindowStart ? new Date(rawWindowStart).getTime() : null
+  const nowMs = Date.now()
+  const diffMs = windowStartMs !== null ? windowStartMs - nowMs : null
+  const hoursRemaining = diffMs !== null ? diffMs / (1000 * 60 * 60) : null
+
+  // Timing-based refund policy evaluation (mirrors server RefundPolicyEngine)
+  let policyTier: "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND" = "FULL_REFUND"
+  let refundPercentage = 100
+  let deductionLabel = "Cancellation Fee"
+  let policyTitle = "Full Refund Eligible"
+  let policyExplanation = ""
+  let timeRemainingFormatted = ""
+
+  if (hoursRemaining !== null) {
+    if (hoursRemaining <= 0) {
+      timeRemainingFormatted = "slot commenced"
+    } else if (hoursRemaining < 1) {
+      const mins = Math.max(1, Math.round(hoursRemaining * 60))
+      timeRemainingFormatted = `~${mins} min before slot`
+    } else {
+      const hrs = Math.round(hoursRemaining * 10) / 10
+      timeRemainingFormatted = `~${hrs} hrs before slot`
+    }
+
+    if (hoursRemaining >= 24) {
+      policyTier = "FULL_REFUND"
+      refundPercentage = 100
+      deductionLabel = "Cancellation Fee (> 24h prior)"
+      policyTitle = "100% Full Refund Policy (>24h in advance)"
+      policyExplanation = `Your wash is scheduled in ${timeRemainingFormatted}. Because you are cancelling more than 24 hours in advance, you receive a 100% full refund with ₹0 cancellation charges.`
+    } else if (hoursRemaining >= 2) {
+      policyTier = "PARTIAL_REFUND"
+      refundPercentage = 50
+      deductionLabel = "50% Cancellation Fee (2h–24h window)"
+      policyTitle = "50% Cancellation Policy (2h–24h before slot)"
+      policyExplanation = `Your wash is scheduled in ${timeRemainingFormatted}. Under our policy, cancellations between 2 and 24 hours before the slot retain a 50% fee (₹${Math.round(
+        totalAmount * 0.5
+      )}) to compensate for reserved bay capacity. The remaining 50% (₹${Math.round(
+        totalAmount * 0.5
+      )}) is credited to your wallet.`
+    } else {
+      policyTier = "NO_REFUND"
+      refundPercentage = 0
+      deductionLabel = "100% Late Cancellation Penalty (< 2h window)"
+      policyTitle = "Late Cancellation Policy (<2h before slot)"
+      policyExplanation = `Your wash is scheduled in ${timeRemainingFormatted}. Cancellations made less than 2 hours before the slot are non-refundable as the service bay and staff have already been committed.`
+    }
+  } else {
+    // Default fallback when windowStart is unavailable
+    policyTier = "FULL_REFUND"
+    refundPercentage = 100
+    deductionLabel = "Cancellation Fee"
+    policyTitle = "Full Refund Policy"
+    policyExplanation =
+      "You will receive a full refund credited directly to your wallet balance upon cancellation."
+  }
+
+  const refundAmount = Math.round((totalAmount * refundPercentage) / 100)
+  const nonRefundableAmount = totalAmount - refundAmount
+
+  const stationName =
+    booking.stationDetails?.name || booking.stationName || "Wash Station"
+  const vehicleName =
+    booking.vehicleDetails?.brand
+      ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
+      : booking.vehicleType || booking.vehicleModel || "Vehicle"
+  const serviceName = booking.serviceType ? `${booking.serviceType} Wash` : "Wash Service"
+  const formattedSlotTime =
+    booking.slotTime ||
+    (rawWindowStart
+      ? new Date(rawWindowStart).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Scheduled Slot")
 
   const handleConfirm = async () => {
     try {
@@ -107,43 +195,39 @@ export default function CancellationModal({
 
               <div className="grid grid-cols-2 gap-4 flex-1 text-xs sm:text-sm w-full">
                 <div>
-                  <span className="text-[11px] font-bold text-[#005321] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
                     STATION
                   </span>
                   <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.stationDetails?.name || "LuxeWash Terminal 4"}
+                    {stationName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#005321] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
                     VEHICLE
                   </span>
                   <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.vehicleDetails?.brand || "Vehicle"} {booking.vehicleDetails?.model || ""}
+                    {vehicleName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#005321] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
                     SERVICE
                   </span>
                   <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.serviceType || "Standard"} Wash
+                    {serviceName}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-[#005321] tracking-widest uppercase block">
+                  <span className="text-[11px] font-bold text-[#8C909F] tracking-widest uppercase block">
                     TIME
                   </span>
-                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base">
-                    {booking.scheduling?.windowStart
-                      ? new Date(booking.scheduling.windowStart).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "11:15 AM"}
+                  <span className="font-semibold text-[#DCE1FB] text-sm sm:text-base flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>{formattedSlotTime}</span>
                   </span>
                 </div>
               </div>
@@ -151,22 +235,67 @@ export default function CancellationModal({
 
             {/* Refund Breakdown Section */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-[#C2C6D6] uppercase tracking-wider block px-1">
-                REFUND BREAKDOWN
-              </span>
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-[#C2C6D6] uppercase tracking-wider block">
+                  REFUND BREAKDOWN
+                </span>
+                <span
+                  className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
+                    policyTier === "FULL_REFUND"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : policyTier === "PARTIAL_REFUND"
+                      ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                      : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                  }`}
+                >
+                  {refundPercentage}% Refund ({policyTier.replace("_", " ")})
+                </span>
+              </div>
 
-              <div className="p-6 rounded-2xl bg-[#070D1F] border border-[#424754]/10 space-y-3 text-sm">
+              <div className="p-6 rounded-2xl bg-[#070D1F] border border-[#424754]/10 space-y-3.5 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[#C2C6D6]">Service Amount</span>
                   <span className="font-medium text-[#DCE1FB] text-base">₹{totalAmount}</span>
                 </div>
 
+                {nonRefundableAmount > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#C2C6D6]">{deductionLabel}</span>
+                    <span className="font-medium text-[#FFB4AB]">- ₹{nonRefundableAmount}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#C2C6D6]">{deductionLabel}</span>
+                    <span className="font-medium text-[#4AE176]">₹0 (Free Cancellation)</span>
+                  </div>
+                )}
+
                 <div className="pt-3 border-t border-[#424754]/20 flex items-center justify-between">
-                  <span className="font-semibold text-[#DCE1FB] text-base">Total Refund Amount</span>
+                  <div>
+                    <span className="font-semibold text-[#DCE1FB] text-base block">
+                      Total Refund Amount
+                    </span>
+                    <span className="text-[11px] text-[#8C909F]">
+                      Credited directly to your wallet
+                    </span>
+                  </div>
                   <span className="text-2xl sm:text-3xl font-extrabold text-[#ADC6FF] tracking-tight">
                     ₹{refundAmount}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Clear Policy Rule Explanation Box */}
+            <div className="p-4.5 rounded-2xl bg-[#0B132B] border border-[#3B82F6]/20 flex items-start gap-3.5 text-left">
+              <Info className="h-5 w-5 text-[#60A5FA] flex-shrink-0 mt-0.5" />
+              <div className="space-y-1 text-xs">
+                <h4 className="font-bold text-[#93C5FD] text-xs sm:text-sm">
+                  {policyTitle}
+                </h4>
+                <p className="text-[#C2C6D6] leading-relaxed">
+                  {policyExplanation}
+                </p>
               </div>
             </div>
 
@@ -265,9 +394,25 @@ export default function CancellationModal({
             </div>
 
             <div className="space-y-1 flex-1">
-              <h3 className="text-lg font-semibold text-[#DCE1FB]">Refund Processing</h3>
+              <h3 className="text-lg font-semibold text-[#DCE1FB]">
+                {refundAmount > 0 ? "Refund Processing" : "No Refund Due"}
+              </h3>
               <p className="text-sm text-[#C2C6D6] leading-relaxed">
-                Refund of <strong className="text-[#4AE176]">₹{refundAmount}</strong> will be processed within 3–5 business days to your original payment method / wallet.
+                {refundAmount > 0 ? (
+                  <>
+                    {refundPercentage === 100 ? (
+                      <>
+                        Full refund of <strong className="text-[#4AE176]">₹{refundAmount}</strong> (100% refund for cancelling &gt;24h in advance) is credited back to your wallet instantly.
+                      </>
+                    ) : (
+                      <>
+                        50% partial refund of <strong className="text-[#4AE176]">₹{refundAmount}</strong> (₹{nonRefundableAmount} fee retained for cancelling 2–24h prior) is credited back to your wallet instantly.
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "This booking was cancelled less than 2 hours before its scheduled window, so it is non-refundable per our cancellation policy."
+                )}
               </p>
             </div>
           </div>

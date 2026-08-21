@@ -25,6 +25,9 @@ export interface Booking {
   vehicleType: string
   slotDate: string
   slotTime: string
+  windowStart?: string
+  scheduling?: { windowStart?: string; windowEnd?: string }
+  pricingSnapshot?: { totalPrice?: number; basePrice?: number; extraPrice?: number; currency?: string }
   amount: number
   paymentStatus: PaymentStatus
   status: BookingStatus
