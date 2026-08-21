@@ -527,7 +527,7 @@ export default function ProviderBookingDetailsView({
                   {booking.statusHistory.filter(l => l.reason || l.notes).map((log) => (
                     <div key={log.id} className="p-3 rounded-xl border border-white/5 bg-[#070d1f] text-xs space-y-0.5">
                       <div className="flex items-center justify-between text-muted-foreground text-[10px]">
-                        <span className="font-bold text-foreground">Status: {log.toStatus.replace("_", " ")}</span>
+                        <span className="font-bold text-foreground">Status: {log.toStatus ? log.toStatus.replace("_", " ") : "UPDATED"}</span>
                         <span>{new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                       </div>
                       {log.reason && <p className="text-amber-300 font-medium">{log.reason}</p>}

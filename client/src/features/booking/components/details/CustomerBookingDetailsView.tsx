@@ -74,6 +74,13 @@ export default function CustomerBookingDetailsView({
   const rescheduleCount = booking.rescheduleCount ?? 0
   const isMaxReschedulesReached = rescheduleCount >= 2
 
+  const totalPrice = booking.pricingSnapshot?.totalPrice ?? 0
+  const basePrice = booking.pricingSnapshot?.basePrice ?? 0
+  const extraPrice = booking.pricingSnapshot?.extraPrice ?? 0
+  const paymentMethodStr = booking.paymentMethod ? booking.paymentMethod.replace("_", " ") : "ONLINE"
+  const paymentStatusStr = booking.paymentStatus || "PENDING"
+  const bookingStatusStr = booking.status ? booking.status.replace("_", " ") : "PENDING"
+
   const canReschedule = Boolean(
     (booking.status === "CONFIRMED" || booking.status === "PENDING") &&
       !booking.isWalkIn &&
@@ -116,13 +123,13 @@ export default function CustomerBookingDetailsView({
                         ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                         : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
                           ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 animate-pulse"
-                          : booking.status === "CANCELLED"
+                          : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
                             ? "bg-red-500/15 text-red-400 border border-red-500/30"
                             : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-current" />
-                    <span>{booking.status.replace("_", " ")}</span>
+                    <span>{bookingStatusStr}</span>
                   </span>
                   <span className="text-xs text-muted-foreground font-mono">
                     {formattedDates.dateStr}
@@ -143,10 +150,10 @@ export default function CustomerBookingDetailsView({
                   Total Amount
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
-                  ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
+                  ₹{totalPrice.toLocaleString("en-IN")}
                 </span>
                 <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                  ✓ {booking.paymentStatus} via {booking.paymentMethod.replace("_", " ")}
+                  ✓ {paymentStatusStr} via {paymentMethodStr}
                 </div>
               </div>
             </div>
@@ -339,9 +346,9 @@ export default function CustomerBookingDetailsView({
                 </span>
                 <div className="flex items-center gap-2 font-bold text-foreground text-sm">
                   <CreditCard size={16} className="text-primary" />
-                  <span>{booking.paymentMethod.replace("_", " ")}</span>
+                  <span>{paymentMethodStr}</span>
                 </div>
-                <p className="text-xs text-emerald-400 font-medium">✓ {booking.paymentStatus}</p>
+                <p className="text-xs text-emerald-400 font-medium">✓ {paymentStatusStr}</p>
               </div>
 
               <div className="space-y-1">
@@ -364,15 +371,15 @@ export default function CustomerBookingDetailsView({
               <div className="flex justify-between text-muted-foreground">
                 <span>{serviceName} (Base)</span>
                 <span className="font-bold text-foreground">
-                  ₹{booking.pricingSnapshot.basePrice.toLocaleString("en-IN")}
+                  ₹{basePrice.toLocaleString("en-IN")}
                 </span>
               </div>
 
-              {booking.pricingSnapshot.extraPrice > 0 && (
+              {extraPrice > 0 && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>Extra Add-ons Total</span>
                   <span className="font-bold text-foreground">
-                    +₹{booking.pricingSnapshot.extraPrice.toLocaleString("en-IN")}
+                    +₹{extraPrice.toLocaleString("en-IN")}
                   </span>
                 </div>
               )}
@@ -385,7 +392,7 @@ export default function CustomerBookingDetailsView({
               <div className="flex justify-between text-sm font-black text-foreground pt-3 border-t border-white/5">
                 <span>Total Amount Paid</span>
                 <span className="text-primary font-sans text-base">
-                  ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
+                  ₹{totalPrice.toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
@@ -404,8 +411,8 @@ export default function CustomerBookingDetailsView({
             serviceName={serviceName}
             scheduledDate={formattedDates.dateStr}
             scheduledTime={formattedDates.timeStr}
-            totalPrice={booking.pricingSnapshot.totalPrice}
-            paymentStatus={booking.paymentStatus}
+            totalPrice={totalPrice}
+            paymentStatus={paymentStatusStr}
           />
 
           {/* Active Vehicle Info Card */}
