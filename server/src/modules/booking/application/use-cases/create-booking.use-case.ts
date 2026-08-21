@@ -6,7 +6,7 @@ import { IExtraServiceRepository } from "@/modules/station/domain/repositories/e
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { Booking, BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { Booking, BookingStatus, PaymentStatus, derivePaymentMethod } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -128,6 +128,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       paymentStatus:
         input.paymentType === "ONLINE_FULL" ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType: input.paymentType,
+      paymentMethod: derivePaymentMethod(input.paymentType),
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

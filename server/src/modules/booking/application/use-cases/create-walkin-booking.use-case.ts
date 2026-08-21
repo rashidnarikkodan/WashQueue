@@ -5,7 +5,13 @@ import { IStationPricingRepository } from "@/modules/station/domain/repositories
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { Booking, BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+import {
+  Booking,
+  BookingStatus,
+  PaymentStatus,
+  PaymentType,
+  derivePaymentMethod,
+} from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -142,6 +148,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       paymentStatus:
         paymentType === PaymentType.CASH_WALKIN ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType,
+      paymentMethod: derivePaymentMethod(paymentType),
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

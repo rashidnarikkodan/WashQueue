@@ -1,34 +1,21 @@
-export enum BookingStatus {
-  PENDING = "PENDING",
-  CONFIRMED = "CONFIRMED",
-  CHECKED_IN = "CHECKED_IN",
-  IN_SERVICE = "IN_SERVICE",
-  SERVICE_COMPLETED = "SERVICE_COMPLETED",
-  AWAITING_HANDOVER = "AWAITING_HANDOVER",
-  COMPLETED = "COMPLETED",
-  CANCELLED = "CANCELLED",
-  NO_SHOW = "NO_SHOW",
-  STALLED = "STALLED",
-}
+import { BookingStatus, ServiceType } from "@/common/constants/booking.constants"
+import { PaymentStatus, PaymentType, PaymentMethod } from "@/common/constants/payment.constants"
 
-export enum ServiceType {
-  HALF = "HALF",
-  FULL = "FULL",
-}
+export { BookingStatus, ServiceType, PaymentStatus, PaymentType, PaymentMethod }
 
-export enum PaymentStatus {
-  PENDING = "PENDING",
-  PARTIAL = "PARTIAL",
-  PAID = "PAID",
-  REFUNDED = "REFUNDED",
-  FAILED = "FAILED",
-}
-
-export enum PaymentType {
-  ONLINE_FULL = "ONLINE_FULL",
-  PAY_AT_STATION = "PAY_AT_STATION",
-  DEPOSIT_PLUS_CASH = "DEPOSIT_PLUS_CASH",
-  CASH_WALKIN = "CASH_WALKIN",
+// Single source of truth for "how was this paid" — PAY_AT_STATION covers every non-online
+// paymentType (PAY_AT_STATION, CASH_WALKIN, DEPOSIT_PLUS_CASH) since none of them involve an
+// online/wallet transaction at booking time. ONLINE_FULL branches on the actual settlement.
+export function derivePaymentMethod(
+  paymentType: PaymentType,
+  opts: { isWalletPayment?: boolean; walletAmount?: number } = {}
+): PaymentMethod {
+  if (paymentType === PaymentType.ONLINE_FULL) {
+    if (opts.isWalletPayment) return PaymentMethod.WALLET
+    if (opts.walletAmount && opts.walletAmount > 0) return PaymentMethod.WALLET_AND_ONLINE
+    return PaymentMethod.ONLINE
+  }
+  return PaymentMethod.PAY_AT_STATION
 }
 
 export interface VehicleSnapshot {
@@ -139,6 +126,7 @@ export interface BookingProps {
   qr: QRDetails
   paymentStatus: PaymentStatus
   paymentType: PaymentType
+  paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number
   refundAmount: number
@@ -158,6 +146,7 @@ export interface BookingProps {
   stationDetails?: StationDetails
   vehicleDetails?: VehicleDetails
   customerDetails?: CustomerDetails
+  rescheduleCount?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -235,6 +224,10 @@ export class Booking {
 
   get paymentType(): PaymentType {
     return this.props.paymentType
+  }
+
+  get paymentMethod(): PaymentMethod {
+    return this.props.paymentMethod
   }
 
   get depositAmount(): number {
@@ -321,6 +314,10 @@ export class Booking {
     return this.props.updatedAt
   }
 
+  get rescheduleCount(): number {
+    return this.props.rescheduleCount ?? 0
+  }
+
   getProps(): BookingProps {
     return { ...this.props }
   }
@@ -370,6 +367,11 @@ export class Booking {
       return false
     }
 
+    // Max 2 reschedules permitted
+    if ((this.props.rescheduleCount ?? 0) >= 2) {
+      return false
+    }
+
     const windowStartMs = new Date(this.props.scheduling.windowStart).getTime()
     const nowMs = now.getTime()
     const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
@@ -377,14 +379,19 @@ export class Booking {
     return (windowStartMs - nowMs) >= TWENTY_FOUR_HOURS_MS
   }
 
-
   reschedule(newScheduling: SchedulingDetails, now: Date = new Date()): void {
     if (!this.canReschedule(now)) {
+      if ((this.props.rescheduleCount ?? 0) >= 2) {
+        throw new Error(
+          "Cannot reschedule booking: Maximum limit of 2 reschedules has been reached."
+        )
+      }
       throw new Error(
         `Cannot reschedule booking: Rescheduling is only allowed at least 24 hours prior to the scheduled window start for PENDING or CONFIRMED bookings.`
       )
     }
 
+    this.props.rescheduleCount = (this.props.rescheduleCount ?? 0) + 1
     this.props.scheduling = newScheduling
     if (this.props.qr) {
       this.props.qr.qrExpiresAt = new Date(

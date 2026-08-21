@@ -5,6 +5,7 @@ import {
   BookingStatus,
   PaymentStatus,
   PaymentType,
+  PaymentMethod,
   ServiceType,
 } from "../../domain/entities/Booking"
 import { IBookingDocument } from "../models/booking.model"
@@ -145,6 +146,7 @@ export class BookingMapper {
       },
       paymentStatus: doc.paymentStatus as PaymentStatus,
       paymentType: doc.paymentType as PaymentType,
+      paymentMethod: doc.paymentMethod as PaymentMethod,
       depositAmount: doc.depositAmount ?? 0,
       cashAmount: doc.cashAmount ?? 0,
       refundAmount: doc.refundAmount ?? 0,
@@ -201,6 +203,7 @@ export class BookingMapper {
               cancelledAt: doc.cancellation.cancelledAt || new Date(),
             }
           : null,
+      rescheduleCount: doc.rescheduleCount ?? 0,
       createdAt: doc.createdAt || new Date(),
       updatedAt: doc.updatedAt || new Date(),
     }
@@ -266,6 +269,7 @@ export class BookingMapper {
       },
       paymentStatus: props.paymentStatus,
       paymentType: props.paymentType,
+      paymentMethod: props.paymentMethod,
       depositAmount: props.depositAmount,
       cashAmount: props.cashAmount,
       refundAmount: props.refundAmount,
@@ -292,6 +296,7 @@ export class BookingMapper {
             cancelledAt: props.cancellation.cancelledAt || new Date(),
           }
         : null,
+      rescheduleCount: props.rescheduleCount ?? 0,
     }
 
     return raw

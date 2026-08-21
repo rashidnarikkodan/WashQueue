@@ -5,7 +5,14 @@ import { IStationPricingRepository } from "@/modules/station/domain/repositories
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
-import { Booking, BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+import {
+  Booking,
+  BookingStatus,
+  PaymentStatus,
+  PaymentType,
+  PaymentMethod,
+  derivePaymentMethod,
+} from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -25,7 +32,7 @@ export interface ConfirmBookingReservationInput {
   razorpay_order_id: string
   razorpay_payment_id: string
   razorpay_signature: string
-  paymentMethod?: "RAZORPAY" | "WALLET"
+  paymentMethod?: PaymentMethod
   /**
    * Set only by the Razorpay webhook flow, which has already authenticated the
    * request via its own x-razorpay-signature payload HMAC (a different signature
@@ -63,7 +70,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
   async execute(input: ConfirmBookingReservationInput): Promise<BookingResponseDTO> {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentMethod } = input
 
-    const isWalletPayment = paymentMethod === "WALLET"
+    const isWalletPayment = paymentMethod === PaymentMethod.WALLET
 
     if (!isWalletPayment && !input.skipSignatureVerification) {
       // Verify Razorpay HMAC Signature for online card/UPI payments
@@ -166,6 +173,10 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       paymentStatus:
         reservation.paymentType === PaymentType.ONLINE_FULL ? PaymentStatus.PAID : PaymentStatus.PENDING,
       paymentType: reservation.paymentType,
+      paymentMethod: derivePaymentMethod(reservation.paymentType, {
+        isWalletPayment,
+        walletAmount: reservation.walletAmount,
+      }),
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

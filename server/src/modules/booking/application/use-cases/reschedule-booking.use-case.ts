@@ -53,9 +53,17 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
+    // 4. Max Reschedule Limit Check (Max 2 times)
+    if (booking.rescheduleCount >= 2) {
+      throw new AppError(
+        "Maximum limit of 2 reschedules has been reached for this booking. Further rescheduling is not permitted.",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
     const now = new Date()
 
-    // 4. 24-Hour Policy Rule Check
+    // 5. 24-Hour Policy Rule Check
     if (!booking.canReschedule(now)) {
       throw new AppError(
         "Bookings can only be rescheduled at least 24 hours prior to the scheduled window start",

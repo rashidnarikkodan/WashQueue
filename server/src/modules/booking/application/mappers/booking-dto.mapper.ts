@@ -51,6 +51,7 @@ export class BookingDTOMapper {
       },
       paymentStatus: props.paymentStatus,
       paymentType: props.paymentType,
+      paymentMethod: props.paymentMethod,
       depositAmount: props.depositAmount,
       cashAmount: props.cashAmount,
       refundAmount: props.refundAmount,
@@ -91,6 +92,7 @@ export class BookingDTOMapper {
           }
         : null,
       statusHistory: mappedHistory,
+      rescheduleCount: props.rescheduleCount ?? 0,
       createdAt: props.createdAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),
     }
