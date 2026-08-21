@@ -39,7 +39,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -51,7 +50,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Debounced search for Nominatim API
   useEffect(() => {
     if (!searchQuery.trim()) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -169,7 +167,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors focus:outline-none select-none py-1.5 px-3 rounded-full hover:bg-muted/30 border border-transparent hover:border-border/30 ${className}`}
@@ -183,13 +180,11 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
         />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div
           className="absolute right-0 lg:left-0 lg:right-auto mt-2 w-72 rounded-2xl border border-border bg-card p-2 shadow-2xl z-50 flex flex-col focus:outline-none animate-in fade-in slide-in-from-top-2 duration-200"
           role="listbox"
         >
-          {/* Autocomplete Search Field */}
           <div className="relative p-1">
             <input
               type="text"
@@ -204,7 +199,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
 
           <div className="h-px bg-border my-1.5 px-1"></div>
 
-          {/* Conditional content listing */}
           {searchQuery.trim() ? (
             <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto pr-0.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">
@@ -252,7 +246,6 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
             </div>
           ) : (
             <>
-              {/* Use Current Location Button */}
               <button
                 onClick={handleUseCurrentLocation}
                 disabled={isLocating}
@@ -270,12 +263,10 @@ export default function LocationSelector({ className = "" }: LocationSelectorPro
 
               <div className="h-px bg-border my-1 px-1"></div>
 
-              {/* Header Label */}
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2.5 py-1">
                 Popular Locations
               </span>
 
-              {/* Presets List */}
               <div className="flex flex-col gap-0.5 max-h-56 overflow-y-auto pr-0.5">
                 {PRESETS.map((location) => {
                   const isSelected = selectedLocation === location

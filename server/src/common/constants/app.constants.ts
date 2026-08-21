@@ -1,4 +1,3 @@
-// App-wide general constants
 
 export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Login successful",

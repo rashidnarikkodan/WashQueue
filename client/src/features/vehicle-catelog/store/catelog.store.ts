@@ -60,7 +60,6 @@ export const useVehicleCatelogStore = create<VehicleCatelogStore>((set, get) => 
         classes: sortedClasses,
       })
 
-      // Auto-expand first category if not set yet
       if (sortedCats.length > 0 && Object.keys(get().expandedCategories).length === 0) {
         set({
           expandedCategories: { [sortedCats[0].id]: true },

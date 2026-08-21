@@ -40,7 +40,6 @@ export class UserController {
   ) {}
 
   getUsers = async (req: Request, res: Response) => {
-    // req.query is already validated/coerced by validateRequest(usersQuerySchema) on the route
     const query = req.query as unknown as z.infer<typeof usersQuerySchema>
     const data = await this.getUsersUseCase.execute(query)
     success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.USERS_RETRIEVED_SUCCESS)
@@ -97,8 +96,6 @@ export class UserController {
   }
 
   exportUsers = async (req: Request, res: Response) => {
-    // req.query is already validated/coerced by validateRequest(usersQuerySchema) on the route;
-    // page/limit are forced here to export the full result set regardless of what was requested.
     const validatedQuery = req.query as unknown as z.infer<typeof usersQuerySchema>
     const query = { ...validatedQuery, page: 1, limit: 10000 }
     const data = await this.getUsersUseCase.execute(query)

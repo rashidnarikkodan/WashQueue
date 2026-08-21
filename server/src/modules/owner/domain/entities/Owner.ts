@@ -13,7 +13,6 @@ export interface OwnerProps {
   createdAt?: Date
   updatedAt?: Date
 
-  // onboarding fields
   onboardingStep?: number
   idProofType?: string
   idProofUrl?: string
@@ -45,7 +44,6 @@ export class Owner implements OwnerProps {
   readonly createdAt?: Date
   readonly updatedAt?: Date
 
-  // onboarding fields
   readonly onboardingStep?: number
   readonly idProofType?: string
   readonly idProofUrl?: string

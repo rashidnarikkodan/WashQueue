@@ -12,10 +12,8 @@ const Sidebar = ({ items }: Props) => {
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
   const [isOpenMobile, setIsOpenMobile] = useState(false)
 
-  // Mobile keyboard accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an editable field
       const target = e.target as HTMLElement
       if (
         target.tagName === "INPUT" ||
@@ -67,7 +65,6 @@ const Sidebar = ({ items }: Props) => {
 
   return (
     <>
-      {/* Mobile Small Trigger Handle (Visible on screen edge when mobile sidebar is closed) */}
       <button
         type="button"
         onClick={() => setIsOpenMobile(true)}
@@ -85,7 +82,6 @@ const Sidebar = ({ items }: Props) => {
         <ChevronRight size={18} className="animate-pulse" />
       </button>
 
-      {/* Backdrop overlay for mobile screen */}
       {isOpenMobile && (
         <div
           onClick={() => setIsOpenMobile(false)}
@@ -94,7 +90,6 @@ const Sidebar = ({ items }: Props) => {
         />
       )}
 
-      {/* Sidebar Container */}
       <aside
         className={`
           group
@@ -128,7 +123,6 @@ const Sidebar = ({ items }: Props) => {
           ${isOpenMobile ? "w-[260px] translate-x-0" : "-translate-x-full w-[260px] md:translate-x-0"}
         `}
       >
-        {/* Mobile Header with Close Button */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/40 md:hidden px-2">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Navigation</span>
           <button

@@ -11,10 +11,8 @@ interface OwnerStore {
   onboardingDetails: OnboardingDetails
   isSubmitted: boolean
 
-  /** Load draft from server on page mount */
   fetchOnboardingStatus: () => Promise<void>
 
-  /** Save current step data and advance to next step */
   saveStepAndContinue: (
     currentStep: number,
     formData: FormData,
@@ -22,7 +20,6 @@ interface OwnerStore {
     setStep: (s: number) => void
   ) => Promise<void>
 
-  /** Final submit of the completed onboarding application */
   submitOnboarding: () => Promise<boolean>
 }
 
@@ -37,7 +34,6 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
     set({ isFetchingStatus: true })
     try {
       const status = await ownerApi.getOnboardingStatus()
-      // Sync authStore user profile in-memory & localStorage to prevent redirect loops
       const currentUser = useAuthStore.getState().user
       if (currentUser) {
         const updatedUser = {
@@ -55,7 +51,6 @@ export const useOwnerStore = create<OwnerStore>((set) => ({
         isFetchingStatus: false,
       })
     } catch {
-      // Silently fail — user may simply not have started onboarding yet
       set({ isFetchingStatus: false })
     }
   },

@@ -45,7 +45,6 @@ export default function PromptModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Sync internal value whenever modal opens with new defaultValue
   useEffect(() => {
     if (isOpen) {
       setValue(defaultValue || "")
@@ -53,7 +52,6 @@ export default function PromptModal({
     }
   }, [isOpen, defaultValue])
 
-  // Sync native dialog state with isOpen prop and auto-focus input
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -63,7 +61,6 @@ export default function PromptModal({
         dialog.showModal()
         document.body.style.overflow = "hidden"
       }
-      // Auto-focus and select text after dialog opens
       const timer = setTimeout(() => {
         if (inputType === "textarea") {
           if (textareaRef.current) {
@@ -86,7 +83,6 @@ export default function PromptModal({
     }
   }, [isOpen, inputType])
 
-  // Clean up overflow styling on unmount
   useEffect(() => {
     return () => {
       document.body.style.overflow = ""
@@ -117,7 +113,6 @@ export default function PromptModal({
     }
   }
 
-  // Handle Enter key for single-line input or Ctrl+Enter for textarea
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       if (inputType === "text") {
@@ -160,7 +155,6 @@ export default function PromptModal({
       className="m-auto w-full max-w-lg rounded-2xl border border-border bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <form onSubmit={handleSubmit} className="flex flex-col p-6 space-y-4">
-        {/* Header */}
         <div className="flex items-start gap-3.5">
           <div
             className={`p-2.5 rounded-xl border shrink-0 ${
@@ -196,7 +190,6 @@ export default function PromptModal({
           </button>
         </div>
 
-        {/* Input Body */}
         <div className="space-y-1.5 pt-1">
           {label && (
             <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -244,7 +237,6 @@ export default function PromptModal({
             />
           )}
 
-          {/* Feedback / Counter / Hint */}
           <div className="flex items-center justify-between text-[11px] px-1">
             {error ? (
               <span className="text-destructive font-semibold">{error}</span>
@@ -262,7 +254,6 @@ export default function PromptModal({
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-border/50">
           <button
             type="button"

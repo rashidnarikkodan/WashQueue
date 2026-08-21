@@ -7,7 +7,6 @@ import { IPDFInvoiceService } from "../../application/interfaces/pdf-invoice.int
 
 export class PDFInvoiceService implements IPDFInvoiceService {
   async generateInvoicePdf(booking: BookingResponseDTO): Promise<Buffer> {
-    // Dynamically resolve Vehicle Category & Class names by ID if present
     let categoryName = "Standard"
     let className = "Standard Vehicle"
 
@@ -20,7 +19,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
         const catDoc = await VehicleCategoryModel.findById(categoryId).lean()
         if (catDoc && catDoc.name) categoryName = catDoc.name
       } catch {
-        // Ignore lookup errors gracefully
       }
     }
 
@@ -29,7 +27,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
         const clsDoc = await VehicleClassModel.findById(classId).lean()
         if (clsDoc && clsDoc.name) className = clsDoc.name
       } catch {
-        // Ignore lookup errors gracefully
       }
     }
 
@@ -42,18 +39,15 @@ export class PDFInvoiceService implements IPDFInvoiceService {
         doc.on("end", () => resolve(Buffer.concat(buffers)))
         doc.on("error", (err) => reject(err))
 
-        // Color Palette
-        const primaryColor = "#0f172a" // Slate 900
-        const accentColor = "#0284c7" // Sky 600
-        const textDark = "#1e293b" // Slate 800
-        const textMuted = "#64748b" // Slate 500
-        const bgLight = "#f8fafc" // Slate 50
-        const borderColor = "#cbd5e1" // Slate 300
+        const primaryColor = "#0f172a"
+        const accentColor = "#0284c7"
+        const textDark = "#1e293b"
+        const textMuted = "#64748b"
+        const bgLight = "#f8fafc"
+        const borderColor = "#cbd5e1"
 
-        // Header Background Banner
         doc.rect(0, 0, doc.page.width, 95).fill(primaryColor)
 
-        // Header Title & Subtitle
         doc.fillColor("#ffffff").fontSize(22).font("Helvetica-Bold").text("WashQueue", 40, 28)
         doc.fontSize(9.5).font("Helvetica").text("Automated Wash Station Management System", 40, 56)
 
@@ -69,11 +63,9 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         let y = 110
 
-        // Section 1 & Section 2 Grid (Customer & Vehicle Info)
         const boxWidth = 250
         const boxHeight = 125
 
-        // Left Box: Customer Essential Details
         doc.rect(40, y, boxWidth, boxHeight).fillAndStroke(bgLight, borderColor)
         doc
           .fillColor(textMuted)
@@ -99,7 +91,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
         doc.text(`Account Type: ${customerType}`, 52, y + 72)
         doc.text(`Booking #: ${booking.bookingNumber}`, 52, y + 86)
 
-        // Right Box: Vehicle Specifications & Category/Class Info
         doc.rect(305, y, boxWidth, boxHeight).fillAndStroke(bgLight, borderColor)
         doc
           .fillColor(textMuted)
@@ -134,7 +125,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         y += boxHeight + 15
 
-        // Section 3: Station & Time Window Info Bar
         doc.rect(40, y, 515, 65).fillAndStroke(bgLight, borderColor)
         doc
           .fillColor(textMuted)
@@ -179,7 +169,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         y += 80
 
-        // Service Table Header
         doc.rect(40, y, 515, 24).fill(accentColor)
         doc.fillColor("#ffffff").fontSize(9).font("Helvetica-Bold")
         doc.text("SERVICE DESCRIPTION", 52, y + 7)
@@ -188,10 +177,8 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         y += 24
 
-        // Items Helper
         const formatCurrency = (amt: number) => `₹${amt.toFixed(2)}`
 
-        // Base Service Item
         const serviceName =
           booking.serviceType === "FULL" ? "Full Wash Service" : "Express Half Wash Service"
         doc.rect(40, y, 515, 28).strokeColor(borderColor).stroke()
@@ -213,7 +200,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         y += 28
 
-        // Extra Services Items
         if (booking.extraServices && booking.extraServices.length > 0) {
           for (const extra of booking.extraServices) {
             doc.rect(40, y, 515, 28).strokeColor(borderColor).stroke()
@@ -237,7 +223,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
 
         y += 15
 
-        // Totals Box
         const totalBoxWidth = 230
         const totalBoxX = 325
 
@@ -278,7 +263,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
           }
         }
 
-        // Final Total Highlight Bar
         doc.rect(totalBoxX - 10, y + 4, totalBoxWidth + 15, 32).fill(primaryColor)
         doc
           .fillColor("#ffffff")
@@ -287,7 +271,6 @@ export class PDFInvoiceService implements IPDFInvoiceService {
           .text("TOTAL INVOICE AMOUNT:", totalBoxX, y + 14)
         doc.fontSize(12).text(formatCurrency(booking.pricingSnapshot.totalPrice), 470, y + 13)
 
-        // Footer Section
         const footerY = doc.page.height - 65
         doc.moveTo(40, footerY).lineTo(555, footerY).strokeColor(borderColor).stroke()
 

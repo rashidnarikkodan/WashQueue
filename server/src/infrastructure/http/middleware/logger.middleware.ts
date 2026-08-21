@@ -4,7 +4,6 @@ import logger from "@/configs/logger.config"
 const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now()
 
-  // Log incoming request (including query parameters & parsed body)
   logger.info(
     {
       method: req.method,
@@ -16,7 +15,6 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
     `Incoming: ${req.method} ${req.url}`
   )
 
-  // Intercept the response body
   const originalSend = res.send
   let responseBody: unknown
 
@@ -35,7 +33,6 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
         parsedResponseBody = JSON.parse(responseBody)
       }
     } catch {
-      // Leave as string if it is not valid JSON
     }
 
     const logData = {

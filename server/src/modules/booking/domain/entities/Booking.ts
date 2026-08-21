@@ -3,8 +3,6 @@ import { PaymentStatus, PaymentMethod } from "@/common/constants/payment.constan
 
 export { BookingStatus, ServiceType, PaymentStatus, PaymentMethod }
 
-// Called once the caller already knows the payment is an online settlement (as opposed to
-// PAY_AT_STATION/NO_PAYMENT) — picks the exact instrument based on wallet usage.
 export function deriveOnlinePaymentMethod(
   opts: { isWalletPayment?: boolean; walletAmount?: number } = {}
 ): PaymentMethod {
@@ -13,9 +11,6 @@ export function deriveOnlinePaymentMethod(
   return PaymentMethod.ONLINE
 }
 
-// Single source of truth for whether a booking's payment is considered settled at creation.
-// PAY_AT_STATION always defers to the station: settled immediately for a walk-in (cash handed
-// over on the spot) but left PENDING for a pre-booked slot (cash due later at check-in).
 export function derivePaymentStatus(paymentMethod: PaymentMethod, isWalkIn: boolean): PaymentStatus {
   if (paymentMethod === PaymentMethod.PAY_AT_STATION) {
     return isWalkIn ? PaymentStatus.PAID : PaymentStatus.PENDING
@@ -370,12 +365,10 @@ export class Booking {
       return false
     }
 
-    // Disallow walk-in bookings if applicable
     if (this.props.isWalkIn) {
       return false
     }
 
-    // Max 2 reschedules permitted
     if ((this.props.rescheduleCount ?? 0) >= 2) {
       return false
     }
@@ -408,7 +401,6 @@ export class Booking {
     }
     this.props.updatedAt = now
   }
-
 
   checkIn(byUserId: string): void {
     if (!this.canTransitionTo(BookingStatus.CHECKED_IN)) {
@@ -463,7 +455,6 @@ export class Booking {
     this.props.updatedAt = now
   }
 
-  // Post-inspection completes both inspection verification and customer handover in a single action
   completePostInspection(inspection: InspectionRecord): void {
     const now = new Date()
     this.props.status = BookingStatus.COMPLETED
@@ -515,8 +506,6 @@ export class Booking {
     this.props.updatedAt = now
   }
 
-  // STALLED is an exceptional side-channel (equipment failure, payment dispute, etc.), not
-  // part of the linear happy-path state machine — deliberately bypasses canTransitionTo.
   stall(reason: string, byUserId: string): void {
     const allowedEntryStatuses = [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE]
     if (!allowedEntryStatuses.includes(this.props.status)) {

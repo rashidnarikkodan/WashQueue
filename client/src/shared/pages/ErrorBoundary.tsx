@@ -7,7 +7,6 @@ export default function ErrorBoundary() {
   const navigate = useNavigate()
   const [showDetails, setShowDetails] = useState(false)
 
-  // Extract error details safely
   let errorMessage = "An unexpected client error has occurred."
   let errorStatus = "Error"
   let errorStack = ""
@@ -30,17 +29,14 @@ export default function ErrorBoundary() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
-      {/* Visual background glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] rounded-full bg-destructive/10 filter blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[350px] h-[350px] rounded-full bg-destructive/10 filter blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-lg bg-card text-card-foreground border border-border rounded-3xl p-8 md:p-10 space-y-8 shadow-2xl backdrop-blur-md text-center z-10 animate-in zoom-in-95 duration-300">
-        {/* Error Alert Icon */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-destructive/15 text-destructive border border-destructive/30 shadow-lg shadow-destructive/10 animate-pulse">
           <AlertTriangle className="h-10 w-10 stroke-[2.5]" />
         </div>
 
-        {/* Text Header */}
         <div className="space-y-3">
           <span className="px-3 py-1 rounded-full border border-destructive/30 bg-destructive/10 text-xs font-bold uppercase tracking-wider text-destructive">
             {errorStatus}
@@ -54,7 +50,6 @@ export default function ErrorBoundary() {
           </p>
         </div>
 
-        {/* Short Error summary box */}
         <div className="p-4 rounded-2xl bg-muted/40 border border-border text-left">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
             Error Message
@@ -64,7 +59,6 @@ export default function ErrorBoundary() {
           </p>
         </div>
 
-        {/* Developer Detailed Info (Collapsible) */}
         {errorStack && (
           <div className="space-y-2">
             <button
@@ -97,7 +91,6 @@ export default function ErrorBoundary() {
           </div>
         )}
 
-        {/* Action Triggers */}
         <div className="flex flex-col sm:flex-row gap-4 pt-2">
           <button
             onClick={() => navigate("/")}

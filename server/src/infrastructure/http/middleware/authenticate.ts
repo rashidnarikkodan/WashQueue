@@ -20,13 +20,11 @@ export const authenticate = async (
   try {
     let token: string | undefined
 
-    // 1. Try to read from Authorization header
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1]
     }
 
-    // 2. Try to read from cookies
     if (!token && req.cookies) {
       token = req.cookies.accessToken
     }
@@ -50,7 +48,6 @@ export const authenticate = async (
       throw new UnauthorizedError("Invalid or expired authentication token")
     }
 
-    // Check Redis blacklist for blocked users
     const isBlacklisted = await redis.get(`blocked:${decoded.userId}`)
     if (isBlacklisted) {
       throw new UnauthorizedError("Your account has been suspended by the administrator")
@@ -92,7 +89,6 @@ export const optionalAuthenticate = async (
       }
     }
   } catch {
-    // Ignore invalid/missing token for optional authentication
   }
   next()
 }

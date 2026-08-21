@@ -64,7 +64,6 @@ export default function StationDiscoveryMap({
   const [showStyleMenu, setShowStyleMenu] = useState(false)
   const [selectedStation, setSelectedStation] = useState<Station | null>(null)
 
-  // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
@@ -96,11 +95,9 @@ export default function StationDiscoveryMap({
     }
   }, [stations, userLocation, themeMapStyle])
 
-  // Sync Station Markers
   useEffect(() => {
     if (!mapRef.current) return
 
-    // Clear existing station markers
     markersRef.current.forEach((m) => m.remove())
     markersRef.current = []
 
@@ -115,7 +112,6 @@ export default function StationDiscoveryMap({
       hasPoints = true
       bounds.extend([lng, lat])
 
-      // Custom marker DOM element
       const el = document.createElement("div")
       el.className = "station-map-marker group cursor-pointer"
       el.innerHTML = `
@@ -128,7 +124,6 @@ export default function StationDiscoveryMap({
         </div>
       `
 
-      // Mouseenter (hover) shows detail card modal
       el.addEventListener("mouseenter", () => {
         setSelectedStation(station)
       })
@@ -161,7 +156,6 @@ export default function StationDiscoveryMap({
     }
   }, [stations, userLocation, onStationSelect])
 
-  // Sync User Location Marker
   useEffect(() => {
     if (!mapRef.current) return
 
@@ -201,8 +195,6 @@ export default function StationDiscoveryMap({
     })
   }
 
-  // Follow the app's light/dark theme automatically (streets = light basemap, dark = dark vector)
-  // unless the user has explicitly chosen a specific map style.
   useEffect(() => {
     if (!mapRef.current || hasUserOverriddenStyleRef.current) return
     if (themeMapStyle === currentMode) return
@@ -228,10 +220,8 @@ export default function StationDiscoveryMap({
 
   return (
     <div className="relative w-full h-[650px] rounded-3xl overflow-hidden border border-border bg-card shadow-2xl">
-      {/* Interactive Map Canvas */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Map Layer Switcher (Top Right) */}
       <div className="absolute top-4 right-4 z-20">
         <div className="relative">
           <button
@@ -285,7 +275,6 @@ export default function StationDiscoveryMap({
         </div>
       </div>
 
-      {/* Recenter Button (Top Left) */}
       {userLocation && (
         <button
           type="button"
@@ -298,7 +287,6 @@ export default function StationDiscoveryMap({
         </button>
       )}
 
-      {/* Selected Station Floating Hover Preview Card (Bottom Center Overlay) */}
       {selectedStation && (
         <div className="absolute bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-96 z-30 bg-card/95 backdrop-blur-xl border border-primary/40 rounded-2xl shadow-2xl p-4 transition-all animate-in fade-in slide-in-from-bottom-3">
           <div className="flex gap-3 items-start justify-between">

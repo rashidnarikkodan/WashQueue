@@ -86,7 +86,6 @@ export default function BookingResultModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      {/* Glow Effect Backdrop */}
       <div
         className={`absolute w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none -z-10 ${
           isSuccess
@@ -99,7 +98,6 @@ export default function BookingResultModal({
         }`}
       />
 
-      {/* Main Full-Screen Modal Card */}
       <div
         className={`w-full max-w-lg rounded-[32px] p-6 sm:p-10 border shadow-2xl text-center space-y-6 relative overflow-hidden bg-card text-card-foreground animate-in zoom-in-95 duration-200 ${
           isSuccess
@@ -111,7 +109,6 @@ export default function BookingResultModal({
             : "border-destructive/30 shadow-destructive/20"
         }`}
       >
-        {/* Animated Badge Icon Header */}
         <div className="flex justify-center pt-2">
           <div
             className={`w-20 h-20 rounded-full flex items-center justify-center transition-all animate-pulse shadow-lg ${
@@ -136,7 +133,6 @@ export default function BookingResultModal({
           </div>
         </div>
 
-        {/* Title & Booking ID Pill */}
         <div className="space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground font-sans">
             {isSuccess
@@ -185,7 +181,6 @@ export default function BookingResultModal({
           </div>
         </div>
 
-        {/* Details Card Summary */}
         <div className="p-5 rounded-2xl bg-muted/40 border border-border space-y-3 text-left text-xs text-foreground">
           {isSuccess ? (
             <>
@@ -256,7 +251,6 @@ export default function BookingResultModal({
           )}
         </div>
 
-        {/* Action Buttons for Next Move */}
         <div className="space-y-2.5 pt-2">
           {isSuccess ? (
             <>

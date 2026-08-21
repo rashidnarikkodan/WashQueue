@@ -30,7 +30,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     isSubmitted: boolean
     tokens?: { accessToken: string; refreshToken: string }
   }> {
-    // Fetch existing onboarding details to merge (preserve previous step data)
     const userDoc = await this.userRepository.findById(userId)
 
     if (!userDoc) {

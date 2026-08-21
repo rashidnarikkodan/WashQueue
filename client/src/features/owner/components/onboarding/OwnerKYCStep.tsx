@@ -45,7 +45,6 @@ export default function OwnerKYCStep({
 }: OwnerKYCStepProps) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Header */}
       <div className="space-y-1">
         <span className="text-[10px] sm:text-xs font-bold text-primary tracking-widest uppercase block">
           STEP 1 OF 3
@@ -60,7 +59,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Personal Information */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <User size={16} className="text-primary" />
@@ -113,7 +111,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Business Information */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Building2 size={16} className="text-primary" />
@@ -153,7 +150,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Identity Verification */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <ShieldCheck size={16} className="text-primary" />
@@ -192,7 +188,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Business Verification (Optional) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -229,7 +224,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Footer Actions */}
       <div className="flex justify-between items-center pt-2 select-none">
         <button
           type="button"

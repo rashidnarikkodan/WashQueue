@@ -9,7 +9,6 @@ import { getErrorMessage } from "@/shared/utils/error"
 import { STATION_STATUS } from "../types"
 import type { ExtraServiceInput, StationImage } from "../types"
 
-// Form Step Components
 import {
   StationDetailsForm,
   AvailabilityForm,
@@ -34,7 +33,6 @@ export default function AddEditStation() {
 
   const user = useAuthStore((state) => state.user)
 
-  // Redirect unapproved owners away from creation/editing wizard
   useEffect(() => {
     if (user && user.role === "owner" && !user.isVerified) {
       toast.error(
@@ -44,19 +42,15 @@ export default function AddEditStation() {
     }
   }, [user, navigate])
 
-  // Orchestrator State
-
   const [activeStep, setActiveStep] = useState<number>(1)
   const [stationId, setStationId] = useState<string | null>(targetStationId)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Status & Rejection Tracking
   const [stationStatus, setStationStatus] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState<string | null>(null)
   const [existingImages, setExistingImages] = useState<StationImage[]>([])
 
-  // Accumulated Form Data
   const [stationDetails, setStationDetails] = useState<StationDetailsFormData | null>(null)
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [availability, setAvailability] = useState<
@@ -68,7 +62,6 @@ export default function AddEditStation() {
     extraServices: ExtraServiceInput[]
   } | null>(null)
 
-  // Load existing station data if editing/resuming draft or rejected station
   useEffect(() => {
     if (!targetStationId) return
 
@@ -138,7 +131,6 @@ export default function AddEditStation() {
           })
         }
 
-        // Set active step based on progress
         if (s.name && s.operatingHours?.length && detail.pricing?.length) {
           setActiveStep(4)
         } else if (s.name && s.operatingHours?.length) {
@@ -158,7 +150,6 @@ export default function AddEditStation() {
     loadStationData()
   }, [targetStationId])
 
-  // Step 1: Submit Station Details
   const handleStep1Submit = async (
     data: StationDetailsFormData,
     images: File[],
@@ -197,7 +188,6 @@ export default function AddEditStation() {
 
     try {
       if (!stationId) {
-        // First time creating station draft
         const res = await stationApi.createStation(formData)
         const newStationId = res.stationId || res.station?.id
         setStationId(newStationId)
@@ -206,7 +196,6 @@ export default function AddEditStation() {
         }
         setImageFiles([])
       } else {
-        // Updating existing draft or active station
         formData.append("step", "1")
         if (deletedPublicIds.length > 0) {
           formData.append("deletedImagePublicIds", JSON.stringify(deletedPublicIds))
@@ -227,7 +216,6 @@ export default function AddEditStation() {
     }
   }
 
-  // Step 2: Submit Availability
   const handleStep2Submit = async (
     data: AvailabilityFormData & { holidays?: { date: string; reason?: string }[] }
   ) => {
@@ -263,7 +251,6 @@ export default function AddEditStation() {
     }
   }
 
-  // Step 3: Submit Pricing
   const handleStep3Submit = async (pricingList: PricingItem[]) => {
     if (!stationId) {
       toast.error("Station ID missing. Please complete Step 1 first.")
@@ -298,7 +285,6 @@ export default function AddEditStation() {
     }
   }
 
-  // Step 4: Submit Extra Services & Amenities
   const handleStep4Submit = async (data: {
     amenities: string[]
     extraServices: ExtraServiceInput[]
@@ -351,7 +337,6 @@ export default function AddEditStation() {
     }
   }
 
-  // Step 5: Final Review & Submit
   const handleFinalSubmit = async () => {
     if (!stationId) {
       toast.error("Station ID missing. Cannot submit.")
@@ -365,7 +350,6 @@ export default function AddEditStation() {
         await stationApi.submitStation(stationId)
         toast.success("Station submitted for review successfully!")
       } else {
-        // When editing an active or pending station, submit updates & trigger pending admin review
         await stationApi.updateStation(stationId, {
           step: 1,
           status: STATION_STATUS.PENDING_REVIEW,
@@ -410,7 +394,6 @@ export default function AddEditStation() {
 
   return (
     <div className="w-full max-w-[1650px] mx-auto flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-16 px-4 py-8 sm:px-8">
-      {/* Left Column: Form Step Tracking */}
       <div className="w-full lg:w-auto lg:sticky lg:top-8 shrink-0">
         <Stepper
           steps={ADD_STATION_STEPPER}
@@ -426,9 +409,7 @@ export default function AddEditStation() {
         />
       </div>
 
-      {/* Right Column: Main Form Card Container */}
       <div className="grow max-w-6xl bg-transparent sm:bg-card border-0 sm:border border-slate-800/80 rounded-none sm:rounded-3xl p-4 sm:p-8 md:p-10 shadow-none sm:shadow-2xl relative z-10 w-full max-h-none sm:max-h-210 overflow-y-visible sm:overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800/60 scrollbar-track-transparent">
-        {/* Rejection Notice Banner */}
         {stationStatus === STATION_STATUS.REJECTED && (
           <div className="mb-6 p-4 border border-red-500/30 bg-red-500/10 rounded-2xl flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
@@ -442,7 +423,6 @@ export default function AddEditStation() {
           </div>
         )}
 
-        {/* Draft Notice Banner */}
         {stationStatus === STATION_STATUS.DRAFT && (
           <div className="mb-6 p-4 border border-blue-500/30 bg-blue-500/10 rounded-2xl flex items-start gap-3">
             <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
@@ -456,7 +436,6 @@ export default function AddEditStation() {
           </div>
         )}
 
-        {/* Active Station Edit Banner */}
         {isEditMode && stationStatus === STATION_STATUS.ACTIVE && (
           <div className="mb-6 p-4 border border-emerald-500/30 bg-emerald-500/10 rounded-2xl flex items-start gap-3">
             <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />

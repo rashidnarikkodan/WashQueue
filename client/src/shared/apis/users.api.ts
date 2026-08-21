@@ -19,7 +19,6 @@ interface UserApiPayload {
   lastLoginAt?: string
   onboardingStep?: number
   onboardingDetails?: Record<string, string | number | boolean | undefined | null>
-  // Onboarding fields returned flat by the server (merged from the OnboardingDetails document)
   legalFullName?: string
   businessName?: string
   gstNumber?: string
@@ -59,8 +58,6 @@ const toUser = (u?: UserApiPayload): User => ({
   lastLoginAt: u?.lastLoginAt,
   onboardingStep: u?.onboardingStep,
   rejectionReason: u?.rejectionReason,
-  // Merge: use explicit onboardingDetails if present, otherwise build it from
-  // the flat onboarding fields the server sometimes returns at the root level.
   onboardingDetails:
     u?.onboardingDetails ??
     (u?.legalFullName || u?.businessName || u?.idProofUrl

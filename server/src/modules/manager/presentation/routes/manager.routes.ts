@@ -14,7 +14,6 @@ import { API_ROUTES } from "@/common/constants/route.constants"
 export const createManagerRouter = (managerController: ManagerController): Router => {
   const router = Router()
 
-  // Public invitation routes
   router.get(API_ROUTES.MANAGERS.VERIFY_INVITATION, asyncHandler(managerController.verifyToken))
 
   router.post(
@@ -28,7 +27,6 @@ export const createManagerRouter = (managerController: ManagerController): Route
     asyncHandler(managerController.rejectInvitation)
   )
 
-  // Authenticated routes
   router.use(authenticate)
 
   router.post(

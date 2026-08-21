@@ -30,7 +30,6 @@ export default function MyBookingsPage() {
     cancelBooking,
   } = useBookingList()
 
-  // Customer HUD Stats
   const stats: StatItem[] = useMemo(() => {
     const totalCount = pagination?.total ?? bookings.length
     const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length
@@ -58,7 +57,6 @@ export default function MyBookingsPage() {
     ]
   }, [bookings, pagination?.total])
 
-  // Customer columns
   const columns = useMemo(
     () =>
       getCustomerColumns({
@@ -84,10 +82,8 @@ export default function MyBookingsPage() {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
-      {/* Breadcrumb Bar */}
       <Breadcrumbs items={[{ label: "Home", path: "/" }, { label: "My Bookings" }]} />
 
-      {/* Top Header Row with Heading & Parallel Refresh Button */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
@@ -98,7 +94,6 @@ export default function MyBookingsPage() {
           </p>
         </div>
 
-        {/* Parallel Refresh Button */}
         <button
           type="button"
           onClick={handleRefresh}
@@ -113,7 +108,6 @@ export default function MyBookingsPage() {
         </button>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold flex items-center justify-between">
           <span>{error}</span>
@@ -123,10 +117,8 @@ export default function MyBookingsPage() {
         </div>
       )}
 
-      {/* Stats HUD Bar */}
       <StatsHUD stats={stats} />
 
-      {/* Bookings Toolbar (Tabs & Search) */}
       <DataTableToolbar
         tabs={CUSTOMER_BOOKING_TABS}
         activeTab={activeTab}
@@ -136,7 +128,6 @@ export default function MyBookingsPage() {
         searchPlaceholder="Search booking ID, vehicle number, service..."
       />
 
-      {/* Bookings DataTable */}
       <DataTable<Booking>
         data={filteredBookings}
         columns={columns}
@@ -147,7 +138,6 @@ export default function MyBookingsPage() {
         onPageChange={(p: number) => updateParams({ page: p })}
       />
 
-      {/* Check-In QR Ticket Modal */}
       {selectedBookingForQr && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-6 shadow-2xl text-center relative">
@@ -200,7 +190,6 @@ export default function MyBookingsPage() {
         </div>
       )}
 
-      {/* Figma Designed Cancellation Confirmation & Success Modal */}
       {selectedBookingForCancel && (
         <CancellationModal
           booking={selectedBookingForCancel}

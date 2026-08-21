@@ -9,14 +9,12 @@ import type { UserProfile, UpdateProfileInput, ProfileStats } from "../types"
 export const profileApi = {
   getProfile: async (): Promise<UserProfile> => {
     try {
-      // Fetch authenticated user profile directly from server
       const authUser = await authApi.me()
 
       let businessName: string | undefined
       let whatsapp: string | undefined
       let headquarters: string | undefined
 
-      // If user is owner, fetch onboarding details from server
       if (authUser.role === "owner" || authUser.role === "admin") {
         try {
           const onboarding = await ownerApi.getOnboardingStatus()
@@ -30,7 +28,6 @@ export const profileApi = {
             }
           }
         } catch {
-          // Onboarding status may be empty if not submitted yet
         }
       }
 
@@ -83,7 +80,6 @@ export const profileApi = {
 
   getStats: async (): Promise<ProfileStats> => {
     try {
-      // Call actual APIs to compute telemetry stats
       const vehiclesPromise = vehicleApi.getVehicles().catch(() => [])
       const stationsPromise = stationApi.getStations({ page: 1, limit: 100 }).catch(() => null)
 
@@ -93,7 +89,7 @@ export const profileApi = {
       const stationsCount = stationsRes && stationsRes.stations ? stationsRes.stations.length : 0
 
       return {
-        totalBookings: 0, // Real bookings telemetry count
+        totalBookings: 0,
         favoriteStations: stationsCount,
         vehiclesAdded: vehiclesCount,
       }

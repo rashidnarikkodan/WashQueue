@@ -46,13 +46,11 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
   const [isTorchOn, setIsTorchOn] = useState<boolean>(false)
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null)
 
-  // Instant Synchronous Media Track Cleanup (Guarantees camera hardware turns off immediately)
   const stopAllMediaTracks = useCallback(() => {
     if (mediaStreamRef.current) {
       try {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop())
       } catch {
-        // ignore
       }
       mediaStreamRef.current = null
     }
@@ -63,7 +61,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
         stream.getTracks().forEach((track) => track.stop())
         videoRef.current.srcObject = null
       } catch {
-        // ignore
       }
     }
 
@@ -97,7 +94,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
 
-      // If closed while getUserMedia was resolving, terminate stream immediately
       if (!isMountedRef.current) {
         stream.getTracks().forEach((track) => {
           track.stop()
@@ -141,7 +137,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     }
   }, [facingMode, selectedCameraId, stopAllMediaTracks])
 
-  // Enumerate devices on mount, preferring the rear/environment camera by default
   useEffect(() => {
     let isMounted = true
 
@@ -175,7 +170,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Instant camera teardown on tab switch, window blur, page hide, or unmount
   useEffect(() => {
     const handlePageHide = () => stopAllMediaTracks()
     const handleVisibilityChange = () => {
@@ -194,7 +188,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     }
   }, [stopAllMediaTracks])
 
-  // Auto-(re)start camera when the selected device or facing mode changes
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
@@ -324,7 +317,6 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
               />
             )}
 
-            {/* Corner-bracket frame overlay, matches the QR scanner's visual language */}
             {isCameraActive && !cameraError && !previewDataUrl && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10 overflow-hidden">
                 <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-3xl flex items-center justify-center shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">

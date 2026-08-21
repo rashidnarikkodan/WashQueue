@@ -37,7 +37,6 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       noShowOnly,
     }
 
-    // 1. ADMIN Role: Unrestricted listing across all stations/providers with filters & pagination
     if (normRole === "ADMIN") {
       const result = await this.bookingRepository.findBookings(queryFilter)
       return {
@@ -46,7 +45,6 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
     }
 
-    // 2. MANAGER Role: Filter bookings for stations assigned to this manager
     if (normRole === "MANAGER") {
       let stationIds: string[] = []
 
@@ -73,7 +71,6 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
     }
 
-    // 3. OWNER Role: Filter bookings for stations owned by this owner
     if (normRole === "OWNER") {
       let ownedStationIds: string[] = []
       if (this.stationRepository) {
@@ -94,7 +91,6 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
     }
 
-    // 4. Default / CUSTOMER Role: Filter bookings created by this customer userId
     queryFilter.userId = userId
     const result = await this.bookingRepository.findBookings(queryFilter)
 

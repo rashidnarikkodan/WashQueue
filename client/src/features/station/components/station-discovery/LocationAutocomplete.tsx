@@ -11,9 +11,6 @@ interface LocationAutocompleteProps {
   className?: string
 }
 
-// Autocomplete search box backed by the Places API (New). Typing free text still drives the
-// existing name/address text search; picking a suggestion additionally resolves lat/lng so the
-// backend's geospatial ($geoNear) search can run alongside it.
 export default function LocationAutocomplete({
   value,
   onChange,
@@ -79,7 +76,6 @@ export default function LocationAutocomplete({
     }
   }, [debouncedValue])
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -104,7 +100,6 @@ export default function LocationAutocomplete({
       onLocationSelect(null)
     } finally {
       setIsResolving(false)
-      // Rotate the session token now that this search session has resolved to a place.
       sessionTokenRef.current = crypto.randomUUID()
     }
   }

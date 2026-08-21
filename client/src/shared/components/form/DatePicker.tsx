@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from "react"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react"
 
 interface DatePickerProps {
-  value?: string // YYYY-MM-DD
+  value?: string
   onChange: (date: string) => void
   label?: string
   placeholder?: string
-  minDate?: string // YYYY-MM-DD
-  maxDate?: string // YYYY-MM-DD
-  disabledDates?: string[] // Array of YYYY-MM-DD dates that cannot be selected
+  minDate?: string
+  maxDate?: string
+  disabledDates?: string[]
   disabled?: boolean
   error?: string
   id?: string
@@ -48,7 +48,6 @@ export default function DatePicker({
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Parse current selected date or default to today
   const selectedDateObj = value ? new Date(value + "T00:00:00") : null
 
   const [viewDate, setViewDate] = useState(() => {
@@ -59,7 +58,6 @@ export default function DatePicker({
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
 
-  // Sync view date if value changes from outside
   useEffect(() => {
     if (value) {
       const parsed = new Date(value + "T00:00:00")
@@ -70,7 +68,6 @@ export default function DatePicker({
     }
   }, [value])
 
-  // Close popover on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -99,14 +96,12 @@ export default function DatePicker({
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const firstDayOfWeek = new Date(year, month, 1).getDay()
 
-  // Build grid days
   const prevMonthDays = new Date(year, month, 0).getDate()
   const trailingDaysCount = firstDayOfWeek
 
   const days: { dateStr: string; dayNum: number; isCurrentMonth: boolean; isDisabled: boolean }[] =
     []
 
-  // Trailing previous month days
   for (let i = trailingDaysCount - 1; i >= 0; i--) {
     const dNum = prevMonthDays - i
     const prevDate = new Date(year, month - 1, dNum)
@@ -119,7 +114,6 @@ export default function DatePicker({
     })
   }
 
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const currDate = new Date(year, month, d)
     const dateStr = formatDateISO(currDate)
@@ -131,7 +125,6 @@ export default function DatePicker({
     })
   }
 
-  // Next month leading days to complete week grid (42 total or 35 total)
   const remainingSlots = (7 - (days.length % 7)) % 7
   for (let i = 1; i <= remainingSlots; i++) {
     const nextDate = new Date(year, month + 1, i)
@@ -178,7 +171,6 @@ export default function DatePicker({
 
   const todayStr = formatDateISO(new Date())
 
-  // Formatted display text (e.g. "Jul 20, 2026")
   const displayFormatted =
     selectedDateObj && !isNaN(selectedDateObj.getTime())
       ? selectedDateObj.toLocaleDateString("en-US", {
@@ -233,10 +225,8 @@ export default function DatePicker({
           )}
         </button>
 
-        {/* Popover Calendar Dropdown */}
         {isOpen && (
           <div className="absolute top-full left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-card border border-border shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 text-card-foreground">
-            {/* Month / Year Navigation */}
             <div className="flex items-center justify-between border-b border-border pb-3">
               <button
                 type="button"
@@ -259,7 +249,6 @@ export default function DatePicker({
               </button>
             </div>
 
-            {/* Day Names Row */}
             <div className="grid grid-cols-7 text-center">
               {DAY_NAMES.map((d) => (
                 <span key={d} className="text-[11px] font-bold text-muted-foreground uppercase">
@@ -268,7 +257,6 @@ export default function DatePicker({
               ))}
             </div>
 
-            {/* Days Grid */}
             <div className="grid grid-cols-7 gap-1">
               {days.map((item, idx) => {
                 const isSelected = item.dateStr === value
@@ -298,7 +286,6 @@ export default function DatePicker({
               })}
             </div>
 
-            {/* Quick Actions Footer */}
             <div className="flex justify-between items-center border-t border-border pt-3 text-xs">
               <button
                 type="button"

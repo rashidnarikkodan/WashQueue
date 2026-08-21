@@ -41,7 +41,6 @@ export default function ManagerQueuePage() {
   const [isAdvancing, setIsAdvancing] = useState(false)
   const [filterType, setFilterType] = useState<QueueFilter>("ALL")
 
-  // Exception handling state
   const [stallingBookingId, setStallingBookingId] = useState<string | null>(null)
   const [stallReasonInput, setStallReasonInput] = useState("")
   const [resolvingBookingId, setResolvingBookingId] = useState<string | null>(null)
@@ -50,7 +49,6 @@ export default function ManagerQueuePage() {
     "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
   >("CHECKED_IN")
 
-  // Helper to resolve check-in arrival timestamp
   const getCheckInTime = useCallback((b: BookingResponse): number => {
     if (b.statusHistory && b.statusHistory.length > 0) {
       const checkInLog = b.statusHistory.find(
@@ -65,9 +63,6 @@ export default function ManagerQueuePage() {
 
   const [liveQueueData, setLiveQueueData] = useState<LiveQueueData | null>(null)
 
-  // 1. Fetch Manager Station & Authoritative Live Queue
-  // `silent` skips the isLoading toggle so real-time refreshes patch data in place
-  // instead of blanking the list with the "Loading queue list..." state.
   const fetchStationAndQueue = useCallback(
     async (silent = false) => {
       if (!silent) setIsLoading(true)
@@ -80,26 +75,22 @@ export default function ManagerQueuePage() {
             stationName: activeStation.stationName,
           })
 
-          // Fetch authoritative server-computed operational queue
           try {
             const liveQ = await bookingApi.getLiveQueue(activeStation.stationId)
             setLiveQueueData(liveQ)
           } catch {}
 
-          // Fetch bookings for this station
           const res = await bookingApi.getUserBookings({
             stationId: activeStation.stationId,
             limit: 100,
           })
           const allBookings = res.bookings || []
 
-          // Filter strictly for ACTIVE operational queue items (NO COMPLETED / CANCELLED / NO_SHOW)
           const activeList = allBookings.filter((b: BookingResponse) =>
             isActiveQueueStatus(b.status)
           )
           setBookings(activeList)
 
-          // Select the first in-service or checked-in booking
           setSelectedBookingId((prev) => {
             if (prev && activeList.some((b) => b.id === prev)) {
               return prev
@@ -138,8 +129,6 @@ export default function ManagerQueuePage() {
     }
   }, [fetchStationAndQueue])
 
-  // Patch a single booking (and the live queue meta) in place from a real-time payload,
-  // instead of refetching the whole station queue and blanking the UI.
   const applyRealtimeBookingUpdate = useCallback(
     async (bookingId?: string) => {
       if (!stationInfo?.stationId) return
@@ -167,7 +156,6 @@ export default function ManagerQueuePage() {
     [stationInfo?.stationId]
   )
 
-  // 2. Real-Time Socket.IO Subscriptions (Event-driven without polling interval)
   useEffect(() => {
     if (!stationInfo?.stationId) return
 
@@ -178,8 +166,6 @@ export default function ManagerQueuePage() {
       void applyRealtimeBookingUpdate(payload?.bookingId)
     }
 
-    // Only a genuine reconnect (after a dropped connection) warrants a full silent resync;
-    // routine events are patched in place above.
     const handleReconnect = () => {
       void fetchStationAndQueue(true)
     }
@@ -213,7 +199,6 @@ export default function ManagerQueuePage() {
     }
   }, [stationInfo?.stationId, applyRealtimeBookingUpdate, fetchStationAndQueue])
 
-  // 3. Operational Filtered Queue List
   const queueList = useMemo(() => {
     const filtered = bookings.filter((b) => {
       if (filterType === "WAITING") return b.status === "CHECK_IN" || b.status === "CHECKED_IN"
@@ -228,7 +213,6 @@ export default function ManagerQueuePage() {
       return true
     })
 
-    // Sort order: IN_SERVICE first, then earliest checked-in arrival
     return filtered.sort((a, b) => {
       if (a.status === "IN_SERVICE" && b.status !== "IN_SERVICE") return -1
       if (b.status === "IN_SERVICE" && a.status !== "IN_SERVICE") return 1
@@ -236,7 +220,6 @@ export default function ManagerQueuePage() {
     })
   }, [bookings, filterType, getCheckInTime])
 
-  // Counts for operational filter tabs
   const filterCounts = useMemo(() => {
     return {
       all: bookings.length,
@@ -252,13 +235,11 @@ export default function ManagerQueuePage() {
     }
   }, [bookings])
 
-  // Active Selected Booking Details
   const selectedBooking = useMemo(() => {
     if (!selectedBookingId) return null
     return bookings.find((b) => b.id === selectedBookingId) || null
   }, [bookings, selectedBookingId])
 
-  // Live "In Progress" Session Timer for IN_SERVICE vehicle
   const serviceStartedAt = selectedBooking?.serviceStartedAt
   const isSelectedBookingInService =
     !!selectedBooking && selectedBooking.status === "IN_SERVICE" && !!serviceStartedAt
@@ -287,7 +268,6 @@ export default function ManagerQueuePage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
   }, [elapsedSeconds])
 
-  // KPI Calculations
   const activeQueueCount = useMemo(() => {
     return bookings.filter(
       (b) => b.status === "CHECK_IN" || b.status === "CHECKED_IN" || b.status === "IN_SERVICE"
@@ -295,7 +275,6 @@ export default function ManagerQueuePage() {
   }, [bookings])
   const estimatedWaitMinutes = activeQueueCount * 15
 
-  // Real per-vehicle queue position / wait estimate / bay assignment
   const getQueueMeta = useCallback(
     (bookingId: string) => {
       if (!liveQueueData) return null
@@ -308,11 +287,9 @@ export default function ManagerQueuePage() {
     [liveQueueData]
   )
 
-  // Handle Advance Booking Status
   const handleAdvanceStatus = async (targetStatus: string) => {
     if (!selectedBooking) return
 
-    // If manager clicks Complete Service on an IN_SERVICE vehicle -> open Post-Inspection workflow
     if (
       targetStatus === "SERVICE_COMPLETED" ||
       (selectedBooking.status === "IN_SERVICE" && targetStatus === "COMPLETED")
@@ -345,7 +322,6 @@ export default function ManagerQueuePage() {
     }
   }
 
-  // Handle Stalling
   const handleConfirmStall = async () => {
     if (!stallingBookingId || !stallReasonInput.trim()) {
       toast.error("Please provide a reason for stalling the booking")
@@ -368,7 +344,6 @@ export default function ManagerQueuePage() {
     }
   }
 
-  // Handle Resolving Stalled
   const handleConfirmResolveStalled = async () => {
     if (!resolvingBookingId || !resolutionInput.trim()) {
       toast.error("Please provide resolution notes")
@@ -408,7 +383,6 @@ export default function ManagerQueuePage() {
     year: "numeric",
   })
 
-  // Determine vehicle image source (pre-inspection photo, vehicle image, or null)
   const selectedVehicleImage = useMemo(() => {
     if (!selectedBooking) return null
     if (

@@ -41,12 +41,10 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   const [managerAssignment, setManagerAssignment] = useState<ManagerListItem | null>(null)
   const [pendingInvitation, setPendingInvitation] = useState<ManagerInvitationItem | null>(null)
 
-  // Modals state
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [isEditPermissionsModalOpen, setIsEditPermissionsModalOpen] = useState(false)
   const [isSubmittingAction, setIsSubmittingAction] = useState(false)
 
-  // Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean
     title: string
@@ -80,7 +78,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       setManagerAssignment(assigned)
       setPendingInvitation(pending)
     } catch {
-      // Quiet fail if missing manager context
     } finally {
       setLoading(false)
     }
@@ -107,7 +104,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         setManagerAssignment(assigned)
         setPendingInvitation(pending)
       } catch {
-        // Quiet fail if missing manager context
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -122,12 +118,10 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
 
   if (!isOwner) return null
 
-  // Helper check if owner is self manager
   const isSelfManager =
     station.managerId === user?.id ||
     (managerAssignment && managerAssignment.managerUserId === user?.id)
 
-  // Action: Self Assign
   const handleSelfAssign = async () => {
     try {
       setIsSubmittingAction(true)
@@ -163,7 +157,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     }
   }
 
-  // Action: Remove Manager
   const handleRemoveManager = () => {
     if (!managerAssignment) return
     const targetAssignment = managerAssignment
@@ -191,7 +184,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     })
   }
 
-  // Action: Suspend / Reactivate Manager
   const handleToggleSuspend = () => {
     if (!managerAssignment) return
     const isSuspended = managerAssignment.status === "SUSPENDED"
@@ -227,7 +219,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     })
   }
 
-  // Action: Cancel Pending Invitation
   const handleCancelInvitation = () => {
     if (!pendingInvitation) return
     const targetInvitation = pendingInvitation
@@ -255,7 +246,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
     })
   }
 
-  // Action: Resend Pending Invitation
   const handleResendInvitation = async () => {
     if (!pendingInvitation) return
     try {
@@ -272,10 +262,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
 
   return (
     <div className="p-6 sm:p-7 rounded-3xl bg-card border border-border shadow-xl space-y-6 text-foreground relative overflow-hidden">
-      {/* Background ambient glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Section Header */}
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
@@ -292,7 +280,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         {loading && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
       </div>
 
-      {/* STATE 1: ACTIVE MANAGER ASSIGNED */}
       {managerAssignment ? (
         <div className="space-y-5">
           <div className="p-4 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -324,7 +311,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons for Assigned Manager */}
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIsEditPermissionsModalOpen(true)}
@@ -370,7 +356,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
             </div>
           </div>
 
-          {/* Manager Granted Permissions List */}
           {managerAssignment.permissions && managerAssignment.permissions.length > 0 && (
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -391,7 +376,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           )}
         </div>
       ) : pendingInvitation ? (
-        /* STATE 2: PENDING INVITATION */
         <div className="p-4 rounded-2xl bg-warning/10 border border-warning/30 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
@@ -444,7 +428,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
           </div>
         </div>
       ) : (
-        /* STATE 3: NO MANAGER ASSIGNED */
         <div className="p-6 rounded-2xl bg-muted/40 border border-border text-center space-y-4">
           <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6 text-warning" />
@@ -480,7 +463,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         </div>
       )}
 
-      {/* Invite Manager Modal */}
       <InviteManagerModal
         isOpen={isInviteModalOpen}
         stationId={station.id}
@@ -492,7 +474,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         }}
       />
 
-      {/* Update Permissions Modal */}
       {managerAssignment && (
         <UpdatePermissionsModal
           isOpen={isEditPermissionsModalOpen}
@@ -505,7 +486,6 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         />
       )}
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}

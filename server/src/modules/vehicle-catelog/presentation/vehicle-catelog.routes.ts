@@ -14,8 +14,6 @@ export const createVehicleCatelogRouter = (
 ): Router => {
   const router = Router()
 
-  // --- Category Routes ---
-  // Public
   router.get(
     API_ROUTES.VEHICLE_CATALOG.CATEGORIES,
     asyncHandler(vehicleCatelogController.getCategories)
@@ -25,7 +23,6 @@ export const createVehicleCatelogRouter = (
     asyncHandler(vehicleCatelogController.getCategory)
   )
 
-  // Protected (Admin only)
   router.post(
     API_ROUTES.VEHICLE_CATALOG.CATEGORIES,
     authenticate,
@@ -47,15 +44,12 @@ export const createVehicleCatelogRouter = (
     asyncHandler(vehicleCatelogController.deleteCategory)
   )
 
-  // --- Class Routes ---
-  // Public
   router.get(API_ROUTES.VEHICLE_CATALOG.CLASSES, asyncHandler(vehicleCatelogController.getClasses))
   router.get(
     API_ROUTES.VEHICLE_CATALOG.CLASS_BY_ID,
     asyncHandler(vehicleCatelogController.getClass)
   )
 
-  // Protected (Admin only)
   router.post(
     API_ROUTES.VEHICLE_CATALOG.CLASSES,
     authenticate,

@@ -14,13 +14,11 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
   ) {}
 
   async execute(data: ResetPasswordInput): Promise<void> {
-    // Verify OTP code using the repository and entity
     const otp = await this.otpRepository.findByEmail(data.email)
     if (!otp || !otp.verify(data.code)) {
       throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_CODE, HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Delete OTP after successful verification
     await this.otpRepository.delete(data.email)
 
     const user = await this.userRepository.findByEmail(data.email)
@@ -28,10 +26,8 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
       throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
-    // Hash the new password using the abstracted hash service
     const hashedPassword = await this.hashService.hash(data.password)
 
-    // Update the password in database using descriptive method
     await this.userRepository.resetPassword(user.id!, hashedPassword)
   }
 }

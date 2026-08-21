@@ -1,7 +1,7 @@
 export interface TimeWindowDTO {
   windowId: string
-  start: string // ISO date-time string
-  end: string // ISO date-time string
+  start: string
+  end: string
   bookedCount: number
   remainingCapacity: number
   status: "OPEN" | "FULL" | "CLOSED" | "PAST"

@@ -1,6 +1,3 @@
-/**
- * Generates a dynamic greeting based on the current system time of day.
- */
 export function getGreeting(): string {
   const hour = new Date().getHours()
 

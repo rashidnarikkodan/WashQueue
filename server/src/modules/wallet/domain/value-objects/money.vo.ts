@@ -10,7 +10,6 @@ export class Money {
       throw new AppError("Invalid monetary amount", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Round to 2 decimal places to prevent floating point precision errors
     this._amount = Math.round((amount + Number.EPSILON) * 100) / 100
     this._currency = currency.toUpperCase()
   }

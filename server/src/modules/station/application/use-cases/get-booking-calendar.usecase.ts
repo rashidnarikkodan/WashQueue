@@ -22,7 +22,6 @@ export class GetBookingCalendarUseCase {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // Lazily ensure all windows up to the booking horizon exist before querying
     await this.ensureBookingHorizonService.ensureBookingHorizon(stationId)
 
     const slotConfig = await this.slotConfigRepository.findByStationId(stationId)

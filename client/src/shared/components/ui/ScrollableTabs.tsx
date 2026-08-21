@@ -42,7 +42,6 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
     return () => window.removeEventListener("resize", checkScroll)
   }, [checkScroll, tabs])
 
-  // Auto-scroll active tab into view
   useEffect(() => {
     if (!activeTab) return
     const activeBtn = tabRefs.current[activeTab]
@@ -60,7 +59,6 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
     setTimeout(checkScroll, 300)
   }
 
-  // Keyboard Left / Right Arrow Key Focus Navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault()
@@ -170,7 +168,6 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
       onKeyDown={handleKeyDown}
       className={`relative flex items-center group outline-none border-b border-border/60 ${className}`}
     >
-      {/* Left Arrow Button */}
       {canScrollLeft && (
         <button
           type="button"
@@ -183,7 +180,6 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
         </button>
       )}
 
-      {/* Tabs Container */}
       <div
         ref={containerRef}
         onScroll={checkScroll}
@@ -220,7 +216,6 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
         })}
       </div>
 
-      {/* Right Arrow Button */}
       {canScrollRight && (
         <button
           type="button"

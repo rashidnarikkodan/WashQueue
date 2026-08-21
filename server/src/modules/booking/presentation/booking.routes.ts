@@ -26,7 +26,6 @@ import {
 export const createBookingRouter = (bookingController: BookingController): Router => {
   const router = Router()
 
-  // Public Live Station Queue (accessible for station visitors)
   router.get(
     "/stations/:stationId/public-queue",
     validateRequest(stationIdParamSchema, "params"),
@@ -35,7 +34,6 @@ export const createBookingRouter = (bookingController: BookingController): Route
 
   router.use(authenticate)
 
-  // Customer & Role-Scoped Operations
   router.post("/", validateRequest(createBookingSchema), asyncHandler(bookingController.create))
   router.get(
     "/",
@@ -65,7 +63,6 @@ export const createBookingRouter = (bookingController: BookingController): Route
     asyncHandler(bookingController.reschedule)
   )
 
-  // Operational Queue Operations (Manager / Owner / Admin)
   router.get(
     "/stations/:stationId/queue",
     authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
@@ -74,7 +71,6 @@ export const createBookingRouter = (bookingController: BookingController): Route
     asyncHandler(bookingController.getOperationalQueue)
   )
 
-  // Manager / Staff Operations
   router.post(
     "/validate-qr",
     authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),

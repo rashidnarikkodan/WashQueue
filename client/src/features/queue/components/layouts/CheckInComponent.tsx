@@ -19,7 +19,6 @@ export default function CheckInComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
 
-  // Handle Automatic QR Code Scan Validation & Pre-Inspection Navigation
   const handleQrScanSuccess = async (scannedValue: string) => {
     if (isSubmitting) return
     setIsSubmitting(true)
@@ -37,7 +36,6 @@ export default function CheckInComponent() {
     }
   }
 
-  // Handle Manual Check-In Entry Validation
   const handleManualCheckIn = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     if (!bookingIdInput.trim()) {
@@ -63,7 +61,6 @@ export default function CheckInComponent() {
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        {/* Left Card: Digital Check-In / QR Scanner */}
         <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 relative overflow-hidden flex flex-col justify-between shadow-md text-card-foreground">
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-3">
@@ -75,7 +72,6 @@ export default function CheckInComponent() {
             </span>
           </div>
 
-          {/* Interactive QR Camera Scanner */}
           <QrCameraScanner
             onScanSuccess={handleQrScanSuccess}
             isProcessing={isSubmitting}
@@ -87,7 +83,6 @@ export default function CheckInComponent() {
           </div>
         </div>
 
-        {/* Right Card: Manual Check-In Form */}
         <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 flex flex-col justify-between shadow-md text-card-foreground">
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-border pb-4">
@@ -123,7 +118,6 @@ export default function CheckInComponent() {
             </form>
           </div>
 
-          {/* Assistance Box */}
           <div className="p-5 rounded-2xl bg-muted/50 border border-border space-y-2 text-xs">
             <div className="flex items-center gap-2 font-bold text-primary">
               <HelpCircle className="h-4 w-4" />
@@ -136,7 +130,6 @@ export default function CheckInComponent() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {confirmedBooking && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 text-center shadow-2xl animate-in zoom-in-95">

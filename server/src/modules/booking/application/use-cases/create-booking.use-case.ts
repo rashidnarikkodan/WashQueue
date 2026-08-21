@@ -40,7 +40,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
   }
 
   async execute(userId: string, input: CreateBookingInput): Promise<BookingResponseDTO> {
-    // 1. Validate Station
     const station = await this.stationRepository.findById(input.stationId)
     if (!station) {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
@@ -50,13 +49,11 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       throw new AppError("Station is currently inactive or suspended", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 2. Validate Vehicle belongs to user
     const vehicle = await this.vehicleRepository.findById(input.vehicleId)
     if (!vehicle || vehicle.userId !== userId || !vehicle.data.isActive) {
       throw new AppError("Vehicle not found or does not belong to user", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 3 & 4. Resolve pricing for vehicle class and validate/price extra services
     const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
       station.id,
       vehicle.data.classId,
@@ -64,7 +61,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       input.extraServiceIds
     )
 
-    // 5. Validate Time Window
     const timeWindow = await this.timeWindowRepository.findById(input.timeWindowId)
     if (!timeWindow || timeWindow.stationId !== station.id) {
       throw new AppError("Selected time window not found", HTTP_STATUS.NOT_FOUND)
@@ -78,7 +74,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       )
     }
 
-    // 6. Reserve Capacity Atomically
     const reservedWindow = await this.timeWindowRepository.reserveCapacityAtomically(timeWindow.id)
     if (!reservedWindow) {
       throw new AppError(
@@ -87,7 +82,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       )
     }
 
-    // 7. Calculate Pricing & Settlement Snapshots
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
@@ -95,11 +89,9 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       isWalkIn: false,
     })
 
-    // 8. Generate Booking Number and QR Token
     const bookingNumber = BookingNumberService.generate()
     const qrResult = QRTokenService.generateToken(timeWindow.windowEnd)
 
-    // 9. Construct Booking Aggregate Root
     const now = new Date()
     const booking = new Booking({
       id: "",
@@ -137,7 +129,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       updatedAt: now,
     })
 
-    // 10. Save Booking & Audit Log
     const savedBooking = await this.bookingRepository.save(booking)
 
     const statusLog = new BookingStatusLog({
@@ -151,10 +142,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 11. Dispatch Notification
     await this.notificationService.notify("BOOKING_CREATED", savedBooking)
 
-    // 12. Return DTO with raw QR token
     return BookingDTOMapper.toDTO(savedBooking, qrResult.rawToken)
   }
 }

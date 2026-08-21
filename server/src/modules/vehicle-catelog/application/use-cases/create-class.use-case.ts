@@ -15,7 +15,6 @@ export class CreateClassUseCase implements ICreateClassUseCase {
   ) {}
 
   async execute(input: CreateClassInput): Promise<ClassResponseDto> {
-    // 1. Verify category exists
     const category = await this.categoryRepository.findById(input.categoryId)
     if (!category) {
       throw new NotFoundError("Vehicle category not found")
@@ -23,13 +22,11 @@ export class CreateClassUseCase implements ICreateClassUseCase {
 
     const slug = input.slug || slugify(input.name)
 
-    // 2. Verify class name is unique
     const existingByName = await this.classRepository.findByName(input.name)
     if (existingByName) {
       throw new ConflictError(`Vehicle class with name "${input.name}" already exists`)
     }
 
-    // 3. Verify class slug is unique
     const existingBySlug = await this.classRepository.findBySlug(slug)
     if (existingBySlug) {
       throw new ConflictError(`Vehicle class with slug "${slug}" already exists`)

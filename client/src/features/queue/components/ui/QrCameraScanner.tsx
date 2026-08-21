@@ -49,7 +49,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true)
   const [lastScannedResult, setLastScannedResult] = useState<string | null>(null)
 
-  // Web Audio Synthesizer Beep for Instant Scan Feedback
   const playScanBeep = useCallback(() => {
     if (!isAudioEnabled) return
     try {
@@ -62,8 +61,8 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       const gain = ctx.createGain()
 
       osc.type = "sine"
-      osc.frequency.setValueAtTime(880, ctx.currentTime) // A5 note
-      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1) // A6 note
+      osc.frequency.setValueAtTime(880, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1)
 
       gain.gain.setValueAtTime(0.15, ctx.currentTime)
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12)
@@ -74,16 +73,13 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       osc.start()
       osc.stop(ctx.currentTime + 0.12)
     } catch {
-      // Audio playback failed or blocked by browser policy
     }
   }, [isAudioEnabled])
 
-  // Parse QR string (extract raw token, booking ID, JSON payload, or URL query param)
   const parseQrContent = useCallback((rawText: string): string => {
     const trimmed = rawText.trim()
     if (!trimmed) return ""
 
-    // Case 1: URL format (e.g. https://domain.com/check-in?token=XYZ or ?bookingId=WQ-123)
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
       try {
         const url = new URL(trimmed)
@@ -92,11 +88,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (tokenParam) return tokenParam
         if (bookingIdParam) return bookingIdParam
       } catch {
-        // Fallback to raw string
       }
     }
 
-    // Case 2: JSON payload (e.g. {"bookingId": "WQ-829301", "qrToken": "..."})
     if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
       try {
         const parsed = JSON.parse(trimmed)
@@ -104,15 +98,12 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (parsed.token) return String(parsed.token)
         if (parsed.bookingId) return String(parsed.bookingId)
       } catch {
-        // Fallback to raw string
       }
     }
 
-    // Case 3: Raw token or booking number string
     return trimmed
   }, [])
 
-  // Handle successful QR detection
   const handleDecodedText = useCallback(
     (decodedText: string) => {
       console.log("🎯 [QR Scanner] QR Code Detected in Camera Feed:", {
@@ -124,7 +115,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       if (!parsedText) return
 
       const now = Date.now()
-      // Cooldown check (2.5 seconds) to prevent duplicate scans
       if (
         parsedText === lastScannedTextRef.current &&
         now - lastScannedTimeRef.current < 2500
@@ -141,13 +131,11 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       try {
         if (navigator.vibrate) navigator.vibrate(80)
       } catch {
-        // Vibration not supported
       }
 
       setLastScannedResult(parsedText)
       onScanSuccess(parsedText)
 
-      // Clear recent scan badge after 3 seconds
       setTimeout(() => {
         setLastScannedResult(null)
       }, 3000)
@@ -157,7 +145,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
   const isMountedRef = useRef<boolean>(true)
 
-  // Track mounted lifecycle
   useEffect(() => {
     isMountedRef.current = true
     return () => {
@@ -165,7 +152,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }, [])
 
-  // Stop Camera Stream
   const stopCamera = useCallback(async () => {
     isScanningRef.current = false
 
@@ -191,7 +177,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             track.enabled = false
           })
         } catch {
-          // ignore
         }
       }
       videoRef.current.srcObject = null
@@ -201,7 +186,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     setIsTorchOn(false)
   }, [])
 
-  // Dual-Orientation High-Speed Frame Detection Loop (jsQR + BarcodeDetector)
   const startScanningLoop = useCallback(() => {
     if (!canvasRef.current) {
       canvasRef.current = document.createElement("canvas")
@@ -210,7 +194,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     const ctx = canvas.getContext("2d", { willReadFrequently: true })
     if (!ctx) return
 
-    // Initialize BarcodeDetector API if available in browser
     interface BarcodeResult {
       rawValue?: string
     }
@@ -226,7 +209,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         ).BarcodeDetector
         nativeDetector = new DetectorClass({ formats: ["qr_code"] })
       } catch {
-        // Fallback to jsQR
       }
     }
 
@@ -244,7 +226,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         }
 
         try {
-          // Pass 1: Try Native Hardware BarcodeDetector if available (instant C++ decode)
           if (nativeDetector) {
             try {
               const barcodes = await nativeDetector.detect(video)
@@ -254,11 +235,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
                 return
               }
             } catch {
-              // Ignore native detector frame error and proceed to jsQR
             }
           }
 
-          // Pass 2: Draw Standard Video Frame to Canvas
           ctx.drawImage(video, 0, 0, vWidth, vHeight)
           let imageData = ctx.getImageData(0, 0, vWidth, vHeight)
           let code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -271,7 +250,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             return
           }
 
-          // Pass 3: Horizontally Mirrored Frame Scan (for mirrored cameras/selfie screens)
           ctx.save()
           ctx.scale(-1, 1)
           ctx.drawImage(video, -vWidth, 0, vWidth, vHeight)
@@ -288,7 +266,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             return
           }
         } catch {
-          // Catch frame reading exception
         }
       }
 
@@ -300,7 +277,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     animFrameIdRef.current = requestAnimationFrame(scanFrame)
   }, [handleDecodedText])
 
-  // Start Camera Stream
   const startCamera = useCallback(async () => {
     if (!isMountedRef.current) return
     setCameraError(null)
@@ -317,7 +293,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
 
-      // If component unmounted while waiting for getUserMedia, immediately terminate stream tracks
       if (!isMountedRef.current) {
         stream.getTracks().forEach((track) => {
           track.stop()
@@ -333,7 +308,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         await videoRef.current.play().catch(() => {})
       }
 
-      // Check torch support on video track
       const track = stream.getVideoTracks()[0]
       if (track) {
         const capabilities = track.getCapabilities?.() as Record<string, unknown> | undefined
@@ -348,7 +322,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       setIsCameraActive(true)
       setIsInitializing(false)
 
-      // Start Dual-Orientation Frame Detection Loop
       startScanningLoop()
     } catch (err: unknown) {
       console.error("Camera stream error:", err)
@@ -369,7 +342,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }, [facingMode, selectedCameraId, startScanningLoop, stopCamera])
 
-  // Enumerate Connected Camera Devices
   useEffect(() => {
     const listCameras = async () => {
       try {
@@ -391,7 +363,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     listCameras()
   }, [])
 
-  // Auto-start camera when component mounts or dependencies change
   useEffect(() => {
     startCamera()
     return () => {
@@ -399,7 +370,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }, [startCamera, stopCamera])
 
-  // Instant camera hardware teardown on tab switch, window blur, or page navigation
   useEffect(() => {
     const handlePageHide = () => {
       stopCamera()
@@ -424,7 +394,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }, [startCamera, stopCamera])
 
-  // Switch Facing Mode
   const toggleFacingMode = () => {
     const nextMode = facingMode === "environment" ? "user" : "environment"
     setFacingMode(nextMode)
@@ -443,7 +412,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }
 
-  // Toggle Torch/Flash
   const toggleTorch = async () => {
     if (!isTorchSupported || !mediaStreamRef.current) return
     try {
@@ -463,7 +431,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     }
   }
 
-  // Scan QR Code from uploaded Image File (supporting normal and mirrored scans)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -495,7 +462,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       })
 
       if (!code) {
-        // Try horizontally flipped
         tempCtx.save()
         tempCtx.scale(-1, 1)
         tempCtx.drawImage(img, -tempCanvas.width, 0, tempCanvas.width, tempCanvas.height)
@@ -526,9 +492,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
   return (
     <div className="w-full flex flex-col space-y-4">
-      {/* Scanner Viewfinder Box */}
       <div className="relative aspect-[4/3] rounded-3xl bg-slate-950 border-2 border-border overflow-hidden flex flex-col items-center justify-center shadow-inner group">
-        {/* Live Camera Video Feed (Mirrored Viewfinder for natural UX) */}
         <video
           ref={videoRef}
           playsInline
@@ -537,7 +501,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           className="absolute inset-0 w-full h-full object-cover -scale-x-100"
         />
 
-        {/* Viewfinder Target Reticle Animation */}
         {isCameraActive && !isInitializing && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="w-64 h-64 sm:w-72 sm:h-72 border-2 border-primary/60 rounded-3xl relative flex items-center justify-center animate-pulse">
@@ -551,7 +514,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           </div>
         )}
 
-        {/* Status Overlay Badges */}
         {isInitializing && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xs flex flex-col items-center justify-center space-y-3 z-20">
             <RefreshCw className="h-8 w-8 text-primary animate-spin" />
@@ -594,7 +556,6 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         )}
       </div>
 
-      {/* Control Actions & Toolbar */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <button

@@ -72,7 +72,6 @@ export default function OwnerProfileOverviewCard({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Onboarding Documents and Details Section */}
         <div className="lg:col-span-12">
           <div className="flex items-center gap-2 mb-4">
             <Shield size={14} className="text-primary" />
@@ -84,7 +83,6 @@ export default function OwnerProfileOverviewCard({
           <OnboardingDetailsSummary details={user.onboardingDetails || {}} email={user.email} />
         </div>
 
-        {/* Manage stations side */}
         <div className="lg:col-span-12 space-y-3.5 pt-4 border-t border-border/40">
           <h4 className="text-[10px] text-muted-foreground font-black tracking-widest uppercase">
             Registered Service Stations ({stations.length})

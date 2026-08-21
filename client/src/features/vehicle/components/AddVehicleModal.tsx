@@ -8,9 +8,6 @@ import { vehicleCatelogApi } from "@/shared/apis/catelog.api"
 import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import type { Vehicle, CreateVehicleInput } from "../types"
 
-// ─────────────────────────────────────────────
-// Inline helper: info badge with popover tooltip
-// ─────────────────────────────────────────────
 interface InfoBadgeProps {
   description: string
 }
@@ -50,9 +47,6 @@ function InfoBadge({ description }: InfoBadgeProps) {
   )
 }
 
-// ─────────────────────────────────────────────
-// Inline helper: selected item description chip
-// ─────────────────────────────────────────────
 interface DescriptionChipProps {
   description?: string
 }
@@ -84,11 +78,9 @@ export default function AddVehicleModal({
 
   const { categories, loadData } = useVehicleCatelogStore()
 
-  // Dynamically loaded classes for the selected category
   const [categoryClasses, setCategoryClasses] = useState<VehicleClass[]>([])
   const [isLoadingClasses, setIsLoadingClasses] = useState(false)
 
-  // Form Fields State
   const [nickname, setNickname] = useState("")
   const [brand, setBrand] = useState("")
   const [model, setModel] = useState("")
@@ -98,12 +90,10 @@ export default function AddVehicleModal({
   const [classId, setClassId] = useState("")
   const [isPrimary, setIsPrimary] = useState(false)
 
-  // Image upload state
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
-  // Validation Errors
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const resetForm = () => {
@@ -121,7 +111,6 @@ export default function AddVehicleModal({
     setImagePreview(null)
   }
 
-  // Populate initial vehicle data if editing
   useEffect(() => {
     if (isOpen && initialVehicle) {
       queueMicrotask(() => {
@@ -156,14 +145,12 @@ export default function AddVehicleModal({
     }
   }, [isOpen, initialVehicle])
 
-  // Fetch categories when modal opens (if not already loaded)
   useEffect(() => {
     if (isOpen && categories.length === 0) {
       loadData()
     }
   }, [isOpen, categories.length, loadData])
 
-  // Native Dialog Sync
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -182,7 +169,6 @@ export default function AddVehicleModal({
     }
   }, [isOpen])
 
-  // Cleanup overflow styling
   useEffect(() => {
     return () => {
       document.body.style.overflow = ""
@@ -246,7 +232,6 @@ export default function AddVehicleModal({
     }
   }
 
-  // Backdrop Click Dismiss
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     const dialog = dialogRef.current
     if (e.target === dialog) {
@@ -272,7 +257,6 @@ export default function AddVehicleModal({
       onClick={handleBackdropClick}
       className="fixed inset-0 m-auto bg-card border border-border/80 shadow-2xl rounded-3xl p-0 w-full max-w-lg overflow-hidden backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
-      {/* Title Header */}
       <div className="flex justify-between items-center px-6 py-5 border-b border-border/60">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -290,12 +274,10 @@ export default function AddVehicleModal({
         </button>
       </div>
 
-      {/* Body Form */}
       <form
         onSubmit={handleFormSubmit}
         className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]"
       >
-        {/* Landscape Image Upload Zone */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
@@ -316,7 +298,6 @@ export default function AddVehicleModal({
           </div>
 
           {imagePreview ? (
-            /* Preview panel */
             <div
               className="relative w-full h-36 rounded-2xl overflow-hidden border border-border cursor-pointer group"
               onClick={() => imageInputRef.current?.click()}
@@ -331,7 +312,6 @@ export default function AddVehicleModal({
               </div>
             </div>
           ) : (
-            /* Drop zone */
             <div
               role="button"
               tabIndex={0}
@@ -360,7 +340,6 @@ export default function AddVehicleModal({
             </div>
           )}
 
-          {/* Hidden file input */}
           <input
             ref={imageInputRef}
             type="file"
@@ -431,9 +410,7 @@ export default function AddVehicleModal({
           />
         </div>
 
-        {/* Category & Class with info badges */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Category */}
           <div className="flex flex-col gap-1 w-full">
             <FormSelect
               label="Category"
@@ -475,7 +452,6 @@ export default function AddVehicleModal({
             <DescriptionChip description={selectedCategory?.description} />
           </div>
 
-          {/* Class */}
           <div className="flex flex-col gap-1 w-full relative">
             <FormSelect
               label="Class"
@@ -509,7 +485,6 @@ export default function AddVehicleModal({
           </div>
         </div>
 
-        {/* Primary Switch */}
         <div className="bg-muted/40 border border-border/60 p-4 rounded-2xl">
           <FormSwitch
             label="Set as Primary Vehicle"
@@ -520,7 +495,6 @@ export default function AddVehicleModal({
           />
         </div>
 
-        {/* Actions Footer */}
         <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"

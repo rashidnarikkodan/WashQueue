@@ -4,8 +4,6 @@ import type { Column } from "@/shared/components/data-table"
 import type { User } from "../types"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
 
-// ─── Shared Helpers ───────────────────────────────────────────────────────────
-
 const getInitials = (name: string) => {
   if (!name) return "U"
   return name
@@ -37,12 +35,6 @@ const formatDate = (dateStr: string) => {
   }
 }
 
-// ─── User Management Columns ─────────────────────────────────────────────────
-
-/**
- * Column definitions for the UserManagement page.
- * @param onToggleClick - Called when admin clicks block/unblock — page owns the confirmation modal.
- */
 export function getUserColumns(onToggleClick: (user: User) => void): Column<User>[] {
   return [
     {
@@ -115,7 +107,6 @@ export function getUserColumns(onToggleClick: (user: User) => void): Column<User
       align: "right",
       cell: (user) => (
         <div className="flex items-center justify-end gap-2">
-          {/* Admin accounts have no block button */}
           {user.role !== ROLE.ADMIN && (
             <button
               onClick={() => onToggleClick(user)}

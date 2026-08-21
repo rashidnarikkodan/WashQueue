@@ -6,7 +6,6 @@ interface PersonalInformationCardProps {
 }
 
 export default function PersonalInformationCard({ user }: PersonalInformationCardProps) {
-  // If owner, check onboardingDetails for fullName and phone.
   const fullName = (user.onboardingDetails?.fullName as string) || user.name || "N/A"
   const phone = (user.onboardingDetails?.phone as string) || user.phone || "Not Registered"
 

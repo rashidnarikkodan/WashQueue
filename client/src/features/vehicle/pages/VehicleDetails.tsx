@@ -53,7 +53,6 @@ export default function VehicleDetails() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
-  // Document management state
   const [documents, setDocuments] = useState<VehicleDocument[]>([
     {
       id: "doc-1",
@@ -70,7 +69,6 @@ export default function VehicleDetails() {
   ])
   const [isUploadingDoc, setIsUploadingDoc] = useState(false)
 
-  // Mock wash activity history (can be linked to bookings api)
   const [washActivities] = useState<VehicleWashActivity[]>([
     {
       id: "act-1",
@@ -191,7 +189,6 @@ export default function VehicleDetails() {
   return (
     <div className="min-h-screen bg-[#020617] text-[#DCE1FB] font-sans pt-24 pb-16 transition-colors duration-300">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Breadcrumb Navigation */}
         <div>
           <Link
             to={APP_ROUTES.HOME}
@@ -202,7 +199,6 @@ export default function VehicleDetails() {
           </Link>
         </div>
 
-        {/* HEADER ACTIONS (SUPPLEMENTARY FOR TOP RIGHT) */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-slate-800/80 pb-6">
           <div className="space-y-1">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#DCE1FB] tracking-tight">
@@ -213,9 +209,7 @@ export default function VehicleDetails() {
             </p>
           </div>
 
-          {/* Action buttons */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Edit Vehicle */}
             <button
               onClick={() => setIsEditModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3E495D]/60 hover:bg-[#3E495D] text-[#AEB9D0] font-semibold text-sm transition-all cursor-pointer border border-slate-700/50"
@@ -224,7 +218,6 @@ export default function VehicleDetails() {
               <span>Edit Vehicle</span>
             </button>
 
-            {/* Delete */}
             <button
               onClick={() => setIsDeleteModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3E495D]/60 hover:bg-red-950/60 hover:border-red-500/40 text-[#AEB9D0] hover:text-red-400 font-semibold text-sm transition-all cursor-pointer border border-slate-700/50"
@@ -233,7 +226,6 @@ export default function VehicleDetails() {
               <span>Delete</span>
             </button>
 
-            {/* Set as Default */}
             <button
               onClick={handleSetPrimaryToggle}
               disabled={currentVehicle.isPrimary || isActionLoading}
@@ -258,11 +250,8 @@ export default function VehicleDetails() {
           </div>
         </div>
 
-        {/* TOP SECTION: VEHICLE OVERVIEW (Grid: 5 Cols Left, 7 Cols Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* LEFT: Vehicle Visual Card */}
           <div className="lg:col-span-5 bg-[#191F31] border border-slate-800/80 rounded-3xl overflow-hidden p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative">
-            {/* Category / Class Badges */}
             <div className="flex items-center gap-2 z-10">
               <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ADC6FF]/20 text-[#ADC6FF] border border-[#ADC6FF]/20 backdrop-blur-md">
                 {categoryName.toUpperCase()}
@@ -272,7 +261,6 @@ export default function VehicleDetails() {
               </span>
             </div>
 
-            {/* Vehicle Hero Image Container */}
             <div className="my-6 relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#191F31] to-[#151B2D] border border-slate-800/60 p-4 shadow-xl flex items-center justify-center min-h-[220px]">
               <img
                 src={vehicleImage}
@@ -281,7 +269,6 @@ export default function VehicleDetails() {
               />
             </div>
 
-            {/* Vehicle Details Title & License Tag */}
             <div className="space-y-4 pt-2">
               <div className="flex items-end justify-between">
                 <div>
@@ -298,7 +285,6 @@ export default function VehicleDetails() {
                 </div>
               </div>
 
-              {/* 3 Technical Features Pills */}
               <div className="grid grid-cols-3 gap-3 border-t border-slate-800/80 pt-4">
                 <div className="bg-[#151B2D] p-3 rounded-2xl flex flex-col items-center justify-center text-center gap-1 border border-slate-800/50">
                   <Zap className="w-4 h-4 text-[#C2C6D6]" />
@@ -316,16 +302,13 @@ export default function VehicleDetails() {
             </div>
           </div>
 
-          {/* RIGHT: Owner Information & Quick Actions */}
           <div className="lg:col-span-7 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl">
             <div className="space-y-8">
-              {/* Heading */}
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 rounded-full bg-[#ADC6FF]" />
                 <h3 className="text-xl font-bold text-[#DCE1FB]">Owner Information</h3>
               </div>
 
-              {/* Owner Specs Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#C2C6D6] block">
@@ -362,7 +345,6 @@ export default function VehicleDetails() {
                 </div>
               </div>
 
-              {/* Default Vehicle Card Toggle Box */}
               <div className="pt-4">
                 <div className="bg-[#151B2D] border border-slate-800/80 p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -375,7 +357,6 @@ export default function VehicleDetails() {
                     </div>
                   </div>
 
-                  {/* Custom Switch Component */}
                   <button
                     type="button"
                     onClick={handleSetPrimaryToggle}
@@ -396,9 +377,7 @@ export default function VehicleDetails() {
           </div>
         </div>
 
-        {/* SECOND ROW BENTO GRID FOR SECONDARY CONTENT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* SERVICE COMPATIBILITY (Wide - 8 Cols) */}
           <div className="lg:col-span-8 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/60 pb-4">
               <div className="flex items-center gap-3">
@@ -408,9 +387,7 @@ export default function VehicleDetails() {
               <span className="text-sm text-[#C2C6D6]">Optimized for {className}</span>
             </div>
 
-            {/* 2 Compatible Service Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Service Card 1 */}
               <div className="bg-[#151B2D] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between gap-4 hover:border-[#ADC6FF]/40 transition-all">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
@@ -443,7 +420,6 @@ export default function VehicleDetails() {
                 </div>
               </div>
 
-              {/* Service Card 2 */}
               <div className="bg-[#151B2D] border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between gap-4 hover:border-[#ADC6FF]/40 transition-all">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
@@ -478,9 +454,7 @@ export default function VehicleDetails() {
             </div>
           </div>
 
-          {/* QUICK ACTIONS (Vertical - 4 Cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            {/* Call to action highlight card */}
             <div className="bg-[#ADC6FF] text-[#002E6A] rounded-3xl p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-2xl">
               <div className="space-y-2">
                 <h3 className="text-2xl font-black leading-snug">
@@ -500,7 +474,6 @@ export default function VehicleDetails() {
               </button>
             </div>
 
-            {/* Quick action buttons list */}
             <div className="bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 space-y-3 shadow-2xl">
               <button
                 onClick={() => navigate("/stations")}
@@ -527,9 +500,7 @@ export default function VehicleDetails() {
           </div>
         </div>
 
-        {/* THIRD ROW: ACTIVITY & INSIGHTS (7 Cols Left, 5 Cols Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* RECENT WASH ACTIVITY (7 Cols) */}
           <div className="lg:col-span-7 bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-800/60 pb-4">
               <Clock className="w-5 h-5 text-[#C2C6D6]" />
@@ -580,9 +551,7 @@ export default function VehicleDetails() {
             </div>
           </div>
 
-          {/* MAINTENANCE & DOCUMENTS (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Maintenance Insights */}
             <div className="bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
               <h3 className="text-xl font-bold text-[#DCE1FB]">Maintenance Insights</h3>
 
@@ -606,7 +575,6 @@ export default function VehicleDetails() {
                   </div>
                 </div>
 
-                {/* Recommended action banner */}
                 <div className="p-4 rounded-2xl bg-[#93000A]/20 border border-[#FFB4AB]/20 flex items-start gap-3">
                   <AlertTriangle className="w-5 h-5 text-[#FFB4AB] shrink-0 mt-0.5" />
                   <div>
@@ -629,7 +597,6 @@ export default function VehicleDetails() {
               </div>
             </div>
 
-            {/* Documents */}
             <div className="bg-[#191F31] border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
               <h3 className="text-xl font-bold text-[#DCE1FB]">Documents</h3>
 
@@ -665,7 +632,6 @@ export default function VehicleDetails() {
                   </div>
                 ))}
 
-                {/* Upload New Document Button */}
                 <label className="border-2 border-dashed border-slate-700 hover:border-[#ADC6FF]/60 rounded-2xl p-4 flex items-center justify-center gap-2 cursor-pointer transition-all bg-[#151B2D]/40 hover:bg-[#151B2D]">
                   {isUploadingDoc ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#ADC6FF]" />
@@ -689,7 +655,6 @@ export default function VehicleDetails() {
         </div>
       </div>
 
-      {/* Edit Vehicle Modal */}
       <AddVehicleModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -704,7 +669,6 @@ export default function VehicleDetails() {
         isSubmitting={isActionLoading}
       />
 
-      {/* Delete Confirmation Modal */}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

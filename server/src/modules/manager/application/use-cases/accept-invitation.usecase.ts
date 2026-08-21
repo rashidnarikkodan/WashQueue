@@ -73,7 +73,6 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
 
     const userId = user.id
 
-    // Check if user is already managing another active station
     const userAssignments = await this.managerAssignmentRepository.findByUserId(userId)
     const otherActiveAssignment = userAssignments.find(
       (a) => a.stationId !== invitation.stationId && a.status === ManagerAssignmentStatus.ACTIVE
@@ -84,11 +83,9 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       )
     }
 
-    // Accept invitation
     invitation.accept()
     await this.managerInvitationRepository.update(invitation)
 
-    // Check if assignment already exists
     let assignment = await this.managerAssignmentRepository.findByUserAndStation(
       userId,
       invitation.stationId
@@ -112,8 +109,6 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       }
     } catch (error) {
       if (isDuplicateKeyError(error)) {
-        // The invitation was already marked ACCEPTED above, but the assignment write lost the
-        // race — roll the invitation back to PENDING so the token isn't burned on a failed accept.
         await this.managerInvitationRepository.update(
           new ManagerInvitation({
             id: invitation.id,
@@ -135,7 +130,6 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
       throw error
     }
 
-    // Sync managerId directly onto the Station entity via repository interface
     if (this.stationRepository && invitation.stationId && userId) {
       await this.stationRepository.setManagerId(invitation.stationId, userId)
     }

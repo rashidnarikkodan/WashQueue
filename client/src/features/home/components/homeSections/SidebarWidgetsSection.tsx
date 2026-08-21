@@ -6,7 +6,6 @@ export default function SidebarWidgetsSection() {
 
   return (
     <div className="lg:col-span-4 space-y-6 animate-in slide-in-from-right duration-500 text-left">
-      {/* Queue Intelligence Card */}
       <div className="bg-card border border-border rounded-3xl p-6 shadow-xl space-y-6">
         <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest">
           Queue Intelligence
@@ -39,7 +38,6 @@ export default function SidebarWidgetsSection() {
         </div>
       </div>
 
-      {/* Weather Insights Card */}
       <div className="bg-card border border-border rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">

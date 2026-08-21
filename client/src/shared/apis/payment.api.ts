@@ -5,7 +5,7 @@ import type { BookingResponse } from "@/shared/apis/booking.api"
 import type { PaymentMethod } from "@/shared/constants/payment.constants"
 
 export interface CreateOrderInput {
-  amount: number // in paise
+  amount: number
   currency?: string
   receipt?: string
   stationId?: string

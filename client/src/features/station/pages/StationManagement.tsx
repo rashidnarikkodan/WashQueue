@@ -9,7 +9,6 @@ import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { STATION_STATUS, type Station } from "../types"
 
-// Tab definitions for filtering stations
 const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
   { id: "draft", label: "Draft", activeColor: "border-blue-500 text-blue-500" },
@@ -41,20 +40,17 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const { stations, pagination, statusCounts, isLoading, error, fetchStations } = useStationStore()
   const user = useAuthStore((state) => state.user)
 
-  // Determine active view mode role (explicit prop > auth user role > route path check)
   const isAdmin = useMemo(() => {
     if (explicitRole) return explicitRole === "admin"
     if (user?.role === "admin") return true
     return location.pathname.startsWith("/admin")
   }, [explicitRole, user?.role, location.pathname])
 
-  // URL-driven query & tab state (primarily used for Admin Data Table view)
   const searchQuery = searchParams.get("q") || ""
   const activeTab = searchParams.get("tab") || "all"
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 10
 
-  // Fetch station list
   const loadStations = useCallback(async () => {
     const statusFilter =
       activeTab === "draft"
@@ -96,7 +92,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     loadStations()
   }, [loadStations])
 
-  // URL query parameter updater (for Admin Table search, tabs, and pagination)
   const updateParams = (newParams: Record<string, string | null | number | boolean>) => {
     const params = new URLSearchParams(searchParams)
     Object.entries(newParams).forEach(([key, val]) => {
@@ -112,7 +107,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     setSearchParams(params, { replace: true })
   }
 
-  // --- Admin Specific DataTable Columns ---
   const adminColumns: Column<Station>[] = [
     {
       id: "info",
@@ -226,7 +220,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     },
   ]
 
-  // Admin Pagination Metadata
   const totalCount = statusCounts?.all ?? pagination?.total ?? stations.length
 
   const paginationMeta = {
@@ -238,18 +231,13 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     hasPrevPage: pagination?.hasPrevPage ?? currentPage > 1,
   }
 
-  // ==========================================
-  // RENDER: ADMIN VIEW (Data Table)
-  // ==========================================
   if (isAdmin) {
     return (
       <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen">
-        {/* Breadcrumbs */}
         <Breadcrumbs
           items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Station Management" }]}
         />
 
-        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
@@ -261,7 +249,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           </div>
         </div>
 
-        {/* DataTable Toolbar (Search & Tabs) */}
         <DataTableToolbar
           searchQuery={searchQuery}
           onSearchChange={(q) => updateParams({ q })}
@@ -272,7 +259,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           onTabChange={(tab) => updateParams({ tab })}
         />
 
-        {/* DataTable View */}
         <DataTable<Station>
           columns={adminColumns}
           data={stations}
@@ -288,15 +274,9 @@ export default function StationManagement({ role: explicitRole }: StationManagem
     )
   }
 
-  // ==========================================
-  // RENDER: OWNER VIEW (Card Grid View)
-  // ==========================================
   return (
     <div className="space-y-6 min-h-screen animate-in fade-in duration-300">
-      {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Owner", path: "/owner/dashboard" }, { label: "Stations" }]} />
-
-      {/* Header */}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -330,7 +310,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           <span>Create Station</span>
         </button>
       </div>
-      {/* DataTable Toolbar (Search & Tabs) */}
       <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={(q) => updateParams({ q })}
@@ -341,14 +320,12 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         onTabChange={(tab) => updateParams({ tab })}
       />
 
-      {/* Error Alert */}
       {error && (
         <div className="bg-red-500/10 text-red-400 p-4 rounded-xl text-sm border border-red-500/20">
           {error}
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
           {[1, 2, 3, 4].map((i) => (
@@ -359,7 +336,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
           ))}
         </div>
       ) : (
-        /* Responsive Card Grid */
         <div
           key={activeTab}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2 animate-in fade-in slide-in-from-bottom-3 duration-300 ease-out"
@@ -414,7 +390,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         </div>
       )}
 
-      {/* Owner View Pagination */}
       <Pagination
         meta={paginationMeta}
         onPageChange={(p) => updateParams({ page: p })}

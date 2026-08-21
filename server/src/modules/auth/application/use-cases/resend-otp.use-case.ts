@@ -14,20 +14,15 @@ export class ResendOtpUseCase implements IResendOtpUseCase {
   async execute(data: { email: string }): Promise<void> {
     const user = await this.userRepository.findByEmail(data.email)
 
-    // Respond the same way whether or not the account exists, matching forgot-password's
-    // anti-enumeration behavior — only actually send an OTP if a user was found.
     if (!user) {
       return
     }
 
-    // Generate numeric OTP
     const code = await this.otpService.generateOtp(user.email)
 
-    // Save OTP to repository using domain entity
     const otp = new Otp({ email: user.email, code })
     await this.otpRepository.save(otp)
 
-    // Send email with OTP code
     await this.mailService.sendVerificationEmail(user.email, code)
   }
 }

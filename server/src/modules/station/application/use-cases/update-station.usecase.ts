@@ -83,7 +83,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     }
 
     const runUpdateWork = async (session?: unknown) => {
-      // If an active station is modified, check if restricted fields were changed requiring admin approval
       if (station.status === StationStatus.ACTIVE) {
         const props = station.getProps()
         let requiresAdminApproval = false
@@ -154,12 +153,10 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             requiresAdminApproval = true
           }
         } else if (updates.step === 3) {
-          // Price changes always require admin approval
           if (updates.pricing && updates.pricing.length > 0) {
             requiresAdminApproval = true
           }
         } else if (updates.step === 4) {
-          // Extra services changes always require admin approval
           if (updates.extraServices && updates.extraServices.length > 0) {
             requiresAdminApproval = true
           }
@@ -171,7 +168,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       }
 
       if (updates.step === 1) {
-        // Delete removed images from media storage if specified
         if (
           updates.deletedImagePublicIds &&
           updates.deletedImagePublicIds.length > 0 &&
@@ -186,7 +182,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           }
         }
 
-        // Process new file uploads if provided
         const props = station.getProps()
         let currentImages: StationImage[] = updates.images ?? props.images
         if (updates.newFiles && updates.newFiles.length > 0 && this.mediaUploadService) {
@@ -199,7 +194,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           currentImages = [...currentImages, ...newStationImages]
         }
 
-        // Update basic station info if any basic info field is provided
         if (
           updates.name ||
           updates.description !== undefined ||
@@ -223,7 +217,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
         }
         await this.stationRepository.save(station)
       } else if (updates.step === 2) {
-        // Update operatingHours, holidays, slotConfig
         station.updateAvailability({
           operatingHours: updates.operatingHours,
           holidays: updates.holidays ?? [],
@@ -252,7 +245,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           await this.generateTimeWindowsUseCase.execute(stationId, true)
         }
       } else if (updates.step === 3) {
-        // Upsert station pricing records for every configured vehicle class
         if (updates.pricing && Array.isArray(updates.pricing)) {
           for (const priceEntry of updates.pricing) {
             await this.stationPricingRepository.upsertByStationAndClass(
@@ -268,13 +260,11 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           }
         }
       } else if (updates.step === 4) {
-        // Update amenities
         if (updates.amenities) {
           station.updateAmenities(updates.amenities)
           await this.stationRepository.save(station)
         }
 
-        // Create, update, and delete extra services with slug validation & duplicate checks
         if (updates.extraServices && Array.isArray(updates.extraServices)) {
           const existingExtraServices = await this.extraServiceRepository.findByStationId(
             stationId,
@@ -282,7 +272,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           )
           const activeServices = updates.extraServices.filter((s) => !s.isDeleted)
 
-          // Validate duplicates within incoming payload by name or slug
           const seenNames = new Set<string>()
           const seenSlugs = new Set<string>()
 
@@ -320,7 +309,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
                 await this.extraServiceRepository.delete(existing.id, session)
               }
             } else {
-              // Check if existing record exists by ID or by slug/name matching
               const existing = serviceInput.id
                 ? existingExtraServices.find((e) => e.id === serviceInput.id)
                 : existingExtraServices.find(
@@ -332,7 +320,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
 
               if (existing) {
                 processedIds.add(existing.id)
-                // Update existing record (prevents duplicates!)
                 await this.extraServiceRepository.update(
                   existing.id,
                   {
@@ -345,7 +332,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
                   session
                 )
               } else {
-                // Create new record
                 const created = await this.extraServiceRepository.save(
                   {
                     stationId,
@@ -364,7 +350,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
             }
           }
 
-          // Clean up any remaining duplicate/orphaned extra services in DB for this station
           for (const existing of existingExtraServices) {
             if (!processedIds.has(existing.id)) {
               await this.extraServiceRepository.delete(existing.id, session)
@@ -380,7 +365,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
       await runUpdateWork()
     }
 
-    // Fetch the updated complete station details
     const updatedStation = await this.stationRepository.findById(stationId)
     if (!updatedStation) {
       throw new NotFoundError("Station not found after update")

@@ -36,7 +36,6 @@ const OwnerLayout = () => {
     return <Navigate to="/verify-email" replace />
   }
 
-  // Redirect owner users to onboarding if they haven't completed it yet
   if (
     user &&
     user.role === ROLE.OWNER &&

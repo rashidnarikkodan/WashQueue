@@ -37,7 +37,6 @@ const processQueue = (error: unknown) => {
   failedQueue = []
 }
 
-// Interceptor 1: Success Toast Handling
 api.interceptors.response.use((response) => {
   const successToast = response.config?.successToast
   if (successToast) {
@@ -47,7 +46,6 @@ api.interceptors.response.use((response) => {
   return response
 })
 
-// Interceptor 2: Silent Token Refresh (Authentication Recovery)
 api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
@@ -62,7 +60,6 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    // Handle Session Expiry (Try silent refresh on 401, unless it's refresh token, login, or logout)
     if (status === 401 && !originalRequest._retry) {
       const isAuthExemptRequest =
         originalRequest.url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
@@ -70,7 +67,6 @@ api.interceptors.response.use(
         originalRequest.url?.includes(API_ROUTES.AUTH.LOGOUT)
 
       if (isAuthExemptRequest) {
-        // If refresh token, login, or logout request failed, clear credentials silently
         localStorage.removeItem("wq_user")
         localStorage.removeItem("wq_auth")
         localStorage.removeItem("wq_temp_email")
@@ -93,9 +89,6 @@ api.interceptors.response.use(
           failedQueue.push({ resolve, reject })
         })
           .then(() => {
-            // Mark as retried before replaying — otherwise a request that still comes back
-            // 401 after the refresh (e.g. the new token hasn't propagated yet) would re-enter
-            // this branch and could trigger another refresh cycle.
             originalRequest._retry = true
             return api(originalRequest)
           })
@@ -117,7 +110,6 @@ api.interceptors.response.use(
           .catch((err) => {
             processQueue(err)
 
-            // Force logout on refresh token failure
             localStorage.removeItem("wq_user")
             localStorage.removeItem("wq_auth")
             localStorage.removeItem("wq_temp_email")
@@ -144,7 +136,6 @@ api.interceptors.response.use(
   }
 )
 
-// Interceptor 3: Error Toast Handling
 api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
@@ -162,7 +153,6 @@ api.interceptors.response.use(
       url?.includes(API_ROUTES.AUTH.REFRESH_TOKEN) ||
       url?.includes(API_ROUTES.AUTH.LOGIN)
 
-    // Only display error toast if it wasn't a standard 401 or auth exempt request
     if (status !== 401 && !isExemptFromToast && !skipToast) {
       toast.error(message, { duration: 4500 })
     }

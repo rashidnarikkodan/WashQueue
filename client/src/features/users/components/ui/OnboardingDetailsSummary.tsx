@@ -79,7 +79,6 @@ const OnboardingDetailsSummary = ({
 
   return (
     <div className="space-y-6 pt-2 text-left">
-      {/* Section 1: Owner & Business Identity */}
       <div className="border border-slate-800/80 rounded-2xl p-5 space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -150,7 +149,6 @@ const OnboardingDetailsSummary = ({
           )}
         </div>
 
-        {/* Identity & Legal Docs verification proof */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
@@ -176,7 +174,6 @@ const OnboardingDetailsSummary = ({
         </div>
       </div>
 
-      {/* Section 2: Payout Details */}
       <div className="border border-slate-800/80 rounded-2xl p-5 space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -231,7 +228,6 @@ const OnboardingDetailsSummary = ({
           </div>
         </div>
 
-        {/* Bank Proof preview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
@@ -255,7 +251,6 @@ const OnboardingDetailsSummary = ({
         </div>
       </div>
 
-      {/* Section 3: Optional Business Verification (License/GST certificates) */}
       {(details.businessLicenseUrl ||
         details.gstCertificateUrl ||
         businessLicenseFile ||
@@ -282,7 +277,6 @@ const OnboardingDetailsSummary = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Business License */}
             {(details.businessLicenseUrl || businessLicenseFile) && (
               <div>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">
@@ -296,7 +290,6 @@ const OnboardingDetailsSummary = ({
               </div>
             )}
 
-            {/* GST Certificate */}
             {(details.gstCertificateUrl || gstCertificateFile) && (
               <div>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">

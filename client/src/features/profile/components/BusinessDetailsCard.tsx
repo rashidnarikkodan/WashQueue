@@ -8,7 +8,6 @@ interface BusinessDetailsCardProps {
 export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProps) {
   return (
     <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl text-card-foreground">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -17,7 +16,6 @@ export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProp
           <h2 className="text-2xl font-bold text-foreground">Business Information</h2>
         </div>
 
-        {/* Verified Provider Badge */}
         {profile.role === "owner" && (
           <span className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 w-fit">
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -26,7 +24,6 @@ export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProp
         )}
       </div>
 
-      {/* Business Name Highlight Box */}
       <div className="bg-muted/50 border border-border/80 p-6 rounded-xl space-y-1">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
           BUSINESS NAME
@@ -36,7 +33,6 @@ export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProp
         </p>
       </div>
 
-      {/* Grid of Business Details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-1">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">

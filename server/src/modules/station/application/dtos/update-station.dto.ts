@@ -44,13 +44,13 @@ export interface ExtraServicePricingInput {
 }
 
 export interface ExtraServiceInput {
-  id?: string // if provided, update. if missing, create.
+  id?: string
   name: string
   slug?: string
   description?: string
   pricing: ExtraServicePricingInput[]
   isActive: boolean
-  isDeleted?: boolean // if true, delete this extra service.
+  isDeleted?: boolean
 }
 
 export interface UpdateAmenitiesInput {

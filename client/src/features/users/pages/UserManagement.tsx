@@ -35,7 +35,6 @@ const UserManagement = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [pendingToggleUser, setPendingToggleUser] = useState<User | null>(null)
 
-  // ─── URL-driven state ───────────────────────────────────────────────────────
   const searchQuery = searchParams.get("q") || ""
   const roleFilter = searchParams.get("role") || "all"
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL
@@ -43,9 +42,6 @@ const UserManagement = () => {
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 5
 
-  // ─── Data fetching ──────────────────────────────────────────────────────────
-  // Guards against out-of-order responses: if filters change quickly, a slower older
-  // request can otherwise resolve after a newer one and clobber the current state.
   const latestRequestRef = useRef(0)
   const fetchUsers = useCallback(async () => {
     const requestId = ++latestRequestRef.current
@@ -83,7 +79,6 @@ const UserManagement = () => {
     }
   }, [fetchUsers])
 
-  // ─── URL param helpers ──────────────────────────────────────────────────────
   const updateParams = (newParams: Record<string, string | null | number | boolean>) => {
     const params = new URLSearchParams(searchParams)
     Object.entries(newParams).forEach(([key, val]) => {
@@ -104,7 +99,6 @@ const UserManagement = () => {
   const setStatusFilter = (status: string) => updateParams({ status })
   const setCurrentPage = (page: number) => updateParams({ page })
 
-  // ─── Actions ────────────────────────────────────────────────────────────────
   const handleConfirmToggle = async () => {
     if (!pendingToggleUser) return
     const targetId = pendingToggleUser.id
@@ -161,7 +155,6 @@ const UserManagement = () => {
     }
   }
 
-  // ─── Table configuration (built each render — cheap) ───────────────────────
   const columns = getUserColumns((user) => setPendingToggleUser(user))
   const { selectFilters } = buildUserFilters({
     statusFilter,
@@ -172,10 +165,8 @@ const UserManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Users" }]} />
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">User Management</h1>
@@ -194,7 +185,6 @@ const UserManagement = () => {
         </button>
       </div>
 
-      {/* Stats */}
       <UserStats
         totalUsers={stats.total}
         activeUsers={stats.active}
@@ -202,7 +192,6 @@ const UserManagement = () => {
         ownersCount={stats.owners}
       />
 
-      {/* User Directory Toolbar (Search & Filters) */}
       <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -214,7 +203,6 @@ const UserManagement = () => {
         selectFilters={selectFilters}
       />
 
-      {/* User Directory DataTable */}
       <DataTable<User>
         columns={columns}
         data={users}
@@ -227,7 +215,6 @@ const UserManagement = () => {
         onPageChange={setCurrentPage}
       />
 
-      {/* Block / Unblock Confirmation Modal */}
       <ConfirmationModal
         isOpen={!!pendingToggleUser}
         onClose={() => setPendingToggleUser(null)}

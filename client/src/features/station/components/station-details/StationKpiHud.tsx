@@ -19,7 +19,6 @@ export default function StationKpiHud({ station }: StationKpiHudProps) {
   return (
     <section className="overflow-x-auto hide-scrollbar py-2">
       <div className="flex gap-5 min-w-max">
-        {/* Card 1: Today's Bookings */}
         <div className="w-72 bg-[#151b2d] p-6 rounded-2xl hover:bg-[#191f31] border border-white/5 transition-all space-y-3">
           <div className="flex justify-between items-start">
             <div className="p-2.5 bg-[#adc6ff]/10 text-[#adc6ff] rounded-xl">
@@ -37,7 +36,6 @@ export default function StationKpiHud({ station }: StationKpiHudProps) {
           </div>
         </div>
 
-        {/* Card 2: Active Queue */}
         <div className="w-72 bg-[#151b2d] p-6 rounded-2xl hover:bg-[#191f31] border border-white/5 transition-all space-y-3">
           <div className="flex justify-between items-start">
             <div className="p-2.5 bg-[#4ae176]/10 text-[#4ae176] rounded-xl">
@@ -55,7 +53,6 @@ export default function StationKpiHud({ station }: StationKpiHudProps) {
           </div>
         </div>
 
-        {/* Card 3: Revenue Today */}
         <div className="w-72 bg-[#151b2d] p-6 rounded-2xl hover:bg-[#191f31] border border-white/5 transition-all space-y-3">
           <div className="flex justify-between items-start">
             <div className="p-2.5 bg-[#3e495d] text-[#aeb9d0] rounded-xl">
@@ -73,7 +70,6 @@ export default function StationKpiHud({ station }: StationKpiHudProps) {
           </div>
         </div>
 
-        {/* Card 4: Occupancy */}
         <div className="w-72 bg-[#151b2d] p-6 rounded-2xl hover:bg-[#191f31] border border-white/5 transition-all space-y-3">
           <div className="flex justify-between items-start">
             <div className="p-2.5 bg-[#adc6ff]/10 text-[#adc6ff] rounded-xl">
@@ -91,7 +87,6 @@ export default function StationKpiHud({ station }: StationKpiHudProps) {
           </div>
         </div>
 
-        {/* Card 5: Avg Wait Time */}
         <div className="w-72 bg-[#151b2d] p-6 rounded-2xl hover:bg-[#191f31] border border-white/5 transition-all space-y-3">
           <div className="flex justify-between items-start">
             <div className="p-2.5 bg-[#4ae176]/10 text-[#4ae176] rounded-xl">

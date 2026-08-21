@@ -12,7 +12,6 @@ import { stationRepository } from "../station/station.module"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 import { MailService } from "../../core/application/services/mail.service"
 
-// infrastructures
 export const userRepository = new UserRepository()
 const ownerRepository = new OwnerMongoRepository()
 const cacheService = new RedisCacheService()
@@ -22,7 +21,6 @@ const ownerVerificationStatusService = new OwnerVerificationStatusService(
   mailService
 )
 
-// use cases
 const getUsersUseCase = new GetUsersUseCase(userRepository)
 const getUserUseCase = new GetUserUseCase(userRepository, ownerRepository)
 const updateUserUseCase = new UpdateUserUseCase(
@@ -33,7 +31,6 @@ const updateUserUseCase = new UpdateUserUseCase(
 const getBookmarksUseCase = new GetBookmarksUseCase(userRepository, stationRepository)
 const toggleBookmarkUseCase = new ToggleBookmarkUseCase(userRepository)
 
-// presentation
 const userController = new UserController(
   getUsersUseCase,
   getUserUseCase,

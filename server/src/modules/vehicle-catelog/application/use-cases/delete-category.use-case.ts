@@ -16,7 +16,6 @@ export class DeleteCategoryUseCase implements IDeleteCategoryUseCase {
       throw new NotFoundError("Vehicle category not found")
     }
 
-    // Integrity check: prevent deletion if classes reference this category
     const linkedClasses = await this.classRepository.findAll({ categoryId: id })
     if (linkedClasses.length > 0) {
       throw new BadRequestError(

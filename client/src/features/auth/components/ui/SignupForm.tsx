@@ -51,7 +51,6 @@ export default function SignupForm() {
 
   const [state, formAction] = useActionState(signupAction, initialState)
 
-  // Sync validation errors to local state
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalErrors({
@@ -64,7 +63,6 @@ export default function SignupForm() {
 
   useEffect(() => {
     if (state.success && state.email && state.name) {
-      // Sync verification context to Zustand store and localStorage
       useAuthStore.setState({
         tempUser: { name: state.name, email: state.email },
       })
@@ -74,7 +72,6 @@ export default function SignupForm() {
       navigate("/verify-email")
     }
 
-    // Error is handled via inline message box inside form
   }, [state, navigate])
 
   return (
@@ -133,7 +130,6 @@ export default function SignupForm() {
           error={localErrors.email}
           onChange={(e) => {
             const val = e.target.value
-            // Instantly clear email format error as soon as they type a valid email format
             if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val) || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, email: "" }))
             }

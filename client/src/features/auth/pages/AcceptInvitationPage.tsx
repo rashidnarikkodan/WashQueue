@@ -21,7 +21,6 @@ export default function AcceptInvitationPage() {
   const token = searchParams.get("token") || ""
   const navigate = useNavigate()
 
-  // Derive missing-token error without setState in effect
   const missingToken = !token
 
   const [loading, setLoading] = useState(!missingToken)
@@ -30,7 +29,6 @@ export default function AcceptInvitationPage() {
     missingToken ? "Invalid invitation link. No token provided." : null
   )
 
-  // Form State
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
@@ -92,7 +90,6 @@ export default function AcceptInvitationPage() {
     }
   }
 
-  // Common Split Layout wrapper - Blue card on RIGHT (side="right"), Form on LEFT
   const renderLayout = (children: React.ReactNode) => (
     <SplitAuthLayout
       side="right"
@@ -111,7 +108,6 @@ export default function AcceptInvitationPage() {
     </SplitAuthLayout>
   )
 
-  // 1. Loading State
   if (loading) {
     return renderLayout(
       <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
@@ -123,7 +119,6 @@ export default function AcceptInvitationPage() {
     )
   }
 
-  // 2. Error / Invalid Invitation State
   if (errorMsg || !invitation) {
     return renderLayout(
       <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -148,7 +143,6 @@ export default function AcceptInvitationPage() {
     )
   }
 
-  // 3. Accepted / Success State
   if (isAccepted) {
     return renderLayout(
       <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -175,10 +169,8 @@ export default function AcceptInvitationPage() {
     )
   }
 
-  // 4. Main Invitation Acceptance Form (Form on LEFT, NO Google Auth, NO Login switch button)
   return renderLayout(
     <div className="space-y-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Form Header */}
       <div className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
           Join as Manager
@@ -188,7 +180,6 @@ export default function AcceptInvitationPage() {
         </p>
       </div>
 
-      {/* Station Details Invitation Card */}
       <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-sm space-y-3">
         <div className="flex items-center gap-2.5 text-foreground font-bold text-sm">
           <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -216,7 +207,6 @@ export default function AcceptInvitationPage() {
         )}
       </div>
 
-      {/* Direct Registration Form (No Google Auth, No Or Email Divider) */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormInput
           id="manager-name-input"

@@ -38,7 +38,6 @@ export default function StationHeroHeader({
 
   return (
     <header className="grid grid-cols-12 gap-8 lg:gap-12 items-end">
-      {/* Left Column: Title & Info */}
       <div className="col-span-12 lg:col-span-7 space-y-6">
         <div className="flex items-center gap-3 flex-wrap">
           <span className="px-3.5 py-1 bg-[#00a74b]/15 text-[#4ae176] border border-[#4ae176]/30 text-[10px] font-bold tracking-widest uppercase rounded-full flex items-center gap-2">
@@ -112,7 +111,6 @@ export default function StationHeroHeader({
         </div>
       </div>
 
-      {/* Right Column: Hero Media Showcase */}
       <div className="col-span-12 lg:col-span-5 relative group">
         <div className="rounded-2xl overflow-hidden aspect-[16/10] bg-[#151b2d] border border-white/5 shadow-2xl relative flex items-center justify-center">
           {hasImages ? (
@@ -124,7 +122,6 @@ export default function StationHeroHeader({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0c1324]/80 via-transparent to-transparent"></div>
 
-              {/* Sub Thumbnails Overlay */}
               <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                 <div className="flex -space-x-3">
                   {subImages.map((img, idx) => (
@@ -159,7 +156,6 @@ export default function StationHeroHeader({
           )}
         </div>
 
-        {/* Fullscreen Lightbox Modal */}
         {showFullGallery && (
           <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-6 flex flex-col justify-center items-center gap-4">
             <button

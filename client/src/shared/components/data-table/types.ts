@@ -3,8 +3,6 @@ import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 
 export type { PaginationMeta }
 
-// ─── Column ──────────────────────────────────────────────────────────────────
-
 export interface Column<T> {
   id: string
   header: string
@@ -15,16 +13,11 @@ export interface Column<T> {
   align?: "left" | "center" | "right"
 }
 
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
-
 export interface TabConfig {
   id: string
   label: string
-  /** Tailwind border + text classes when active. Defaults to "border-primary text-primary" */
   activeColor?: string
 }
-
-// ─── Filters ─────────────────────────────────────────────────────────────────
 
 export interface SelectFilterOption {
   label: string
@@ -44,45 +37,34 @@ export interface ToggleFilter {
   label: string
   value: boolean
   onChange: (val: boolean) => void
-  /** Tailwind classes applied to the track when ON. Defaults to "bg-primary/25 border border-primary/30" */
   activeColor?: string
-  /** Tailwind color class for the thumb when ON. Defaults to "bg-[#ADC6FF]" */
   thumbActiveColor?: string
 }
 
-// ─── DataTable Props ──────────────────────────────────────────────────────────
-
 export interface DataTableProps<T> {
-  // Data
   columns: Column<T>[]
   data: T[]
   rowKey: (row: T) => string
 
-  // Custom standalone toolbar element
   toolbar?: React.ReactNode
 
-  // Toolbar — search
   searchQuery?: string
   onSearchChange?: (q: string) => void
   searchPlaceholder?: string
   searchLabel?: string
 
-  // Toolbar — tabs
   tabs?: TabConfig[]
   activeTab?: string
   onTabChange?: (tab: string) => void
 
-  // Toolbar — filters
   selectFilters?: SelectFilter[]
   toggleFilters?: ToggleFilter[]
 
-  // State
   isLoading?: boolean
   loadingText?: string
   errorMsg?: string | null
   emptyMessage?: string
 
-  // Pagination
   pagination?: PaginationMeta
   onPageChange?: (page: number) => void
 }

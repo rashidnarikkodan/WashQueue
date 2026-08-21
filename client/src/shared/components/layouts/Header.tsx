@@ -18,16 +18,13 @@ export default function Header({ role }: { role?: string }) {
 
   const isCustomer = currentRole === "customer"
 
-  // Interactive States
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Close menus on route change
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false)
   }, [pathname])
 
-  // Dynamic Navigation Configurations
   const navLinks = {
     admin: [],
     manager: [],
@@ -40,7 +37,6 @@ export default function Header({ role }: { role?: string }) {
 
   const activeLinks = navLinks[currentRole as keyof typeof navLinks] || []
 
-  // Role Badge Styling
   const roleBadges = {
     admin: {
       label: "Admin",
@@ -62,7 +58,6 @@ export default function Header({ role }: { role?: string }) {
   return (
     <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
-        {/* Left Side: Brand Logo & Role Badge */}
         <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-xl font-bold italic tracking-tight text-primary">WashQueue</span>
@@ -77,7 +72,6 @@ export default function Header({ role }: { role?: string }) {
           )}
         </div>
 
-        {/* Center Section: Navigation Links OR Toggleable Search Box */}
         <div className="col-span-1 flex justify-center max-w-lg mx-auto w-full">
 
               <nav className="hidden md:flex items-center gap-6">
@@ -102,10 +96,8 @@ export default function Header({ role }: { role?: string }) {
             
         </div>
 
-        {/* Right Side: Utilities, Profile & Hamburger Menu */}
         <div className="col-span-1 flex justify-end items-center gap-3">        
 
-          {/* Favorites Heart Icon (Consumer-only & Authenticated) */}
           {isAuthenticated && isCustomer && (
             <Link
               to={APP_ROUTES.BOOKMARKS}
@@ -115,13 +107,10 @@ export default function Header({ role }: { role?: string }) {
               <Heart className="h-4.5 w-4.5" />
             </Link>
           )}
-          {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Notifications Dropdown */}
           {isAuthenticated && <NotificationDropdown />}
 
-          {/* User Profile / Login trigger */}
           {isAuthenticated ? (
             <ProfileDropdown currentRole={currentRole} />
           ) : (
@@ -133,7 +122,6 @@ export default function Header({ role }: { role?: string }) {
             </button>
           )}
 
-          {/* Mobile Menu Toggle Button */}
           {activeLinks.length > 0 && (
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -146,7 +134,6 @@ export default function Header({ role }: { role?: string }) {
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
       {isMobileMenuOpen && activeLinks.length > 0 && (
         <div className="md:hidden border-t border-border bg-card/95 rounded-b-[3rem] backdrop-blur-md p-4 shadow-xl animate-in slide-in-from-top-4 duration-200">
           <div className="space-y-1.5 px-2">

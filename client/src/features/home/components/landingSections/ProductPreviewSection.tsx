@@ -4,11 +4,9 @@ export default function ProductPreviewSection() {
   return (
     <section className="py-24 border-b border-border bg-background/20">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Column 1: UI Mockup Panel */}
         <div className="relative p-6 sm:p-8 rounded-[2rem] border border-border bg-card/35 backdrop-blur-md shadow-xl overflow-hidden">
           <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Header Dots Mockup */}
           <div className="flex justify-between items-center mb-6 border-b border-border/60 pb-4">
             <div className="flex gap-2">
               <span className="w-3 h-3 rounded-full bg-red-400/80" />
@@ -20,7 +18,6 @@ export default function ProductPreviewSection() {
             </span>
           </div>
 
-          {/* Station Card UI */}
           <div className="p-5 rounded-2xl bg-background/40 border border-border/50 mb-4 space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="font-bold text-foreground text-sm sm:text-base">
@@ -30,7 +27,6 @@ export default function ProductPreviewSection() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Queue Length indicator */}
               <div className="space-y-2">
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">
                   QUEUE LENGTH
@@ -42,7 +38,6 @@ export default function ProductPreviewSection() {
                   <span className="w-1.5 h-6 rounded-sm bg-muted" />
                 </div>
               </div>
-              {/* Wait time */}
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block">
                   WAIT TIME
@@ -52,7 +47,6 @@ export default function ProductPreviewSection() {
             </div>
           </div>
 
-          {/* Queue Status UI */}
           <div className="p-5 rounded-2xl bg-background/40 border border-border/50 space-y-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-full bg-primary/10 text-primary">
@@ -71,7 +65,6 @@ export default function ProductPreviewSection() {
           </div>
         </div>
 
-        {/* Column 2: Details List */}
         <div className="flex flex-col items-start text-left space-y-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
             Granular Control for Premium Detailing.

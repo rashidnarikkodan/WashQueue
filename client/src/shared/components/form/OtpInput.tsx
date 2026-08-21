@@ -11,7 +11,6 @@ interface OtpInputProps {
 export default function OtpInput({ value, onChange, disabled = false }: OtpInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // Focus the first input on mount
   useEffect(() => {
     inputRefs.current[0]?.focus()
   }, [])

@@ -21,9 +21,6 @@ app.use(corsConfig)
 app.use(
   express.json({
     limit: "50mb",
-    // Preserve the exact raw bytes alongside the parsed body so webhook handlers
-    // (e.g. Razorpay) can verify signatures against what was actually sent, not
-    // a re-serialized copy of the parsed object.
     verify: (req, _res, buf) => {
       ;(req as express.Request & { rawBody?: Buffer }).rawBody = buf
     },

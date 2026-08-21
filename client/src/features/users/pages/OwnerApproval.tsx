@@ -31,13 +31,11 @@ const OwnerApproval = () => {
   const [rejectingOwnerId, setRejectingOwnerId] = useState<string | null>(null)
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
 
-  // ─── URL-driven state ───────────────────────────────────────────────────────
   const searchQuery = searchParams.get("q") || ""
   const activeTab = (searchParams.get("tab") as "all" | "customer" | "owner") || "customer"
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 10
 
-  // ─── Data fetching ──────────────────────────────────────────────────────────
   const fetchOwners = useCallback(async () => {
     setIsLoading(true)
     setErrorMsg(null)
@@ -84,7 +82,6 @@ const OwnerApproval = () => {
     fetchOwners()
   }, [fetchOwners])
 
-  // ─── URL param helpers ──────────────────────────────────────────────────────
   const updateParams = (newParams: Record<string, string | null | number | boolean>) => {
     const params = new URLSearchParams(searchParams)
     Object.entries(newParams).forEach(([key, val]) => {
@@ -104,7 +101,6 @@ const OwnerApproval = () => {
   const setActiveTab = (tab: string) => updateParams({ tab })
   const setCurrentPage = (page: number) => updateParams({ page })
 
-  // ─── Actions ────────────────────────────────────────────────────────────────
   const handleApprove = async (id: string) => {
     try {
       setOwners((prev) => prev.map((o) => (o.id === id ? { ...o, isVerified: true } : o)))
@@ -140,17 +136,14 @@ const OwnerApproval = () => {
     }
   }
 
-  // ─── Table configuration ────────────────────────────────────────────────────
   const columns = getOwnerColumns((owner) => setSelectedOwner(owner))
 
   return (
     <div className="space-y-6 text-left animate-in fade-in duration-300">
-      {/* Breadcrumbs */}
       <Breadcrumbs
         items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Owner Verification" }]}
       />
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Owner Verification</h1>
@@ -160,7 +153,6 @@ const OwnerApproval = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <UserStats
         totalUsers={stats.total}
         activeUsers={stats.approved}
@@ -169,7 +161,6 @@ const OwnerApproval = () => {
         isOwnerApproval={true}
       />
 
-      {/* Toolbar */}
       <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -180,7 +171,6 @@ const OwnerApproval = () => {
         onTabChange={setActiveTab}
       />
 
-      {/* DataTable */}
       <DataTable<User>
         columns={columns}
         data={owners}
@@ -189,17 +179,14 @@ const OwnerApproval = () => {
         loadingText="Fetching owner applications..."
         errorMsg={errorMsg}
         emptyMessage="No owner applications found."
-        // Pagination
         pagination={paginationMeta}
         onPageChange={setCurrentPage}
       />
 
-      {/* Slide-over Application Details Panel */}
       {selectedOwner && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div onClick={() => setSelectedOwner(null)} className="absolute inset-0 cursor-pointer" />
           <div className="relative w-full max-w-lg bg-card border-l border-border/80 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
-            {/* Header */}
             <div className="p-6 border-b border-border/40 flex items-center justify-between">
               <div className="space-y-1">
                 <h2 className="text-xl font-black text-foreground tracking-tight">
@@ -217,7 +204,6 @@ const OwnerApproval = () => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <OnboardingDetailsSummary
                 details={selectedOwner.onboardingDetails || {}}
@@ -225,7 +211,6 @@ const OwnerApproval = () => {
               />
             </div>
 
-            {/* Action Bar */}
             <div className="p-6 border-t border-border/40 flex items-center gap-4 bg-muted/10">
               {!selectedOwner.isVerified ? (
                 <>
@@ -258,7 +243,6 @@ const OwnerApproval = () => {
         </div>
       )}
 
-      {/* Custom Rejection Reason Modal */}
       {rejectingOwnerId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-card border border-border/80 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left">

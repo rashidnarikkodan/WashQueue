@@ -3,7 +3,7 @@ export type TimeWindowStatus = "OPEN" | "FULL" | "CLOSED" | "PAST"
 export interface TimeWindowInstanceProps {
   id: string
   stationId: string
-  date: string // YYYY-MM-DD
+  date: string
   windowStart: Date
   windowEnd: Date
   capacityTotal: number

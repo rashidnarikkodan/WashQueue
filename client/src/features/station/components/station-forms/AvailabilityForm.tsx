@@ -52,7 +52,6 @@ export default function AvailabilityForm({
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Apply schedule of first day to all active days if applySameSchedule is toggled
   useEffect(() => {
     if (applySameSchedule && formData.operatingHours.length > 0) {
       const first = formData.operatingHours[0]
@@ -165,7 +164,6 @@ export default function AvailabilityForm({
       })
     }
 
-    // Custom validations
     if (formData.walkInReservedSlots > formData.capacityPerWindow) {
       errMap.walkInReservedSlots = "Walk-in reserved slots cannot exceed total window capacity"
     }
@@ -186,7 +184,6 @@ export default function AvailabilityForm({
         return
       }
 
-      // Break time validations
       if (day.breaks && day.breaks.length > 0) {
         for (const brk of day.breaks) {
           if (brk.start >= brk.end) {
@@ -316,7 +313,6 @@ export default function AvailabilityForm({
                   </div>
                 </div>
 
-                {/* Sub-section: Daily Breaks */}
                 {!item.isClosed && item.breaks && item.breaks.length > 0 && (
                   <div className="pl-4 border-l-2 border-amber-500/40 space-y-2 pt-1">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-400">
@@ -379,7 +375,6 @@ export default function AvailabilityForm({
         </div>
       </div>
 
-      {/* Section 2: Time Window & Bays Configuration */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
           <Info size={16} className="text-[#ADC6FF]" />
@@ -475,7 +470,6 @@ export default function AvailabilityForm({
         </div>
       </div>
 
-      {/* Section 3: Holidays */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
@@ -484,7 +478,6 @@ export default function AvailabilityForm({
           </div>
         </div>
 
-        {/* Add Holiday Inline Form */}
         <div className="p-4 rounded-xl border border-slate-800 bg-[#151B2D] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <DatePicker
@@ -508,7 +501,6 @@ export default function AvailabilityForm({
           </div>
         </div>
 
-        {/* Holiday Chips */}
         <div className="flex flex-wrap gap-3">
           {holidays.map((hol, idx) => (
             <div
@@ -530,7 +522,6 @@ export default function AvailabilityForm({
         </div>
       </div>
 
-      {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
         <div className="flex items-center gap-3">
           <button

@@ -20,7 +20,6 @@ export function useBookingList({
 
   const [filterStations, setFilterStations] = useState<Array<{ id: string; name: string }>>([])
 
-  // Zustand Store
   const {
     bookings,
     pagination,
@@ -40,7 +39,6 @@ export function useBookingList({
     setCancellationReason,
   } = useBookingStore()
 
-  // Query state from URL
   const searchQuery = searchParams.get("q") || ""
   const activeTab = (searchParams.get("tab") as BookingStatus) || "ALL"
   const selectedStationId = searchParams.get("stationId") || "ALL"
@@ -48,7 +46,6 @@ export function useBookingList({
   const limit = 10
   const refetchParam = searchParams.get("refetch")
 
-  // Fetch station list for station filter dropdown when Admin or Owner
   useEffect(() => {
     if (isAdmin) {
       import("@/shared/apis/station.api")
@@ -63,7 +60,6 @@ export function useBookingList({
           }
         })
         .catch(() => {
-          // Ignore error fallback
         })
     } else if (isOwner) {
       const ownerUserId = user?.ownerId || user?.id
@@ -82,13 +78,11 @@ export function useBookingList({
             }
           })
           .catch(() => {
-            // Ignore error fallback
           })
       }
     }
   }, [isAdmin, isOwner, user?.ownerId, user?.id])
 
-  // Derive unique stations fallback if filterStations empty
   const ownerStations = useMemo(() => {
     if (filterStations.length > 0) return filterStations
 
@@ -101,7 +95,6 @@ export function useBookingList({
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
   }, [filterStations, bookings])
 
-  // Helper to update query parameters
   const updateParams = useCallback(
     (newParams: Record<string, string | number | undefined>) => {
       setSearchParams((prev) => {
@@ -119,7 +112,6 @@ export function useBookingList({
     [setSearchParams]
   )
 
-  // Fetch bookings data on URL params change
   useEffect(() => {
     loadBookings({
       activeTab,
@@ -141,7 +133,6 @@ export function useBookingList({
     refetchParam,
   ])
 
-  // Fetch manager station if manager role
   useEffect(() => {
     if (isManager) {
       loadManagerStation()
@@ -150,7 +141,6 @@ export function useBookingList({
 
   const filteredBookings = bookings
 
-  // Handle Cancel Submit
   const handleConfirmCancel = async () => {
     if (!selectedBookingForCancel) return
     const success = await cancelBooking(selectedBookingForCancel.id, cancellationReason)

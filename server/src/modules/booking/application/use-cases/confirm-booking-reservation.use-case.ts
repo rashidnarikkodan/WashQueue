@@ -32,11 +32,6 @@ export interface ConfirmBookingReservationInput {
   razorpay_payment_id: string
   razorpay_signature: string
   paymentMethod?: PaymentMethod
-  /**
-   * Set only by the Razorpay webhook flow, which has already authenticated the
-   * request via its own x-razorpay-signature payload HMAC (a different signature
-   * than the checkout-flow order/payment HMAC checked below).
-   */
   skipSignatureVerification?: boolean
 }
 
@@ -72,7 +67,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     const isWalletPayment = paymentMethod === PaymentMethod.WALLET
 
     if (!isWalletPayment && !input.skipSignatureVerification) {
-      // Verify Razorpay HMAC Signature for online card/UPI payments
       const isMatch = this.paymentGateway.verifyPaymentSignature(
         razorpay_order_id,
         razorpay_payment_id,
@@ -84,13 +78,11 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       }
     }
 
-    // 2. Find Reservation
     const reservation = await this.reservationRepository.findByRazorpayOrderId(razorpay_order_id)
     if (!reservation) {
       throw new AppError("Reservation not found for order", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 3. Idempotency Check: Already Confirmed
     if (reservation.status === "CONFIRMED" && reservation.bookingId) {
       const existingBooking = await this.bookingRepository.findById(reservation.bookingId)
       if (existingBooking) {
@@ -98,7 +90,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       }
     }
 
-    // 4. Handle Expired or Released Reservation Payment
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED_REFUND_NEEDED" || reservation.isExpired) {
       reservation.markExpiredRefund(razorpay_payment_id)
       await this.reservationRepository.save(reservation)
@@ -109,7 +100,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       )
     }
 
-    // 5. Convert HELD Reservation to CONFIRMED Booking
     const station = await this.stationRepository.findById(reservation.stationId)
     const vehicle = await this.vehicleRepository.findById(reservation.vehicleId)
     const timeWindow = await this.timeWindowRepository.findById(reservation.timeWindowId)
@@ -124,8 +114,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       )
     }
 
-    // strict=false: extras were already validated when the reservation was created, so a
-    // since-removed/deactivated extra is silently dropped here rather than blocking confirmation.
     const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
       station.id,
       vehicle.data.classId,
@@ -184,9 +172,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       updatedAt: now,
     })
 
-    // Booking creation, its audit log, and the reservation's CONFIRMED transition are one
-    // atomic unit — a manager should never see a half-confirmed reservation with no booking,
-    // or a booking with no audit trail, because one write in the sequence failed.
     const runConfirmationWork = async (session?: unknown) => {
       const savedBooking = await this.bookingRepository.save(booking, session)
 
@@ -211,10 +196,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       ? await this.transactionRunner.runInTransaction(runConfirmationWork)
       : await runConfirmationWork()
 
-    // Deduct wallet balance if split payment was used. This is a best-effort side payment on
-    // top of an already-committed booking (the wallet module manages its own transaction and
-    // can't join the one above), so a failure here must not undo the confirmed booking — it's
-    // logged for manual reconciliation instead of being silently swallowed.
     if (reservation.walletAmount > 0) {
       try {
         await this.debitWalletUseCase.execute({
@@ -242,7 +223,6 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       }
     }
 
-    // Notify
     await this.notificationService.notify("BOOKING_CREATED", savedBooking)
 
     return BookingDTOMapper.toDTO(savedBooking, qrResult.rawToken)

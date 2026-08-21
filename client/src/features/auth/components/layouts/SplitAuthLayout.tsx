@@ -36,10 +36,8 @@ export default function SplitAuthLayout({
           : "md:rounded-l-[100px] rounded-b-[40px] md:rounded-br-none order-1 md:order-2"
       }`}
     >
-      {/* Background Decor Glow */}
       <div className="absolute right-[-50px] top-[-50px] h-[300px] w-[300px] rounded-full bg-primary-foreground/10 filter blur-3xl"></div>
 
-      {/* Brand Header */}
       {showLogo ? (
         <div className="flex items-center gap-2 z-10">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground text-primary font-bold shadow-lg">
@@ -51,7 +49,6 @@ export default function SplitAuthLayout({
         <div />
       )}
 
-      {/* Central Message */}
       <div
         className={`my-auto space-y-4 max-w-lg z-10 ${
           centerBranding ? "text-center mx-auto flex flex-col items-center justify-center" : ""
@@ -63,7 +60,6 @@ export default function SplitAuthLayout({
         <p className="text-base md:text-lg opacity-90 font-light">{description}</p>
       </div>
 
-      {/* Bottom Footer or Redirect Button */}
       {(footerElement || (buttonText && onRedirectClick)) && (
         <div
           className={`flex flex-col gap-3 md:gap-4 z-10 pt-4 border-t border-primary-foreground/20 ${

@@ -8,7 +8,6 @@ interface ProfileActivityStatsProps {
 export default function ProfileActivityStats({ stats }: ProfileActivityStatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      {/* Stat 1: Total Bookings */}
       <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative text-card-foreground">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-4">
           TOTAL BOOKINGS
@@ -21,7 +20,6 @@ export default function ProfileActivityStats({ stats }: ProfileActivityStatsProp
         </div>
       </div>
 
-      {/* Stat 2: Favorite Stations */}
       <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative text-card-foreground">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-4">
           FAVORITE STATIONS
@@ -34,7 +32,6 @@ export default function ProfileActivityStats({ stats }: ProfileActivityStatsProp
         </div>
       </div>
 
-      {/* Stat 3: Vehicles Added */}
       <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl relative text-card-foreground">
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-4">
           VEHICLES ADDED

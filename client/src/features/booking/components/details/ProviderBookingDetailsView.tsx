@@ -49,7 +49,6 @@ export default function ProviderBookingDetailsView({
     booking.vehicleDetails?.registrationNumber || booking.walkInVehicle?.registrationNumber || "N/A"
   const serviceName = booking.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash"
 
-  // Initials
   const customerInitials = useMemo(() => {
     if (!customerName) return "CU"
     const parts = customerName.trim().split(" ")
@@ -57,13 +56,11 @@ export default function ProviderBookingDetailsView({
     return customerName.slice(0, 2).toUpperCase()
   }, [customerName])
 
-  // Badge
   const customerBadge = useMemo(() => {
     if (booking.isWalkIn || booking.walkInCustomer) return "WALK-IN GUEST"
     return "REGISTERED USER"
   }, [booking.isWalkIn, booking.walkInCustomer])
 
-  // Live Timer only active when service is in progress or completed
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
 
   const isServiceStarted = Boolean(
@@ -119,7 +116,6 @@ export default function ProviderBookingDetailsView({
     return `${pad(mins)}:${pad(secs)}`
   }, [elapsedSeconds])
 
-  // Execution Timeline Steps derived from real status history logs
   const timelineSteps = useMemo(() => {
     const historyMap = new Map<string, string>()
     if (booking.statusHistory) {
@@ -175,7 +171,6 @@ export default function ProviderBookingDetailsView({
     })
   }, [booking.statusHistory, booking.status])
 
-  // Inspection note from status history if exists
   const inspectionLog = useMemo(() => {
     if (!booking.statusHistory) return null
     return booking.statusHistory.find(
@@ -185,7 +180,6 @@ export default function ProviderBookingDetailsView({
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
-      {/* Action Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
@@ -254,11 +248,8 @@ export default function ProviderBookingDetailsView({
         </div>
       </div>
 
-      {/* Main 12-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left 8-Column Main Execution Feed */}
         <div className="lg:col-span-8 space-y-8">
-          {/* 1. Booking Overview Bar (4 KPI Tiles) */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl grid grid-cols-1 sm:grid-cols-4 gap-6 text-left">
             <div className="space-y-1">
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
@@ -328,7 +319,6 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          {/* 2. Live Execution Timeline (Horizontal Stepper) */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2">
@@ -350,7 +340,6 @@ export default function ProviderBookingDetailsView({
               </span>
             </div>
 
-            {/* Stepper Steps */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 relative">
               {timelineSteps.map((step, idx) => (
                 <div key={idx} className="flex flex-col items-center text-center space-y-2">
@@ -388,7 +377,6 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          {/* 3. Pre-Service Inspection Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <h3 className="text-base font-bold text-foreground">Pre-Service Inspection</h3>
@@ -476,7 +464,6 @@ export default function ProviderBookingDetailsView({
             )}
           </div>
 
-          {/* 4. Post-Service Inspection */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <h3 className="text-base font-bold text-foreground">Post-Service Quality Inspection</h3>
@@ -591,7 +578,6 @@ export default function ProviderBookingDetailsView({
             )}
           </div>
 
-          {/* 5. Exception Handling / Log Details (Rendered if Cancellation or Status Log Notes exist) */}
           {(booking.status === "CANCELLED" || booking.cancellation || (booking.statusHistory && booking.statusHistory.some(l => l.reason || l.notes))) && (
             <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
               <div className="flex items-center gap-2 text-amber-500 border-b border-border pb-3">
@@ -634,9 +620,7 @@ export default function ProviderBookingDetailsView({
           )}
         </div>
 
-        {/* Right 4-Column Sticky Aside Management Panel */}
         <div className="lg:col-span-4 space-y-6">
-          {/* A. Customer & Vehicle Card */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground font-black text-xl flex items-center justify-center shrink-0">
@@ -675,7 +659,6 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          {/* B. Booking Schedule & Contextual Status / Timer Card */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <div className="grid grid-cols-2 gap-4 border-b border-border pb-4">
               <div className="space-y-0.5">
@@ -698,7 +681,6 @@ export default function ProviderBookingDetailsView({
               </div>
             </div>
 
-            {/* Contextual Status / Execution Timer Display */}
             {isServiceStarted && booking.status !== "CANCELLED" && booking.status !== "NO_SHOW" ? (
               <div className="p-5 rounded-2xl border border-primary/20 bg-muted/40 text-center space-y-1">
                 <span className="text-[9px] font-black uppercase text-muted-foreground block tracking-widest">
@@ -758,7 +740,6 @@ export default function ProviderBookingDetailsView({
             )}
           </div>
 
-          {/* C. Financial Summary Card */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h4 className="text-xs font-black uppercase text-muted-foreground tracking-widest border-b border-border pb-3">
               FINANCIAL SUMMARY
@@ -810,7 +791,6 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          {/* D. Quick Management Action Buttons */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-3">
             {booking.status === "IN_SERVICE" && (
               <button

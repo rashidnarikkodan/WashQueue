@@ -182,7 +182,6 @@ export class BookingMongoRepository implements IBookingRepository {
           orConditions.push({ userId: { $in: matchingUsers.map((u) => u._id) } })
         }
       } catch {
-        // Ignore user lookup error if module fails
       }
 
       try {
@@ -203,7 +202,6 @@ export class BookingMongoRepository implements IBookingRepository {
           orConditions.push({ vehicleId: { $in: matchingVehicles.map((v) => v._id) } })
         }
       } catch {
-        // Ignore vehicle lookup error if module fails
       }
 
       query.$or = orConditions

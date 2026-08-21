@@ -32,7 +32,6 @@ export default function EditStationModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md p-4 sm:p-6 flex justify-center items-center overflow-y-auto">
       <div className="bg-[#0c1324] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-        {/* Modal Header */}
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#151b2d]">
           <div>
             <h2 className="text-xl font-extrabold text-white">Edit Station Configuration</h2>
@@ -46,7 +45,6 @@ export default function EditStationModal({
           </button>
         </div>
 
-        {/* Stepper Header */}
         <div className="grid grid-cols-4 bg-[#191f31] border-b border-white/5 text-xs">
           {steps.map((st) => {
             const Icon = st.icon
@@ -68,7 +66,6 @@ export default function EditStationModal({
           })}
         </div>
 
-        {/* Modal Body */}
         <div className="p-6 overflow-y-auto flex-1">
           {activeStep === 1 && (
             <StationDetailsForm

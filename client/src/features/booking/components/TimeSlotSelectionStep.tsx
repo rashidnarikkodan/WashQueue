@@ -3,8 +3,8 @@ import DatePicker from "@/shared/components/form/DatePicker"
 
 export interface TimeSlotOption {
   id: string
-  timeWindow: string // e.g. "09:00 - 10:00"
-  label: string // e.g. "Morning Slot", "Selected", "Fully Booked", "Time Elapsed", "2 Slots Left"
+  timeWindow: string
+  label: string
   status: "AVAILABLE" | "SELECTED" | "LIMITED" | "FULL" | "PAST"
   slotsLeft?: number
 }
@@ -42,7 +42,6 @@ export default function TimeSlotSelectionStep({
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-      {/* Step Header */}
       <div className="flex items-center gap-4 w-full">
         <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shrink-0 shadow-md shadow-primary/20">
           3
@@ -53,7 +52,6 @@ export default function TimeSlotSelectionStep({
       </div>
 
       <div className="flex flex-col gap-6 pl-0 sm:pl-14">
-        {/* Date Selector Header */}
         <div className="space-y-3 text-left">
           <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             SERVICE DATE
@@ -71,7 +69,6 @@ export default function TimeSlotSelectionStep({
           </div>
         </div>
 
-        {/* Time Windows Grid */}
         <div className="space-y-3 text-left">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

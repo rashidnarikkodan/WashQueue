@@ -18,24 +18,20 @@ export default function WalletPage() {
   const [isTxLoading, setIsTxLoading] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>("ALL")
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize] = useState<number>(10)
   const [totalPages, setTotalPages] = useState<number>(1)
   const [totalRecords, setTotalRecords] = useState<number>(0)
   const [isExporting, setIsExporting] = useState<boolean>(false)
 
-  // Top-Up Modal State
   const [isTopUpOpen, setIsTopUpOpen] = useState(false)
   const [topUpAmount, setTopUpAmount] = useState<number>(500)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Statement Modal State
   const [isStatementOpen, setIsStatementOpen] = useState(false)
   const [statementTransactions, setStatementTransactions] = useState<WalletTransactionItem[]>([])
   const [isStatementLoading, setIsStatementLoading] = useState(false)
 
-  // 1. Fetch Wallet Balance
   const fetchWallet = useCallback(async () => {
     try {
       const data = await walletApi.getBalance()
@@ -48,7 +44,6 @@ export default function WalletPage() {
     }
   }, [])
 
-  // 2. Fetch Transactions with Filter & Pagination
   const fetchTransactions = useCallback(
     async (filterType: string, pageNum: number) => {
       setIsTxLoading(true)
@@ -88,18 +83,15 @@ export default function WalletPage() {
     }
   }, [fetchWallet, fetchTransactions, activeFilter, currentPage])
 
-  // Filter Change Handler
   const handleFilterChange = (filterId: string) => {
     setActiveFilter(filterId)
     setCurrentPage(1)
   }
 
-  // Page Change Handler
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
 
-  // Export to Excel / CSV Handler
   const handleExportExcel = async () => {
     setIsExporting(true)
     try {
@@ -127,7 +119,6 @@ export default function WalletPage() {
     }
   }
 
-  // Load Razorpay Checkout Script Dynamically
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -142,7 +133,6 @@ export default function WalletPage() {
     })
   }
 
-  // Top-Up Payment Handler
   const handleTopUpSubmit = async () => {
     if (!topUpAmount || topUpAmount < 1) {
       toast.error("Please enter a valid top-up amount (minimum ₹1)")
@@ -158,10 +148,8 @@ export default function WalletPage() {
         return
       }
 
-      // 1. Create Top-Up Order on Server
       const orderData = await walletApi.createTopUpOrder(topUpAmount)
 
-      // 2. Open Razorpay Checkout Modal
       const options = {
         key: orderData.keyId,
         amount: Math.round(topUpAmount * 100),
@@ -217,7 +205,6 @@ export default function WalletPage() {
     }
   }
 
-  // Open Wallet Statement Modal
   const handleOpenStatement = async () => {
     setIsStatementOpen(true)
     setIsStatementLoading(true)
@@ -232,7 +219,6 @@ export default function WalletPage() {
     }
   }
 
-  // Quick Metrics Calculations
   const totalTransactionsCount = totalRecords || transactions.length
   const totalSpentAmount = useMemo(() => {
     return transactions
@@ -249,7 +235,6 @@ export default function WalletPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pt-4 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Hero Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-6">
           <div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
@@ -273,7 +258,6 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {/* Overview Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7">
             <WalletHeroCard
@@ -289,7 +273,6 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
         <WalletStatsGrid
           totalTransactionsCount={totalTransactionsCount}
           totalSpentAmount={totalSpentAmount}
@@ -297,7 +280,6 @@ export default function WalletPage() {
           statusText={wallet?.status || "Active"}
         />
 
-        {/* Transaction History Section */}
         <TransactionHistoryTable
           transactions={transactions}
           isLoading={isTxLoading}
@@ -313,7 +295,6 @@ export default function WalletPage() {
         />
       </div>
 
-      {/* Modals */}
       <TopUpModal
         isOpen={isTopUpOpen}
         onClose={() => setIsTopUpOpen(false)}

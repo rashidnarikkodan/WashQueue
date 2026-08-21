@@ -13,7 +13,6 @@ import {
 } from "lucide-react"
 import type { VehicleCategory } from "../../types"
 
-// Helper to assign icons based on category name (inherits text color)
 const getCategoryIcon = (name: string) => {
   const lower = name.toLowerCase()
   if (lower.includes("car") || lower.includes("passenger") || lower.includes("auto")) {
@@ -47,7 +46,6 @@ const getCategoryIcon = (name: string) => {
   return <Car size={20} />
 }
 
-// Helper descriptions matching figma mockup
 const getCategoryDescription = (name: string) => {
   const lower = name.toLowerCase()
   if (lower.includes("car") || lower.includes("passenger")) {
@@ -94,7 +92,6 @@ export default function CategoryCard({
       }`}
     >
       <div className="flex items-center gap-5 min-w-0 flex-1">
-        {/* Icon Box */}
         <div
           className={`flex w-12 h-12 justify-center items-center rounded-xl shrink-0 transition-all duration-200 ${
             category.isActive
@@ -118,7 +115,6 @@ export default function CategoryCard({
               {catClassesCount} {catClassesCount === 1 ? "Class" : "Classes"}
             </span>
 
-            {/* Status Badge */}
             <span
               className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider border shrink-0 ${
                 category.isActive
@@ -139,9 +135,7 @@ export default function CategoryCard({
         </div>
       </div>
 
-      {/* Actions & Chevron */}
       <div className="flex items-center gap-2.5 mt-4 sm:mt-0 self-end sm:self-center shrink-0">
-        {/* Status Toggle (Eye/EyeOff) */}
         <button
           onClick={(e) => onToggleStatus(category, e)}
           title={category.isActive ? "Deactivate Category" : "Activate Category"}
@@ -160,7 +154,6 @@ export default function CategoryCard({
           )}
         </button>
 
-        {/* Pencil Icon (Edit Category) */}
         <button
           onClick={(e) => onEdit(category, e)}
           title="Edit Category"
@@ -169,7 +162,6 @@ export default function CategoryCard({
           <Pencil size={14} />
         </button>
 
-        {/* Trash Icon (Delete Category) */}
         <button
           onClick={(e) => onDelete(category, e)}
           title="Delete Category"
@@ -178,7 +170,6 @@ export default function CategoryCard({
           <Trash2 size={14} />
         </button>
 
-        {/* Chevron (Toggle Expanded) */}
         <div className="p-2.5 rounded-xl border border-border bg-muted/20 text-muted-foreground hover:text-foreground transition-all ml-1 shrink-0">
           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>

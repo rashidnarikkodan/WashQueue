@@ -22,11 +22,6 @@ export class StallBookingUseCase {
     private readonly notificationService: IBookingNotificationService
   ) {}
 
-  /**
-   * Transition vehicle to STALLED state for genuine operational exceptions:
-   * (e.g. payment dispute, vehicle problem, inspection issue, equipment failure).
-   * Valid entry states: CHECKED_IN or IN_SERVICE.
-   */
   async execute(managerUserId: string, input: StallBookingInput): Promise<BookingResponseDTO> {
     const { bookingId, reason } = input
 
@@ -51,7 +46,6 @@ export class StallBookingUseCase {
 
     booking.stall(reason.trim(), managerUserId)
 
-    // Optimistic-concurrency guard (CHECKED_IN/IN_SERVICE -> STALLED)
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, allowedEntryStatuses)
 
     if (!domainBooking) {
@@ -60,7 +54,6 @@ export class StallBookingUseCase {
 
     const now = domainBooking.stalledInfo?.stalledAt || new Date()
 
-    // Save Audit Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -72,10 +65,8 @@ export class StallBookingUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // Sync Redis Operational Queue State
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // Dispatch Real-Time Socket Event
     await this.notificationService.notify("BOOKING_STALLED", domainBooking, {
       stalledReason: reason,
       previousStatus,

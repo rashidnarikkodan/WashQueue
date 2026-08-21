@@ -113,7 +113,6 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
   async reserveCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null> {
     if (!Types.ObjectId.isValid(windowId)) return null
 
-    // Atomic update condition: window must be OPEN and advanceBookedCount < (capacityTotal - walkInReservedSlots)
     const doc = await TimeWindowModel.findOneAndUpdate(
       {
         _id: new Types.ObjectId(windowId),
@@ -130,7 +129,6 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
 
     if (!doc) return null
 
-    // Check if new count reached capacity limit and update status to FULL
     const onlineCap = Math.max(0, doc.capacityTotal - doc.walkInReservedSlots)
     if (doc.advanceBookedCount >= onlineCap) {
       doc.status = "FULL"
@@ -143,7 +141,6 @@ export class TimeWindowMongoRepository implements ITimeWindowRepository {
   async reserveWalkInCapacityAtomically(windowId: string): Promise<TimeWindowInstance | null> {
     if (!Types.ObjectId.isValid(windowId)) return null
 
-    // Atomic update condition: walk-in count < reserved walk-in slots OR total booked < total capacity
     const doc = await TimeWindowModel.findOneAndUpdate(
       {
         _id: new Types.ObjectId(windowId),

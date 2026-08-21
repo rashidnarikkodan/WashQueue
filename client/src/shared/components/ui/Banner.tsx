@@ -87,7 +87,6 @@ export default function Banner({
       className={`mb-6 p-4 sm:p-5 rounded-2xl border backdrop-blur-md shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300 ${config.container} ${className}`}
     >
       <div className="flex items-start sm:items-center gap-3.5 flex-1">
-        {/* Pulsing Icon */}
         <div className="relative shrink-0 mt-0.5 sm:mt-0">
           <div
             className={`absolute inset-0 rounded-xl blur-md animate-pulse opacity-50 ${config.iconColor}`}
@@ -99,7 +98,6 @@ export default function Banner({
           </div>
         </div>
 
-        {/* Content Body */}
         <div className="space-y-1 flex-1">
           {(title || badgeText) && (
             <div className="flex flex-wrap items-center gap-2">
@@ -128,7 +126,6 @@ export default function Banner({
         </div>
       </div>
 
-      {/* Optional Action or Close Button */}
       {(action || onClose) && (
         <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
           {action}

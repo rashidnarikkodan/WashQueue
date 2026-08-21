@@ -23,7 +23,6 @@ export const WalletHeroCard: React.FC<WalletHeroCardProps> = ({
 }) => {
   return (
     <div className="relative overflow-hidden rounded-3xl bg-card p-8 border border-border shadow-2xl flex flex-col justify-between min-h-[260px]">
-      {/* Background Decorative Blur */}
       <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
       <div className="space-y-4">

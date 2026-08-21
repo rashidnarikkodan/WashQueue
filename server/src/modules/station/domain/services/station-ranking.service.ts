@@ -19,22 +19,17 @@ export class StationRankingService {
     const W_VERIFIED = 0.1
     const W_PRICE = 0.1
 
-    // 1. Distance Sub-score (Exponential decay: 0km => 1.0, 10km => ~0.36, 25km => ~0.08)
     const distKm = typeof item.distanceKm === "number" ? item.distanceKm : 15
     const sDist = Math.exp(-distKm / 10)
 
-    // 2. Wait Time Sub-score (0 mins => 1.0, 60+ mins => 0.0)
     const waitMins = Math.max(0, item.estimatedWaitMins || 0)
     const sWait = Math.max(0, 1 - waitMins / 60)
 
-    // 3. Rating Sub-score (5.0 => 1.0)
     const rating = Math.min(5, Math.max(0, item.rating || 0))
     const sRating = rating / 5
 
-    // 4. Verification Sub-score
     const sVerified = item.isVerified ? 1.0 : 0.0
 
-    // 5. Price Sub-score (Lower starting price relative to $150 benchmark scores higher)
     const price = item.startingPrice ?? 50
     const sPrice = Math.max(0, 1 - price / 150)
 
@@ -47,9 +42,6 @@ export class StationRankingService {
     )
   }
 
-  /**
-   * Sorts array of HydratedStationItem deterministically based on sortBy parameter.
-   */
   static sort(
     items: (HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number })[],
     sortBy?: string,

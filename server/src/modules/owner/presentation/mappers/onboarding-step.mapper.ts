@@ -10,10 +10,6 @@ export interface ParsedOnboardingStepRequest {
 export class OnboardingStepRequestMapper {
   constructor(private readonly mediaUploadService: MediaUploadService) {}
 
-  /**
-   * Extracts text fields and uploaded files from the multipart HTTP request,
-   * returning clean onboarding details DTO.
-   */
   async mapToOnboardingDetails(req: AuthenticatedRequest): Promise<ParsedOnboardingStepRequest> {
     const step = parseInt(req.body.step ?? "1", 10)
 
@@ -45,7 +41,6 @@ export class OnboardingStepRequestMapper {
       ifscCode,
     }
 
-    // Process file uploads via MediaUploadService safely
     const [idProofUrl, businessLicenseUrl, gstCertificateUrl, bankProofUrl] = await Promise.all([
       this.mediaUploadService.uploadFileByFieldname(files, "idProofFile"),
       this.mediaUploadService.uploadFileByFieldname(files, "businessLicenseFile"),
@@ -58,7 +53,6 @@ export class OnboardingStepRequestMapper {
     if (gstCertificateUrl) details.gstCertificateUrl = gstCertificateUrl
     if (bankProofUrl) details.bankProofUrl = bankProofUrl
 
-    // Filter out undefined or empty string values
     const cleanDetails = Object.fromEntries(
       Object.entries(details).filter(([, v]) => v !== undefined && v !== "")
     ) as IOwnerOnboardingDetails

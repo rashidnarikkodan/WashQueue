@@ -118,7 +118,6 @@ export default function CustomerBookingDetailsView({
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
-      {/* Top Main Title Banner */}
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
@@ -134,13 +133,9 @@ export default function CustomerBookingDetailsView({
         </p>
       </div>
 
-      {/* Unified 12-Column Responsive Layout (Zero Vertical Gaps) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* Left 8-Column Main Flow */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 1. Status & Service Progress Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-8 relative overflow-hidden">
-            {/* Top Status & Station Name */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -185,7 +180,6 @@ export default function CustomerBookingDetailsView({
               </div>
             </div>
 
-            {/* Interactive Progress Bar Tracker */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 <span>Service Progress</span>
@@ -196,7 +190,6 @@ export default function CustomerBookingDetailsView({
                 </span>
               </div>
 
-              {/* Stages Circles */}
               <div className="relative flex justify-between items-center z-10 px-2">
                 <div className="absolute top-1/2 left-4 right-4 h-1 -translate-y-1/2 bg-muted -z-10 rounded-full" />
                 <div
@@ -242,7 +235,6 @@ export default function CustomerBookingDetailsView({
               </div>
             </div>
 
-            {/* Action Control Buttons */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-border">
               <div className="flex flex-wrap items-center gap-3">
                 {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
@@ -271,7 +263,6 @@ export default function CustomerBookingDetailsView({
                           </span>
                         </button>
 
-                        {/* Floating Hover Tooltip */}
                         <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[260px] opacity-0 group-hover:opacity-100 transition-all duration-200 z-30 transform group-hover:-translate-y-1">
                           <div className="p-3 rounded-2xl bg-popover border border-border text-popover-foreground shadow-2xl backdrop-blur-md text-left space-y-1">
                             <div className="flex items-center gap-1.5 font-bold text-[11px]">
@@ -327,7 +318,6 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* 2. Estimated Wash Time & Duration Breakdown Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
               <div className="space-y-1">
@@ -343,7 +333,6 @@ export default function CustomerBookingDetailsView({
                 </h3>
               </div>
 
-              {/* Status Context Indicator */}
               {booking.status === "IN_SERVICE" ? (
                 <div className="px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-500 text-xs font-bold flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
@@ -372,7 +361,6 @@ export default function CustomerBookingDetailsView({
               )}
             </div>
 
-            {/* Time Breakdown Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
@@ -413,7 +401,6 @@ export default function CustomerBookingDetailsView({
               </div>
             </div>
 
-            {/* Queue Waiting Time vs Wash Service Duration Clarification */}
             <div className="p-4 sm:p-5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-xs text-muted-foreground leading-relaxed">
               <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary shrink-0">
                 <Info size={16} />
@@ -434,7 +421,6 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* 2b. Vehicle Inspection Reports Card (Pre & Post Service) */}
           {(booking.preServiceInspection || booking.postServiceInspection) && (
             <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
               <div className="flex items-center gap-2 border-b border-border pb-4">
@@ -548,7 +534,6 @@ export default function CustomerBookingDetailsView({
             </div>
           )}
 
-          {/* 3. Booking Tier & Specifications Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center gap-2 border-b border-border pb-4">
               <ShieldCheck size={18} className="text-primary" />
@@ -609,7 +594,6 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* 3. Payment Summary Breakdown */}
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h3 className="text-lg font-bold text-foreground border-b border-border pb-4">
               Payment Summary Breakdown
@@ -647,7 +631,6 @@ export default function CustomerBookingDetailsView({
           </div>
         </div>
 
-        {/* Right 4-Column Check-in QR & Side Info */}
         <div className="lg:col-span-4 space-y-6">
           <QRCodePass
             value={qrPayload}
@@ -663,7 +646,6 @@ export default function CustomerBookingDetailsView({
             paymentStatus={paymentStatusStr}
           />
 
-          {/* Active Vehicle Info Card */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
               Vehicle Information
@@ -684,7 +666,6 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* Support & Contact Card */}
           <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest">
               Support &amp; Assistance

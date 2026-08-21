@@ -165,7 +165,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       await authApi.logout()
     } catch {
-      // ignore network errors — always clear local state
     } finally {
       set({
         user: null,

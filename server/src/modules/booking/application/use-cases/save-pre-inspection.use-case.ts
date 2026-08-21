@@ -18,7 +18,6 @@ export interface SavePreInspectionInput {
   notes?: string
 }
 
-// Front, rear, left, right — the same 4 angles PreInspectionPage.tsx captures on the client.
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 
 export class SavePreInspectionAndCheckInUseCase {
@@ -53,7 +52,6 @@ export class SavePreInspectionAndCheckInUseCase {
       )
     }
 
-    // Manager Authorization Check — ensure the caller runs this booking's station
     const station = await this.stationRepository.findById(existing.stationId)
     if (!station) {
       throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
@@ -96,7 +94,6 @@ export class SavePreInspectionAndCheckInUseCase {
 
     existing.completePreInspection(inspectionRecord, managerUserId)
 
-    // Optimistic-concurrency guard prevents race conditions & duplicate check-ins
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(
       existing,
       BookingStatus.CONFIRMED
@@ -109,7 +106,6 @@ export class SavePreInspectionAndCheckInUseCase {
       )
     }
 
-    // Save audit log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -121,10 +117,8 @@ export class SavePreInspectionAndCheckInUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // Push to Redis station queue
     await this.redisQueueService.pushToStationQueue(domainBooking)
 
-    // Send notification
     await this.notificationService.notify("CHECKIN_SUCCESS", domainBooking)
 
     return BookingDTOMapper.toDTO(domainBooking)

@@ -123,7 +123,6 @@ export const StationSortBy = {
   WAIT_TIME: "WAIT_TIME",
   REVIEW_COUNT: "REVIEW_COUNT",
   NEWEST: "NEWEST",
-  // Backward compatibility alias keys:
   nearest: "DISTANCE",
   rating: "RATING",
   fastest: "WAIT_TIME",
@@ -138,42 +137,34 @@ export const STATION_SORT_BY = StationSortBy
 export type WashType = "HALF" | "FULL" | "ALL"
 
 export interface GetStationsQuery {
-  // Location
   latitude?: number
   longitude?: number
   radiusKm?: number
   maxDistanceKm?: number
 
-  // Search & Status
   search?: string
   status?: string
   ownerId?: string
 
-  // Vehicle & Category
   vehicleCategory?: string
   vehicleClassId?: string
 
-  // Pricing
   washType?: WashType
   minPrice?: number
   maxPrice?: number
 
-  // Rating
   minRating?: number
   minimumRating?: number
 
-  // Filters
   amenities?: string[]
   extraServices?: string[]
   openNow?: boolean
   availableToday?: boolean
   verifiedOnly?: boolean
 
-  // Sorting
   sortBy?: StationSortBy | string
   sortOrder?: "asc" | "desc"
 
-  // Pagination
   page?: number
   limit?: number
 }
@@ -213,8 +204,6 @@ export interface CreateStationResponse {
   stationId: string
   station: Station
 }
-
-// --- Input types matching server DTOs ---
 
 export interface StationImage {
   url: string

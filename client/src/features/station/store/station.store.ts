@@ -14,7 +14,6 @@ import { getErrorMessage } from "@/shared/utils/error"
 import { stationApi } from "@/shared/apis"
 
 interface StationStore {
-  // State
   stations: Station[]
   pagination: GetStationsResponse["pagination"] | null
   statusCounts: StationStatusCounts | null
@@ -23,7 +22,6 @@ interface StationStore {
   isSubmitting: boolean
   error: string | null
 
-  // Actions
   fetchStations: (query?: GetStationsQuery) => Promise<void>
   fetchStationById: (id: string) => Promise<void>
   createStation: (input: CreateStationInput) => Promise<Station | null>
@@ -44,8 +42,6 @@ interface StationStore {
   clearSelected: () => void
 }
 
-// Guards fetchStations against out-of-order responses: rapid filter/search/page changes can
-// otherwise let a slower, stale request resolve after a newer one and overwrite fresh state.
 let latestFetchStationsRequestId = 0
 
 export const useStationStore = create<StationStore>((set) => ({
@@ -92,7 +88,6 @@ export const useStationStore = create<StationStore>((set) => ({
     try {
       const result = await stationApi.createStation(input)
       const station = result.station
-      // Optimistically add the new station to the list
       set((state) => ({
         stations: [station, ...state.stations],
         isSubmitting: false,
@@ -110,7 +105,6 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isSubmitting: true, error: null })
     try {
       const detail = await stationApi.updateStation(id, input)
-      // Update the selected station and the list entry
       set((state) => ({
         selectedStation: detail,
         stations: state.stations.map((s) => (s.id === id ? detail.station : s)),
@@ -129,7 +123,6 @@ export const useStationStore = create<StationStore>((set) => ({
     set({ isSubmitting: true, error: null })
     try {
       const updated = await stationApi.submitStation(id)
-      // Update status in list and selected station
       set((state) => ({
         stations: state.stations.map((s) => (s.id === id ? updated : s)),
         selectedStation: state.selectedStation

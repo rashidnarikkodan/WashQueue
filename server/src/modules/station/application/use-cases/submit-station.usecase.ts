@@ -44,7 +44,6 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
     const props = station.getProps()
     const errors: { field: string; message: string }[] = []
 
-    // 1. Basic station information exists
     if (!props.name || props.name.trim() === "") {
       errors.push({ field: "name", message: "Station name is required" })
     }
@@ -70,7 +69,6 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       errors.push({ field: "address.pincode", message: "Pincode is required" })
     }
 
-    // 2. Valid location exists
     if (
       !props.location ||
       typeof props.location.latitude !== "number" ||
@@ -83,17 +81,14 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       })
     }
 
-    // 3. At least one image exists
     if (!props.images || props.images.length === 0) {
       errors.push({ field: "images", message: "At least one station image is required" })
     }
 
-    // 4. Operating hours are configured
     if (!props.operatingHours || props.operatingHours.length === 0) {
       errors.push({ field: "operatingHours", message: "Operating hours must be configured" })
     }
 
-    // 5. Slot configuration is complete
     const slot = props.slotConfig
     if (!slot) {
       errors.push({ field: "slotConfig", message: "Slot configuration is required" })
@@ -121,7 +116,6 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       }
     }
 
-    // 6. At least one pricing record exists and required pricing values are valid
     const pricing = await this.stationPricingRepository.findByStationId(stationId)
     if (!pricing || pricing.length === 0) {
       errors.push({
@@ -150,7 +144,6 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
       throw new ValidationError("Station is incomplete for submission", errors)
     }
 
-    // Call submit() on domain entity to transition status to PENDING_REVIEW
     station.submit()
 
     return this.stationRepository.save(station)

@@ -21,35 +21,29 @@ export class SignupUseCase implements ISignupUseCase {
   ) {}
 
   async execute(data: SignupInput): Promise<null> {
-    // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(data.email)
     if (existingUser) {
       throw new AppError("User already exists", HTTP_STATUS.CONFLICT)
     }
 
-    // Hash password using abstracted IHashService
     const hashedPassword = await this.hashService.hash(data.password)
 
-    // Save the user in database using Domain Entity
     const newUser = new User({
       name: data.name,
       email: data.email,
       password: hashedPassword,
-      role: ROLE.CUSTOMER, // default signing-up role
+      role: ROLE.CUSTOMER,
       isVerified: false,
       authProvider: AUTH_PROVIDER.LOCAL,
     })
 
     const user = await this.userRepository.save(newUser)
 
-    // Generate numeric OTP
     const code = await this.otpService.generateOtp(user.email)
 
-    // Save the OTP in database/repository using Domain Entity
     const otp = new Otp({ email: user.email, code })
     await this.otpRepository.save(otp)
 
-    // Send email with OTP code
     await this.mailService.sendVerificationEmail(user.email, code)
 
     return null

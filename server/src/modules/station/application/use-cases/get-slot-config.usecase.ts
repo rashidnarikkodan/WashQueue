@@ -18,7 +18,6 @@ export class GetSlotConfigUseCase {
 
     const config = await this.slotConfigRepository.findByStationId(stationId)
     if (!config) {
-      // Fallback from station.slotConfig if exists
       const stationSlotConfig = station.getProps().slotConfig
       if (stationSlotConfig) {
         return {

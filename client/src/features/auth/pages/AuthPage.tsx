@@ -6,14 +6,11 @@ export default function AuthPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Detect whether we are in sign-up mode based on pathname
   const isSignup = location.pathname.startsWith("/signup")
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground">
-      {/* 1. DESKTOP VIEW WITH DOUBLE SLIDING ANIMATION */}
       <div className="relative w-full min-h-screen bg-background overflow-hidden hidden md:flex items-stretch">
-        {/* Left Column (Hosts Signup Form) */}
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
           <div
             className={`w-full max-w-md transition-all duration-700 ease-in-out ${
@@ -26,7 +23,6 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Right Column (Hosts Login Form) */}
         <div className="w-1/2 flex items-center justify-center p-8 md:p-16 z-10">
           <div
             className={`w-full max-w-md transition-all duration-700 ease-in-out ${
@@ -39,15 +35,12 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Absolutely Positioned Sliding Blue Card */}
         <div
           className={`absolute top-0 bottom-0 left-0 w-1/2 h-full bg-primary text-primary-foreground shadow-2xl z-20 transition-all duration-700 ease-in-out flex flex-col justify-center items-center p-8 md:p-16 overflow-hidden ${
             isSignup ? "translate-x-full rounded-l-[100px]" : "translate-x-0 rounded-r-[100px]"
           }`}
         >
-          {/* Centered Switch Panel */}
           <div className="relative w-full max-w-md h-[320px] flex items-center justify-center z-10">
-            {/* View shown during Signup state (shows Login redirect) */}
             <div
               className={`absolute inset-0 flex flex-col items-center justify-center text-center space-y-5 transition-all duration-500 ease-in-out ${
                 isSignup
@@ -75,7 +68,6 @@ export default function AuthPage() {
               </div>
             </div>
 
-            {/* View shown during Login state (shows SignUp redirect) */}
             <div
               className={`absolute inset-0 flex flex-col items-center justify-center text-center space-y-5 transition-all duration-500 ease-in-out ${
                 !isSignup
@@ -104,16 +96,11 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* 2. MOBILE VIEW WITH CLEAN SWITCHING TRANSITION */}
       <div className="flex flex-col min-h-screen bg-background md:hidden">
-        {/* Static Header Panel */}
         <div className="h-[280px] bg-gradient-to-tr from-primary to-primary/80 text-primary-foreground rounded-b-[40px] p-8 flex flex-col justify-between relative overflow-hidden shadow-lg shrink-0">
-          {/* Background Decor Glow */}
           <div className="absolute right-[-50px] top-[-50px] h-[200px] w-[200px] rounded-full bg-white/10 filter blur-2xl"></div>
 
-          {/* Message Area */}
           <div className="relative h-40 text-center w-full z-10">
-            {/* Login Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
                 isSignup
@@ -127,7 +114,6 @@ export default function AuthPage() {
               </p>
             </div>
 
-            {/* Signup Card Content */}
             <div
               className={`absolute inset-0 flex flex-col justify-center space-y-1 transition-all duration-500 ease-in-out ${
                 isSignup
@@ -142,7 +128,6 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {/* Switch Prompt */}
           <div className="relative h-12 w-full border-t border-primary-foreground/20 pt-2 z-10 flex items-center justify-between">
             <div
               className={`absolute inset-x-0 bottom-0 flex items-center justify-between transition-all duration-500 ${
@@ -176,10 +161,8 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Content Panel */}
         <div className="flex-1 p-6 flex items-start justify-center overflow-y-auto">
           <div className="relative w-full max-w-md pt-4">
-            {/* Login form block */}
             <div
               className={`w-full transition-all duration-500 ease-in-out ${
                 !isSignup
@@ -190,7 +173,6 @@ export default function AuthPage() {
               <LoginForm />
             </div>
 
-            {/* Signup form block */}
             <div
               className={`w-full transition-all duration-500 ease-in-out ${
                 isSignup

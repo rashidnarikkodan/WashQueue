@@ -8,7 +8,6 @@ export default function StationBottomUtilities({ onUnlist }: StationBottomUtilit
   return (
     <section className="pt-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Analytics Card */}
         <div className="p-8 bg-[#151b2d] hover:bg-[#191f31] rounded-2xl border border-white/5 transition-all group cursor-pointer space-y-4">
           <div className="p-3 bg-[#adc6ff]/10 text-[#adc6ff] rounded-xl w-fit group-hover:scale-110 transition-transform">
             <BarChart3 size={28} />
@@ -21,7 +20,6 @@ export default function StationBottomUtilities({ onUnlist }: StationBottomUtilit
           </div>
         </div>
 
-        {/* Export Data Card */}
         <div className="p-8 bg-[#151b2d] hover:bg-[#191f31] rounded-2xl border border-white/5 transition-all group cursor-pointer space-y-4">
           <div className="p-3 bg-[#adc6ff]/10 text-[#adc6ff] rounded-xl w-fit group-hover:scale-110 transition-transform">
             <Download size={28} />
@@ -34,7 +32,6 @@ export default function StationBottomUtilities({ onUnlist }: StationBottomUtilit
           </div>
         </div>
 
-        {/* Unlist Station Card */}
         <div
           onClick={onUnlist}
           className="p-8 bg-red-500/5 hover:bg-red-500/10 rounded-2xl border border-red-500/20 transition-all group cursor-pointer space-y-4"

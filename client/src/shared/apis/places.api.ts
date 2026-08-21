@@ -1,6 +1,3 @@
-// Thin client for the Places API (New) - autocomplete + place details.
-// Calls Google's endpoints directly from the browser (no backend proxy needed);
-// the API key must be restricted to this app's HTTP referrers in Google Cloud Console.
 const PLACES_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY as string | undefined
 
 export interface PlaceSuggestion {

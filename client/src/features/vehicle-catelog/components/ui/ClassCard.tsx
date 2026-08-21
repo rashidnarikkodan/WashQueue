@@ -19,18 +19,14 @@ export default function ClassCard({
 }: ClassCardProps) {
   return (
     <div className="relative flex flex-col justify-center pl-10 min-h-[56px]">
-      {/* Connect parent category bottom line to the first child's curve top */}
       {index === 0 && (
         <div className="absolute left-[16px] top-[-16px] h-[16px] w-[2px] bg-border"></div>
       )}
 
-      {/* Continuation line to subsequent children */}
       <div className="absolute left-[16px] top-0 -bottom-4 w-[2px] bg-border"></div>
 
-      {/* L-shaped curved line */}
       <div className="absolute left-[16px] top-0 w-[24px] h-[28px] border-l-2 border-b-2 border-border rounded-bl-xl"></div>
 
-      {/* Class Content Card */}
       <div
         className={`flex items-center justify-between p-4 rounded-3xl border transition-all duration-200 shadow-sm ${
           cls.isActive
@@ -56,7 +52,6 @@ export default function ClassCard({
                 Class Code: {cls.slug}
               </span>
 
-              {/* Status Badge */}
               <span
                 className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider border shrink-0 ${
                   cls.isActive
@@ -80,9 +75,7 @@ export default function ClassCard({
           </div>
         </div>
 
-        {/* Class Action Buttons */}
         <div className="flex items-center gap-2 shrink-0 ml-4">
-          {/* Status Toggle (Eye/EyeOff) */}
           <button
             onClick={(e) => onToggleStatus(cls, e)}
             title={cls.isActive ? "Deactivate Class" : "Activate Class"}

@@ -23,7 +23,6 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
 
   return (
     <div className="space-y-6">
-      {/* Statistics counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-2xl p-4.5 shadow-md flex flex-col justify-between">
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">
@@ -57,7 +56,6 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
         </div>
       </div>
 
-      {/* Booking History Table Card */}
       <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">

@@ -12,10 +12,8 @@ import {
 export const createPaymentRouter = (paymentController: PaymentController): Router => {
   const router = Router()
 
-  // Webhook endpoint (unauthenticated)
   router.post("/webhook", asyncHandler(paymentController.handleWebhook))
 
-  // Authenticated endpoints
   router.use(authenticate)
 
   router.post(

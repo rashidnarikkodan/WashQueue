@@ -28,9 +28,7 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
   return (
     <div className="relative bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl overflow-hidden text-card-foreground">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        {/* Left Side: Avatar & Details */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          {/* Avatar Container */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl opacity-50" />
             {profile.avatar && !imgError ? (
@@ -47,19 +45,16 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
             )}
           </div>
 
-          {/* User Name, Badges & Meta */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
                 {profile.name}
               </h1>
 
-              {/* Role Badge */}
               <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                 {roleLabel}
               </span>
 
-              {/* Verified Badge */}
               {profile.isVerified && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -68,7 +63,6 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
               )}
             </div>
 
-            {/* Email, Phone, Member Since Metadata row */}
             <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground font-normal pt-1">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-muted-foreground" />
@@ -88,7 +82,6 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
           </div>
         </div>
 
-        {/* Right Side: Edit Profile CTA Button */}
         <div className="shrink-0">
           <button
             onClick={onEditClick}

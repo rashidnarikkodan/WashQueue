@@ -15,13 +15,11 @@ export function useBookingVehicles({ station, stationId }: UseBookingVehiclesPar
   const [isAddVehicleModalOpen, setIsAddVehicleModalOpen] = useState(false)
   const [isAddingVehicle, setIsAddingVehicle] = useState(false)
 
-  // Fetch User Vehicles
   const loadUserVehicles = useCallback(async () => {
     try {
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
     } catch {
-      // Ignore API errors gracefully
     } finally {
       setIsVehiclesLoading(false)
     }
@@ -38,7 +36,6 @@ export function useBookingVehicles({ station, stationId }: UseBookingVehiclesPar
     }
   }, [loadUserVehicles])
 
-  // Station Supported Class IDs Set
   const stationClassIds = useMemo<Set<string> | null>(() => {
     if (!station?.pricing || station.pricing.length === 0) return null
     return new Set(
@@ -48,16 +45,13 @@ export function useBookingVehicles({ station, stationId }: UseBookingVehiclesPar
     )
   }, [station])
 
-  // Available Vehicles matching station's supported classes
   const availableVehicles = useMemo(() => {
     if (!stationClassIds) return []
     return vehicles.filter((v) => v.classId && stationClassIds.has(v.classId))
   }, [vehicles, stationClassIds])
 
-  // Combined Loading State to prevent dual rendering / UI flicker
   const isStep1Loading = isVehiclesLoading || (Boolean(stationId) && !station)
 
-  // Keep selected vehicle ID synced to valid available vehicle
   useEffect(() => {
     queueMicrotask(() => {
       if (availableVehicles.length > 0) {
@@ -72,13 +66,11 @@ export function useBookingVehicles({ station, stationId }: UseBookingVehiclesPar
     })
   }, [availableVehicles, selectedVehicleId])
 
-  // Selected Vehicle Object
   const selectedVehicle = useMemo(
     () => availableVehicles.find((v) => v.id === selectedVehicleId) || availableVehicles[0] || null,
     [availableVehicles, selectedVehicleId]
   )
 
-  // Handle Add Vehicle Submission from Modal
   const handleAddVehicleSubmit = async (input: CreateVehicleInput): Promise<boolean> => {
     setIsAddingVehicle(true)
     try {

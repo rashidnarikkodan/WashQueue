@@ -17,7 +17,6 @@ export const getErrorMessage = (error: unknown, fallback = "Server Error"): stri
   if (typeof error === "object" && error !== null) {
     const maybeError = error as Partial<ErrorResponseLike>
 
-    // 1. Check server response custom message first
     if (
       typeof maybeError.response?.data?.message === "string" &&
       maybeError.response.data.message.trim()
@@ -25,7 +24,6 @@ export const getErrorMessage = (error: unknown, fallback = "Server Error"): stri
       return maybeError.response.data.message
     }
 
-    // 2. Check standard Error.message
     if (typeof maybeError.message === "string" && maybeError.message.trim()) {
       return maybeError.message
     }

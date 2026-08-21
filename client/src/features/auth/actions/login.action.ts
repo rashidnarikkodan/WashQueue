@@ -12,7 +12,6 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
 
     const errors: LoginState["errors"] = {}
 
-    // validation
     if (!email) {
       errors.email = ["Email is required"]
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -33,7 +32,6 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
       }
     }
 
-    // API call
     const user = await authApi.login(email, password)
 
     return {

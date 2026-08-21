@@ -27,7 +27,6 @@ export default function OwnerOnboarding() {
 
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
-  // On mount: load server-side draft to resume where user left off
   useEffect(() => {
     const hasCompleted =
       user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4
@@ -35,20 +34,17 @@ export default function OwnerOnboarding() {
       fetchOnboardingStatus()
     }
     return () => {
-      // Reset fetching status so it starts as true next time the component mounts
       useOwnerStore.setState({ isFetchingStatus: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // If already submitted, redirect away
   useEffect(() => {
     if (isSubmitted) {
       navigate(APP_ROUTES.OWNER.DASHBOARD)
     }
   }, [isSubmitted, navigate])
 
-  // Redirect owner users to dashboard immediately if they completed onboarding to prevent flashing
   if (user && user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4) {
     return <Navigate to={APP_ROUTES.OWNER.DASHBOARD} replace />
   }
@@ -82,7 +78,6 @@ export default function OwnerOnboarding() {
   return (
     <>
       <div className="w-full max-w-[1650px] mx-auto flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-16 px-4 py-8 sm:px-8">
-        {/* Left Column: Form Step Tracking */}
         <Stepper
           steps={ONBOARDING_STEPS}
           currentStep={onboardingStep}
@@ -91,7 +86,6 @@ export default function OwnerOnboarding() {
           footerNote="Application will be reviewed before activation."
         />
 
-        {/* Right Column: Main Form Card */}
         <div className="grow max-w-6xl bg-transparent sm:bg-card border-0 sm:border border-slate-800/80 rounded-none sm:rounded-3xl p-4 sm:p-8 md:p-10 shadow-none sm:shadow-2xl relative z-10 w-full max-h-none sm:max-h-210 overflow-y-visible sm:overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800/60 scrollbar-track-transparent">
           {onboardingDetails.rejectionReason && onboardingStep === 1 && (
             <div className="mb-6 p-4 border border-red-500/20 bg-red-500/5 rounded-2xl flex gap-3 text-left">

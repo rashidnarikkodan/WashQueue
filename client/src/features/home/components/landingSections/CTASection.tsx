@@ -7,7 +7,6 @@ export default function CTASection() {
   return (
     <section className="py-20 md:py-28 max-w-5xl mx-auto px-6">
       <div className="p-8 sm:p-16 rounded-[2.5rem] bg-gradient-to-tr from-sky-400 to-blue-600 dark:from-primary/95 dark:to-blue-600 text-foreground shadow-2xl relative overflow-hidden text-center flex flex-col items-center space-y-6">
-        {/* Decorative glows */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-64 h-64 bg-background/20 rounded-full blur-3xl pointer-events-none" />
 

@@ -87,7 +87,6 @@ export class StationMongoRepository
       const doc = await this.model.findById(id).exec()
       if (doc) return this.mapper.toDomain(doc)
     }
-    // Fallback: search by name/slug if id parameter is a slug
     return this.findByName(id)
   }
 
@@ -121,7 +120,6 @@ export class StationMongoRepository
       filter.latitude !== 0 &&
       filter.longitude !== 0
 
-    // --- PHASE 1: Candidate Search Aggregation (Indexed Scan) ---
     const candidatePipeline: PipelineStage[] = []
 
     const radiusKm = filter.maxDistanceKm || filter.radiusKm || 50
@@ -145,7 +143,6 @@ export class StationMongoRepository
       candidatePipeline.push({ $match: matchStage })
     }
 
-    // Limit candidate pool size to prevent high memory usage during hydration
     candidatePipeline.push({ $limit: 150 })
 
     const candidateDocs = await this.model.aggregate(candidatePipeline).exec()
@@ -164,7 +161,6 @@ export class StationMongoRepository
 
     const candidateIds = candidateStations.map((s) => new Types.ObjectId(s.id))
 
-    // --- PHASE 2: Targeted Batch Relational Hydration & Filtering ---
     let matchingClassIds: Types.ObjectId[] | undefined = undefined
     if (filter.vehicleClassId && Types.ObjectId.isValid(filter.vehicleClassId)) {
       matchingClassIds = [new Types.ObjectId(filter.vehicleClassId)]
@@ -181,7 +177,6 @@ export class StationMongoRepository
       }
     }
 
-    // Pricing Filter & Map
     const pricingQuery: Record<string, unknown> = {
       stationId: { $in: candidateIds },
       isActive: true,
@@ -206,7 +201,6 @@ export class StationMongoRepository
       stationPricingMap.set(sid, list)
     })
 
-    // Extra Services Filter
     let filterExtraServiceIds: Types.ObjectId[] | undefined = undefined
     if (filter.extraServices?.length || filter.extraServiceIds?.length) {
       const rawIds = filter.extraServices || filter.extraServiceIds || []
@@ -230,10 +224,8 @@ export class StationMongoRepository
       stationExtraServicesMap.set(sid, (stationExtraServicesMap.get(sid) || 0) + 1)
     })
 
-    // --- PHASE 3: Redis Live Hydration ---
     const liveStateMap = await StationRedisHydrationService.hydrateLiveStates(candidateStations)
 
-    // --- PHASE 4: Build Hydrated Candidate Items & Apply Relational Filters ---
     let hydratedItems: (HydratedStationItem & {
       halfWashPrice?: number
       fullWashPrice?: number
@@ -247,17 +239,14 @@ export class StationMongoRepository
         isOpen: true,
       }
 
-      // Filter openNow
       if (filter.openNow && !liveState.isOpen) {
         continue
       }
 
-      // Filter vehicle category / class if filter active and no pricing matched
       if (matchingClassIds && matchingClassIds.length > 0 && !stationPricingMap.has(sid)) {
         continue
       }
 
-      // Filter extra services if filter active and no extra services matched
       if (
         filterExtraServiceIds &&
         filterExtraServiceIds.length > 0 &&
@@ -287,11 +276,9 @@ export class StationMongoRepository
         if (prices.length > 0) startingPrice = Math.min(...prices)
       }
 
-      // Wash Type Filter
       if (filter.washType === "HALF" && halfWashPrice === undefined) continue
       if (filter.washType === "FULL" && fullWashPrice === undefined) continue
 
-      // Price Range Filter
       const minP = filter.minPrice ?? filter.minHalfWashPrice ?? filter.minFullWashPrice
       const maxP = filter.maxPrice ?? filter.maxHalfWashPrice ?? filter.maxFullWashPrice
       const comparePrice =
@@ -321,12 +308,10 @@ export class StationMongoRepository
       hydratedItems.push(item)
     }
 
-    // --- PHASE 5: Deterministic Smart Ranking & Sorting ---
     hydratedItems = StationRankingService.sort(hydratedItems, filter.sortBy, filter.sortOrder)
 
     const total = hydratedItems.length
 
-    // --- PHASE 6: Pagination Slicing & Property Hydration ---
     const skip = (page - 1) * limit
     const paginatedItems = hydratedItems.slice(skip, skip + limit)
 
@@ -343,7 +328,6 @@ export class StationMongoRepository
       return domainObj
     })
 
-    // --- PHASE 7: Status Breakdown Counts Aggregation ---
     const countMatchFilter = { ...filter }
     delete countMatchFilter.status
 
@@ -456,17 +440,14 @@ export class StationMongoRepository
           }
         }
       } catch {
-        // Ignore fallback to provided id
       }
 
       match.ownerId = { $in: possibleIds }
     }
 
     if (filter.status && filter.status !== "all") {
-      //for admin and owners
       match.status = filter.status
     } else if (!filter.status && !filter.ownerId) {
-      //for public users
       match.status = "ACTIVE"
     }
 
@@ -491,7 +472,6 @@ export class StationMongoRepository
       match.rating = { $gte: minRating }
     }
 
-    //in-case we add amenties filteration
     if (filter.amenities && filter.amenities.length > 0) {
       match.amenities = { $all: filter.amenities }
     }

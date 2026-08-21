@@ -100,7 +100,6 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div className="w-full max-w-[560px] md:max-w-[600px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col my-auto animate-in zoom-in-95 duration-200">
-        {/* Header */}
         <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -125,7 +124,6 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
           </button>
         </div>
 
-        {/* Body Form */}
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-5">
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
@@ -173,7 +171,6 @@ export const UpdatePermissionsModal: React.FC<UpdatePermissionsModalProps> = ({
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"

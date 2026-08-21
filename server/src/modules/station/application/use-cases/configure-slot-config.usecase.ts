@@ -54,7 +54,6 @@ export class ConfigureSlotConfigUseCase {
 
     const savedConfig = await this.slotConfigRepository.save(updatedConfig)
 
-    // Update station embedded slotConfig to keep in sync
     const currentSlotConfig = station.getProps().slotConfig
     const windowDurationChanged =
       currentSlotConfig?.windowDurationMins !== undefined &&
@@ -81,7 +80,6 @@ export class ConfigureSlotConfigUseCase {
     })
     await this.stationRepository.save(station)
 
-    // Trigger time window generation for configured advance booking days with forceRegenerate = true
     await this.generateTimeWindowsUseCase.execute(input.stationId, true)
 
     return {

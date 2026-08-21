@@ -15,7 +15,6 @@ export default function StationLiveOpsCard({ station }: StationLiveOpsCardProps)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Card 1: Bay Status */}
       <div className="bg-[#2e3447]/30 backdrop-blur-xl p-6 rounded-2xl border border-white/5 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-base font-bold text-white">Bay Status</h3>
@@ -42,7 +41,6 @@ export default function StationLiveOpsCard({ station }: StationLiveOpsCardProps)
         </div>
       </div>
 
-      {/* Card 2: Queue Intel */}
       <div className="bg-[#2e3447]/30 backdrop-blur-xl p-6 rounded-2xl border border-white/5 space-y-4 flex flex-col justify-between">
         <div>
           <h3 className="text-base font-bold text-white mb-4">Queue Intel</h3>
@@ -57,7 +55,6 @@ export default function StationLiveOpsCard({ station }: StationLiveOpsCardProps)
         <p className="text-xs text-[#8c909f]">Volume is 15% higher than typical Tuesdays.</p>
       </div>
 
-      {/* Card 3: Staffing */}
       <div className="bg-[#2e3447]/30 backdrop-blur-xl p-6 rounded-2xl border border-white/5 space-y-4 flex flex-col justify-between">
         <div>
           <h3 className="text-base font-bold text-white mb-4">Staffing</h3>

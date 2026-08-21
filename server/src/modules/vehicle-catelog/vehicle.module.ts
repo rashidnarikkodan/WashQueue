@@ -13,11 +13,9 @@ import { DeleteClassUseCase } from "./application/use-cases/delete-class.use-cas
 import { VehicleCatelogController } from "./presentation/vehicle-catelog.controller"
 import { createVehicleCatelogRouter } from "./presentation/vehicle-catelog.routes"
 
-// Repositories
 export const vehicleCategoryRepository = new VehicleCategoryMongoRepository()
 export const vehicleClassRepository = new VehicleClassMongoRepository()
 
-// Use Cases
 const createCategoryUseCase = new CreateCategoryUseCase(vehicleCategoryRepository)
 const getCategoryUseCase = new GetCategoryUseCase(vehicleCategoryRepository)
 const getCategoriesUseCase = new GetCategoriesUseCase(vehicleCategoryRepository)
@@ -33,7 +31,6 @@ const getClassesUseCase = new GetClassesUseCase(vehicleClassRepository)
 const updateClassUseCase = new UpdateClassUseCase(vehicleClassRepository, vehicleCategoryRepository)
 const deleteClassUseCase = new DeleteClassUseCase(vehicleClassRepository)
 
-// Controller
 const vehicleCatelogController = new VehicleCatelogController(
   createCategoryUseCase,
   getCategoryUseCase,
@@ -47,7 +44,6 @@ const vehicleCatelogController = new VehicleCatelogController(
   deleteClassUseCase
 )
 
-// Router
 const vehicleCatelogRouter = createVehicleCatelogRouter(vehicleCatelogController)
 
 export default vehicleCatelogRouter

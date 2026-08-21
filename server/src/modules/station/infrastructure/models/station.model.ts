@@ -3,7 +3,7 @@ import { StationStatus } from "../../domain/entities/Station"
 
 interface IGeoPoint {
   type: "Point"
-  coordinates: [number, number] // [longitude, latitude]
+  coordinates: [number, number]
 }
 
 interface IStationContact {
@@ -99,7 +99,7 @@ const stationSchema = new Schema<IStation>(
         enum: ["Point"],
         default: "Point",
       },
-      coordinates: { type: [Number], default: [0, 0] }, // [lng, lat]
+      coordinates: { type: [Number], default: [0, 0] },
     },
 
     address: {

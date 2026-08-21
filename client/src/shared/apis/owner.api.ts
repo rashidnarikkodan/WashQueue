@@ -25,7 +25,6 @@ export interface OnboardingStatus {
 }
 
 export const ownerApi = {
-  /** Fetch the owner's current onboarding progress */
   getOnboardingStatus: async (): Promise<OnboardingStatus> => {
     const response = await api.get("/owner/onboarding/status", {
       skipToast: true,
@@ -33,9 +32,6 @@ export const ownerApi = {
     return response.data.data
   },
 
-  /**
-   * Save progress for a specific step (multipart to handle file uploads)
-   */
   saveOnboardingStep: async (step: number, formData: FormData): Promise<OnboardingStatus> => {
     formData.append("step", String(step))
     const response = await api.post("/owner/onboarding/step", formData, {
@@ -45,7 +41,6 @@ export const ownerApi = {
     return response.data.data
   },
 
-  /** Finalize and submit the onboarding application */
   submitOnboarding: async (): Promise<{ success: boolean; message: string }> => {
     const response = await api.post("/owner/onboarding/submit", {}, { skipToast: true })
     return response.data.data

@@ -22,14 +22,12 @@ const Search = ({
   const [localValue, setLocalValue] = useState(value)
   const debouncedValue = useDebounce(localValue, debounceDelay)
 
-  // Fire parent's onChange only when debounced value settles
   useEffect(() => {
     if (debouncedValue !== value) {
       onChange(debouncedValue)
     }
   }, [debouncedValue, onChange, value])
 
-  // Sync local state if parent resets the query externally (e.g. clear button)
   useEffect(() => {
     if (value !== localValue) {
       // eslint-disable-next-line react-hooks/set-state-in-effect

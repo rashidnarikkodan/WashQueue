@@ -25,14 +25,11 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Cancellation & Reschedule Modal states
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false)
 
-  // Status Advance state
   const [isAdvancingStatus, setIsAdvancingStatus] = useState(false)
 
-  // Determine role context from explicit prop first, then URL pathname, fallback to CUSTOMER
   const currentRole: RoleType = useMemo(() => {
     if (role) return role
 
@@ -48,8 +45,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
   const isOwner = currentRole === ROLE.OWNER
   const isAdmin = currentRole === ROLE.ADMIN
 
-
-  // Load Booking Details helper
   const fetchBookingDetails = useCallback(async () => {
     if (!id) return
     setIsLoading(true)
@@ -92,8 +87,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     }
   }, [id])
 
-  // Real-Time Socket.IO Subscription — keep this booking's status/progress live
-  // without a full reload; the manager side emits every status change into this room.
   useEffect(() => {
     if (!id) return
     const socket = getSocketClient()
@@ -134,7 +127,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     }
   }, [id])
 
-  // Handle Status Transition for Staff/Manager/Owner/Admin
   const handleAdvanceStatus = async (targetStatus: string) => {
     if (!booking) return
     setIsAdvancingStatus(true)
@@ -150,7 +142,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     }
   }
 
-  // Derived Info
   const formattedDates = useMemo(() => {
     if (!booking?.scheduling) return { dateStr: "", timeStr: "" }
     const start = new Date(booking.scheduling.windowStart)
@@ -167,7 +158,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     return { dateStr, timeStr }
   }, [booking])
 
-  // Progress Stages logic
   const stages = [
     { id: "CONFIRMED", label: "Confirmed" },
     { id: "CHECKED_IN", label: "Arrived" },
@@ -252,7 +242,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
-      {/* Universal Breadcrumbs & Top Header Bar */}
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
         <Breadcrumbs
           items={[
@@ -282,7 +271,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         </button>
       </div>
 
-      {/* Role-Based Dynamic View Rendering */}
       {isCustomer ? (
         <CustomerBookingDetailsView
           booking={booking}
@@ -303,7 +291,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         />
       )}
 
-      {/* Reschedule Booking Modal */}
       {isRescheduleModalOpen && booking && (
         <RescheduleModal
           booking={booking}
@@ -313,7 +300,6 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         />
       )}
 
-      {/* Figma Designed Cancellation Confirmation & Success Modal */}
       {isCancelModalOpen && booking && (
         <CancellationModal
           booking={booking}

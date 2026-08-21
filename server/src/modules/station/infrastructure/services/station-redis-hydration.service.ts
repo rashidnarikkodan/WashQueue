@@ -8,9 +8,6 @@ export interface StationLiveState {
 }
 
 export class StationRedisHydrationService {
-  /**
-   * Hydrates multiple stations with live Redis queue depth and estimated wait time in a single MGET call.
-   */
   static async hydrateLiveStates(stations: Station[]): Promise<Map<string, StationLiveState>> {
     const resultMap = new Map<string, StationLiveState>()
     if (stations.length === 0) return resultMap
@@ -32,16 +29,13 @@ export class StationRedisHydrationService {
             })
             return
           } catch {
-            // Fallback on JSON parse failure
           }
         }
 
-        // Fallback computation from station slotConfig & operating hours
         const props = station.getProps()
         const bays = Math.max(1, props.slotConfig?.bays || 1)
         const duration = Math.max(15, props.slotConfig?.windowDurationMins || 30)
-        // Simulated default queue depth based on bays
-        const queueDepth = Math.floor(Math.random() * 2) // Default lightweight queue
+        const queueDepth = Math.floor(Math.random() * 2)
         const estimatedWaitMins = Math.round((queueDepth * duration) / bays)
 
         resultMap.set(station.id, {
@@ -51,7 +45,6 @@ export class StationRedisHydrationService {
         })
       })
     } catch {
-      // In case Redis connection issue occurs, fallback cleanly without failing query
       stations.forEach((station) => {
         resultMap.set(station.id, {
           queueDepth: 0,
@@ -64,9 +57,6 @@ export class StationRedisHydrationService {
     return resultMap
   }
 
-  /**
-   * Checks whether station is open at the current time based on operatingHours.
-   */
   static checkIsOpen(station: Station): boolean {
     const props = station.getProps()
     if (!props.isActive || props.status !== "ACTIVE") return false

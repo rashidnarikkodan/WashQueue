@@ -20,9 +20,6 @@ export class BookingPricingResolutionService {
     private readonly extraServiceRepository: IExtraServiceRepository
   ) {}
 
-  // strict=true throws on an invalid/inactive extra (new bookings/reservations); strict=false
-  // silently skips it (confirming an already-created reservation, where extras were validated
-  // at creation time and shouldn't block confirmation if station config later changed).
   async resolve(
     stationId: string,
     vehicleClassId: string,

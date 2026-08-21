@@ -12,7 +12,6 @@ export default function ProfileFooterActions({
 }: ProfileFooterActionsProps) {
   return (
     <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl text-card-foreground">
-      {/* Left side actions */}
       <div className="flex flex-wrap items-center gap-4">
         <button
           onClick={onChangePasswordClick}
@@ -23,7 +22,6 @@ export default function ProfileFooterActions({
         </button>
       </div>
 
-      {/* Right side: Sign Out */}
       <div>
         <button
           onClick={onSignOutClick}

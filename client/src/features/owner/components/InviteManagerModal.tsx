@@ -159,7 +159,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div className="w-full max-w-[560px] md:max-w-[620px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden text-foreground relative flex flex-col max-h-[92vh] my-auto animate-in zoom-in-95 duration-200">
-        {/* Header */}
         <div className="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-border bg-card/60 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -189,9 +188,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Content Body */}
         {isSuccessState ? (
-          /* SUCCESS STATE MODAL */
           <div className="px-6 sm:px-8 py-8 flex flex-col items-center text-center gap-6 my-auto overflow-y-auto">
             <div className="relative">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-success/15 border-2 border-success flex items-center justify-center text-success shadow-xl shadow-success/20 animate-bounce-short">
@@ -207,7 +204,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               <p className="text-sm text-muted-foreground leading-relaxed">{successResultMsg}</p>
             </div>
 
-            {/* Summary Box */}
             <div className="w-full bg-muted/40 p-4 sm:p-5 rounded-2xl text-left text-xs sm:text-sm space-y-3 border border-border">
               <div className="flex items-center justify-between pb-2 border-b border-border">
                 <span className="text-muted-foreground font-medium">Invited Email</span>
@@ -249,10 +245,8 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
             </button>
           </div>
         ) : (
-          /* INVITE FORM MODAL */
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
             <div className="px-6 sm:px-8 py-5 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
-              {/* Station Badge Header */}
               {stationName && (
                 <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex items-center gap-2.5 text-xs text-muted-foreground">
                   <Building2 className="w-4 h-4 text-primary shrink-0" />
@@ -262,9 +256,7 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                 </div>
               )}
 
-              {/* Grid Layout for Email & Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Email Input */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-primary" />
@@ -280,7 +272,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                   />
                 </div>
 
-                {/* Name Input */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-primary" />
@@ -296,7 +287,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                 </div>
               </div>
 
-              {/* Permissions Selector */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -343,7 +333,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
                 </div>
               </div>
 
-              {/* Helper Text Container */}
               <div className="p-3.5 sm:p-4 rounded-xl bg-card border border-border text-xs text-muted-foreground leading-relaxed flex items-start gap-3">
                 <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
@@ -356,7 +345,6 @@ export const InviteManagerModal: React.FC<InviteManagerModalProps> = ({
               </div>
             </div>
 
-            {/* Footer */}
             <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-border bg-card/70 shrink-0">
               <button
                 type="button"

@@ -69,7 +69,6 @@ export default function RescheduleModal({
   const rescheduleCount = booking.rescheduleCount ?? 0
   const isMaxLimitReached = rescheduleCount >= 2
 
-  // 24 hours eligibility check
   const isEligible = currentWindowStart
     ? currentWindowStart.getTime() - Date.now() >= 24 * 60 * 60 * 1000
     : false
@@ -111,7 +110,6 @@ export default function RescheduleModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div className="w-full max-w-2xl bg-card text-card-foreground border border-border rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8 text-left">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 sm:p-8 pb-4 border-b border-border relative">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
@@ -141,9 +139,7 @@ export default function RescheduleModal({
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* Current Schedule Summary */}
           <div className="p-4 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-0.5">
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
@@ -186,7 +182,6 @@ export default function RescheduleModal({
             </div>
           ) : null}
 
-          {/* Date Selector */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
               SELECT NEW SERVICE DATE
@@ -202,7 +197,6 @@ export default function RescheduleModal({
             />
           </div>
 
-          {/* Available Slots Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
@@ -307,7 +301,6 @@ export default function RescheduleModal({
             )}
           </div>
 
-          {/* New Selection Preview */}
           {selectedSlot && !isSameAsCurrentSlot && (
             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
@@ -323,7 +316,6 @@ export default function RescheduleModal({
           )}
         </div>
 
-        {/* Modal Footer */}
         <div className="flex items-center justify-end gap-3 p-6 sm:p-8 pt-4 border-t border-border bg-muted/40">
           <button
             type="button"

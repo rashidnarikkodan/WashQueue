@@ -59,10 +59,8 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
 
     set({ isUpdating: true })
     try {
-      // Send real API request to server
       const updated = await profileApi.updateProfile(current.id, input)
 
-      // Merge updated fields into store state
       set({
         profile: {
           ...current,
@@ -71,7 +69,6 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
         },
       })
 
-      // Sync updated user info with global authStore & localStorage
       const authUser = useAuthStore.getState().user
       if (authUser) {
         const newAuthUser = {

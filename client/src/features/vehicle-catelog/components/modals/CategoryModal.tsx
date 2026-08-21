@@ -8,17 +8,17 @@ interface CategoryModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (data: CreateCategoryInput | UpdateCategoryInput) => Promise<void>
-  category?: VehicleCategory | null // If present, we are editing
+  category?: VehicleCategory | null
 }
 
 const slugify = (text: string): string => {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // Remove all non-word chars except spaces and hyphens
-    .replace(/[\s_]+/g, "-") // Replace spaces or underscores with hyphens
-    .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
-    .replace(/--+/g, "-") // Replace multiple hyphens with single one
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/--+/g, "-")
 }
 
 export default function CategoryModal({ isOpen, onClose, onSave, category }: CategoryModalProps) {
@@ -27,7 +27,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Form states
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
   const [description, setDescription] = useState("")
@@ -35,7 +34,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
   const [isActive, setIsActive] = useState(true)
   const [isSlugManual, setIsSlugManual] = useState(false)
 
-  // Sync native dialog state with isOpen prop
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -53,7 +51,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
     }
   }, [isOpen])
 
-  // Populate form states when category changes or when modal opens
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -65,7 +62,7 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
         setDescription(category.description || "")
         setOrder(category.order)
         setIsActive(category.isActive)
-        setIsSlugManual(true) // Editing means slug is already set
+        setIsSlugManual(true)
       } else {
         setName("")
         setSlug("")
@@ -77,7 +74,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
     }
   }, [isOpen, category])
 
-  // Clean up overflow styling on unmount
   useEffect(() => {
     return () => {
       document.body.style.overflow = ""
@@ -173,7 +169,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
     }
   }
 
-  // Close when native ESC is pressed
   const handleCancelClick = (e: React.SyntheticEvent) => {
     e.preventDefault()
     handleCancel()
@@ -186,7 +181,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
       className="m-auto w-full max-w-md rounded-2xl border border-border bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col p-6 space-y-4">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h3 className="text-lg font-bold text-foreground leading-snug">
             {category ? "Edit Category" : "Add New Category"}
@@ -202,7 +196,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {error && (
             <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
@@ -287,7 +280,6 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
             )}
           </div>
 
-          {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
             <button
               type="button"

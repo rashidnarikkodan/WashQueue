@@ -31,7 +31,6 @@ export class OwnerController {
     private readonly onboardingStepMapper: OnboardingStepRequestMapper
   ) {}
 
-  /** GET /api/owner/onboarding/status */
   getOnboardingStatus = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
@@ -42,7 +41,6 @@ export class OwnerController {
     success(res, result, HTTP_STATUS.OK, "Onboarding status retrieved successfully")
   }
 
-  /** POST /api/owner/onboarding/step */
   saveOnboardingStep = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
@@ -62,7 +60,6 @@ export class OwnerController {
     success(res, rest, HTTP_STATUS.OK, "Onboarding step saved successfully")
   }
 
-  /** POST /api/owner/onboarding/submit */
   submitOnboarding = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
@@ -78,14 +75,12 @@ export class OwnerController {
     success(res, rest, HTTP_STATUS.OK, result.message)
   }
 
-  /** POST /api/owner */
   createOwner = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
       throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
-    // req.body is already validated/coerced by validateRequest(createOwnerSchema) on the route
     const data = await this.createOwnerUseCase.execute({
       ...(req.body as z.infer<typeof createOwnerSchema>),
       userId,
@@ -94,7 +89,6 @@ export class OwnerController {
     success(res, data, HTTP_STATUS.CREATED, SUCCESS_MESSAGES.OWNER_CREATED_SUCCESS)
   }
 
-  /** GET /api/owner/profile */
   getOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
@@ -109,14 +103,12 @@ export class OwnerController {
     success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_RETRIEVED_SUCCESS)
   }
 
-  /** PATCH /api/owner/profile */
   updateOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
       throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
-    // req.body is already validated/coerced by validateRequest(updateOwnerSchema) on the route
     const data = await this.updateOwnerUseCase.execute(userId, req.body as z.infer<typeof updateOwnerSchema>)
 
     if (!data) {

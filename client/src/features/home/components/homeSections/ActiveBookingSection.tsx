@@ -40,9 +40,7 @@ export default function ActiveBookingSection() {
         </button>
       </div>
 
-      {/* Progress Tracker Component */}
       <div className="relative pt-6">
-        {/* Connector Lines */}
         <div className="absolute top-[36px] left-[32px] right-[32px] h-[3px] bg-muted -z-10 rounded-full" />
         <div className="absolute top-[36px] left-[32px] w-[25%] h-[3px] bg-[#ADC6FF] shadow-[0_0_12px_rgba(173,198,255,0.6)] -z-10 rounded-full" />
 

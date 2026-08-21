@@ -8,7 +8,6 @@ interface StationAboutSectionProps {
 export function StationAboutSection({ stationName, description }: StationAboutSectionProps) {
   return (
     <div className="p-8 rounded-2xl border border-border bg-card shadow-xl space-y-6 relative overflow-hidden">
-      {/* Subtle Background Watermark Icon */}
       <Info size={120} className="absolute -right-8 -bottom-8 text-border/30 pointer-events-none" />
 
       <div className="space-y-3 relative z-10">
@@ -18,7 +17,6 @@ export function StationAboutSection({ stationName, description }: StationAboutSe
         </p>
       </div>
 
-      {/* Feature Badges Grid */}
       <div className="flex flex-wrap items-center gap-8 pt-4 border-t border-border/60 relative z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-success/10 border border-success/20 text-success flex items-center justify-center shrink-0">

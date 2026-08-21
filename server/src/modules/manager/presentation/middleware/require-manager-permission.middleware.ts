@@ -28,7 +28,6 @@ export const createRequireManagerPermissionMiddleware = (
           throw new ForbiddenError("Station context is required for manager authorization")
         }
 
-        // Check if user is station owner (Owners have implicit full access to their stations)
         const station = await stationRepository.findById(stationId)
         if (station) {
           const ownerDoc = await OwnerModel.findOne({
@@ -43,7 +42,6 @@ export const createRequireManagerPermissionMiddleware = (
           }
         }
 
-        // Check Manager Assignment
         const assignment = await managerAssignmentRepository.findByUserAndStation(
           req.user.userId,
           stationId

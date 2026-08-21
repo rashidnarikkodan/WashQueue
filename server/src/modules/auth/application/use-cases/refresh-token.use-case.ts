@@ -33,7 +33,6 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
       }
 
-      // Verify incoming refresh token against hashed refresh token stored in DB using repository and entity
       const activeToken = await this.refreshTokenRepository.findByUserId(user.id!)
       if (!activeToken) {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
@@ -44,16 +43,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
 
-      // Map payload and generate tokens
       const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
       const newAccessToken = this.tokenService.generateAccessToken(tokenPayload)
       const newRefreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-      // Hash the new refresh token for safe storage
       const hashedNewRefreshToken = await this.hashService.hash(newRefreshToken)
 
-      // Save hashed refresh token
       await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedNewRefreshToken))
 
       return {

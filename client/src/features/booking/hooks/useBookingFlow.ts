@@ -14,7 +14,6 @@ export function useBookingFlow(stationId: string | null) {
   const { fetchStationById, selectedStation } = useStationStore()
   const { categories, classes, loadData: loadCatalogData } = useVehicleCatelogStore()
 
-  // --- Auth Modal State ---
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalConfig, setAuthModalConfig] = useState<{
     title?: string
@@ -26,28 +25,24 @@ export function useBookingFlow(stationId: string | null) {
     actionName: "book a wash",
   })
 
-  // Prompt unauthenticated users upon landing
   useEffect(() => {
     if (!isAuthenticated || !user) {
       queueMicrotask(() => setIsAuthModalOpen(true))
     }
   }, [isAuthenticated, user])
 
-  // --- Fetch Station on ID change ---
   useEffect(() => {
     if (stationId) {
       fetchStationById(stationId)
     }
   }, [stationId, fetchStationById])
 
-  // --- Fetch Catalog Data on mount ---
   useEffect(() => {
     if (categories.length === 0 || classes.length === 0) {
       loadCatalogData()
     }
   }, [categories.length, classes.length, loadCatalogData])
 
-  // --- Sub-Hooks ---
   const vehicleState = useBookingVehicles({
     station: selectedStation,
     stationId,
@@ -62,11 +57,9 @@ export function useBookingFlow(stationId: string | null) {
     stationId,
   })
 
-  // --- Payment Modal & Hook State ---
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const paymentState = useBookingPayment(isPaymentModalOpen)
 
-  // --- Booking Submission & Result State ---
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
   const [createdBooking, setCreatedBooking] = useState<BookingResponse | null>(null)
   const [resultModalState, setResultModalState] = useState<{
@@ -84,7 +77,6 @@ export function useBookingFlow(stationId: string | null) {
     slotState.selectedSlotId
   )
 
-  // Online Payment Success Handler (Reservation already verified and confirmed into Booking by backend)
   const handleOnlinePaymentSuccess = useCallback((booking?: BookingResponse) => {
     setIsPaymentModalOpen(false)
     if (booking) {
@@ -99,7 +91,6 @@ export function useBookingFlow(stationId: string | null) {
     }
   }, [])
 
-  // Pay at Station / Cash Booking Submission
   const handleCashBooking = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setAuthModalConfig({
@@ -161,7 +152,6 @@ export function useBookingFlow(stationId: string | null) {
     serviceState.selectedExtraIds,
   ])
 
-  // Handle CTA Click from Summary Card
   const handleProceedBooking = (method: "ONLINE" | "CASH") => {
     if (!isAuthenticated || !user) {
       setAuthModalConfig({
@@ -180,7 +170,6 @@ export function useBookingFlow(stationId: string | null) {
     }
   }
 
-  // Handle Secure Payment Execution from PaymentModal
   const handlePayFromModal = () => {
     if (
       !stationId ||
@@ -236,7 +225,6 @@ export function useBookingFlow(stationId: string | null) {
   }
 
   return {
-    // Station & Auth
     selectedStation,
     categories,
     classes,
@@ -244,7 +232,6 @@ export function useBookingFlow(stationId: string | null) {
     setIsAuthModalOpen,
     authModalConfig,
 
-    // Step 1: Vehicles
     vehicles: vehicleState.vehicles,
     selectedVehicle: vehicleState.selectedVehicle,
     selectedVehicleId: vehicleState.selectedVehicleId,
@@ -257,7 +244,6 @@ export function useBookingFlow(stationId: string | null) {
     stationClassIds: vehicleState.stationClassIds,
     handleOpenAddVehicle,
 
-    // Step 2: Services
     plans: serviceState.plans,
     selectedPlan: serviceState.selectedPlan,
     selectedPlanId: serviceState.selectedPlanId,
@@ -268,7 +254,6 @@ export function useBookingFlow(stationId: string | null) {
     toggleExtraService: serviceState.toggleExtraService,
     totalPrice: serviceState.totalPrice,
 
-    // Step 3: Slots
     selectedDate: slotState.selectedDate,
     setSelectedDate: slotState.setSelectedDate,
     selectedSlotId: slotState.selectedSlotId,
@@ -280,14 +265,12 @@ export function useBookingFlow(stationId: string | null) {
     formattedDate: slotState.formattedDate,
     isLoadingSlots: slotState.isLoadingSlots,
 
-    // Submission & Summary
     canSubmit,
     isSubmittingBooking,
     createdBooking,
     resultModalState,
     setResultModalState,
 
-    // Payment Modal & Handlers
     isPaymentModalOpen,
     setIsPaymentModalOpen,
     paymentState,

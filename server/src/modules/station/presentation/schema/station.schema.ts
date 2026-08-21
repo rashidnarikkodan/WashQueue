@@ -58,7 +58,6 @@ export const createStationSchema = z.object({
   images: z.preprocess(preprocessJson, z.array(imageSchema).optional().default([])),
 })
 
-// Step 1 — basic info update (after initial creation)
 const step1Schema = z.object({
   step: z.literal(1),
   name: z
@@ -75,7 +74,6 @@ const step1Schema = z.object({
   status: z.nativeEnum(StationStatus).optional(),
 })
 
-// Step 2 — availability
 const operatingHourSchema = z.object({
   day: z.string().min(1, "Day is required"),
   open: z.string().regex(/^\d{2}:\d{2}$/, "Open time must be in HH:mm format"),
@@ -128,7 +126,6 @@ const step2Schema = z.object({
   slotConfig: z.preprocess(preprocessJson, slotConfigurationSchema),
 })
 
-// Step 3 — pricing
 const pricingEntrySchema = z.object({
   vehicleClassId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid vehicleClassId"),
   halfWashPrice: z.preprocess(
@@ -153,7 +150,6 @@ const step3Schema = z.object({
   ),
 })
 
-// Step 4 — amenities & extra services
 const extraServicePricingSchema = z.object({
   vehicleClassId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid vehicleClassId"),
   price: z.preprocess(

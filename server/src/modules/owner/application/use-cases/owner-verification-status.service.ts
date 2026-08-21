@@ -24,14 +24,12 @@ export class OwnerVerificationStatusService implements IOwnerVerificationStatusS
 
     const displayName = owner.legalFullName || userName || "Owner"
 
-    // Approval email trigger
     const wasVerified = owner.isVerified === true
     const isVerifiedNow = updates.isVerified === true
     if (!wasVerified && isVerifiedNow) {
       await this.mailService.sendOwnerApprovalEmail(userEmail, displayName)
     }
 
-    // Rejection email trigger: transition from in-review back to the first step, unverified
     const wasInReview = owner.onboardingStep === ONBOARDING_STEP.IN_REVIEW
     const isRejectedNow =
       updates.onboardingStep === ONBOARDING_STEP.FIRST_STEP && updates.isVerified === false

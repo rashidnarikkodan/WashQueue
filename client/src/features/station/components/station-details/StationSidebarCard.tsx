@@ -41,21 +41,18 @@ function groupOperatingHours(operatingHours?: Station["operatingHours"]): Groupe
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 
-  // Map to ordered list
   const orderedList = [...operatingHours].sort((a, b) => {
     const aIdx = dayOrder.indexOf(a.day.toLowerCase())
     const bIdx = dayOrder.indexOf(b.day.toLowerCase())
     return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx)
   })
 
-  // Create signature for each day to group matching schedules
   const getSignature = (oh: (typeof operatingHours)[0]) => {
     if (oh.isClosed) return "CLOSED"
     const breaksSig = (oh.breaks || []).map((b) => `${b.start}-${b.end}`).join("|")
     return `${oh.open}-${oh.close}#${breaksSig}`
   }
 
-  // Check if all 7 days have identical schedule
   if (orderedList.length === 7) {
     const firstSig = getSignature(orderedList[0])
     const allSame = orderedList.every((item) => getSignature(item) === firstSig)
@@ -72,7 +69,6 @@ function groupOperatingHours(operatingHours?: Station["operatingHours"]): Groupe
     }
   }
 
-  // Group consecutive days with the same signature
   const groups: GroupedOperatingHour[] = []
   let currentGroup: (typeof operatingHours)[0][] = []
   let currentSig: string | null = null
@@ -135,9 +131,7 @@ export function StationSidebarCard({
 
   return (
     <div className="space-y-6 lg:sticky lg:top-24">
-      {/* Main Station Summary Card */}
       <div className="p-8 rounded-2xl bg-background shadow-2xl space-y-6">
-        {/* Title & Status */}
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2">
             <h1 className="text-3xl font-black text-foreground tracking-tight">{station.name}</h1>
@@ -160,7 +154,6 @@ export function StationSidebarCard({
           </div>
         </div>
 
-        {/* Metrics List */}
         <div className="space-y-3 pt-2">
           <div className="flex justify-between items-center py-3 border-b border-border/60">
             <span className="text-sm font-semibold text-foreground">Slot Window</span>
@@ -188,9 +181,7 @@ export function StationSidebarCard({
           </div>
         </div>
 
-        {/* ROLE-BASED ACTION CTA BUTTONS */}
         <div className="pt-2">
-          {/* USER / CUSTOMER ROLE */}
           {role === ROLE.CUSTOMER && (
             <button
               onClick={() => {
@@ -207,7 +198,6 @@ export function StationSidebarCard({
             </button>
           )}
 
-          {/* ADMIN ROLE */}
           {role === "admin" && (
             <div className="space-y-3">
               {isPending && (
@@ -255,7 +245,6 @@ export function StationSidebarCard({
             </div>
           )}
 
-          {/* OWNER ROLE */}
           {role === ROLE.OWNER && (
             <div className="space-y-3">
               <button
@@ -302,7 +291,6 @@ export function StationSidebarCard({
             </div>
           )}
 
-          {/* MANAGER ROLE */}
           {role === ROLE.MANAGER && (
             <div className="space-y-3">
               <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 space-y-1.5 text-left">
@@ -345,7 +333,6 @@ export function StationSidebarCard({
           )}
         </div>
 
-        {/* Hours of Operation */}
         <div className="pt-4 border-t border-border/60 space-y-3">
           <span className="text-[10px] font-black uppercase tracking-widest text-foreground">
             Hours of Operation
@@ -388,7 +375,6 @@ export function StationSidebarCard({
         </div>
       </div>
 
-      {/* Dynamic Disclaimer Footer */}
       <p className="text-[10px] text-muted-foreground text-center leading-relaxed px-4">
         Prices and wait times are dynamic and subject to real-time traffic conditions. Service
         guarantees depend on real-time situations.

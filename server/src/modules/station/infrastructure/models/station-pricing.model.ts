@@ -21,7 +21,6 @@ const stationPricingSchema = new Schema<IStationPricing>(
   { timestamps: true, collection: "station_pricing" }
 )
 
-// One pricing record per station + vehicle class combination
 stationPricingSchema.index({ stationId: 1, vehicleClassId: 1 }, { unique: true })
 
 export const StationPricingModel = model<IStationPricing>("StationPricing", stationPricingSchema)

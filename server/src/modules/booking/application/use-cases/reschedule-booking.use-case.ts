@@ -31,18 +31,15 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 1. Authorization check
     const isStaff = userRole === "MANAGER" || userRole === "OWNER" || userRole === "ADMIN"
     if (!isStaff && booking.userId !== userId) {
       throw new AppError("You are not authorized to reschedule this booking", HTTP_STATUS.FORBIDDEN)
     }
 
-    // 2. Walk-in restriction
     if (booking.isWalkIn) {
       throw new AppError("Walk-in bookings cannot be rescheduled", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 3. Status restriction
     if (
       booking.status !== BookingStatus.PENDING &&
       booking.status !== BookingStatus.CONFIRMED
@@ -53,7 +50,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
-    // 4. Max Reschedule Limit Check (Max 2 times)
     if (booking.rescheduleCount >= 2) {
       throw new AppError(
         "Maximum limit of 2 reschedules has been reached for this booking. Further rescheduling is not permitted.",
@@ -63,7 +59,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
 
     const now = new Date()
 
-    // 5. 24-Hour Policy Rule Check
     if (!booking.canReschedule(now)) {
       throw new AppError(
         "Bookings can only be rescheduled at least 24 hours prior to the scheduled window start",
@@ -71,7 +66,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
-    // 5. Validate Target Time Window
     const newTimeWindow = await this.timeWindowRepository.findById(input.newTimeWindowId)
     if (!newTimeWindow) {
       throw new AppError("Selected time window not found", HTTP_STATUS.NOT_FOUND)
@@ -99,7 +93,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
-    // 6. Atomically reserve capacity on the new window
     const reservedNewWindow = await this.timeWindowRepository.reserveCapacityAtomically(
       newTimeWindow.id
     )
@@ -110,13 +103,11 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
-    // 7. Atomically release capacity on the old window
     const oldTimeWindowId = booking.scheduling.timeWindowId
     if (oldTimeWindowId) {
       await this.timeWindowRepository.releaseCapacityAtomically(oldTimeWindowId)
     }
 
-    // 8. Domain state mutation
     const oldScheduling = { ...booking.scheduling }
     booking.reschedule(
       {
@@ -127,7 +118,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       now
     )
 
-    // 9. Persist booking and audit status log
     const runRescheduleWork = async (session?: unknown) => {
       const updated = await this.bookingRepository.updateWithStatusGuard(
         booking,
@@ -156,7 +146,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       : await runRescheduleWork()
 
     if (!domainBooking) {
-      // Rollback time window capacities if concurrency guard fails
       await this.timeWindowRepository.releaseCapacityAtomically(newTimeWindow.id)
       if (oldTimeWindowId) {
         await this.timeWindowRepository.reserveCapacityAtomically(oldTimeWindowId)
@@ -168,7 +157,6 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       )
     }
 
-    // 10. Real-time notifications to customer and station managers
     await this.notificationService.notify("BOOKING_RESCHEDULED", domainBooking, {
       oldScheduling,
       newScheduling: domainBooking.scheduling,

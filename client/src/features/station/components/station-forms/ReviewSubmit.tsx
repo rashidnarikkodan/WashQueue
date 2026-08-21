@@ -45,7 +45,6 @@ export default function ReviewSubmit({
 
   return (
     <div className="space-y-8 text-left">
-      {/* Editorial Header */}
       <div className="space-y-2 border-b border-slate-800/80 pb-6">
         <span className="text-[12px] font-bold tracking-[2.4px] text-[#ADC6FF] uppercase">
           STEP 5 OF 5
@@ -67,7 +66,6 @@ export default function ReviewSubmit({
         </div>
       )}
 
-      {/* Section 1: Station Details & Media */}
       <div className="p-6 rounded-2xl border border-slate-800/80 bg-[#151B2D] space-y-4">
         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-[#ADC6FF] uppercase">
@@ -128,7 +126,6 @@ export default function ReviewSubmit({
           </div>
         </div>
 
-        {/* Media preview */}
         {totalPhotosCount > 0 && (
           <div className="pt-2">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
@@ -164,7 +161,6 @@ export default function ReviewSubmit({
         )}
       </div>
 
-      {/* Section 2: Availability */}
       <div className="p-6 rounded-2xl border border-slate-800/80 bg-[#151B2D] space-y-4">
         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-[#ADC6FF] uppercase">
@@ -246,7 +242,6 @@ export default function ReviewSubmit({
         </div>
       </div>
 
-      {/* Section 3: Pricing */}
       <div className="p-6 rounded-2xl border border-slate-800/80 bg-[#151B2D] space-y-4">
         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-[#ADC6FF] uppercase">
@@ -292,7 +287,6 @@ export default function ReviewSubmit({
         </div>
       </div>
 
-      {/* Section 4: Extra Services & Amenities */}
       <div className="p-6 rounded-2xl border border-slate-800/80 bg-[#151B2D] space-y-4">
         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-[#ADC6FF] uppercase">
@@ -363,7 +357,6 @@ export default function ReviewSubmit({
         )}
       </div>
 
-      {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
         <div className="flex items-center gap-3">
           <button

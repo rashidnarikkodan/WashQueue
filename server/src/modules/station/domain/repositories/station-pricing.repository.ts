@@ -19,6 +19,5 @@ export interface IStationPricingRepository {
 
   deleteByStationId(stationId: string, session?: unknown): Promise<void>
 
-  /** Min/max half- and full-wash prices across all active pricing rows, or null if none exist. */
   getActivePriceBounds(): Promise<StationPriceBounds | null>
 }

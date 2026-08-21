@@ -15,10 +15,9 @@ export interface OperationalQueueItemDTO {
   serviceStartedAt?: string
   completedAt?: string
 
-  // Server-Authoritative Computed Fields
-  queuePosition: number // 1-indexed for waiting (CHECKED_IN), 0 for active in bay
-  isBayActive: boolean // true if IN_SERVICE
-  assignedBayNumber?: number // Bay # (1..totalBays)
+  queuePosition: number
+  isBayActive: boolean
+  assignedBayNumber?: number
   estimatedWaitMinutes: number
   estimatedServiceStart?: string
   stalledReason?: string
@@ -30,7 +29,7 @@ export interface OperationalStationQueueDTO {
   totalBays: number
   activeServicesCount: number
   availableBays: number
-  queueDepth: number // Count of waiting vehicles (CHECKED_IN)
+  queueDepth: number
   totalActiveAndWaiting: number
   averageWashDurationMinutes: number
   waitingQueue: OperationalQueueItemDTO[]

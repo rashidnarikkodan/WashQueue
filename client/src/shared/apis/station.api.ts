@@ -63,9 +63,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Fetch a single station by ID (owner-authenticated).
-   */
   getStationById: async (id: string): Promise<StationDetail> => {
     try {
       const response = await api.get<{ data: StationDetail }>(API_ROUTES.STATIONS.BY_ID(id))
@@ -75,9 +72,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Create a new station draft (Step 1 of setup, supports FormData multipart file upload).
-   */
   createStation: async (input: CreateStationInput | FormData): Promise<CreateStationResponse> => {
     try {
       const isFormData = typeof FormData !== "undefined" && input instanceof FormData
@@ -92,9 +86,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Update a station with any of the 4 setup steps (supports FormData multipart file upload).
-   */
   updateStation: async (
     id: string,
     input: UpdateStationInput | FormData
@@ -112,9 +103,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Submit a station for review (transitions DRAFT → PENDING_REVIEW).
-   */
   submitStation: async (id: string): Promise<Station> => {
     try {
       const response = await api.post<{ data: Station }>(API_ROUTES.STATIONS.SUBMIT(id))
@@ -124,9 +112,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Review (approve, reject, or suspend) a station.
-   */
   reviewStation: async (
     id: string,
     action: "APPROVE" | "REJECT" | "SUSPEND",
@@ -143,9 +128,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Delete a station draft or rejected application.
-   */
   deleteStation: async (id: string): Promise<void> => {
     try {
       await api.delete(API_ROUTES.STATIONS.BY_ID(id))
@@ -154,9 +136,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Toggle station active status (ACTIVE ↔ INACTIVE).
-   */
   toggleActiveStation: async (id: string): Promise<Station> => {
     try {
       const response = await api.patch<{ data: Station }>(
@@ -168,9 +147,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Assign manager (self or invite) for a station.
-   */
   assignManager: async (
     id: string,
     input: { managerType: "SELF" | "INVITE"; email?: string }
@@ -186,9 +162,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Fetch booking calendar statuses for a station.
-   */
   getBookingCalendar: async (
     stationId: string
   ): Promise<{
@@ -204,9 +177,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Fetch available time windows for a station on a given date.
-   */
   getAvailableTimeWindows: async (
     stationId: string,
     date: string
@@ -225,9 +195,6 @@ export const stationApi = {
     }
   },
 
-  /**
-   * Fetch live public queue for station details page.
-   */
   getPublicLiveQueue: async (
     stationId: string
   ): Promise<{

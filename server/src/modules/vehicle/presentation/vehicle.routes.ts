@@ -10,7 +10,6 @@ import { API_ROUTES } from "@/common/constants/route.constants"
 export const createVehicleRouter = (vehicleController: VehicleController): Router => {
   const router = Router()
 
-  // All vehicle routes require authentication
   router.use(authenticate)
 
   router.post(

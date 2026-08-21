@@ -42,13 +42,11 @@ export default function VehicleCatelog() {
     saveClass,
   } = useVehicleCatelogStore()
 
-  // Local Table Filtering & Pagination States
   const [selectedCategoryId, setSelectedCategoryId] = useState("ALL")
   const [selectedStatus, setSelectedStatus] = useState("ALL")
   const [page, setPage] = useState(1)
   const limit = 10
 
-  // Local Modal UI States
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<VehicleCategory | null>(null)
 
@@ -56,7 +54,6 @@ export default function VehicleCatelog() {
   const [editingClass, setEditingClass] = useState<VehicleClass | null>(null)
   const [defaultCategoryId, setDefaultCategoryId] = useState<string | undefined>(undefined)
 
-  // Delete Confirmation States
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
     type: "category" | "class"
     id: string
@@ -68,7 +65,6 @@ export default function VehicleCatelog() {
     loadData()
   }, [loadData])
 
-  // --- CRUD Category Actions ---
   const handleAddCategoryClick = () => {
     setEditingCategory(null)
     setIsCategoryModalOpen(true)
@@ -95,7 +91,6 @@ export default function VehicleCatelog() {
     setIsCategoryModalOpen(false)
   }
 
-  // --- CRUD Class Actions ---
   const handleAddClassClick = (categoryId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
     setEditingClass(null)
@@ -125,7 +120,6 @@ export default function VehicleCatelog() {
     setIsClassModalOpen(false)
   }
 
-  // --- Confirm Actions ---
   const handleConfirmDelete = async () => {
     if (!deleteConfirmTarget) return
     const { type, id } = deleteConfirmTarget
@@ -138,7 +132,6 @@ export default function VehicleCatelog() {
       }
       setDeleteConfirmTarget(null)
     } catch {
-      // Toast error is handled inside store actions
     }
   }
 
@@ -152,22 +145,18 @@ export default function VehicleCatelog() {
     await toggleClassStatus(cls.id, cls.isActive)
   }
 
-  // Filter classes for Table view based on search, category filter, and status filter
   const filteredClasses = useMemo(() => {
     return classes.filter((cls) => {
       const parentCat = categories.find((c) => c.id === cls.categoryId)
       const categoryName = parentCat ? parentCat.name : ""
 
-      // Category filter
       if (selectedCategoryId !== "ALL" && cls.categoryId !== selectedCategoryId) {
         return false
       }
 
-      // Status filter
       if (selectedStatus === "ACTIVE" && !cls.isActive) return false
       if (selectedStatus === "INACTIVE" && cls.isActive) return false
 
-      // Search query filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase()
         return (
@@ -181,7 +170,6 @@ export default function VehicleCatelog() {
     })
   }, [classes, categories, selectedCategoryId, selectedStatus, searchQuery])
 
-  // Category Tabs
   const categoryTabs = useMemo(
     () => [
       { id: "ALL", label: "All Classes" },
@@ -190,7 +178,6 @@ export default function VehicleCatelog() {
     [categories]
   )
 
-  // Select Filters dropdowns
   const selectFilters = useMemo(
     () => [
       {
@@ -224,7 +211,6 @@ export default function VehicleCatelog() {
     [selectedCategoryId, selectedStatus, categories]
   )
 
-  // Paginate classes locally for Table view
   const total = filteredClasses.length
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -245,11 +231,9 @@ export default function VehicleCatelog() {
     [total, page, limit, totalPages]
   )
 
-  // Format statistics numbers (Total categories, Total unique classes)
   const formattedCategoryCount = String(categories.length).padStart(2, "0")
   const formattedClassCount = String(classes.length).padStart(2, "0")
 
-  // Generic DataTable Column Definitions
   const columns = getClassColumns({
     categories,
     onToggleStatus: handleToggleClassStatusClick,
@@ -259,12 +243,10 @@ export default function VehicleCatelog() {
 
   return (
     <div className="space-y-6 text-left text-slate-100 select-none animate-in fade-in duration-300">
-      {/* Breadcrumbs */}
       <Breadcrumbs
         items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Catelog Management" }]}
       />
 
-      {/* Top Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 border-b border-slate-800 pb-6">
         <div className="max-w-2xl text-left">
           <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#DCE1FB] via-slate-100 to-slate-400 leading-tight tracking-tight mb-2">
@@ -276,9 +258,7 @@ export default function VehicleCatelog() {
           </p>
         </div>
 
-        {/* View Switcher & Action Button */}
         <div className="flex items-center gap-4 self-start md:self-end">
-          {/* Switcher Wrapper */}
           <div className="flex p-1 bg-[#191F31] rounded-xl border border-slate-800/80">
             <button
               onClick={() => setViewMode("tree")}
@@ -304,7 +284,6 @@ export default function VehicleCatelog() {
             </button>
           </div>
 
-          {/* Add Category Trigger Button */}
           <button
             onClick={handleAddCategoryClick}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#ADC6FF] text-[#002E6A] hover:bg-[#b8cffd] text-xs font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg hover:shadow-xl shrink-0"
@@ -315,9 +294,7 @@ export default function VehicleCatelog() {
         </div>
       </div>
 
-      {/* Bento-style Statistics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Total Categories Card */}
         <div className="flex justify-between items-center p-6 rounded-3xl border border-slate-800 bg-[#151B2D] shadow-md transition-all hover:border-slate-700/50">
           <div className="text-left space-y-1.5">
             <span className="text-xs text-[#ADC6FF] font-bold uppercase tracking-wider">
@@ -332,7 +309,6 @@ export default function VehicleCatelog() {
           </span>
         </div>
 
-        {/* Total Classes Card */}
         <div className="flex justify-between items-center p-6 rounded-3xl border border-slate-800 bg-[#151B2D] shadow-md transition-all hover:border-slate-700/50">
           <div className="text-left space-y-1.5">
             <span className="text-xs text-[#ADC6FF] font-bold uppercase tracking-wider">
@@ -348,7 +324,6 @@ export default function VehicleCatelog() {
         </div>
       </div>
 
-      {/* Main Content Area */}
       {isLoading ? (
         <Loading
           size="lg"
@@ -356,7 +331,6 @@ export default function VehicleCatelog() {
           className="py-20 gap-3 text-slate-400"
         />
       ) : viewMode === "tree" ? (
-        /* TREE ACCORDION VIEW MODE */
         <div className="flex flex-col gap-6">
           {categories.map((cat) => {
             const catClasses = classes.filter((cls) => cls.categoryId === cat.id)
@@ -364,7 +338,6 @@ export default function VehicleCatelog() {
 
             return (
               <div key={cat.id} className="flex flex-col gap-2">
-                {/* Category Accordion Header Card */}
                 <CategoryCard
                   category={cat}
                   catClassesCount={catClasses.length}
@@ -375,11 +348,9 @@ export default function VehicleCatelog() {
                   onToggleStatus={handleToggleCategoryStatusClick}
                 />
 
-                {/* Sub-classes Expanded Node Tree */}
                 {isExpanded && (
                   <div className="flex flex-col pl-16 relative mt-1 gap-4">
                     <div className="flex flex-col gap-4">
-                      {/* Sub-class Items */}
                       {catClasses.map((cls, index) => (
                         <ClassCard
                           key={cls.id}
@@ -391,7 +362,6 @@ export default function VehicleCatelog() {
                         />
                       ))}
 
-                      {/* Add Class Placeholder Card (always the visual last tree child) */}
                       <AddClassPlaceholderCard
                         categoryId={cat.id}
                         classesCount={catClasses.length}
@@ -405,7 +375,6 @@ export default function VehicleCatelog() {
           })}
         </div>
       ) : (
-        /* TABLE VIEW MODE (Separated Toolbar & Table Components with Filters & Pagination) */
         <div className="flex flex-col gap-4">
           <DataTableToolbar
             tabs={categoryTabs}
@@ -433,7 +402,6 @@ export default function VehicleCatelog() {
         </div>
       )}
 
-      {/* --- CRUD Category Modal Dialog --- */}
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
@@ -441,7 +409,6 @@ export default function VehicleCatelog() {
         category={editingCategory}
       />
 
-      {/* --- CRUD Class Modal Dialog --- */}
       <ClassModal
         isOpen={isClassModalOpen}
         onClose={() => setIsClassModalOpen(false)}
@@ -451,7 +418,6 @@ export default function VehicleCatelog() {
         defaultCategoryId={defaultCategoryId}
       />
 
-      {/* --- Delete Confirmation Dialog --- */}
       <ConfirmationModal
         isOpen={!!deleteConfirmTarget}
         onClose={() => setDeleteConfirmTarget(null)}

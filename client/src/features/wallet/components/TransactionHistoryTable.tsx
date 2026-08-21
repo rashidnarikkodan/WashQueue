@@ -122,7 +122,6 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
 
   return (
     <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 shadow-md">
-      {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-3">
           <FileText className="h-5 w-5 text-primary" />
@@ -147,7 +146,6 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         </div>
       </div>
 
-      {/* Category Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {filterTabs.map((tab) => (
           <button
@@ -165,7 +163,6 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         ))}
       </div>
 
-      {/* Transaction List */}
       <div className="space-y-3">
         {isLoading ? (
           <div className="py-12 text-center text-muted-foreground text-sm flex items-center justify-center gap-2">
@@ -182,7 +179,6 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         )}
       </div>
 
-      {/* Pagination Controls */}
       {totalRecords > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/60 text-xs text-muted-foreground">
           <span>

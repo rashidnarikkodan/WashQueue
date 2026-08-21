@@ -16,7 +16,6 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
 
   return (
     <div className="space-y-4">
-      {/* Main Hero Container */}
       <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-card border border-border shadow-2xl flex items-center justify-center group">
         {hasImages ? (
           <>
@@ -42,7 +41,6 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
         )}
       </div>
 
-      {/* Thumbnail Bar */}
       {hasImages && images.length > 1 && (
         <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
           {images.map((img, idx) => {
@@ -68,7 +66,6 @@ export function StationHeroGallery({ images = [], stationName }: StationHeroGall
         </div>
       )}
 
-      {/* Fullscreen Lightbox Modal */}
       {showFullGallery && (
         <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md p-6 flex flex-col justify-center items-center gap-4 animate-in fade-in duration-200">
           <button

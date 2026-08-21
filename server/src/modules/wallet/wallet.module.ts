@@ -13,14 +13,12 @@ import { PayWithWalletUseCase } from "./application/use-cases/pay-with-wallet.us
 import { WalletController } from "./presentation/wallet.controller"
 import { createWalletRouter } from "./presentation/wallet.routes"
 
-// Instantiate repositories & services
 export const walletRepository = new WalletMongoRepository()
 export const walletTransactionRepository = new WalletTransactionMongoRepository()
 export const walletPaymentGateway = sharedRazorpayService
 
 import { RefundWalletUseCase } from "./application/use-cases/refund-wallet.use-case"
 
-// Instantiate use cases
 export const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository)
 export const creditWalletUseCase = new CreditWalletUseCase(walletRepository)
 export const debitWalletUseCase = new DebitWalletUseCase(walletRepository)
@@ -36,7 +34,6 @@ export const verifyTopUpPaymentUseCase = new VerifyTopUpPaymentUseCase(
 )
 export const payWithWalletUseCase = new PayWithWalletUseCase(debitWalletUseCase)
 
-// Instantiate controller
 export const walletController = new WalletController(
   getWalletBalanceUseCase,
   creditWalletUseCase,
@@ -47,7 +44,6 @@ export const walletController = new WalletController(
   payWithWalletUseCase
 )
 
-// Create router
 const walletRouter = createWalletRouter(walletController)
 
 export default walletRouter

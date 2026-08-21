@@ -1,9 +1,6 @@
 import { useState } from "react"
 import { AlertTriangle, Trash2, CheckCircle2, DollarSign, X, Info, Clock } from "lucide-react"
 
-// Accepts either the full BookingResponse (booking detail page) or the flatter
-// table-row Booking summary (bookings list page) — only the fields actually
-// rendered below are declared, all optional except `id`, so both shapes fit.
 export interface CancellableBooking {
   id?: string
   bookingNumber?: string
@@ -57,7 +54,6 @@ export default function CancellationModal({
 
   if (!isOpen || !booking) return null
 
-  // Pricing calculations
   const totalAmount =
     booking?.pricingSnapshot?.totalPrice ??
     booking?.totalPrice ??
@@ -71,7 +67,6 @@ export default function CancellationModal({
   const diffMs = windowStartMs !== null ? windowStartMs - nowMs : null
   const hoursRemaining = diffMs !== null ? diffMs / (1000 * 60 * 60) : null
 
-  // Timing-based refund policy evaluation (mirrors server RefundPolicyEngine)
   let policyTier: "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND" = "FULL_REFUND"
   let refundPercentage = 100
   let deductionLabel = "Cancellation Fee"
@@ -114,7 +109,6 @@ export default function CancellationModal({
       policyExplanation = `Your wash is scheduled in ${timeRemainingFormatted}. Cancellations made less than 2 hours before the slot are non-refundable as the service bay and staff have already been committed.`
     }
   } else {
-    // Default fallback when windowStart is unavailable
     policyTier = "FULL_REFUND"
     refundPercentage = 100
     deductionLabel = "Cancellation Fee"
@@ -157,9 +151,7 @@ export default function CancellationModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       {!isSuccess ? (
-        /* ================= 1. CONFIRMATION MODAL STATE ================= */
         <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
-          {/* Top Warning Header */}
           <div className="flex flex-col items-center gap-2 p-8 pb-4 relative">
             <button
               onClick={onClose}
@@ -181,9 +173,7 @@ export default function CancellationModal({
             </p>
           </div>
 
-          {/* Scrollable Content Area */}
           <div className="p-6 sm:p-8 pt-0 space-y-6 max-h-[70vh] overflow-y-auto">
-            {/* Booking Summary Bento Card */}
             <div className="p-5 sm:p-6 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center sm:items-start gap-5">
               <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
                 <img
@@ -233,7 +223,6 @@ export default function CancellationModal({
               </div>
             </div>
 
-            {/* Refund Breakdown Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
@@ -286,7 +275,6 @@ export default function CancellationModal({
               </div>
             </div>
 
-            {/* Clear Policy Rule Explanation Box */}
             <div className="p-4.5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-left">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs">
@@ -299,7 +287,6 @@ export default function CancellationModal({
               </div>
             </div>
 
-            {/* Cancellation Reason Pills */}
             <div className="space-y-3">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block px-1">
                 REASON FOR CANCELLATION
@@ -326,7 +313,6 @@ export default function CancellationModal({
               </div>
             </div>
 
-            {/* Warning Notice Box */}
             <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <p className="text-xs text-destructive leading-relaxed font-medium">
@@ -335,7 +321,6 @@ export default function CancellationModal({
             </div>
           </div>
 
-          {/* Bottom Actions */}
           <div className="p-6 sm:p-8 bg-muted/40 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               type="button"
@@ -357,13 +342,10 @@ export default function CancellationModal({
           </div>
         </div>
       ) : (
-        /* ================= 2. SUCCESSFUL CANCELLATION MODAL STATE ================= */
         <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 my-8 relative p-8 sm:p-12 flex flex-col items-center text-center space-y-8">
-          {/* Asymmetric Background Accents */}
           <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
-          {/* Success Visual & Status Badge */}
           <div className="flex flex-col items-center gap-4">
             <div className="w-24 h-24 rounded-full bg-emerald-500/20 flex items-center justify-center p-2">
               <div className="w-full h-full rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -376,7 +358,6 @@ export default function CancellationModal({
             </span>
           </div>
 
-          {/* Hero Headline & Subtext */}
           <div className="space-y-3 max-w-[512px]">
             <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
               Your booking has been cancelled successfully.
@@ -387,7 +368,6 @@ export default function CancellationModal({
             </p>
           </div>
 
-          {/* Refund Information Card (Editorial Sunken Feel) */}
           <div className="w-full max-w-[544px] p-6 sm:p-8 rounded-2xl bg-muted/40 border border-border flex items-center gap-5 text-left">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
               <DollarSign className="h-6 w-6 text-emerald-500" />
@@ -417,7 +397,6 @@ export default function CancellationModal({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="w-full max-w-[544px] flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               type="button"
@@ -436,7 +415,6 @@ export default function CancellationModal({
             </button>
           </div>
 
-          {/* Footer Metadata */}
           <div className="w-full max-w-[544px] pt-6 border-t border-border flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
             <span>TRANSACTION ID: {booking.bookingNumber || "WQ-9823-X1"}</span>
             <span>ISSUED: {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()}</span>

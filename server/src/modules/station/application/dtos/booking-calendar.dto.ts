@@ -1,7 +1,7 @@
 export type CalendarDateStatus = "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED"
 
 export interface CalendarDateEntryDTO {
-  date: string // YYYY-MM-DD
+  date: string
   status: CalendarDateStatus
 }
 

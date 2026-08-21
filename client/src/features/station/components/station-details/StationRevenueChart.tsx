@@ -43,7 +43,6 @@ export default function StationRevenueChart() {
         </div>
       </div>
 
-      {/* Chart Bars */}
       <div className="h-56 flex items-end gap-3 sm:gap-4 pt-6">
         {bars.map((bar, idx) => (
           <div

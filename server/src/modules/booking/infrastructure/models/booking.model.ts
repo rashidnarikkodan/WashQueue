@@ -1,8 +1,6 @@
 import { Schema, model, Document, Types } from "mongoose"
 import { BookingStatus, PaymentStatus, PaymentMethod } from "../../domain/entities/Booking"
 
-// Persistence-only field (no domain behavior hangs off it), so its own small vocabulary
-// lives here rather than in the domain layer — see RefundDetailsSnapshot at the repository boundary.
 const REFUND_STATUS_VALUES = ["NONE", "PENDING", "PROCESSED", "FAILED"] as const
 
 export interface IBookingDocument extends Document {
@@ -301,7 +299,6 @@ const bookingSchema = new Schema<IBookingDocument>(
   }
 )
 
-// Compound Indexes for fast queries
 bookingSchema.index({ userId: 1, status: 1 })
 bookingSchema.index({ stationId: 1, status: 1 })
 bookingSchema.index({ stationId: 1, "scheduling.windowStart": 1 })

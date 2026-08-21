@@ -19,13 +19,11 @@ import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use
 import { ChangePasswordUseCase } from "./application/use-cases/change-password.use-case"
 import { ResendOtpUseCase } from "./application/use-cases/resend-otp.use-case"
 
-// router and controller
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
 
-// infrastructures/repositories
 const otpRepository = new OtpRedisRepository()
 const refreshTokenRepository = new RefreshTokenMongoRepository()
 const ownerRepository = new OwnerMongoRepository()

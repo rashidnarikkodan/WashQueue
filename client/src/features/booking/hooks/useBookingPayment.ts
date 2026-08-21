@@ -61,7 +61,6 @@ export function useBookingPayment(isModalOpen = false) {
     }
   }, [])
 
-  // Auto-fetch wallet balance whenever payment modal opens
   useEffect(() => {
     let ignore = false
     if (isModalOpen) {
@@ -92,7 +91,6 @@ export function useBookingPayment(isModalOpen = false) {
       setIsProcessing(true)
 
       try {
-        // --- 1. WALLET METHOD PRE-CHECK ---
         if (selectedMethod === "wallet") {
           let currentBalance = walletBalance
           if (currentBalance === null) {
@@ -119,7 +117,6 @@ export function useBookingPayment(isModalOpen = false) {
           }
         }
 
-        // --- 2. CREATE ORDER & ATOMIC SLOT RESERVATION ---
         const shouldUseWallet = selectedMethod === "upi" && useWalletWithUpi
 
         const orderPayload = {
@@ -149,7 +146,6 @@ export function useBookingPayment(isModalOpen = false) {
           setActiveReservationId(order.reservation_id)
         }
 
-        // --- 3. EXECUTE DIRECT WALLET PAYMENT (100% from wallet) ---
         if (selectedMethod === "wallet" || order.amount === 0) {
           try {
             if (selectedMethod === "wallet") {
@@ -189,7 +185,6 @@ export function useBookingPayment(isModalOpen = false) {
           return
         }
 
-        // --- 4. EXECUTE RAZORPAY PAYMENT (For remaining or full UPI amount) ---
         const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TMRUfl1mCLmihQ"
 
         if (typeof window.Razorpay === "undefined") {

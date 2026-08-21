@@ -14,7 +14,6 @@ export interface IOwner extends Document {
   createdAt: Date
   updatedAt: Date
 
-  // onboarding fields
   onboardingStep: number
   idProofType?: string
   idProofUrl?: string

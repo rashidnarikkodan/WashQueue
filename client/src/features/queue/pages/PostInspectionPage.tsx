@@ -32,8 +32,6 @@ interface ChecklistItemConfig {
   group: string
 }
 
-// Order matters: rendered top-to-bottom grouped by `group`. Keys here must match
-// REQUIRED_CHECKLIST_KEYS in the server's save-post-inspection use case.
 const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
   { key: "paintGloss", label: "Bodywork & Paint Gloss", group: "EXTERIOR INTEGRITY" },
   { key: "wheels", label: "Wheels & Rim Cleaning", group: "EXTERIOR INTEGRITY" },
@@ -50,7 +48,6 @@ export default function ManagerPostInspectionPage() {
   const navigate = useNavigate()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   
-  // Photo Evidence State for 4 angles
   const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
     front: "",
     rear: "",
@@ -61,7 +58,6 @@ export default function ManagerPostInspectionPage() {
   const [uploadTargetSlot, setUploadTargetSlot] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Checklist State
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     paintGloss: true,
     wheels: true,
@@ -79,7 +75,6 @@ export default function ManagerPostInspectionPage() {
   const [handoverNotes, setHandoverNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch Booking Details
   const fetchBooking = useCallback(async () => {
     if (!id) return
     try {
@@ -100,12 +95,10 @@ export default function ManagerPostInspectionPage() {
     }
   }, [id])
 
-  // Open the in-app live camera for a given slot
   const triggerCamera = (slotKey: string) => {
     setActiveCameraSlot(slotKey)
   }
 
-  // Handle a photo captured on the spot from PhotoCaptureCamera
   const handlePhotoCaptured = (slotKey: string, dataUrl: string) => {
     setCapturedPhotos((prev) => ({
       ...prev,
@@ -115,7 +108,6 @@ export default function ManagerPostInspectionPage() {
     toast.success(`✓ ${slotKey.toUpperCase()} photo captured!`)
   }
 
-  // Remove Photo from Slot
   const handleRemovePhoto = (slotKey: string) => {
     setCapturedPhotos((prev) => ({
       ...prev,
@@ -123,13 +115,11 @@ export default function ManagerPostInspectionPage() {
     }))
   }
 
-  // Open the OS file/gallery picker for a given slot
   const triggerUpload = (slotKey: string) => {
     setUploadTargetSlot(slotKey)
     fileInputRef.current?.click()
   }
 
-  // Handle a photo chosen manually from device storage/gallery
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ""
@@ -162,12 +152,10 @@ export default function ManagerPostInspectionPage() {
     }
   }, [fetchBooking])
 
-  // Toggle Checklist item
   const toggleChecklistItem = (key: string) => {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // Handle Add/Edit Remark Modal
   const handleOpenRemarkModal = (itemKey: string, itemLabel: string) => {
     setRemarkModalItem({ key: itemKey, label: itemLabel })
   }
@@ -196,14 +184,11 @@ export default function ManagerPostInspectionPage() {
   const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
   const allPhotosCaptured = missingPhotoSlots.length === 0
 
-  // A failed (unchecked) checklist item must have a remark explaining the issue before
-  // the inspection can be completed — mirrors the server's own validation.
   const failedItemsMissingRemark = CHECKLIST_ITEMS.filter(
     (item) => !checklist[item.key] && !remarks[item.key]?.trim()
   )
   const allChecklistReviewed = failedItemsMissingRemark.length === 0
 
-  // Single-Step Complete Inspection & Customer Handover
   const handleCompleteInspectionAndHandover = async () => {
     if (!booking) return
     if (!allPhotosCaptured) {
@@ -257,7 +242,6 @@ export default function ManagerPostInspectionPage() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
       
-      {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
@@ -274,13 +258,10 @@ export default function ManagerPostInspectionPage() {
         </span>
       </div>
 
-      {/* 2. Bento Grid Layout (70% - 30% split) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Column (70% width / 7 Cols): Details & Inspection Checklist */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Booking Summary Card */}
           <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
@@ -323,7 +304,6 @@ export default function ManagerPostInspectionPage() {
             </div>
           </div>
 
-          {/* Inspection Checklist Card */}
           <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center gap-3 border-b border-border pb-4">
               <CheckCircle2 className="h-6 w-6 text-primary" />
@@ -389,10 +369,8 @@ export default function ManagerPostInspectionPage() {
 
         </div>
 
-        {/* Right Column (30% width / 5 Cols): Evidence & Actions */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Photo Evidence Hub Card (4 Spot Camera Boxes) */}
           <div className="rounded-3xl bg-card border border-border p-6 space-y-4 text-card-foreground shadow-md">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
@@ -477,7 +455,6 @@ export default function ManagerPostInspectionPage() {
             </div>
           </div>
 
-          {/* Handover Readiness Card */}
           <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
             <h3 className="text-base font-bold text-foreground border-b border-border pb-3">
               Readiness Check

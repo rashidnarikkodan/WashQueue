@@ -48,7 +48,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     managerUserId: string,
     input: CreateWalkInBookingInput
   ): Promise<BookingResponseDTO> {
-    // 1. Validate Station
     const station = await this.stationRepository.findById(input.stationId)
     if (!station) {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
@@ -58,7 +57,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       throw new AppError("Station is currently inactive or suspended", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 2 & 3. Resolve pricing for vehicle class and validate/price extra services
     const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
       station.id,
       input.vehicle.classId,
@@ -66,7 +64,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       input.extraServiceIds
     )
 
-    // 4. Validate Time Window & Reserve Walk-In Capacity Atomically
     let timeWindow = input.timeWindowId ? await this.timeWindowRepository.findById(input.timeWindowId) : null
     if (!timeWindow) {
       const todayStr = new Date().toISOString().split("T")[0] || ""
@@ -92,7 +89,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       )
     }
 
-    // 5. Calculate Pricing
     const paymentMethod = input.paymentMethod || PaymentMethod.PAY_AT_STATION
     const pricingResult = BookingPricingService.calculate({
       basePrice,
@@ -101,11 +97,9 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       isWalkIn: true,
     })
 
-    // 6. Generate Booking Number and QR Token
     const bookingNumber = BookingNumberService.generate()
     const qrResult = QRTokenService.generateToken(timeWindow.windowEnd)
 
-    // 7. Create Walk-in Booking Aggregate (Initial status is CONFIRMED, ready for pre-service inspection)
     const now = new Date()
     const booking = new Booking({
       id: "",
@@ -156,7 +150,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       updatedAt: now,
     })
 
-    // 8. Save Booking & Audit Log
     const savedBooking = await this.bookingRepository.save(booking)
 
     const statusLog = new BookingStatusLog({
@@ -170,7 +163,6 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 10. Dispatch Notification
     await this.notificationService.notify("BOOKING_CREATED", savedBooking)
 
     return BookingDTOMapper.toDTO(savedBooking, qrResult.rawToken)

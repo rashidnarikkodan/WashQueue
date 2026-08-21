@@ -12,7 +12,6 @@ import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 export class BookingRedisQueueService implements IBookingQueueService {
   constructor(private readonly bookingStatusLogRepository: IBookingStatusLogRepository) {}
 
-
   private computeOrderScore(booking: Booking): number {
     const checkedInTs = booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : Date.now()
     if (!booking.isWalkIn && booking.scheduling && booking.scheduling.windowStart) {
@@ -22,9 +21,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
     return checkedInTs
   }
 
-  /**
-   * Pushes checked-in booking into the Redis station queue cleanly.
-   */
   async pushToStationQueue(booking: Booking): Promise<void> {
     try {
       const stationId = booking.stationId
@@ -37,13 +33,10 @@ export class BookingRedisQueueService implements IBookingQueueService {
       const score = this.computeOrderScore(booking)
       const now = Date.now()
 
-      // 1. Add to sorted waiting set (score = deterministic score)
       await redis.zadd(queueKey, score, bookingId)
 
-      // 2. Ensure removed from active set if re-queueing
       await redis.srem(activeKey, bookingId)
 
-      // 3. Store Redis Hash metadata
       await redis.hset(bookingKey, {
         bookingId,
         bookingNumber: booking.bookingNumber,
@@ -56,7 +49,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
         windowEnd: booking.scheduling?.windowEnd ? new Date(booking.scheduling.windowEnd).toISOString() : "",
       })
 
-      // 4. Update station metadata
       const queueDepth = await redis.zcard(queueKey)
       const activeCount = await redis.scard(activeKey)
       await redis.hset(metaKey, {
@@ -71,9 +63,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
     }
   }
 
-  /**
-   * Updates Redis state when booking status changes (IN_SERVICE, SERVICE_COMPLETED, COMPLETED, CANCELLED, NO_SHOW).
-   */
   async updateQueueStatus(booking: Booking): Promise<void> {
     try {
       const stationId = booking.stationId
@@ -86,7 +75,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
       const now = Date.now()
 
       if (booking.status === BookingStatus.IN_SERVICE) {
-        // Vehicle enters active bay: remove from waiting set, add to active set
         await redis.zrem(queueKey, bookingId)
         await redis.sadd(activeKey, bookingId)
         await redis.hset(bookingKey, {
@@ -94,10 +82,8 @@ export class BookingRedisQueueService implements IBookingQueueService {
           serviceStartedAt: (booking.serviceStartedAt ? new Date(booking.serviceStartedAt).getTime() : now).toString(),
         })
       } else if ([BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER].includes(booking.status)) {
-        // Service finished: update status hash (remains in active set until final handover/completion)
         await redis.hset(bookingKey, "status", booking.status)
       } else if ([BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(booking.status)) {
-        // Terminal state: remove from waiting set, active set, and delete hash
         await redis.zrem(queueKey, bookingId)
         await redis.srem(activeKey, bookingId)
         await redis.del(bookingKey)
@@ -105,7 +91,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
         await redis.hset(bookingKey, "status", booking.status)
       }
 
-      // Refresh meta counters
       const queueDepth = await redis.zcard(queueKey)
       const activeCount = await redis.scard(activeKey)
       await redis.hset(metaKey, {
@@ -120,9 +105,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
     }
   }
 
-  /**
-   * Fetches operational queue from Redis, or triggers MongoDB reconciliation if cold/corrupted.
-   */
   async getOperationalQueue(stationId: string, totalBays: number): Promise<OperationalStationQueueDTO | null> {
     try {
       const queueKey = `queue:station:${stationId}:waiting`
@@ -130,18 +112,14 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
       const exists = await redis.exists(queueKey)
       if (!exists) {
-        // Cold start or missing Redis key -> compute from Mongo AND (re)persist the
-        // ordering keys, since nothing is maintaining them yet.
         return await this.reconcileStationQueue(stationId, { syncRedis: true })
       }
 
-      // Fetch waiting booking IDs ordered deterministically by score
       const waitingBookingIds = await redis.zrange(queueKey, 0, -1)
       const activeBookingIds = await redis.smembers(activeKey)
 
       const totalActiveAndWaiting = waitingBookingIds.length + activeBookingIds.length
       if (totalActiveAndWaiting === 0) {
-        // Empty queue
         return {
           stationId,
           stationName: "",
@@ -157,12 +135,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
         }
       }
 
-      // Redis already holds a valid, incrementally-maintained ordering (kept in sync by
-      // pushToStationQueue/updateQueueStatus/cleanStaleQueueEntries on state transitions).
-      // Recompute the live position/wait-time DTOs from Mongo (they're inherently
-      // time-dependent), but don't blow away and rewrite the Redis keys on every read —
-      // that turned every read into a write storm with no caching benefit and raced with
-      // concurrent readers doing the same delete+rebuild.
       return await this.reconcileStationQueue(stationId, { syncRedis: false })
     } catch (error) {
       logger.error({ error, stationId }, "[RedisQueue] Failed to read queue from Redis; falling back to MongoDB reconciliation")
@@ -170,14 +142,10 @@ export class BookingRedisQueueService implements IBookingQueueService {
     }
   }
 
-  /**
-   * Reconciles Redis operational queue against MongoDB persistent source of truth.
-   */
   private computeDynamicServiceDurationMinutes(booking: Booking, historicalAvgMinutes?: number): number {
     const baseMinutes = booking.serviceType === "FULL" ? 40 : 20
     const extraServicesMinutes = (booking.extraServices?.length || 0) * 5
 
-    // Vehicle Class / Model Duration Modifier
     const modelLower = (booking.vehicleDetails?.model || "").toLowerCase()
     let classModifier = 0
     if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
@@ -188,16 +156,12 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
     const calculated = baseMinutes + extraServicesMinutes + classModifier
 
-    // Blend with historical station average if available (50/50 weighting)
     if (historicalAvgMinutes && historicalAvgMinutes >= 10 && historicalAvgMinutes <= 120) {
       return Math.round((calculated + historicalAvgMinutes) / 2)
     }
     return calculated
   }
 
-  /**
-   * Reconciles Redis operational queue against MongoDB persistent source of truth.
-   */
   async reconcileStationQueue(
     stationId: string,
     options: { syncRedis?: boolean } = {}
@@ -207,14 +171,12 @@ export class BookingRedisQueueService implements IBookingQueueService {
     const activeKey = `queue:station:${stationId}:active`
     const metaKey = `queue:station:${stationId}:meta`
 
-    // 1. Fetch Station configuration for total bays
     let totalBays = 1
     const stationDoc = await StationModel.findById(stationId).exec()
     if (stationDoc && stationDoc.slotConfig && typeof stationDoc.slotConfig.bays === "number") {
       totalBays = Math.max(1, stationDoc.slotConfig.bays)
     }
 
-    // Query historical completed services for actual average duration per station
     let historicalAvgMinutes: number | undefined
     try {
       const historyDocs = await BookingModel.find({
@@ -237,10 +199,8 @@ export class BookingRedisQueueService implements IBookingQueueService {
         historicalAvgMinutes = Math.round(totalDuration / historyDocs.length)
       }
     } catch {
-      // Fall back if history query fails
     }
 
-    // 2. Fetch active operational bookings from MongoDB
     const activeDocs = await BookingModel.find({
       stationId,
       status: {
@@ -259,7 +219,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
     const domainBookings = activeDocs.map((doc) => BookingMapper.toDomain(doc))
 
-    // 3. Separate Active (IN_SERVICE / COMPLETED_SERVICE / HANDOVER) vs Waiting (CHECKED_IN)
     const activeServicesList: Booking[] = []
     const waitingList: Booking[] = []
 
@@ -271,15 +230,13 @@ export class BookingRedisQueueService implements IBookingQueueService {
       }
     }
 
-    // 4. Sort waitingList deterministically by score
     waitingList.sort((a, b) => this.computeOrderScore(a) - this.computeOrderScore(b))
 
     const activeServicesCount = activeServicesList.length
     const availableBays = Math.max(0, totalBays - activeServicesCount)
     const queueDepth = waitingList.length
-    const avgDuration = historicalAvgMinutes || 25 // Average wash duration in minutes
+    const avgDuration = historicalAvgMinutes || 25
 
-    // 5. Build Authoritative Server-Calculated DTOs
     const activeItems: OperationalQueueItemDTO[] = activeServicesList.map((b, idx) => {
       const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
       const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
@@ -301,14 +258,13 @@ export class BookingRedisQueueService implements IBookingQueueService {
         checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toISOString() : undefined,
         serviceStartedAt: b.serviceStartedAt ? new Date(b.serviceStartedAt).toISOString() : undefined,
         completedAt: b.completedAt ? new Date(b.completedAt).toISOString() : undefined,
-        queuePosition: 0, // 0 for active in bay
+        queuePosition: 0,
         isBayActive: true,
         assignedBayNumber: (idx % totalBays) + 1,
         estimatedWaitMinutes: 0,
       }
     })
 
-    // Calculate remaining minutes on active bays & simulate multi-bay queue timeline
     const nowMs = Date.now()
     const bayFinishMinutes: number[] = []
 
@@ -321,22 +277,20 @@ export class BookingRedisQueueService implements IBookingQueueService {
         const remainingMinutes = Math.max(1, Math.round(duration - elapsedMinutes))
         bayFinishMinutes.push(remainingMinutes)
       } else {
-        bayFinishMinutes.push(0) // Empty bay immediately available
+        bayFinishMinutes.push(0)
       }
     }
 
     const waitingItems: OperationalQueueItemDTO[] = waitingList.map((b, idx) => {
-      const position = idx + 1 // 1-indexed queue position
+      const position = idx + 1
       const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
       const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
       const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
 
-      // Sort bays to find earliest available bay for vehicle
       bayFinishMinutes.sort((x, y) => x - y)
       const estimatedWaitMinutes = bayFinishMinutes[0] ?? 0
       const estimatedServiceStart = new Date(nowMs + estimatedWaitMinutes * 60 * 1000).toISOString()
 
-      // Update earliest bay's finish timeline with this vehicle's service duration
       const duration = this.computeDynamicServiceDurationMinutes(b, historicalAvgMinutes)
       bayFinishMinutes[0] = (bayFinishMinutes[0] ?? 0) + duration
 
@@ -361,8 +315,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
       }
     })
 
-    // 6. Resynchronize Redis ordering keys — only when actually needed (cold start /
-    // explicit forced resync), not on every read; see getOperationalQueue.
     if (syncRedis) {
       try {
         await redis.del(queueKey)
@@ -402,9 +354,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
     }
   }
 
-  /**
-   * Cleans stale queue entries (>24 hours checked-in without progression).
-   */
   async cleanStaleQueueEntries(stationId: string): Promise<number> {
     try {
       const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)
@@ -430,7 +379,6 @@ export class BookingRedisQueueService implements IBookingQueueService {
           continue
         }
 
-        // Atomic guard: only transition if still CHECKED_IN (avoids racing a concurrent start-service call)
         const updatedDoc = await BookingModel.findOneAndUpdate(
           { _id: doc._id, status: BookingStatus.CHECKED_IN },
           {

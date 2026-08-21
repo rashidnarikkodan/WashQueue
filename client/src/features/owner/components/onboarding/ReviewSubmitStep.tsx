@@ -28,12 +28,10 @@ export default function ReviewSubmitStep({
   onBack,
   isLoading,
 }: ReviewSubmitStepProps) {
-  // Merge savedDetails and active formData so previously uploaded files show correctly
   const mergedDetails = { ...savedDetails, ...formData }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Header */}
       <div className="space-y-1">
         <span className="text-[10px] sm:text-xs font-bold text-primary tracking-widest uppercase block">
           STEP 3 OF 3
@@ -48,7 +46,6 @@ export default function ReviewSubmitStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Banner Info */}
       <div className="flex items-center gap-4 p-4 border border-blue-500/20 bg-blue-500/10 rounded-2xl">
         <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
           <Check size={14} strokeWidth={3} />
@@ -63,7 +60,6 @@ export default function ReviewSubmitStep({
         </div>
       </div>
 
-      {/* Details Overview Box */}
       <OnboardingDetailsSummary
         details={mergedDetails}
         email={userEmail}
@@ -76,7 +72,6 @@ export default function ReviewSubmitStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Security Notice */}
       <div className="flex items-center justify-between p-4 border border-emerald-500/15 bg-emerald-500/5 rounded-2xl">
         <div className="flex items-center gap-4">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
@@ -96,7 +91,6 @@ export default function ReviewSubmitStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Footer Actions */}
       <div className="flex justify-between items-center pt-2 select-none">
         <button
           type="button"

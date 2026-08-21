@@ -54,7 +54,6 @@ export class GetPublicStationQueueUseCase {
       queueData = await this.redisQueueService.reconcileStationQueue(stationId)
     }
 
-    // Format active in-bay wash items
     const activeServices: PublicQueueItemDTO[] = (queueData.activeServices || []).map((item, idx) => ({
       id: item.bookingId,
       bookingNumber: item.bookingNumber,
@@ -67,7 +66,6 @@ export class GetPublicStationQueueUseCase {
       isBayActive: true,
     }))
 
-    // Format waiting queue items
     const waitingQueue: PublicQueueItemDTO[] = (queueData.waitingQueue || []).map((item) => ({
       id: item.bookingId,
       bookingNumber: item.bookingNumber,

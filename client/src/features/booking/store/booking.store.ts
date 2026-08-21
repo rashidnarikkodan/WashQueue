@@ -18,7 +18,6 @@ export interface LoadBookingsParams {
 }
 
 interface BookingStore {
-  // State
   bookings: Booking[]
   pagination: {
     total: number
@@ -34,13 +33,11 @@ interface BookingStore {
   managedStation: ManagedStationItem | null
   isFetchingManagerStation: boolean
 
-  // Modals state
   selectedBookingForQr: Booking | null
   selectedBookingForCancel: Booking | null
   cancellationReason: string
   isSubmittingCancel: boolean
 
-  // Actions
   loadBookings: (
     params?: string | LoadBookingsParams,
     userName?: string,
@@ -165,7 +162,6 @@ export const useBookingStore = create<BookingStore>((set) => ({
         }
       })
 
-      // Prioritize active and confirmed bookings first, sorted by closest upcoming window
       const getStatusPriority = (status?: string): number => {
         switch (status) {
           case "IN_SERVICE":

@@ -6,11 +6,6 @@ import { randomUUID } from "node:crypto"
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 export class TimeWindowGenerationService {
-  /**
-   * Generates time window instances for a range of dates.
-   * Skips holidays and closed operating days.
-   * Prevents generating duplicate windows if windowStart already exists in existingStarts.
-   */
   generateWindowsForDateRange(
     station: Station,
     slotConfig: SlotConfig,
@@ -21,7 +16,6 @@ export class TimeWindowGenerationService {
     const generated: TimeWindowInstance[] = []
     const now = new Date()
 
-    // Normalize start date and end date to midnight local
     const current = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
     const targetEnd = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
 
@@ -34,13 +28,11 @@ export class TimeWindowGenerationService {
     while (current <= targetEnd) {
       const dateStr = this.dateToISO(current)
 
-      // Skip holidays
       if (holidaysSet.has(dateStr)) {
         current.setDate(current.getDate() + 1)
         continue
       }
 
-      // Check operating hours for day of week
       const dayName = DAY_NAMES[current.getDay()]
       if (!dayName) {
         current.setDate(current.getDate() + 1)
@@ -57,7 +49,6 @@ export class TimeWindowGenerationService {
         continue
       }
 
-      // Parse open & close times (e.g. "09:00", "18:00")
       const [openHour, openMin] = operatingHour.open.split(":").map(Number)
       const [closeHour, closeMin] = operatingHour.close.split(":").map(Number)
 
@@ -120,7 +111,6 @@ export class TimeWindowGenerationService {
     return generated
   }
 
-  /** Format a local Date as YYYY-MM-DD */
   dateToISO(d: Date): string {
     const yyyy = d.getFullYear()
     const mm = String(d.getMonth() + 1).padStart(2, "0")

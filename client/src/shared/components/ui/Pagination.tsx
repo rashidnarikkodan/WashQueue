@@ -40,7 +40,6 @@ export const Pagination: React.FC<PaginationProps> = ({
   const isMinimal = variant === "minimal"
   const isCompact = variant === "compact"
 
-  // Generate page numbers with windowing
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = []
     const delta = 1
@@ -62,7 +61,6 @@ export const Pagination: React.FC<PaginationProps> = ({
       aria-label="Pagination"
       className={`flex flex-col sm:flex-row items-center justify-between gap-3 py-2 px-2 select-none w-full ${className}`}
     >
-      {/* Details text */}
       {showDetails && !isMinimal && (
         <div className="text-xs text-muted-foreground/90 font-medium flex items-center gap-2">
           <span>
@@ -71,7 +69,6 @@ export const Pagination: React.FC<PaginationProps> = ({
             <span className="font-semibold text-foreground">{total}</span>
           </span>
 
-          {/* Rows per page selector */}
           {onLimitChange && (
             <div className="hidden md:flex items-center gap-1.5 ml-2 pl-3 border-l border-border/40">
               <span className="text-muted-foreground/70">Per page:</span>
@@ -91,9 +88,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         </div>
       )}
 
-      {/* Pagination controls */}
       <div className="flex items-center gap-1">
-        {/* First Page */}
         {showFirstLast && (
           <button
             onClick={() => onPageChange(1)}
@@ -105,7 +100,6 @@ export const Pagination: React.FC<PaginationProps> = ({
           </button>
         )}
 
-        {/* Prev Page */}
         <button
           onClick={() => hasPrevPage && onPageChange(page - 1)}
           disabled={!hasPrevPage}
@@ -115,14 +109,12 @@ export const Pagination: React.FC<PaginationProps> = ({
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {/* Mobile Page indicator */}
         <div className="flex sm:hidden items-center px-2 text-xs font-medium text-muted-foreground">
           <span className="font-semibold text-foreground">{page}</span>
           <span className="mx-1 opacity-50">/</span>
           <span>{totalPages}</span>
         </div>
 
-        {/* Desktop Page Numbers */}
         {!isCompact && (
           <div className="hidden sm:flex items-center gap-1">
             {pageNumbers.map((p, idx) => {
@@ -158,7 +150,6 @@ export const Pagination: React.FC<PaginationProps> = ({
           </div>
         )}
 
-        {/* Next Page */}
         <button
           onClick={() => hasNextPage && onPageChange(page + 1)}
           disabled={!hasNextPage}
@@ -168,7 +159,6 @@ export const Pagination: React.FC<PaginationProps> = ({
           <ChevronRight className="w-4 h-4" />
         </button>
 
-        {/* Last Page */}
         {showFirstLast && (
           <button
             onClick={() => onPageChange(totalPages)}

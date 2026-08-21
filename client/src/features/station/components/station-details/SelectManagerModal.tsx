@@ -39,7 +39,6 @@ export function SelectManagerModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="relative w-full max-w-[850px] bg-[#0F172A] border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8 overflow-hidden text-slate-100">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-6 right-6 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition-colors cursor-pointer"
@@ -48,7 +47,6 @@ export function SelectManagerModal({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header */}
         <div className="text-center space-y-1.5 pt-2">
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Assign a Manager for this Station
@@ -58,9 +56,7 @@ export function SelectManagerModal({
           </p>
         </div>
 
-        {/* 2 Option Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: Invite a new Manager */}
           <div className="bg-[#020617] border border-slate-800/80 hover:border-blue-500/40 rounded-2xl p-6 flex flex-col items-center justify-between text-center transition-all group min-h-[340px]">
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-5 group-hover:scale-105 transition-transform">
@@ -89,7 +85,6 @@ export function SelectManagerModal({
             </button>
           </div>
 
-          {/* Card 2: Assign Yourself as Manager */}
           <div className="bg-[#020617] border border-slate-800/80 hover:border-blue-500/40 rounded-2xl p-6 flex flex-col items-center justify-between text-center transition-all group min-h-[340px]">
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-5 group-hover:scale-105 transition-transform">
@@ -128,7 +123,6 @@ export function SelectManagerModal({
           </div>
         </div>
 
-        {/* Bottom Note Box */}
         <div className="w-full bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
           <p className="text-xs font-medium text-blue-400/90 leading-relaxed">
             <strong className="font-bold">Station Rules:</strong> 1. Each station can have only 1

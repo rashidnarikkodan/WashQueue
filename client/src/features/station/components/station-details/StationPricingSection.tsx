@@ -16,7 +16,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
     loadData()
   }, [loadData])
 
-  // Map active pricing entries for this station
   const activePricingMap = useMemo(() => {
     const map = new Map<string, StationPricing>()
     pricing.forEach((p) => {
@@ -30,7 +29,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
     return map
   }, [pricing])
 
-  // Filter categories that have at least one active vehicle class configured for this station
   const availableCategories = useMemo(() => {
     return categories.filter((cat) =>
       classes.some((c) => c.categoryId === cat.id && activePricingMap.has(c.id))
@@ -61,7 +59,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
 
   return (
     <div className="space-y-6">
-      {/* Header & Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
@@ -72,7 +69,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
           </p>
         </div>
 
-        {/* Category Dropdown Pill */}
         {availableCategories.length > 1 && (
           <div className="w-full sm:w-64">
             <FormSelect
@@ -86,7 +82,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
         )}
       </div>
 
-      {/* Pricing Cards Grouped by Category */}
       <div className="space-y-6">
         {displayedCategories.length > 0 ? (
           displayedCategories.map((category) => {
@@ -100,7 +95,6 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
                 key={category.id}
                 className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all"
               >
-                {/* Category Header Banner */}
                 <div className="px-6 py-3.5 bg-muted/60 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {getCategoryIcon(category.name)}
@@ -113,14 +107,12 @@ export function StationPricingSection({ pricing = [] }: StationPricingSectionPro
                   </span>
                 </div>
 
-                {/* Table Column Headers */}
                 <div className="grid grid-cols-12 px-6 py-3 border-b border-border/80 bg-muted/20 text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
                   <div className="col-span-6">Vehicle Class</div>
                   <div className="col-span-3 text-right">Half Wash</div>
                   <div className="col-span-3 text-right">Full Wash</div>
                 </div>
 
-                {/* Rows */}
                 <div className="divide-y divide-border/60">
                   {catClasses.map((cls) => {
                     const priceItem = activePricingMap.get(cls.id)

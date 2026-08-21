@@ -126,7 +126,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
       onClick={handleBackdropClick}
       className="fixed inset-0 m-auto bg-card border border-border shadow-xl rounded-3xl p-0 w-full max-w-md overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground"
     >
-      {/* Header */}
       <div className="flex justify-between items-center px-6 py-5 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -145,7 +144,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         </button>
       </div>
 
-      {/* Body / Form */}
       {isGoogleAccount ? (
         <div className="p-6 space-y-5 text-left">
           <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm space-y-2">
@@ -198,7 +196,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             required
           />
 
-          {/* Footer Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"

@@ -26,7 +26,6 @@ export default function VehicleSelectionStep({
 }: VehicleSelectionStepProps) {
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-      {/* Header Bar */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shrink-0 shadow-md shadow-primary/20">
@@ -47,7 +46,6 @@ export default function VehicleSelectionStep({
         </button>
       </div>
 
-      {/* Vehicles Grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 w-full">
           {[1, 2, 3].map((i) => (

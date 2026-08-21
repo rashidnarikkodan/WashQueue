@@ -77,8 +77,6 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 WalletTransactionSchema.index({ userId: 1, createdAt: -1 })
 WalletTransactionSchema.index({ walletId: 1, createdAt: -1 })
 
-// DB-level idempotency guard: a completed transaction for a given (user, reference, type)
-// can only exist once, even if the app-level check-then-insert in the repository races.
 WalletTransactionSchema.index(
   { userId: 1, referenceId: 1, type: 1 },
   {

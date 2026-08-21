@@ -35,7 +35,6 @@ import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 
 import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
 
-// Instantiate repositories & services
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
 export const userRepository = new UserRepository()
@@ -48,12 +47,10 @@ const timeWindowGenerationService = new TimeWindowGenerationService()
 const cloudinaryService = new CloudinaryService()
 const mediaUploadService = new MediaUploadService(cloudinaryService)
 
-// Instantiate step parser factory & request mapper
 const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
 const managerAssignmentRepository = new MongoManagerAssignmentRepository()
 
-// Lazy booking-horizon service (replaces GenerateTimeWindowsUseCase as the entry point)
 const ensureBookingHorizonService = new EnsureBookingHorizonService(
   stationRepository,
   slotConfigRepository,
@@ -61,7 +58,6 @@ const ensureBookingHorizonService = new EnsureBookingHorizonService(
   timeWindowGenerationService
 )
 
-// Keep GenerateTimeWindowsUseCase for ConfigureSlotConfigUseCase (eager initial generation on config save)
 const generateTimeWindowsUseCase = new GenerateTimeWindowsUseCase(
   stationRepository,
   slotConfigRepository,
@@ -143,7 +139,6 @@ const getStationFilterOptionsUseCase = new GetStationFilterOptionsUseCase(
   filterOptionsCacheService
 )
 
-// Instantiate controller
 const stationController = new StationController(
   createStationUseCase,
   updateStationUseCase,
@@ -163,7 +158,6 @@ const stationController = new StationController(
   getStationFilterOptionsUseCase
 )
 
-// Create router
 const stationRouter = createRouter(stationController)
 
 export default stationRouter

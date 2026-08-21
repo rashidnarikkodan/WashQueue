@@ -87,7 +87,7 @@ const MAP_STYLES: Record<MapStyleMode, string | maplibregl.StyleSpecification> =
   streets: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
 }
 
-const DEFAULT_CENTER: [number, number] = [76.2711, 10.8505] // Default Kerala / India
+const DEFAULT_CENTER: [number, number] = [76.2711, 10.8505]
 
 export default function LocationPickerMap({
   latitude = 0,
@@ -105,7 +105,6 @@ export default function LocationPickerMap({
 
   const { resolvedTheme } = useTheme()
   const themeMapStyle: MapStyleMode = resolvedTheme === "light" ? "streets" : "dark"
-  // Once the user manually picks a style from the menu, stop auto-following the app theme.
   const hasUserOverriddenStyleRef = useRef(false)
 
   const [currentMode, setCurrentMode] = useState<MapStyleMode>(themeMapStyle)
@@ -118,10 +117,8 @@ export default function LocationPickerMap({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
-  // Debounced search timer
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Helper for reverse geocoding to auto-fill address details
   const performReverseGeocode = useCallback(
     async (lat: number, lng: number) => {
       if (readOnly || !onChangeLocation) return
@@ -168,7 +165,6 @@ export default function LocationPickerMap({
     [onChangeLocation, readOnly]
   )
 
-  // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
@@ -189,10 +185,8 @@ export default function LocationPickerMap({
       attributionControl: false,
     })
 
-    // Add navigation controls (zoom in/out, pitch)
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right")
 
-    // Create custom HTML element for pin marker
     const markerEl = document.createElement("div")
     markerEl.className = `location-picker-marker relative group ${readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`
     markerEl.innerHTML = `
@@ -220,7 +214,6 @@ export default function LocationPickerMap({
 
     markerRef.current = marker
 
-    // Marker drag end handler (interactive mode)
     if (!readOnly && onChangeLocation) {
       marker.on("dragend", () => {
         const lngLat = marker.getLngLat()
@@ -230,7 +223,6 @@ export default function LocationPickerMap({
         performReverseGeocode(lat, lng)
       })
 
-      // Map click handler (move marker on click)
       map.on("click", (e: maplibregl.MapMouseEvent) => {
         const lat = parseFloat(e.lngLat.lat.toFixed(6))
         const lng = parseFloat(e.lngLat.lng.toFixed(6))
@@ -247,9 +239,8 @@ export default function LocationPickerMap({
       mapRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // run once on mount
+  }, [])
 
-  // Handle switching map style (Dark / Satellite / Streets)
   const handleStyleChange = (mode: MapStyleMode) => {
     if (!mapRef.current) return
     hasUserOverriddenStyleRef.current = true
@@ -261,7 +252,6 @@ export default function LocationPickerMap({
 
     map.setStyle(targetStyle)
 
-    // Ensure marker stays attached on style load
     map.once("style.load", () => {
       if (markerRef.current) {
         markerRef.current.addTo(map)
@@ -269,8 +259,6 @@ export default function LocationPickerMap({
     })
   }
 
-  // Follow the app's light/dark theme (streets = light basemap, dark = dark vector basemap)
-  // unless the user has explicitly picked a style from the menu (satellite included).
   useEffect(() => {
     if (!mapRef.current || hasUserOverriddenStyleRef.current) return
     if (themeMapStyle === currentMode) return
@@ -286,7 +274,6 @@ export default function LocationPickerMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [themeMapStyle])
 
-  // Sync marker position & map center when props change from external updates
   useEffect(() => {
     if (!mapRef.current || !markerRef.current) return
     if (
@@ -309,7 +296,6 @@ export default function LocationPickerMap({
     }
   }, [latitude, longitude])
 
-  // Handle Search Input Change
   const handleSearchChange = (val: string) => {
     setSearchQuery(val)
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
@@ -346,7 +332,6 @@ export default function LocationPickerMap({
     }, 400)
   }
 
-  // Handle Selecting a Search Suggestion
   const handleSelectSuggestion = (sug: SearchSuggestion) => {
     const lat = parseFloat(Number(sug.lat).toFixed(6))
     const lng = parseFloat(Number(sug.lon).toFixed(6))
@@ -384,7 +369,6 @@ export default function LocationPickerMap({
     setTimeout(() => setStatusMessage(null), 4000)
   }
 
-  // Recenter map on current location pin
   const handleRecenterPin = () => {
     if (mapRef.current && latitude !== 0 && longitude !== 0) {
       mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15, speed: 1.2 })
@@ -395,7 +379,6 @@ export default function LocationPickerMap({
     <div
       className={`relative w-full rounded-2xl overflow-hidden border border-border bg-background ${className}`}
     >
-      {/* Search Overlay Bar (If enabled) */}
       {showSearch && (
         <div className="absolute top-3 left-3 right-14 sm:right-auto sm:w-80 md:w-96 z-20 flex flex-col gap-1.5">
           <div className="relative flex items-center w-full bg-background/90 backdrop-blur-md border border-border/80 rounded-xl shadow-lg shadow-black/40 text-foreground">
@@ -429,7 +412,6 @@ export default function LocationPickerMap({
             )}
           </div>
 
-          {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="w-full bg-background/95 backdrop-blur-md border border-border/80 rounded-xl shadow-2xl overflow-hidden z-30 max-h-60 overflow-y-auto">
               {suggestions.map((item) => (
@@ -458,7 +440,6 @@ export default function LocationPickerMap({
         </div>
       )}
 
-      {/* Map View / Satellite Switcher Controls (Top Right) */}
       <div className="absolute top-3 right-3 z-30 flex flex-col items-end">
         <div className="relative">
           <button
@@ -471,7 +452,6 @@ export default function LocationPickerMap({
             <span className="capitalize hidden sm:inline">{currentMode} View</span>
           </button>
 
-          {/* Style Options Menu */}
           {showStyleMenu && (
             <div className="absolute right-0 mt-2 w-44 bg-background/95 backdrop-blur-xl border border-border/80 rounded-xl shadow-2xl overflow-hidden p-1.5 z-40 flex flex-col gap-1">
               <button
@@ -517,7 +497,6 @@ export default function LocationPickerMap({
         </div>
       </div>
 
-      {/* Recenter Pin Floating Button */}
       <button
         type="button"
         onClick={handleRecenterPin}
@@ -527,7 +506,6 @@ export default function LocationPickerMap({
         <Crosshair size={18} />
       </button>
 
-      {/* Status / Reverse Geocoding Banner */}
       {(isReverseGeocoding || statusMessage) && (
         <div className="absolute bottom-3 left-14 right-16 z-20 flex items-center gap-2 bg-background/90 backdrop-blur-md border border-primary/30 rounded-xl px-3 py-1.5 text-xs text-primary shadow-lg animate-fade-in truncate">
           {isReverseGeocoding ? (
@@ -544,10 +522,8 @@ export default function LocationPickerMap({
         </div>
       )}
 
-      {/* Map Container */}
       <div ref={mapContainerRef} className={`w-full ${height}`} />
 
-      {/* Map Instructions Badge */}
       {!readOnly && (
         <div className="absolute bottom-3 right-14 z-10 hidden md:flex items-center gap-1.5 bg-background/80 backdrop-blur-md border border-border rounded-lg px-2.5 py-1 text-[11px] font-medium text-muted-foreground pointer-events-none">
           <Navigation size={12} className="text-primary" />

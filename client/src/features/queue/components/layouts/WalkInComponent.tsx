@@ -26,31 +26,25 @@ export default function WalkInComponent() {
   } | null>(null)
   const [stationDetail, setStationDetail] = useState<StationDetail | null>(null)
 
-  // Catalog State
   const [allCategories, setAllCategories] = useState<VehicleCategory[]>([])
   const [allClasses, setAllClasses] = useState<VehicleClass[]>([])
   const [isLoadingCatelog, setIsLoadingCatelog] = useState<boolean>(true)
 
-  // Time Windows State (today's live availability for this station)
   const [timeWindows, setTimeWindows] = useState<TimeWindowSlot[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState<boolean>(false)
 
-  // Form State
   const [registrationNumber, setRegistrationNumber] = useState("")
   const [category, setCategory] = useState("")
   const [vehicleClass, setVehicleClass] = useState("")
   const [serviceType, setServiceType] = useState<"HALF" | "FULL">("FULL")
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
 
-  // Customer Details State (Simple 2 inputs)
   const [phone, setPhone] = useState("")
   const [fullName, setFullName] = useState("")
 
-  // Submit State
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdBooking, setCreatedBooking] = useState<BookingResponse | null>(null)
 
-  // 1. Fetch Categories & Classes on Mount
   useEffect(() => {
     let isMounted = true
     void Promise.resolve().then(async () => {
@@ -74,7 +68,6 @@ export default function WalkInComponent() {
     }
   }, [])
 
-  // 2. Fetch Station & Details & Today's Slots
   const fetchStation = useCallback(async () => {
     try {
       const stations = await managerApi.getManagedStations()
@@ -119,7 +112,6 @@ export default function WalkInComponent() {
     }
   }, [fetchStation])
 
-  // 3. Station Supported Classes & Categories Filtering
   const stationSupportedClassIds = useMemo(() => {
     if (!stationDetail?.pricing) return new Set<string>()
     return new Set(
@@ -133,7 +125,6 @@ export default function WalkInComponent() {
     )
   }, [stationDetail])
 
-  // Show only categories that have at least one active vehicle class supported at this station
   const availableCategories = useMemo(() => {
     if (stationSupportedClassIds.size === 0) return []
     return allCategories.filter((cat) =>
@@ -146,7 +137,6 @@ export default function WalkInComponent() {
     )
   }, [allCategories, allClasses, stationSupportedClassIds])
 
-  // Show only classes for the selected category that are supported at this station
   const availableClasses = useMemo(() => {
     if (!category || stationSupportedClassIds.size === 0) return []
     return allClasses.filter(
@@ -157,7 +147,6 @@ export default function WalkInComponent() {
     )
   }, [category, allClasses, stationSupportedClassIds])
 
-  // Auto-sync category selection
   useEffect(() => {
     if (availableCategories.length > 0) {
       if (!category || !availableCategories.some((c) => c.id === category)) {
@@ -168,7 +157,6 @@ export default function WalkInComponent() {
     }
   }, [availableCategories, category])
 
-  // Auto-sync vehicle class selection
   useEffect(() => {
     if (availableClasses.length > 0) {
       if (!vehicleClass || !availableClasses.some((c) => c.id === vehicleClass)) {
@@ -179,7 +167,6 @@ export default function WalkInComponent() {
     }
   }, [availableClasses, vehicleClass])
 
-  // 4. Extra Services Available for this Station
   const availableExtras = useMemo(() => {
     if (!stationDetail?.extraServices || stationDetail.extraServices.length === 0) {
       return []
@@ -197,20 +184,17 @@ export default function WalkInComponent() {
       })
   }, [stationDetail, vehicleClass])
 
-  // Clean up selected extras if vehicle class or available extras change
   useEffect(() => {
     const validExtraIds = new Set(availableExtras.map((e) => e.id))
     setSelectedExtras((prev) => prev.filter((id) => validExtraIds.has(id)))
   }, [availableExtras])
 
-  // Toggle Extra Services
   const toggleExtra = (id: string) => {
     setSelectedExtras((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     )
   }
 
-  // 5. Pricing Calculations
   const classPricing = stationDetail?.pricing?.find(
     (p) => p.vehicleClassId === vehicleClass && p.isActive !== false
   )
@@ -224,17 +208,14 @@ export default function WalkInComponent() {
   }, 0)
   const grandTotal = basePrice + extrasTotal
 
-  // 6. Slot Window Calculation (Fixed current time window, non-selectable)
   const currentSlot = useMemo(() => {
     if (timeWindows.length === 0) return null
     const nowMs = Date.now()
-    // Find window that contains the current time
     const activeWin = timeWindows.find(
       (w) => new Date(w.start).getTime() <= nowMs && new Date(w.end).getTime() > nowMs
     )
     if (activeWin) return activeWin
 
-    // If current time is not inside any window, find next upcoming open window, or fallback to first
     const upcoming = timeWindows.find(
       (w) => w.status === "OPEN" && new Date(w.start).getTime() > nowMs
     )
@@ -263,7 +244,6 @@ export default function WalkInComponent() {
     ? currentSlot.bookedCount + currentSlot.remainingCapacity
     : 0
 
-  // 7. Submit Walk-In Booking
   const handleCreateWalkIn = async () => {
     if (!stationInfo?.stationId) {
       toast.error("No active station assigned.")
@@ -316,9 +296,7 @@ export default function WalkInComponent() {
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column (70% width / 8 Cols) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Card 1: Vehicle Details */}
           <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center gap-3 border-b border-border pb-4">
               <Car className="h-6 w-6 text-primary" />
@@ -364,7 +342,6 @@ export default function WalkInComponent() {
               </div>
             </div>
 
-            {/* Vehicle Class Selector */}
             <div className="space-y-2">
               <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 CLASS
@@ -400,7 +377,6 @@ export default function WalkInComponent() {
             </div>
           </div>
 
-          {/* Card 2: Service Details */}
           <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center gap-3 border-b border-border pb-4">
               <Sparkles className="h-6 w-6 text-primary" />
@@ -412,7 +388,6 @@ export default function WalkInComponent() {
                 availableExtras.length > 0 ? "sm:grid-cols-2" : ""
               } gap-6`}
             >
-              {/* Wash Type */}
               <div className="space-y-3">
                 <span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                   WASH TYPE
@@ -450,7 +425,6 @@ export default function WalkInComponent() {
                 </div>
               </div>
 
-              {/* Add-On Extras - only rendered if available in this station */}
               {availableExtras.length > 0 && (
                 <div className="space-y-3">
                   <span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -494,7 +468,6 @@ export default function WalkInComponent() {
             </div>
           </div>
 
-          {/* Card 3: Customer Details (Optional) - Two Simple Inputs */}
           <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center gap-3 border-b border-border pb-4">
               <h2 className="text-xl font-bold text-foreground">Customer Details (Optional)</h2>
@@ -531,9 +504,7 @@ export default function WalkInComponent() {
           </div>
         </div>
 
-        {/* Right Column (30% width / 4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Card 1: Live Queue Availability & Fixed Current Time Window */}
           <div className="rounded-3xl bg-card border border-border overflow-hidden space-y-6 text-card-foreground shadow-md">
             <div className="p-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-500 flex items-center gap-2">
@@ -639,7 +610,6 @@ export default function WalkInComponent() {
             </div>
           </div>
 
-          {/* Card 2: Booking Summary & Final Payment */}
           <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
             <h3 className="text-lg font-bold text-foreground border-b border-border pb-3">
               Booking Summary
@@ -676,7 +646,6 @@ export default function WalkInComponent() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {createdBooking && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card text-card-foreground border border-border rounded-3xl w-full max-w-md p-6 space-y-6 text-center shadow-2xl animate-in zoom-in-95">

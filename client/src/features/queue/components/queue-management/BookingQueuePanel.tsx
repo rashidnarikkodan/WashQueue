@@ -47,7 +47,6 @@ export function BookingQueuePanel({
         </span>
       </div>
 
-      {/* Operational Stage Filter Pills (No Completed History) */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {filterTabs.map((t) => (
           <button
@@ -73,7 +72,6 @@ export function BookingQueuePanel({
         ))}
       </div>
 
-      {/* Single Unified Queue List Items */}
       <div className="space-y-3 flex-1 overflow-y-auto max-h-[560px] pr-1">
         {isLoading ? (
           <div className="py-12 text-center text-muted-foreground text-sm rounded-3xl bg-card border border-border">

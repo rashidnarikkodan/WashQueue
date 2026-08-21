@@ -1,6 +1,3 @@
-// Resizes/re-encodes an image file to a JPEG data URL, matching the dimension cap and
-// quality PhotoCaptureCamera uses for live captures, so uploaded and captured photos are
-// consistent in size before being sent as base64 strings in the inspection payload.
 const MAX_DIMENSION = 1280
 const JPEG_QUALITY = 0.7
 

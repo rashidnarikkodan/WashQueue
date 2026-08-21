@@ -52,19 +52,15 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase {
       throw new AppError("Incorrect current password", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Additional check using argon2 verify to ensure new password is not structurally identical to current hash
     const isSameAsCurrent = await this.hashService.verify(user.password, data.newPassword)
     if (isSameAsCurrent) {
       throw new AppError("New password cannot be the same as current password", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Hash the new password using Argon2
     const hashedPassword = await this.hashService.hash(data.newPassword)
 
-    // Update password in database
     await this.userRepository.resetPassword(userId, hashedPassword)
 
-    // Invalidate existing authentication refresh token sessions
     await this.refreshTokenRepository.clear(userId)
   }
 }

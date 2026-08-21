@@ -32,13 +32,11 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
       throw new NotFoundError("Station not found")
     }
 
-    // Check ownership using owner.id
     if (station.ownerId.toString() !== owner.id.toString()) {
       throw new ForbiddenError("Only the station owner can assign a manager to this station")
     }
 
     if (input.managerType === "SELF") {
-      // Check Rule 2: An owner can only directly manage ONE station queue
       const existingManagedStation = await this.stationRepository.findStationManagedByOwner(
         owner.id,
         userId,
@@ -51,10 +49,8 @@ export class AssignManagerUseCase implements IAssignManagerUseCase {
         )
       }
 
-      // Update owner manager status via domain repository
       await this.ownerRepository.updateIsManager(userId, true)
 
-      // Update station manager assignment via domain entity & repository
       station.assignManager(userId)
       const updatedStation = await this.stationRepository.update(station.id, { managerId: userId })
 

@@ -90,14 +90,11 @@ export default function NotificationDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Filter & Search Logic
   const filteredNotifications = notifications.filter((n) => {
-    // Tab Filter
     if (activeTab === "unread" && !n.unread) return false
     if (activeTab === "bookings" && n.category !== "bookings") return false
     if (activeTab === "system" && n.category !== "system") return false
 
-    // Search query
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase()
       const matchTitle = n.title.toLowerCase().includes(query)
@@ -149,7 +146,6 @@ export default function NotificationDropdown() {
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* Bell Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
@@ -164,10 +160,8 @@ export default function NotificationDropdown() {
         )}
       </button>
 
-      {/* Notifications Panel */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-[450px] md:w-[500px] max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-          {/* Header Section */}
           <div className="flex flex-col p-6 pb-4 gap-4 border-b border-border/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -197,7 +191,6 @@ export default function NotificationDropdown() {
               </div>
             </div>
 
-            {/* Search Input */}
             <div className="relative flex items-center bg-muted/50 border border-border/60 rounded-xl px-3 py-2 text-sm text-foreground focus-within:border-primary/50 transition-colors">
               <Search className="h-4.5 w-4.5 text-muted-foreground mr-2" />
               <input
@@ -217,7 +210,6 @@ export default function NotificationDropdown() {
               )}
             </div>
 
-            {/* Filter Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {(["all", "unread", "bookings", "system"] as const).map((tab) => (
                 <button
@@ -235,7 +227,6 @@ export default function NotificationDropdown() {
             </div>
           </div>
 
-          {/* Notification Cards List */}
           <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[450px]">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((n) => (
@@ -246,7 +237,6 @@ export default function NotificationDropdown() {
                   }`}
                 >
                   <div className="flex items-start gap-4">
-                    {/* Icon container */}
                     <div className="relative">
                       <div
                         className={`flex h-11 w-11 items-center justify-center rounded-xl ${getIconBackground(n)}`}
@@ -258,7 +248,6 @@ export default function NotificationDropdown() {
                       )}
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -275,7 +264,6 @@ export default function NotificationDropdown() {
                         </span>
                       </div>
 
-                      {/* Styled Description */}
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         {n.descriptionHighlight ? (
                           <>
@@ -290,14 +278,12 @@ export default function NotificationDropdown() {
                         )}
                       </p>
 
-                      {/* Promo Image */}
                       {n.image && (
                         <div className="mt-2.5 rounded-xl overflow-hidden h-28 w-full border border-border/60">
                           <img src={n.image} alt={n.title} className="w-full h-full object-cover" />
                         </div>
                       )}
 
-                      {/* Card Actions */}
                       {n.type === "completed" && (
                         <div className="flex items-center gap-3 pt-2">
                           <button className="px-3.5 py-1.5 text-xs font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity">
@@ -320,7 +306,6 @@ export default function NotificationDropdown() {
             )}
           </div>
 
-          {/* Footer Section */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/20">
             <button
               onClick={handleClearAll}

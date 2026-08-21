@@ -69,7 +69,6 @@ export class EnsureBookingHorizonService {
         try {
           await this.slotConfigRepository.save(slotConfig)
         } catch {
-          // ignore
         }
       }
     }

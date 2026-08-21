@@ -52,13 +52,11 @@ export default function BookingSummaryCard({
 
   return (
     <div className="w-full flex flex-col gap-6 p-6 sm:p-7 rounded-3xl border border-border/60 bg-card shadow-2xl text-left sticky top-24 text-card-foreground">
-      {/* Header Section */}
       <div className="space-y-1 pb-4 border-b border-border/60">
         <h3 className="text-xl font-bold text-foreground tracking-tight">Booking Summary</h3>
         <p className="text-xs text-muted-foreground">Review your wash booking details</p>
       </div>
 
-      {/* Station Details Header */}
       {station && (
         <div className="flex items-center justify-between pb-3 border-b border-border/40 text-xs">
           <div className="space-y-1">
@@ -79,9 +77,7 @@ export default function BookingSummaryCard({
         </div>
       )}
 
-      {/* Clean Overview Items */}
       <div className="space-y-3.5 text-xs sm:text-sm">
-        {/* Vehicle */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 text-muted-foreground">
             <Car size={16} className="text-primary shrink-0" />
@@ -98,7 +94,6 @@ export default function BookingSummaryCard({
           )}
         </div>
 
-        {/* Service Plan */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 text-muted-foreground">
             <ShieldCheck size={16} className="text-primary shrink-0" />
@@ -113,7 +108,6 @@ export default function BookingSummaryCard({
           )}
         </div>
 
-        {/* Add-ons */}
         {selectedExtras.map((extra) => (
           <div
             key={extra.id}
@@ -126,7 +120,6 @@ export default function BookingSummaryCard({
           </div>
         ))}
 
-        {/* Scheduled Slot */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 text-muted-foreground">
             <Calendar size={16} className="text-primary shrink-0" />
@@ -143,7 +136,6 @@ export default function BookingSummaryCard({
         </div>
       </div>
 
-      {/* Total Price Display */}
       <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 space-y-1">
         <div className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
           TOTAL PRICE
@@ -156,13 +148,11 @@ export default function BookingSummaryCard({
         </div>
       </div>
 
-      {/* Payment Method Section */}
       <div className="space-y-3">
         <div className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
           PAYMENT METHOD
         </div>
 
-        {/* Option 1: Pay Now (Selected / Active) */}
         <div
           onClick={() => setPaymentMethod("ONLINE")}
           className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-3 ${
@@ -188,7 +178,6 @@ export default function BookingSummaryCard({
           </div>
         </div>
 
-        {/* Option 2: Pay At Station (Unselected / Disabled) */}
         <div className="p-4 rounded-2xl border border-border/40 bg-muted/10 opacity-60 cursor-not-allowed space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -202,7 +191,6 @@ export default function BookingSummaryCard({
         </div>
       </div>
 
-      {/* Info Banner */}
       <div className="flex items-center gap-2.5 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs">
         <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
         <span className="text-[11px] leading-tight">
@@ -210,7 +198,6 @@ export default function BookingSummaryCard({
         </span>
       </div>
 
-      {/* Main CTA Button */}
       <button
         type="button"
         disabled={!canSubmit || isSubmitting}
@@ -231,7 +218,6 @@ export default function BookingSummaryCard({
         <ArrowRight size={18} />
       </button>
 
-      {/* Footer */}
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground text-center">
         <Lock size={12} className="opacity-60" />
         <span>Secure payments powered by encrypted checkout.</span>

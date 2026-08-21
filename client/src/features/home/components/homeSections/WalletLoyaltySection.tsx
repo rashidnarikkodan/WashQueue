@@ -7,16 +7,13 @@ export default function WalletLoyaltySection() {
   const { user } = useAuthStore()
   const data = MOCK_DASHBOARD_DATA
 
-  // Use either the real user wallet balance or mock
   const walletBalance =
     user?.walletBalance !== undefined ? `$${user.walletBalance.toFixed(2)}` : data.wallet.balance
 
   return (
     <FeatureLock>
-      {/* Wallet & Loyalty Rewards Support Grid */}
       <section className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-2xl animate-in fade-in duration-500 text-left">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
-          {/* Balance panel */}
           <div className="md:col-span-4 flex flex-col justify-between space-y-6">
             <div className="space-y-1">
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
@@ -37,12 +34,10 @@ export default function WalletLoyaltySection() {
             </div>
           </div>
 
-          {/* vertical dividing line */}
           <div className="hidden md:block md:col-span-1 py-2 justify-self-center">
             <div className="w-[1px] h-full bg-muted/60" />
           </div>
 
-          {/* Loyalty points details */}
           <div className="md:col-span-4 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
               <div className="flex justify-between items-end">
@@ -59,7 +54,6 @@ export default function WalletLoyaltySection() {
                 </span>
               </div>
 
-              {/* Custom Gradient Progress Bar */}
               <div className="h-3.5 bg-muted rounded-full overflow-hidden relative border border-slate-900">
                 <div
                   className="h-full bg-gradient-to-r from-emerald-400 to-primary"
@@ -73,12 +67,10 @@ export default function WalletLoyaltySection() {
             </p>
           </div>
 
-          {/* vertical dividing line */}
           <div className="hidden md:block md:col-span-1 py-2 justify-self-center">
             <div className="w-[1px] h-full bg-muted/60" />
           </div>
 
-          {/* Support section */}
           <div className="md:col-span-2 flex flex-col justify-between space-y-6">
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
               Quick Support

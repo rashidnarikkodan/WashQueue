@@ -38,7 +38,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     handleRefresh,
   } = useBookingList({ isManager, isOwner, isAdmin })
 
-  // Operational HUD Stats
   const stats: StatItem[] = useMemo(() => {
     const totalCount = pagination?.total ?? bookings.length
     const confirmedCount = bookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length
@@ -144,7 +143,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         ? "/manager/bookings"
         : "/bookings"
 
-  // Columns definition
   const columns = useMemo(
     () =>
       getManagementColumns({
@@ -179,7 +177,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
-      {/* Breadcrumb Bar */}
       <Breadcrumbs
         items={[
           {
@@ -190,7 +187,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         ]}
       />
 
-      {/* Top Header Row with Heading & Parallel Refresh Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
@@ -201,7 +197,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
           </p>
         </div>
 
-        {/* Manager/Admin/Owner Station Filter Badge */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           { isOwner && ownerStations.length > 0 && (
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
@@ -236,7 +231,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
             </div>
           )}
 
-          {/* Parallel Refresh Button */}
           <button
             type="button"
             onClick={handleRefresh}
@@ -252,7 +246,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         </div>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold flex items-center justify-between">
           <span>{error}</span>
@@ -262,10 +255,8 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         </div>
       )}
 
-      {/* Operational Stats HUD */}
       <StatsHUD stats={stats} />
 
-      {/* Management Toolbar (Search & Filters) */}
       <DataTableToolbar
         tabs={MANAGEMENT_BOOKING_TABS}
         activeTab={activeTab}
@@ -291,7 +282,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         }
       />
 
-      {/* Management DataTable */}
       <DataTable<Booking>
         data={filteredBookings}
         columns={columns}

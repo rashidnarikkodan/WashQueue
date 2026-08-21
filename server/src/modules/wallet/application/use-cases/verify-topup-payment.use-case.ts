@@ -31,7 +31,6 @@ export class VerifyTopUpPaymentUseCase implements IVerifyTopUpPaymentUseCase {
       )
     }
 
-    // Idempotency check: verify payment hasn't already been processed
     const existingTx = await this.transactionRepository.findByReferenceId(
       dto.razorpayPaymentId
     )

@@ -12,7 +12,6 @@ export class GetWalletBalanceUseCase implements IGetWalletBalanceUseCase {
     let wallet = await this.walletRepository.findByUserId(userId)
 
     if (!wallet) {
-      // Auto-initialize empty wallet for first-time user query
       const newWallet = new Wallet({
         userId,
         balance: Money.zero("INR"),

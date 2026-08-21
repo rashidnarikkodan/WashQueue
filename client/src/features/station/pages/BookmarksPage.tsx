@@ -35,7 +35,6 @@ export default function BookmarksPage() {
   }, [])
 
   const handleToggleBookmark = async (stationId: string): Promise<boolean> => {
-    // Optimistically remove from list
     const previousStations = stations
     setStations((prev) => prev.filter((s) => s.id !== stationId))
     try {
@@ -44,8 +43,6 @@ export default function BookmarksPage() {
     } catch (err) {
       console.error("Failed to update bookmark:", err)
       toast.error("Failed to update bookmark")
-      // Refetch if toggle failed; fall back to the pre-toggle list if the refetch also fails
-      // rather than leaving the station permanently (and silently) missing from the page.
       try {
         const data = (await usersApi.getBookmarks()) as Station[]
         setStations(data || [])
@@ -60,7 +57,6 @@ export default function BookmarksPage() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-16 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Header Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 sm:py-4">
           <div className="flex items-center gap-4">
             <div>
@@ -81,7 +77,6 @@ export default function BookmarksPage() {
           )}
         </div>
 
-        {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -89,7 +84,6 @@ export default function BookmarksPage() {
           </div>
         )}
 
-        {/* Error State */}
         {!isLoading && error && (
           <div className="flex flex-col items-center justify-center py-16 px-4 bg-red-500/10 border border-red-500/20 rounded-3xl text-center">
             <p className="text-red-400 font-semibold text-sm mb-4">{error}</p>
@@ -110,7 +104,6 @@ export default function BookmarksPage() {
           </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && !error && stations.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
             <Bookmark className="w-12 h-12 text-muted-foreground/30 mb-4" />
@@ -129,7 +122,6 @@ export default function BookmarksPage() {
           </div>
         )}
 
-        {/* Station Cards Grid */}
         {!isLoading && !error && stations.length > 0 && (
           <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -13,7 +13,6 @@ export default function BookingList({ role: propRole }: BookingListProps) {
   const location = useLocation()
   const { user, activeViewMode } = useAuthStore()
 
-  // Determine role based on URL route, activeViewMode toggle, propRole, and user role
   const currentRole: RoleType = useMemo(() => {
     if (location.pathname.startsWith("/admin")) return ROLE.ADMIN
 

@@ -65,7 +65,6 @@ const VehicleCard = ({
             : ""
       }`}
     >
-      {/* Disabled Overlay for Unavailable Vehicle Class */}
       {!isAvailable && (
         <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-center cursor-not-allowed">
           <span className="px-3.5 py-1.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-wider shadow-md">
@@ -76,7 +75,6 @@ const VehicleCard = ({
           </span>
         </div>
       )}
-      {/* Image and status badge */}
       <div className="h-48 sm:h-56 relative overflow-hidden bg-muted">
         <img
           src={displayImage}
@@ -118,10 +116,8 @@ const VehicleCard = ({
         </div>
       </div>
 
-      {/* Body details */}
       <div className="p-6 space-y-6 flex-grow flex flex-col justify-between">
         <div className="space-y-4">
-          {/* Brand & Plate */}
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-xl font-extrabold text-foreground">
@@ -145,7 +141,6 @@ const VehicleCard = ({
             </div>
           </div>
 
-          {/* Technical Specs Details Grid */}
           {showSpecs && (
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t border-border pt-4">
               <div>
@@ -176,7 +171,6 @@ const VehicleCard = ({
           )}
         </div>
 
-        {/* Quick Buttons */}
         {showActions && (
           <div className="flex gap-3 pt-6">
             <button

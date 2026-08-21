@@ -6,7 +6,7 @@ import { IGetStationFilterOptionsUseCase } from "../interfaces/station-usecases.
 import { StationFilterOptionsDTO } from "../dtos/station-filter-options.dto"
 
 const CACHE_KEY = "cache:stations:filter_options"
-const CACHE_TTL_SECONDS = 86400 // 24h
+const CACHE_TTL_SECONDS = 86400
 
 const STATIC_AMENITIES = [
   { slug: "wifi", name: "Free Wi-Fi", icon: "wifi" },
@@ -42,7 +42,6 @@ export class GetStationFilterOptionsUseCase implements IGetStationFilterOptionsU
         return JSON.parse(cached) as StationFilterOptionsDTO
       }
     } catch {
-      // Cache read failure falls through to computing fresh options below.
     }
 
     const [categories, classes, priceBounds] = await Promise.all([
@@ -74,7 +73,6 @@ export class GetStationFilterOptionsUseCase implements IGetStationFilterOptionsU
     try {
       await this.cacheService.set(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS)
     } catch {
-      // Cache write failure is non-fatal — the computed payload is still returned below.
     }
 
     return payload

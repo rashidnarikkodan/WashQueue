@@ -10,7 +10,6 @@ export default function SocialButton({ onClick, label }: SocialButtonProps) {
       onClick={onClick}
       className="flex items-center justify-center gap-3 w-full bg-card border border-border/80 text-foreground hover:bg-muted/40 font-semibold px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer shadow-sm text-sm"
     >
-      {/* Simple Google SVG Icon */}
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

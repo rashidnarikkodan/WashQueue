@@ -6,12 +6,10 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32 lg:pb-36 border-b border-border bg-background/20">
-      {/* Glow Effects */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
       <div className="absolute bottom-10 right-1/4 w-80 h-80 rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-        {/* Left Column: Core pitch */}
         <div className="lg:col-span-6 flex flex-col items-start space-y-6 text-left relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
@@ -48,10 +46,8 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Column: Dynamic HUD Visual */}
         <div className="lg:col-span-6 flex justify-center lg:justify-end relative">
           <div className="relative w-full max-w-[480px] h-[340px] rounded-[2.5rem] border border-border bg-gradient-to-br from-slate-900/60 to-slate-950/60 shadow-2xl overflow-hidden backdrop-blur-md">
-            {/* Tech line graphic wrapper */}
             <div className="absolute inset-0 opacity-15 pointer-events-none">
               <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <path
@@ -71,7 +67,6 @@ export default function HeroSection() {
               </svg>
             </div>
 
-            {/* Floating Card 1 (Queue Progress) */}
             <div className="absolute top-[12%] left-[8%] w-[250px] p-5 rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 pointer-events-auto">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
@@ -88,7 +83,6 @@ export default function HeroSection() {
                   </span>
                 </div>
 
-                {/* Custom progress slider */}
                 <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
                   <div className="h-full bg-primary rounded-full" style={{ width: "45%" }} />
                 </div>
@@ -100,7 +94,6 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Floating Card 2 (SUV Pro Polish) */}
             <div className="absolute bottom-[8%] right-[6%] w-[220px] p-4 rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 pointer-events-auto">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">

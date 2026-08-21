@@ -20,7 +20,6 @@ export function KpiCardsGrid({
 }: KpiCardsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      {/* Card 1: Today's Bookings */}
       <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           TODAY&apos;S BOOKINGS
@@ -33,7 +32,6 @@ export function KpiCardsGrid({
         </p>
       </div>
 
-      {/* Card 2: Active Queue */}
       <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           ACTIVE QUEUE DEPTH
@@ -52,7 +50,6 @@ export function KpiCardsGrid({
         </p>
       </div>
 
-      {/* Card 3: Station Bay Capacity */}
       <div className="rounded-3xl bg-card text-card-foreground p-6 border border-border space-y-3 flex flex-col justify-between shadow-sm">
         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           STATION BAYS
@@ -69,7 +66,6 @@ export function KpiCardsGrid({
         </p>
       </div>
 
-      {/* Card 4: New Check-in Action */}
       <div
         onClick={onCheckInClick}
         className="rounded-3xl bg-card text-card-foreground p-6 border border-primary/40 hover:border-primary transition-all cursor-pointer space-y-3 flex flex-col justify-between group shadow-md shadow-primary/5"

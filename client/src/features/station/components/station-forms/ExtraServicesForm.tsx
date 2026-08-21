@@ -276,7 +276,6 @@ export default function ExtraServicesForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 text-left">
-      {/* Step Header */}
       <div className="space-y-2 border-b border-border pb-6">
         <span className="text-[12px] font-bold tracking-[2.4px] text-primary uppercase">
           STEP 4 OF 5
@@ -289,14 +288,12 @@ export default function ExtraServicesForm({
         </p>
       </div>
 
-      {/* Inline Form Error Banner */}
       {formError && (
         <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-semibold flex items-center gap-2">
           <span>{formError}</span>
         </div>
       )}
 
-      {/* Section 1: Extra Services */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 text-xs font-bold tracking-wider text-primary uppercase">
@@ -324,7 +321,6 @@ export default function ExtraServicesForm({
                 key={service.id || `service-${originalIndex}`}
                 className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-sm hover:shadow-md transition-all"
               >
-                {/* Service Card Header */}
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <div className="flex items-center gap-3">
                     <span className="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-[11px] font-extrabold uppercase tracking-wider">
@@ -345,7 +341,6 @@ export default function ExtraServicesForm({
                   </button>
                 </div>
 
-                {/* Service Details Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormInput
                     label="SERVICE NAME *"
@@ -373,7 +368,6 @@ export default function ExtraServicesForm({
                   }
                 />
 
-                {/* Pricing per active category & class - Clean 2-column layout without nested sub-boxes */}
                 <div className="space-y-4 pt-4 border-t border-border">
                   <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase block">
                     PRICING PER ACTIVE VEHICLE CLASS (₹)
@@ -390,13 +384,11 @@ export default function ExtraServicesForm({
 
                       return (
                         <div key={category.id} className="space-y-2.5">
-                          {/* Flat category title header */}
                           <div className="flex items-center gap-2 text-xs font-bold text-primary tracking-wider uppercase pt-1">
                             {getCategoryIcon(category.name)}
                             <span>{category.name}</span>
                           </div>
 
-                          {/* Minimal 2-column grid */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {categoryClasses.map((cls) => {
                               const priceItem = (service.pricing || []).find(
@@ -455,7 +447,6 @@ export default function ExtraServicesForm({
         </button>
       </div>
 
-      {/* Section 2: Amenities */}
       <div className="space-y-5 p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-sm">
         <div className="space-y-1 border-b border-border pb-4">
           <h3 className="text-lg font-bold text-foreground flex items-center gap-2.5">
@@ -530,7 +521,6 @@ export default function ExtraServicesForm({
         </div>
       </div>
 
-      {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-border pt-6">
         <div className="flex items-center gap-3">
           <button

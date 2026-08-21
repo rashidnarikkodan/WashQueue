@@ -79,13 +79,11 @@ export class StationMapper implements IMapper<Station, IStation> {
   }
 
   static toPersistence(entity: Partial<Station>): Partial<IStation> {
-    // When called with a full Station instance from save(), use getProps()
     if (entity && typeof entity.getProps === "function") {
       const props = entity.getProps()
       return StationMapper.propsToRaw(props)
     }
 
-    // Partial updates — not used in this module (we always save full entities)
     return {}
   }
 

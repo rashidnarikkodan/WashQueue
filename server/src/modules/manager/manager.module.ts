@@ -26,7 +26,6 @@ import { createRequireManagerPermissionMiddleware } from "./presentation/middlew
 import { OwnerMongoRepository } from "@/modules/owner/infrastructure/repository/owner.mongo.repository"
 import { mailService } from "@/modules/auth/auth.module"
 
-// Repositories
 const userRepository = new UserRepository()
 const stationRepository = new StationMongoRepository()
 export const managerAssignmentRepository: IManagerAssignmentRepository =
@@ -34,7 +33,6 @@ export const managerAssignmentRepository: IManagerAssignmentRepository =
 const managerInvitationRepository = new MongoManagerInvitationRepository()
 const ownerRepository = new OwnerMongoRepository()
 
-// Use Cases
 const inviteManagerUseCase = new InviteManagerUseCase(
   stationRepository,
   userRepository,
@@ -102,7 +100,6 @@ const getManagedStationsUseCase = new GetManagedStationsUseCase(
 
 const verifyInvitationTokenUseCase = new VerifyInvitationTokenUseCase(managerInvitationRepository)
 
-// Controller
 const managerController = new ManagerController(
   inviteManagerUseCase,
   acceptInvitationUseCase,
@@ -119,12 +116,10 @@ const managerController = new ManagerController(
   verifyInvitationTokenUseCase
 )
 
-// Middleware factory
 export const requireManagerPermission = createRequireManagerPermissionMiddleware(
   managerAssignmentRepository,
   stationRepository
 )
 
-// Export Router
 const managerRouter: Router = createManagerRouter(managerController)
 export default managerRouter

@@ -46,7 +46,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
       throw new ForbiddenError("You do not have permission to manage this station")
     }
 
-    // Check Rule 1: A station can only have one active manager
     const stationAssignments = await this.managerAssignmentRepository.findByStationId(
       input.stationId
     )
@@ -58,7 +57,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     const existingUser = await this.userRepository.findByEmail(email)
 
     if (activeStationManager) {
-      // Allow re-assigning or updating permissions for the SAME active manager
       if (!existingUser || activeStationManager.managerUserId !== existingUser.id) {
         throw new ConflictError(
           "This station already has an active manager assigned. A station can only have one manager."
@@ -66,7 +64,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
       }
     }
 
-    // Check Rule 2: A manager can only be assigned to one station (active pending invitation check)
     const anyPendingInvitation = await this.managerInvitationRepository.findPendingByEmail(email)
     if (anyPendingInvitation && anyPendingInvitation.stationId !== input.stationId) {
       throw new ConflictError(
@@ -75,7 +72,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     }
 
     if (existingUser && existingUser.id) {
-      // Check Rule 2: Existing user already managing another station
       const userAssignments = await this.managerAssignmentRepository.findByUserId(existingUser.id)
       const otherActiveAssignment = userAssignments.find(
         (a) => a.stationId !== input.stationId && a.status === ManagerAssignmentStatus.ACTIVE
@@ -86,7 +82,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         )
       }
 
-      // Case A: User already exists
       const existingAssignment = await this.managerAssignmentRepository.findByUserAndStation(
         existingUser.id,
         input.stationId
@@ -96,7 +91,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         if (existingAssignment.status === ManagerAssignmentStatus.ACTIVE) {
           throw new ConflictError("This user is already an active manager for this station")
         } else {
-          // Reactivate assignment with updated permissions
           existingAssignment.reactivate()
           existingAssignment.updatePermissions(input.permissions)
           try {
@@ -117,7 +111,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         }
       }
 
-      // Update role to MANAGER if user is currently CUSTOMER
       if (existingUser.role === ROLE.CUSTOMER) {
         await this.userRepository.updateRole(existingUser.id, ROLE.MANAGER)
       }
@@ -149,14 +142,13 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
       }
     }
 
-    // Case B: User does not exist -> Create or Renew Invitation
     const existingPendingInvitation = await this.managerInvitationRepository.findByEmailAndStation(
       email,
       input.stationId
     )
 
     const token = crypto.randomBytes(32).toString("hex")
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days expiration
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
     let createdInvitation: ManagerInvitation
 
@@ -165,7 +157,6 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
         throw new ConflictError("A pending invitation already exists for this email and station")
       }
 
-      // Renew expired invitation
       const updated = new ManagerInvitation({
         id: existingPendingInvitation.id,
         email,

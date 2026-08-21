@@ -4,7 +4,6 @@ export default function FeaturesSection() {
   return (
     <section className="py-24 bg-card/15 border-b border-border">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Section Headers */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div className="flex flex-col items-start space-y-3">
             <span className="text-sm font-bold uppercase tracking-widest text-primary">
@@ -20,9 +19,7 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[280px]">
-          {/* Box 1: Real-Time Queue Tracking (Large) */}
           <div className="md:col-span-8 p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm overflow-hidden flex flex-col justify-between relative group hover:border-primary/45 transition-colors duration-300">
             <div className="absolute -bottom-8 -right-8 w-1/2 h-[60%] opacity-20 pointer-events-none group-hover:scale-105 transition-transform duration-500">
               <img
@@ -49,7 +46,6 @@ export default function FeaturesSection() {
             </div>
           </div>
 
-          {/* Box 2: Vehicle-Aware Pricing (Small) */}
           <div className="md:col-span-4 p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary/45 transition-colors duration-300">
             <div className="space-y-4">
               <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary">
@@ -68,7 +64,6 @@ export default function FeaturesSection() {
             </span>
           </div>
 
-          {/* Box 3: Smart Estimation (Small) */}
           <div className="md:col-span-4 p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary/45 transition-colors duration-300">
             <div className="space-y-4">
               <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary">
@@ -85,7 +80,6 @@ export default function FeaturesSection() {
             </span>
           </div>
 
-          {/* Box 4: Instant Booking (Medium) */}
           <div className="md:col-span-8 p-8 rounded-3xl border border-border bg-card/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary/45 transition-colors duration-300">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
               <div className="space-y-4">
@@ -99,7 +93,6 @@ export default function FeaturesSection() {
                 </p>
               </div>
 
-              {/* Visual slot availability badges */}
               <div className="flex flex-col gap-3 p-4 rounded-2xl bg-background/20 border border-border/60">
                 <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-primary/20 bg-background/40">
                   <span className="text-xs font-semibold text-foreground">Bay 1</span>

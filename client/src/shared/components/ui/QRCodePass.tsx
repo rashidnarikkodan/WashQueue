@@ -92,12 +92,10 @@ export default function QRCodePass({
 
   return (
     <div className="w-full space-y-3">
-      {/* Ticket Pass Main Container */}
       <div
         ref={passRef}
         className="w-full rounded-3xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden text-left select-none"
       >
-        {/* Header Bar */}
         <div className="bg-primary p-4 text-primary-foreground flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary-foreground/20 flex items-center justify-center text-primary-foreground font-bold">
@@ -116,9 +114,7 @@ export default function QRCodePass({
           </span>
         </div>
 
-        {/* Ticket Details Grid */}
         <div className="p-4 sm:p-5 space-y-3 bg-card">
-          {/* Station & Vehicle Row */}
           <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border">
             <div className="space-y-1">
               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
@@ -149,7 +145,6 @@ export default function QRCodePass({
             </div>
           </div>
 
-          {/* Service & Schedule Row */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block">
@@ -187,10 +182,8 @@ export default function QRCodePass({
           </div>
         </div>
 
-        {/* Sleek Dashed Perforated Line */}
         <div className="w-full border-t border-dashed border-border px-4 my-1" />
 
-        {/* QR Code Entry Stub */}
         <div className="p-4 sm:p-5 bg-muted/40 text-center space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="font-semibold uppercase tracking-wider text-[9px]">ENTRY QR PASS</span>
@@ -218,7 +211,6 @@ export default function QRCodePass({
         </div>
       </div>
 
-      {/* Action Controls */}
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <button

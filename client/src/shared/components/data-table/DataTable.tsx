@@ -10,7 +10,6 @@ function DataTable<T>({
   data,
   rowKey,
   toolbar,
-  // Toolbar props for backwards compatibility
   searchQuery,
   onSearchChange,
   searchPlaceholder,
@@ -20,16 +19,13 @@ function DataTable<T>({
   onTabChange,
   selectFilters,
   toggleFilters,
-  // State
   isLoading = false,
   loadingText = "Loading...",
   errorMsg,
   emptyMessage,
-  // Pagination
   pagination,
   onPageChange,
 }: DataTableProps<T>) {
-  // Search takes full width only when no side-by-side select/toggle filters exist
   const hasFilters =
     (selectFilters && selectFilters.length > 0) || (toggleFilters && toggleFilters.length > 0)
   const searchColSpan = hasFilters ? "md:col-span-2" : "md:col-span-6"

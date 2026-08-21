@@ -80,7 +80,6 @@ export function ActiveSessionPanel({
           </div>
         ) : (
           <div className="p-6 sm:p-8 space-y-6 flex-1 flex flex-col justify-between">
-            {/* Top Section: Vehicle Image (Left) + Customer & Vehicle Details (Right) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="aspect-[16/10] w-full rounded-2xl border border-border overflow-hidden bg-black/40 flex items-center justify-center relative shadow-sm">
                 {selectedVehicleImage ? (
@@ -178,7 +177,6 @@ export function ActiveSessionPanel({
               </div>
             </div>
 
-            {/* Middle Section: Service Details */}
             <div className="pt-3">
               <div className="p-4 rounded-2xl bg-muted/40 border-l-4 border-primary space-y-2">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest block">
@@ -204,7 +202,6 @@ export function ActiveSessionPanel({
               </div>
             </div>
 
-            {/* Bottom Section: Primary Action Buttons */}
             <div className="pt-4 border-t border-border grid grid-cols-2 gap-4">
               {selectedBooking.status === "STALLED" ? (
                 <button

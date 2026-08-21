@@ -10,7 +10,7 @@ interface ClassModalProps {
   onClose: () => void
   onSave: (data: CreateClassInput | UpdateClassInput) => Promise<void>
   categories: VehicleCategory[]
-  vehicleClass?: VehicleClass | null // If present, we are editing
+  vehicleClass?: VehicleClass | null
   defaultCategoryId?: string
 }
 
@@ -37,7 +37,6 @@ export default function ClassModal({
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Form states
   const [categoryId, setCategoryId] = useState("")
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
@@ -46,7 +45,6 @@ export default function ClassModal({
   const [isActive, setIsActive] = useState(true)
   const [isSlugManual, setIsSlugManual] = useState(false)
 
-  // Sync native dialog state with isOpen prop
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
@@ -64,7 +62,6 @@ export default function ClassModal({
     }
   }, [isOpen])
 
-  // Populate form states when vehicleClass / categories change or modal opens
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -90,7 +87,6 @@ export default function ClassModal({
     }
   }, [isOpen, vehicleClass, defaultCategoryId, categories])
 
-  // Clean up overflow styling on unmount
   useEffect(() => {
     return () => {
       document.body.style.overflow = ""
@@ -191,7 +187,6 @@ export default function ClassModal({
     }
   }
 
-  // Close when native ESC is pressed
   const handleCancelClick = (e: React.SyntheticEvent) => {
     e.preventDefault()
     handleCancel()
@@ -204,7 +199,6 @@ export default function ClassModal({
       className="m-auto w-full max-w-md rounded-2xl border border-slate-800/80 bg-card p-0 shadow-2xl backdrop:bg-slate-950/60 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col p-6 space-y-4">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <h3 className="text-lg font-bold text-slate-100 leading-snug">
             {vehicleClass ? "Edit Vehicle Class" : "Add New Vehicle Class"}
@@ -220,7 +214,6 @@ export default function ClassModal({
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {error && (
             <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
@@ -228,7 +221,6 @@ export default function ClassModal({
             </div>
           )}
 
-          {/* Category Dropdown Selection */}
           <FormSelect
             label="Category *"
             value={categoryId}
@@ -320,7 +312,6 @@ export default function ClassModal({
             )}
           </div>
 
-          {/* Footer Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
             <button
               type="button"

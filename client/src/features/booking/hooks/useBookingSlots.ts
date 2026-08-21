@@ -16,7 +16,6 @@ export function useBookingSlots({ stationId }: UseBookingSlotsParams) {
   const [serverWindows, setServerWindows] = useState<Window[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
-  // Fetch Booking Calendar from server
   useEffect(() => {
     if (!stationId) return
     stationApi
@@ -29,7 +28,6 @@ export function useBookingSlots({ stationId }: UseBookingSlotsParams) {
               (d) => d.date === prevDate && d.status === "AVAILABLE"
             )
 
-            // If currently selected date is not valid, pick the first available date
             if (!currentValid) {
               const firstAvailable = data.dates.find((d) => d.status === "AVAILABLE")
               return firstAvailable ? firstAvailable.date : prevDate
@@ -41,7 +39,6 @@ export function useBookingSlots({ stationId }: UseBookingSlotsParams) {
       .catch(() => {})
   }, [stationId])
 
-  // Fetch Available Time Windows for selectedDate
   useEffect(() => {
     if (!stationId || !selectedDate) return
 
@@ -71,13 +68,11 @@ export function useBookingSlots({ stationId }: UseBookingSlotsParams) {
     void fetchWindows()
   }, [stationId, selectedDate])
 
-  // Compute disabled dates array (dates that are NOT available)
   const disabledDates = useMemo(() => {
     if (!bookingCalendar?.dates) return []
     return bookingCalendar.dates.filter((d) => d.status !== "AVAILABLE").map((d) => d.date)
   }, [bookingCalendar])
 
-  // Transform server windows into TimeSlotOption items
   const timeSlotOptions: TimeSlotOption[] = useMemo(() => {
     if (serverWindows.length > 0) {
       const now = new Date()

@@ -3,8 +3,6 @@ import { BookingStatus, PaymentMethod } from "../../domain/entities/Booking"
 
 export const objectIdRegex = /^[0-9a-fA-F]{24}$/
 
-// --- Booking Schemas ---
-
 export const createBookingSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),
   vehicleId: z.string().regex(objectIdRegex, "Invalid vehicle ID"),
@@ -112,8 +110,6 @@ export const resolveStalledSchema = z.object({
   resolution: z.string().min(1, "Resolution is required"),
   targetStatus: z.enum(["CHECKED_IN", "IN_SERVICE", "CANCELLED"]).optional(),
 })
-
-// --- Payment & Reservation Schemas ---
 
 export const createPaymentOrderSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),

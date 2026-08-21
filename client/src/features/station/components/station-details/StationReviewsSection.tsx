@@ -22,7 +22,6 @@ export function StationReviewsSection({
 }: StationReviewsSectionProps) {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground tracking-tight">Reviews &amp; Ratings</h2>
         {reviewCount > 0 && (
@@ -32,10 +31,8 @@ export function StationReviewsSection({
         )}
       </div>
 
-      {/* Reviews Content Layout */}
       {reviewCount > 0 || reviews.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Average Rating Card (1 Column) */}
           <div className="p-8 rounded-2xl border border-border bg-card/90 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
             <span className="text-6xl font-black text-primary tracking-tighter">
               {rating ? rating.toFixed(1) : "0.0"}
@@ -50,7 +47,6 @@ export function StationReviewsSection({
             </span>
           </div>
 
-          {/* Customer Reviews List (3 Columns) */}
           <div className="md:col-span-3 space-y-4">
             {reviews.map((rev) => (
               <div

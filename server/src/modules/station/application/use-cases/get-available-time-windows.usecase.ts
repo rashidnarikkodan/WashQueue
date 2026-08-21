@@ -18,14 +18,12 @@ export class GetAvailableTimeWindowsUseCase {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // Lazily ensure windows exist for the full booking horizon before querying
     await this.ensureBookingHorizonService.ensureBookingHorizon(stationId)
 
     const instances = await this.timeWindowRepository.findByStationIdAndDate(stationId, date)
     const now = new Date()
 
     const windows: TimeWindowDTO[] = instances.map((w) => {
-      // Update status dynamically if time has passed
       w.updateStatusBasedOnTimeAndCapacity(now)
 
       return {

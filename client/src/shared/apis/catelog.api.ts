@@ -9,7 +9,6 @@ import type {
   UpdateClassInput,
 } from "@/features/vehicle-catelog/types"
 
-// Response wrappers matching backend's standard JSON format
 interface ApiResponse<T> {
   success: boolean
   message: string
@@ -17,7 +16,6 @@ interface ApiResponse<T> {
 }
 
 export const vehicleCatelogApi = {
-  // --- Category APIs ---
   getCategories: async (): Promise<VehicleCategory[]> => {
     try {
       const response = await api.get<ApiResponse<VehicleCategory[]>>("/vehicle-catalog/categories")
@@ -78,7 +76,6 @@ export const vehicleCatelogApi = {
     }
   },
 
-  // --- Class APIs ---
   getClasses: async (filters?: { categoryId?: string }): Promise<VehicleClass[]> => {
     try {
       const response = await api.get<ApiResponse<VehicleClass[]>>("/vehicle-catalog/classes", {

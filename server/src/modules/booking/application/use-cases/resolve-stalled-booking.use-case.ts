@@ -25,10 +25,6 @@ export class ResolveStalledBookingUseCase {
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
   ) {}
 
-  /**
-   * Explicit Recovery Business Operation:
-   * Recovers a STALLED booking to CHECKED_IN, IN_SERVICE, or CANCELLED.
-   */
   async execute(managerUserId: string, input: ResolveStalledBookingInput): Promise<BookingResponseDTO> {
     const { bookingId, resolution, targetStatus } = input
 
@@ -60,7 +56,6 @@ export class ResolveStalledBookingUseCase {
 
     booking.resolveStall(resolution.trim(), managerUserId, finalTargetStatus)
 
-    // Optimistic-concurrency guard (STALLED -> target status)
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, BookingStatus.STALLED)
 
     if (!domainBooking) {
@@ -69,7 +64,6 @@ export class ResolveStalledBookingUseCase {
 
     const now = domainBooking.stalledInfo?.resolvedAt || new Date()
 
-    // If resolved via cancellation, evaluate domain refund policy
     if (finalTargetStatus === BookingStatus.CANCELLED && this.evaluateAndProcessRefundUseCase) {
       await this.evaluateAndProcessRefundUseCase.execute({
         bookingId: domainBooking.id,
@@ -78,7 +72,6 @@ export class ResolveStalledBookingUseCase {
       })
     }
 
-    // Save Audit Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -90,10 +83,8 @@ export class ResolveStalledBookingUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // Sync Redis Operational Queue State
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // Dispatch Real-Time Socket Event
     await this.notificationService.notify("QUEUE_UPDATED", domainBooking, {
       resolvedStatus: finalTargetStatus,
       resolution,

@@ -20,11 +20,9 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
-  // Personal fields
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
 
-  // Business fields (only for owner/provider)
   const [businessName, setBusinessName] = useState("")
   const [businessEmail, setBusinessEmail] = useState("")
   const [whatsapp, setWhatsapp] = useState("")
@@ -134,17 +132,14 @@ export default function EditProfileModal({
       onClick={handleBackdropClick}
       className="fixed inset-0 m-auto bg-card border border-border shadow-xl rounded-[20px] p-0 w-full max-w-[800px] max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground"
     >
-      {/* Header / Close Button */}
       <div className="flex justify-between items-center px-8 py-6 border-b border-border bg-card">
         <div className="flex items-center gap-3">
-          {/* User Icon Badge */}
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <UserCheck className="w-6 h-6 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Edit Profile</h2>
         </div>
 
-        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -154,12 +149,9 @@ export default function EditProfileModal({
         </button>
       </div>
 
-      {/* Modal Body: Asymmetrical Bento Layout */}
       <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(90vh-170px)]">
         <div className="p-8 space-y-10 overflow-y-auto custom-scrollbar">
-          {/* Section 1: Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            {/* Left Col: Avatar Upload & Status Badge */}
             <div className="md:col-span-4 flex flex-col items-center sm:items-start gap-4">
               <div className="relative">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-border overflow-hidden bg-gradient-to-br from-muted to-card flex items-center justify-center shadow-xl">
@@ -175,7 +167,6 @@ export default function EditProfileModal({
                   )}
                 </div>
 
-                {/* Camera Overlay Button */}
                 <button
                   type="button"
                   className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center shadow-lg transition-transform hover:scale-105 cursor-pointer"
@@ -185,7 +176,6 @@ export default function EditProfileModal({
                 </button>
               </div>
 
-              {/* Verified Pill Badge */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-500">
@@ -194,10 +184,8 @@ export default function EditProfileModal({
               </div>
             </div>
 
-            {/* Right Col: Personal Input Fields */}
             <div className="md:col-span-8 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Full Name */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Full Name
@@ -213,7 +201,6 @@ export default function EditProfileModal({
                   {errors.name && <p className="text-xs text-red-400 font-medium">{errors.name}</p>}
                 </div>
 
-                {/* Email Address */}
                 <div className="space-y-2 relative">
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Email Address
@@ -232,7 +219,6 @@ export default function EditProfileModal({
                 </div>
               </div>
 
-              {/* Phone Number */}
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Phone Number
@@ -246,7 +232,6 @@ export default function EditProfileModal({
                 />
               </div>
 
-              {/* Business Fields (ONLY FOR OWNER/PROVIDER ROLES) */}
               {isOwnerOrProvider && (
                 <div className="pt-4 border-t border-border space-y-6">
                   <div className="flex items-center gap-2">
@@ -316,9 +301,7 @@ export default function EditProfileModal({
           </div>
         </div>
 
-        {/* Sticky Action Bar (Footer) */}
         <div className="flex justify-between items-center px-10 py-6 border-t border-border bg-card">
-          {/* Cancel */}
           <button
             type="button"
             onClick={onClose}
@@ -328,7 +311,6 @@ export default function EditProfileModal({
             Cancel
           </button>
 
-          {/* Action Buttons Group */}
           <div className="flex items-center gap-4">
             <button
               type="button"

@@ -33,12 +33,10 @@ export class RemoveManagerUseCase implements IRemoveManagerUseCase {
     const managerUserId = assignment.managerUserId
     await this.managerAssignmentRepository.delete(assignmentId)
 
-    // Unset managerId on Station entity via repository interface
     if (this.stationRepository && assignment.stationId) {
       await this.stationRepository.setManagerId(assignment.stationId, null)
     }
 
-    // Check if the user has any other active manager assignments
     const remainingAssignments = await this.managerAssignmentRepository.findByUserId(managerUserId)
     if (remainingAssignments.length === 0) {
       const user = await this.userRepository.findById(managerUserId)

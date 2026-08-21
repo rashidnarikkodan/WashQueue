@@ -27,9 +27,6 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     })
   }
 
-  /**
-   * General / Booking Order Creation
-   */
   async createOrder({
     amountInPaise,
     currency = "INR",
@@ -56,9 +53,6 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     }
   }
 
-  /**
-   * Wallet Top-Up Order Creation
-   */
   async createTopUpOrder(
     userId: string,
     amountInRupees: number,
@@ -94,9 +88,6 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     }
   }
 
-  /**
-   * Verifies standard Razorpay checkout signature
-   */
   verifyPaymentSignature(orderId: string, paymentId: string, signature: string): boolean {
     if (!orderId || !paymentId || !signature) {
       return false
@@ -115,16 +106,10 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     }
   }
 
-  /**
-   * Verifies Wallet Top-Up signature (alias for verifyPaymentSignature)
-   */
   verifyTopUpSignature(orderId: string, paymentId: string, signature: string): boolean {
     return this.verifyPaymentSignature(orderId, paymentId, signature)
   }
 
-  /**
-   * Verifies Razorpay Webhook signature
-   */
   verifyWebhookSignature(rawBody: string, signature: string): boolean {
     const webhookSecret = env.RAZORPAY_KEY_SECRET
     if (!webhookSecret || !signature) return false
@@ -143,5 +128,4 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
   }
 }
 
-// Global Singleton Instance
 export const sharedRazorpayService = new SharedRazorpayService()

@@ -46,7 +46,6 @@ export class SocketServerService {
       pingInterval: 10000,
     })
 
-    // Middleware: Socket Authentication & Room Setup
     this.io.use((socket: Socket, next) => {
       try {
         const token =
@@ -66,7 +65,6 @@ export class SocketServerService {
               }
             }
           } catch {
-            // Unauthenticated guest socket - still allowed for public queue view
           }
         }
         next()
@@ -85,7 +83,6 @@ export class SocketServerService {
         logger.info({ socketId: socket.id, userRoom }, "[SocketIO] Socket joined user room")
       }
 
-      // Room Subscriptions
       socket.on("join_station", (data: { stationId: string }) => {
         if (data?.stationId) {
           const stationRoom = `station:${data.stationId}`

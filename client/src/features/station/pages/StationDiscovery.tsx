@@ -32,17 +32,14 @@ const StationDiscovery = () => {
   const { vehicles, loadVehicles } = useVehicleStore()
   const user = useAuthStore()
 
-  // Load user vehicles if logged in
   useEffect(() => {
     if (user.isAuthenticated && vehicles.length === 0) {
       loadVehicles()
     }
   }, [user.isAuthenticated, vehicles.length, loadVehicles])
 
-  // View state
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
 
-  // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS)
@@ -53,7 +50,6 @@ const StationDiscovery = () => {
   const [locationError, setLocationError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
 
-  // Selected Vehicle details
   const selectedVehicleObj = useMemo(() => {
     if (!filters.selectedVehicleId) return null
     return vehicles.find((v) => v.id === filters.selectedVehicleId)
@@ -63,10 +59,8 @@ const StationDiscovery = () => {
     ? selectedVehicleObj.nickname || `${selectedVehicleObj.brand} ${selectedVehicleObj.model}`
     : undefined
 
-  // Debounce search query input
   const debouncedSearch = useDebounce(searchQuery, 400)
 
-  // Trigger HTML5 Geolocation to get user coordinates (only on manual user click)
   const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationError("Geolocation is not supported by your browser.")
@@ -97,7 +91,6 @@ const StationDiscovery = () => {
     )
   }, [])
 
-  // Fetch stations from backend on mount or filter/search/page changes
   const loadData = useCallback(async () => {
     await fetchStations({
       page,
@@ -118,14 +111,12 @@ const StationDiscovery = () => {
     loadData()
   }, [loadData])
 
-  // Clear active user location
   const handleClearLocation = () => {
     setUserLocation(null)
     setLocationError(null)
     setPage(1)
   }
 
-  // Count active non-default filters
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.sortBy !== DEFAULT_FILTERS.sortBy) count++
@@ -168,7 +159,6 @@ const StationDiscovery = () => {
 
   return (
     <div className="min-h-screen pt-4 sm:pt-8 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
-      {/* Top Header Section aligned to layout */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-border/60 pb-6 text-left">
         <div className="shrink-0 space-y-1">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground whitespace-nowrap">
@@ -181,9 +171,7 @@ const StationDiscovery = () => {
           </p>
         </div>
 
-        {/* Right Side Controls: Search Bar & View Mode Toggle */}
         <div className="flex flex-wrap items-center gap-3 justify-start lg:justify-end">
-          {/* Main Search Input */}
           <LocationAutocomplete
             value={searchQuery}
             onChange={setSearchQuery}
@@ -195,7 +183,6 @@ const StationDiscovery = () => {
             className="sm:w-[280px] lg:w-[320px]"
           />
 
-          {/* Location Trigger Button */}
           <button
             onClick={userLocation ? handleClearLocation : handleGetLocation}
             disabled={isLocating}
@@ -221,7 +208,6 @@ const StationDiscovery = () => {
             )}
           </button>
 
-          {/* Sort Dropdown Selector */}
           <div className="relative flex items-center shrink-0">
             <ArrowUpDown className="w-4 h-4 text-primary absolute left-3.5 pointer-events-none" />
             <select
@@ -244,7 +230,6 @@ const StationDiscovery = () => {
             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 pointer-events-none" />
           </div>
 
-          {/* Filter Modal Trigger Button */}
           <button
             onClick={() => setIsFilterModalOpen(true)}
             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${activeFilterCount > 0
@@ -261,7 +246,6 @@ const StationDiscovery = () => {
             )}
           </button>
 
-          {/* Map View Convert Toggle Button */}
           <button
             onClick={() => setViewMode((prev) => (prev === "grid" ? "map" : "grid"))}
             className="flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-full border border-border bg-card hover:bg-muted text-foreground text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md cursor-pointer select-none shrink-0"
@@ -281,7 +265,6 @@ const StationDiscovery = () => {
         </div>
       </div>
 
-      {/* Registered User Vehicles Quick Filter Pill Bar */}
       {user.isAuthenticated && vehicles.length > 0 && (
         <div className="flex items-center gap-3 overflow-x-auto pb-1 text-xs">
           <span className="text-muted-foreground font-semibold text-xs shrink-0 flex items-center gap-1.5">
@@ -329,7 +312,6 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      {/* Location Permission / Error Alert */}
       {locationError && (
         <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs sm:text-sm">
           <span>{locationError}</span>
@@ -342,7 +324,6 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      {/* Nearest Sort Location Prompt */}
       {(filters.sortBy === "nearest" || filters.sortBy === "DISTANCE") &&
         !userLocation &&
         !locationError && (
@@ -364,89 +345,6 @@ const StationDiscovery = () => {
           </div>
         )}
 
-      {/* {/* Active Filter Pills Tag Bar */}
-      {/* {(activeFilterCount > 0  || searchQuery) && (
-        <div className="flex items-center flex-wrap gap-2 text-xs pt-1">
-          <span className="text-muted-foreground font-medium mr-1">Active Filters:</span>
-
-          {searchQuery && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-semibold">
-              Search: "{searchQuery}"
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
-                onClick={() => setSearchQuery("")}
-              />
-            </span>
-          )}
-
-          {selectedVehicleName && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground border border-primary/20 font-bold">
-              Vehicle: {selectedVehicleName}
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
-                onClick={() =>
-                  setFilters((p) => ({
-                    ...p,
-                    selectedVehicleId: undefined,
-                    vehicleClassId: undefined,
-                  }))
-                }
-              />
-            </span>
-          )}
-
-          {userLocation && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
-              Location Filter Active
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:opacity-80"
-                onClick={handleClearLocation}
-              />
-            </span>
-          )}
-
-          {filters.sortBy !== DEFAULT_FILTERS.sortBy && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-foreground font-medium">
-              Sort: {getSortLabel()}
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() =>
-                  setFilters((p: FilterOptions) => ({ ...p, sortBy: DEFAULT_FILTERS.sortBy }))
-                }
-              />
-            </span>
-          )}
-
-          {filters.vehicleCategory !== "all" && !selectedVehicleName && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-foreground font-medium">
-              Category Filter Active
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p: FilterOptions) => ({ ...p, vehicleCategory: "all" }))}
-              />
-            </span>
-          )}
-
-          {filters.minRating > 0 && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border text-foreground font-medium">
-              {filters.minRating}+ Stars
-              <X
-                className="w-3.5 h-3.5 cursor-pointer hover:text-primary"
-                onClick={() => setFilters((p: FilterOptions) => ({ ...p, minRating: 0 }))}
-              />
-            </span>
-          )}
-
-          <button
-            onClick={handleResetFilters}
-            className="text-xs text-muted-foreground hover:text-primary underline ml-2 font-medium cursor-pointer"
-          >
-            Clear All
-          </button>
-        </div> 
-      )} */}
-
-      {/* Error Alert */}
       {error && (
         <div className="flex items-center justify-between p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           <span>{error}</span>
@@ -460,7 +358,6 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      {/* View Content Section (Grid vs Map View) */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -471,7 +368,6 @@ const StationDiscovery = () => {
           ))}
         </div>
       ) : stations.length === 0 ? (
-        /* Empty State */
         <div className="flex flex-col items-center justify-center py-24 px-4 text-center space-y-4">
           <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Search className="w-7 h-7" />
@@ -493,14 +389,12 @@ const StationDiscovery = () => {
           </button>
         </div>
       ) : viewMode === "map" ? (
-        /* Interactive Map View Mode */
         <StationDiscoveryMap
           stations={stations}
           userLocation={userLocation}
           onStationSelect={(id) => navigate(`/stations/${id}`)}
         />
       ) : (
-        /* Responsive Stations Grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {stations.map((station: Station) => (
             <StationCard
@@ -535,20 +429,17 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      {/* Pagination Controls */}
       {pagination && (
         <div className="pt-6 border-t border-border/60">
           <Pagination meta={pagination} onPageChange={setPage} />
         </div>
       )}
 
-      {/* Floating Capsule Filter & Sort Bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <div
           onClick={() => setIsFilterModalOpen(true)}
           className="flex items-center gap-4 px-6 py-3.5 rounded-full bg-card/95 hover:bg-card border border-border hover:border-primary/50 text-foreground shadow-2xl backdrop-blur-md cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 select-none group"
         >
-          {/* Left Side: Filter & Sort Trigger */}
           <div className="flex items-center gap-2.5">
             <SlidersHorizontal className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
             <span className="text-sm font-bold text-foreground">Filter & Sort</span>
@@ -559,17 +450,14 @@ const StationDiscovery = () => {
             )}
           </div>
 
-          {/* Divider line */}
           <div className="h-4 w-px bg-border" />
 
-          {/* Right Side: Active Sort Indicator */}
           <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
             {getSortLabel()}
           </span>
         </div>
       </div>
 
-      {/* Bottom Sheet Filter Modal */}
       <StationFilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}

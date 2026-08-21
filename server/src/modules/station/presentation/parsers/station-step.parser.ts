@@ -15,7 +15,6 @@ export interface IStationStepParser<T> {
   parse(req: AuthenticatedRequest): Promise<T> | T
 }
 
-/** Utility function to parse JSON string fields safely */
 export function safeJsonParse<T>(val: unknown, fallback: T): T {
   if (val === undefined || val === null || val === "") {
     return fallback
@@ -45,7 +44,6 @@ export class StationStep1Parser implements IStationStepParser<{ step: 1 } & Upda
 
     const images: StationImage[] = safeJsonParse(req.body.images, [])
 
-    // Process uploaded files if available
     const files = req.files
     let multerFiles: Express.Multer.File[] = []
     if (Array.isArray(files)) {

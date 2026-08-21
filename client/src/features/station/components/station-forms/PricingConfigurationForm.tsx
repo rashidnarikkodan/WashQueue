@@ -34,7 +34,6 @@ export default function PricingConfigurationForm({
     loadData()
   }, [loadData])
 
-  // Map initial values or set defaults when classes load
   useEffect(() => {
     if (classes.length > 0) {
       const state: Record<string, PricingItem> = {}
@@ -118,7 +117,6 @@ export default function PricingConfigurationForm({
       [catId]: isActive,
     }))
 
-    // Batch update active status for all classes under this category
     const catClasses = classes.filter((cls) => cls.categoryId === catId)
     setPricingState((prev) => {
       const next = { ...prev }
@@ -208,7 +206,6 @@ export default function PricingConfigurationForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 text-left">
-      {/* Header */}
       <div className="space-y-2 border-b border-border pb-6">
         <span className="text-[12px] font-bold tracking-[2.4px] text-primary uppercase">
           STEP 3 OF 5
@@ -221,14 +218,12 @@ export default function PricingConfigurationForm({
         </p>
       </div>
 
-      {/* Inline Form Error Banner */}
       {formError && (
         <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-semibold flex items-center gap-2">
           <span>{formError}</span>
         </div>
       )}
 
-      {/* Categories Accordion */}
       <div className="space-y-4">
         {categories.map((category) => {
           const categoryClasses = classes.filter((cls) => cls.categoryId === category.id)
@@ -245,7 +240,6 @@ export default function PricingConfigurationForm({
                   : "border-border/50 bg-muted/30 opacity-75"
               }`}
             >
-              {/* Category Header */}
               <div
                 className={`flex items-center justify-between px-6 py-4 transition-colors select-none ${
                   isActive ? "bg-muted/60" : "bg-muted/30"
@@ -276,7 +270,6 @@ export default function PricingConfigurationForm({
                 </div>
               </div>
 
-              {/* Category Content */}
               {isActive && (
                 <div className="p-4 sm:p-6 bg-card space-y-3 animate-in fade-in duration-200">
                   <div className="hidden sm:grid grid-cols-4 px-4 py-2 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
@@ -359,7 +352,6 @@ export default function PricingConfigurationForm({
         })}
       </div>
 
-      {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-border pt-6">
         <div className="flex items-center gap-3">
           <button

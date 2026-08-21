@@ -58,7 +58,6 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
             />
           </div>
 
-          {/* Preset Buttons */}
           <div className="grid grid-cols-4 gap-2">
             {presetAmounts.map((amt) => (
               <button

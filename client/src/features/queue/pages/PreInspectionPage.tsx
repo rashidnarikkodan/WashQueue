@@ -45,7 +45,6 @@ export default function ManagerPreInspectionPage() {
   const [uploadTargetSlot, setUploadTargetSlot] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Fetch Booking details
   const fetchBooking = useCallback(async () => {
     if (!id) return
     try {
@@ -80,12 +79,10 @@ export default function ManagerPreInspectionPage() {
     }
   }, [fetchBooking])
 
-  // Open the in-app live camera for a given slot
   const triggerCamera = (slotKey: string) => {
     setActiveCameraSlot(slotKey)
   }
 
-  // Handle a photo captured on the spot from PhotoCaptureCamera
   const handlePhotoCaptured = (slotKey: string, dataUrl: string) => {
     setCapturedPhotos((prev) => ({
       ...prev,
@@ -95,7 +92,6 @@ export default function ManagerPreInspectionPage() {
     toast.success(`✓ ${slotKey.toUpperCase()} photo captured!`)
   }
 
-  // Remove Photo from Slot
   const handleRemovePhoto = (slotKey: string) => {
     setCapturedPhotos((prev) => ({
       ...prev,
@@ -103,13 +99,11 @@ export default function ManagerPreInspectionPage() {
     }))
   }
 
-  // Open the OS file/gallery picker for a given slot
   const triggerUpload = (slotKey: string) => {
     setUploadTargetSlot(slotKey)
     fileInputRef.current?.click()
   }
 
-  // Handle a photo chosen manually from device storage/gallery
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ""
@@ -134,7 +128,6 @@ export default function ManagerPreInspectionPage() {
   const missingPhotoSlots = PHOTO_SLOTS.filter((slot) => !capturedPhotos[slot.key])
   const allPhotosCaptured = missingPhotoSlots.length === 0
 
-  // Complete Pre-Service Inspection & Perform Atomic Check-In
   const handleSaveInspection = async () => {
     if (!booking) return
     if (!allPhotosCaptured) {
@@ -171,7 +164,6 @@ export default function ManagerPreInspectionPage() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
       
-      {/* Page Header */}
       <div className="space-y-2 border-b border-border pb-6">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
           Customer Check-in & Pre-Inspection
@@ -181,10 +173,8 @@ export default function ManagerPreInspectionPage() {
         </p>
       </div>
 
-      {/* Main Inspection Layout */}
       <div className="space-y-8">
         
-        {/* Phase 1: Check-In Verification Card */}
         <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-6 text-card-foreground shadow-md">
           
           <div className="flex items-center justify-between border-b border-border pb-4">
@@ -197,7 +187,6 @@ export default function ManagerPreInspectionPage() {
             </span>
           </div>
 
-          {/* Success Banner */}
           <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-4">
             <div className="h-11 w-11 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center flex-shrink-0">
               <CheckCircle2 className="h-6 w-6" />
@@ -210,10 +199,8 @@ export default function ManagerPreInspectionPage() {
             </div>
           </div>
 
-          {/* Customer & Booking Details Split Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             
-            {/* Customer Details Glass Card */}
             <div className="p-6 rounded-2xl border border-border bg-muted/50 flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary font-black text-2xl flex items-center justify-center">
@@ -237,7 +224,6 @@ export default function ManagerPreInspectionPage() {
               </button>
             </div>
 
-            {/* Booking Details Grid */}
             <div className="grid grid-cols-3 gap-4 p-5 rounded-2xl bg-muted/40 border border-border text-xs">
               <div>
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
@@ -268,7 +254,6 @@ export default function ManagerPreInspectionPage() {
           </div>
         </div>
 
-        {/* Phase 2: Pre-Service Inspection Card (4 Spot Camera Boxes) */}
         <div className="rounded-3xl bg-card border border-border p-6 sm:p-8 space-y-8 text-card-foreground shadow-md">
           
           <div className="flex items-center justify-between border-b border-border pb-4">
@@ -284,7 +269,6 @@ export default function ManagerPreInspectionPage() {
             </span>
           </div>
 
-          {/* Photo Capture Grid (4 Interactive Spot Camera Boxes) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {PHOTO_SLOTS.map((slot) => {
               const photoUrl = capturedPhotos[slot.key]
@@ -299,7 +283,6 @@ export default function ManagerPreInspectionPage() {
                     )}
                   </div>
 
-                  {/* Spot Photo Box Container */}
                   <div
                     onClick={() => !photoUrl && triggerCamera(slot.key)}
                     className={`relative rounded-2xl overflow-hidden border-2 transition-all aspect-[4/3] flex flex-col items-center justify-center p-4 text-center ${
@@ -316,7 +299,6 @@ export default function ManagerPreInspectionPage() {
                           className="w-full h-full object-cover rounded-xl"
                         />
 
-                        {/* Photo Action Overlay */}
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-xs opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-2">
                           <button
                             type="button"
@@ -386,7 +368,6 @@ export default function ManagerPreInspectionPage() {
             })}
           </div>
 
-          {/* Internal Notes Textarea */}
           <div className="space-y-3">
             <span className="block text-xs font-extrabold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" /> INSPECTION FINDINGS & NOTES
@@ -401,7 +382,6 @@ export default function ManagerPreInspectionPage() {
             />
           </div>
 
-          {/* Action Button */}
           <div className="pt-2 flex flex-col items-end gap-2">
             {!allPhotosCaptured && (
               <p className="text-xs font-semibold text-amber-500">

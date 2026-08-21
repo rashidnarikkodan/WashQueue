@@ -54,7 +54,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
     }
   }, [stationId])
 
-  // Initial load and Socket.IO real-time event subscription (Strictly Event-Driven, No Polling)
   useEffect(() => {
     if (!stationId) return
 
@@ -67,7 +66,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
       fetchLiveQueue()
     }
 
-    // Subscribe to live operational queue events
     socket.on("QUEUE_UPDATED", handleRealtimeQueueUpdate)
     socket.on("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
     socket.on("SERVICE_STARTED", handleRealtimeQueueUpdate)
@@ -93,7 +91,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
   const totalLiveVehicles = activeServices.length + waitingQueue.length
   const totalBays = queueData?.totalBays || 1
 
-  // Compute elapsed wash time for active bay vehicles
   const getElapsedString = (serviceStartedAt?: string) => {
     if (!serviceStartedAt) return "In Service"
     const elapsedMinutes = Math.max(
@@ -105,7 +102,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
 
   return (
     <div className="space-y-6 text-left animate-in fade-in duration-300">
-      {/* Header & Live Stream Status */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3.5">
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Live Queue</h2>
@@ -117,7 +113,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           </div>
         </div>
 
-        {/* Live Operational Stats Pills */}
         <div className="flex items-center gap-3">
           <div className="px-3.5 py-1 rounded-xl bg-card border border-border text-xs font-semibold text-muted-foreground flex items-center gap-2">
             <span>Bays:</span>
@@ -137,7 +132,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
         </div>
       </div>
 
-      {/* Queue View Container */}
       {isLoading && !queueData ? (
         <div className="p-8 rounded-2xl border border-border bg-card/60 text-center space-y-3">
           <RefreshCw size={24} className="animate-spin text-primary mx-auto" />
@@ -149,7 +143,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           <p className="text-xs text-destructive">{error}</p>
         </div>
       ) : totalLiveVehicles === 0 ? (
-        /* Empty Live Queue State */
         <div className="p-8 rounded-2xl border border-border bg-card/80 text-center space-y-3 backdrop-blur-md shadow-lg">
           <div className="w-12 h-12 rounded-2xl bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto">
             <Sparkles size={22} />
@@ -167,16 +160,13 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           </div>
         </div>
       ) : (
-        /* Active Operational Queue List (Bays Washing & Waiting Vehicles) */
         <div className="rounded-2xl border border-border bg-card/90 divide-y divide-border/60 overflow-hidden shadow-xl backdrop-blur-md">
-          {/* A. Active Washing in Bays */}
           {activeServices.map((item) => (
             <div
               key={item.id}
               className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
             >
               <div className="flex items-center gap-4">
-                {/* Bay Token Badge */}
                 <div className="w-14 h-14 rounded-2xl border border-success/30 bg-success/10 flex flex-col items-center justify-center shrink-0">
                   <span className="text-[9px] font-black uppercase text-success">BAY</span>
                   <span className="text-lg font-black text-success font-mono">
@@ -184,7 +174,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                   </span>
                 </div>
 
-                {/* Vehicle & Package Details */}
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-bold text-foreground flex items-center gap-1.5">
@@ -201,7 +190,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                 </div>
               </div>
 
-              {/* Live Washing Status Pill */}
               <div className="flex items-center sm:self-center self-start">
                 <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-success/15 text-success border-success/30 flex items-center gap-2 shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-success animate-ping" />
@@ -211,14 +199,12 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
             </div>
           ))}
 
-          {/* B. Waiting in Line Queue */}
           {waitingQueue.map((item, idx) => (
             <div
               key={item.id}
               className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
             >
               <div className="flex items-center gap-4">
-                {/* Queue Position Badge */}
                 <div className="w-14 h-14 rounded-2xl border border-border bg-background flex flex-col items-center justify-center shrink-0">
                   <span className="text-[9px] font-black uppercase text-muted-foreground">POS</span>
                   <span className="text-base font-black text-foreground font-mono">
@@ -226,7 +212,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                   </span>
                 </div>
 
-                {/* Details */}
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-bold text-foreground flex items-center gap-1.5">
@@ -248,7 +233,6 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
                 </div>
               </div>
 
-              {/* Waiting Status Tag */}
               <div className="flex items-center sm:self-center self-start">
                 <span className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border bg-warning/15 text-warning border-warning/30 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />

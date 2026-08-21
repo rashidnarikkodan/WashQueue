@@ -66,7 +66,6 @@ export default function AuthRequiredModal({
       className="m-auto w-full max-w-md rounded-3xl border border-border/80 bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
       <div className="flex flex-col p-6 sm:p-7 space-y-6 text-left relative">
-        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -76,7 +75,6 @@ export default function AuthRequiredModal({
           <X size={18} />
         </button>
 
-        {/* Header Badge & Titles */}
         <div className="flex flex-col items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm shrink-0">
             <ShieldAlert size={24} className="stroke-[2.2]" />
@@ -93,7 +91,6 @@ export default function AuthRequiredModal({
           </div>
         </div>
 
-        {/* Actions Grid */}
         <div className="flex flex-col gap-2.5 pt-2">
           <button
             type="button"

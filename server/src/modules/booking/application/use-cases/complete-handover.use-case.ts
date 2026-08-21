@@ -31,7 +31,6 @@ export class CompleteHandoverUseCase {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 1. Manager Authorization Check
     const station = await this.stationRepository.findById(booking.stationId)
     if (!station) {
       throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
@@ -57,7 +56,6 @@ export class CompleteHandoverUseCase {
       )
     }
 
-    // 2. Status Eligibility Check
     const allowedStatuses = [BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER]
     if (!allowedStatuses.includes(booking.status)) {
       throw new AppError(
@@ -66,7 +64,6 @@ export class CompleteHandoverUseCase {
       )
     }
 
-    // 3. Post-Service Inspection Completion Verification
     if (!booking.postServiceInspection || !booking.postServiceInspection.capturedAt) {
       throw new AppError(
         "Post-service vehicle quality inspection must be completed prior to customer handover",
@@ -74,7 +71,6 @@ export class CompleteHandoverUseCase {
       )
     }
 
-    // 4. Payment Settlement Verification
     const isPaymentSettled =
       booking.paymentStatus === PaymentStatus.PAID ||
       booking.paymentMethod === PaymentMethod.PAY_AT_STATION
@@ -90,7 +86,6 @@ export class CompleteHandoverUseCase {
 
     booking.complete()
 
-    // Optimistic-concurrency guard to prevent duplicate handover submissions
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, [
       BookingStatus.SERVICE_COMPLETED,
       BookingStatus.AWAITING_HANDOVER,
@@ -103,7 +98,6 @@ export class CompleteHandoverUseCase {
       )
     }
 
-    // 6. Save Status Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -115,10 +109,8 @@ export class CompleteHandoverUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 7. Remove from Redis Operational Queue
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // 8. Dispatch Notification Event
     await this.notificationService.notify("WASH_COMPLETED", domainBooking)
 
     return BookingDTOMapper.toDTO(domainBooking)

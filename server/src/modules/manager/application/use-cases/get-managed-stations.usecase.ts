@@ -30,7 +30,6 @@ export class GetManagedStationsUseCase implements IGetManagedStationsUseCase {
       }
     }
 
-    // Direct fallback: check stationRepository by managerId
     if (result.length === 0) {
       const managedStations = await this.stationRepository.findByManagerId(managerUserId)
       for (const station of managedStations) {

@@ -5,18 +5,15 @@ export default function TechCapabilitiesSection() {
     <section className="py-24 border-b border-border bg-background/10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="p-8 md:p-12 rounded-[2.5rem] border border-border bg-gradient-to-br from-slate-900 to-slate-950 shadow-2xl relative overflow-hidden">
-          {/* Subtle glow */}
           <div className="absolute bottom-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Tech details */}
             <div className="flex flex-col items-start text-left space-y-8">
               <h2 className="text-3xl font-extrabold tracking-tight text-foreground leading-tight">
                 The Tech Stack Behind the Stream.
               </h2>
 
               <div className="space-y-6">
-                {/* Tech Item 1 */}
                 <div className="flex gap-4">
                   <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0 h-fit">
                     <Cpu className="h-6 w-6" />
@@ -29,7 +26,6 @@ export default function TechCapabilitiesSection() {
                     </p>
                   </div>
                 </div>
-                {/* Tech Item 2 */}
                 <div className="flex gap-4">
                   <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0 h-fit">
                     <Layers className="h-6 w-6" />
@@ -47,7 +43,6 @@ export default function TechCapabilitiesSection() {
               </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4 sm:gap-6">
               <div className="p-6 rounded-2xl border border-border bg-background/40 hover:-translate-y-1 transition-transform duration-300">
                 <span className="text-3xl sm:text-4xl font-extrabold text-primary block">42ms</span>

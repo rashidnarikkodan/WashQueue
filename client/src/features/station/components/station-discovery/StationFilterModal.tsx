@@ -57,12 +57,10 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     }
   }
 
-  // Dynamic Metadata from Backend Server
   const [categories, setCategories] = useState<VehicleCategory[]>([])
   const [filterMetadata, setFilterMetadata] = useState<FilterMetadata | null>(null)
   const [loadingMetadata, setLoadingMetadata] = useState(false)
 
-  // Fetch backend categories and filter options metadata
   useEffect(() => {
     const fetchMetadata = async () => {
       setLoadingMetadata(true)
@@ -79,7 +77,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
           setFilterMetadata(metaData)
         }
       } catch {
-        // Quiet fallback
       } finally {
         setLoadingMetadata(false)
       }
@@ -93,7 +90,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
     }
   }, [isOpen, isAuthenticated, vehicles.length, loadVehicles])
 
-  // Handle smooth open transition state
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -105,7 +101,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
 
   if (!isRendered) return null
 
-  // Calculate active filter count
   const getActiveFilterCount = (): number => {
     let count = 0
     if (draftFilters.sortBy !== DEFAULT_FILTERS.sortBy) count++
@@ -138,7 +133,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Dimmed Backdrop */}
       <div
         onClick={onClose}
         className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
@@ -146,18 +140,15 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
         }`}
       />
 
-      {/* Full Width Bottom Sheet Container */}
       <div
         className={`relative w-full max-w-full max-h-[92vh] flex flex-col rounded-t-[36px] sm:rounded-t-[44px] bg-card border-t border-border shadow-2xl z-10 overflow-hidden transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
       >
-        {/* Drag Handle Bar */}
         <div className="flex justify-center items-center pt-3.5 pb-1 shrink-0">
           <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
         </div>
 
-        {/* Modal Header */}
         <div className="flex items-start justify-between px-6 sm:px-12 py-4 border-b border-border/60 shrink-0">
           <div>
             <div className="flex items-center gap-2.5">
@@ -180,12 +171,9 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Content Body - Two Columns */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-12 py-8 text-foreground">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-            {/* PART 1: VEHICLE & WASH TYPE PREFERENCES */}
             <div className="space-y-8 pr-0 lg:pr-6 border-b lg:border-b-0 lg:border-r border-border/60 pb-8 lg:pb-0">
-              {/* REGISTERED USER VEHICLES */}
               {isAuthenticated && vehicles.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -199,7 +187,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                   </div>
 
                   <div className="flex flex-wrap gap-2.5">
-                    {/* Clear vehicle selection option */}
                     <button
                       onClick={() =>
                         setDraftFilters((prev) => ({
@@ -246,7 +233,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               )}
 
-              {/* SORT BY */}
               <div className="space-y-3">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                   SORT BY
@@ -271,7 +257,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               </div>
 
-              {/* VEHICLE CATEGORY */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
@@ -332,7 +317,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               </div>
 
-              {/* VEHICLE CLASSES (Sub-classes matching selected category) */}
               {filterMetadata?.vehicleClasses && filterMetadata.vehicleClasses.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
@@ -383,9 +367,7 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
               )}
             </div>
 
-            {/* PART 2: DISTANCE, RATING & AMENITIES */}
             <div className="space-y-8">
-              {/* DISTANCE FILTER */}
               <div className="space-y-4">
                 <div className="flex justify-between items-baseline">
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
@@ -430,7 +412,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
                 </div>
               </div>
 
-              {/* MINIMUM RATING */}
               <div className="space-y-3">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
                   MINIMUM RATING
@@ -473,7 +454,6 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
           </div>
         </div>
 
-        {/* Sticky Bottom Footer Bar */}
         <div className="flex items-center justify-between px-6 sm:px-12 py-4 border-t border-border bg-card shrink-0 gap-4">
           <button
             onClick={handleReset}

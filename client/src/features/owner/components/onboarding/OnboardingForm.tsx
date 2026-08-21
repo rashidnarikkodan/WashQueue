@@ -20,7 +20,6 @@ interface OnboardingFormProps {
   isLoading?: boolean
 }
 
-// Helper to build FormData from text/boolean fields + optional file
 function buildFormData(
   fields: Record<string, string | number | boolean | null | undefined>,
   files?: Record<string, File | null>
@@ -53,16 +52,13 @@ export default function OnboardingForm({
 }: OnboardingFormProps) {
   const { user } = useAuthStore()
 
-  // Internal step state controlled by the form (mirrors store.onboardingStep for setStep calls)
   const [localStep, setLocalStep] = useState(step)
 
-  // Keep localStep in sync with prop changes (e.g., after fetchOnboardingStatus resolves)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalStep(step)
   }, [step])
 
-  // Form State — pre-fill from server draft
   const [formData, setFormData] = useState({
     fullName: savedDetails.fullName ?? "",
     phone: savedDetails.phone ?? "",
@@ -76,7 +72,6 @@ export default function OnboardingForm({
     ifscCode: savedDetails.ifscCode ?? "",
   })
 
-  // Keep formData in sync with savedDetails when it is loaded/updated
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData({
@@ -93,7 +88,6 @@ export default function OnboardingForm({
     })
   }, [savedDetails])
 
-  // Files State
   const [idProofFile, setIdProofFile] = useState<File | null>(null)
   const [businessLicenseFile, setBusinessLicenseFile] = useState<File | null>(null)
   const [gstCertificateFile, setGstCertificateFile] = useState<File | null>(null)
@@ -135,7 +129,6 @@ export default function OnboardingForm({
     }
   }
 
-  // Step 1 → 2: save owner & KYC details
   const handleContinueToStep2 = () => {
     const validationResult = step1Schema.safeParse({
       fullName: formData.fullName,
@@ -185,7 +178,6 @@ export default function OnboardingForm({
     onSaveStep(1, fd, 2, setLocalStep)
   }
 
-  // Step 2 → 3: save payout/bank details
   const handleContinueToStep3 = () => {
     const validationResult = step2Schema.safeParse({
       accountHolderName: formData.accountHolderName,
@@ -232,7 +224,6 @@ export default function OnboardingForm({
     onSubmit()
   }
 
-  // Display the localStep (keeps UI in sync with save-step transitions)
   const activeStep = localStep
 
   return (

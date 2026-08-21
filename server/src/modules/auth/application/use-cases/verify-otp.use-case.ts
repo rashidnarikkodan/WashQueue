@@ -25,7 +25,6 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       throw new AppError(ERROR_MESSAGES.INVALID_OR_EXPIRED_OTP, HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Delete OTP after successful verification
     await this.otpRepository.delete(data.email)
 
     const user = await this.userRepository.findByEmail(data.email)
@@ -37,16 +36,13 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
-    // Generate JWT tokens using the payload mapper
     const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Secure the refresh token by hashing it
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
-    // Verify user and save session
     await this.userRepository.update(user.id!, { isVerified: true })
     await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
 

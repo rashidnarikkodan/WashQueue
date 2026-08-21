@@ -31,13 +31,11 @@ export class StartServiceUseCase {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 1. Station Existence & Bay Capacity
     const station = await this.stationRepository.findById(booking.stationId)
     if (!station) {
       throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 2. Manager Authorization Check
     const isOwner = station.getProps().ownerId === managerUserId
     let isAuthorizedManager = isOwner
 
@@ -58,7 +56,6 @@ export class StartServiceUseCase {
       )
     }
 
-    // 3. Status Eligibility Check (Must be strictly CHECKED_IN)
     if (booking.status === BookingStatus.IN_SERVICE) {
       throw new AppError("Service is already active for this booking", HTTP_STATUS.BAD_REQUEST)
     }
@@ -70,7 +67,6 @@ export class StartServiceUseCase {
       )
     }
 
-    // 4. Pre-Service Inspection Verification
     if (!booking.preServiceInspection || !booking.preServiceInspection.capturedAt) {
       throw new AppError(
         "Pre-service vehicle inspection must be completed before starting service",
@@ -78,7 +74,6 @@ export class StartServiceUseCase {
       )
     }
 
-    // 5. Bay Capacity Validation
     const totalBays = station.getProps().slotConfig?.bays || 1
     const activeCount = await this.bookingRepository.countByStationAndStatus(
       booking.stationId,
@@ -96,7 +91,6 @@ export class StartServiceUseCase {
 
     booking.startService()
 
-    // Optimistic-concurrency guard (CHECKED_IN -> IN_SERVICE) to prevent double-start race conditions
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(
       booking,
       BookingStatus.CHECKED_IN
@@ -111,7 +105,6 @@ export class StartServiceUseCase {
 
     const now = domainBooking.serviceStartedAt || new Date()
 
-    // 7. Write Audit Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -123,10 +116,8 @@ export class StartServiceUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 8. Synchronize Redis Operational Queue
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // 9. Dispatch Real-time Notification
     await this.notificationService.notify("WASH_STARTED", domainBooking)
 
     return BookingDTOMapper.toDTO(domainBooking)

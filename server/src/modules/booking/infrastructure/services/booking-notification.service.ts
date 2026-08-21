@@ -10,10 +10,6 @@ import {
 export type { NotificationEventType }
 
 export class BookingNotificationService implements IBookingNotificationService {
-  /**
-   * Dispatches notifications to customer & station manager based on domain events.
-   * Emits room-scoped Socket.IO events to station managers and customers.
-   */
   async notify(
     eventType: NotificationEventType,
     booking: Booking,
@@ -45,17 +41,14 @@ export class BookingNotificationService implements IBookingNotificationService {
         timestamp: new Date().toISOString(),
       }
 
-      // 1. Emit station-scoped operational events to station manager room
       if (booking.stationId) {
         socketService.emitToStation(booking.stationId, eventType, payload)
-        // Also trigger general QUEUE_UPDATED refresh on station
         socketService.emitToStation(booking.stationId, "QUEUE_UPDATED", {
           stationId: booking.stationId,
           lastUpdated: new Date().toISOString(),
         })
       }
 
-      // 2. Emit customer-scoped events to customer personal room
       if (booking.userId) {
         socketService.emitToUser(booking.userId, eventType, payload)
         socketService.emitToUser(booking.userId, "QUEUE_POSITION_CHANGED", payload)
@@ -69,7 +62,6 @@ export class BookingNotificationService implements IBookingNotificationService {
         }
       }
 
-      // 3. Emit booking-scoped event
       if (booking.id) {
         socketService.emitToBooking(booking.id, eventType, payload)
       }

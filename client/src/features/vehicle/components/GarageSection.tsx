@@ -77,7 +77,6 @@ export default function GarageSection() {
           )
         })}
 
-        {/* Add Card placeholder matching original layout */}
         <button
           onClick={handleAddVehicleClick}
           className="border-2 border-dashed border-border hover:border-primary/40 rounded-3xl p-6 flex flex-col justify-center items-center text-center gap-4 transition-all duration-300 min-h-120 w-full cursor-pointer bg-transparent"

@@ -35,7 +35,6 @@ export default function ServiceSelectionStep({
 }: ServiceSelectionStepProps) {
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-      {/* Step Header */}
       <div className="flex items-center gap-4 w-full">
         <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shrink-0 shadow-md shadow-primary/20">
           2
@@ -45,7 +44,6 @@ export default function ServiceSelectionStep({
         </h2>
       </div>
 
-      {/* Main Wash Packages Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {plans.map((p) => {
           const isSelected = selectedPlanId === p.id
@@ -59,7 +57,6 @@ export default function ServiceSelectionStep({
                   : "border-border bg-card hover:border-primary/50 shadow-sm"
               }`}
             >
-              {/* Header: Title & Price */}
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div>
                   <h3 className="font-bold text-lg text-foreground">{p.name}</h3>
@@ -74,10 +71,8 @@ export default function ServiceSelectionStep({
                 </div>
               </div>
 
-              {/* Description */}
               <p className="text-xs text-muted-foreground leading-relaxed mb-6">{p.description}</p>
 
-              {/* Select Plan Button */}
               <div
                 className={`mt-auto flex items-center justify-between px-4 py-2.5 rounded-xl font-bold text-xs transition-all ${
                   isSelected
@@ -93,7 +88,6 @@ export default function ServiceSelectionStep({
         })}
       </div>
 
-      {/* Extra Add-On Services Section */}
       {extraServices.length > 0 && (
         <div className="mt-4 space-y-3 text-left">
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">

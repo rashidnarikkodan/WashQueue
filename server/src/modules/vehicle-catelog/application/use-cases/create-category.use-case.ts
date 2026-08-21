@@ -12,13 +12,11 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
   async execute(input: CreateCategoryInput): Promise<CategoryResponseDto> {
     const slug = input.slug || slugify(input.name)
 
-    // Check if category name already exists
     const existingName = await this.categoryRepository.findByName(input.name)
     if (existingName) {
       throw new ConflictError(`Vehicle category with name "${input.name}" already exists`)
     }
 
-    // Check if category slug already exists
     const existingSlug = await this.categoryRepository.findBySlug(slug)
     if (existingSlug) {
       throw new ConflictError(`Vehicle category with slug "${slug}" already exists`)

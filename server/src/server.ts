@@ -12,21 +12,16 @@ import { SocketServerService } from "./infrastructure/websocket/socket-server.se
 
 async function startServer() {
   try {
-    // Establish database connection
     await connectDB()
 
-    // Test Redis connection
     await redis.ping()
 
-    // Start background cleanup jobs
     startReservationCleanupJob(60000)
     startNoShowCleanupJob(300000)
 
-    // Create HTTP Server & initialize Socket.IO
     const httpServer = createServer(app)
     SocketServerService.getInstance().init(httpServer)
 
-    // Start Listener
     httpServer.listen(env.PORT, () => {
       logger.info(`Server running with Socket.IO at http://localhost:${env.PORT}`)
     })

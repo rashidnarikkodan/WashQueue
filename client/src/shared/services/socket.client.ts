@@ -8,9 +8,6 @@ let socketInstance: Socket | null = null
 
 export function getSocketClient(): Socket {
   if (!socketInstance) {
-    // Auth runs on httpOnly cookies (see shared/config/axios.ts), so the JWT is never
-    // readable from JS. Send it via withCredentials so the server can read it off the
-    // handshake's cookie header instead of a token the client can't actually provide.
     socketInstance = io(SOCKET_URL, {
       autoConnect: true,
       reconnection: true,

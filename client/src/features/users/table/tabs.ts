@@ -1,6 +1,5 @@
 import type { TabConfig } from "@/shared/components/data-table"
 
-/** Tabs for UserManagement page */
 export const userTabs: TabConfig[] = [
   { id: "all", label: "All Users" },
   { id: "customer", label: "Customers" },
@@ -15,7 +14,6 @@ export const userTabs: TabConfig[] = [
   },
 ]
 
-/** Tabs for OwnerApproval page */
 export const ownerApprovalTabs: TabConfig[] = [
   { id: "all", label: "All Owners" },
   { id: "customer", label: "Pending Verification" },

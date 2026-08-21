@@ -140,7 +140,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* Avatar Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity shadow-sm ring-2 ring-background ring-offset-2 ring-offset-primary cursor-pointer"
@@ -149,10 +148,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         {initials}
       </button>
 
-      {/* Dropdown Panel */}
       {isOpen && (
         <div className="absolute right-0 top-12 z-50 w-96 rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-card-foreground">
-          {/* 1. Profile Header */}
           <div className="p-5 border-b border-border/50 bg-muted/30">
             <div className="flex items-center gap-3.5">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-base font-extrabold shadow-md shadow-primary/20">
@@ -171,7 +168,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             </div>
           </div>
 
-          {/* 2. Role Switcher / CTA Banner */}
           <div className="p-3 border-b border-border/40 bg-primary/5">
             <button
               type="button"
@@ -191,7 +187,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             </button>
           </div>
 
-          {/* 3. Vertical Navigation List (Pure vertical list, no grid!) */}
           <div className="p-2 space-y-1">
             <Link
               to="/profile"
@@ -278,7 +273,6 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             </div>
           </div>
 
-          {/* 4. Footer Section */}
           <div className="p-3 border-t border-border/40 bg-muted/20 flex justify-end">
             <button
               type="button"

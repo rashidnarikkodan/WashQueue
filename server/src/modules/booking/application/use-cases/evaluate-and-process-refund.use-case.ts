@@ -35,7 +35,6 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
       throw new AppError("Booking ID is required for refund processing", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 1. Idempotency Check: If refund has already been processed, return existing result without duplicate payout!
     const existingRefund = await this.bookingRepository.getRefundDetails(bookingId)
     if (existingRefund && existingRefund.status === "PROCESSED") {
       const domainBooking = await this.bookingRepository.findById(bookingId)
@@ -64,7 +63,6 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
         ? domainBooking.pricingSnapshot?.totalPrice || domainBooking.depositAmount || 0
         : domainBooking.depositAmount || 0
 
-    // 2. Evaluate Policy via Domain Policy Engine
     const policyResult = RefundPolicyEngine.evaluate({
       status: domainBooking.status,
       cancellationReason: reason || domainBooking.cancellation?.cancellationReason || "",
@@ -79,7 +77,6 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
 
     let transactionId: string | null = null
 
-    // 3. Process Wallet Refund if policy dictates refundAmount > 0
     const targetUserId = domainBooking.userId
 
     const walletExecutor = this.refundWalletUseCase || this.creditWalletUseCase
@@ -104,7 +101,6 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
       }
     }
 
-    // 4. Atomically lock refund status to PROCESSED (Idempotency Lock)
     const newPaymentStatus =
       policyResult.refundAmount > 0 && policyResult.refundAmount >= paidAmount
         ? PaymentStatus.REFUNDED

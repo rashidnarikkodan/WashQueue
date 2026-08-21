@@ -23,7 +23,6 @@ import {
   debitWalletUseCase,
 } from "../wallet/wallet.module"
 
-// Use cases
 import { CreateBookingReservationUseCase } from "./application/use-cases/create-booking-reservation.use-case"
 import { ConfirmBookingReservationUseCase } from "./application/use-cases/confirm-booking-reservation.use-case"
 import { CancelBookingReservationUseCase } from "./application/use-cases/cancel-booking-reservation.use-case"
@@ -47,24 +46,20 @@ import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-c
 import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
 import { GetPublicStationQueueUseCase } from "./application/use-cases/get-public-station-queue.use-case"
 
-// Presentation
 import { BookingController } from "./presentation/booking.controller"
 import { createBookingRouter } from "./presentation/booking.routes"
 import { PaymentController } from "./presentation/payment.controller"
 import { createPaymentRouter } from "./presentation/payment.routes"
 
-// Instantiate Repositories
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
 export const bookingReservationRepository = new BookingReservationMongoRepository()
 const transactionRunner = new MongooseTransactionRunner()
 
-// Instantiate Services
 const bookingRedisQueueService = new BookingRedisQueueService(bookingStatusLogRepository)
 const bookingNotificationService = new BookingNotificationService()
 const pdfInvoiceService = new PDFInvoiceService()
 
-// Payment & Reservation Use Cases
 export const createBookingReservationUseCase = new CreateBookingReservationUseCase(
   stationRepository,
   stationPricingRepository,
@@ -107,7 +102,6 @@ export const cleanupExpiredReservationsUseCase = new CleanupExpiredReservationsU
   timeWindowRepository
 )
 
-// Refund & Booking Lifecycle Use Cases
 export const evaluateAndProcessRefundUseCase = new EvaluateAndProcessRefundUseCase(
   bookingRepository,
   creditWalletUseCase,
@@ -240,7 +234,6 @@ export const getPublicStationQueueUseCase = new GetPublicStationQueueUseCase(
   stationRepository
 )
 
-// Presentation Composition
 const bookingController = new BookingController(
   createBookingUseCase,
   createWalkInBookingUseCase,

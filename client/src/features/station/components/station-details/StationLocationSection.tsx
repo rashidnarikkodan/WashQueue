@@ -38,9 +38,7 @@ export function StationLocationSection({
         </h2>
       </div>
 
-      {/* Map Card */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl space-y-0">
-        {/* Interactive Maplibre View */}
         <LocationPickerMap
           latitude={lat}
           longitude={lng}
@@ -49,7 +47,6 @@ export function StationLocationSection({
           height="h-80 sm:h-96"
         />
 
-        {/* Address Bar Footer */}
         <div className="p-6 bg-card border-t border-border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl border border-border bg-background flex items-center justify-center text-primary shrink-0">

@@ -57,7 +57,6 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
     userId: string,
     input: CreateBookingReservationInput
   ): Promise<BookingReservationResponseDTO> {
-    // 1. Validate Station
     const station = await this.stationRepository.findById(input.stationId)
     if (!station) {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
@@ -67,13 +66,11 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       throw new AppError("Station is currently inactive or suspended", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 2. Validate Vehicle
     const vehicle = await this.vehicleRepository.findById(input.vehicleId)
     if (!vehicle || vehicle.userId !== userId || !vehicle.data.isActive) {
       throw new AppError("Vehicle not found or does not belong to user", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 3 & 4. Resolve pricing for vehicle class and validate/price extra services
     const { basePrice, selectedExtraServices } = await this.pricingResolutionService.resolve(
       station.id,
       vehicle.data.classId,
@@ -81,7 +78,6 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       input.extraServiceIds
     )
 
-    // 5. Validate Time Window
     const timeWindow = await this.timeWindowRepository.findById(input.timeWindowId)
     if (!timeWindow || timeWindow.stationId !== station.id) {
       throw new AppError("Selected time window not found", HTTP_STATUS.NOT_FOUND)
@@ -92,13 +88,11 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       throw new AppError("SLOT_UNAVAILABLE", HTTP_STATUS.CONFLICT)
     }
 
-    // 6. ATOMICALLY Reserve Slot Capacity BEFORE creating Payment Order
     const reservedWindow = await this.timeWindowRepository.reserveCapacityAtomically(timeWindow.id)
     if (!reservedWindow) {
       throw new AppError("SLOT_UNAVAILABLE", HTTP_STATUS.CONFLICT)
     }
 
-    // 7. Calculate Pricing & Settlement
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
@@ -114,7 +108,6 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
         ? pricingResult.pricingSnapshot.totalPrice
         : pricingResult.depositAmount
 
-    // Check if wallet balance should be applied
     let walletAmountToDeduct = 0
     let payableAmountRupees = fullPayableAmountRupees
 
@@ -128,7 +121,6 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
 
     const payableAmountPaise = Math.round(payableAmountRupees * 100)
 
-    // 8. Create Payment Order via abstracted payment gateway
     let paymentOrderId = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`
     if (payableAmountPaise >= 100) {
       try {
@@ -138,14 +130,12 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
         })
         paymentOrderId = order.orderId
       } catch (err: unknown) {
-        // Rollback capacity if payment order creation fails
         await this.timeWindowRepository.releaseCapacityAtomically(timeWindow.id)
         const message = err instanceof Error ? err.message : "Failed to create payment order"
         throw new AppError(message, HTTP_STATUS.INTERNAL_SERVER_ERROR)
       }
     }
 
-    // 9. Save Reservation with 10 minute expiration
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
     const reservation = new BookingReservation({
       id: "",

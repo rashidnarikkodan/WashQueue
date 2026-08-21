@@ -7,9 +7,6 @@ export type MulterFileMap = Record<string, Express.Multer.File[]>
 export class MediaUploadService {
   constructor(private readonly mediaStorage: IMediaStorage) {}
 
-  /**
-   * Uploads a single Multer file. Throws AppError if upload fails.
-   */
   async uploadFile(file: Express.Multer.File): Promise<UploadedFile> {
     try {
       const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
@@ -29,11 +26,6 @@ export class MediaUploadService {
     }
   }
 
-  /**
-   * Helper to upload the first file for a given field name from a Multer file map.
-   * Returns undefined if field is missing or has no files.
-   * Throws AppError if the file exists but upload fails.
-   */
   async uploadFileByFieldname(
     files: MulterFileMap | undefined,
     fieldname: string
@@ -46,10 +38,6 @@ export class MediaUploadService {
     return uploaded.url
   }
 
-  /**
-   * Uploads multiple Multer files and returns their URLs and public IDs.
-   * Throws AppError if any file upload fails.
-   */
   async uploadMultipleFiles(
     files: Express.Multer.File[] | undefined
   ): Promise<{ url: string; publicId: string }[]> {

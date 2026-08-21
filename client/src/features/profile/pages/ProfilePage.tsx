@@ -56,21 +56,16 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans pt-10 pb-16 transition-colors duration-300">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Header Section */}
         <ProfileHeader profile={profile} onEditClick={() => setEditModalOpen(true)} />
 
-        {/* Activity Stats Quick Glance */}
         <ProfileActivityStats stats={stats} />
 
-        {/* Main Details Section */}
         {profile.role === "owner" || profile.role === "admin" || profile.role === "manager" ? (
           <div className="space-y-8">
-            {/* Middle Section: Business Information (Full Width) */}
             <div className="w-full">
               <BusinessDetailsCard profile={profile} />
             </div>
 
-            {/* Bottom Section: Personal Details & Account Information */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
               <PersonalDetailsCard profile={profile} />
               <AccountDetailsCard profile={profile} />
@@ -78,15 +73,12 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* Left: Personal Details */}
             <PersonalDetailsCard profile={profile} />
 
-            {/* Right: Account Information */}
             <AccountDetailsCard profile={profile} />
           </div>
         )}
 
-        {/* Footer Action Section */}
         <ProfileFooterActions
           onChangePasswordClick={() => setChangePasswordModalOpen(true)}
           onSignOutClick={handleSignOut}
@@ -94,7 +86,6 @@ export default function ProfilePage() {
         />
       </div>
 
-      {/* Edit Profile Modal */}
       <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -103,7 +94,6 @@ export default function ProfilePage() {
         isSubmitting={isUpdating}
       />
 
-      {/* Change Password Modal */}
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setChangePasswordModalOpen(false)}

@@ -176,7 +176,6 @@ export default function StationDetailsForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 text-left">
-      {/* Editorial Header */}
       <div className="space-y-2 border-b border-slate-800/80 pb-6">
         <span className="text-[12px] font-bold tracking-[2.4px] text-[#ADC6FF] uppercase">
           STEP 1 OF 5
@@ -189,7 +188,6 @@ export default function StationDetailsForm({
         </p>
       </div>
 
-      {/* Section 1: Basic Information */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
           <Info size={16} className="text-[#ADC6FF]" />
@@ -237,7 +235,6 @@ export default function StationDetailsForm({
         </div>
       </div>
 
-      {/* Section 2: Location Mapping */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
@@ -255,7 +252,6 @@ export default function StationDetailsForm({
           </button>
         </div>
 
-        {/* Interactive MapLibre Location Picker */}
         <LocationPickerMap
           latitude={formData.latitude}
           longitude={formData.longitude}
@@ -300,7 +296,6 @@ export default function StationDetailsForm({
         </div>
       </div>
 
-      {/* Section 3: Full Address */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
           <Building size={16} className="text-[#ADC6FF]" />
@@ -362,7 +357,6 @@ export default function StationDetailsForm({
         </div>
       </div>
 
-      {/* Section 4: Station Media */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-semibold tracking-wider text-[#C2C6D6] uppercase">
           <ImageIcon size={16} className="text-[#ADC6FF]" />
@@ -370,7 +364,6 @@ export default function StationDetailsForm({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Saved / Existing Images */}
           {existingImages.map((img, idx) => (
             <div
               key={`existing-${idx}-${img.publicId || img.url}`}
@@ -397,7 +390,6 @@ export default function StationDetailsForm({
             </div>
           ))}
 
-          {/* New Selected Image Files */}
           {imageFiles.map((file, idx) => (
             <div
               key={`new-${idx}-${file.name}`}
@@ -443,7 +435,6 @@ export default function StationDetailsForm({
         {errors.images && <span className="text-xs text-red-400 font-medium">{errors.images}</span>}
       </div>
 
-      {/* Footer Navigation */}
       <div className="flex justify-between items-center border-t border-slate-800/80 pt-6">
         <button
           type="button"

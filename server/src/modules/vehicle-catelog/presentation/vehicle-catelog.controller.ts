@@ -33,8 +33,6 @@ export class VehicleCatelogController {
     private readonly deleteClassUseCase: IDeleteClassUseCase
   ) {}
 
-  // --- Category Handlers ---
-
   createCategory = async (req: Request, res: Response): Promise<void> => {
     const category = await this.createCategoryUseCase.execute(req.body)
     success(res, category, HTTP_STATUS.CREATED, SUCCESS_MESSAGES.CATEGORY_CREATED_SUCCESS)
@@ -65,8 +63,6 @@ export class VehicleCatelogController {
     await this.deleteCategoryUseCase.execute(id)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.CATEGORY_DELETED_SUCCESS)
   }
-
-  // --- Class Handlers ---
 
   createClass = async (req: Request, res: Response): Promise<void> => {
     const vehicleClass = await this.createClassUseCase.execute(req.body)

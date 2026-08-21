@@ -42,7 +42,6 @@ export default function PayoutStep({
 }: PayoutStepProps) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Header */}
       <div className="space-y-1">
         <span className="text-[10px] sm:text-xs font-bold text-primary tracking-widest uppercase block">
           STEP 2 OF 3
@@ -57,7 +56,6 @@ export default function PayoutStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Bank Information Grid */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20 text-primary">
@@ -133,7 +131,6 @@ export default function PayoutStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Bank Verification Document Upload */}
       <div className="space-y-4">
         <h3 className="text-sm font-black text-slate-400 uppercase tracking-wider">
           Bank Verification
@@ -151,7 +148,6 @@ export default function PayoutStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Security Notice */}
       <div className="flex items-start gap-4 p-5 border border-blue-500/15 bg-blue-500/5 rounded-2xl">
         <div className="w-9 h-9 rounded-full bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center shrink-0 mt-0.5">
           <ShieldCheck size={18} />
@@ -168,7 +164,6 @@ export default function PayoutStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Footer Actions */}
       <div className="flex justify-between items-center pt-2 select-none">
         <button
           type="button"

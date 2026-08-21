@@ -7,14 +7,10 @@ export interface GeneratedQR {
 }
 
 export class QRTokenService {
-  /**
-   * Generates a secure random QR token string, SHA-256 hash, and expiry date.
-   */
   static generateToken(windowEnd: Date): GeneratedQR {
     const rawToken = randomBytes(32).toString("hex")
     const qrTokenHash = this.hashToken(rawToken)
 
-    // Expires 24 hours after time window end
     const qrExpiresAt = new Date(windowEnd.getTime() + 24 * 60 * 60 * 1000)
 
     return {

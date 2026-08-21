@@ -21,8 +21,6 @@ import { StationLocationSection } from "../components/station-details/StationLoc
 import { StationSidebarCard } from "../components/station-details/StationSidebarCard"
 import { StationManagerSection } from "../components/station-details/StationManagerSection"
 
-// Modular Details Components
-
 interface CommonStationDetailProps {
   role?: RoleType
 }
@@ -45,11 +43,9 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
   const user = useAuthStore((state) => state.user)
 
-  // Manager state tracking
   const [managerPermissions, setManagerPermissions] = useState<ManagerPermission[]>([])
   const [noManagedStation, setNoManagedStation] = useState(false)
 
-  // Resolve role from explicit prop OR portal route context
   let currentRole: RoleType = ROLE.CUSTOMER
   if (role) {
     currentRole = role
@@ -78,7 +74,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     navigate(`/bookings/new?stationId=${id}`)
   }
 
-  // Confirmation Modal State
   const [confirmModalConfig, setConfirmModalConfig] = useState<{
     isOpen: boolean
     title: string
@@ -264,7 +259,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
   return (
     <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-32 space-y-4 sm:space-y-6 text-left animate-in fade-in duration-300">
-      {/* Breadcrumb Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Breadcrumbs
           items={[
@@ -292,7 +286,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </button>
       </div>
 
-      {/* Rejection Alert Banner */}
       {isRejected && station.rejectionReason && (
         <div className="p-5 border border-destructive/30 bg-destructive/10 rounded-2xl flex items-start gap-4 shadow-xl">
           <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-0.5" />
@@ -305,7 +298,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       )}
 
-      {/* Suspended Alert Banner */}
       {isSuspended && (
         <div className="p-5 border border-warning/30 bg-warning/10 rounded-2xl flex items-center justify-between gap-4 shadow-xl">
           <div className="flex items-start gap-4">
@@ -335,15 +327,12 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       )}
 
-      {/* MAIN LAYOUT: 70% Left Column + 30% Right Sticky Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* Left Column (70%) */}
         <div className="lg:col-span-8 space-y-12">
           <StationHeroGallery images={station.images} stationName={station.name} />
 
           <StationAboutSection stationName={station.name} description={station.description} />
 
-          {/* Mobile-Only Summary & Booking Card (Right after Station Overview) */}
           <div className="block lg:hidden">
             <StationSidebarCard
               station={station}
@@ -394,7 +383,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           )}
         </div>
 
-        {/* Right Column (30%) - Desktop Sticky Sidebar */}
         <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24">
           <StationSidebarCard
             station={station}
@@ -415,7 +403,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       </div>
 
-      {/* Custom Rejection Reason Input Modal */}
       {rejecting && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
@@ -464,7 +451,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       )}
 
-      {/* Custom Suspension Reason Input Modal */}
       {suspending && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-left space-y-4">
@@ -513,7 +499,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         </div>
       )}
 
-      {/* Auth Required Modal */}
       <AuthRequiredModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -522,7 +507,6 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         actionName="book a wash"
       />
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmModalConfig.isOpen}
         onClose={() => setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))}

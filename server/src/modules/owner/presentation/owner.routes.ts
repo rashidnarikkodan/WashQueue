@@ -11,7 +11,6 @@ import { API_ROUTES } from "@/common/constants/route.constants"
 export const createOwnerRouter = (ownerController: OwnerController): Router => {
   const router = Router()
 
-  //Authentication
   router.use(authenticate)
 
   router.get(API_ROUTES.OWNER.ONBOARDING_STATUS, asyncHandler(ownerController.getOnboardingStatus))

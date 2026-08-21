@@ -10,7 +10,6 @@ export const RefundTrackerCard: React.FC<RefundTrackerCardProps> = ({
 }) => {
   return (
     <div className="flex flex-col justify-between gap-4">
-      {/* Refund Balance Box */}
       <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <div className="h-11 w-11 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground">
@@ -26,7 +25,6 @@ export const RefundTrackerCard: React.FC<RefundTrackerCardProps> = ({
         </span>
       </div>
 
-      {/* Refund in Progress Tracker */}
       <div className="rounded-2xl bg-card p-5 border border-border space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <div>

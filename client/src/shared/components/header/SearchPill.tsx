@@ -15,7 +15,6 @@ export default function SearchPill({ onClose }: SearchPillProps) {
       }
     }
 
-    // Slight delay to ensure trigger button clicks do not immediately close the overlay
     const timer = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside)
     }, 10)

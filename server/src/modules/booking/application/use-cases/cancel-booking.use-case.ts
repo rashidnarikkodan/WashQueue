@@ -42,11 +42,11 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     const hoursRemaining = (windowStartMs - now.getTime()) / (1000 * 60 * 60)
 
     if (hoursRemaining >= 24) {
-      return paidAmount // 100% full refund
+      return paidAmount
     } else if (hoursRemaining >= 2) {
-      return Math.round(paidAmount * 0.5) // 50% partial refund
+      return Math.round(paidAmount * 0.5)
     } else {
-      return 0 // 0% non-refundable late cancellation
+      return 0
     }
   }
 
@@ -60,7 +60,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // Rule 1: Service state check — cancellation prohibited once service has started
     if (
       booking.status === BookingStatus.IN_SERVICE ||
       booking.status === BookingStatus.SERVICE_COMPLETED ||
@@ -87,8 +86,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
     booking.cancel(cancellationReason, userId)
 
-    // The status transition and its audit log are one atomic unit — a cancelled booking
-    // should never exist without the log entry explaining why, or vice versa.
     const runCancellationWork = async (session?: unknown) => {
       const updated = await this.bookingRepository.updateWithStatusGuard(
         booking,
@@ -122,9 +119,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       )
     }
 
-    // Refund evaluation runs after the cancellation is committed — it's a best-effort wallet
-    // side-effect (the wallet module manages its own transaction) that must not block or
-    // undo an already-committed cancellation.
     const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
     if (this.evaluateAndProcessRefundUseCase) {
       await this.evaluateAndProcessRefundUseCase.execute({
@@ -134,10 +128,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       })
     }
 
-    // Rule 6: Synchronize Redis operational queue
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // Rule 7: Real-time notification
     await this.notificationService.notify("BOOKING_CANCELLED", domainBooking)
 
     return BookingDTOMapper.toDTO(domainBooking)

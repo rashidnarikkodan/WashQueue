@@ -23,11 +23,9 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Resend OTP states & timer hook
   const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(60)
   const [isResending, setIsResending] = useState(false)
 
-  // Get email from localStorage where it was saved during forgot password request
   useEffect(() => {
     const savedEmail = localStorage.getItem("wq_reset_email")
     if (!savedEmail) {
@@ -104,12 +102,10 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full transition-colors duration-300">
-      {/* Background Decor Glow */}
       <div className="absolute left-[-100px] top-[-100px] h-[400px] w-[400px] rounded-full bg-primary/5 filter blur-3xl"></div>
 
       <main className="flex-grow flex items-center justify-center z-10 p-4">
         <div className="w-full max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col">
-          {/* Back button properly aligned and styled simply */}
           <Link
             to="/forgot-password"
             className="inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors w-fit group"
@@ -118,7 +114,6 @@ export default function ResetPasswordPage() {
             Back
           </Link>
 
-          {/* Header Section (Directly on Page - No divider line) */}
           <div className="space-y-3">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground/90 to-primary/80 bg-clip-text text-transparent">
               Reset Password
@@ -129,13 +124,11 @@ export default function ResetPasswordPage() {
             </p>
           </div>
 
-          {/* Split layout Form (Directly on Page - Wide layout, no vertical or horizontal dividing lines) */}
           <form
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 pt-2"
             noValidate
           >
-            {/* Left Column: OTP Verification */}
             <div className="space-y-8 flex flex-col justify-between">
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -150,7 +143,6 @@ export default function ResetPasswordPage() {
                 {errors.code && <p className="text-xs text-destructive mt-1">{errors.code}</p>}
               </div>
 
-              {/* Resend OTP minimal inline section */}
               <div className="text-left mt-4 min-h-[24px]">
                 {!isResendActive ? (
                   <p className="text-xs text-muted-foreground">
@@ -174,7 +166,6 @@ export default function ResetPasswordPage() {
               </div>
             </div>
 
-            {/* Right Column: Reset Password (No divider line/borders) */}
             <div className="space-y-8 md:pl-8 lg:pl-12">
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-foreground">Set New Password</h2>
@@ -226,7 +217,6 @@ export default function ResetPasswordPage() {
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isResetting}

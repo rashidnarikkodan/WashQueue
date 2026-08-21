@@ -60,7 +60,6 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
 
     await this.ownerRepository.save(owner)
 
-    // Mark step=4 to flag submission pending admin review
     const tokenPayload = {
       userId: userDoc.id || userId,
       role: userDoc.role,

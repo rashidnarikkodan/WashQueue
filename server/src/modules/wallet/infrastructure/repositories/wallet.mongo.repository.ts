@@ -70,7 +70,6 @@ export class WalletMongoRepository implements IWalletRepository {
         throw error
       }
     }
-    // Unreachable: loop always returns or throws, but keeps TS happy.
     throw new ConflictError("Wallet update failed due to concurrent modification")
   }
 
@@ -93,7 +92,6 @@ export class WalletMongoRepository implements IWalletRepository {
       let walletDoc = await WalletModel.findOne({ userId }, null, opts)
 
       if (!walletDoc) {
-        // Initialize empty wallet inside transaction if missing
         const createdDocs = await WalletModel.create(
           [
             {
@@ -115,7 +113,6 @@ export class WalletMongoRepository implements IWalletRepository {
       const domainWallet = WalletPersistenceMapper.toDomainWallet(walletDoc)
       const { updatedWallet, transaction } = operation(domainWallet)
 
-      // Idempotency Guard: Check if transaction with referenceId has already completed
       if (transaction.referenceId) {
         const existingTxDoc = await WalletTransactionModel.findOne(
           {
@@ -138,9 +135,6 @@ export class WalletMongoRepository implements IWalletRepository {
         }
       }
 
-      // Optimistic-concurrency write: the filter only matches if `balance` is still what we
-      // read above, so a concurrent credit/debit that lands between our read and this write
-      // causes this to match nothing (rather than silently overwriting the other update).
       const savedWalletDoc = await WalletModel.findOneAndUpdate(
         { _id: walletDoc._id, balance: walletDoc.balance },
         {
@@ -154,7 +148,6 @@ export class WalletMongoRepository implements IWalletRepository {
         throw new ConflictError("Wallet balance changed concurrently, retry required")
       }
 
-      // Synchronize cached walletBalance on User model atomically
       try {
         const { User: UserModel } = await import("@/modules/user/infrastructure/model/user.model")
         await UserModel.findByIdAndUpdate(
@@ -163,11 +156,9 @@ export class WalletMongoRepository implements IWalletRepository {
           opts
         )
       } catch (userSyncErr) {
-        // Log sync warning but proceed
         console.warn(`[Wallet] Failed to sync user walletBalance for ${userId}:`, userSyncErr)
       }
 
-      // Create transaction ledger record in database
       let txDocs
       try {
         txDocs = await WalletTransactionModel.create(
@@ -195,8 +186,6 @@ export class WalletMongoRepository implements IWalletRepository {
           (createError as { code?: number }).code === 11000
 
         if (isDuplicateKeyError && transaction.referenceId) {
-          // Another concurrent request already recorded this same (userId, referenceId, type)
-          // transaction — the DB unique index caught what the earlier app-level check missed.
           if (useTransaction) {
             await session.abortTransaction()
           }

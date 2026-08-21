@@ -15,7 +15,6 @@ export function useBookingServices({ station, selectedVehicle }: UseBookingServi
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>("HALF_WASH")
   const [selectedExtraIds, setSelectedExtraIds] = useState<string[]>([])
 
-  // Match Station Pricing based on Selected Vehicle's classId
   const matchingPricing = useMemo<StationPricing | null>(() => {
     if (!station?.pricing || station.pricing.length === 0) return null
     if (selectedVehicle?.classId) {
@@ -27,7 +26,6 @@ export function useBookingServices({ station, selectedVehicle }: UseBookingServi
     return station.pricing[0]
   }, [station, selectedVehicle])
 
-  // Derive Service Plans from matched vehicle class pricing
   const plans: ServicePlanOption[] = useMemo(() => {
     const p = matchingPricing
     if (p) {
@@ -54,7 +52,6 @@ export function useBookingServices({ station, selectedVehicle }: UseBookingServi
     return []
   }, [matchingPricing])
 
-  // Derive Extra Services dynamically based on vehicle classId
   const extraServices: ExtraServiceOption[] = useMemo(() => {
     if (station?.extraServices && station.extraServices.length > 0) {
       return station.extraServices.map((e: ExtraService) => {

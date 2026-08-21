@@ -25,7 +25,6 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-foreground tracking-tight">Community Q&amp;A</h2>
 
-      {/* Ask Question Input Box */}
       <div className="p-6 rounded-2xl border border-border bg-card/90 shadow-xl space-y-4">
         <div className="relative">
           <textarea
@@ -44,7 +43,6 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
         </div>
       </div>
 
-      {/* Q&A Thread Box */}
       {questions.length > 0 ? (
         <div className="space-y-4">
           {questions.map((item) => (

@@ -34,7 +34,6 @@ export class VehicleController {
 
     const body = { ...req.body }
 
-    // Upload vehicle image to Cloudinary if a file was provided
     const file = req.file as Express.Multer.File | undefined
     if (file) {
       const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)

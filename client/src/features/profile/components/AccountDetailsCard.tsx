@@ -56,7 +56,6 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
       }
     }
 
-    // Default: local / password / email
     return {
       label: "Email & Password Auth",
       badge: "Password Protected",
@@ -70,7 +69,6 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
 
   return (
     <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl text-card-foreground">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
           <Settings className="w-5 h-5" />
@@ -78,10 +76,7 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         <h2 className="text-2xl font-bold text-foreground">Account Information</h2>
       </div>
 
-      {/* Grid */}
-
       <div className="w-full">
-        {/* Dynamic Authentication Provider Card */}
         <div className="w-full bg-muted/50 border border-border/80 p-5 rounded-xl space-y-3">
           <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -108,9 +103,7 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         </div>
       </div>
 
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Last Updated */}
         <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Clock className="w-3.5 h-3.5" />
@@ -125,7 +118,6 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
           </p>
         </div>
 
-        {/* Member Since */}
         <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <Calendar className="w-3.5 h-3.5" />

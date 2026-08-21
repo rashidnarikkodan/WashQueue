@@ -21,10 +21,8 @@ export default function OTPPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
 
-  // Resend code countdown timer hook (starts at 25 seconds)
   const { isResendActive, resetTimer, formatTimer } = useCountdownTimer(25)
 
-  // Success Verification Modal
   const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
@@ -33,7 +31,6 @@ export default function OTPPage() {
     }
   }, [resetForm])
 
-  // Reactive verification: Auto-submits when all 6 digits are entered
   useEffect(() => {
     const code = otpDigits.join("")
     if (code.length < 6) {
@@ -101,7 +98,6 @@ export default function OTPPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground p-8 relative overflow-hidden w-full transition-colors duration-300">
-      {/* Main Content Area */}
       <main className="grow flex items-center justify-center z-10 p-4">
         {!isVerified ? (
           <div className="w-full max-w-xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col">
@@ -112,7 +108,6 @@ export default function OTPPage() {
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
               Back to Sign Up
             </Link>
-            {/* Header Title Section */}
             <div className="text-center space-y-3">
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none bg-linear-to-r from-foreground via-foreground/90 to-foreground/50 bg-clip-text text-transparent">
                 Confirm Email
@@ -123,13 +118,11 @@ export default function OTPPage() {
               </p>
             </div>
 
-            {/* OTP Digits inputs */}
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="flex justify-center">
                 <OtpInput value={otpDigits} onChange={setOtpDigits} disabled={isVerifying} />
               </div>
 
-              {/* Submit Verification */}
               <div className="space-y-4 max-w-sm mx-auto">
                 <button
                   type="submit"
@@ -146,7 +139,6 @@ export default function OTPPage() {
                   )}
                 </button>
 
-                {/* Resend status & triggers */}
                 <div className="text-center space-y-1">
                   {!isResendActive ? (
                     <span className="text-xs text-muted-foreground block">
@@ -168,7 +160,6 @@ export default function OTPPage() {
             </form>
           </div>
         ) : (
-          /* Verification Success Modal State */
           <div className="w-full max-w-md bg-card/60 backdrop-blur-md border border-border/80 rounded-2xl p-8 space-y-6 text-center shadow-2xl animate-in zoom-in duration-300 z-20">
             <div className="flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold shadow-inner relative">

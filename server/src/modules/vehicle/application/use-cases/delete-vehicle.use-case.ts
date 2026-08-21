@@ -18,7 +18,6 @@ export class DeleteVehicleUseCase implements IDeleteVehicleUseCase {
 
     const wasPrimary = vehicle.data.isPrimary
 
-    // Soft delete
     vehicle.deactivate()
     if (wasPrimary) {
       vehicle.data.isPrimary = false
@@ -26,7 +25,6 @@ export class DeleteVehicleUseCase implements IDeleteVehicleUseCase {
 
     await this.vehicleRepository.save(vehicle)
 
-    // If it was primary, set another active vehicle as primary
     if (wasPrimary) {
       const activeVehicles = await this.vehicleRepository.findByUserId(userId)
       if (activeVehicles.length > 0) {

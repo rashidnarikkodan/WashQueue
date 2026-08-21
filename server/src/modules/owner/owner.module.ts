@@ -13,15 +13,12 @@ import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { OnboardingStepRequestMapper } from "./presentation/mappers/onboarding-step.mapper"
 
-// Infrastructures & Services
 export const ownerRepository = new OwnerMongoRepository()
 const cloudinaryService = new CloudinaryService()
 const mediaUploadService = new MediaUploadService(cloudinaryService)
 
-// Mappers
 const onboardingStepMapper = new OnboardingStepRequestMapper(mediaUploadService)
 
-// Use cases
 const createOwnerUseCase = new CreateOwnerUseCase(ownerRepository, userRepository)
 const getOwnerUseCase = new GetOwnerUseCase(ownerRepository)
 const updateOwnerUseCase = new UpdateOwnerUseCase(ownerRepository)
@@ -37,7 +34,6 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   userRepository
 )
 
-// Presentation
 const ownerController = new OwnerController(
   saveOnboardingStepUseCase,
   getOnboardingStatusUseCase,

@@ -19,7 +19,6 @@ export const createWalletRouter = (walletController: WalletController): Router =
 
   router.use(authenticate)
 
-  // Customer Wallet Endpoints
   router.get("/", asyncHandler(walletController.getBalance))
   router.get("/transactions", validateRequest(getLedgerQuerySchema, "query"), asyncHandler(walletController.getLedger))
   router.get("/export", validateRequest(getLedgerQuerySchema, "query"), asyncHandler(walletController.exportTransactions))
@@ -27,7 +26,6 @@ export const createWalletRouter = (walletController: WalletController): Router =
   router.post("/topup/verify", validateRequest(verifyTopUpPaymentSchema), asyncHandler(walletController.verifyTopUpPayment))
   router.post("/pay", validateRequest(payWithWalletSchema), asyncHandler(walletController.payWithWallet))
 
-  // System / Internal / Admin Operations
   router.post(
     "/credit",
     authorize(ROLE.ADMIN),

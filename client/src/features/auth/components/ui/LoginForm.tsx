@@ -49,7 +49,6 @@ export default function LoginForm() {
 
   const [state, formAction] = useActionState(loginAction, initialState)
 
-  // Sync validation errors to local state
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalErrors({
@@ -60,7 +59,6 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (state.success && state.user) {
-      // Sync auth state to Zustand store and localStorage for persistence
       useAuthStore.setState({
         user: state.user,
         isAuthenticated: true,
@@ -89,7 +87,6 @@ export default function LoginForm() {
       navigate("/verify-email")
     }
 
-    // Error is handled via inline message box inside form
   }, [state, navigate])
 
   return (
@@ -134,7 +131,6 @@ export default function LoginForm() {
           error={localErrors.email}
           onChange={(e) => {
             const val = e.target.value
-            // Instantly clear email format error as soon as they type a valid email format
             if (/\S+@\S+\.\S+/.test(val) || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, email: "" }))
             }
@@ -152,7 +148,6 @@ export default function LoginForm() {
           error={localErrors.password}
           onChange={(e) => {
             const val = e.target.value
-            // Instantly clear password error as soon as it meets the min length condition (8 chars)
             if (val.length >= 8 || val.trim() === "") {
               setLocalErrors((prev) => ({ ...prev, password: "" }))
             }

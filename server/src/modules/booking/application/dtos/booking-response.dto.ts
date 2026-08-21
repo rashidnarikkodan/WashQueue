@@ -57,7 +57,7 @@ export interface BookingResponseDTO {
     categoryId: string
     classId: string
   } | null
-  rawQrToken?: string // Only populated upon creation for caller
+  rawQrToken?: string
   qr: {
     qrExpiresAt: string
   }

@@ -1,10 +1,5 @@
 import { z } from "zod"
 
-/**
- * All multipart body fields arrive as strings (multer behaviour),
- * so step is z.literal("1") / z.literal("2") — not z.number().
- */
-
 const step1Schema = z.object({
   step: z.literal("1"),
   fullName: z
@@ -48,7 +43,6 @@ const step2Schema = z.object({
     .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format (e.g. HDFC0001234)"),
 })
 
-/** Discriminated union — automatically picks the right schema based on the `step` field */
 export const saveOnboardingStepSchema = z.discriminatedUnion("step", [step1Schema, step2Schema])
 
 export type Step1Input = z.infer<typeof step1Schema>

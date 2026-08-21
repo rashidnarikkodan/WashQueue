@@ -69,7 +69,6 @@ const GRID_COLS_MAP: Record<number, string> = {
 export const StatsHUD: React.FC<StatsHUDProps> = ({ stats, columns, className = "" }) => {
   if (!stats || stats.length === 0) return null
 
-  // Determine grid cols based on stats count if not explicitly set
   const colsCount = columns || (Math.min(Math.max(stats.length, 1), 5) as 1 | 2 | 3 | 4 | 5)
   const gridClass = GRID_COLS_MAP[colsCount] || "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
 

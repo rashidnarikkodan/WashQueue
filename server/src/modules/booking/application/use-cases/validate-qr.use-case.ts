@@ -29,7 +29,6 @@ export class ValidateQRForCheckInUseCase {
       throw new AppError("QR token or Booking ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // 1. Safe JSON parsing if scanned payload is JSON string
     if (searchStr.startsWith("{") && searchStr.endsWith("}")) {
       try {
         const parsed = JSON.parse(searchStr)
@@ -41,18 +40,15 @@ export class ValidateQRForCheckInUseCase {
           searchStr = parsed.id
         }
       } catch {
-        // Proceed with raw string if JSON parsing fails
       }
     }
 
     let booking = null
 
-    // 2. Locate booking by QR token hash, booking number, or ObjectId
     try {
       const qrHash = QRTokenService.hashToken(searchStr)
       booking = await this.bookingRepository.findByQrTokenHash(qrHash)
     } catch {
-      // Ignore hash error and fall back
     }
 
     if (!booking) {
@@ -67,18 +63,15 @@ export class ValidateQRForCheckInUseCase {
       booking = await this.bookingRepository.findById(searchStr)
     }
 
-    // Rule 1: QR and Booking Existence
     if (!booking) {
       throw new AppError(`Invalid or unknown QR pass / Booking ID (${searchStr})`, HTTP_STATUS.NOT_FOUND)
     }
 
-    // Rule 2: QR Expiration Check
     const now = new Date()
     if (booking.qr && booking.qr.qrExpiresAt && new Date(booking.qr.qrExpiresAt) < now) {
       throw new AppError("This QR check-in admit pass has expired", HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Rule 3: QR Consumption / Check-in State Check
     if (booking.status === BookingStatus.CHECKED_IN || booking.checkedInAt) {
       throw new AppError("This booking QR pass has already been used and checked in", HTTP_STATUS.BAD_REQUEST)
     }
@@ -87,7 +80,6 @@ export class ValidateQRForCheckInUseCase {
       throw new AppError(`Vehicle is already ${booking.status.replace("_", " ")}`, HTTP_STATUS.BAD_REQUEST)
     }
 
-    // Rule 4: Booking Status Eligibility (Must be strictly CONFIRMED)
     if (booking.status === BookingStatus.CANCELLED || Boolean(booking.cancellation?.cancelledAt)) {
       throw new AppError("This booking has been cancelled and cannot be checked in", HTTP_STATUS.BAD_REQUEST)
     }
@@ -103,7 +95,6 @@ export class ValidateQRForCheckInUseCase {
       )
     }
 
-    // Rule 5: Booking Time Window Match (Skipped for Walk-In bookings)
     if (!booking.isWalkIn && booking.scheduling?.windowStart && booking.scheduling?.windowEnd) {
       const windowStart = new Date(booking.scheduling.windowStart)
       const windowEnd = new Date(booking.scheduling.windowEnd)
@@ -119,7 +110,6 @@ export class ValidateQRForCheckInUseCase {
       const startTimeFormatted = formatWindowTime(windowStart)
       const endTimeFormatted = formatWindowTime(windowEnd)
 
-      // Allow early check-in up to 10 minutes before windowStart
       const earlyBufferMs = 10 * 60 * 1000
       if (nowMs < windowStart.getTime() - earlyBufferMs) {
         throw new AppError(
@@ -128,10 +118,8 @@ export class ValidateQRForCheckInUseCase {
         )
       }
 
-      // Allow 10 minutes grace period after windowEnd before marking NO_SHOW
       const gracePeriodMs = 10 * 60 * 1000
       if (nowMs > windowEnd.getTime() + gracePeriodMs) {
-        // Mark booking as NO_SHOW in database
         try {
           const fromStatus = booking.status
           booking.markNoShow()
@@ -161,7 +149,6 @@ export class ValidateQRForCheckInUseCase {
       }
     }
 
-    // Rule 5: Station Belonging & Manager Authorization Check
     const station = await this.stationRepository.findById(booking.stationId)
     if (!station) {
       throw new AppError("Booking station not found", HTTP_STATUS.NOT_FOUND)
@@ -187,7 +174,6 @@ export class ValidateQRForCheckInUseCase {
       )
     }
 
-    // Rule 6: Payment Condition Check
     const isPaymentSatisfied =
       booking.paymentStatus === PaymentStatus.PAID ||
       booking.paymentMethod === PaymentMethod.PAY_AT_STATION
@@ -199,7 +185,6 @@ export class ValidateQRForCheckInUseCase {
       )
     }
 
-    // Return DTO for UI navigation (status remains CONFIRMED until inspection is completed)
     return BookingDTOMapper.toDTO(booking)
   }
 }

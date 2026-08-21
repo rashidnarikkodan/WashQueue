@@ -18,11 +18,8 @@ export interface SavePostInspectionInput {
   checklist?: InspectionChecklistItem[]
 }
 
-// Front, rear, left, right — the same 4 angles PostInspectionPage.tsx captures on the client.
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 
-// Must match CHECKLIST_ITEMS in PostInspectionPage.tsx — every item must be reviewed
-// (ticked pass/fail) before a post-service inspection can be completed.
 const REQUIRED_CHECKLIST_KEYS = ["paintGloss", "wheels", "glass", "dashboard", "seats", "specialRequest"]
 
 export class SavePostInspectionUseCase {
@@ -50,7 +47,6 @@ export class SavePostInspectionUseCase {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 1. Manager Authorization Check
     const station = await this.stationRepository.findById(booking.stationId)
     if (!station) {
       throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
@@ -76,7 +72,6 @@ export class SavePostInspectionUseCase {
       )
     }
 
-    // 2. Status Eligibility Check (Must be IN_SERVICE, SERVICE_COMPLETED, or AWAITING_HANDOVER)
     const allowedStatuses = [
       BookingStatus.IN_SERVICE,
       BookingStatus.SERVICE_COMPLETED,
@@ -127,7 +122,6 @@ export class SavePostInspectionUseCase {
 
     booking.completePostInspection(inspectionRecord)
 
-    // Optimistic-concurrency guard to prevent duplicate completion submissions
     const domainBooking = await this.bookingRepository.updateWithStatusGuard(
       booking,
       allowedStatuses
@@ -140,7 +134,6 @@ export class SavePostInspectionUseCase {
       )
     }
 
-    // 4. Save Status Log
     const statusLog = new BookingStatusLog({
       id: "",
       bookingId: domainBooking.id,
@@ -152,10 +145,8 @@ export class SavePostInspectionUseCase {
     })
     await this.bookingStatusLogRepository.save(statusLog)
 
-    // 5. Update Redis Queue State (Frees active bay capacity & removes from queue)
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    // 6. Dispatch Notification Event
     await this.notificationService.notify("WASH_COMPLETED", domainBooking)
 
     return BookingDTOMapper.toDTO(domainBooking)

@@ -22,15 +22,10 @@ export class ProcessNoShowBookingsUseCase {
     private readonly evaluateAndProcessRefundUseCase?: EvaluateAndProcessRefundUseCase
   ) {}
 
-  /**
-   * Idempotent background processing for past CONFIRMED online bookings beyond allowed grace period.
-   * Grace Period Policy: 15 minutes past windowEnd.
-   */
   async execute(gracePeriodMinutes: number = 15): Promise<ProcessNoShowResult> {
     const now = new Date()
     const graceCutoff = new Date(now.getTime() - gracePeriodMinutes * 60 * 1000)
 
-    // 1. Query only eligible CONFIRMED bookings past grace cutoff using indexed fields
     const eligibleBookings = await this.bookingRepository.findNoShowCandidates(graceCutoff)
 
     if (eligibleBookings.length === 0) {
@@ -49,20 +44,17 @@ export class ProcessNoShowBookingsUseCase {
         continue
       }
 
-      // 2. Optimistic-concurrency guard ensures status is still CONFIRMED (Idempotency guarantee)
       const domainBooking = await this.bookingRepository.updateWithStatusGuard(
         booking,
         BookingStatus.CONFIRMED
       )
 
       if (!domainBooking) {
-        // Already processed by another worker or checked in simultaneously
         continue
       }
 
       processedBookingIds.push(domainBooking.id)
 
-      // 3. Create Audit Log
       const statusLog = new BookingStatusLog({
         id: "",
         bookingId: domainBooking.id,
@@ -74,10 +66,8 @@ export class ProcessNoShowBookingsUseCase {
       })
       await this.bookingStatusLogRepository.save(statusLog)
 
-      // 4. Update Redis Operational Queue
       await this.redisQueueService.updateQueueStatus(domainBooking)
 
-      // 5. Notify Customer
       try {
         await this.notificationService.notify("BOOKING_CANCELLED", domainBooking, {
           reason: "Marked NO_SHOW due to missed arrival time window",

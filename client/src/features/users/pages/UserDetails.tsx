@@ -10,7 +10,6 @@ import { toast } from "sonner"
 import { getErrorMessage } from "../../../shared/utils/error"
 import Loading from "../../../shared/components/ui/Loading"
 
-// Import sub-components
 import UserDetailsHeader from "../components/ui/UserDetailsHeader"
 import PersonalInformationCard from "../components/ui/PersonalInformationCard"
 import BookingHistoryCard from "../components/ui/BookingHistoryCard"
@@ -20,7 +19,6 @@ import QuickNotificationCard from "../components/ui/QuickNotificationCard"
 import OwnerProfileOverviewCard from "../components/ui/OwnerProfileOverviewCard"
 import FeatureLock from "@/shared/components/ui/FeatureLock"
 
-// Mock generators based on userId
 const getMockBookings = (userId: string): Booking[] => {
   return [
     {
@@ -94,21 +92,17 @@ const UserDetails = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  // Core API State
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // Block/Activation Action State
   const [isSuspending, setIsSuspending] = useState(false)
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false)
 
-  // Dynamic Data Lists (populated using mock generators based on fetched user)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [ownerStations, setOwnerStations] = useState<OwnerStation[]>([])
 
-  // Fetch actual user from server on mount
   useEffect(() => {
     const fetchUser = async () => {
       if (!id) return
@@ -118,7 +112,6 @@ const UserDetails = () => {
         const fetched = await usersApi.getUser(id)
         setUser(fetched)
 
-        // Populate lists dynamically so user details don't show empty fallbacks
         setVehicles(getMockVehicles(fetched.id))
         setBookings(getMockBookings(fetched.id))
         setOwnerStations(getMockStations())
@@ -190,7 +183,6 @@ const UserDetails = () => {
 
   return (
     <div className="space-y-6 max-w-7xl xl:max-w-350 mx-auto px-4 sm:px-6 pb-12 text-[#f8fafc]">
-      {/* Breadcrumbs Row & Back Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Breadcrumbs
           items={[
@@ -209,7 +201,6 @@ const UserDetails = () => {
         </button>
       </div>
 
-      {/* 1. Profile Banner Header Card */}
       <UserDetailsHeader
         user={user}
         isSuspending={isSuspending}
@@ -217,9 +208,7 @@ const UserDetails = () => {
         onScrollToNotification={handleScrollToNotification}
       />
 
-      {/* 2. Grid Dashboard Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8 items-start">
-        {/* Left Side: Personal Info, Bookings, Owner Profile (8 Cols) */}
         <div className="xl:col-span-8 space-y-6">
           <PersonalInformationCard user={user} />
 
@@ -227,13 +216,11 @@ const UserDetails = () => {
 
           <RegisteredVehiclesCard vehicles={vehicles} />
 
-          {/* Conditional Card: Owner Profile details */}
           {(user.role === ROLE.OWNER || user.role === ROLE.MANAGER) && (
             <OwnerProfileOverviewCard user={user} stations={ownerStations} />
           )}
         </div>
 
-        {/* Right Side: Notification Form & Loyalty (4 Cols) */}
         <div className="xl:col-span-4 space-y-6">
           <QuickNotificationCard userEmail={user.email} userName={user.name || "User"} />
 
@@ -243,7 +230,6 @@ const UserDetails = () => {
         </div>
       </div>
 
-      {/* Account Block Confirmation Modal */}
       <ConfirmationModal
         isOpen={isBlockConfirmOpen}
         onClose={() => setIsBlockConfirmOpen(false)}

@@ -52,11 +52,9 @@ export default function UserDetailsHeader({
 
   return (
     <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-2xl flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between relative overflow-hidden">
-      {/* Decorative subtle background gradients */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center w-full xl:w-auto">
-        {/* Large Initials Avatar */}
         <div className="w-20 h-20 rounded-full bg-muted text-primary border border-primary/20 font-extrabold flex items-center justify-center text-3xl shadow-inner shrink-0">
           {getInitials(user.name)}
         </div>
@@ -67,7 +65,6 @@ export default function UserDetailsHeader({
               {user.name || "N/A"}
             </h1>
 
-            {/* Active/Blocked Status dot tag */}
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                 user.isBlocked
@@ -82,7 +79,6 @@ export default function UserDetailsHeader({
             </span>
           </div>
 
-          {/* Email & Phone */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-muted-foreground text-sm">
             <span className="flex items-center gap-1.5">
               <Mail size={14} className="text-muted-foreground" />
@@ -96,7 +92,6 @@ export default function UserDetailsHeader({
             )}
           </div>
 
-          {/* Badges for Authentication & Role */}
           <div className="flex flex-wrap gap-2 pt-1">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-muted text-muted-foreground border border-border">
               <Shield size={11} className="text-muted-foreground" />
@@ -116,10 +111,8 @@ export default function UserDetailsHeader({
         </div>
       </div>
 
-      {/* Right side buttons & relative time meta */}
       <div className="flex flex-col sm:flex-row xl:flex-col items-start sm:items-center xl:items-end gap-4 w-full xl:w-auto pt-4 xl:pt-0 border-t border-border/40 xl:border-t-0 shrink-0">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Send Notification focus/trigger */}
           <button
             onClick={onScrollToNotification}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-muted border border-border hover:bg-muted/80 text-foreground font-semibold text-xs transition-all cursor-pointer"
@@ -128,7 +121,6 @@ export default function UserDetailsHeader({
             <span>Send Notification</span>
           </button>
 
-          {/* Suspend / Activate Account Button */}
           <button
             onClick={onToggleBlock}
             disabled={isSuspending}
@@ -154,7 +146,6 @@ export default function UserDetailsHeader({
           </button>
         </div>
 
-        {/* Joined & Active dates info */}
         <div className="text-muted-foreground text-[11px] font-bold tracking-wider text-left sm:text-right xl:text-right space-y-0.5">
           <p>
             JOINED: <span className="text-foreground">{formatJoinedDate(user.createdAt)}</span>

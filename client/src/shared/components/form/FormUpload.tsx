@@ -21,7 +21,6 @@ interface FormUploadProps {
   error?: string
   id?: string
   icon?: ReactNode
-  /** URL of a previously uploaded file (from server draft) */
   existingUrl?: string
 }
 
@@ -137,7 +136,6 @@ export default function FormUpload({
           )}
         </div>
 
-        {/* Live preview for row layout */}
         {(localPreview || (existingUrl && showExistingImage)) && (
           <div className="mt-3 border border-slate-850 bg-slate-950/20 rounded-2xl p-4 flex items-center justify-center min-h-[150px] max-h-[220px] overflow-hidden animate-in fade-in duration-300">
             <img
@@ -148,7 +146,6 @@ export default function FormUpload({
           </div>
         )}
 
-        {/* Document details preview block if PDF */}
         {((file && !file.type.startsWith("image/")) || (existingUrl && isPdf)) && (
           <div className="mt-3 border border-slate-850 bg-slate-950/20 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
             <div className="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center shrink-0">
@@ -172,11 +169,9 @@ export default function FormUpload({
     )
   }
 
-  // Variant: Card (Drag and Drop / Big box preview combination layout)
   return (
     <div className="flex flex-col gap-1.5 w-full">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Dropzone Column */}
         <div
           onClick={triggerUpload}
           className={`group border-2 border-dashed rounded-2xl p-6 flex flex-col justify-center items-center text-center gap-3 transition-all duration-300 cursor-pointer min-h-[220px] ${
@@ -209,7 +204,6 @@ export default function FormUpload({
           </span>
         </div>
 
-        {/* Preview Column */}
         <div className="border border-slate-850 bg-slate-950/20 rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] overflow-hidden">
           {file ? (
             <div className="space-y-3 animate-in zoom-in duration-300 w-full flex flex-col items-center">

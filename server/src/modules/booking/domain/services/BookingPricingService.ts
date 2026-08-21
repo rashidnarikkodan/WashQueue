@@ -6,8 +6,8 @@ export interface CalculatePricingInput {
   paymentMethod: PaymentMethod
   isWalkIn?: boolean
   currency?: string
-  platformCommissionRate?: number // Default 0.10 (10%)
-  depositPercentage?: number // Default 0.20 (20%)
+  platformCommissionRate?: number
+  depositPercentage?: number
 }
 
 export interface CalculatedPricingResult {
@@ -31,18 +31,14 @@ export class BookingPricingService {
       cashAmount = 0
     } else if (input.paymentMethod === PaymentMethod.PAY_AT_STATION) {
       if (input.isWalkIn) {
-        // Walk-in: cash collected in full, in person, right now — no online deposit involved.
         depositAmount = 0
         cashAmount = totalPrice
       } else {
-        // Pre-booked pay-at-station: a deposit is charged online now to guarantee the slot,
-        // the remainder is collected as cash when the customer arrives at the station.
         const rate = input.depositPercentage ?? 0.2
         depositAmount = Number((totalPrice * rate).toFixed(2))
         cashAmount = Number((totalPrice - depositAmount).toFixed(2))
       }
     } else {
-      // ONLINE, WALLET, WALLET_AND_ONLINE — fully settled online/wallet now
       depositAmount = totalPrice
       cashAmount = 0
     }

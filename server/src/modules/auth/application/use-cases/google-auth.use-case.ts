@@ -50,7 +50,6 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       if (!this.client || !env.GOOGLE_CLIENT_ID) {
         throw new AppError(ERROR_MESSAGES.GOOGLE_CONFIG_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR)
       }
-      // Verify Google ID token (JWT)
       try {
         const ticket = await this.client.verifyIdToken({
           idToken: token,
@@ -70,7 +69,6 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         )
       }
     } else {
-      // Treat as Google Access Token and fetch user profile via UserInfo API
       try {
         const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: { Authorization: `Bearer ${token}` },
@@ -114,16 +112,13 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
       throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
     }
 
-    // Map payload using mapper
     const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    // Secure the refresh token by hashing it
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
 
-    // Save refresh token and update last login timestamp
     await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
     await this.userRepository.update(user.id!, { lastLoginAt: new Date() })
 

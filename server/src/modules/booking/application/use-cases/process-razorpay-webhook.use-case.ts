@@ -55,7 +55,6 @@ export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUse
         return { success: true, message: "No reservation matching order ID" }
       }
 
-      // Idempotency: If already confirmed, return success
       if (reservation.status === "CONFIRMED") {
         return { success: true, message: "Reservation already confirmed" }
       }
@@ -66,13 +65,10 @@ export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUse
             razorpay_order_id: orderId,
             razorpay_payment_id: paymentId,
             razorpay_signature: signature,
-            // The webhook payload's own HMAC was already verified above; it is not
-            // the same signature the checkout flow's verifyPaymentSignature expects.
             skipSignatureVerification: true,
           })
           return { success: true, message: "Booking confirmed via webhook" }
         } catch {
-          // If confirmation failed, mark for refund
           reservation.markExpiredRefund(paymentId)
           await this.reservationRepository.save(reservation)
           return { success: true, message: "Booking confirmation failed; marked for refund" }

@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-// src/app/routes/index.tsx
 
 import { lazy, Suspense } from "react"
 import { createBrowserRouter } from "react-router-dom"

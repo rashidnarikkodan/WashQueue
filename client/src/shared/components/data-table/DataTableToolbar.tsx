@@ -42,7 +42,6 @@ export function DataTableToolbar({
     <div
       className={`rounded-2xl border border-border/40 bg-card/50 backdrop-blur-md overflow-hidden flex flex-col gap-4 p-1 shadow-md ${className}`}
     >
-      {/* Tab strip with scroll arrows & arrow key navigation */}
       {tabs.length > 0 && (
         <div className="px-3 pt-3 border-b border-border/30">
           <ScrollableTabs
@@ -53,7 +52,6 @@ export function DataTableToolbar({
         </div>
       )}
 
-      {/* Filters grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 px-5 pb-5 pt-2 items-end">
         {onSearchChange && (
           <Search

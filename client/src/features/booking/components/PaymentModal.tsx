@@ -33,7 +33,6 @@ export default function PaymentModal({
   const subtotal = Math.max(0, totalAmount * 0.82)
   const taxesAndFees = Math.max(0, totalAmount - subtotal)
 
-  // Wallet deduction calculation when UPI is selected
   const availableWallet = walletBalance && walletBalance > 0 ? walletBalance : 0
   const isWalletEligibleForUpi = selectedMethod === "upi" && availableWallet > 0
   const walletDeduction =
@@ -43,7 +42,6 @@ export default function PaymentModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
       <div className="w-full max-w-[560px] rounded-3xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden flex flex-col my-8">
-        {/* Header */}
         <div className="flex items-start justify-between p-6 sm:p-8 pb-4 border-b border-border">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
@@ -61,9 +59,7 @@ export default function PaymentModal({
           </button>
         </div>
 
-        {/* Payment Methods */}
         <div className="p-6 sm:p-8 space-y-4">
-          {/* Option 1: UPI Payment Card */}
           <div
             className={`rounded-2xl transition-all border overflow-hidden ${
               selectedMethod === "upi"
@@ -71,7 +67,6 @@ export default function PaymentModal({
                 : "bg-card border-border hover:border-primary/30"
             } ${isProcessing ? "opacity-60 pointer-events-none" : ""}`}
           >
-            {/* Main Selection Area */}
             <div
               onClick={() => !isProcessing && onSelectMethod("upi")}
               className="flex items-center gap-4 p-4 cursor-pointer"
@@ -98,7 +93,6 @@ export default function PaymentModal({
               </div>
             </div>
 
-            {/* Wallet Deduct Toggle for UPI */}
             {selectedMethod === "upi" && (
               <div className="px-4 pb-4 pt-1">
                 {isLoadingWallet ? (
@@ -130,7 +124,6 @@ export default function PaymentModal({
                         </div>
                       </div>
 
-                      {/* Animated Toggle Switch */}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -157,7 +150,6 @@ export default function PaymentModal({
                       </button>
                     </div>
 
-                    {/* Split Details Pill */}
                     {useWalletWithUpi && (
                       <div className="flex items-center justify-between text-[11px] px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
                         <div className="flex items-center gap-1.5">
@@ -183,7 +175,6 @@ export default function PaymentModal({
             )}
           </div>
 
-          {/* Option 2: Full Wallet Payment */}
           <div
             onClick={() => !isProcessing && onSelectMethod("wallet")}
             className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
@@ -234,7 +225,6 @@ export default function PaymentModal({
           </div>
         </div>
 
-        {/* Total & CTA Section */}
         <div className="p-6 sm:p-8 bg-muted/40 border-t border-border space-y-5">
           <div className="space-y-2 text-xs">
             <div className="flex justify-between text-muted-foreground">
@@ -250,7 +240,6 @@ export default function PaymentModal({
               <span className="text-foreground font-semibold">₹{totalAmount.toFixed(2)}</span>
             </div>
 
-            {/* Split Breakdown Details */}
             {selectedMethod === "upi" && useWalletWithUpi && walletDeduction > 0 && (
               <div className="flex justify-between text-emerald-500 pt-1 font-medium">
                 <span className="flex items-center gap-1">
