@@ -9,6 +9,7 @@ import { requireManagerPermission } from "@/modules/manager/manager.module"
 import { ManagerPermission } from "@/modules/manager/domain/entities/ManagerAssignment"
 import {
   cancelBookingSchema,
+  rescheduleBookingSchema,
   createBookingSchema,
   createWalkInBookingSchema,
   getBookingListQuerySchema,
@@ -49,6 +50,12 @@ export const createBookingRouter = (bookingController: BookingController): Route
     validateRequest(bookingIdParamSchema, "params"),
     validateRequest(cancelBookingSchema),
     asyncHandler(bookingController.cancel)
+  )
+  router.patch(
+    "/:bookingId/reschedule",
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(rescheduleBookingSchema),
+    asyncHandler(bookingController.reschedule)
   )
 
   // Operational Queue Operations (Manager / Owner / Admin)

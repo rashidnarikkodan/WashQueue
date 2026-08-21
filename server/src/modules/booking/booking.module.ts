@@ -35,6 +35,7 @@ import { CreateWalkInBookingUseCase } from "./application/use-cases/create-walki
 import { GetBookingUseCase } from "./application/use-cases/get-booking.use-case"
 import { GetUserBookingsUseCase } from "./application/use-cases/get-user-bookings.use-case"
 import { CancelBookingUseCase } from "./application/use-cases/cancel-booking.use-case"
+import { RescheduleBookingUseCase } from "./application/use-cases/reschedule-booking.use-case"
 import { ValidateQRForCheckInUseCase } from "./application/use-cases/validate-qr.use-case"
 import { SavePreInspectionAndCheckInUseCase } from "./application/use-cases/save-pre-inspection.use-case"
 import { GetOperationalQueueUseCase } from "./application/use-cases/get-operational-queue.use-case"
@@ -152,6 +153,14 @@ const cancelBookingUseCase = new CancelBookingUseCase(
   transactionRunner
 )
 
+export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
+  bookingRepository,
+  timeWindowRepository,
+  bookingStatusLogRepository,
+  bookingNotificationService,
+  transactionRunner
+)
+
 const validateQRUseCase = new ValidateQRForCheckInUseCase(
   bookingRepository,
   managerAssignmentRepository,
@@ -232,6 +241,7 @@ const bookingController = new BookingController(
   getBookingUseCase,
   getUserBookingsUseCase,
   cancelBookingUseCase,
+  rescheduleBookingUseCase,
   pdfInvoiceService,
   validateQRUseCase,
   savePreInspectionUseCase,

@@ -57,6 +57,10 @@ export const cancelBookingSchema = z.object({
   reason: z.string().min(1, "Cancellation reason is required"),
 })
 
+export const rescheduleBookingSchema = z.object({
+  newTimeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID"),
+})
+
 export const getBookingListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(10),

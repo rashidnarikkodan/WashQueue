@@ -163,7 +163,7 @@ export interface BookingProps {
 }
 
 export class Booking {
-  constructor(private readonly props: BookingProps) {}
+  constructor(private readonly props: BookingProps) { }
 
   get id(): string {
     return this.props.id
@@ -358,6 +358,42 @@ export class Booking {
         return false
     }
   }
+
+  canReschedule(now: Date = new Date()): boolean {
+    const allowedStatuses = [BookingStatus.PENDING, BookingStatus.CONFIRMED]
+    if (!allowedStatuses.includes(this.props.status)) {
+      return false
+    }
+
+    // Disallow walk-in bookings if applicable
+    if (this.props.isWalkIn) {
+      return false
+    }
+
+    const windowStartMs = new Date(this.props.scheduling.windowStart).getTime()
+    const nowMs = now.getTime()
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
+
+    return (windowStartMs - nowMs) >= TWENTY_FOUR_HOURS_MS
+  }
+
+
+  reschedule(newScheduling: SchedulingDetails, now: Date = new Date()): void {
+    if (!this.canReschedule(now)) {
+      throw new Error(
+        `Cannot reschedule booking: Rescheduling is only allowed at least 24 hours prior to the scheduled window start for PENDING or CONFIRMED bookings.`
+      )
+    }
+
+    this.props.scheduling = newScheduling
+    if (this.props.qr) {
+      this.props.qr.qrExpiresAt = new Date(
+        new Date(newScheduling.windowEnd).getTime() + 24 * 60 * 60 * 1000
+      )
+    }
+    this.props.updatedAt = now
+  }
+
 
   checkIn(byUserId: string): void {
     if (!this.canTransitionTo(BookingStatus.CHECKED_IN)) {
