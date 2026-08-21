@@ -46,7 +46,19 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
   ]
 
   const renderTransactionRow = (tx: WalletTransactionItem) => {
-    const isCredit = tx.type === "CREDIT"
+    const isCredit =
+      tx.type === "CREDIT" ||
+      tx.type === "REFUND" ||
+      tx.category === "REFUND" ||
+      tx.category === "TOP_UP" ||
+      tx.category === "CASHBACK"
+    const isRefund = tx.category === "REFUND" || tx.type === "REFUND"
+    const defaultTitle = isRefund
+      ? "Refund"
+      : isCredit
+      ? "Wallet Credit"
+      : "Payment"
+
     return (
       <div
         key={tx.id}
@@ -69,7 +81,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
 
           <div>
             <h4 className="text-sm font-bold text-foreground">
-              {tx.description || (isCredit ? "Wallet Credit" : "Payment")}
+              {tx.description || defaultTitle}
             </h4>
             <p className="text-xs text-muted-foreground">
               {new Date(tx.createdAt).toLocaleDateString("en-IN", {

@@ -16,7 +16,7 @@ export interface WalletTransactionItem {
   id: string
   walletId: string
   userId: string
-  type: "CREDIT" | "DEBIT"
+  type: "CREDIT" | "DEBIT" | "REFUND"
   category: "TOP_UP" | "BOOKING_PAYMENT" | "REFUND" | "CASHBACK" | "ADMIN_ADJUSTMENT"
   amount: number
   balanceBefore: number
@@ -31,7 +31,7 @@ export interface WalletTransactionItem {
 export interface GetTransactionsQuery {
   page?: number
   limit?: number
-  type?: "CREDIT" | "DEBIT"
+  type?: "CREDIT" | "DEBIT" | "REFUND"
   category?: "TOP_UP" | "BOOKING_PAYMENT" | "REFUND" | "CASHBACK" | "ADMIN_ADJUSTMENT"
   startDate?: string
   endDate?: string
