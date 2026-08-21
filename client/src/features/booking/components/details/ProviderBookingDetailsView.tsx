@@ -63,11 +63,25 @@ export default function ProviderBookingDetailsView({
     return "REGISTERED USER"
   }, [booking.isWalkIn, booking.walkInCustomer])
 
-  // Live Timer
+  // Live Timer only active when service is in progress or completed
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
 
+  const isServiceStarted = Boolean(
+    booking.serviceStartedAt ||
+      booking.checkedInAt ||
+      booking.status === "IN_SERVICE" ||
+      booking.status === "SERVICE_COMPLETED" ||
+      booking.status === "AWAITING_HANDOVER" ||
+      booking.status === "COMPLETED"
+  )
+
   useEffect(() => {
-    const startTimeStr = booking.serviceStartedAt || booking.checkedInAt || booking.createdAt
+    if (!isServiceStarted || booking.status === "CANCELLED" || booking.status === "NO_SHOW") {
+      setElapsedSeconds(0)
+      return
+    }
+
+    const startTimeStr = booking.serviceStartedAt || booking.checkedInAt
     if (!startTimeStr) return
 
     const startTime = new Date(startTimeStr).getTime()
@@ -88,9 +102,9 @@ export default function ProviderBookingDetailsView({
     void Promise.resolve().then(updateTimer)
     return () => clearInterval(interval)
   }, [
+    isServiceStarted,
     booking.serviceStartedAt,
     booking.checkedInAt,
-    booking.createdAt,
     booking.completedAt,
     booking.status,
     booking.updatedAt,
@@ -127,6 +141,9 @@ export default function ProviderBookingDetailsView({
     ]
 
     const currentStatus = booking.status
+    const isCancelled = currentStatus === "CANCELLED"
+    const isNoShow = currentStatus === "NO_SHOW"
+
     const order = [
       "PENDING",
       "CONFIRMED",
@@ -142,13 +159,18 @@ export default function ProviderBookingDetailsView({
       const recordedTime = historyMap.get(stg.key)
       const stageIdx = order.indexOf(stg.key)
       const active = currentStatus === stg.key
-      const done = recordedTime ? true : currentIdx >= stageIdx && currentIdx !== -1
+      const done = recordedTime ? true : currentIdx >= stageIdx && currentIdx !== -1 && !isCancelled && !isNoShow
 
       return {
         label: stg.label,
-        time: recordedTime || (active ? "In Progress" : done ? "Done" : "Pending"),
+        time: isCancelled && !recordedTime
+          ? "Cancelled"
+          : isNoShow && !recordedTime
+            ? "No-Show"
+            : recordedTime || (active ? "In Progress" : done ? "Done" : "Pending"),
         done,
         active,
+        isCancelled: isCancelled && !recordedTime,
       }
     })
   }, [booking.statusHistory, booking.status])
@@ -252,8 +274,28 @@ export default function ProviderBookingDetailsView({
                 Current Status
               </span>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-xs shadow-emerald-400" />
-                <span className="text-base font-bold text-emerald-400 uppercase">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    booking.status === "COMPLETED"
+                      ? "bg-emerald-400 shadow-xs shadow-emerald-400"
+                      : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
+                        ? "bg-blue-400 animate-pulse shadow-xs shadow-blue-400"
+                        : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                          ? "bg-red-400 shadow-xs shadow-red-400"
+                          : "bg-amber-400 shadow-xs shadow-amber-400"
+                  }`}
+                />
+                <span
+                  className={`text-base font-bold uppercase ${
+                    booking.status === "COMPLETED"
+                      ? "text-emerald-400"
+                      : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
+                        ? "text-blue-400"
+                        : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                          ? "text-red-400"
+                          : "text-amber-400"
+                  }`}
+                >
                   {booking.status.replace("_", " ")}
                 </span>
               </div>
@@ -293,8 +335,18 @@ export default function ProviderBookingDetailsView({
                 <Clock size={18} className="text-primary" />
                 <h3 className="text-base font-bold text-foreground">Live Execution Timeline</h3>
               </div>
-              <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
-                REAL-TIME
+              <span
+                className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                  booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                    : "bg-primary/10 text-primary border border-primary/20"
+                }`}
+              >
+                {booking.status === "CANCELLED"
+                  ? "TERMINATED"
+                  : booking.status === "NO_SHOW"
+                    ? "EXPIRED"
+                    : "REAL-TIME"}
               </span>
             </div>
 
@@ -304,18 +356,32 @@ export default function ProviderBookingDetailsView({
                 <div key={idx} className="flex flex-col items-center text-center space-y-2">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-md transition-all ${
-                      step.active
-                        ? "bg-[#151b2d] border-4 border-primary text-primary scale-110 shadow-primary/30"
-                        : step.done
-                          ? "bg-primary text-slate-950 font-black"
-                          : "bg-[#191f31] border border-white/10 text-muted-foreground"
+                      step.isCancelled
+                        ? "bg-[#191f31] border border-red-500/20 text-red-400/50"
+                        : step.active
+                          ? "bg-[#151b2d] border-4 border-primary text-primary scale-110 shadow-primary/30"
+                          : step.done
+                            ? "bg-primary text-slate-950 font-black"
+                            : "bg-[#191f31] border border-white/10 text-muted-foreground"
                     }`}
                   >
                     {step.done ? <CheckCircle2 size={16} /> : idx + 1}
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground block">{step.label}</span>
-                    <span className="text-[10px] text-muted-foreground block">{step.time}</span>
+                    <span
+                      className={`text-xs font-bold block ${
+                        step.isCancelled ? "text-muted-foreground line-through" : "text-foreground"
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                    <span
+                      className={`text-[10px] block ${
+                        step.isCancelled ? "text-red-400/70" : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.time}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -328,18 +394,22 @@ export default function ProviderBookingDetailsView({
               <h3 className="text-base font-bold text-foreground">Pre-Service Inspection</h3>
               <span
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
-                  booking.status === "IN_SERVICE" ||
-                  booking.status === "SERVICE_COMPLETED" ||
-                  booking.status === "COMPLETED"
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                  booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                    ? "bg-slate-800 text-slate-400 border border-white/10"
+                    : booking.status === "IN_SERVICE" ||
+                        booking.status === "SERVICE_COMPLETED" ||
+                        booking.status === "COMPLETED"
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                 }`}
               >
-                {booking.status === "IN_SERVICE" ||
-                booking.status === "SERVICE_COMPLETED" ||
-                booking.status === "COMPLETED"
-                  ? "CONDUCTED"
-                  : "PENDING"}
+                {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                  ? "NOT APPLICABLE"
+                  : booking.status === "IN_SERVICE" ||
+                      booking.status === "SERVICE_COMPLETED" ||
+                      booking.status === "COMPLETED"
+                    ? "CONDUCTED"
+                    : "PENDING"}
               </span>
             </div>
 
@@ -350,6 +420,12 @@ export default function ProviderBookingDetailsView({
                 </span>
                 <p className="text-xs italic text-slate-300 leading-relaxed">
                   "{inspectionLog.notes}"
+                </p>
+              </div>
+            ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
+              <div className="p-4 rounded-xl border border-white/5 bg-[#070d1f]">
+                <p className="text-xs text-muted-foreground">
+                  Wash booking was cancelled before service was initiated. Pre-inspection was not required.
                 </p>
               </div>
             ) : (
@@ -365,7 +441,7 @@ export default function ProviderBookingDetailsView({
                   className="px-3.5 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
                 >
                   <FileText size={14} />
-                  <span>{inspectionLog ? "View Inspection" : "Log Pre-Inspection"}</span>
+                  <span>Log Pre-Inspection</span>
                 </button>
               </div>
             )}
@@ -377,16 +453,20 @@ export default function ProviderBookingDetailsView({
               <h3 className="text-base font-bold text-foreground">Post-Service Quality Inspection</h3>
               <span
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
-                  booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED"
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "bg-slate-800 text-slate-400 border border-white/10"
+                  booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                    ? "bg-slate-800 text-slate-400 border border-white/10"
+                    : booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED"
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : "bg-slate-800 text-slate-400 border border-white/10"
                 }`}
               >
-                {booking.status === "COMPLETED"
-                  ? "COMPLETED"
-                  : booking.status === "SERVICE_COMPLETED"
-                    ? "READY FOR HANDOVER"
-                    : "LOCKED"}
+                {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                  ? "NOT APPLICABLE"
+                  : booking.status === "COMPLETED"
+                    ? "COMPLETED"
+                    : booking.status === "SERVICE_COMPLETED"
+                      ? "READY FOR HANDOVER"
+                      : "LOCKED"}
               </span>
             </div>
 
@@ -409,7 +489,9 @@ export default function ProviderBookingDetailsView({
               <div className="p-4 rounded-xl border border-dashed border-white/10 bg-[#070d1f] text-xs text-muted-foreground flex items-center gap-3">
                 <Lock size={16} className="shrink-0 text-muted-foreground/60" />
                 <span>
-                  Post-service quality check unlocks once washing is completed by the manager or technician.
+                  {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                    ? "Service cancelled; post-wash quality inspection is not applicable."
+                    : "Post-service quality check unlocks once washing is completed by the manager or technician."}
                 </span>
               </div>
             )}
@@ -499,7 +581,7 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          {/* B. Booking Schedule & Live Execution Timer Card */}
+          {/* B. Booking Schedule & Contextual Status / Timer Card */}
           <div className="p-6 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-4 text-left">
             <div className="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
               <div className="space-y-0.5">
@@ -522,20 +604,64 @@ export default function ProviderBookingDetailsView({
               </div>
             </div>
 
-            {/* Live Timer Counter Display */}
-            <div className="p-5 rounded-2xl border border-primary/20 bg-[#070d1f] text-center space-y-1">
-              <span className="text-[9px] font-black uppercase text-muted-foreground block tracking-widest">
-                {booking.completedAt || booking.status === "COMPLETED"
-                  ? "TOTAL DURATION"
-                  : "ELAPSED EXECUTION TIME"}
-              </span>
-              <div className="flex items-center justify-center gap-2 text-primary font-mono text-3xl font-bold">
-                {booking.status === "IN_SERVICE" && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                )}
-                <span>{formattedTimer}</span>
+            {/* Contextual Status / Execution Timer Display */}
+            {isServiceStarted && booking.status !== "CANCELLED" && booking.status !== "NO_SHOW" ? (
+              <div className="p-5 rounded-2xl border border-primary/20 bg-[#070d1f] text-center space-y-1">
+                <span className="text-[9px] font-black uppercase text-muted-foreground block tracking-widest">
+                  {booking.completedAt || booking.status === "COMPLETED"
+                    ? "TOTAL SERVICE DURATION"
+                    : "LIVE SERVICE ELAPSED TIME"}
+                </span>
+                <div className="flex items-center justify-center gap-2 text-primary font-mono text-3xl font-bold">
+                  {(booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN") && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  )}
+                  <span>{formattedTimer}</span>
+                </div>
               </div>
-            </div>
+            ) : booking.status === "CANCELLED" ? (
+              <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5 space-y-2 text-left">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-red-400">
+                    Booking Cancelled
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-red-500/20 text-red-400">
+                    Inactive
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  {booking.cancellation?.cancellationReason || "Cancelled by customer before service."}
+                </p>
+                {booking.cancellation?.cancelledAt && (
+                  <span className="text-[10px] text-muted-foreground font-mono block">
+                    Cancelled: {new Date(booking.cancellation.cancelledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
+              </div>
+            ) : booking.status === "NO_SHOW" ? (
+              <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 space-y-1 text-left">
+                <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 block">
+                  Customer No-Show
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  The vehicle was not presented during the scheduled slot window.
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 space-y-1 text-left">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                    Awaiting Arrival
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-400">
+                    Upcoming
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Vehicle scheduled for {formattedDates.timeStr}. Check-in will start execution tracking.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* C. Financial Summary Card */}
@@ -577,8 +703,14 @@ export default function ProviderBookingDetailsView({
                     ₹{(booking.pricingSnapshot?.totalPrice ?? 0).toLocaleString("en-IN")}
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  {booking.paymentStatus}
+                <span
+                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${
+                    booking.status === "CANCELLED"
+                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                      : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                  }`}
+                >
+                  {booking.status === "CANCELLED" ? "REFUNDED" : booking.paymentStatus}
                 </span>
               </div>
             </div>
@@ -608,14 +740,26 @@ export default function ProviderBookingDetailsView({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => onAdvanceStatus("AWAITING_HANDOVER")}
-              disabled={isAdvancingStatus || booking.status !== "COMPLETED"}
-              className="w-full py-4 rounded-2xl bg-[#2e3447] text-muted-foreground text-xs font-black uppercase tracking-wider hover:text-foreground transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              INITIATE HANDOVER
-            </button>
+            {booking.status === "SERVICE_COMPLETED" && (
+              <button
+                type="button"
+                onClick={() => onAdvanceStatus("COMPLETED")}
+                disabled={isAdvancingStatus}
+                className="w-full py-4 rounded-2xl bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-emerald-400/20"
+              >
+                COMPLETE &amp; HANDOVER
+              </button>
+            )}
+
+            {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
+              <button
+                type="button"
+                onClick={() => navigate("/manager/check-in")}
+                className="w-full py-4 rounded-2xl bg-primary text-slate-950 font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
+              >
+                CHECK-IN VEHICLE
+              </button>
+            )}
 
             {(booking.status === "CONFIRMED" || booking.status === "PENDING" || booking.status === "CHECKED_IN") && (
               <button
@@ -626,6 +770,21 @@ export default function ProviderBookingDetailsView({
               >
                 MARK NO-SHOW
               </button>
+            )}
+
+            {(booking.status === "CANCELLED" || booking.status === "NO_SHOW") && (
+              <div className="p-3.5 rounded-2xl bg-[#151b2d] border border-white/5 text-center text-xs font-semibold text-muted-foreground">
+                {booking.status === "CANCELLED"
+                  ? "Booking is Cancelled & Closed"
+                  : "Customer Marked No-Show"}
+              </div>
+            )}
+
+            {booking.status === "COMPLETED" && (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-2">
+                <CheckCircle2 size={16} />
+                <span>Service Completed &amp; Handed Over</span>
+              </div>
             )}
           </div>
         </div>
