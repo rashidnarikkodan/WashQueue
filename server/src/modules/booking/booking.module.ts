@@ -46,10 +46,10 @@ import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-c
 import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
 import { GetPublicStationQueueUseCase } from "./application/use-cases/get-public-station-queue.use-case"
 
-import { BookingController } from "./presentation/booking.controller"
-import { createBookingRouter } from "./presentation/booking.routes"
-import { PaymentController } from "./presentation/payment.controller"
-import { createPaymentRouter } from "./presentation/payment.routes"
+import { BookingController } from "./presentation/controllers/booking.controller"
+import { createBookingRouter } from "./presentation/routers/booking.routes"
+import { PaymentController } from "./presentation/controllers/payment.controller"
+import { createPaymentRouter } from "./presentation/routers/payment.routes"
 
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()

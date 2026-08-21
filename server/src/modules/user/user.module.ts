@@ -7,7 +7,7 @@ import { UserRepository } from "./infrastructure/repository/user.mongo.repositor
 import { UserController } from "./presentation/user.controller"
 import { createUsersRouter } from "./presentation/user.routes"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
-import { OwnerVerificationStatusService } from "../owner/application/use-cases/owner-verification-status.service"
+import { OwnerVerificationStatusService } from "../owner/application/service/owner-verification-status.service"
 import { stationRepository } from "../station/station.module"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 import { MailService } from "../../core/application/services/mail.service"

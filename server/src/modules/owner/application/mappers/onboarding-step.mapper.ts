@@ -1,5 +1,5 @@
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
-import { IOwnerOnboardingDetails } from "../../application/interfaces/owner-usecases.interfaces"
+import { IOwnerOnboardingDetails } from "../interfaces/owner-usecases.interfaces"
 import { MediaUploadService, MulterFileMap } from "@/core/application/services/media-upload.service"
 
 export interface ParsedOnboardingStepRequest {

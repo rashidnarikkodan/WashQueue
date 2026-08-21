@@ -17,14 +17,13 @@ import {
   IToggleActiveStationUseCase,
   IAssignManagerUseCase,
   IGetStationFilterOptionsUseCase,
+  IConfigureSlotConfigUseCase,
+  IGetSlotConfigUseCase,
+  IGetBookingCalendarUseCase,
+  IGetAvailableTimeWindowsUseCase,
 } from "../application/interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { StationRequestMapper } from "./mappers/station.mapper"
-
-import { ConfigureSlotConfigUseCase } from "../application/use-cases/configure-slot-config.usecase"
-import { GetSlotConfigUseCase } from "../application/use-cases/get-slot-config.usecase"
-import { GetBookingCalendarUseCase } from "../application/use-cases/get-booking-calendar.usecase"
-import { GetAvailableTimeWindowsUseCase } from "../application/use-cases/get-available-time-windows.usecase"
+import { StationRequestMapper } from "../application/mappers/station-request.mapper"
 import {
   configureSlotConfigSchema,
   getAvailableTimeWindowsQuerySchema,
@@ -32,6 +31,7 @@ import {
 
 export class StationController {
   constructor(
+    private readonly stationMapper: StationRequestMapper,
     private readonly createStationUseCase: ICreateStationUseCase,
     private readonly updateStationUseCase: IUpdateStationUseCase,
     private readonly getStationUseCase: IGetStationUseCase,
@@ -42,11 +42,10 @@ export class StationController {
     private readonly toggleActiveStationUseCase: IToggleActiveStationUseCase,
     private readonly assignManagerUseCase: IAssignManagerUseCase,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly stationMapper: StationRequestMapper,
-    private readonly configureSlotConfigUseCase: ConfigureSlotConfigUseCase,
-    private readonly getSlotConfigUseCase: GetSlotConfigUseCase,
-    private readonly getBookingCalendarUseCase: GetBookingCalendarUseCase,
-    private readonly getAvailableTimeWindowsUseCase: GetAvailableTimeWindowsUseCase,
+    private readonly configureSlotConfigUseCase: IConfigureSlotConfigUseCase,
+    private readonly getSlotConfigUseCase: IGetSlotConfigUseCase,
+    private readonly getBookingCalendarUseCase: IGetBookingCalendarUseCase,
+    private readonly getAvailableTimeWindowsUseCase: IGetAvailableTimeWindowsUseCase,
     private readonly getStationFilterOptionsUseCase: IGetStationFilterOptionsUseCase
   ) {}
 

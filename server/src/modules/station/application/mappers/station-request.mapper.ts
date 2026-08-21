@@ -1,9 +1,9 @@
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { CreateStationInput } from "../../application/dtos/create-station.dto"
-import { UpdateStationInput } from "../../application/dtos/update-station.dto"
-import { StationStepParserFactory, safeJsonParse } from "../parsers/station-step.parser"
+import { CreateStationInput } from "../dtos/create-station.dto"
+import { UpdateStationInput } from "../dtos/update-station.dto"
+import { StationStepParserFactory, safeJsonParse } from "./station-step.parser"
 import { StationImage } from "../../domain/entities/Station"
 
 export interface ReviewStationRequestInput {

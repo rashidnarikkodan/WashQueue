@@ -6,8 +6,9 @@ import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { SlotConfig } from "../../domain/entities/SlotConfig"
 import { TimeWindowInstance } from "../../domain/entities/TimeWindowInstance"
+import { IGenerateTimeWindowsUseCase } from "../interfaces/station-usecases.interface"
 
-export class GenerateTimeWindowsUseCase {
+export class GenerateTimeWindowsUseCase implements IGenerateTimeWindowsUseCase {
   constructor(
     private stationRepository: IStationRepository,
     private slotConfigRepository: ISlotConfigRepository,

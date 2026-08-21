@@ -5,10 +5,11 @@ import { EnsureBookingHorizonService } from "../services/ensure-booking-horizon.
 import { BookingCalendarResponseDTO, CalendarDateEntryDTO } from "../dtos/booking-calendar.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { IGetBookingCalendarUseCase } from "../interfaces/station-usecases.interface"
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
-export class GetBookingCalendarUseCase {
+export class GetBookingCalendarUseCase implements IGetBookingCalendarUseCase {
   constructor(
     private stationRepository: IStationRepository,
     private slotConfigRepository: ISlotConfigRepository,

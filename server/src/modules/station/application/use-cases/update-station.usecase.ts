@@ -26,7 +26,7 @@ const slugify = (text: string): string => {
 }
 
 import { ISlotConfigRepository } from "../../domain/repositories/slot-config.repository"
-import { GenerateTimeWindowsUseCase } from "./generate-time-windows.usecase"
+import { IGenerateTimeWindowsUseCase } from "../interfaces/station-usecases.interface"
 import { SlotConfig } from "../../domain/entities/SlotConfig"
 import { randomUUID } from "node:crypto"
 
@@ -40,7 +40,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     private readonly mediaUploadService?: MediaUploadService,
     private readonly managerAssignmentRepository?: IManagerAssignmentRepository,
     private readonly slotConfigRepository?: ISlotConfigRepository,
-    private readonly generateTimeWindowsUseCase?: GenerateTimeWindowsUseCase,
+    private readonly generateTimeWindowsUseCase?: IGenerateTimeWindowsUseCase,
     private readonly transactionRunner?: ITransactionRunner
   ) {}
 

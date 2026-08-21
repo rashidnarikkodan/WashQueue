@@ -3,8 +3,9 @@ import { ISlotConfigRepository } from "../../domain/repositories/slot-config.rep
 import { SlotConfigResponseDTO } from "../dtos/slot-config.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { IGetSlotConfigUseCase } from "../interfaces/station-usecases.interface"
 
-export class GetSlotConfigUseCase {
+export class GetSlotConfigUseCase implements IGetSlotConfigUseCase {
   constructor(
     private stationRepository: IStationRepository,
     private slotConfigRepository: ISlotConfigRepository

@@ -4,8 +4,9 @@ import { EnsureBookingHorizonService } from "../services/ensure-booking-horizon.
 import { AvailableTimeWindowsResponseDTO, TimeWindowDTO } from "../dtos/available-time-windows.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { IGetAvailableTimeWindowsUseCase } from "../interfaces/station-usecases.interface"
 
-export class GetAvailableTimeWindowsUseCase {
+export class GetAvailableTimeWindowsUseCase implements IGetAvailableTimeWindowsUseCase {
   constructor(
     private stationRepository: IStationRepository,
     private timeWindowRepository: ITimeWindowRepository,

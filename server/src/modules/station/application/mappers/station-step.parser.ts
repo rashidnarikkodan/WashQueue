@@ -7,7 +7,7 @@ import {
   UpdateAvailabilityInput,
   UpsertPricingInput,
   UpdateAmenitiesInput,
-} from "../../application/dtos/update-station.dto"
+} from "../dtos/update-station.dto"
 import { StationImage } from "../../domain/entities/Station"
 
 export interface IStationStepParser<T> {

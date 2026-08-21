@@ -11,7 +11,7 @@ import { OwnerController } from "./presentation/owner.controller"
 import { createOwnerRouter } from "./presentation/owner.routes"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
-import { OnboardingStepRequestMapper } from "./presentation/mappers/onboarding-step.mapper"
+import { OnboardingStepRequestMapper } from "./application/mappers/onboarding-step.mapper"
 
 export const ownerRepository = new OwnerMongoRepository()
 const cloudinaryService = new CloudinaryService()

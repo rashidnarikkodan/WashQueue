@@ -18,7 +18,7 @@ import {
   IUpdateOwnerUseCase,
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
-import { OnboardingStepRequestMapper } from "./mappers/onboarding-step.mapper"
+import { OnboardingStepRequestMapper } from "../application/mappers/onboarding-step.mapper"
 
 export class OwnerController {
   constructor(

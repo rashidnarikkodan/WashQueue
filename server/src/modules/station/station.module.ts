@@ -14,11 +14,11 @@ import { StationController } from "./presentation/station.controller"
 import { createRouter } from "./presentation/station.routes"
 import { GetStationsUseCase } from "./application/use-cases/get-stations.usecase"
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
-import { StationRequestMapper } from "./presentation/mappers/station.mapper"
+import { StationRequestMapper } from "./application/mappers/station-request.mapper"
 import { ReviewStationUseCase } from "./application/use-cases/review-station.usecase"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
-import { StationStepParserFactory } from "./presentation/parsers/station-step.parser"
+import { StationStepParserFactory } from "./application/mappers/station-step.parser"
 import { ConfigureSlotConfigUseCase } from "./application/use-cases/configure-slot-config.usecase"
 import { GetSlotConfigUseCase } from "./application/use-cases/get-slot-config.usecase"
 import { GenerateTimeWindowsUseCase } from "./application/use-cases/generate-time-windows.usecase"
@@ -140,6 +140,7 @@ const getStationFilterOptionsUseCase = new GetStationFilterOptionsUseCase(
 )
 
 const stationController = new StationController(
+  stationRequestMapper,
   createStationUseCase,
   updateStationUseCase,
   getStationUseCase,
@@ -150,7 +151,6 @@ const stationController = new StationController(
   toggleActiveStationUseCase,
   assignManagerUseCase,
   ownerRepository,
-  stationRequestMapper,
   configureSlotConfigUseCase,
   getSlotConfigUseCase,
   getBookingCalendarUseCase,
