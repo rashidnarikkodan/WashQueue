@@ -12,11 +12,7 @@ import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
 export class BookingRedisQueueService implements IBookingQueueService {
   constructor(private readonly bookingStatusLogRepository: IBookingStatusLogRepository) {}
 
-  /**
-   * Deterministic queue ordering score computation:
-   * For Scheduled Bookings: min(windowStart, checkedInAt) timestamp
-   * For Walk-In Bookings: checkedInAt timestamp
-   */
+
   private computeOrderScore(booking: Booking): number {
     const checkedInTs = booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : Date.now()
     if (!booking.isWalkIn && booking.scheduling && booking.scheduling.windowStart) {

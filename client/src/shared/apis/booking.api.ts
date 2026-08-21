@@ -106,6 +106,13 @@ export interface BookingResponse {
   depositAmount: number
   cashAmount: number
   statusHistory?: BookingStatusHistoryItem[]
+  estimatedServiceDurationMinutes?: number
+  serviceDurationBreakdown?: {
+    baseMinutes: number
+    extraServicesMinutes: number
+    vehicleClassModifierMinutes: number
+    totalEstimatedMinutes: number
+  }
   createdAt: string
   updatedAt: string
 }

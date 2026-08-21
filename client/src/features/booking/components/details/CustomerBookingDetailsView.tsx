@@ -81,6 +81,29 @@ export default function CustomerBookingDetailsView({
   const paymentStatusStr = booking.paymentStatus || "PENDING"
   const bookingStatusStr = booking.status ? booking.status.replace("_", " ") : "PENDING"
 
+  const durationBreakdown = booking.serviceDurationBreakdown || {
+    baseMinutes: booking.serviceType === "FULL" ? 40 : 20,
+    extraServicesMinutes: (booking.extraServices?.length || 0) * 5,
+    vehicleClassModifierMinutes: 0,
+    totalEstimatedMinutes:
+      (booking.serviceType === "FULL" ? 40 : 20) + (booking.extraServices?.length || 0) * 5,
+  }
+  const estimatedWashDuration =
+    booking.estimatedServiceDurationMinutes || durationBreakdown.totalEstimatedMinutes
+
+  const nowMs = Date.now()
+  const serviceStartMs = booking.serviceStartedAt
+    ? new Date(booking.serviceStartedAt).getTime()
+    : booking.checkedInAt
+      ? new Date(booking.checkedInAt).getTime()
+      : null
+
+  const elapsedServiceMinutes = serviceStartMs
+    ? Math.max(0, Math.floor((nowMs - serviceStartMs) / (1000 * 60)))
+    : 0
+
+  const remainingServiceMinutes = Math.max(1, estimatedWashDuration - elapsedServiceMinutes)
+
   const canReschedule = Boolean(
     (booking.status === "CONFIRMED" || booking.status === "PENDING") &&
       !booking.isWalkIn &&
@@ -300,7 +323,94 @@ export default function CustomerBookingDetailsView({
             </div>
           </div>
 
-          {/* 2. Booking Tier & Specifications Card */}
+          {/* 2. Estimated Wash Time & Duration Breakdown Card */}
+          <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#151b2d]/80 backdrop-blur-md shadow-2xl space-y-6 text-left relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+                  <Clock size={16} />
+                  <span>Estimated Wash Time</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
+                  <span>~{estimatedWashDuration} Mins</span>
+                  <span className="text-xs font-semibold text-muted-foreground font-sans bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                    {serviceName}
+                  </span>
+                </h3>
+              </div>
+
+              {/* Status Context Indicator */}
+              {booking.status === "IN_SERVICE" ? (
+                <div className="px-4 py-2 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping" />
+                  <span>Wash In Progress (~{remainingServiceMinutes} mins remaining)</span>
+                </div>
+              ) : booking.status === "CHECKED_IN" ? (
+                <div className="px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span>Checked In · Bay Assignment in Queue</span>
+                </div>
+              ) : booking.status === "COMPLETED" ? (
+                <div className="px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 size={16} />
+                  <span>Service Completed Cleanly</span>
+                </div>
+              ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
+                <div className="px-4 py-2 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold flex items-center gap-2">
+                  <XCircle size={16} />
+                  <span>{booking.status === "CANCELLED" ? "Booking Cancelled" : "Slot Expired"}</span>
+                </div>
+              ) : (
+                <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold flex items-center gap-2">
+                  <Clock size={14} />
+                  <span>Estimated Slot Execution</span>
+                </div>
+              )}
+            </div>
+
+            {/* Time Breakdown Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
+                  Base Wash Duration
+                </span>
+                <span className="text-sm sm:text-base font-bold text-foreground">
+                  {durationBreakdown.baseMinutes} mins
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  {booking.serviceType === "FULL" ? "Comprehensive wash" : "Express quick wash"}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
+                  Add-On Treatments
+                </span>
+                <span className="text-sm sm:text-base font-bold text-foreground">
+                  +{durationBreakdown.extraServicesMinutes} mins
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  {booking.extraServices?.length || 0} extra service{booking.extraServices?.length === 1 ? "" : "s"}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#070d1f] border border-white/5 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground block">
+                  Vehicle Class Modifier
+                </span>
+                <span className="text-sm sm:text-base font-bold text-foreground">
+                  {durationBreakdown.vehicleClassModifierMinutes > 0
+                    ? `+${durationBreakdown.vehicleClassModifierMinutes} mins`
+                    : "Standard (+0 min)"}
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  {booking.vehicleDetails?.model || "Standard vehicle profile"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Booking Tier & Specifications Card */}
           <div className="p-6 sm:p-8 rounded-3xl border border-white/5 bg-[#191f31] shadow-2xl space-y-6 text-left">
             <div className="flex items-center gap-2 border-b border-white/5 pb-4">
               <ShieldCheck size={18} className="text-primary" />

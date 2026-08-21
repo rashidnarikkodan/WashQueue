@@ -92,6 +92,35 @@ export class BookingDTOMapper {
         : null,
       statusHistory: mappedHistory,
       rescheduleCount: props.rescheduleCount ?? 0,
+      estimatedServiceDurationMinutes: (() => {
+        const base = props.serviceType === "FULL" ? 40 : 20
+        const extra = (props.extraServices?.length || 0) * 5
+        const modelLower = (props.vehicleDetails?.model || "").toLowerCase()
+        let classMod = 0
+        if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+          classMod = 10
+        } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+          classMod = 15
+        }
+        return base + extra + classMod
+      })(),
+      serviceDurationBreakdown: (() => {
+        const base = props.serviceType === "FULL" ? 40 : 20
+        const extra = (props.extraServices?.length || 0) * 5
+        const modelLower = (props.vehicleDetails?.model || "").toLowerCase()
+        let classMod = 0
+        if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+          classMod = 10
+        } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+          classMod = 15
+        }
+        return {
+          baseMinutes: base,
+          extraServicesMinutes: extra,
+          vehicleClassModifierMinutes: classMod,
+          totalEstimatedMinutes: base + extra + classMod,
+        }
+      })(),
       createdAt: props.createdAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),
     }

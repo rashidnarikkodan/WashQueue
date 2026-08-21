@@ -112,6 +112,13 @@ export interface BookingResponseDTO {
   } | null
   statusHistory?: BookingStatusLogDTO[]
   rescheduleCount?: number
+  estimatedServiceDurationMinutes?: number
+  serviceDurationBreakdown?: {
+    baseMinutes: number
+    extraServicesMinutes: number
+    vehicleClassModifierMinutes: number
+    totalEstimatedMinutes: number
+  }
   createdAt: string
   updatedAt: string
 }
