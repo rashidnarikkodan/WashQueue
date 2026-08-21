@@ -1,6 +1,6 @@
 import { Types } from "mongoose"
 import { BookingReservation } from "../../domain/entities/BookingReservation"
-import { ServiceType, PaymentType } from "../../domain/entities/Booking"
+import { ServiceType, PaymentMethod } from "../../domain/entities/Booking"
 import { IBookingReservationDocument } from "../models/booking-reservation.model"
 
 export class BookingReservationMapper {
@@ -13,7 +13,7 @@ export class BookingReservationMapper {
       timeWindowId: doc.timeWindowId.toString(),
       serviceType: doc.serviceType as ServiceType,
       extraServiceIds: doc.extraServiceIds || [],
-      paymentType: doc.paymentType as PaymentType,
+      paymentMethod: doc.paymentMethod as PaymentMethod,
       depositAmount: doc.depositAmount,
       cashAmount: doc.cashAmount,
       totalAmount: doc.totalAmount,
@@ -40,7 +40,7 @@ export class BookingReservationMapper {
         : raw.timeWindowId,
       serviceType: raw.serviceType,
       extraServiceIds: raw.extraServiceIds,
-      paymentType: raw.paymentType,
+      paymentMethod: raw.paymentMethod,
       depositAmount: raw.depositAmount,
       cashAmount: raw.cashAmount,
       totalAmount: raw.totalAmount,

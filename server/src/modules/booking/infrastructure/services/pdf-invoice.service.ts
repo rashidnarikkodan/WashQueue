@@ -175,7 +175,7 @@ export class PDFInvoiceService implements IPDFInvoiceService {
           .fontSize(8.5)
           .font("Helvetica")
           .fillColor(textMuted)
-          .text(`Payment Method: ${booking.paymentType}`, 317, y + 42)
+          .text(`Payment Method: ${booking.paymentMethod}`, 317, y + 42)
 
         y += 80
 

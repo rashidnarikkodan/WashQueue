@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { BookingStatus, PaymentType, PaymentMethod } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentMethod } from "../../domain/entities/Booking"
 
 export const objectIdRegex = /^[0-9a-fA-F]{24}$/
 
@@ -14,17 +14,17 @@ export const createBookingSchema = z.object({
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
     .default([]),
-  paymentType: z.nativeEnum(PaymentType).default(PaymentType.ONLINE_FULL),
+  paymentMethod: z.nativeEnum(PaymentMethod).default(PaymentMethod.ONLINE),
 })
 
 export const createWalkInBookingSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),
   timeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID").optional(),
   serviceType: z.enum(["HALF", "FULL"]),
-  paymentType: z
-    .nativeEnum(PaymentType)
+  paymentMethod: z
+    .nativeEnum(PaymentMethod)
     .optional()
-    .default(PaymentType.CASH_WALKIN),
+    .default(PaymentMethod.PAY_AT_STATION),
   extraServiceIds: z
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
@@ -116,9 +116,9 @@ export const createPaymentOrderSchema = z.object({
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
     .default([]),
-  paymentType: z
-    .enum([PaymentType.ONLINE_FULL, PaymentType.PAY_AT_STATION])
-    .default(PaymentType.ONLINE_FULL),
+  paymentMethod: z
+    .enum([PaymentMethod.ONLINE, PaymentMethod.PAY_AT_STATION])
+    .default(PaymentMethod.ONLINE),
   useWallet: z.boolean().optional().default(false),
 })
 

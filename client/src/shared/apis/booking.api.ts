@@ -1,7 +1,7 @@
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
-import { PAYMENT_TYPE, type PaymentType } from "@/shared/constants/payment.constants"
+import { PAYMENT_METHOD, type PaymentMethod } from "@/shared/constants/payment.constants"
 
 export interface CreateBookingInput {
   stationId: string
@@ -9,7 +9,7 @@ export interface CreateBookingInput {
   timeWindowId: string
   serviceType: "HALF" | "FULL"
   extraServiceIds?: string[]
-  paymentType?: PaymentType
+  paymentMethod?: PaymentMethod
 }
 
 export interface BookingStatusHistoryItem {
@@ -102,7 +102,7 @@ export interface BookingResponse {
   } | null
   status: string
   paymentStatus: string
-  paymentType: string
+  paymentMethod: string
   depositAmount: number
   cashAmount: number
   statusHistory?: BookingStatusHistoryItem[]
@@ -382,7 +382,7 @@ export const bookingApi = {
         stationId: input.stationId,
         timeWindowId: input.timeWindowId,
         serviceType: input.serviceType,
-        paymentType: PAYMENT_TYPE.CASH_WALKIN,
+        paymentMethod: PAYMENT_METHOD.PAY_AT_STATION,
         extraServiceIds: input.extraServiceIds || [],
         customer: input.customer || (input.walkInCustomer ? { name: input.walkInCustomer.name, phone: input.walkInCustomer.phone } : undefined),
         vehicle: input.vehicle || (input.walkInVehicle ? { registrationNumber: input.walkInVehicle.registrationNumber, categoryId: input.walkInVehicle.categoryId, classId: input.walkInVehicle.classId } : undefined),

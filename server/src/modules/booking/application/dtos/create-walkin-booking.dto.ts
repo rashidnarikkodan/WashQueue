@@ -1,10 +1,10 @@
-import { PaymentType, ServiceType } from "../../domain/entities/Booking"
+import { PaymentMethod, ServiceType } from "../../domain/entities/Booking"
 
 export interface CreateWalkInBookingInput {
   stationId: string
   timeWindowId: string
   serviceType: ServiceType
-  paymentType?: PaymentType // Defaults to CASH_WALKIN
+  paymentMethod?: PaymentMethod // Defaults to PAY_AT_STATION
   extraServiceIds?: string[]
 
   // Registered or Guest Customer

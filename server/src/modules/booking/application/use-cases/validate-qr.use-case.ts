@@ -1,7 +1,7 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import logger from "@/configs/logger.config"
-import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentMethod } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { QRTokenService } from "../../domain/services/QRTokenService"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
@@ -190,8 +190,7 @@ export class ValidateQRForCheckInUseCase {
     // Rule 6: Payment Condition Check
     const isPaymentSatisfied =
       booking.paymentStatus === PaymentStatus.PAID ||
-      booking.paymentType === PaymentType.DEPOSIT_PLUS_CASH ||
-      booking.paymentType === PaymentType.CASH_WALKIN
+      booking.paymentMethod === PaymentMethod.PAY_AT_STATION
 
     if (!isPaymentSatisfied) {
       throw new AppError(

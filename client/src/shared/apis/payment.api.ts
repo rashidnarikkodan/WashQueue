@@ -2,7 +2,7 @@ import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
 import type { BookingResponse } from "@/shared/apis/booking.api"
-import type { PaymentType, PaymentMethod } from "@/shared/constants/payment.constants"
+import type { PaymentMethod } from "@/shared/constants/payment.constants"
 
 export interface CreateOrderInput {
   amount: number // in paise
@@ -13,7 +13,7 @@ export interface CreateOrderInput {
   timeWindowId?: string
   serviceType?: "HALF" | "FULL"
   extraServiceIds?: string[]
-  paymentType?: Extract<PaymentType, "ONLINE_FULL" | "PAY_AT_STATION">
+  paymentMethod?: Extract<PaymentMethod, "ONLINE" | "PAY_AT_STATION">
   useWallet?: boolean
 }
 

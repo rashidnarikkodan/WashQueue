@@ -2,7 +2,6 @@ import { PaginationMeta } from "@/common/types/pagination"
 import {
   BookingStatus,
   PaymentStatus,
-  PaymentType,
   PaymentMethod,
   ServiceType,
 } from "../../domain/entities/Booking"
@@ -63,7 +62,6 @@ export interface BookingResponseDTO {
     qrExpiresAt: string
   }
   paymentStatus: PaymentStatus
-  paymentType: PaymentType
   paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number

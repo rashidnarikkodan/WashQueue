@@ -9,15 +9,6 @@ export const PAYMENT_STATUS = {
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS]
 export type PaymentStatusType = PaymentStatus
 
-export const PAYMENT_TYPE = {
-  ONLINE_FULL: "ONLINE_FULL",
-  PAY_AT_STATION: "PAY_AT_STATION",
-  DEPOSIT_PLUS_CASH: "DEPOSIT_PLUS_CASH",
-  CASH_WALKIN: "CASH_WALKIN",
-} as const
-
-export type PaymentType = (typeof PAYMENT_TYPE)[keyof typeof PAYMENT_TYPE]
-
 export const PAYMENT_METHOD = {
   WALLET: "WALLET",
   ONLINE: "ONLINE",
@@ -41,7 +32,6 @@ export type RefundStatusType = RefundStatus
 
 export const PAYMENT = {
   STATUS: PAYMENT_STATUS,
-  TYPE: PAYMENT_TYPE,
   METHOD: PAYMENT_METHOD,
   REFUND: {
     STATUS: REFUND_STATUS,

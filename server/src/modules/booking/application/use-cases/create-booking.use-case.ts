@@ -6,7 +6,7 @@ import { IExtraServiceRepository } from "@/modules/station/domain/repositories/e
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { Booking, BookingStatus, PaymentStatus, derivePaymentMethod } from "../../domain/entities/Booking"
+import { Booking, BookingStatus, derivePaymentStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -91,7 +91,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
-      paymentType: input.paymentType,
+      paymentMethod: input.paymentMethod,
+      isWalkIn: false,
     })
 
     // 8. Generate Booking Number and QR Token
@@ -125,10 +126,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus:
-        input.paymentType === "ONLINE_FULL" ? PaymentStatus.PAID : PaymentStatus.PENDING,
-      paymentType: input.paymentType,
-      paymentMethod: derivePaymentMethod(input.paymentType),
+      paymentStatus: derivePaymentStatus(input.paymentMethod, false),
+      paymentMethod: input.paymentMethod,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

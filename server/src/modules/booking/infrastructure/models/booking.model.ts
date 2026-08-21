@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose"
-import { BookingStatus, PaymentStatus, PaymentType, PaymentMethod } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentMethod } from "../../domain/entities/Booking"
 
 // Persistence-only field (no domain behavior hangs off it), so its own small vocabulary
 // lives here rather than in the domain layer — see RefundDetailsSnapshot at the repository boundary.
@@ -62,7 +62,6 @@ export interface IBookingDocument extends Document {
   }
 
   paymentStatus: PaymentStatus
-  paymentType: PaymentType
   paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number
@@ -148,7 +147,7 @@ const bookingSchema = new Schema<IBookingDocument>(
       basePrice: { type: Number, required: true },
       extraPrice: { type: Number, required: true, default: 0 },
       totalPrice: { type: Number, required: true },
-      currency: { type: String, required: true, default: "USD" },
+      currency: { type: String, required: true, default: "INR" },
     },
 
     extraServices: [
@@ -196,12 +195,6 @@ const bookingSchema = new Schema<IBookingDocument>(
       type: String,
       enum: Object.values(PaymentStatus),
       default: PaymentStatus.PENDING,
-    },
-
-    paymentType: {
-      type: String,
-      enum: Object.values(PaymentType),
-      required: true,
     },
 
     paymentMethod: {

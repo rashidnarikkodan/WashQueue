@@ -20,7 +20,7 @@ export interface BookingIntentPayload {
   timeWindowId: string
   serviceType: "HALF" | "FULL" | string
   extraServiceIds?: string[]
-  paymentType?: string
+  paymentMethod?: string
 }
 
 export interface PaymentSuccessResult {
@@ -136,8 +136,8 @@ export function useBookingPayment(isModalOpen = false) {
                 ? "FULL"
                 : bookingIntentData.serviceType) as "HALF" | "FULL",
               extraServiceIds: bookingIntentData.extraServiceIds,
-              paymentType: (bookingIntentData.paymentType || "ONLINE_FULL") as
-                | "ONLINE_FULL"
+              paymentMethod: (bookingIntentData.paymentMethod || PAYMENT_METHOD.ONLINE) as
+                | "ONLINE"
                 | "PAY_AT_STATION",
             }
             : {}),

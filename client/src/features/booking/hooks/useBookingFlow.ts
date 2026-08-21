@@ -3,7 +3,7 @@ import { useStationStore } from "@/features/station/store/station.store"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
-import { PAYMENT_TYPE } from "@/shared/constants/payment.constants"
+import { PAYMENT_METHOD } from "@/shared/constants/payment.constants"
 import { useBookingVehicles } from "./useBookingVehicles"
 import { useBookingServices } from "./useBookingServices"
 import { useBookingSlots } from "./useBookingSlots"
@@ -134,7 +134,7 @@ export function useBookingFlow(stationId: string | null) {
         timeWindowId: slotState.selectedSlotId,
         serviceType,
         extraServiceIds: serviceState.selectedExtraIds,
-        paymentType: PAYMENT_TYPE.PAY_AT_STATION,
+        paymentMethod: PAYMENT_METHOD.PAY_AT_STATION,
       })
 
       setCreatedBooking(created)
@@ -203,7 +203,7 @@ export function useBookingFlow(stationId: string | null) {
             ? "FULL"
             : "HALF",
         extraServiceIds: serviceState.selectedExtras.map((e) => e.id),
-        paymentType: PAYMENT_TYPE.ONLINE_FULL,
+        paymentMethod: PAYMENT_METHOD.ONLINE,
       },
       onSuccess: (paymentData) => {
         handleOnlinePaymentSuccess(paymentData.booking)

@@ -68,7 +68,7 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
     const policyResult = RefundPolicyEngine.evaluate({
       status: domainBooking.status,
       cancellationReason: reason || domainBooking.cancellation?.cancellationReason || "",
-      paymentType: domainBooking.paymentType,
+      paymentMethod: domainBooking.paymentMethod,
       paymentStatus: domainBooking.paymentStatus,
       paidAmount,
       depositAmount: domainBooking.depositAmount,

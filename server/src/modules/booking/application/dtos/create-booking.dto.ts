@@ -1,4 +1,4 @@
-import { PaymentType, ServiceType } from "../../domain/entities/Booking"
+import { PaymentMethod, ServiceType } from "../../domain/entities/Booking"
 
 export interface CreateBookingInput {
   stationId: string
@@ -6,5 +6,5 @@ export interface CreateBookingInput {
   timeWindowId: string
   serviceType: ServiceType
   extraServiceIds?: string[]
-  paymentType: PaymentType
+  paymentMethod: PaymentMethod
 }

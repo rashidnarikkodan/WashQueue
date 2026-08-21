@@ -50,7 +50,6 @@ export class BookingDTOMapper {
         qrExpiresAt: props.qr.qrExpiresAt.toISOString(),
       },
       paymentStatus: props.paymentStatus,
-      paymentType: props.paymentType,
       paymentMethod: props.paymentMethod,
       depositAmount: props.depositAmount,
       cashAmount: props.cashAmount,

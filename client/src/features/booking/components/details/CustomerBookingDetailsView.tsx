@@ -144,7 +144,7 @@ export default function CustomerBookingDetailsView({
                 ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
               </span>
               <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                ✓ {booking.paymentStatus} via {booking.paymentType.replace("_", " ")}
+                ✓ {booking.paymentStatus} via {booking.paymentMethod.replace("_", " ")}
               </div>
             </div>
           </div>
@@ -359,7 +359,7 @@ export default function CustomerBookingDetailsView({
                 </span>
                 <div className="flex items-center gap-2 font-bold text-foreground text-sm">
                   <CreditCard size={16} className="text-primary" />
-                  <span>{booking.paymentType.replace("_", " ")}</span>
+                  <span>{booking.paymentMethod.replace("_", " ")}</span>
                 </div>
                 <p className="text-xs text-emerald-400 font-medium">✓ {booking.paymentStatus}</p>
               </div>

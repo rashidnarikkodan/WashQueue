@@ -8,10 +8,9 @@ import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicl
 import {
   Booking,
   BookingStatus,
-  PaymentStatus,
-  PaymentType,
   PaymentMethod,
-  derivePaymentMethod,
+  derivePaymentStatus,
+  deriveOnlinePaymentMethod,
 } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
@@ -138,7 +137,8 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
-      paymentType: reservation.paymentType,
+      paymentMethod: reservation.paymentMethod,
+      isWalkIn: false,
     })
 
     const bookingNumber = BookingNumberService.generate()
@@ -170,13 +170,11 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus:
-        reservation.paymentType === PaymentType.ONLINE_FULL ? PaymentStatus.PAID : PaymentStatus.PENDING,
-      paymentType: reservation.paymentType,
-      paymentMethod: derivePaymentMethod(reservation.paymentType, {
-        isWalletPayment,
-        walletAmount: reservation.walletAmount,
-      }),
+      paymentStatus: derivePaymentStatus(reservation.paymentMethod, false),
+      paymentMethod:
+        reservation.paymentMethod === PaymentMethod.PAY_AT_STATION
+          ? PaymentMethod.PAY_AT_STATION
+          : deriveOnlinePaymentMethod({ isWalletPayment, walletAmount: reservation.walletAmount }),
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

@@ -19,7 +19,7 @@ export interface CalculatedPricingResult {
 
 export class BookingPricingService {
   static calculate(input: CalculatePricingInput): CalculatedPricingResult {
-    const currency = input.currency || "USD"
+    const currency = input.currency || "INR"
     const extraPrice = input.extraServices.reduce((sum, item) => sum + item.price, 0)
     const totalPrice = Number((input.basePrice + extraPrice).toFixed(2))
 
