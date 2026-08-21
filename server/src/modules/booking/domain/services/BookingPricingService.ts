@@ -1,9 +1,10 @@
-import { PaymentType, PricingSnapshot, SettlementSnapshot } from "../entities/Booking"
+import { PaymentMethod, PricingSnapshot, SettlementSnapshot } from "../entities/Booking"
 
 export interface CalculatePricingInput {
   basePrice: number
   extraServices: Array<{ serviceId: string; name: string; price: number }>
-  paymentType: PaymentType
+  paymentMethod: PaymentMethod
+  isWalkIn?: boolean
   currency?: string
   platformCommissionRate?: number // Default 0.10 (10%)
   depositPercentage?: number // Default 0.20 (20%)
@@ -25,16 +26,25 @@ export class BookingPricingService {
     let depositAmount = 0
     let cashAmount = 0
 
-    if (input.paymentType === PaymentType.ONLINE_FULL) {
+    if (input.paymentMethod === PaymentMethod.NO_PAYMENT) {
+      depositAmount = 0
+      cashAmount = 0
+    } else if (input.paymentMethod === PaymentMethod.PAY_AT_STATION) {
+      if (input.isWalkIn) {
+        // Walk-in: cash collected in full, in person, right now — no online deposit involved.
+        depositAmount = 0
+        cashAmount = totalPrice
+      } else {
+        // Pre-booked pay-at-station: a deposit is charged online now to guarantee the slot,
+        // the remainder is collected as cash when the customer arrives at the station.
+        const rate = input.depositPercentage ?? 0.2
+        depositAmount = Number((totalPrice * rate).toFixed(2))
+        cashAmount = Number((totalPrice - depositAmount).toFixed(2))
+      }
+    } else {
+      // ONLINE, WALLET, WALLET_AND_ONLINE — fully settled online/wallet now
       depositAmount = totalPrice
       cashAmount = 0
-    } else if (input.paymentType === PaymentType.PAY_AT_STATION) {
-      const rate = input.depositPercentage ?? 0.2
-      depositAmount = Number((totalPrice * rate).toFixed(2))
-      cashAmount = Number((totalPrice - depositAmount).toFixed(2))
-    } else if (input.paymentType === PaymentType.CASH_WALKIN) {
-      depositAmount = 0
-      cashAmount = totalPrice
     }
 
     const commissionRate = input.platformCommissionRate ?? 0.1
