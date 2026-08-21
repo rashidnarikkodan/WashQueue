@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { PaymentType } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentMethod } from "../../domain/entities/Booking"
 
 export const objectIdRegex = /^[0-9a-fA-F]{24}$/
 
@@ -14,17 +14,17 @@ export const createBookingSchema = z.object({
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
     .default([]),
-  paymentType: z.enum(["ONLINE_FULL", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"]).default("ONLINE_FULL"),
+  paymentMethod: z.nativeEnum(PaymentMethod).default(PaymentMethod.ONLINE),
 })
 
 export const createWalkInBookingSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),
   timeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID").optional(),
   serviceType: z.enum(["HALF", "FULL"]),
-  paymentType: z
-    .enum(["ONLINE_FULL", "DEPOSIT_PLUS_CASH", "CASH_WALKIN"])
+  paymentMethod: z
+    .nativeEnum(PaymentMethod)
     .optional()
-    .default("CASH_WALKIN"),
+    .default(PaymentMethod.PAY_AT_STATION),
   extraServiceIds: z
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
@@ -57,11 +57,15 @@ export const cancelBookingSchema = z.object({
   reason: z.string().min(1, "Cancellation reason is required"),
 })
 
+export const rescheduleBookingSchema = z.object({
+  newTimeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID"),
+})
+
 export const getBookingListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(10),
   type: z.enum(["upcoming", "history", "all", "noshow"]).optional().default("all"),
-  status: z.string().optional(),
+  status: z.nativeEnum(BookingStatus).optional(),
   stationId: z.string().optional(),
   providerId: z.string().optional(),
   q: z.string().optional(),
@@ -112,9 +116,9 @@ export const createPaymentOrderSchema = z.object({
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
     .default([]),
-  paymentType: z
-    .enum([PaymentType.ONLINE_FULL, PaymentType.PAY_AT_STATION])
-    .default(PaymentType.ONLINE_FULL),
+  paymentMethod: z
+    .enum([PaymentMethod.ONLINE, PaymentMethod.PAY_AT_STATION])
+    .default(PaymentMethod.ONLINE),
   useWallet: z.boolean().optional().default(false),
 })
 
@@ -122,7 +126,7 @@ export const verifyPaymentSchema = z.object({
   razorpay_order_id: z.string().min(1, "Razorpay order ID is required"),
   razorpay_payment_id: z.string().min(1, "Razorpay payment ID is required"),
   razorpay_signature: z.string().min(1, "Razorpay signature is required"),
-  paymentMethod: z.enum(["RAZORPAY", "WALLET"]).optional().default("RAZORPAY"),
+  paymentMethod: z.nativeEnum(PaymentMethod).optional().default(PaymentMethod.ONLINE),
 })
 
 export const reservationIdParamSchema = z.object({

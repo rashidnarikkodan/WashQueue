@@ -6,6 +6,7 @@ import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import {
   ICancelBookingUseCase,
+  IRescheduleBookingUseCase,
   ICompleteHandoverUseCase,
   ICreateBookingUseCase,
   ICreateWalkInBookingUseCase,
@@ -30,6 +31,7 @@ export class BookingController {
     private readonly getBookingUseCase: IGetBookingUseCase,
     private readonly getUserBookingsUseCase: IGetUserBookingsUseCase,
     private readonly cancelBookingUseCase: ICancelBookingUseCase,
+    private readonly rescheduleBookingUseCase: IRescheduleBookingUseCase,
     private readonly pdfInvoiceService: IPDFInvoiceService,
     private readonly validateQrUseCase: IValidateQRForCheckInUseCase,
     private readonly savePreInspectionUseCase: ISavePreInspectionAndCheckInUseCase,
@@ -105,6 +107,26 @@ export class BookingController {
       role
     )
     success(res, booking, HTTP_STATUS.OK, "Booking cancelled successfully")
+  }
+
+  reschedule = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId
+    if (!userId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params as { bookingId: string }
+    const { newTimeWindowId } = req.body as { newTimeWindowId: string }
+    const role = req.user?.role
+    const booking = await this.rescheduleBookingUseCase.execute(
+      userId,
+      {
+        bookingId,
+        newTimeWindowId,
+      },
+      role
+    )
+    success(res, booking, HTTP_STATUS.OK, "Booking rescheduled successfully")
   }
 
   downloadInvoice = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

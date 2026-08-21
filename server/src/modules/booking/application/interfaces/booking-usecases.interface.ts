@@ -3,6 +3,7 @@ import { BookingListResponseDTO, BookingResponseDTO } from "../dtos/booking-resp
 import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
+import { RescheduleBookingInput } from "../dtos/reschedule-booking.dto"
 import { CheckInBookingInput } from "../dtos/checkin-booking.dto"
 import {
   CreateBookingReservationInput,
@@ -43,6 +44,14 @@ export interface IGetUserBookingsUseCase {
 
 export interface ICancelBookingUseCase {
   execute(userId: string, input: CancelBookingInput, userRole?: string): Promise<BookingResponseDTO>
+}
+
+export interface IRescheduleBookingUseCase {
+  execute(
+    userId: string,
+    input: RescheduleBookingInput,
+    userRole?: string
+  ): Promise<BookingResponseDTO>
 }
 
 export interface ICreateBookingReservationUseCase {

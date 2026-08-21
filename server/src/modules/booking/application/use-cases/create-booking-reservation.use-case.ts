@@ -7,7 +7,7 @@ import { ITimeWindowRepository } from "@/modules/station/domain/repositories/tim
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
 import { IWalletRepository } from "@/modules/wallet/domain/repositories/wallet.repository.interface"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { ServiceType, PaymentType } from "../../domain/entities/Booking"
+import { ServiceType, PaymentMethod } from "../../domain/entities/Booking"
 import { BookingPricingService } from "../../domain/services/BookingPricingService"
 import { BookingReservation } from "../../domain/entities/BookingReservation"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
@@ -21,7 +21,7 @@ export interface CreateBookingReservationInput {
   timeWindowId: string
   serviceType: "HALF" | "FULL"
   extraServiceIds?: string[]
-  paymentType: "ONLINE_FULL" | "PAY_AT_STATION"
+  paymentMethod: "ONLINE" | "PAY_AT_STATION"
   useWallet?: boolean
 }
 
@@ -102,14 +102,15 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
-      paymentType:
-        input.paymentType === "PAY_AT_STATION"
-          ? PaymentType.PAY_AT_STATION
-          : PaymentType.ONLINE_FULL,
+      paymentMethod:
+        input.paymentMethod === "PAY_AT_STATION"
+          ? PaymentMethod.PAY_AT_STATION
+          : PaymentMethod.ONLINE,
+      isWalkIn: false,
     })
 
     const fullPayableAmountRupees =
-      input.paymentType === "ONLINE_FULL"
+      input.paymentMethod === "ONLINE"
         ? pricingResult.pricingSnapshot.totalPrice
         : pricingResult.depositAmount
 
@@ -117,7 +118,7 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
     let walletAmountToDeduct = 0
     let payableAmountRupees = fullPayableAmountRupees
 
-    if (input.useWallet && input.paymentType === "ONLINE_FULL") {
+    if (input.useWallet && input.paymentMethod === "ONLINE") {
       const userWallet = await this.walletRepository.findByUserId(userId)
       if (userWallet && userWallet.balance.amount > 0) {
         walletAmountToDeduct = Math.min(userWallet.balance.amount, fullPayableAmountRupees)
@@ -154,10 +155,10 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
       timeWindowId: timeWindow.id,
       serviceType: input.serviceType === "FULL" ? ServiceType.FULL : ServiceType.HALF,
       extraServiceIds: input.extraServiceIds || [],
-      paymentType:
-        input.paymentType === "PAY_AT_STATION"
-          ? PaymentType.PAY_AT_STATION
-          : PaymentType.ONLINE_FULL,
+      paymentMethod:
+        input.paymentMethod === "PAY_AT_STATION"
+          ? PaymentMethod.PAY_AT_STATION
+          : PaymentMethod.ONLINE,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       totalAmount: pricingResult.pricingSnapshot.totalPrice,

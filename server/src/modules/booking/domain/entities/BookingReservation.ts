@@ -1,4 +1,4 @@
-import { ServiceType, PaymentType } from "./Booking"
+import { ServiceType, PaymentMethod } from "./Booking"
 
 export type ReservationStatus = "HELD" | "CONFIRMED" | "RELEASED" | "EXPIRED_REFUND_NEEDED"
 
@@ -10,7 +10,7 @@ export interface BookingReservationProps {
   timeWindowId: string
   serviceType: ServiceType
   extraServiceIds: string[]
-  paymentType: PaymentType
+  paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number
   totalAmount: number
@@ -65,8 +65,8 @@ export class BookingReservation {
     return this.props.extraServiceIds
   }
 
-  get paymentType(): PaymentType {
-    return this.props.paymentType
+  get paymentMethod(): PaymentMethod {
+    return this.props.paymentMethod
   }
 
   get depositAmount(): number {

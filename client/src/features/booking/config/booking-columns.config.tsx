@@ -1,6 +1,7 @@
 import type { Column } from "@/shared/components/data-table"
 import { Eye, Building2, Car, Clock } from "lucide-react"
 import type { Booking } from "../types/booking.types"
+import { BOOKING_STATUS } from "@/shared/constants/booking.constants"
 
 interface CustomerColumnHandlers {
   onNavigate: (bookingId: string) => void
@@ -95,14 +96,14 @@ export function getCustomerColumns({ onNavigate }: CustomerColumnHandlers): Colu
       accessor: "status",
       cell: (b) => {
         let badgeStyle = "bg-muted text-muted-foreground border-border"
-        if (b.status === "COMPLETED")
+        if (b.status === BOOKING_STATUS.COMPLETED)
           badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-        if (b.status === "IN_PROGRESS" || b.status === "IN_SERVICE")
+        if (b.status === BOOKING_STATUS.IN_SERVICE)
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
-        if (b.status === "CONFIRMED")
+        if (b.status === BOOKING_STATUS.CONFIRMED)
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
-        if (b.status === "NO_SHOW") badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        if (b.status === BOOKING_STATUS.CANCELLED) badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === BOOKING_STATUS.NO_SHOW) badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span
@@ -236,14 +237,14 @@ export function getManagementColumns({
       accessor: "status",
       cell: (b) => {
         let badgeStyle = "bg-muted text-muted-foreground border-border"
-        if (b.status === "COMPLETED")
+        if (b.status === BOOKING_STATUS.COMPLETED)
           badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-        if (b.status === "IN_PROGRESS" || b.status === "IN_SERVICE")
+        if (b.status === BOOKING_STATUS.IN_SERVICE)
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
-        if (b.status === "CONFIRMED")
+        if (b.status === BOOKING_STATUS.CONFIRMED)
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === "CANCELLED") badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
-        if (b.status === "NO_SHOW") badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        if (b.status === BOOKING_STATUS.CANCELLED) badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === BOOKING_STATUS.NO_SHOW) badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span

@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentMethod } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
@@ -77,8 +77,7 @@ export class CompleteHandoverUseCase {
     // 4. Payment Settlement Verification
     const isPaymentSettled =
       booking.paymentStatus === PaymentStatus.PAID ||
-      booking.paymentType === PaymentType.DEPOSIT_PLUS_CASH ||
-      booking.paymentType === PaymentType.CASH_WALKIN
+      booking.paymentMethod === PaymentMethod.PAY_AT_STATION
 
     if (!isPaymentSettled) {
       throw new AppError(

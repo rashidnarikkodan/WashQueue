@@ -4,7 +4,7 @@ import {
   BookingProps,
   BookingStatus,
   PaymentStatus,
-  PaymentType,
+  PaymentMethod,
   ServiceType,
 } from "../../domain/entities/Booking"
 import { IBookingDocument } from "../models/booking.model"
@@ -108,7 +108,7 @@ export class BookingMapper {
         basePrice: doc.pricingSnapshot?.basePrice ?? 0,
         extraPrice: doc.pricingSnapshot?.extraPrice ?? 0,
         totalPrice: doc.pricingSnapshot?.totalPrice ?? 0,
-        currency: doc.pricingSnapshot?.currency || "USD",
+        currency: doc.pricingSnapshot?.currency || "INR",
       },
       extraServices: (doc.extraServices || []).map((es) => ({
         serviceId: es.serviceId ? es.serviceId.toString() : "",
@@ -144,7 +144,7 @@ export class BookingMapper {
         qrExpiresAt: doc.qr?.qrExpiresAt || new Date(),
       },
       paymentStatus: doc.paymentStatus as PaymentStatus,
-      paymentType: doc.paymentType as PaymentType,
+      paymentMethod: doc.paymentMethod as PaymentMethod,
       depositAmount: doc.depositAmount ?? 0,
       cashAmount: doc.cashAmount ?? 0,
       refundAmount: doc.refundAmount ?? 0,
@@ -201,6 +201,7 @@ export class BookingMapper {
               cancelledAt: doc.cancellation.cancelledAt || new Date(),
             }
           : null,
+      rescheduleCount: doc.rescheduleCount ?? 0,
       createdAt: doc.createdAt || new Date(),
       updatedAt: doc.updatedAt || new Date(),
     }
@@ -265,7 +266,7 @@ export class BookingMapper {
         qrExpiresAt: props.qr.qrExpiresAt,
       },
       paymentStatus: props.paymentStatus,
-      paymentType: props.paymentType,
+      paymentMethod: props.paymentMethod,
       depositAmount: props.depositAmount,
       cashAmount: props.cashAmount,
       refundAmount: props.refundAmount,
@@ -292,6 +293,7 @@ export class BookingMapper {
             cancelledAt: props.cancellation.cancelledAt || new Date(),
           }
         : null,
+      rescheduleCount: props.rescheduleCount ?? 0,
     }
 
     return raw

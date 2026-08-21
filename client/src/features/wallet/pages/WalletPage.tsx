@@ -236,13 +236,13 @@ export default function WalletPage() {
   const totalTransactionsCount = totalRecords || transactions.length
   const totalSpentAmount = useMemo(() => {
     return transactions
-      .filter((tx) => tx.type === "DEBIT" && tx.status === "COMPLETED")
+      .filter((tx) => tx.type === "DEBIT" && tx.category !== "REFUND" && tx.status === "COMPLETED")
       .reduce((acc, tx) => acc + tx.amount, 0)
   }, [transactions])
 
   const totalRefundAmount = useMemo(() => {
     return transactions
-      .filter((tx) => tx.category === "REFUND" && tx.status === "COMPLETED")
+      .filter((tx) => (tx.category === "REFUND" || tx.type === "REFUND") && tx.status === "COMPLETED")
       .reduce((acc, tx) => acc + tx.amount, 0)
   }, [transactions])
 

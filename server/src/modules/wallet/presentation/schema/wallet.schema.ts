@@ -52,7 +52,7 @@ export const debitWalletSchema = z.object({
 export const getLedgerQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
-  type: z.enum(["CREDIT", "DEBIT"]).optional(),
+  type: z.enum(["CREDIT", "DEBIT", "REFUND"]).optional(),
   category: z
     .enum(["TOP_UP", "BOOKING_PAYMENT", "REFUND", "CASHBACK", "ADMIN_ADJUSTMENT"])
     .optional(),

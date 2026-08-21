@@ -6,6 +6,7 @@ import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import type { Booking } from "../types/booking.types"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
+import { BOOKING_STATUS } from "@/shared/constants/booking.constants"
 import { MANAGEMENT_BOOKING_TABS } from "../config/booking-tabs.config"
 import { getManagementColumns } from "../config/booking-columns.config"
 import { useBookingList } from "../hooks/useBookingList"
@@ -40,13 +41,13 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   // Operational HUD Stats
   const stats: StatItem[] = useMemo(() => {
     const totalCount = pagination?.total ?? bookings.length
-    const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length
+    const confirmedCount = bookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length
     const inProgressCount = bookings.filter(
-      (b) => b.status === "CHECKED_IN" || b.status === "IN_SERVICE" || b.status === "IN_PROGRESS"
+      (b) => b.status === BOOKING_STATUS.CHECKED_IN || b.status === BOOKING_STATUS.IN_SERVICE
     ).length
-    const completedCount = bookings.filter((b) => b.status === "COMPLETED").length
+    const completedCount = bookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length
     const totalRevenue = bookings
-      .filter((b) => b.status === "COMPLETED")
+      .filter((b) => b.status === BOOKING_STATUS.COMPLETED)
       .reduce((sum, b) => sum + (b.amount || 0), 0)
 
     if (isManager) {

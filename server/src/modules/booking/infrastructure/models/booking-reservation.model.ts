@@ -8,7 +8,7 @@ export interface IBookingReservationDocument {
   timeWindowId: Types.ObjectId
   serviceType: "HALF" | "FULL"
   extraServiceIds: string[]
-  paymentType: "ONLINE_FULL" | "PAY_AT_STATION"
+  paymentMethod: "ONLINE" | "PAY_AT_STATION"
   depositAmount: number
   cashAmount: number
   totalAmount: number
@@ -31,7 +31,7 @@ const bookingReservationSchema = new Schema<IBookingReservationDocument>(
     timeWindowId: { type: Schema.Types.ObjectId, ref: "TimeWindowInstance", required: true },
     serviceType: { type: String, enum: ["HALF", "FULL"], required: true },
     extraServiceIds: [{ type: String }],
-    paymentType: { type: String, enum: ["ONLINE_FULL", "PAY_AT_STATION"], required: true },
+    paymentMethod: { type: String, enum: ["ONLINE", "PAY_AT_STATION"], required: true },
     depositAmount: { type: Number, required: true },
     cashAmount: { type: Number, required: true },
     totalAmount: { type: Number, required: true },

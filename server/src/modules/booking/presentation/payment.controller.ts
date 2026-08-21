@@ -36,6 +36,7 @@ export class PaymentController {
         amount: result.amount,
         currency: result.currency,
         reservation_id: result.reservationId,
+        wallet_amount: result.walletAmount,
         expires_at: result.expiresAt,
       },
       HTTP_STATUS.OK,

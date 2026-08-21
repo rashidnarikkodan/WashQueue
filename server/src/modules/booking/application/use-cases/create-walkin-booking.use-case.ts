@@ -5,7 +5,12 @@ import { IStationPricingRepository } from "@/modules/station/domain/repositories
 import { IExtraServiceRepository } from "@/modules/station/domain/repositories/extra-service.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { Booking, BookingStatus, PaymentStatus, PaymentType } from "../../domain/entities/Booking"
+import {
+  Booking,
+  BookingStatus,
+  PaymentMethod,
+  derivePaymentStatus,
+} from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingNumberService } from "../../domain/services/BookingNumberService"
@@ -88,11 +93,12 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
     }
 
     // 5. Calculate Pricing
-    const paymentType = input.paymentType || PaymentType.CASH_WALKIN
+    const paymentMethod = input.paymentMethod || PaymentMethod.PAY_AT_STATION
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
-      paymentType,
+      paymentMethod,
+      isWalkIn: true,
     })
 
     // 6. Generate Booking Number and QR Token
@@ -139,9 +145,8 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus:
-        paymentType === PaymentType.CASH_WALKIN ? PaymentStatus.PAID : PaymentStatus.PENDING,
-      paymentType,
+      paymentStatus: derivePaymentStatus(paymentMethod, true),
+      paymentMethod,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
       refundAmount: 0,

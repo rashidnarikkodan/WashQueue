@@ -1,4 +1,4 @@
-import { BookingStatus, PaymentStatus, PaymentType } from "../entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentMethod } from "../entities/Booking"
 
 export type RefundType = "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND"
 export type RefundMethod = "WALLET_REFUND" | "ORIGINAL_PAYMENT_REFUND" | "NONE"
@@ -7,7 +7,7 @@ export type Responsibility = "CUSTOMER" | "STATION" | "SYSTEM"
 export interface EvaluateRefundInput {
   status: BookingStatus
   cancellationReason?: string
-  paymentType: PaymentType
+  paymentMethod: PaymentMethod
   paymentStatus: PaymentStatus
   paidAmount: number
   depositAmount: number
@@ -33,7 +33,7 @@ export class RefundPolicyEngine {
     const {
       status,
       cancellationReason = "",
-      paymentType,
+      paymentMethod,
       paymentStatus,
       paidAmount = 0,
       depositAmount = 0,
@@ -49,8 +49,8 @@ export class RefundPolicyEngine {
           : depositAmount
         : depositAmount
 
-    // Rule 1: No payment paid or CASH_WALKIN with 0 online payment -> NO_REFUND
-    if (totalPaid <= 0 || paymentType === PaymentType.CASH_WALKIN) {
+    // Rule 1: No payment paid, or PAY_AT_STATION with 0 online payment -> NO_REFUND
+    if (totalPaid <= 0 || paymentMethod === PaymentMethod.PAY_AT_STATION) {
       return {
         refundType: "NO_REFUND",
         refundMethod: "NONE",

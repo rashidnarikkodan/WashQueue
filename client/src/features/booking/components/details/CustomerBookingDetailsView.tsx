@@ -11,6 +11,7 @@ import {
   Loader2,
   MessageSquare,
   ChevronRight,
+  CalendarClock,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -22,6 +23,7 @@ interface CustomerBookingDetailsViewProps {
   currentStageIndex: number
   stages: Array<{ id: string; label: string }>
   onOpenCancelModal: () => void
+  onOpenRescheduleModal?: () => void
 }
 
 export default function CustomerBookingDetailsView({
@@ -30,6 +32,7 @@ export default function CustomerBookingDetailsView({
   currentStageIndex,
   stages,
   onOpenCancelModal,
+  onOpenRescheduleModal,
 }: CustomerBookingDetailsViewProps) {
   const [isDownloading, setIsDownloading] = useState(false)
 
@@ -67,6 +70,17 @@ export default function CustomerBookingDetailsView({
       vehicleId: booking.vehicleId,
       status: booking.status,
     })
+
+  const rescheduleCount = booking.rescheduleCount ?? 0
+  const isMaxReschedulesReached = rescheduleCount >= 2
+
+  const canReschedule = Boolean(
+    (booking.status === "CONFIRMED" || booking.status === "PENDING") &&
+      !booking.isWalkIn &&
+      !isMaxReschedulesReached &&
+      booking.scheduling?.windowStart &&
+      new Date(booking.scheduling.windowStart).getTime() - Date.now() >= 24 * 60 * 60 * 1000
+  )
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
@@ -130,7 +144,7 @@ export default function CustomerBookingDetailsView({
                 ₹{booking.pricingSnapshot.totalPrice.toLocaleString("en-IN")}
               </span>
               <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                ✓ {booking.paymentStatus} via {booking.paymentType.replace("_", " ")}
+                ✓ {booking.paymentStatus} via {booking.paymentMethod.replace("_", " ")}
               </div>
             </div>
           </div>
@@ -194,16 +208,70 @@ export default function CustomerBookingDetailsView({
 
           {/* Action Control Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/5">
-            <div>
+            <div className="flex flex-wrap items-center gap-3">
               {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
-                <button
-                  type="button"
-                  onClick={onOpenCancelModal}
-                  className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <XCircle size={15} />
-                  <span>Cancel Booking</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={onOpenCancelModal}
+                    className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                  >
+                    <XCircle size={15} />
+                    <span>Cancel Booking</span>
+                  </button>
+
+                  {!booking.isWalkIn && onOpenRescheduleModal && (
+                    <div className="relative group inline-block">
+                      <button
+                        type="button"
+                        onClick={onOpenRescheduleModal}
+                        disabled={!canReschedule}
+                        className="px-5 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <CalendarClock size={15} />
+                        <span>
+                          Reschedule
+                          {rescheduleCount > 0 && ` (${rescheduleCount}/2)`}
+                        </span>
+                      </button>
+
+                      {/* Floating Hover Tooltip */}
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 w-max max-w-[260px] opacity-0 group-hover:opacity-100 transition-all duration-200 z-30 transform group-hover:-translate-y-1">
+                        <div className="p-3 rounded-2xl bg-[#0f1422] border border-white/10 text-white shadow-2xl backdrop-blur-md text-left space-y-1">
+                          <div className="flex items-center gap-1.5 font-bold text-[11px]">
+                            {isMaxReschedulesReached ? (
+                              <>
+                                <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                                <span className="text-red-400">Limit Reached (2/2 Used)</span>
+                              </>
+                            ) : canReschedule ? (
+                              <>
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                                <span className="text-emerald-400">
+                                  {2 - rescheduleCount} Reschedule
+                                  {2 - rescheduleCount === 1 ? "" : "s"} Remaining
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                                <span className="text-amber-400">24h Cutoff Policy</span>
+                              </>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            {isMaxReschedulesReached
+                              ? "Maximum limit of 2 reschedules reached for this booking."
+                              : canReschedule
+                                ? `You can reschedule up to 2 times (${2 - rescheduleCount} left). Available at least 24h prior to window.`
+                                : "Rescheduling is only permitted at least 24 hours prior to the scheduled slot window start."}
+                          </p>
+                        </div>
+                        <div className="w-2 h-2 bg-[#0f1422] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -291,7 +359,7 @@ export default function CustomerBookingDetailsView({
                 </span>
                 <div className="flex items-center gap-2 font-bold text-foreground text-sm">
                   <CreditCard size={16} className="text-primary" />
-                  <span>{booking.paymentType.replace("_", " ")}</span>
+                  <span>{booking.paymentMethod.replace("_", " ")}</span>
                 </div>
                 <p className="text-xs text-emerald-400 font-medium">✓ {booking.paymentStatus}</p>
               </div>

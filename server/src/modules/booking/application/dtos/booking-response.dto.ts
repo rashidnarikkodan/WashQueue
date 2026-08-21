@@ -2,7 +2,7 @@ import { PaginationMeta } from "@/common/types/pagination"
 import {
   BookingStatus,
   PaymentStatus,
-  PaymentType,
+  PaymentMethod,
   ServiceType,
 } from "../../domain/entities/Booking"
 
@@ -62,7 +62,7 @@ export interface BookingResponseDTO {
     qrExpiresAt: string
   }
   paymentStatus: PaymentStatus
-  paymentType: PaymentType
+  paymentMethod: PaymentMethod
   depositAmount: number
   cashAmount: number
   refundAmount: number
@@ -111,6 +111,7 @@ export interface BookingResponseDTO {
     capturedAt: string
   } | null
   statusHistory?: BookingStatusLogDTO[]
+  rescheduleCount?: number
   createdAt: string
   updatedAt: string
 }
