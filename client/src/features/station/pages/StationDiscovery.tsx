@@ -557,24 +557,24 @@ const StationDiscovery = () => {
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <div
           onClick={() => setIsFilterModalOpen(true)}
-          className="flex items-center gap-4 px-6 py-3.5 rounded-full bg-[#1E293B]/90 hover:bg-[#1E293B] border border-blue-500/40 text-foreground shadow-2xl backdrop-blur-md cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 select-none group"
+          className="flex items-center gap-4 px-6 py-3.5 rounded-full bg-card/95 hover:bg-card border border-border hover:border-primary/50 text-foreground shadow-2xl backdrop-blur-md cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 select-none group"
         >
           {/* Left Side: Filter & Sort Trigger */}
           <div className="flex items-center gap-2.5">
             <SlidersHorizontal className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
-            <span className="text-sm font-semibold text-white">Filter & Sort</span>
+            <span className="text-sm font-bold text-foreground">Filter & Sort</span>
             {activeFilterCount > 0 && (
-              <span className="bg-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-primary text-primary-foreground text-[11px] font-black px-2 py-0.5 rounded-full shadow-xs">
                 {activeFilterCount}
               </span>
             )}
           </div>
 
           {/* Divider line */}
-          <div className="h-4 w-px bg-border/80" />
+          <div className="h-4 w-px bg-border" />
 
           {/* Right Side: Active Sort Indicator */}
-          <span className="text-xs text-muted-foreground font-medium hover:text-white transition-colors">
+          <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
             {getSortLabel()}
           </span>
         </div>

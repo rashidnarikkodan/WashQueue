@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTheme } from "next-themes"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { Layers, Globe, Moon, Sun, Crosshair, ArrowRight, X } from "lucide-react"
@@ -55,7 +56,11 @@ export default function StationDiscoveryMap({
   const markersRef = useRef<maplibregl.Marker[]>([])
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
 
-  const [currentMode, setCurrentMode] = useState<MapStyleMode>("dark")
+  const { resolvedTheme } = useTheme()
+  const themeMapStyle: MapStyleMode = resolvedTheme === "light" ? "streets" : "dark"
+  const hasUserOverriddenStyleRef = useRef(false)
+
+  const [currentMode, setCurrentMode] = useState<MapStyleMode>(themeMapStyle)
   const [showStyleMenu, setShowStyleMenu] = useState(false)
   const [selectedStation, setSelectedStation] = useState<Station | null>(null)
 
@@ -75,7 +80,7 @@ export default function StationDiscoveryMap({
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: MAP_STYLES.dark,
+      style: MAP_STYLES[themeMapStyle],
       center: [initialLng, initialLat],
       zoom: userLocation ? 13 : 11,
       attributionControl: false,
@@ -89,7 +94,7 @@ export default function StationDiscoveryMap({
       map.remove()
       mapRef.current = null
     }
-  }, [stations, userLocation])
+  }, [stations, userLocation, themeMapStyle])
 
   // Sync Station Markers
   useEffect(() => {
@@ -183,6 +188,7 @@ export default function StationDiscoveryMap({
 
   const handleStyleChange = (mode: MapStyleMode) => {
     if (!mapRef.current) return
+    hasUserOverriddenStyleRef.current = true
     setCurrentMode(mode)
     setShowStyleMenu(false)
 
@@ -194,6 +200,21 @@ export default function StationDiscoveryMap({
       if (userMarkerRef.current) userMarkerRef.current.addTo(map)
     })
   }
+
+  // Follow the app's light/dark theme automatically (streets = light basemap, dark = dark vector)
+  // unless the user has explicitly chosen a specific map style.
+  useEffect(() => {
+    if (!mapRef.current || hasUserOverriddenStyleRef.current) return
+    if (themeMapStyle === currentMode) return
+
+    setCurrentMode(themeMapStyle)
+    const map = mapRef.current
+    map.setStyle(MAP_STYLES[themeMapStyle])
+    map.once("style.load", () => {
+      markersRef.current.forEach((m) => m.addTo(map))
+      if (userMarkerRef.current) userMarkerRef.current.addTo(map)
+    })
+  }, [themeMapStyle, currentMode])
 
   const handleRecenterUser = () => {
     if (mapRef.current && userLocation) {
