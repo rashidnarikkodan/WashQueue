@@ -210,7 +210,7 @@ export default function MyBookingsPage() {
             await cancelBooking(selectedBookingForCancel.id, reason)
             handleRefresh()
           }}
-          onBookAgain={() => navigate("/book")}
+          onBookAgain={() => navigate("/stations")}
           onBackToHome={() => navigate("/")}
         />
       )}

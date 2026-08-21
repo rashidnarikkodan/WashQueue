@@ -49,7 +49,7 @@ export const adminRoutes = {
     },
     {
       path: "bookings/:id",
-      element: <BookingDetails />,
+      element: <BookingDetails role="admin" />,
     },
     {
       path: "queues",

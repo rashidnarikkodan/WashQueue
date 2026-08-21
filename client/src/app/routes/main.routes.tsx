@@ -116,7 +116,7 @@ export const mainRoutes = {
       path: "bookings/:id",
       element: (
         <ProtectedRoute>
-          <BookingDetails />
+          <BookingDetails role="customer" />
         </ProtectedRoute>
       ),
     },

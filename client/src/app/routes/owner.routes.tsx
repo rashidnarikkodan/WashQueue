@@ -37,7 +37,7 @@ export const ownerRoutes = {
     },
     {
       path: "bookings/:id",
-      element: <BookingDetails />,
+      element: <BookingDetails role="owner" />,
     },
     {
       path: "stations",

@@ -12,7 +12,11 @@ import ProviderBookingDetailsView from "../components/details/ProviderBookingDet
 import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
 
-export default function BookingDetails() {
+interface BookingDetailsProps {
+  role?: RoleType
+}
+
+export default function BookingDetails({ role }: BookingDetailsProps = {}) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -28,15 +32,16 @@ export default function BookingDetails() {
   // Status Advance state
   const [isAdvancingStatus, setIsAdvancingStatus] = useState(false)
 
-  // Determine role context strictly based on the route being visited
+  // Determine role context from explicit prop first, then URL pathname, fallback to CUSTOMER
   const currentRole: RoleType = useMemo(() => {
+    if (role) return role
+
     if (location.pathname.startsWith("/admin")) return ROLE.ADMIN
     if (location.pathname.startsWith("/owner")) return ROLE.OWNER
     if (location.pathname.startsWith("/manager")) return ROLE.MANAGER
 
-    // If on /bookings/:id (or any user route), always render the customer view
     return ROLE.CUSTOMER
-  }, [location.pathname])
+  }, [role, location.pathname])
 
   const isCustomer = currentRole === ROLE.CUSTOMER
   const isManager = currentRole === ROLE.MANAGER

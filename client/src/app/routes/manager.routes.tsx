@@ -34,7 +34,7 @@ export const managerRoutes = {
     },
     {
       path: "bookings/:id",
-      element: <BookingDetails />,
+      element: <BookingDetails role="manager" />,
     },
     {
       path: "bookings/:id/pre-inspection",
