@@ -12,6 +12,7 @@ import {
   MessageSquare,
   ChevronRight,
   CalendarClock,
+  Info,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -405,6 +406,26 @@ export default function CustomerBookingDetailsView({
                 </span>
                 <p className="text-[11px] text-muted-foreground">
                   {booking.vehicleDetails?.model || "Standard vehicle profile"}
+                </p>
+              </div>
+            </div>
+
+            {/* Queue Waiting Time vs Wash Service Duration Clarification */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-xs text-muted-foreground leading-relaxed">
+              <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary shrink-0">
+                <Info size={16} />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-foreground text-xs sm:text-sm">
+                    How Queue Waiting Time Works
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25 font-bold">
+                    Arrival &amp; Check-In Based
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-[11px] sm:text-xs">
+                  Your booking secures your service slot window (<strong>{formattedDates.timeStr}</strong>). Once you arrive at the station and complete check-in (via QR scan / pre-inspection), your vehicle is entered into the live operational queue. The dynamic waiting time is calculated in real time based on active bay availability and vehicles ahead in line.
                 </p>
               </div>
             </div>
