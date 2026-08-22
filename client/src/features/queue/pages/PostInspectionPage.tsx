@@ -12,6 +12,7 @@ import type { BookingResponse, InspectionChecklistItem } from "@/shared/apis/boo
 import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
 import PromptModal from "@/shared/components/ui/PromptModal"
 import { readImageFileAsResizedDataUrl } from "@/shared/utils/imageFile"
+import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 interface PhotoSlotConfig {
   key: "front" | "rear" | "left" | "right"
@@ -46,6 +47,7 @@ const CHECKLIST_GROUPS = Array.from(new Set(CHECKLIST_ITEMS.map((item) => item.g
 export default function ManagerPostInspectionPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const basePath = useQueueBasePath()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   
   const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
@@ -222,7 +224,7 @@ export default function ManagerPostInspectionPage() {
         checklist: checklistPayload,
       })
       toast.success("✓ Inspection verified & vehicle handover completed!")
-      navigate("/manager/queues")
+      navigate(`${basePath}/queues`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("Post inspection error:", err)

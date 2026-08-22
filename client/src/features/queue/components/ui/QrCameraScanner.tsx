@@ -11,8 +11,12 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
+  Camera,
+  CameraOff,
 } from "lucide-react"
 import { toast } from "sonner"
+
+const SCAN_INTERVAL_MS = 150
 
 interface QrCameraScannerProps {
   onScanSuccess: (decodedText: string) => void
@@ -40,6 +44,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
   const [cameras, setCameras] = useState<CameraDevice[]>([])
   const [selectedCameraId, setSelectedCameraId] = useState<string>("")
+  const [isCameraEnabled, setIsCameraEnabled] = useState<boolean>(false)
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false)
   const [isInitializing, setIsInitializing] = useState<boolean>(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -212,8 +217,17 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       }
     }
 
+    let lastProcessedAt = 0
+
     const scanFrame = async () => {
       if (!isScanningRef.current) return
+
+      const now = performance.now()
+      if (now - lastProcessedAt < SCAN_INTERVAL_MS) {
+        animFrameIdRef.current = requestAnimationFrame(scanFrame)
+        return
+      }
+      lastProcessedAt = now
 
       const video = videoRef.current
       if (video && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0) {
@@ -286,8 +300,8 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     try {
       const constraints: MediaStreamConstraints = {
         video: selectedCameraId
-          ? { deviceId: { exact: selectedCameraId }, width: { ideal: 1280 }, height: { ideal: 720 } }
-          : { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+          ? { deviceId: { exact: selectedCameraId }, width: { ideal: 960 }, height: { ideal: 540 } }
+          : { facingMode: facingMode, width: { ideal: 960 }, height: { ideal: 540 } },
         audio: false,
       }
 
@@ -364,11 +378,19 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   }, [])
 
   useEffect(() => {
+    if (!isCameraEnabled) {
+      stopCamera()
+      return
+    }
     startCamera()
     return () => {
       stopCamera()
     }
-  }, [startCamera, stopCamera])
+  }, [isCameraEnabled, startCamera, stopCamera])
+
+  const toggleCameraEnabled = useCallback(() => {
+    setIsCameraEnabled((prev) => !prev)
+  }, [])
 
   useEffect(() => {
     const handlePageHide = () => {
@@ -377,7 +399,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         handlePageHide()
-      } else if (isScanningRef.current) {
+      } else if (isCameraEnabled && isScanningRef.current) {
         startCamera()
       }
     }
@@ -392,7 +414,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange)
       stopCamera()
     }
-  }, [startCamera, stopCamera])
+  }, [isCameraEnabled, startCamera, stopCamera])
 
   const toggleFacingMode = () => {
     const nextMode = facingMode === "environment" ? "user" : "environment"
@@ -501,7 +523,29 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           className="absolute inset-0 w-full h-full object-cover -scale-x-100"
         />
 
-        {isCameraActive && !isInitializing && (
+        {!isCameraEnabled && (
+          <div className="absolute inset-0 bg-slate-950 p-6 flex flex-col items-center justify-center text-center space-y-4 z-20">
+            <div className="h-14 w-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <CameraOff className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-slate-200">Camera is off</p>
+              <p className="text-xs text-slate-400 max-w-xs">
+                Kept off by default to avoid lag. Start it when you're ready to scan.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={toggleCameraEnabled}
+              className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer shadow-md"
+            >
+              <Camera className="h-4 w-4" />
+              Start Camera Scanner
+            </button>
+          </div>
+        )}
+
+        {isCameraEnabled && isCameraActive && !isInitializing && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="w-64 h-64 sm:w-72 sm:h-72 border-2 border-primary/60 rounded-3xl relative flex items-center justify-center animate-pulse">
               <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-2xl" />
@@ -514,14 +558,14 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           </div>
         )}
 
-        {isInitializing && (
+        {isCameraEnabled && isInitializing && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xs flex flex-col items-center justify-center space-y-3 z-20">
             <RefreshCw className="h-8 w-8 text-primary animate-spin" />
             <p className="text-xs font-semibold text-slate-300">Initializing High-Speed Camera...</p>
           </div>
         )}
 
-        {cameraError && (
+        {isCameraEnabled && cameraError && (
           <div className="absolute inset-0 bg-slate-950/95 p-6 flex flex-col items-center justify-center text-center space-y-3 z-20">
             <AlertTriangle className="h-10 w-10 text-amber-500" />
             <p className="text-xs font-medium text-slate-300 max-w-xs">{cameraError}</p>
@@ -560,15 +604,35 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={toggleFacingMode}
-            className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
-            title="Switch Front/Back Camera"
+            onClick={toggleCameraEnabled}
+            className={`p-2.5 rounded-xl border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors ${
+              isCameraEnabled
+                ? "bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30"
+                : "bg-primary/10 hover:bg-primary/20 text-primary border-primary/30"
+            }`}
+            title={isCameraEnabled ? "Turn Off Camera" : "Turn On Camera"}
           >
-            <SwitchCamera className="h-4 w-4 text-primary" />
-            <span className="hidden sm:inline">Switch Camera</span>
+            {isCameraEnabled ? (
+              <CameraOff className="h-4 w-4" />
+            ) : (
+              <Camera className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">{isCameraEnabled ? "Stop Camera" : "Start Camera"}</span>
           </button>
 
-          {isTorchSupported && (
+          {isCameraEnabled && (
+            <button
+              type="button"
+              onClick={toggleFacingMode}
+              className="p-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border flex items-center gap-2 text-xs font-semibold cursor-pointer transition-colors"
+              title="Switch Front/Back Camera"
+            >
+              <SwitchCamera className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Switch Camera</span>
+            </button>
+          )}
+
+          {isCameraEnabled && isTorchSupported && (
             <button
               type="button"
               onClick={toggleTorch}

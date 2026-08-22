@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import type { Station } from "../../types"
 import { useAuthStore } from "@/features/auth/store/auth.store"
-import { stationApi } from "@/shared/apis/station.api"
 import { managerApi } from "@/shared/apis/manager.api"
 import type { ManagerListItem, ManagerInvitationItem } from "@/shared/apis/manager.api"
 import { InviteManagerModal } from "@/features/owner/components/InviteManagerModal"

@@ -16,6 +16,7 @@ import { ActiveSessionPanel } from "@/features/queue/components/queue-management
 import { StallBookingModal } from "@/features/queue/components/queue-management/StallBookingModal"
 import { ResolveStalledModal } from "@/features/queue/components/queue-management/ResolveStalledModal"
 import type { LiveQueueData, QueueFilter } from "@/features/queue/components/queue-management/types"
+import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 const isActiveQueueStatus = (status: string) => {
   return (
@@ -31,6 +32,7 @@ const isActiveQueueStatus = (status: string) => {
 
 export default function ManagerQueuePage() {
   const navigate = useNavigate()
+  const basePath = useQueueBasePath()
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
     stationName: string
@@ -295,7 +297,7 @@ export default function ManagerQueuePage() {
       targetStatus === "SERVICE_COMPLETED" ||
       (selectedBooking.status === "IN_SERVICE" && targetStatus === "COMPLETED")
     ) {
-      navigate(`/manager/bookings/${selectedBooking.id}/post-inspection`)
+      navigate(`${basePath}/bookings/${selectedBooking.id}/post-inspection`)
       return
     }
 
@@ -396,10 +398,10 @@ export default function ManagerQueuePage() {
     return vDetails?.image || null
   }, [selectedBooking])
 
-  const goToCheckIn = useCallback(() => navigate("/manager/check-in"), [navigate])
+  const goToCheckIn = useCallback(() => navigate(`${basePath}/check-in`), [navigate, basePath])
   const goToPostInspection = useCallback(
-    (bookingId: string) => navigate(`/manager/bookings/${bookingId}/post-inspection`),
-    [navigate]
+    (bookingId: string) => navigate(`${basePath}/bookings/${bookingId}/post-inspection`),
+    [navigate, basePath]
   )
 
   const openStallModal = useCallback((bookingId: string) => {

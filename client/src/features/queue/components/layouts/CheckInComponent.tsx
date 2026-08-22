@@ -12,9 +12,11 @@ import {
 import { bookingApi } from "@/shared/apis/booking.api"
 import { QrCameraScanner } from "../ui/QrCameraScanner"
 import type { BookingResponse } from "@/shared/apis/booking.api"
+import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 export default function CheckInComponent() {
   const navigate = useNavigate()
+  const basePath = useQueueBasePath()
   const [bookingIdInput, setBookingIdInput] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
@@ -26,7 +28,7 @@ export default function CheckInComponent() {
       const res = await bookingApi.validateQr(scannedValue)
       toast.success("QR Verified! Navigating to Pre-Service Inspection...")
       setBookingIdInput("")
-      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+      navigate(`${basePath}/bookings/${res.id}/pre-inspection`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("QR Validation error:", err)
@@ -48,7 +50,7 @@ export default function CheckInComponent() {
       const res = await bookingApi.validateQr(bookingIdInput.trim())
       toast.success("Booking Verified! Opening Pre-Service Inspection...")
       setBookingIdInput("")
-      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+      navigate(`${basePath}/bookings/${res.id}/pre-inspection`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("Validation error:", err)
@@ -167,7 +169,7 @@ export default function CheckInComponent() {
               <button
                 onClick={() => {
                   setConfirmedBooking(null)
-                  navigate("/manager/queue")
+                  navigate(`${basePath}/queue`)
                 }}
                 className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer"
               >

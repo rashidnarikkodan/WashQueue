@@ -1,14 +1,14 @@
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ISelfAssignManagerUseCase } from "../interfaces/manager-usecases.interface"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { AppError } from "@/common/errors/app-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { StationProps } from "@/modules/station/domain/entities/Station"
+import { ManagerAssignment, ManagerAssignmentStatus, ManagerPermission } from "../../domain/entities/ManagerAssignment"
+
+const ALL_MANAGER_PERMISSIONS = Object.values(ManagerPermission)
 
 export class SelfAssignManagerUseCase implements ISelfAssignManagerUseCase {
   constructor(
@@ -44,11 +44,31 @@ export class SelfAssignManagerUseCase implements ISelfAssignManagerUseCase {
 
     await this.ownerRepository.updateIsManager(data.ownerUserId, true)
 
-    station.assignManager(data.ownerUserId)
-    const updatedStation = await this.stationRepository.update(station.id, {
-      managerId: data.ownerUserId,
-    })
+    const existingAssignment = await this.managerAssignmentRepository.findByUserAndStation(
+      data.ownerUserId,
+      data.stationId
+    )
 
+    if (existingAssignment) {
+      existingAssignment.reactivate()
+      existingAssignment.updatePermissions(ALL_MANAGER_PERMISSIONS)
+      await this.managerAssignmentRepository.update(existingAssignment)
+    } else {
+      await this.managerAssignmentRepository.create(
+        new ManagerAssignment({
+          managerUserId: data.ownerUserId,
+          stationId: data.stationId,
+          ownerId: data.ownerUserId,
+          permissions: ALL_MANAGER_PERMISSIONS,
+          status: ManagerAssignmentStatus.ACTIVE,
+          assignedAt: new Date(),
+        })
+      )
+    }
+
+    await this.stationRepository.setManagerId(data.stationId, data.ownerUserId)
+
+    const updatedStation = await this.stationRepository.findById(data.stationId)
     return updatedStation ? updatedStation.getProps() : station.getProps()
   }
 }

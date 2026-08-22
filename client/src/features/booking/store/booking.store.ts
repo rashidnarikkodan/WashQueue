@@ -5,7 +5,7 @@ import { managerApi } from "@/shared/apis/manager.api"
 import { getErrorMessage } from "@/shared/utils/error"
 import type { Booking, BookingStatus, PaymentStatus } from "../types/booking.types"
 
-type ManagedStationItem = Awaited<ReturnType<typeof managerApi.getManagedStations>>[number]
+type ManagedStationItem = Awaited<ReturnType<typeof managerApi.getManagedStation>>[number]
 
 export interface LoadBookingsParams {
   activeTab?: string
@@ -216,7 +216,7 @@ export const useBookingStore = create<BookingStore>((set) => ({
   loadManagerStation: async () => {
     set({ isFetchingManagerStation: true })
     try {
-      const res = await managerApi.getManagedStations()
+      const res = await managerApi.getManagedStation()
       if (res && res.length > 0) {
         set({ managedStation: res[0] })
       }

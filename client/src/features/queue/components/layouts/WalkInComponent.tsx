@@ -17,9 +17,11 @@ import type { BookingResponse } from "@/shared/apis/booking.api"
 import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/types"
 import type { StationDetail } from "@/features/station/types"
 import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
+import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 export default function WalkInComponent() {
   const navigate = useNavigate()
+  const basePath = useQueueBasePath()
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
     stationName: string
@@ -70,7 +72,7 @@ export default function WalkInComponent() {
 
   const fetchStation = useCallback(async () => {
     try {
-      const stations = await managerApi.getManagedStations()
+      const stations = await managerApi.getManagedStation()
       if (stations && stations.length > 0) {
         const sId = stations[0].stationId
         setStationInfo({
@@ -283,7 +285,7 @@ export default function WalkInComponent() {
         `✓ Walk-In Booking Created! (${res.bookingNumber}) Navigating to Pre-Service Inspection...`
       )
       setCreatedBooking(res)
-      navigate(`/manager/bookings/${res.id}/pre-inspection`)
+      navigate(`${basePath}/bookings/${res.id}/pre-inspection`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("Failed to create walk-in booking:", err)
@@ -662,7 +664,7 @@ export default function WalkInComponent() {
               <button
                 onClick={() => {
                   setCreatedBooking(null)
-                  navigate("/manager/queue")
+                  navigate(`${basePath}/queue`)
                 }}
                 className="flex-1 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all cursor-pointer"
               >

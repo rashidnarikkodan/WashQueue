@@ -15,6 +15,7 @@ import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
 import { readImageFileAsResizedDataUrl } from "@/shared/utils/imageFile"
+import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 interface PhotoSlotConfig {
   key: "front" | "rear" | "left" | "right"
@@ -32,6 +33,7 @@ const PHOTO_SLOTS: PhotoSlotConfig[] = [
 export default function ManagerPreInspectionPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const basePath = useQueueBasePath()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   const [notes, setNotes] = useState("")
   const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
@@ -146,7 +148,7 @@ export default function ManagerPreInspectionPage() {
         notes: notes || "Pre-service inspection verified",
       })
       toast.success("Pre-service inspection saved & vehicle checked in to queue!")
-      navigate("/manager/queues")
+      navigate(`${basePath}/queues`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }
       console.error("Inspection save error:", err)

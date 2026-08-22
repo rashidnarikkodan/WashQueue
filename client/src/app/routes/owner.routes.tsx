@@ -11,6 +11,9 @@ const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboardin
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
+const OwnerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
+const OwnerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -29,8 +32,28 @@ export const ownerRoutes = {
       element: <OwnerDashboard />,
     },
     {
+      path: "queue",
+      element: <ManagerQueuePage />,
+    },
+    {
       path: "queues",
       element: <ManagerQueuePage />,
+    },
+    {
+      path: "check-in",
+      element: <CheckInPage />,
+    },
+    {
+      path: "walk-ins",
+      element: <CheckInPage defaultTab="WALK_IN" />,
+    },
+    {
+      path: "pre-inspection",
+      element: <OwnerPreInspectionPage />,
+    },
+    {
+      path: "post-inspection",
+      element: <OwnerPostInspectionPage />,
     },
     {
       path: "bookings",
@@ -39,6 +62,14 @@ export const ownerRoutes = {
     {
       path: "bookings/:id",
       element: <BookingDetails role="owner" />,
+    },
+    {
+      path: "bookings/:id/pre-inspection",
+      element: <OwnerPreInspectionPage />,
+    },
+    {
+      path: "bookings/:id/post-inspection",
+      element: <OwnerPostInspectionPage />,
     },
     {
       path: "stations",
