@@ -1,86 +1,286 @@
-export interface OwnerProps {
+interface OwnerProps {
   id?: string
   userId: string
+
   legalFullName?: string
   businessName?: string
   gstNumber?: string
+
   whatsapp?: string
   businessEmail?: string
   phone?: string
+
+  hasStation?: boolean
+  hasMobileService?: boolean
+  mobileActive?: boolean
+
   isVerified?: boolean
   isManager?: boolean
   verifiedAt?: Date
-  createdAt?: Date
-  updatedAt?: Date
 
   onboardingStep?: number
+
   idProofType?: string
   idProofUrl?: string
   businessLicenseUrl?: string
   gstCertificateUrl?: string
+
   accountHolderName?: string
   bankName?: string
   accountNumber?: string
   ifscCode?: string
   bankProofUrl?: string
+
   rejectionReason?: string
+
+  createdAt?: Date
+  updatedAt?: Date
 }
 
-export class Owner implements OwnerProps {
-  readonly id?: string
-  readonly userId: string
-  readonly legalFullName?: string
-  readonly businessName?: string
-  readonly gstNumber?: string
-  readonly whatsapp?: string
-  readonly businessEmail?: string
-  readonly phone?: string
-  readonly hasStation?: boolean
-  readonly hasMobileService?: boolean
-  readonly mobileActive?: boolean
-  readonly isVerified?: boolean
-  readonly isManager?: boolean
-  readonly verifiedAt?: Date
-  readonly createdAt?: Date
-  readonly updatedAt?: Date
+export class Owner {
+  constructor(private props: OwnerProps) {}
 
-  readonly onboardingStep?: number
-  readonly idProofType?: string
-  readonly idProofUrl?: string
-  readonly businessLicenseUrl?: string
-  readonly gstCertificateUrl?: string
-  readonly accountHolderName?: string
-  readonly bankName?: string
-  readonly accountNumber?: string
-  readonly ifscCode?: string
-  readonly bankProofUrl?: string
-  readonly rejectionReason?: string
+  get id(): string | undefined {
+    return this.props.id
+  }
 
-  constructor(props: OwnerProps) {
-    this.id = props.id
-    this.userId = props.userId
-    this.legalFullName = props.legalFullName
-    this.businessName = props.businessName
-    this.gstNumber = props.gstNumber
-    this.whatsapp = props.whatsapp
-    this.businessEmail = props.businessEmail
-    this.phone = props.phone
-    this.isVerified = props.isVerified ?? false
-    this.isManager = props.isManager ?? false
-    this.verifiedAt = props.verifiedAt
-    this.createdAt = props.createdAt
-    this.updatedAt = props.updatedAt
+  get userId(): string {
+    return this.props.userId
+  }
 
-    this.onboardingStep = props.onboardingStep ?? 1
-    this.idProofType = props.idProofType
-    this.idProofUrl = props.idProofUrl
-    this.businessLicenseUrl = props.businessLicenseUrl
-    this.gstCertificateUrl = props.gstCertificateUrl
-    this.accountHolderName = props.accountHolderName
-    this.bankName = props.bankName
-    this.accountNumber = props.accountNumber
-    this.ifscCode = props.ifscCode
-    this.bankProofUrl = props.bankProofUrl
-    this.rejectionReason = props.rejectionReason
+  get legalFullName(): string | undefined {
+    return this.props.legalFullName
+  }
+
+  get businessName(): string | undefined {
+    return this.props.businessName
+  }
+
+  get gstNumber(): string | undefined {
+    return this.props.gstNumber
+  }
+
+  get whatsapp(): string | undefined {
+    return this.props.whatsapp
+  }
+
+  get businessEmail(): string | undefined {
+    return this.props.businessEmail
+  }
+
+  get phone(): string | undefined {
+    return this.props.phone
+  }
+
+  get hasStation(): boolean {
+    return this.props.hasStation ?? false
+  }
+
+  get hasMobileService(): boolean {
+    return this.props.hasMobileService ?? false
+  }
+
+  get mobileActive(): boolean {
+    return this.props.mobileActive ?? false
+  }
+
+  get isVerified(): boolean {
+    return this.props.isVerified ?? false
+  }
+
+  get isManager(): boolean {
+    return this.props.isManager ?? false
+  }
+
+  get verifiedAt(): Date | undefined {
+    return this.props.verifiedAt
+  }
+
+  get onboardingStep(): number {
+    return this.props.onboardingStep ?? 1
+  }
+
+  get idProofType(): string | undefined {
+    return this.props.idProofType
+  }
+
+  get idProofUrl(): string | undefined {
+    return this.props.idProofUrl
+  }
+
+  get businessLicenseUrl(): string | undefined {
+    return this.props.businessLicenseUrl
+  }
+
+  get gstCertificateUrl(): string | undefined {
+    return this.props.gstCertificateUrl
+  }
+
+  get accountHolderName(): string | undefined {
+    return this.props.accountHolderName
+  }
+
+  get bankName(): string | undefined {
+    return this.props.bankName
+  }
+
+  get accountNumber(): string | undefined {
+    return this.props.accountNumber
+  }
+
+  get ifscCode(): string | undefined {
+    return this.props.ifscCode
+  }
+
+  get bankProofUrl(): string | undefined {
+    return this.props.bankProofUrl
+  }
+
+  get rejectionReason(): string | undefined {
+    return this.props.rejectionReason
+  }
+
+  get createdAt(): Date | undefined {
+    return this.props.createdAt
+  }
+
+  get updatedAt(): Date | undefined {
+    return this.props.updatedAt
+  }
+
+  setAsManager(): void {
+    this.props.isManager = true
+    this.touch()
+  }
+
+  removeManagerRole(): void {
+    this.props.isManager = false
+    this.touch()
+  }
+
+  verify(): void {
+    this.props.isVerified = true
+    this.props.verifiedAt = new Date()
+    this.props.rejectionReason = undefined
+    this.touch()
+  }
+
+  reject(reason: string): void {
+    if (!reason.trim()) {
+      throw new Error("Rejection reason is required")
+    }
+
+    this.props.isVerified = false
+    this.props.verifiedAt = undefined
+    this.props.rejectionReason = reason
+    this.touch()
+  }
+
+  updateBusinessInformation(data: {
+    legalFullName?: string
+    businessName?: string
+    gstNumber?: string
+    businessEmail?: string
+    phone?: string
+    whatsapp?: string
+  }): void {
+    this.props.legalFullName = data.legalFullName
+    this.props.businessName = data.businessName
+    this.props.gstNumber = data.gstNumber
+    this.props.businessEmail = data.businessEmail
+    this.props.phone = data.phone
+    this.props.whatsapp = data.whatsapp
+
+    this.touch()
+  }
+
+  updateBankDetails(data: {
+    accountHolderName: string
+    bankName: string
+    accountNumber: string
+    ifscCode: string
+  }): void {
+    this.props.accountHolderName = data.accountHolderName
+    this.props.bankName = data.bankName
+    this.props.accountNumber = data.accountNumber
+    this.props.ifscCode = data.ifscCode
+
+    this.touch()
+  }
+
+  updateDocuments(data: {
+    idProofType?: string
+    idProofUrl?: string
+    businessLicenseUrl?: string
+    gstCertificateUrl?: string
+    bankProofUrl?: string
+  }): void {
+    this.props.idProofType = data.idProofType
+    this.props.idProofUrl = data.idProofUrl
+    this.props.businessLicenseUrl = data.businessLicenseUrl
+    this.props.gstCertificateUrl = data.gstCertificateUrl
+    this.props.bankProofUrl = data.bankProofUrl
+
+    this.touch()
+  }
+
+  setOnboardingStep(step: number): void {
+    if (step < 1) {
+      throw new Error("Invalid onboarding step")
+    }
+
+    this.props.onboardingStep = step
+    this.touch()
+  }
+
+  enableStation(): void {
+    this.props.hasStation = true
+    this.touch()
+  }
+
+  disableStation(): void {
+    this.props.hasStation = false
+    this.touch()
+  }
+
+  enableMobileService(): void {
+    this.props.hasMobileService = true
+    this.touch()
+  }
+
+  disableMobileService(): void {
+    this.props.hasMobileService = false
+    this.props.mobileActive = false
+    this.touch()
+  }
+
+  activateMobileService(): void {
+    if (!this.props.hasMobileService) {
+      throw new Error("Mobile service must be enabled before activation")
+    }
+
+    this.props.mobileActive = true
+    this.touch()
+  }
+
+  deactivateMobileService(): void {
+    this.props.mobileActive = false
+    this.touch()
+  }
+
+  toJSON() {
+    return {
+      ...this.props,
+      hasStation: this.hasStation,
+      hasMobileService: this.hasMobileService,
+      mobileActive: this.mobileActive,
+      isVerified: this.isVerified,
+      isManager: this.isManager,
+      onboardingStep: this.onboardingStep,
+    }
+  }
+
+  private touch(): void {
+    this.props.updatedAt = new Date()
   }
 }

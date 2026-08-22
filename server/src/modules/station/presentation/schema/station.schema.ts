@@ -241,3 +241,18 @@ export const configureSlotConfigSchema = z.object({
 export const getAvailableTimeWindowsQuerySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format, must be YYYY-MM-DD"),
 })
+
+export const getStationsQuery = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(10),
+  maxDistanceKm: z.coerce.number().optional(),
+  minRating: z.coerce.number().optional(),
+  vehicleCategory: z.string().optional(),
+  vehicleClassId: z.string().optional(),
+  status: z.enum([...Object.values(StationStatus),'all']).optional(),
+  sortBy: z.string().optional(),
+  search: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  ownerId: z.string().optional()
+})

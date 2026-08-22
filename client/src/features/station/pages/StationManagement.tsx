@@ -11,21 +11,21 @@ import { STATION_STATUS, type Station } from "../types"
 
 const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
-  { id: "draft", label: "Draft", activeColor: "border-blue-500 text-blue-500" },
-  { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
-  { id: "active", label: "Active Stations", activeColor: "border-emerald-500 text-emerald-500" },
-  { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
-  { id: "rejected", label: "Rejected", activeColor: "border-red-500 text-red-500" },
+  { id: STATION_STATUS.DRAFT, label: "Draft", activeColor: "border-blue-500 text-blue-500" },
+  { id: STATION_STATUS.PENDING_REVIEW, label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
+  { id: STATION_STATUS.ACTIVE, label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: STATION_STATUS.SUSPENDED, label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
+  { id: STATION_STATUS.REJECTED, label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
 const OWNER_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
-  { id: "draft", label: "Draft", activeColor: "border-blue-500 text-blue-500" },
-  { id: "pending", label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
-  { id: "active", label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
-  { id: "inactive", label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
-  { id: "suspended", label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
-  { id: "rejected", label: "Rejected", activeColor: "border-red-500 text-red-500" },
+  { id: STATION_STATUS.DRAFT, label: "Draft", activeColor: "border-blue-500 text-blue-500" },
+  { id: STATION_STATUS.PENDING_REVIEW, label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
+  { id: STATION_STATUS.ACTIVE, label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: STATION_STATUS.INACTIVE, label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
+  { id: STATION_STATUS.SUSPENDED, label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
+  { id: STATION_STATUS.REJECTED, label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
 export interface StationManagementProps {
@@ -52,27 +52,13 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const limit = 10
 
   const loadStations = useCallback(async () => {
-    const statusFilter =
-      activeTab === "draft"
-        ? STATION_STATUS.DRAFT
-        : activeTab === "pending"
-          ? STATION_STATUS.PENDING_REVIEW
-          : activeTab === "active"
-            ? STATION_STATUS.ACTIVE
-            : activeTab === "inactive"
-              ? STATION_STATUS.INACTIVE
-              : activeTab === "suspended"
-                ? STATION_STATUS.SUSPENDED
-                : activeTab === "rejected"
-                  ? STATION_STATUS.REJECTED
-                  : "all"
 
     if (isAdmin) {
       await fetchStations({
         page: currentPage,
         limit,
         search: searchQuery || undefined,
-        status: statusFilter,
+        status: activeTab,
       })
     } else {
       const ownerUserId = user?.ownerId || user?.id
@@ -80,13 +66,13 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         await fetchStations({
           ownerId: ownerUserId,
           search: searchQuery || undefined,
-          status: statusFilter,
+          status: activeTab,
           page: currentPage,
           limit,
         })
       }
     }
-  }, [isAdmin, activeTab, currentPage, searchQuery, limit, user?.ownerId, user?.id, fetchStations])
+  }, [isAdmin, activeTab, currentPage, searchQuery, limit, user?.ownerId, user?.id])
 
   useEffect(() => {
     loadStations()

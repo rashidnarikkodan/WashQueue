@@ -119,7 +119,7 @@ export interface BookingProps {
   id: string
   bookingNumber: string
   userId?: string | null
-  providerId: string
+  ownerId: string
   stationId: string
   vehicleId?: string | null
   vehicleSnapshot: VehicleSnapshot
@@ -173,8 +173,8 @@ export class Booking {
     return this.props.userId
   }
 
-  get providerId(): string {
-    return this.props.providerId
+  get ownerId(): string {
+    return this.props.ownerId
   }
 
   get stationId(): string {

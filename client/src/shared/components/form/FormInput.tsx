@@ -19,6 +19,7 @@ interface FormInputProps {
   leftIcon?: ReactNode
   onlyNumbers?: boolean
   maxLength?: number
+  className?: string
 }
 
 export default function FormInput({
@@ -38,6 +39,7 @@ export default function FormInput({
   leftIcon,
   onlyNumbers,
   maxLength,
+  className,
 }: FormInputProps) {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -123,7 +125,7 @@ export default function FormInput({
             error
               ? "border-red-500/80 focus:ring-red-500/20 focus:border-red-500"
               : "border-border/80 hover:border-border"
-          }`}
+          } ${className}`}
         />
         {isPassword && (
           <button

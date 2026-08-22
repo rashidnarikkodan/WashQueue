@@ -97,7 +97,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       id: "",
       bookingNumber,
       userId,
-      providerId: station.ownerId && station.ownerId.length > 0 ? station.ownerId : userId,
+      ownerId: station.ownerId && station.ownerId.length > 0 ? station.ownerId : userId,
       stationId: station.id,
       vehicleId: vehicle.id,
       vehicleSnapshot: {

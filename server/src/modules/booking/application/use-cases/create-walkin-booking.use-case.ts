@@ -105,7 +105,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       id: "",
       bookingNumber,
       userId: input.customer?.userId || null,
-      providerId: station.ownerId,
+      ownerId: station.ownerId,
       stationId: station.id,
       vehicleId: input.vehicle.vehicleId || null,
       vehicleSnapshot: {

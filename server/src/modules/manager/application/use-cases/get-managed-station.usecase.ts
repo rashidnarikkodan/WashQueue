@@ -2,11 +2,11 @@ import { IManagerAssignmentRepository } from "../../domain/repositories/manager-
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import {
-  IGetManagedStationsUseCase,
+  IGetManagedStationUseCase,
   ManagedStationResponse,
 } from "../interfaces/manager-usecases.interface"
 
-export class GetManagedStationsUseCase implements IGetManagedStationsUseCase {
+export class GetManagedStationUseCase implements IGetManagedStationUseCase {
   constructor(
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly stationRepository: IStationRepository

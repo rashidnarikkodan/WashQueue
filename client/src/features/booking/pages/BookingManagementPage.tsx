@@ -28,7 +28,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     ownerStations,
     page,
     pagination,
-    bookings,
     filteredBookings,
     isLoading,
     error,
@@ -38,14 +37,18 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     handleRefresh,
   } = useBookingList({ isManager, isOwner, isAdmin })
 
+  const isOwnerScopedToOwnStations = isOwner && selectedStationId === "ALL"
+
   const stats: StatItem[] = useMemo(() => {
-    const totalCount = pagination?.total ?? bookings.length
-    const confirmedCount = bookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length
-    const inProgressCount = bookings.filter(
+    const totalCount = isOwnerScopedToOwnStations
+      ? filteredBookings.length
+      : pagination?.total ?? filteredBookings.length
+    const confirmedCount = filteredBookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length
+    const inProgressCount = filteredBookings.filter(
       (b) => b.status === BOOKING_STATUS.CHECKED_IN || b.status === BOOKING_STATUS.IN_SERVICE
     ).length
-    const completedCount = bookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length
-    const totalRevenue = bookings
+    const completedCount = filteredBookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length
+    const totalRevenue = filteredBookings
       .filter((b) => b.status === BOOKING_STATUS.COMPLETED)
       .reduce((sum, b) => sum + (b.amount || 0), 0)
 
@@ -133,7 +136,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         color: "indigo",
       },
     ]
-  }, [bookings, pagination?.total, isManager, isOwner, managedStation])
+  }, [filteredBookings, pagination?.total, isManager, isOwner, isOwnerScopedToOwnStations, managedStation])
 
   const basePath = isAdmin
     ? "/admin/bookings"
@@ -153,9 +156,8 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   )
 
   const paginationMeta = useMemo(() => {
-    if (pagination) return pagination
-    const total = filteredBookings.length
-    const limit = 10
+    const limit = pagination?.limit ?? 10
+    const total = isOwnerScopedToOwnStations ? filteredBookings.length : pagination?.total ?? filteredBookings.length
     const totalPages = Math.max(1, Math.ceil(total / limit))
     return {
       total,
@@ -165,7 +167,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
     }
-  }, [pagination, filteredBookings.length, page])
+  }, [pagination, isOwnerScopedToOwnStations, filteredBookings.length, page])
 
   const backPath = isAdmin
     ? "/admin/dashboard"
@@ -198,7 +200,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          { isOwner && ownerStations.length > 0 && (
+          {isOwner && ownerStations.length > 0 && (
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
               <Building2 size={15} className="text-primary shrink-0" />
               <select
@@ -265,7 +267,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         onSearchChange={(q) => updateParams({ q, page: 1 })}
         searchPlaceholder="Search booking ID, customer name, vehicle plate..."
         selectFilters={
-          ( isOwner) && ownerStations.length > 0
+          isOwner && ownerStations.length > 0
             ? [
                 {
                   id: "stationFilter",

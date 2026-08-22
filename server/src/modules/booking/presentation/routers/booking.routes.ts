@@ -21,6 +21,7 @@ import {
   completeHandoverSchema,
   stallBookingSchema,
   resolveStalledSchema,
+  getOwnerBookingListQuerySchema,
 } from "../schema/booking.schema"
 
 export const createBookingRouter = (bookingController: BookingController): Router => {
@@ -39,6 +40,11 @@ export const createBookingRouter = (bookingController: BookingController): Route
     "/",
     validateRequest(getBookingListQuerySchema, "query"),
     asyncHandler(bookingController.getUserBookings)
+  )
+  router.get(
+    "/owners/:ownerId",
+    validateRequest(getOwnerBookingListQuerySchema, "query"),
+    asyncHandler(bookingController.getOwnerBooking)
   )
   router.get(
     "/:bookingId",

@@ -96,7 +96,7 @@ export function StationDetails({ role }: CommonStationDetailProps) {
     async function initStation() {
       if (currentRole === ROLE.MANAGER) {
         try {
-          const managedList = await managerApi.getManagedStations()
+          const managedList = await managerApi.getManagedStation()
           if (!isMounted) return
           if (managedList && managedList.length > 0) {
             const targetId = id || managedList[0].stationId

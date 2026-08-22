@@ -14,8 +14,9 @@ import {
   ISuspendManagerUseCase,
   IReactivateManagerUseCase,
   IRemoveManagerUseCase,
-  IGetManagedStationsUseCase,
+  IGetManagedStationUseCase,
   IVerifyInvitationTokenUseCase,
+  ISelfAssignManagerUseCase,
 } from '../application/interfaces/manager-usecases.interface'
 
 export class ManagerController {
@@ -31,14 +32,25 @@ export class ManagerController {
     private readonly suspendManagerUseCase: ISuspendManagerUseCase,
     private readonly reactivateManagerUseCase: IReactivateManagerUseCase,
     private readonly removeManagerUseCase: IRemoveManagerUseCase,
-    private readonly getManagedStationsUseCase: IGetManagedStationsUseCase,
-    private readonly verifyInvitationTokenUseCase: IVerifyInvitationTokenUseCase
+    private readonly getManagedStationUseCase: IGetManagedStationUseCase,
+    private readonly verifyInvitationTokenUseCase: IVerifyInvitationTokenUseCase,
+    private readonly selfAssignManagerUseCase: ISelfAssignManagerUseCase
   ) {}
 
   invite = async (req: AuthenticatedRequest, res: Response) => {
     const ownerUserId = req.user!.userId
     const result = await this.inviteManagerUseCase.execute(ownerUserId, req.body)
     success(res, result, HTTP_STATUS.CREATED, result.message)
+  }
+
+  selfAssignManager = async (req: AuthenticatedRequest, res: Response) => {
+    const ownerUserId = req.user!.userId
+    const { stationId } = req.body
+
+    console.log(stationId, ownerUserId)
+
+    const result = await this.selfAssignManagerUseCase.execute({ownerUserId,stationId})
+    success(res, result, HTTP_STATUS.CREATED, '')
   }
 
   getOwnerManagers = async (req: AuthenticatedRequest, res: Response) => {
@@ -126,7 +138,7 @@ export class ManagerController {
 
   getManagedStations = async (req: AuthenticatedRequest, res: Response) => {
     const managerUserId = req.user!.userId
-    const stations = await this.getManagedStationsUseCase.execute(managerUserId)
+    const stations = await this.getManagedStationUseCase.execute(managerUserId)
     success(res, stations, HTTP_STATUS.OK, "Managed stations retrieved successfully")
   }
 }

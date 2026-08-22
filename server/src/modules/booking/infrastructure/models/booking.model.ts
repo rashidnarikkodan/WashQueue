@@ -7,7 +7,7 @@ export interface IBookingDocument extends Document {
   _id: Types.ObjectId
   bookingNumber: string
   userId?: Types.ObjectId | null
-  providerId: Types.ObjectId
+  ownerId: Types.ObjectId
   stationId: Types.ObjectId
   vehicleId?: Types.ObjectId | null
 
@@ -136,7 +136,7 @@ const bookingSchema = new Schema<IBookingDocument>(
   {
     bookingNumber: { type: String, required: true, unique: true, index: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
-    providerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     stationId: { type: Schema.Types.ObjectId, ref: "Station", required: true, index: true },
     vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle", default: null },
 

@@ -63,8 +63,8 @@ export class BookingMapper {
       id: doc._id?.toString() || (doc as unknown as { id?: string }).id || "",
       bookingNumber: doc.bookingNumber || "",
       userId: doc.userId ? getIdString(doc.userId) : null,
-      providerId: doc.providerId
-        ? getIdString(doc.providerId)
+      ownerId: doc.ownerId
+        ? getIdString(doc.ownerId)
         : doc.createdByUserId
           ? doc.createdByUserId.toString()
           : "",
@@ -216,8 +216,8 @@ export class BookingMapper {
     const raw: Partial<IBookingDocument> = {
       bookingNumber: props.bookingNumber,
       userId: toObjectId(props.userId),
-      providerId:
-        toObjectId(props.providerId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
+      ownerId:
+        toObjectId(props.ownerId) || toObjectId(props.createdByUserId) || new Types.ObjectId(),
       stationId: toObjectId(props.stationId) || new Types.ObjectId(),
       vehicleId: toObjectId(props.vehicleId),
       vehicleSnapshot: {

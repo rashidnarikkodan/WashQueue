@@ -21,7 +21,7 @@ export interface BookingResponseDTO {
   id: string
   bookingNumber: string
   userId?: string | null
-  providerId: string
+  ownerId: string
   stationId: string
   vehicleId?: string | null
   vehicleSnapshot: {

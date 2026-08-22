@@ -12,6 +12,16 @@ export interface CreateBookingInput {
   paymentMethod?: PaymentMethod
 }
 
+interface OwnerBookingQuery {
+  page: number
+  limit: number
+  status: string
+  stationId: string
+  search: string
+  startDate: string
+  endDate: string
+}
+
 export interface InspectionChecklistItem {
   key: string
   label: string
@@ -34,7 +44,7 @@ export interface BookingResponse {
   id: string
   bookingNumber: string
   userId?: string | null
-  providerId: string
+  ownerId: string
   stationId: string
   vehicleId?: string | null
   vehicleSnapshot?: {
@@ -131,7 +141,7 @@ export interface GetUserBookingsParams {
   limit?: number
   status?: string
   stationId?: string
-  providerId?: string
+  ownerId?: string
   q?: string
 }
 
@@ -197,6 +207,18 @@ export const bookingApi = {
     }
   },
 
+  getOwnerBookings: async (ownerId: string, query: OwnerBookingQuery) => {
+    try {
+      const res = await api.get(API_ROUTES.BOOKINGS.OWNER_BOOKINGS(ownerId),{
+        params:query,
+      })
+      return res.data.data
+
+    } catch (error) {
+      handleApiError(error, "Get Owners Booking Failed")
+    }
+  },
+
   cancelBooking: async (bookingId: string, reason: string): Promise<BookingResponse> => {
     try {
       const response = await api.patch(API_ROUTES.BOOKINGS.CANCEL(bookingId), { reason })
@@ -248,7 +270,7 @@ export const bookingApi = {
     try {
       const response = await api.post(API_ROUTES.BOOKINGS.HANDOVER_BY_ID(bookingId), {
         notes,
-        bookingId
+        bookingId,
       })
       return response.data.data
     } catch (error) {
@@ -313,7 +335,9 @@ export const bookingApi = {
     }
   },
 
-  getLiveQueue: async (stationId: string): Promise<{
+  getLiveQueue: async (
+    stationId: string
+  ): Promise<{
     stationId: string
     stationName: string
     totalBays: number
@@ -364,9 +388,7 @@ export const bookingApi = {
     }>
   }> => {
     try {
-      const response = await api.get(
-        `${API_ROUTES.BOOKINGS.ROOT}/stations/${stationId}/queue`
-      )
+      const response = await api.get(`${API_ROUTES.BOOKINGS.ROOT}/stations/${stationId}/queue`)
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to load live station queue")
@@ -388,7 +410,12 @@ export const bookingApi = {
     serviceType: "HALF" | "FULL"
     customer?: { userId?: string; name: string; phone: string }
     walkInCustomer?: { name: string; phone: string }
-    vehicle?: { vehicleId?: string; registrationNumber: string; categoryId: string; classId: string }
+    vehicle?: {
+      vehicleId?: string
+      registrationNumber: string
+      categoryId: string
+      classId: string
+    }
     walkInVehicle?: { registrationNumber: string; categoryId: string; classId: string }
     extraServiceIds?: string[]
   }): Promise<BookingResponse> => {
@@ -399,8 +426,20 @@ export const bookingApi = {
         serviceType: input.serviceType,
         paymentMethod: PAYMENT_METHOD.PAY_AT_STATION,
         extraServiceIds: input.extraServiceIds || [],
-        customer: input.customer || (input.walkInCustomer ? { name: input.walkInCustomer.name, phone: input.walkInCustomer.phone } : undefined),
-        vehicle: input.vehicle || (input.walkInVehicle ? { registrationNumber: input.walkInVehicle.registrationNumber, categoryId: input.walkInVehicle.categoryId, classId: input.walkInVehicle.classId } : undefined),
+        customer:
+          input.customer ||
+          (input.walkInCustomer
+            ? { name: input.walkInCustomer.name, phone: input.walkInCustomer.phone }
+            : undefined),
+        vehicle:
+          input.vehicle ||
+          (input.walkInVehicle
+            ? {
+                registrationNumber: input.walkInVehicle.registrationNumber,
+                categoryId: input.walkInVehicle.categoryId,
+                classId: input.walkInVehicle.classId,
+              }
+            : undefined),
       }
       const response = await api.post(`${API_ROUTES.BOOKINGS.ROOT}/walk-in`, payload)
       return response.data.data

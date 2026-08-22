@@ -82,6 +82,9 @@ export class StationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
+
+  
+
   async findById(id: string): Promise<Station | null> {
     if (Types.ObjectId.isValid(id)) {
       const doc = await this.model.findById(id).exec()
@@ -122,7 +125,7 @@ export class StationMongoRepository
 
     const candidatePipeline: PipelineStage[] = []
 
-    const radiusKm = filter.maxDistanceKm || filter.radiusKm || 50
+    const radiusKm = filter.maxDistanceKm || 25
 
     if (hasGeo) {
       candidatePipeline.push({
@@ -201,29 +204,6 @@ export class StationMongoRepository
       stationPricingMap.set(sid, list)
     })
 
-    let filterExtraServiceIds: Types.ObjectId[] | undefined = undefined
-    if (filter.extraServices?.length || filter.extraServiceIds?.length) {
-      const rawIds = filter.extraServices || filter.extraServiceIds || []
-      filterExtraServiceIds = rawIds
-        .filter((id) => Types.ObjectId.isValid(id))
-        .map((id) => new Types.ObjectId(id))
-    }
-
-    const extraServiceQuery: Record<string, unknown> = {
-      stationId: { $in: candidateIds },
-      isActive: true,
-    }
-    if (filterExtraServiceIds && filterExtraServiceIds.length > 0) {
-      extraServiceQuery._id = { $in: filterExtraServiceIds }
-    }
-
-    const extraServices = await ExtraServiceModel.find(extraServiceQuery).exec()
-    const stationExtraServicesMap = new Map<string, number>()
-    extraServices.forEach((es) => {
-      const sid = es.stationId.toString()
-      stationExtraServicesMap.set(sid, (stationExtraServicesMap.get(sid) || 0) + 1)
-    })
-
     const liveStateMap = await StationRedisHydrationService.hydrateLiveStates(candidateStations)
 
     let hydratedItems: (HydratedStationItem & {
@@ -244,14 +224,6 @@ export class StationMongoRepository
       }
 
       if (matchingClassIds && matchingClassIds.length > 0 && !stationPricingMap.has(sid)) {
-        continue
-      }
-
-      if (
-        filterExtraServiceIds &&
-        filterExtraServiceIds.length > 0 &&
-        !stationExtraServicesMap.has(sid)
-      ) {
         continue
       }
 
@@ -276,21 +248,6 @@ export class StationMongoRepository
         if (prices.length > 0) startingPrice = Math.min(...prices)
       }
 
-      if (filter.washType === "HALF" && halfWashPrice === undefined) continue
-      if (filter.washType === "FULL" && fullWashPrice === undefined) continue
-
-      const minP = filter.minPrice ?? filter.minHalfWashPrice ?? filter.minFullWashPrice
-      const maxP = filter.maxPrice ?? filter.maxHalfWashPrice ?? filter.maxFullWashPrice
-      const comparePrice =
-        filter.washType === "HALF"
-          ? halfWashPrice
-          : filter.washType === "FULL"
-            ? fullWashPrice
-            : startingPrice
-      if (comparePrice !== undefined) {
-        if (typeof minP === "number" && comparePrice < minP) continue
-        if (typeof maxP === "number" && comparePrice > maxP) continue
-      }
 
       const item: HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number } = {
         station,
@@ -394,12 +351,6 @@ export class StationMongoRepository
       longitude: filter.longitude,
       maxDistanceKm: filter.radiusKm,
       vehicleClassId: filter.vehicleClassId,
-      extraServiceIds: filter.extraServiceIds,
-      minimumRating: filter.minimumRating,
-      minHalfWashPrice: filter.minHalfWashPrice,
-      maxHalfWashPrice: filter.maxHalfWashPrice,
-      minFullWashPrice: filter.minFullWashPrice,
-      maxFullWashPrice: filter.maxFullWashPrice,
       page: filter.page,
       limit: filter.limit,
       status: "ACTIVE",
@@ -422,9 +373,6 @@ export class StationMongoRepository
           $or: [
             ...(Types.ObjectId.isValid(ownerIdStr)
               ? [{ _id: new Types.ObjectId(ownerIdStr) }]
-              : []),
-            ...(Types.ObjectId.isValid(ownerIdStr)
-              ? [{ userId: new Types.ObjectId(ownerIdStr) }]
               : []),
           ],
         }).exec()
@@ -451,15 +399,15 @@ export class StationMongoRepository
       match.status = "ACTIVE"
     }
 
-    if (filter.city) {
-      match["address.city"] = { $regex: filter.city, $options: "i" }
-    }
-    if (filter.state) {
-      match["address.state"] = { $regex: filter.state, $options: "i" }
-    }
-    if (filter.country) {
-      match["address.country"] = { $regex: filter.country, $options: "i" }
-    }
+    // if (filter.city) {
+    //   match["address.city"] = { $regex: filter.city, $options: "i" }
+    // }
+    // if (filter.state) {
+    //   match["address.state"] = { $regex: filter.state, $options: "i" }
+    // }
+    // if (filter.country) {
+    //   match["address.country"] = { $regex: filter.country, $options: "i" }
+    // }
     if (filter.isActive !== undefined) {
       match.isActive = filter.isActive
     }
@@ -467,16 +415,16 @@ export class StationMongoRepository
       match.verifiedAt = { $exists: true, $ne: null }
     }
 
-    const minRating = filter.minimumRating ?? filter.minRating
+    //rating filter
+    const minRating = filter.minRating
     if (minRating !== undefined && minRating > 0) {
       match.rating = { $gte: minRating }
     }
 
-    if (filter.amenities && filter.amenities.length > 0) {
-      match.amenities = { $all: filter.amenities }
-    }
 
-    const q = filter.search ?? (filter as unknown as { q?: string }).q
+
+    //search result filter
+    const q = filter.search
     if (q && q.trim().length > 0) {
       const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       const regex = new RegExp(escaped, "i")

@@ -147,21 +147,6 @@ export const stationApi = {
     }
   },
 
-  assignManager: async (
-    id: string,
-    input: { managerType: "SELF" | "INVITE"; email?: string }
-  ): Promise<Station> => {
-    try {
-      const response = await api.post<{ data: Station }>(
-        API_ROUTES.STATIONS.ASSIGN_MANAGER(id),
-        input
-      )
-      return response.data.data
-    } catch (error) {
-      throw handleApiError(error, "Failed to assign manager for this station")
-    }
-  },
-
   getBookingCalendar: async (
     stationId: string
   ): Promise<{

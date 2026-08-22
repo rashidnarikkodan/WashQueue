@@ -8,7 +8,6 @@ import { ConfigureSlotConfigInput, SlotConfigResponseDTO } from "../dtos/slot-co
 import { TimeWindowInstance } from "../../domain/entities/TimeWindowInstance"
 import { AvailableTimeWindowsResponseDTO } from "../dtos/available-time-windows.dto"
 import { BookingCalendarResponseDTO } from "../dtos/booking-calendar.dto"
-import { AssignManagerInput } from "../use-cases/assign-manager.usecase"
 
 export interface ICreateStationUseCase {
   execute(userId: string, input: CreateStationInput): Promise<Station>
@@ -51,14 +50,6 @@ export interface IReviewStationUseCase {
 
 export interface IToggleActiveStationUseCase {
   execute(stationId: string, userId: string): Promise<Station>
-}
-
-export interface IAssignManagerUseCase {
-  execute(
-    stationId: string,
-    userId: string,
-    input: AssignManagerInput
-  ): Promise<StationProps>
 }
 
 export interface IGetStationFilterOptionsUseCase {

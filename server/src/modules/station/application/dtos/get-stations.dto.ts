@@ -25,7 +25,6 @@ export interface GetStationsQuery {
   latitude?: number
   longitude?: number
   maxDistanceKm?: number
-  radiusKm?: number
 
   search?: string
   status?: string
@@ -34,20 +33,7 @@ export interface GetStationsQuery {
   vehicleCategory?: string
   vehicleClassId?: string
 
-  washType?: WashType
-  minPrice?: number
-  maxPrice?: number
-  minHalfWashPrice?: number
-  maxHalfWashPrice?: number
-  minFullWashPrice?: number
-  maxFullWashPrice?: number
-
   minRating?: number
-  minimumRating?: number
-
-  amenities?: string[]
-  extraServices?: string[]
-  extraServiceIds?: string[]
 
   openNow?: boolean
   availableToday?: boolean

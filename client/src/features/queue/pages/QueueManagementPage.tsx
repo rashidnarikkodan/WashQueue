@@ -67,7 +67,8 @@ export default function ManagerQueuePage() {
     async (silent = false) => {
       if (!silent) setIsLoading(true)
       try {
-        const stations = await managerApi.getManagedStations()
+        const stations = await managerApi.getManagedStation()
+        
         if (stations && stations.length > 0) {
           const activeStation = stations[0]
           setStationInfo({
@@ -415,7 +416,7 @@ export default function ManagerQueuePage() {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 space-y-8">
       <QueuePageHeader
-        stationName={stationInfo?.stationName || "Airport Express Auto Care"}
+        stationName={stationInfo?.stationName || "Your Station"}
         currentDateFormatted={currentDateFormatted}
       />
 

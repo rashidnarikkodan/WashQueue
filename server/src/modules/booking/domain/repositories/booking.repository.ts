@@ -12,7 +12,7 @@ export interface FindBookingsFilter {
   userId?: string
   stationId?: string
   stationIds?: string[]
-  providerId?: string
+  ownerId?: string
   status?: BookingStatus | BookingStatus[] | string
   search?: string
   startDate?: Date | string

@@ -5,6 +5,7 @@ const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 import StationManagement from "@/features/station/pages/StationManagement"
 import AddEditStation from "@/features/station/pages/AddEditStation"
+import ManagerQueuePage from "@/features/queue/pages/QueueManagementPage"
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
@@ -29,7 +30,7 @@ export const ownerRoutes = {
     },
     {
       path: "queues",
-      element: <>Queue Management</>,
+      element: <ManagerQueuePage />,
     },
     {
       path: "bookings",

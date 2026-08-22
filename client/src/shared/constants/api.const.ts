@@ -24,7 +24,6 @@ export const API_ROUTES = {
     BY_ID: (id: string) => `/stations/${id}`,
     SUBMIT: (id: string) => `/stations/${id}/submit`,
     REVIEW: (id: string) => `/stations/${id}/review`,
-    ASSIGN_MANAGER: (id: string) => `/stations/${id}/assign-manager`,
   },
   VEHICLES: {
     ROOT: "/vehicles",
@@ -33,6 +32,7 @@ export const API_ROUTES = {
   },
   BOOKINGS: {
     ROOT: "/bookings",
+    OWNER_BOOKINGS:(ownerId:string)=>`/bookings/owners/${ownerId}`,
     BY_ID: (id: string) => `/bookings/${id}`,
     CANCEL: (id: string) => `/bookings/${id}/cancel`,
     RESCHEDULE: (id: string) => `/bookings/${id}/reschedule`,

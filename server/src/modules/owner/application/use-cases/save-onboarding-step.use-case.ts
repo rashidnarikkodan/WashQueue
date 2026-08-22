@@ -28,7 +28,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     step: number
     details: IOwnerOnboardingDetails
     isSubmitted: boolean
-    tokens?: { accessToken: string; refreshToken: string }
+    // tokens?: { accessToken: string; refreshToken: string }
   }> {
     const userDoc = await this.userRepository.findById(userId)
 
@@ -108,15 +108,15 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
         email: userDoc.email,
       }
 
-      const accessToken = this.tokenService.generateAccessToken(tokenPayload)
-      const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
+      // const accessToken = this.tokenService.generateAccessToken(tokenPayload)
+      // const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
       const userUpdateFields: Partial<User> = {
         role: ROLE.OWNER,
-        refreshToken: refreshToken,
+        // refreshToken: refreshToken,
       }
 
-      tokens = { accessToken, refreshToken }
+      // tokens = { accessToken, refreshToken }
 
       await this.userRepository.update(userId, userUpdateFields)
     }
@@ -125,7 +125,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       step,
       details: mergedDetails,
       isSubmitted: step === 4,
-      tokens,
+      // tokens,
     }
   }
 }

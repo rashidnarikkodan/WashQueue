@@ -102,7 +102,6 @@ const StationDiscovery = () => {
       minRating: filters.minRating > 0 ? filters.minRating : undefined,
       vehicleCategory: filters.vehicleCategory !== "all" ? filters.vehicleCategory : undefined,
       vehicleClassId: filters.vehicleClassId,
-      washType: filters.washType && filters.washType !== "ALL" ? filters.washType : undefined,
       sortBy: filters.sortBy,
     })
   }, [fetchStations, page, debouncedSearch, userLocation, filters])

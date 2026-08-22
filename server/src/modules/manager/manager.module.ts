@@ -16,15 +16,16 @@ import { UpdateManagerPermissionsUseCase } from "./application/use-cases/update-
 import { SuspendManagerUseCase } from "./application/use-cases/suspend-manager.usecase"
 import { ReactivateManagerUseCase } from "./application/use-cases/reactivate-manager.usecase"
 import { RemoveManagerUseCase } from "./application/use-cases/remove-manager.usecase"
-import { GetManagedStationsUseCase } from "./application/use-cases/get-managed-stations.usecase"
+import { GetManagedStationUseCase } from "./application/use-cases/get-managed-station.usecase"
 import { VerifyInvitationTokenUseCase } from "./application/use-cases/verify-invitation-token.usecase"
 
-import { ManagerController } from "./presentation/controllers/manager.controller"
-import { createManagerRouter } from "./presentation/routes/manager.routes"
+import { ManagerController } from "./presentation/manager.controller"
+import { createManagerRouter } from "./presentation/manager.routes"
 import { createRequireManagerPermissionMiddleware } from "./presentation/middleware/require-manager-permission.middleware"
 
 import { OwnerMongoRepository } from "@/modules/owner/infrastructure/repository/owner.mongo.repository"
 import { mailService } from "@/modules/auth/auth.module"
+import { SelfAssignManagerUseCase } from "./application/use-cases/self-assign-manager.usecase"
 
 const userRepository = new UserRepository()
 const stationRepository = new StationMongoRepository()
@@ -93,12 +94,18 @@ const removeManagerUseCase = new RemoveManagerUseCase(
   stationRepository
 )
 
-const getManagedStationsUseCase = new GetManagedStationsUseCase(
+const getManagedStationUseCase = new GetManagedStationUseCase(
   managerAssignmentRepository,
   stationRepository
 )
 
 const verifyInvitationTokenUseCase = new VerifyInvitationTokenUseCase(managerInvitationRepository)
+
+const selfAssignManagerUseCase = new SelfAssignManagerUseCase(
+  stationRepository,
+  ownerRepository,
+  managerAssignmentRepository
+)
 
 const managerController = new ManagerController(
   inviteManagerUseCase,
@@ -112,8 +119,9 @@ const managerController = new ManagerController(
   suspendManagerUseCase,
   reactivateManagerUseCase,
   removeManagerUseCase,
-  getManagedStationsUseCase,
-  verifyInvitationTokenUseCase
+  getManagedStationUseCase,
+  verifyInvitationTokenUseCase,
+  selfAssignManagerUseCase
 )
 
 export const requireManagerPermission = createRequireManagerPermissionMiddleware(

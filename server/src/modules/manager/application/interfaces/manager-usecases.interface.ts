@@ -1,3 +1,4 @@
+import { StationProps } from "@/modules/station/domain/entities/Station"
 import { ManagerAssignment, ManagerPermission } from "../../domain/entities/ManagerAssignment"
 import { ManagerInvitation } from "../../domain/entities/ManagerInvitation"
 
@@ -105,10 +106,14 @@ export interface IRemoveManagerUseCase {
   execute(ownerUserId: string, assignmentId: string): Promise<void>
 }
 
-export interface IGetManagedStationsUseCase {
+export interface IGetManagedStationUseCase {
   execute(managerUserId: string): Promise<ManagedStationResponse[]>
 }
 
 export interface IVerifyInvitationTokenUseCase {
   execute(token: string): Promise<ManagerInvitation>
+}
+
+export interface ISelfAssignManagerUseCase {
+  execute(data:{stationId:string,ownerUserId:string}): Promise<StationProps>
 }

@@ -68,6 +68,11 @@ export const managerApi = {
     return response.data.data
   },
 
+  selfAssignManager: async (stationId: string) => {
+    const response = await api.post("/managers/self-assign", { stationId })
+    return response.data.data
+  },
+
   inviteManager: async (payload: InviteManagerPayload): Promise<InviteManagerResult> => {
     const response = await api.post("/managers/invite", payload)
     return response.data.data
@@ -125,7 +130,7 @@ export const managerApi = {
     await api.post(`/managers/invitations/reject`, { token })
   },
 
-  getManagedStations: async (): Promise<
+  getManagedStation: async (): Promise<
     {
       stationId: string
       stationName: string
@@ -134,7 +139,7 @@ export const managerApi = {
       status: "ACTIVE" | "SUSPENDED"
     }[]
   > => {
-    const response = await api.get("/managers/my-stations")
+    const response = await api.get("/managers/station")
     return response.data.data
   },
 }

@@ -3,7 +3,7 @@ import { StationController } from "./station.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate, optionalAuthenticate } from "@/infrastructure/http/middleware/authenticate"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
-import { createStationSchema, patchStationSchema } from "./schema/station.schema"
+import { createStationSchema, getStationsQuery, patchStationSchema } from "./schema/station.schema"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { stationUpload } from "@/infrastructure/multer/multer.middleware"
 import { API_ROUTES } from "@/common/constants/route.constants"
@@ -12,7 +12,7 @@ export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
 
-  router.get(API_ROUTES.STATIONS.LIST, optionalAuthenticate, asyncHandler(stationController.getStations))
+  router.get(API_ROUTES.STATIONS.LIST, optionalAuthenticate, validateRequest(getStationsQuery,'query'), asyncHandler(stationController.getStations))
 
   router.get(API_ROUTES.STATIONS.FILTER_OPTIONS, asyncHandler(stationController.getFilterOptions))
 
@@ -47,7 +47,6 @@ export const createRouter = (stationController: StationController): Router => {
 
   router.patch(API_ROUTES.STATIONS.TOGGLE_ACTIVE, asyncHandler(stationController.toggleActive))
 
-  router.post(API_ROUTES.STATIONS.ASSIGN_MANAGER, asyncHandler(stationController.assignManager))
 
   router.patch(
     API_ROUTES.STATIONS.REVIEW,

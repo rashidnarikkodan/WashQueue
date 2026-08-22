@@ -137,7 +137,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       id: "",
       bookingNumber,
       userId: reservation.userId,
-      providerId: station.ownerId && station.ownerId.length > 0 ? station.ownerId : reservation.userId,
+      ownerId: station.ownerId && station.ownerId.length > 0 ? station.ownerId : reservation.userId,
       stationId: station.id,
       vehicleId: vehicle.id,
       vehicleSnapshot: {

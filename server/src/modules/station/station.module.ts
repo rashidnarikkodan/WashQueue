@@ -27,7 +27,6 @@ import { GetAvailableTimeWindowsUseCase } from "./application/use-cases/get-avai
 import { MongoManagerAssignmentRepository } from "../manager/infrastructure/repositories/manager-assignment.mongo.repository"
 import { DeleteStationUseCase } from "./application/use-cases/delete-station.usecase"
 import { ToggleActiveStationUseCase } from "./application/use-cases/toggle-active-station.usecase"
-import { AssignManagerUseCase } from "./application/use-cases/assign-manager.usecase"
 import { GetStationFilterOptionsUseCase } from "./application/use-cases/get-station-filter-options.usecase"
 import { VehicleCategoryMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-category.mongo.repository"
 import { VehicleClassMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-class.mongo.repository"
@@ -127,7 +126,6 @@ const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
   stationRepository,
   ownerRepository
 )
-const assignManagerUseCase = new AssignManagerUseCase(stationRepository, ownerRepository)
 
 const vehicleCategoryRepository = new VehicleCategoryMongoRepository()
 const vehicleClassRepository = new VehicleClassMongoRepository()
@@ -149,7 +147,6 @@ const stationController = new StationController(
   reviewStationUseCase,
   deleteStationUseCase,
   toggleActiveStationUseCase,
-  assignManagerUseCase,
   ownerRepository,
   configureSlotConfigUseCase,
   getSlotConfigUseCase,

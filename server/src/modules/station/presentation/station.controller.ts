@@ -15,7 +15,6 @@ import {
   IReviewStationUseCase,
   IDeleteStationUseCase,
   IToggleActiveStationUseCase,
-  IAssignManagerUseCase,
   IGetStationFilterOptionsUseCase,
   IConfigureSlotConfigUseCase,
   IGetSlotConfigUseCase,
@@ -40,7 +39,6 @@ export class StationController {
     private readonly reviewStationUseCase: IReviewStationUseCase,
     private readonly deleteStationUseCase: IDeleteStationUseCase,
     private readonly toggleActiveStationUseCase: IToggleActiveStationUseCase,
-    private readonly assignManagerUseCase: IAssignManagerUseCase,
     private readonly ownerRepository: IOwnerRepository,
     private readonly configureSlotConfigUseCase: IConfigureSlotConfigUseCase,
     private readonly getSlotConfigUseCase: IGetSlotConfigUseCase,
@@ -91,52 +89,18 @@ export class StationController {
     success(res, payload, HTTP_STATUS.OK, "Filter options retrieved successfully")
   }
 
+
   getStations = async (req: AuthenticatedRequest, res: Response) => {
     const query = req.query || {}
-    const parsedQuery = {
-      ...query,
-      page: query.page ? Number(query.page) : 1,
-      limit: query.limit ? Number(query.limit) : 10,
-      latitude: query.latitude ? Number(query.latitude) : undefined,
-      longitude: query.longitude ? Number(query.longitude) : undefined,
-      maxDistanceKm: query.maxDistanceKm ? Number(query.maxDistanceKm) : undefined,
-      radiusKm: query.radiusKm ? Number(query.radiusKm) : undefined,
-      minRating: query.minRating
-        ? Number(query.minRating)
-        : query.minimumRating
-          ? Number(query.minimumRating)
-          : undefined,
-      minimumRating: query.minimumRating
-        ? Number(query.minimumRating)
-        : query.minRating
-          ? Number(query.minRating)
-          : undefined,
-      minPrice: query.minPrice ? Number(query.minPrice) : undefined,
-      maxPrice: query.maxPrice ? Number(query.maxPrice) : undefined,
-      search: query.search ? String(query.search) : query.q ? String(query.q) : undefined,
-      status: query.status ? String(query.status) : undefined,
-      sortBy: query.sortBy ? String(query.sortBy) : undefined,
-      sortOrder: query.sortOrder === "desc" ? ("desc" as const) : ("asc" as const),
-      ownerId: query.ownerId ? String(query.ownerId) : undefined,
-      vehicleCategory: query.vehicleCategory ? String(query.vehicleCategory) : undefined,
-      vehicleClassId: query.vehicleClassId ? String(query.vehicleClassId) : undefined,
-      washType: query.washType
-        ? (String(query.washType).toUpperCase() as "HALF" | "FULL" | "ALL")
-        : undefined,
-      amenities: Array.isArray(query.amenities)
-        ? query.amenities.map(String)
-        : typeof query.amenities === "string"
-          ? query.amenities.split(",")
-          : undefined,
-      openNow: String(query.openNow) === "true",
-      verifiedOnly: String(query.verifiedOnly) === "true",
-    }
+
     const userId = req.user?.userId || ''
 
-    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(parsedQuery, userId)
+    console.log(query)
 
-    const page = Math.max(1, parsedQuery.page || 1)
-    const limit = Math.max(1, parsedQuery.limit || 10)
+    const { stations, total, statusCounts } = await this.getStationsUseCase.execute(query, userId)
+
+    const page = Math.max(1, Number(query.page))
+    const limit = Math.max(1, Number(query.limit))
     const totalPages = Math.ceil(total / limit) || 1
 
     const data = stations.map((station) => ({
@@ -232,22 +196,6 @@ export class StationController {
       HTTP_STATUS.OK,
       `Station ${props.isActive ? "activated" : "deactivated"} successfully`
     )
-  }
-
-  assignManager = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
-      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
-    }
-
-    const stationId = this.stationMapper.extractStationId(req)
-    const { managerType, email } = req.body || {}
-    const station = await this.assignManagerUseCase.execute(stationId, userId, {
-      managerType: managerType || "SELF",
-      email,
-    })
-
-    success(res, station, HTTP_STATUS.OK, "Manager assigned for this station successfully")
   }
 
   configureSlotConfig = async (req: AuthenticatedRequest, res: Response) => {

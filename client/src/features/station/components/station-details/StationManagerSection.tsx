@@ -125,27 +125,9 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
   const handleSelfAssign = async () => {
     try {
       setIsSubmittingAction(true)
-      await stationApi.assignManager(station.id, { managerType: "SELF" })
-      setManagerAssignment({
-        assignmentId: `self-${station.id}`,
-        stationId: station.id,
-        stationName: station.name,
-        managerId: user?.id || "",
-        managerUserId: user?.id || "",
-        managerName: user?.name || "Owner (Self)",
-        managerEmail: user?.email || "",
-        permissions: [
-          "BOOKING_MANAGEMENT",
-          "QUEUE_MANAGEMENT",
-          "CUSTOMER_MANAGEMENT",
-          "PRICING_MANAGEMENT",
-          "REPORTS_VIEW",
-          "STATION_SETTINGS",
-        ],
-        status: "ACTIVE",
-        assignedAt: new Date().toISOString(),
-      })
-      setPendingInvitation(null)
+      await managerApi.selfAssignManager(station.id)
+      await loadManagerData()
+      await onRefresh()
       toast.success("Assigned yourself as manager for this station!")
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }

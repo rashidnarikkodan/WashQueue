@@ -47,7 +47,6 @@ export const API_ROUTES = {
     FILTER_OPTIONS: "/filter-options",
     SUBMIT: "/:stationId/submit",
     TOGGLE_ACTIVE: "/:stationId/toggle-active",
-    ASSIGN_MANAGER: "/:stationId/assign-manager",
     REVIEW: "/:stationId/review",
   },
   VEHICLES: {
@@ -64,7 +63,7 @@ export const API_ROUTES = {
     REJECT_INVITATION: "/invitations/reject",
     INVITE: "/invite",
     LIST: "/",
-    MY_STATIONS: "/my-stations",
+    STATION: "/station",
     LIST_INVITATIONS: "/invitations",
     UPDATE_PERMISSIONS: "/:assignmentId/permissions",
     SUSPEND: "/:assignmentId/suspend",
@@ -72,6 +71,7 @@ export const API_ROUTES = {
     REMOVE: "/:assignmentId",
     RESEND_INVITATION: "/invitations/:invitationId/resend",
     CANCEL_INVITATION: "/invitations/:invitationId",
+    SELF_ASSIGN: "/self-assign"
   },
   BOOKINGS: {
     ROOT: "/api/bookings",

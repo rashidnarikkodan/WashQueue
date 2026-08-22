@@ -120,8 +120,8 @@ export class BookingMongoRepository implements IBookingRepository {
       }
     }
 
-    if (filter.providerId && Types.ObjectId.isValid(filter.providerId)) {
-      query.providerId = new Types.ObjectId(filter.providerId)
+    if (filter.ownerId && Types.ObjectId.isValid(filter.ownerId)) {
+      query.ownerId = new Types.ObjectId(filter.ownerId)
     }
 
     if (filter.status) {

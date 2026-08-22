@@ -30,7 +30,7 @@ export class BookingDTOMapper {
       id: props.id,
       bookingNumber: props.bookingNumber,
       userId: props.userId,
-      providerId: props.providerId,
+      ownerId: props.ownerId,
       stationId: props.stationId,
       vehicleId: props.vehicleId,
       vehicleSnapshot: props.vehicleSnapshot,

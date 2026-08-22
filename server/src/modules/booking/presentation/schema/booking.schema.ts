@@ -65,8 +65,17 @@ export const getBookingListQuerySchema = z.object({
   type: z.enum(["upcoming", "history", "all", "noshow"]).optional().default("all"),
   status: z.nativeEnum(BookingStatus).optional(),
   stationId: z.string().optional(),
-  providerId: z.string().optional(),
+  ownerId: z.string().optional(),
   q: z.string().optional(),
+  search: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+})
+export const getOwnerBookingListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(10),
+  status: z.nativeEnum(BookingStatus).optional(),
+  stationId: z.string().optional(),
   search: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
