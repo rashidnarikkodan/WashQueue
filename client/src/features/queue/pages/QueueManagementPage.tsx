@@ -392,7 +392,7 @@ export default function ManagerQueuePage() {
       selectedBooking.preServiceInspection?.photos &&
       selectedBooking.preServiceInspection.photos.length > 0
     ) {
-      return selectedBooking.preServiceInspection.photos[0]
+      return selectedBooking.preServiceInspection.photos[0].secured_url
     }
     const vDetails = selectedBooking.vehicleDetails as { image?: string } | undefined
     return vDetails?.image || null

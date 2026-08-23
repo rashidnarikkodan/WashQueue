@@ -4,21 +4,6 @@ import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { CreateWalkInBookingInput } from "../dtos/create-walkin-booking.dto"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { RescheduleBookingInput } from "../dtos/reschedule-booking.dto"
-import { CheckInBookingInput } from "../dtos/checkin-booking.dto"
-import {
-  CreateBookingReservationInput,
-  BookingReservationResponseDTO,
-} from "../use-cases/create-booking-reservation.use-case"
-import { ConfirmBookingReservationInput } from "../use-cases/confirm-booking-reservation.use-case"
-import { RefundPolicyResult } from "../../domain/services/RefundPolicyEngine"
-import { ProcessRefundInput } from "../use-cases/evaluate-and-process-refund.use-case"
-import { SavePreInspectionInput } from "../use-cases/save-pre-inspection.use-case"
-import { OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
-import { SavePostInspectionInput } from "../use-cases/save-post-inspection.use-case"
-import { StallBookingInput } from "../use-cases/stall-booking.use-case"
-import { ResolveStalledBookingInput } from "../use-cases/resolve-stalled-booking.use-case"
-import { PublicStationQueueDTO } from "../use-cases/get-public-station-queue.use-case"
-import { ProcessNoShowResult } from "../use-cases/process-no-show-bookings.use-case"
 
 export interface ICreateBookingUseCase {
   execute(userId: string, input: CreateBookingInput): Promise<BookingResponseDTO>
@@ -54,71 +39,4 @@ export interface IRescheduleBookingUseCase {
     input: RescheduleBookingInput,
     userRole?: string
   ): Promise<BookingResponseDTO>
-}
-
-export interface ICreateBookingReservationUseCase {
-  execute(
-    userId: string,
-    input: CreateBookingReservationInput
-  ): Promise<BookingReservationResponseDTO>
-}
-
-export interface IConfirmBookingReservationUseCase {
-  execute(input: ConfirmBookingReservationInput): Promise<BookingResponseDTO>
-}
-
-export interface ICancelBookingReservationUseCase {
-  execute(reservationId: string, userId: string): Promise<void>
-}
-
-export interface IProcessRazorpayWebhookUseCase {
-  execute(rawBody: string, signature: string): Promise<{ success: boolean; message: string }>
-}
-
-export interface ICleanupExpiredReservationsUseCase {
-  execute(now?: Date): Promise<number>
-}
-
-export interface IEvaluateAndProcessRefundUseCase {
-  execute(input: ProcessRefundInput): Promise<RefundPolicyResult>
-}
-
-export interface IValidateQRForCheckInUseCase {
-  execute(managerUserId: string, input: CheckInBookingInput): Promise<BookingResponseDTO>
-}
-
-export interface ISavePreInspectionAndCheckInUseCase {
-  execute(managerUserId: string, input: SavePreInspectionInput): Promise<BookingResponseDTO>
-}
-
-export interface IGetOperationalQueueUseCase {
-  execute(managerUserId: string, stationId: string): Promise<OperationalStationQueueDTO>
-}
-
-export interface IStartServiceUseCase {
-  execute(managerUserId: string, bookingId: string): Promise<BookingResponseDTO>
-}
-
-export interface ISavePostInspectionUseCase {
-  execute(managerUserId: string, input: SavePostInspectionInput): Promise<BookingResponseDTO>
-}
-
-export interface ICompleteHandoverUseCase {
-  execute(managerUserId: string, bookingId: string, notes?: string): Promise<BookingResponseDTO>
-}
-
-export interface IStallBookingUseCase {
-  execute(managerUserId: string, input: StallBookingInput): Promise<BookingResponseDTO>
-}
-
-export interface IResolveStalledBookingUseCase {
-  execute(managerUserId: string, input: ResolveStalledBookingInput): Promise<BookingResponseDTO>
-}
-
-export interface IGetPublicStationQueueUseCase {
-  execute(stationId: string): Promise<PublicStationQueueDTO>
-}
-
-export interface IProcessNoShowBookingsUseCase {
-  execute(gracePeriodMinutes?: number): Promise<ProcessNoShowResult>
 }

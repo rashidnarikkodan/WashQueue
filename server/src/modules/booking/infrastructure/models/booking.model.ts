@@ -81,14 +81,14 @@ export interface IBookingDocument extends Document {
   }
 
   preServiceInspection?: {
-    photos: string[]
+    photos: Array<{ position: string; public_id: string; secured_url: string }>
     notes?: string
     capturedBy: Types.ObjectId
     capturedAt: Date
   } | null
 
   postServiceInspection?: {
-    photos: string[]
+    photos: Array<{ position: string; public_id: string; secured_url: string }>
     notes?: string
     capturedBy: Types.ObjectId
     capturedAt: Date
@@ -239,14 +239,28 @@ const bookingSchema = new Schema<IBookingDocument>(
     },
 
     preServiceInspection: {
-      photos: [{ type: String }],
+      photos: [
+        {
+          _id: false,
+          position: { type: String, required: true },
+          public_id: { type: String, required: true },
+          secured_url: { type: String, required: true },
+        },
+      ],
       notes: { type: String },
       capturedBy: { type: Schema.Types.ObjectId, ref: "User" },
       capturedAt: { type: Date },
     },
 
     postServiceInspection: {
-      photos: [{ type: String }],
+      photos: [
+        {
+          _id: false,
+          position: { type: String, required: true },
+          public_id: { type: String, required: true },
+          secured_url: { type: String, required: true },
+        },
+      ],
       notes: { type: String },
       capturedBy: { type: Schema.Types.ObjectId, ref: "User" },
       capturedAt: { type: Date },

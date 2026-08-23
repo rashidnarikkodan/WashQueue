@@ -62,8 +62,14 @@ export interface InspectionChecklistItem {
   remark?: string
 }
 
+export interface InspectionPhoto {
+  position: string
+  public_id: string
+  secured_url: string
+}
+
 export interface InspectionRecord {
-  photos: string[]
+  photos: InspectionPhoto[]
   notes?: string
   capturedBy: string
   capturedAt: Date

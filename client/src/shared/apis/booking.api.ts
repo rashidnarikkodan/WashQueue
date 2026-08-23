@@ -29,6 +29,12 @@ export interface InspectionChecklistItem {
   remark?: string
 }
 
+export interface InspectionPhoto {
+  position: string
+  public_id: string
+  secured_url: string
+}
+
 export interface BookingStatusHistoryItem {
   id: string
   bookingId: string
@@ -106,13 +112,13 @@ export interface BookingResponse {
   } | null
   rawQrToken?: string
   preServiceInspection?: {
-    photos: string[]
+    photos: InspectionPhoto[]
     notes?: string
     capturedBy: string
     capturedAt: string
   } | null
   postServiceInspection?: {
-    photos: string[]
+    photos: InspectionPhoto[]
     notes?: string
     capturedBy: string
     capturedAt: string
@@ -157,7 +163,24 @@ export interface BookingListApiResponse {
   }
 }
 
+export interface CloudinarySignatureResponse {
+  signature: string
+  timestamp: number
+  folder: string
+  apiKey: string
+  cloudName: string
+}
+
 export const bookingApi = {
+  getInspectionUploadSignature: async (): Promise<CloudinarySignatureResponse> => {
+    try {
+      const response = await api.get(API_ROUTES.QUEUE.INSPECTION_UPLOAD_SIGNATURE)
+      return response.data.data
+    } catch (error) {
+      throw handleApiError(error, "Failed to prepare photo upload")
+    }
+  },
+
   createBooking: async (input: CreateBookingInput): Promise<BookingResponse> => {
     try {
       const response = await api.post(API_ROUTES.BOOKINGS.ROOT, input)
@@ -280,7 +303,7 @@ export const bookingApi = {
 
   savePostInspection: async (
     bookingId: string,
-    data: { photos?: string[]; notes?: string; checklist?: InspectionChecklistItem[] }
+    data: { photos?: InspectionPhoto[]; notes?: string; checklist?: InspectionChecklistItem[] }
   ): Promise<BookingResponse> => {
     try {
       const response = await api.post(
@@ -322,7 +345,7 @@ export const bookingApi = {
 
   savePreInspection: async (
     bookingId: string,
-    data: { photos?: string[]; notes?: string }
+    data: { photos?: InspectionPhoto[]; notes?: string }
   ): Promise<BookingResponse> => {
     try {
       const response = await api.post(

@@ -11,13 +11,19 @@ import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse, InspectionChecklistItem } from "@/shared/apis/booking.api"
 import { PhotoCaptureCamera } from "@/features/queue/components/ui/PhotoCaptureCamera"
 import PromptModal from "@/shared/components/ui/PromptModal"
-import { readImageFileAsResizedDataUrl } from "@/shared/utils/imageFile"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
+import { inspectionImagesUpload } from "@/shared/utils/inspectionImagesUpload"
 
 interface PhotoSlotConfig {
   key: "front" | "rear" | "left" | "right"
   title: string
   subtitle: string
+}
+type PhotoSlot = "front" | "rear" | "left" | "right"
+
+type CapturedPhoto = {
+  file: File
+  previewUrl: string
 }
 
 const PHOTO_SLOTS: PhotoSlotConfig[] = [
@@ -50,11 +56,11 @@ export default function ManagerPostInspectionPage() {
   const basePath = useQueueBasePath()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   
-  const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({
-    front: "",
-    rear: "",
-    left: "",
-    right: "",
+  const [capturedPhotos, setCapturedPhotos] = useState<Record<PhotoSlot, CapturedPhoto | null>>({
+    front: null,
+    rear: null,
+    left: null,
+    right: null,
   })
   const [activeCameraSlot, setActiveCameraSlot] = useState<string | null>(null)
   const [uploadTargetSlot, setUploadTargetSlot] = useState<string | null>(null)
@@ -82,15 +88,6 @@ export default function ManagerPostInspectionPage() {
     try {
       const res = await bookingApi.getBookingById(id)
       setBooking(res)
-      if (res.postServiceInspection?.photos && res.postServiceInspection.photos.length > 0) {
-        const [f, r, l, rg] = res.postServiceInspection.photos
-        setCapturedPhotos({
-          front: f || "",
-          rear: r || "",
-          left: l || "",
-          right: rg || "",
-        })
-      }
     } catch (err) {
       console.error("Failed to fetch booking:", err)
       toast.error("Failed to load booking details")
@@ -101,20 +98,40 @@ export default function ManagerPostInspectionPage() {
     setActiveCameraSlot(slotKey)
   }
 
-  const handlePhotoCaptured = (slotKey: string, dataUrl: string) => {
-    setCapturedPhotos((prev) => ({
-      ...prev,
-      [slotKey]: dataUrl,
-    }))
+  const handlePhotoCaptured = (slotKey: PhotoSlot, file: File) => {
+    const previewUrl = URL.createObjectURL(file)
+
+    setCapturedPhotos((prev) => {
+      const previous = prev[slotKey]
+
+      if (previous) {
+        URL.revokeObjectURL(previous.previewUrl)
+      }
+
+      return {
+        ...prev,
+        [slotKey]: {
+          file,
+          previewUrl,
+        },
+      }
+    })
+
     setActiveCameraSlot(null)
     toast.success(`✓ ${slotKey.toUpperCase()} photo captured!`)
   }
 
-  const handleRemovePhoto = (slotKey: string) => {
-    setCapturedPhotos((prev) => ({
-      ...prev,
-      [slotKey]: "",
-    }))
+  const handleRemovePhoto = (slotKey: PhotoSlot) => {
+    setCapturedPhotos((prev) => {
+      const previous = prev[slotKey]
+      if (previous) {
+        URL.revokeObjectURL(previous.previewUrl)
+      }
+      return {
+        ...prev,
+        [slotKey]: null,
+      }
+    })
   }
 
   const triggerUpload = (slotKey: string) => {
@@ -133,8 +150,7 @@ export default function ManagerPostInspectionPage() {
     }
 
     try {
-      const dataUrl = await readImageFileAsResizedDataUrl(file)
-      handlePhotoCaptured(uploadTargetSlot, dataUrl)
+      handlePhotoCaptured(uploadTargetSlot as PhotoSlot, file)
     } catch (err) {
       console.error("Failed to read uploaded photo:", err)
       toast.error("Failed to read the selected photo")
@@ -211,7 +227,11 @@ export default function ManagerPostInspectionPage() {
     }
     setIsSubmitting(true)
     try {
-      const photosArray = Object.values(capturedPhotos).filter(Boolean)
+      const photosToUpload = PHOTO_SLOTS.map((slot) => ({
+        position: slot.key,
+        file: capturedPhotos[slot.key]!.file,
+      }))
+      const uploadedPhotos = await inspectionImagesUpload(photosToUpload)
       const checklistPayload: InspectionChecklistItem[] = CHECKLIST_ITEMS.map((item) => ({
         key: item.key,
         label: item.label,
@@ -219,7 +239,7 @@ export default function ManagerPostInspectionPage() {
         remark: remarks[item.key]?.trim() || undefined,
       }))
       await bookingApi.savePostInspection(booking.id, {
-        photos: photosArray,
+        photos: uploadedPhotos,
         notes: handoverNotes || "Post-service vehicle quality inspection verified & handed over to customer",
         checklist: checklistPayload,
       })
@@ -399,7 +419,7 @@ export default function ManagerPostInspectionPage() {
                     >
                       {photoUrl ? (
                         <>
-                          <img src={photoUrl} alt={slot.title} className="w-full h-full object-cover rounded-lg" />
+                          <img src={photoUrl.previewUrl} alt={slot.title} className="w-full h-full object-cover rounded-lg" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
                             <button
                               type="button"
@@ -548,7 +568,7 @@ export default function ManagerPostInspectionPage() {
         <PhotoCaptureCamera
           title={`Capture ${PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.title || activeCameraSlot}`}
           subtitle={PHOTO_SLOTS.find((s) => s.key === activeCameraSlot)?.subtitle}
-          onCapture={(dataUrl) => handlePhotoCaptured(activeCameraSlot, dataUrl)}
+          onCapture={(file) => handlePhotoCaptured(activeCameraSlot as PhotoSlot, file)}
           onClose={() => setActiveCameraSlot(null)}
         />
       )}

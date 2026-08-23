@@ -438,13 +438,13 @@ export default function CustomerBookingDetailsView({
                       {booking.preServiceInspection.photos.map((photo, idx) => (
                         <a
                           key={idx}
-                          href={photo}
+                          href={photo.secured_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                         >
                           <img
-                            src={photo}
+                            src={photo.secured_url}
                             alt={`Pre-inspection angle ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
@@ -473,13 +473,13 @@ export default function CustomerBookingDetailsView({
                       {booking.postServiceInspection.photos.map((photo, idx) => (
                         <a
                           key={idx}
-                          href={photo}
+                          href={photo.secured_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                         >
                           <img
-                            src={photo}
+                            src={photo.secured_url}
                             alt={`Post-inspection angle ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />

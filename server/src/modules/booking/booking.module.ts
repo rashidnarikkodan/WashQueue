@@ -1,13 +1,9 @@
 import { BookingMongoRepository } from "./infrastructure/repositories/booking.mongo.repository"
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
-import { BookingReservationMongoRepository } from "./infrastructure/repositories/booking-reservation.mongo.repository"
 import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
 import { managerAssignmentRepository } from "../manager/manager.module"
 
-import { BookingRedisQueueService } from "./infrastructure/services/booking-redis-queue.service"
-import { BookingNotificationService } from "./infrastructure/services/booking-notification.service"
-import { PDFInvoiceService } from "./infrastructure/services/pdf-invoice.service"
-import { sharedRazorpayService } from "@/infrastructure/payment/razorpay.service"
+import { bookingNotificationService } from "@/modules/notification/notification.module"
 
 import {
   stationRepository,
@@ -16,100 +12,25 @@ import {
   timeWindowRepository,
 } from "../station/station.module"
 import { vehicleRepository } from "../vehicle/vehicle.module"
-import {
-  creditWalletUseCase,
-  refundWalletUseCase,
-  walletRepository,
-  debitWalletUseCase,
-} from "../wallet/wallet.module"
 
-import { CreateBookingReservationUseCase } from "./application/use-cases/create-booking-reservation.use-case"
-import { ConfirmBookingReservationUseCase } from "./application/use-cases/confirm-booking-reservation.use-case"
-import { CancelBookingReservationUseCase } from "./application/use-cases/cancel-booking-reservation.use-case"
-import { ProcessRazorpayWebhookUseCase } from "./application/use-cases/process-razorpay-webhook.use-case"
-import { CleanupExpiredReservationsUseCase } from "./application/use-cases/cleanup-expired-reservations.use-case"
-import { EvaluateAndProcessRefundUseCase } from "./application/use-cases/evaluate-and-process-refund.use-case"
 import { CreateBookingUseCase } from "./application/use-cases/create-booking.use-case"
 import { CreateWalkInBookingUseCase } from "./application/use-cases/create-walkin-booking.use-case"
 import { GetBookingUseCase } from "./application/use-cases/get-booking.use-case"
 import { GetUserBookingsUseCase } from "./application/use-cases/get-user-bookings.use-case"
 import { CancelBookingUseCase } from "./application/use-cases/cancel-booking.use-case"
 import { RescheduleBookingUseCase } from "./application/use-cases/reschedule-booking.use-case"
-import { ValidateQRForCheckInUseCase } from "./application/use-cases/validate-qr.use-case"
-import { SavePreInspectionAndCheckInUseCase } from "./application/use-cases/save-pre-inspection.use-case"
-import { GetOperationalQueueUseCase } from "./application/use-cases/get-operational-queue.use-case"
-import { ProcessNoShowBookingsUseCase } from "./application/use-cases/process-no-show-bookings.use-case"
-import { StartServiceUseCase } from "./application/use-cases/start-service.use-case"
-import { SavePostInspectionUseCase } from "./application/use-cases/save-post-inspection.use-case"
-import { CompleteHandoverUseCase } from "./application/use-cases/complete-handover.use-case"
-import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-case"
-import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
-import { GetPublicStationQueueUseCase } from "./application/use-cases/get-public-station-queue.use-case"
 
 import { BookingController } from "./presentation/controllers/booking.controller"
 import { createBookingRouter } from "./presentation/routers/booking.routes"
-import { PaymentController } from "./presentation/controllers/payment.controller"
-import { createPaymentRouter } from "./presentation/routers/payment.routes"
+
+import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
+import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
-export const bookingReservationRepository = new BookingReservationMongoRepository()
 const transactionRunner = new MongooseTransactionRunner()
 
-const bookingRedisQueueService = new BookingRedisQueueService(bookingStatusLogRepository)
-const bookingNotificationService = new BookingNotificationService()
-const pdfInvoiceService = new PDFInvoiceService()
-
-export const createBookingReservationUseCase = new CreateBookingReservationUseCase(
-  stationRepository,
-  stationPricingRepository,
-  extraServiceRepository,
-  timeWindowRepository,
-  vehicleRepository,
-  bookingReservationRepository,
-  sharedRazorpayService,
-  walletRepository
-)
-
-export const confirmBookingReservationUseCase = new ConfirmBookingReservationUseCase(
-  bookingReservationRepository,
-  bookingRepository,
-  bookingStatusLogRepository,
-  stationRepository,
-  stationPricingRepository,
-  extraServiceRepository,
-  timeWindowRepository,
-  vehicleRepository,
-  bookingNotificationService,
-  sharedRazorpayService,
-  debitWalletUseCase,
-  transactionRunner
-)
-
-export const cancelBookingReservationUseCase = new CancelBookingReservationUseCase(
-  bookingReservationRepository,
-  timeWindowRepository
-)
-
-export const processRazorpayWebhookUseCase = new ProcessRazorpayWebhookUseCase(
-  bookingReservationRepository,
-  confirmBookingReservationUseCase,
-  sharedRazorpayService
-)
-
-export const cleanupExpiredReservationsUseCase = new CleanupExpiredReservationsUseCase(
-  bookingReservationRepository,
-  timeWindowRepository
-)
-
-export const evaluateAndProcessRefundUseCase = new EvaluateAndProcessRefundUseCase(
-  bookingRepository,
-  creditWalletUseCase,
-  bookingNotificationService,
-  refundWalletUseCase
-)
-
-const createBookingUseCase = new CreateBookingUseCase(
+export const createBookingUseCase = new CreateBookingUseCase(
   bookingRepository,
   bookingStatusLogRepository,
   stationRepository,
@@ -120,31 +41,11 @@ const createBookingUseCase = new CreateBookingUseCase(
   bookingNotificationService
 )
 
-const createWalkInBookingUseCase = new CreateWalkInBookingUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  stationRepository,
-  stationPricingRepository,
-  extraServiceRepository,
-  timeWindowRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
-const getBookingUseCase = new GetBookingUseCase(bookingRepository, bookingStatusLogRepository)
-const getUserBookingsUseCase = new GetUserBookingsUseCase(
+export const getBookingUseCase = new GetBookingUseCase(bookingRepository, bookingStatusLogRepository)
+export const getUserBookingsUseCase = new GetUserBookingsUseCase(
   bookingRepository,
   managerAssignmentRepository,
   stationRepository
-)
-
-const cancelBookingUseCase = new CancelBookingUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService,
-  evaluateAndProcessRefundUseCase,
-  transactionRunner
 )
 
 export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
@@ -155,110 +56,53 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
   transactionRunner
 )
 
-const validateQRUseCase = new ValidateQRForCheckInUseCase(
-  bookingRepository,
-  managerAssignmentRepository,
-  stationRepository,
-  bookingStatusLogRepository,
-  bookingNotificationService
-)
+// CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue
+// service (and CancelBookingUseCase optionally on the payment module's refund use-case).
+// Both of those modules depend back on this module's repos, so building these two eagerly here
+// would create a require() cycle between booking.module.ts and queue.module.ts/payment.module.ts.
+// They're built lazily instead — see @/bootstrap/module-composition.
 
-const savePreInspectionUseCase = new SavePreInspectionAndCheckInUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService,
-  stationRepository,
-  managerAssignmentRepository
-)
+export function createCreateWalkInBookingUseCase(
+  queueService: IBookingQueueService
+): CreateWalkInBookingUseCase {
+  return new CreateWalkInBookingUseCase(
+    bookingRepository,
+    bookingStatusLogRepository,
+    stationRepository,
+    stationPricingRepository,
+    extraServiceRepository,
+    timeWindowRepository,
+    queueService,
+    bookingNotificationService
+  )
+}
 
-export const getOperationalQueueUseCase = new GetOperationalQueueUseCase(
-  bookingRedisQueueService,
-  stationRepository,
-  managerAssignmentRepository
-)
+export function createCancelBookingUseCase(
+  queueService: IBookingQueueService,
+  refundUseCase?: IEvaluateAndProcessRefundUseCase
+): CancelBookingUseCase {
+  return new CancelBookingUseCase(
+    bookingRepository,
+    bookingStatusLogRepository,
+    queueService,
+    bookingNotificationService,
+    refundUseCase,
+    transactionRunner
+  )
+}
 
-export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService,
-)
+export function createBookingController(
+  createWalkInBookingUseCase: CreateWalkInBookingUseCase,
+  cancelBookingUseCase: CancelBookingUseCase
+): BookingController {
+  return new BookingController(
+    createBookingUseCase,
+    createWalkInBookingUseCase,
+    getBookingUseCase,
+    getUserBookingsUseCase,
+    cancelBookingUseCase,
+    rescheduleBookingUseCase
+  )
+}
 
-const startServiceUseCase = new StartServiceUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  stationRepository,
-  managerAssignmentRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
-const savePostInspectionUseCase = new SavePostInspectionUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  stationRepository,
-  managerAssignmentRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
-const completeHandoverUseCase = new CompleteHandoverUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  stationRepository,
-  managerAssignmentRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
-export const stallBookingUseCase = new StallBookingUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService
-)
-
-export const resolveStalledBookingUseCase = new ResolveStalledBookingUseCase(
-  bookingRepository,
-  bookingStatusLogRepository,
-  bookingRedisQueueService,
-  bookingNotificationService,
-  evaluateAndProcessRefundUseCase
-)
-
-export const getPublicStationQueueUseCase = new GetPublicStationQueueUseCase(
-  bookingRedisQueueService,
-  stationRepository
-)
-
-const bookingController = new BookingController(
-  createBookingUseCase,
-  createWalkInBookingUseCase,
-  getBookingUseCase,
-  getUserBookingsUseCase,
-  cancelBookingUseCase,
-  rescheduleBookingUseCase,
-  pdfInvoiceService,
-  validateQRUseCase,
-  savePreInspectionUseCase,
-  getOperationalQueueUseCase,
-  startServiceUseCase,
-  savePostInspectionUseCase,
-  completeHandoverUseCase,
-  stallBookingUseCase,
-  resolveStalledBookingUseCase,
-  getPublicStationQueueUseCase
-)
-
-const paymentController = new PaymentController(
-  createBookingReservationUseCase,
-  confirmBookingReservationUseCase,
-  cancelBookingReservationUseCase,
-  processRazorpayWebhookUseCase
-)
-
-export const bookingRouter = createBookingRouter(bookingController)
-export const paymentRouter = createPaymentRouter(paymentController)
-
-export default bookingRouter
+export { createBookingRouter }

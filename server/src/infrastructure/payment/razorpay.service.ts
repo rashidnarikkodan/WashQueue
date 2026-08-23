@@ -7,7 +7,7 @@ import {
   IPaymentGatewayService,
   CreatePaymentOrderParams,
   PaymentOrderResult,
-} from "@/modules/booking/application/interfaces/payment-gateway.interface"
+} from "@/core/application/interfaces/payment-gateway.interface"
 import { IWalletPaymentGateway } from "@/modules/wallet/application/interfaces/wallet-payment-gateway.interface"
 import { TopUpOrderDTO } from "@/modules/wallet/application/dtos/wallet.dto"
 

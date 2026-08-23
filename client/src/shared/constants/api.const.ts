@@ -44,6 +44,9 @@ export const API_ROUTES = {
     VALIDATE_QR: "/bookings/validate-qr",
     HANDOVER_BY_ID: (id: string) => `/bookings/${id}/handover`,
   },
+  QUEUE: {
+    INSPECTION_UPLOAD_SIGNATURE: "/bookings/inspection-photos/upload-signature",
+  },
   PAYMENT: {
     ROOT:'/payment',
     CREATE_ORDER: "/payment/create-order",
