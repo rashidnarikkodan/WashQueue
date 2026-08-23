@@ -13,7 +13,7 @@ import { BookingNumberService } from "../../domain/services/BookingNumberService
 import { QRTokenService } from "../../domain/services/QRTokenService"
 import { BookingPricingService } from "../../domain/services/BookingPricingService"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
-import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
+import { IBookingNotificationService } from "@/modules/notification/notification.module"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CreateBookingInput } from "../dtos/create-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
