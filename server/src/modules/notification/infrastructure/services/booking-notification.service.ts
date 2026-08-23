@@ -1,5 +1,5 @@
 import logger from "@/configs/logger.config"
-import { Booking } from "../../domain/entities/Booking"
+import { Booking } from "@/modules/booking/domain/entities/Booking"
 import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 
 import {

@@ -1,4 +1,4 @@
-import { Booking } from "../../domain/entities/Booking"
+import { Booking } from "@/modules/booking/domain/entities/Booking"
 
 export type NotificationEventType =
   | "BOOKING_CREATED"
