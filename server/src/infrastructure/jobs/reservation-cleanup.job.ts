@@ -1,6 +1,6 @@
 import cron, { ScheduledTask } from "node-cron"
 import logger from "@/configs/logger.config"
-import { cleanupExpiredReservationsUseCase } from "@/modules/booking/booking.module"
+import { cleanupExpiredReservationsUseCase } from "@/modules/payment/payment.module"
 
 let task: ScheduledTask | null = null
 

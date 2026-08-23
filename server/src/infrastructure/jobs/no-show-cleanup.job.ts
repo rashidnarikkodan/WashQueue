@@ -1,6 +1,6 @@
 import cron, { ScheduledTask } from "node-cron"
 import logger from "@/configs/logger.config"
-import { processNoShowBookingsUseCase } from "@/modules/booking/booking.module"
+import { processNoShowBookingsUseCase } from "@/modules/queue/queue.module"
 
 let task: ScheduledTask | null = null
 

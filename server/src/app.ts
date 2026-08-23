@@ -11,7 +11,9 @@ import vehicleRouter from "@/modules/vehicle-catelog/vehicle.module"
 import stationRouter from "@/modules/station/station.module"
 import userVehicleRouter from "@/modules/vehicle/vehicle.module"
 import managerRouter from "@/modules/manager/manager.module"
-import bookingRouter, { paymentRouter } from "@/modules/booking/booking.module"
+import bookingRouter from "@/bootstrap/module-composition"
+import queueRouter from "@/modules/queue/queue.module"
+import paymentRouter, { invoiceRouter } from "@/modules/payment/payment.module"
 import walletRouter from "@/modules/wallet/wallet.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
@@ -38,6 +40,8 @@ app.use(API_ROUTES.STATIONS.ROOT, stationRouter)
 app.use(API_ROUTES.VEHICLES.ROOT, userVehicleRouter)
 app.use(API_ROUTES.MANAGERS.ROOT, managerRouter)
 app.use(API_ROUTES.BOOKINGS.ROOT, bookingRouter)
+app.use(API_ROUTES.BOOKINGS.ROOT, invoiceRouter)
+app.use(API_ROUTES.BOOKINGS.ROOT, queueRouter)
 app.use(API_ROUTES.PAYMENT.ROOT, paymentRouter)
 app.use(API_ROUTES.WALLET.ROOT, walletRouter)
 
