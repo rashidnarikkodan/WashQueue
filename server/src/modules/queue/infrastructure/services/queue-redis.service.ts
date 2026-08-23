@@ -1,16 +1,19 @@
 import redis from "@/infrastructure/cache/redis.client"
 import logger from "@/configs/logger.config"
-import { Booking, BookingStatus } from "../../domain/entities/Booking"
+import { Booking, BookingStatus } from "@/modules/booking/domain/entities/Booking"
 import { IBookingQueueService } from "../../application/interfaces/booking-queue.interface"
 import { OperationalQueueItemDTO, OperationalStationQueueDTO } from "../../application/dtos/operational-queue.dto"
-import { BookingModel } from "../models/booking.model"
-import { StationModel } from "@/modules/station/infrastructure/models/station.model"
-import { BookingMapper } from "../mappers/booking.mapper"
-import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
-import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { BookingModel } from "@/modules/booking/infrastructure/models/booking.model"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { BookingMapper } from "@/modules/booking/infrastructure/mappers/booking.mapper"
+import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
+import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
 
 export class BookingRedisQueueService implements IBookingQueueService {
-  constructor(private readonly bookingStatusLogRepository: IBookingStatusLogRepository) {}
+  constructor(
+    private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
+    private readonly stationRepository: IStationRepository
+  ) {}
 
   private computeOrderScore(booking: Booking): number {
     const checkedInTs = booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : Date.now()
@@ -172,9 +175,10 @@ export class BookingRedisQueueService implements IBookingQueueService {
     const metaKey = `queue:station:${stationId}:meta`
 
     let totalBays = 1
-    const stationDoc = await StationModel.findById(stationId).exec()
-    if (stationDoc && stationDoc.slotConfig && typeof stationDoc.slotConfig.bays === "number") {
-      totalBays = Math.max(1, stationDoc.slotConfig.bays)
+    const station = await this.stationRepository.findById(stationId)
+    const stationProps = station?.getProps()
+    if (stationProps && stationProps.slotConfig && typeof stationProps.slotConfig.bays === "number") {
+      totalBays = Math.max(1, stationProps.slotConfig.bays)
     }
 
     let historicalAvgMinutes: number | undefined
@@ -341,7 +345,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
     return {
       stationId,
-      stationName: stationDoc?.name || "Station Queue",
+      stationName: stationProps?.name || "Station Queue",
       totalBays,
       activeServicesCount,
       availableBays,

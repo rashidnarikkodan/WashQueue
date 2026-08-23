@@ -1,11 +1,11 @@
-import { IProcessNoShowBookingsUseCase } from "../interfaces/booking-usecases.interface"
+import { IProcessNoShowBookingsUseCase } from "../interfaces/queue-usecases.interface"
 import logger from "@/configs/logger.config"
-import { BookingStatus } from "../../domain/entities/Booking"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
-import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
-import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { BookingStatus } from "@/modules/booking/domain/entities/Booking"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
+import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
+import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
-import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
+import { IBookingNotificationService } from "@/modules/notification/notification.module"
 export interface ProcessNoShowResult {
   processedCount: number
   noShowBookingIds: string[]

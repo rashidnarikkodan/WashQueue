@@ -1,4 +1,4 @@
-import { IGetPublicStationQueueUseCase } from "../interfaces/booking-usecases.interface"
+import { IGetPublicStationQueueUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
