@@ -14,8 +14,14 @@ export const validateQrSchema = z
     message: "Either bookingId or qrToken is required",
   })
 
+export const inspectionPhotoSchema = z.object({
+  position: z.string().min(1),
+  public_id: z.string().min(1),
+  secured_url: z.string().min(1),
+})
+
 export const preInspectionSchema = z.object({
-  photos: z.array(z.string()).optional().default([]),
+  photos: z.array(inspectionPhotoSchema).optional().default([]),
   notes: z.string().optional(),
 })
 
@@ -27,7 +33,7 @@ export const inspectionChecklistItemSchema = z.object({
 })
 
 export const postInspectionSchema = z.object({
-  photos: z.array(z.string()).optional().default([]),
+  photos: z.array(inspectionPhotoSchema).optional().default([]),
   notes: z.string().optional(),
   checklist: z.array(inspectionChecklistItemSchema).optional().default([]),
 })

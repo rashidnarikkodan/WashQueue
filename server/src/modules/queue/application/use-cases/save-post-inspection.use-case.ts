@@ -1,7 +1,7 @@
 import { ISavePostInspectionUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, InspectionChecklistItem } from "@/modules/booking/domain/entities/Booking"
+import { BookingStatus, InspectionChecklistItem, InspectionPhoto } from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -14,7 +14,7 @@ import { IStationRepository } from "@/modules/station/domain/repositories/statio
 
 export interface SavePostInspectionInput {
   bookingId: string
-  photos?: string[]
+  photos?: InspectionPhoto[]
   notes?: string
   checklist?: InspectionChecklistItem[]
 }
@@ -85,7 +85,7 @@ export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
       )
     }
 
-    if (photos.filter(Boolean).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
+    if (photos.filter((p) => p?.secured_url).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
       throw new AppError(
         `Post-service inspection requires all ${REQUIRED_INSPECTION_PHOTO_COUNT} vehicle angle photos (front, rear, left, right) before handover`,
         HTTP_STATUS.BAD_REQUEST

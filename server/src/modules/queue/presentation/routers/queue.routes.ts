@@ -44,6 +44,12 @@ export const createQueueRouter = (queueController: QueueController): Router => {
     asyncHandler(queueController.validateQr)
   )
 
+  router.get(
+    "/inspection-photos/upload-signature",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    asyncHandler(queueController.getInspectionUploadSignature)
+  )
+
   router.post(
     "/:bookingId/pre-inspection",
     authorize(ROLE.MANAGER, ROLE.OWNER),

@@ -99,13 +99,13 @@ export interface BookingResponseDTO {
     phone?: string
   }
   preServiceInspection?: {
-    photos: string[]
+    photos: Array<{ position: string; public_id: string; secured_url: string }>
     notes?: string
     capturedBy: string
     capturedAt: string
   } | null
   postServiceInspection?: {
-    photos: string[]
+    photos: Array<{ position: string; public_id: string; secured_url: string }>
     notes?: string
     capturedBy: string
     capturedAt: string

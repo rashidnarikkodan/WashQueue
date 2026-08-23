@@ -15,7 +15,7 @@ import { toast } from "sonner"
 interface PhotoCaptureCameraProps {
   title: string
   subtitle?: string
-  onCapture: (dataUrl: string) => void
+  onCapture: (file: File) => void
   onClose: () => void
 }
 
@@ -44,14 +44,14 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment")
   const [isTorchSupported, setIsTorchSupported] = useState<boolean>(false)
   const [isTorchOn, setIsTorchOn] = useState<boolean>(false)
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [capturedFile, setCapturedFile] = useState<File | null>(null)
 
   const stopAllMediaTracks = useCallback(() => {
     if (mediaStreamRef.current) {
       try {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop())
-      } catch {
-      }
+      } catch {}
       mediaStreamRef.current = null
     }
 
@@ -60,8 +60,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
         const stream = videoRef.current.srcObject as MediaStream
         stream.getTracks().forEach((track) => track.stop())
         videoRef.current.srcObject = null
-      } catch {
-      }
+      } catch {}
     }
 
     setIsCameraActive(false)
@@ -138,6 +137,14 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
   }, [facingMode, selectedCameraId, stopAllMediaTracks])
 
   useEffect(() => {
+  return () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+  }
+}, [previewUrl])
+
+  useEffect(() => {
     let isMounted = true
 
     if (navigator.mediaDevices?.enumerateDevices) {
@@ -210,10 +217,17 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
         if (nextMode === "environment") {
           return lbl.includes("back") || lbl.includes("environment") || lbl.includes("rear")
         } else {
-          return lbl.includes("front") || lbl.includes("user") || lbl.includes("selfie") || lbl.includes("facetime")
+          return (
+            lbl.includes("front") ||
+            lbl.includes("user") ||
+            lbl.includes("selfie") ||
+            lbl.includes("facetime")
+          )
         }
       })
-      setSelectedCameraId(match ? match.id : (cameras.find((c) => c.id !== selectedCameraId)?.id || ""))
+      setSelectedCameraId(
+        match ? match.id : cameras.find((c) => c.id !== selectedCameraId)?.id || ""
+      )
     } else {
       setSelectedCameraId("")
     }
@@ -240,44 +254,81 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     }
   }
 
-  const handleShutter = () => {
-    const video = videoRef.current
-    if (!video || !video.videoWidth || !video.videoHeight) return
+const handleShutter = () => {
+  const video = videoRef.current
 
-    let width = video.videoWidth
-    let height = video.videoHeight
-    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-      if (width > height) {
-        height = Math.round((height * MAX_DIMENSION) / width)
-        width = MAX_DIMENSION
-      } else {
-        width = Math.round((width * MAX_DIMENSION) / height)
-        height = MAX_DIMENSION
-      }
-    }
-
-    const canvas = document.createElement("canvas")
-    canvas.width = width
-    canvas.height = height
-    const ctx = canvas.getContext("2d")
-    if (!ctx) {
-      toast.error("Failed to capture photo")
-      return
-    }
-
-    ctx.save()
-    ctx.scale(-1, 1)
-    ctx.drawImage(video, -width, 0, width, height)
-    ctx.restore()
-
-    setPreviewDataUrl(canvas.toDataURL("image/jpeg", JPEG_QUALITY))
+  if (!video || !video.videoWidth || !video.videoHeight) {
+    return
   }
 
-  const handleRetake = () => setPreviewDataUrl(null)
+  let width = video.videoWidth
+  let height = video.videoHeight
 
+  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+    if (width > height) {
+      height = Math.round((height * MAX_DIMENSION) / width)
+      width = MAX_DIMENSION
+    } else {
+      width = Math.round((width * MAX_DIMENSION) / height)
+      height = MAX_DIMENSION
+    }
+  }
+
+  const canvas = document.createElement("canvas")
+
+  canvas.width = width
+  canvas.height = height
+
+  const ctx = canvas.getContext("2d")
+
+  if (!ctx) {
+    toast.error("Failed to capture photo")
+    return
+  }
+
+  ctx.save()
+
+  ctx.scale(-1, 1)
+  ctx.drawImage(video, -width, 0, width, height)
+
+  ctx.restore()
+
+  canvas.toBlob(
+    (blob) => {
+      if (!blob) {
+        toast.error("Failed to encode photo")
+        return
+      }
+
+      const file = new File(
+        [blob],
+        `vehicle-photo-${Date.now()}.jpg`,
+        {
+          type: "image/jpeg",
+        }
+      )
+
+      const previewUrl = URL.createObjectURL(file)
+
+      setCapturedFile(file)
+      setPreviewUrl(previewUrl)
+    },
+    "image/jpeg",
+    JPEG_QUALITY
+  )
+}
+
+const handleRetake = () => {
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl)
+  }
+
+  setPreviewUrl(null)
+  setCapturedFile(null)
+}
   const handleUsePhoto = () => {
-    if (!previewDataUrl) return
-    onCapture(previewDataUrl)
+    if (!capturedFile) return
+    onCapture(capturedFile)
   }
 
   return (
@@ -302,9 +353,9 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
 
         <div className="p-5">
           <div className="relative aspect-[4/3] rounded-2xl bg-black overflow-hidden flex flex-col items-center justify-center shadow-lg">
-            {previewDataUrl ? (
+            {previewUrl ? (
               <img
-                src={previewDataUrl}
+                src={previewUrl}
                 alt="Captured preview"
                 className="w-full h-full object-cover"
               />
@@ -317,7 +368,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
               />
             )}
 
-            {isCameraActive && !cameraError && !previewDataUrl && (
+            {isCameraActive && !cameraError && !previewUrl && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10 overflow-hidden">
                 <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-3xl flex items-center justify-center shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-2xl drop-shadow-md" />
@@ -328,7 +379,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
               </div>
             )}
 
-            {!previewDataUrl && (
+            {!previewUrl && (
               <div className="absolute top-3 right-3 flex items-center gap-2 z-20">
                 {isTorchSupported && (
                   <button
@@ -355,7 +406,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
               </div>
             )}
 
-            {(isInitializing) && !previewDataUrl && (
+            {isInitializing && !previewUrl && (
               <div className="absolute inset-0 z-30 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center text-white space-y-3 p-6 text-center">
                 <RefreshCw className="h-8 w-8 text-primary animate-spin" />
                 <p className="text-xs font-semibold text-white/90">Opening camera...</p>
@@ -380,7 +431,7 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
           </div>
 
           <div className="pt-5 flex items-center justify-center gap-3">
-            {previewDataUrl ? (
+            {previewUrl ? (
               <>
                 <button
                   type="button"

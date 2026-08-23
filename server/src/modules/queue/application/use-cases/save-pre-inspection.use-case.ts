@@ -1,7 +1,7 @@
 import { ISavePreInspectionAndCheckInUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus } from "@/modules/booking/domain/entities/Booking"
+import { BookingStatus, InspectionPhoto } from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -14,7 +14,7 @@ import { IStationRepository } from "@/modules/station/domain/repositories/statio
 
 export interface SavePreInspectionInput {
   bookingId: string
-  photos?: string[]
+  photos?: InspectionPhoto[]
   notes?: string
 }
 
@@ -79,7 +79,7 @@ export class SavePreInspectionAndCheckInUseCase implements ISavePreInspectionAnd
 
     const now = new Date()
 
-    if (photos.filter(Boolean).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
+    if (photos.filter((p) => p?.secured_url).length < REQUIRED_INSPECTION_PHOTO_COUNT) {
       throw new AppError(
         `Pre-service inspection requires all ${REQUIRED_INSPECTION_PHOTO_COUNT} vehicle angle photos (front, rear, left, right) before check-in`,
         HTTP_STATUS.BAD_REQUEST

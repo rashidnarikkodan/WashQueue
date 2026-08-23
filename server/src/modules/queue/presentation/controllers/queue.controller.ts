@@ -1,4 +1,6 @@
 import { Request, Response } from "express"
+import cloudinary from "@/configs/cloudinary.config"
+import env from "@/configs/env.config"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
@@ -54,6 +56,28 @@ export class QueueController {
 
     const booking = await this.validateQrUseCase.execute(managerUserId, req.body)
     success(res, booking, HTTP_STATUS.OK, "QR Code validated successfully")
+  }
+
+  getInspectionUploadSignature = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const timestamp = Math.round(Date.now() / 1000)
+    const folder = "washqueue/inspections"
+    const signature = cloudinary.utils.api_sign_request(
+      { timestamp, folder },
+      env.CLOUDINARY_API_SECRET
+    )
+
+    success(res, {
+      signature,
+      timestamp,
+      folder,
+      apiKey: env.CLOUDINARY_API_KEY,
+      cloudName: env.CLOUDINARY_CLOUD_NAME,
+    }, HTTP_STATUS.OK, "Cloudinary upload signature generated")
   }
 
   submitPreInspection = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
