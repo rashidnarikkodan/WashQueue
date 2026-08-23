@@ -1,9 +1,9 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { PaymentStatus } from "../../domain/entities/Booking"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { PaymentStatus } from "@/modules/booking/domain/entities/Booking"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
-import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
+import { IBookingNotificationService } from "@/modules/notification/notification.module"
 import {
   RefundPolicyEngine,
   RefundPolicyResult,
@@ -18,7 +18,7 @@ export interface ProcessRefundInput {
 }
 
 import { RefundWalletUseCase } from "@/modules/wallet/application/use-cases/refund-wallet.use-case"
-import { IEvaluateAndProcessRefundUseCase } from "../interfaces/booking-usecases.interface"
+import { IEvaluateAndProcessRefundUseCase } from "../interfaces/payment-usecases.interface"
 
 export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefundUseCase {
   constructor(

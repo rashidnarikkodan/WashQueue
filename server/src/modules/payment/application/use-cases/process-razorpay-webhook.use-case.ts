@@ -1,5 +1,5 @@
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
+import { IPaymentGatewayService } from "@/core/application/interfaces/payment-gateway.interface"
 
 export interface RazorpayWebhookPayload {
   event: string
@@ -22,7 +22,7 @@ export interface RazorpayWebhookPayload {
   }
 }
 
-import { IConfirmBookingReservationUseCase, IProcessRazorpayWebhookUseCase } from "../interfaces/booking-usecases.interface"
+import { IConfirmBookingReservationUseCase, IProcessRazorpayWebhookUseCase } from "../interfaces/payment-usecases.interface"
 
 export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUseCase {
   constructor(

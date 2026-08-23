@@ -1,4 +1,4 @@
-import { ServiceType, PaymentMethod } from "./Booking"
+import { ServiceType, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
 
 export type ReservationStatus = "HELD" | "CONFIRMED" | "RELEASED" | "EXPIRED_REFUND_NEEDED"
 

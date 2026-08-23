@@ -7,13 +7,13 @@ import { ITimeWindowRepository } from "@/modules/station/domain/repositories/tim
 import { IVehicleRepository } from "@/modules/vehicle/domain/repositories/vehicle.repository"
 import { IWalletRepository } from "@/modules/wallet/domain/repositories/wallet.repository.interface"
 import { StationStatus } from "@/modules/station/domain/entities/Station"
-import { ServiceType, PaymentMethod } from "../../domain/entities/Booking"
-import { BookingPricingService } from "../../domain/services/BookingPricingService"
+import { ServiceType, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
+import { BookingPricingService } from "@/modules/booking/domain/services/BookingPricingService"
 import { BookingReservation } from "../../domain/entities/BookingReservation"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { ICreateBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
-import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
-import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
+import { ICreateBookingReservationUseCase } from "../interfaces/payment-usecases.interface"
+import { BookingPricingResolutionService } from "@/modules/booking/application/services/booking-pricing-resolution.service"
+import { IPaymentGatewayService } from "@/core/application/interfaces/payment-gateway.interface"
 
 export interface CreateBookingReservationInput {
   stationId: string

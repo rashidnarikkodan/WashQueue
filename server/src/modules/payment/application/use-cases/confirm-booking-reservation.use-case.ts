@@ -11,18 +11,18 @@ import {
   PaymentMethod,
   derivePaymentStatus,
   deriveOnlinePaymentMethod,
-} from "../../domain/entities/Booking"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
-import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
-import { BookingNumberService } from "../../domain/services/BookingNumberService"
-import { QRTokenService } from "../../domain/services/QRTokenService"
-import { BookingPricingService } from "../../domain/services/BookingPricingService"
-import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
-import { IBookingNotificationService } from "../interfaces/booking-notification.interface"
-import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
-import { BookingResponseDTO } from "../dtos/booking-response.dto"
+} from "@/modules/booking/domain/entities/Booking"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
+import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
+import { BookingNumberService } from "@/modules/booking/domain/services/BookingNumberService"
+import { QRTokenService } from "@/modules/booking/domain/services/QRTokenService"
+import { BookingPricingService } from "@/modules/booking/domain/services/BookingPricingService"
+import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
+import { IBookingNotificationService } from "@/modules/notification/notification.module"
+import { BookingDTOMapper } from "@/modules/booking/application/mappers/booking-dto.mapper"
+import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
-import { IPaymentGatewayService } from "../interfaces/payment-gateway.interface"
+import { IPaymentGatewayService } from "@/core/application/interfaces/payment-gateway.interface"
 import { DebitWalletUseCase } from "@/modules/wallet/application/use-cases/debit-wallet.use-case"
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
 import logger from "@/configs/logger.config"
@@ -35,8 +35,8 @@ export interface ConfirmBookingReservationInput {
   skipSignatureVerification?: boolean
 }
 
-import { IConfirmBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
-import { BookingPricingResolutionService } from "../services/booking-pricing-resolution.service"
+import { IConfirmBookingReservationUseCase } from "../interfaces/payment-usecases.interface"
+import { BookingPricingResolutionService } from "@/modules/booking/application/services/booking-pricing-resolution.service"
 
 export class ConfirmBookingReservationUseCase implements IConfirmBookingReservationUseCase {
   private readonly pricingResolutionService: BookingPricingResolutionService

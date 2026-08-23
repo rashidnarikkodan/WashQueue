@@ -10,7 +10,7 @@ import {
   IConfirmBookingReservationUseCase,
   ICancelBookingReservationUseCase,
   IProcessRazorpayWebhookUseCase,
-} from "../../application/interfaces/booking-usecases.interface"
+} from "../../application/interfaces/payment-usecases.interface"
 
 export class PaymentController {
   constructor(

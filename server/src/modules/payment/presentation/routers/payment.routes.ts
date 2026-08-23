@@ -7,7 +7,7 @@ import {
   createPaymentOrderSchema,
   verifyPaymentSchema,
   reservationIdParamSchema,
-} from "../schema/booking.schema"
+} from "../schema/payment.schema"
 
 export const createPaymentRouter = (paymentController: PaymentController): Router => {
   const router = Router()

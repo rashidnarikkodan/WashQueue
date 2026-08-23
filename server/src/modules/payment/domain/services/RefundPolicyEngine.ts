@@ -1,4 +1,4 @@
-import { BookingStatus, PaymentStatus, PaymentMethod } from "../entities/Booking"
+import { BookingStatus, PaymentStatus, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
 
 export type RefundType = "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND"
 export type RefundMethod = "WALLET_REFUND" | "ORIGINAL_PAYMENT_REFUND" | "NONE"

@@ -1,7 +1,7 @@
 import { IBookingReservationRepository } from "../../domain/repositories/booking-reservation.repository"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 
-import { ICancelBookingReservationUseCase } from "../interfaces/booking-usecases.interface"
+import { ICancelBookingReservationUseCase } from "../interfaces/payment-usecases.interface"
 
 export class CancelBookingReservationUseCase implements ICancelBookingReservationUseCase {
   constructor(

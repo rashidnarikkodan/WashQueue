@@ -1,6 +1,6 @@
 import { Types } from "mongoose"
 import { BookingReservation } from "../../domain/entities/BookingReservation"
-import { ServiceType, PaymentMethod } from "../../domain/entities/Booking"
+import { ServiceType, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
 import { IBookingReservationDocument } from "../models/booking-reservation.model"
 
 export class BookingReservationMapper {

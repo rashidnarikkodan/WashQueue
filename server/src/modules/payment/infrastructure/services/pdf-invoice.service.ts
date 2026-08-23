@@ -1,11 +1,15 @@
 import PDFDocument from "pdfkit"
-import { Types } from "mongoose"
-import { BookingResponseDTO } from "../../application/dtos/booking-response.dto"
-import { VehicleCategoryModel } from "../../../vehicle-catelog/infrastructure/models/category.model"
-import { VehicleClassModel } from "../../../vehicle-catelog/infrastructure/models/class.model"
+import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
+import { IVehicleCategoryRepository } from "@/modules/vehicle-catelog/domain/repositories/vehicle-category.repsoitory"
+import { IVehicleClassRepository } from "@/modules/vehicle-catelog/domain/repositories/vehicle-class.repsoitory"
 import { IPDFInvoiceService } from "../../application/interfaces/pdf-invoice.interface"
 
 export class PDFInvoiceService implements IPDFInvoiceService {
+  constructor(
+    private readonly vehicleCategoryRepository: IVehicleCategoryRepository,
+    private readonly vehicleClassRepository: IVehicleClassRepository
+  ) {}
+
   async generateInvoicePdf(booking: BookingResponseDTO): Promise<Buffer> {
     let categoryName = "Standard"
     let className = "Standard Vehicle"
@@ -14,18 +18,18 @@ export class PDFInvoiceService implements IPDFInvoiceService {
       booking.vehicleSnapshot?.vehicleCategoryId || booking.walkInVehicle?.categoryId
     const classId = booking.vehicleSnapshot?.vehicleClassId || booking.walkInVehicle?.classId
 
-    if (categoryId && Types.ObjectId.isValid(categoryId)) {
+    if (categoryId) {
       try {
-        const catDoc = await VehicleCategoryModel.findById(categoryId).lean()
-        if (catDoc && catDoc.name) categoryName = catDoc.name
+        const category = await this.vehicleCategoryRepository.findById(categoryId)
+        if (category && category.name) categoryName = category.name
       } catch {
       }
     }
 
-    if (classId && Types.ObjectId.isValid(classId)) {
+    if (classId) {
       try {
-        const clsDoc = await VehicleClassModel.findById(classId).lean()
-        if (clsDoc && clsDoc.name) className = clsDoc.name
+        const vehicleClass = await this.vehicleClassRepository.findById(classId)
+        if (vehicleClass && vehicleClass.name) className = vehicleClass.name
       } catch {
       }
     }
