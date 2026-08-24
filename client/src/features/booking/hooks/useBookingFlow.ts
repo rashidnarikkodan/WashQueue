@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useStationStore } from "@/features/station/store/station.store"
 import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { PAYMENT_METHOD } from "@/shared/constants/payment.constants"
-import { useBookingVehicles } from "./useBookingVehicles"
-import { useBookingServices } from "./useBookingServices"
+import { useBookingSelection } from "./useBookingSelection"
 import { useBookingSlots } from "./useBookingSlots"
 import { useBookingPayment } from "./useBookingPayment"
 
@@ -43,14 +42,9 @@ export function useBookingFlow(stationId: string | null) {
     }
   }, [categories.length, classes.length, loadCatalogData])
 
-  const vehicleState = useBookingVehicles({
+  const selectionState = useBookingSelection({
     station: selectedStation,
     stationId,
-  })
-
-  const serviceState = useBookingServices({
-    station: selectedStation,
-    selectedVehicle: vehicleState.selectedVehicle,
   })
 
   const slotState = useBookingSlots({
@@ -71,12 +65,43 @@ export function useBookingFlow(stationId: string | null) {
     type: "success",
   })
 
-  const canSubmit = Boolean(
-    vehicleState.selectedVehicleId &&
-    serviceState.selectedPlanId &&
-    slotState.selectedSlotId
-  )
+  const bookingIntent = useMemo(() => {
+    if (
+      !stationId ||
+      !selectionState.selectedVehicle ||
+      !selectionState.selectedPlan ||
+      !slotState.selectedSlotId
+    ) {
+      return null
+    }
 
+    const serviceType =
+      selectionState.selectedPlan.id === "FULL_WASH" || selectionState.selectedPlan.id === "full"
+        ? ("FULL" as const)
+        : ("HALF" as const)
+
+    return {
+      stationId,
+      vehicleId: selectionState.selectedVehicle.id,
+      timeWindowId: slotState.selectedSlotId,
+      serviceType,
+      serviceName: selectionState.selectedPlan.name,
+      totalAmount: selectionState.totalPrice,
+      extraServiceIds: selectionState.selectedExtras.map((e) => e.id),
+    }
+  }, [
+    stationId,
+    selectionState.selectedVehicle,
+    selectionState.selectedPlan,
+    selectionState.totalPrice,
+    selectionState.selectedExtras,
+    slotState.selectedSlotId,
+  ])
+
+  const canSubmit = bookingIntent !== null
+
+
+  //to handle successfully completed online payment and open success/error modal
   const handleOnlinePaymentSuccess = useCallback((booking?: BookingResponse) => {
     setIsPaymentModalOpen(false)
     if (booking) {
@@ -102,29 +127,18 @@ export function useBookingFlow(stationId: string | null) {
       return
     }
 
-    if (
-      !canSubmit ||
-      !stationId ||
-      !slotState.selectedSlotId ||
-      !vehicleState.selectedVehicleId ||
-      !serviceState.selectedPlanId
-    ) {
+    if (!bookingIntent) {
       return
     }
 
     setIsSubmittingBooking(true)
     try {
-      const serviceType =
-        serviceState.selectedPlanId === "FULL_WASH" || serviceState.selectedPlanId === "full"
-          ? "FULL"
-          : "HALF"
-
       const created = await bookingApi.createBooking({
-        stationId,
-        vehicleId: vehicleState.selectedVehicleId,
-        timeWindowId: slotState.selectedSlotId,
-        serviceType,
-        extraServiceIds: serviceState.selectedExtraIds,
+        stationId: bookingIntent.stationId,
+        vehicleId: bookingIntent.vehicleId,
+        timeWindowId: bookingIntent.timeWindowId,
+        serviceType: bookingIntent.serviceType,
+        extraServiceIds: bookingIntent.extraServiceIds,
         paymentMethod: PAYMENT_METHOD.PAY_AT_STATION,
       })
 
@@ -141,16 +155,7 @@ export function useBookingFlow(stationId: string | null) {
     } finally {
       setIsSubmittingBooking(false)
     }
-  }, [
-    isAuthenticated,
-    user,
-    canSubmit,
-    stationId,
-    slotState.selectedSlotId,
-    vehicleState.selectedVehicleId,
-    serviceState.selectedPlanId,
-    serviceState.selectedExtraIds,
-  ])
+  }, [isAuthenticated, user, bookingIntent])
 
   const handleProceedBooking = (method: "ONLINE" | "CASH") => {
     if (!isAuthenticated || !user) {
@@ -171,27 +176,19 @@ export function useBookingFlow(stationId: string | null) {
   }
 
   const handlePayFromModal = () => {
-    if (
-      !stationId ||
-      !vehicleState.selectedVehicle?.id ||
-      !slotState.selectedSlotId ||
-      !serviceState.selectedPlan
-    ) {
+    if (!bookingIntent) {
       return
     }
 
     paymentState.initiatePayment({
-      totalAmount: serviceState.totalPrice,
-      serviceName: serviceState.selectedPlan.name,
+      totalAmount: bookingIntent.totalAmount,
+      serviceName: bookingIntent.serviceName,
       bookingIntentData: {
-        stationId,
-        vehicleId: vehicleState.selectedVehicle.id,
-        timeWindowId: slotState.selectedSlotId,
-        serviceType:
-          serviceState.selectedPlan.id === "FULL_WASH" || serviceState.selectedPlan.id === "full"
-            ? "FULL"
-            : "HALF",
-        extraServiceIds: serviceState.selectedExtras.map((e) => e.id),
+        stationId: bookingIntent.stationId,
+        vehicleId: bookingIntent.vehicleId,
+        timeWindowId: bookingIntent.timeWindowId,
+        serviceType: bookingIntent.serviceType,
+        extraServiceIds: bookingIntent.extraServiceIds,
         paymentMethod: PAYMENT_METHOD.ONLINE,
       },
       onSuccess: (paymentData) => {
@@ -221,7 +218,7 @@ export function useBookingFlow(stationId: string | null) {
       setIsAuthModalOpen(true)
       return
     }
-    vehicleState.setIsAddVehicleModalOpen(true)
+    selectionState.setIsAddVehicleModalOpen(true)
   }
 
   return {
@@ -232,27 +229,27 @@ export function useBookingFlow(stationId: string | null) {
     setIsAuthModalOpen,
     authModalConfig,
 
-    vehicles: vehicleState.vehicles,
-    selectedVehicle: vehicleState.selectedVehicle,
-    selectedVehicleId: vehicleState.selectedVehicleId,
-    setSelectedVehicleId: vehicleState.setSelectedVehicleId,
-    isStep1Loading: vehicleState.isStep1Loading,
-    isAddVehicleModalOpen: vehicleState.isAddVehicleModalOpen,
-    setIsAddVehicleModalOpen: vehicleState.setIsAddVehicleModalOpen,
-    isAddingVehicle: vehicleState.isAddingVehicle,
-    handleAddVehicleSubmit: vehicleState.handleAddVehicleSubmit,
-    stationClassIds: vehicleState.stationClassIds,
+    vehicles: selectionState.vehicles,
+    selectedVehicle: selectionState.selectedVehicle,
+    selectedVehicleId: selectionState.selectedVehicleId,
+    setSelectedVehicleId: selectionState.setSelectedVehicleId,
+    isStep1Loading: selectionState.isStep1Loading,
+    isAddVehicleModalOpen: selectionState.isAddVehicleModalOpen,
+    setIsAddVehicleModalOpen: selectionState.setIsAddVehicleModalOpen,
+    isAddingVehicle: selectionState.isAddingVehicle,
+    handleAddVehicleSubmit: selectionState.handleAddVehicleSubmit,
+    stationClassIds: selectionState.stationClassIds,
     handleOpenAddVehicle,
 
-    plans: serviceState.plans,
-    selectedPlan: serviceState.selectedPlan,
-    selectedPlanId: serviceState.selectedPlanId,
-    setSelectedPlanId: serviceState.setSelectedPlanId,
-    extraServices: serviceState.extraServices,
-    selectedExtras: serviceState.selectedExtras,
-    selectedExtraIds: serviceState.selectedExtraIds,
-    toggleExtraService: serviceState.toggleExtraService,
-    totalPrice: serviceState.totalPrice,
+    plans: selectionState.plans,
+    selectedPlan: selectionState.selectedPlan,
+    selectedPlanId: selectionState.selectedPlanId,
+    setSelectedPlanId: selectionState.setSelectedPlanId,
+    extraServices: selectionState.extraServices,
+    selectedExtras: selectionState.selectedExtras,
+    selectedExtraIds: selectionState.selectedExtraIds,
+    toggleExtraService: selectionState.toggleExtraService,
+    totalPrice: selectionState.totalPrice,
 
     selectedDate: slotState.selectedDate,
     setSelectedDate: slotState.setSelectedDate,
