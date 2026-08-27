@@ -26,18 +26,16 @@ export class BookingPricingService {
     let depositAmount: number
     let cashAmount: number
 
-    if (input.paymentMethod === PaymentMethod.NO_PAYMENT) {
+    if (input.isWalkIn) {
+      depositAmount = 0
+      cashAmount = totalPrice
+    } else if (input.paymentMethod === PaymentMethod.NO_PAYMENT) {
       depositAmount = 0
       cashAmount = 0
     } else if (input.paymentMethod === PaymentMethod.PAY_AT_STATION) {
-      if (input.isWalkIn) {
-        depositAmount = 0
-        cashAmount = totalPrice
-      } else {
-        const rate = input.depositPercentage ?? 0.2
-        depositAmount = Number((totalPrice * rate).toFixed(2))
-        cashAmount = Number((totalPrice - depositAmount).toFixed(2))
-      }
+      const rate = input.depositPercentage ?? 0.2
+      depositAmount = Number((totalPrice * rate).toFixed(2))
+      cashAmount = Number((totalPrice - depositAmount).toFixed(2))
     } else {
       depositAmount = totalPrice
       cashAmount = 0

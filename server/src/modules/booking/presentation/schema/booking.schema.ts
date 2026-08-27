@@ -22,7 +22,7 @@ export const createWalkInBookingSchema = z.object({
   paymentMethod: z
     .nativeEnum(PaymentMethod)
     .optional()
-    .default(PaymentMethod.PAY_AT_STATION),
+    .default(PaymentMethod.NO_PAYMENT),
   extraServiceIds: z
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()

@@ -45,7 +45,11 @@ export class RefundPolicyEngine {
           : depositAmount
         : depositAmount
 
-    if (totalPaid <= 0 || paymentMethod === PaymentMethod.PAY_AT_STATION) {
+    if (
+      totalPaid <= 0 ||
+      paymentMethod === PaymentMethod.PAY_AT_STATION ||
+      paymentMethod === PaymentMethod.NO_PAYMENT
+    ) {
       return {
         refundType: "NO_REFUND",
         refundMethod: "NONE",

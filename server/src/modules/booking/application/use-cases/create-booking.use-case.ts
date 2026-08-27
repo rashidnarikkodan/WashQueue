@@ -118,7 +118,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus: derivePaymentStatus(input.paymentMethod, false),
+      paymentStatus: derivePaymentStatus(input.paymentMethod),
       paymentMethod: input.paymentMethod,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,
