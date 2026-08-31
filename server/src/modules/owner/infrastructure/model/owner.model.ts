@@ -25,6 +25,7 @@ export interface IOwner extends Document {
   ifscCode?: string
   bankProofUrl?: string
   rejectionReason?: string
+  transferId?: string
 }
 
 const ownerSchema = new Schema<IOwner>(
@@ -86,6 +87,12 @@ const ownerSchema = new Schema<IOwner>(
     ifscCode: { type: String },
     bankProofUrl: { type: String },
     rejectionReason: { type: String },
+    transferId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
   },
   {
     timestamps: true,

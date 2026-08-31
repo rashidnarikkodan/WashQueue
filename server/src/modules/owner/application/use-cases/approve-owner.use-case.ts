@@ -8,12 +8,14 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
+import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
 
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
-    private readonly mailService: IMailService
+    private readonly mailService: IMailService,
+    private readonly paymentAccountService: IPaymentAccountService
   ) {}
 
   async execute({
@@ -39,6 +41,66 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
 
     if (isApproved) {
       owner.verify()
+
+      // Create payment account for owner on Razorpay Route if not already present
+      if (!owner.transferId) {
+        const legalName = owner.legalFullName?.trim() || user.name?.trim()
+        if (!legalName) {
+          throw new AppError(
+            "Owner full name is required to create payment account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+
+        const businessName = owner.businessName?.trim() || legalName
+        const email = (owner.businessEmail || user.email)?.trim()
+        if (!email) {
+          throw new AppError(
+            "Owner email is required to create payment account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+
+        const phone = (owner.phone || user.phone)?.trim()
+        if (!phone) {
+          throw new AppError(
+            "Owner phone is required to create payment account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+
+        // Extract PAN from GST number if GST has valid 15-character format
+        const gst = owner.gstNumber?.trim().toUpperCase()
+        let pan: string | undefined
+        if (gst && gst.length === 15) {
+          pan = gst.substring(2, 12)
+        }
+
+        const transferId = await this.paymentAccountService.createAccount({
+          email,
+          phone,
+          legal_business_name: businessName,
+          business_type: gst ? "proprietorship" : "individual",
+          contact_name: legalName,
+          reference_id: owner.id || String(owner.userId),
+          customer_facing_business_name: businessName,
+          ...(gst || pan
+            ? {
+                legal_info: {
+                  ...(gst ? { gst } : {}),
+                  ...(pan ? { pan } : {}),
+                },
+              }
+            : {}),
+          notes: {
+            ownerId: owner.id || "",
+            userId: String(owner.userId),
+          },
+        })
+
+        owner.setTransferId(transferId)
+      }
+
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })
 
