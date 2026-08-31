@@ -1,8 +1,4 @@
-import {
-  CreateTransferParams,
-  ITransferService,
-  TransferResult,
-} from "@/core/application/interfaces/payment-gateway.interface"
+import { CreateTransferParams, ITransferService, TransferResult } from "@/core/application/interfaces/transfer.interface"
 import { env } from "process"
 import Razorpay from "razorpay"
 
