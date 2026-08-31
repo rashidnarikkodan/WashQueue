@@ -11,10 +11,13 @@ export class SettlementMapper implements IMapper<Settlement, ISettlementDocument
       stationSettlementAmount: doc.stationSettlementAmount,
       platformCommission: doc.platformCommission,
       status: doc.status,
+      transferId: doc.transferId,
       createdAt: doc.createdAt,
+      settledAt: doc.settledAt,
       totalAmount: doc.totalAmount,
     })
   }
+
   toPersistence(entity: Settlement): Partial<ISettlementDocument> {
     const props = entity.getProps()
     return {
@@ -24,6 +27,7 @@ export class SettlementMapper implements IMapper<Settlement, ISettlementDocument
       platformCommission: props.platformCommission,
       stationSettlementAmount: props.stationSettlementAmount,
       status: props.status,
+      transferId: props.transferId,
       createdAt: props.createdAt,
       settledAt: props.settledAt,
     }

@@ -12,4 +12,8 @@ export class SettlementRepository
     super(SettlementModel, new SettlementMapper())
   }
 
+  async findByBookingId(bookingId: string): Promise<Settlement | null> {
+    const doc = await this.model.findOne({ bookingId }).exec()
+    return doc ? this.mapper.toDomain(doc) : null
+  }
 }

@@ -15,6 +15,7 @@ export interface SettlementProps {
   stationSettlementAmount: number
 
   status: SettlementStatus
+  transferId?: string
 
   createdAt: Date
   settledAt?: Date
@@ -30,10 +31,6 @@ export class Settlement {
   }
 
   private validate(props: SettlementProps): void {
-    if (!props.id) {
-      throw new Error("Settlement id is required")
-    }
-
     if (!props.bookingId) {
       throw new Error("Booking id is required")
     }
@@ -54,15 +51,17 @@ export class Settlement {
       throw new Error("Station settlement amount cannot be negative")
     }
 
-    const calculatedSettlement =
-      props.totalAmount - props.platformCommission
+    const calculatedSettlement = Number(
+      (props.totalAmount - props.platformCommission).toFixed(2)
+    )
 
-    if (props.stationSettlementAmount !== calculatedSettlement) {
+    if (Math.abs(props.stationSettlementAmount - calculatedSettlement) > 0.01) {
       throw new Error(
         "Station settlement amount must equal total amount minus platform commission"
       )
     }
   }
+
   get id(): string | undefined {
     return this.props?.id
   }
@@ -91,6 +90,10 @@ export class Settlement {
     return this.props.status
   }
 
+  get transferId(): string | undefined {
+    return this.props.transferId
+  }
+
   get createdAt(): Date {
     return this.props.createdAt
   }
@@ -99,12 +102,15 @@ export class Settlement {
     return this.props.settledAt
   }
 
-  getProps(){
+  getProps(): SettlementProps {
     return this.props
   }
-  
 
-  markSettled(): void {
+  setTransferId(transferId: string): void {
+    this.props.transferId = transferId
+  }
+
+  markSettled(settledAt: Date = new Date()): void {
     if (this.props.status !== SettlementStatus.PENDING) {
       throw new Error(
         `Settlement cannot be settled from ${this.props.status} status`
@@ -112,7 +118,7 @@ export class Settlement {
     }
 
     this.props.status = SettlementStatus.SETTLED
-    this.props.settledAt = new Date()
+    this.props.settledAt = settledAt
   }
 
   markFailed(): void {

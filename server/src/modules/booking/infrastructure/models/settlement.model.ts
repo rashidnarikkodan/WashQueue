@@ -1,4 +1,4 @@
-import { Document, Model, Schema } from "mongoose"
+import { Document, model, Schema } from "mongoose"
 import { SettlementStatus } from "../../domain/entities/Settlement"
 
 export interface ISettlementDocument extends Document {
@@ -8,9 +8,10 @@ export interface ISettlementDocument extends Document {
   platformCommission: number
   stationSettlementAmount: number
   status: SettlementStatus
+  transferId?: string
+  settledAt?: Date
   createdAt: Date
   updatedAt: Date
-  settledAt: Date
 }
 
 const settlementSchema = new Schema<ISettlementDocument>(
@@ -51,13 +52,23 @@ const settlementSchema = new Schema<ISettlementDocument>(
       required: true,
       index: true,
     },
+
+    transferId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
+
+    settledAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
   }
 )
 
-
-const SettlementModel = new Model('Settlement',settlementSchema)
+export const SettlementModel = model<ISettlementDocument>("Settlement", settlementSchema)
 
 export default SettlementModel

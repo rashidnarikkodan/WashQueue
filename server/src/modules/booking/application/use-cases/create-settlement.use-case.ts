@@ -4,7 +4,13 @@ import { ICreateSettlementUseCase } from "../interfaces/settlement.usecases"
 
 export class CreateSettlementUseCase implements ICreateSettlementUseCase {
   constructor(private readonly settlementRepository: ISettlementRepository) {}
+
   async execute(data: CreateSettlementDTO): Promise<Settlement> {
+    const existing = await this.settlementRepository.findByBookingId(data.bookingId)
+    if (existing) {
+      return existing
+    }
+
     const settlement = new Settlement({
       bookingId: data.bookingId,
       ownerId: data.ownerId,

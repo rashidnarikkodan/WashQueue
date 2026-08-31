@@ -22,6 +22,11 @@ import { RescheduleBookingUseCase } from "./application/use-cases/reschedule-boo
 
 import { BookingController } from "./presentation/controllers/booking.controller"
 import { createBookingRouter } from "./presentation/routers/booking.routes"
+import { SettlementRepository } from "./infrastructure/repositories/settlement.repository"
+import { CreateSettlementUseCase } from "./application/use-cases/create-settlement.use-case"
+import { ProcessSettlementUseCase } from "./application/use-cases/process-settlement.use-case"
+import { ownerRepository } from "../owner/owner.module"
+import { RazorpayTransferService } from "@/infrastructure/payment/razorpay-transfer.service"
 
 import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
@@ -54,6 +59,15 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
   bookingStatusLogRepository,
   bookingNotificationService,
   transactionRunner
+)
+
+export const settlementRepository = new SettlementRepository()
+export const transferService = new RazorpayTransferService()
+export const createSettlementUseCase = new CreateSettlementUseCase(settlementRepository)
+export const processSettlementUseCase = new ProcessSettlementUseCase(
+  settlementRepository,
+  ownerRepository,
+  transferService
 )
 
 // CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue

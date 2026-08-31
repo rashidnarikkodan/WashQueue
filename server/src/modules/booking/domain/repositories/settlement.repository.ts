@@ -1,4 +1,6 @@
-import { IBaseRepository } from "@/core/domain/repository.interface";
-import { Settlement } from "../entities/Settlement";
+import { IBaseRepository } from "@/core/domain/repository.interface"
+import { Settlement } from "../entities/Settlement"
 
-export interface ISettlementRepository extends IBaseRepository<Settlement>{}
+export interface ISettlementRepository extends IBaseRepository<Settlement> {
+  findByBookingId(bookingId: string): Promise<Settlement | null>
+}
