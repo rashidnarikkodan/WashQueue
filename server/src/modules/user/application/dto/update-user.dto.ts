@@ -4,6 +4,5 @@ export interface UpdateUserInput {
   email?: string
   phone?: string
   isVerified?: boolean
-  onboardingStep?: number
-  rejectionReason?: string
 }
+

@@ -2,11 +2,14 @@ import { Router } from "express"
 import { OwnerController } from "./owner.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
+import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { validateRequest } from "@/infrastructure/http/middleware/validation.middleware"
 import { onboardingUpload } from "@/infrastructure/multer/multer.middleware"
 import { saveOnboardingStepSchema } from "./schema/save-onboarding-step.schema"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
+import { approveOwnerSchema } from "./schema/approve-owner.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
+import { ROLE } from "@/common/constants/role.constants"
 
 export const createOwnerRouter = (ownerController: OwnerController): Router => {
   const router = Router()
@@ -38,5 +41,13 @@ export const createOwnerRouter = (ownerController: OwnerController): Router => {
     asyncHandler(ownerController.updateOwnerProfile)
   )
 
+  router.patch(
+    API_ROUTES.OWNER.APPROVAL,
+    authorize(ROLE.ADMIN),
+    validateRequest(approveOwnerSchema),
+    asyncHandler(ownerController.approveOwner)
+  )
+
   return router
 }
+

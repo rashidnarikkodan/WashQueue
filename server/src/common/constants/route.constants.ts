@@ -31,6 +31,7 @@ export const API_ROUTES = {
     ONBOARDING_STATUS: "/onboarding/status",
     ONBOARDING_STEP: "/onboarding/step",
     ONBOARDING_SUBMIT: "/onboarding/submit",
+    APPROVAL: "/:id/approval",
   },
   VEHICLE_CATALOG: {
     ROOT: "/api/vehicle-catalog",

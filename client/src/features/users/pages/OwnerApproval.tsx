@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import UserStats from "../components/ui/UserStats"
 import { usersApi } from "@/shared/apis/users.api"
+import { ownerApi } from "@/shared/apis/owner.api"
 import type { User } from "../types"
 import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 import OnboardingDetailsSummary from "../components/ui/OnboardingDetailsSummary"
@@ -104,7 +105,7 @@ const OwnerApproval = () => {
   const handleApprove = async (id: string) => {
     try {
       setOwners((prev) => prev.map((o) => (o.id === id ? { ...o, isVerified: true } : o)))
-      await usersApi.updateUser(id, { isVerified: true })
+      await ownerApi.approveOwner(id, true)
       toast.success("Owner approved and activated successfully!")
       if (selectedOwner?.id === id) {
         setSelectedOwner((prev: User | null) => (prev ? { ...prev, isVerified: true } : null))
@@ -122,11 +123,7 @@ const OwnerApproval = () => {
           o.id === id ? { ...o, isVerified: false, onboardingStep: 1, rejectionReason: reason } : o
         )
       )
-      await usersApi.updateUser(id, {
-        isVerified: false,
-        onboardingStep: 1,
-        rejectionReason: reason,
-      })
+      await ownerApi.approveOwner(id, false, reason)
       toast.info("Owner application rejected and details reset.")
       if (selectedOwner?.id === id) setSelectedOwner(null)
       setRejectingOwnerId(null)

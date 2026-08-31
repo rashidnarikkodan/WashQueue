@@ -19,6 +19,13 @@ export const API_ROUTES = {
     EXPORT: "/users/export",
     BY_ID: (id: string) => `/users/${id}`,
   },
+  OWNER: {
+    ROOT: "/owner",
+    ONBOARDING_STATUS: "/owner/onboarding/status",
+    ONBOARDING_STEP: "/owner/onboarding/step",
+    ONBOARDING_SUBMIT: "/owner/onboarding/submit",
+    APPROVAL: (id: string) => `/owner/${id}/approval`,
+  },
   STATIONS: {
     ROOT: "/stations",
     BY_ID: (id: string) => `/stations/${id}`,

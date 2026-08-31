@@ -7,15 +7,18 @@ import { UpdateOwnerUseCase } from "./application/use-cases/update-owner.use-cas
 import { SaveOnboardingStepUseCase } from "./application/use-cases/save-onboarding-step.use-case"
 import { GetOnboardingStatusUseCase } from "./application/use-cases/get-onboarding-status.use-case"
 import { SubmitOnboardingUseCase } from "./application/use-cases/submit-onboarding.use-case"
+import { ApproveOwnerUseCase } from "./application/use-cases/approve-owner.use-case"
 import { OwnerController } from "./presentation/owner.controller"
 import { createOwnerRouter } from "./presentation/owner.routes"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
+import { MailService } from "@/core/application/services/mail.service"
 import { OnboardingStepRequestMapper } from "./application/mappers/onboarding-step.mapper"
 
 export const ownerRepository = new OwnerMongoRepository()
 const cloudinaryService = new CloudinaryService()
 const mediaUploadService = new MediaUploadService(cloudinaryService)
+const mailService = new MailService()
 
 const onboardingStepMapper = new OnboardingStepRequestMapper(mediaUploadService)
 
@@ -33,6 +36,11 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   tokenService,
   userRepository
 )
+const approveOwnerUseCase = new ApproveOwnerUseCase(
+  ownerRepository,
+  userRepository,
+  mailService
+)
 
 const ownerController = new OwnerController(
   saveOnboardingStepUseCase,
@@ -41,6 +49,7 @@ const ownerController = new OwnerController(
   createOwnerUseCase,
   getOwnerUseCase,
   updateOwnerUseCase,
+  approveOwnerUseCase,
   onboardingStepMapper
 )
 

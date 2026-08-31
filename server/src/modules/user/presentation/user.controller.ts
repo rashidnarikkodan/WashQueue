@@ -18,7 +18,7 @@ import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authentic
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
-const ADMIN_ONLY_UPDATE_FIELDS = ["isBlocked", "isVerified", "onboardingStep", "rejectionReason"] as const
+const ADMIN_ONLY_UPDATE_FIELDS = ["isBlocked", "isVerified"] as const
 
 interface ExportUserRecord {
   id?: string
