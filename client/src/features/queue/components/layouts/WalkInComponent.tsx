@@ -32,6 +32,7 @@ export default function WalkInComponent() {
   const [vehicleClass, setVehicleClass] = useState("")
   const [serviceType, setServiceType] = useState<"HALF" | "FULL">("FULL")
   const [selectedExtras, setSelectedExtras] = useState<string[]>([])
+  const [nowMs] = useState(() => Date.now())
 
   const [phone, setPhone] = useState("")
   const [fullName, setFullName] = useState("")
@@ -131,34 +132,26 @@ export default function WalkInComponent() {
     )
   }, [allCategories, allClasses, stationSupportedClassIds])
 
+  const effectiveCategory = useMemo(() => {
+    if (availableCategories.length === 0) return ""
+    if (category && availableCategories.some((c) => c.id === category)) return category
+    return availableCategories[0].id
+  }, [availableCategories, category])
+
   const availableClasses = useMemo(() => {
-    if (!category || stationSupportedClassIds.size === 0) return []
+    if (!effectiveCategory || stationSupportedClassIds.size === 0) return []
     return allClasses.filter(
       (cls) =>
         cls.isActive !== false &&
-        cls.categoryId === category &&
+        cls.categoryId === effectiveCategory &&
         stationSupportedClassIds.has(cls.id)
     )
-  }, [category, allClasses, stationSupportedClassIds])
+  }, [effectiveCategory, allClasses, stationSupportedClassIds])
 
-  useEffect(() => {
-    if (availableCategories.length > 0) {
-      if (!category || !availableCategories.some((c) => c.id === category)) {
-        setCategory(availableCategories[0].id)
-      }
-    } else {
-      setCategory("")
-    }
-  }, [availableCategories, category])
-
-  useEffect(() => {
-    if (availableClasses.length > 0) {
-      if (!vehicleClass || !availableClasses.some((c) => c.id === vehicleClass)) {
-        setVehicleClass(availableClasses[0].id)
-      }
-    } else {
-      setVehicleClass("")
-    }
+  const effectiveVehicleClass = useMemo(() => {
+    if (availableClasses.length === 0) return ""
+    if (vehicleClass && availableClasses.some((c) => c.id === vehicleClass)) return vehicleClass
+    return availableClasses[0].id
   }, [availableClasses, vehicleClass])
 
   const availableExtras = useMemo(() => {
@@ -168,7 +161,7 @@ export default function WalkInComponent() {
     return stationDetail.extraServices
       .filter((ex) => ex.isActive !== false)
       .map((ex) => {
-        const p = ex.pricing?.find((pr) => pr.vehicleClassId === vehicleClass)
+        const p = ex.pricing?.find((pr) => pr.vehicleClassId === effectiveVehicleClass)
         return {
           id: ex.id,
           label: ex.name,
@@ -176,27 +169,29 @@ export default function WalkInComponent() {
           price: p ? p.price : 0,
         }
       })
-  }, [stationDetail, vehicleClass])
+  }, [stationDetail, effectiveVehicleClass])
 
-  useEffect(() => {
-    const validExtraIds = new Set(availableExtras.map((e) => e.id))
-    setSelectedExtras((prev) => prev.filter((id) => validExtraIds.has(id)))
-  }, [availableExtras])
+  const validExtraIds = useMemo(() => new Set(availableExtras.map((e) => e.id)), [availableExtras])
+  const effectiveSelectedExtras = useMemo(
+    () => selectedExtras.filter((id) => validExtraIds.has(id)),
+    [selectedExtras, validExtraIds]
+  )
 
   const toggleExtra = (id: string) => {
-    setSelectedExtras((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    )
+    setSelectedExtras((prev) => {
+      const current = prev.filter((exId) => validExtraIds.has(exId))
+      return current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+    })
   }
 
   const classPricing = stationDetail?.pricing?.find(
-    (p) => p.vehicleClassId === vehicleClass && p.isActive !== false
+    (p) => p.vehicleClassId === effectiveVehicleClass && p.isActive !== false
   )
   const halfWashPrice = classPricing?.halfWashPrice ?? 0
   const fullWashPrice = classPricing?.fullWashPrice ?? 0
   const basePrice = serviceType === "HALF" ? halfWashPrice : fullWashPrice
 
-  const extrasTotal = selectedExtras.reduce((sum, exId) => {
+  const extrasTotal = effectiveSelectedExtras.reduce((sum, exId) => {
     const item = availableExtras.find((e) => e.id === exId)
     return sum + (item ? item.price : 0)
   }, 0)
@@ -204,7 +199,6 @@ export default function WalkInComponent() {
 
   const currentSlot = useMemo(() => {
     if (timeWindows.length === 0) return null
-    const nowMs = Date.now()
     const activeWin = timeWindows.find(
       (w) => new Date(w.start).getTime() <= nowMs && new Date(w.end).getTime() > nowMs
     )
@@ -214,7 +208,7 @@ export default function WalkInComponent() {
       (w) => w.status === "OPEN" && new Date(w.start).getTime() > nowMs
     )
     return upcoming || timeWindows.find((w) => w.status === "OPEN") || timeWindows[0]
-  }, [timeWindows])
+  }, [timeWindows, nowMs])
 
   const formatSlotTime = (w?: TimeWindowSlot | null) => {
     if (!w) return "Current Window"
@@ -225,14 +219,13 @@ export default function WalkInComponent() {
 
   const nextWindow = useMemo(() => {
     if (!currentSlot) return null
-    const currentNow = Date.now()
     return timeWindows.find(
       (w) =>
         w.status === "OPEN" &&
         w.windowId !== currentSlot.windowId &&
-        new Date(w.start).getTime() > currentNow
+        new Date(w.start).getTime() > nowMs
     )
-  }, [timeWindows, currentSlot])
+  }, [timeWindows, currentSlot, nowMs])
 
   const slotCapacity = currentSlot ? currentSlot.bookedCount + currentSlot.remainingCapacity : 0
 
@@ -245,7 +238,7 @@ export default function WalkInComponent() {
       toast.error("Please enter a vehicle registration number.")
       return
     }
-    if (!category || !vehicleClass) {
+    if (!effectiveCategory || !effectiveVehicleClass) {
       toast.error("Please select a vehicle category and class.")
       return
     }
@@ -258,8 +251,8 @@ export default function WalkInComponent() {
         serviceType,
         walkInVehicle: {
           registrationNumber: registrationNumber.trim().toUpperCase(),
-          categoryId: category,
-          classId: vehicleClass,
+          categoryId: effectiveCategory,
+          classId: effectiveVehicleClass,
         },
         walkInCustomer:
           fullName.trim() || phone.trim()
@@ -268,7 +261,7 @@ export default function WalkInComponent() {
                 phone: phone.trim(),
               }
             : undefined,
-        extraServiceIds: selectedExtras,
+        extraServiceIds: effectiveSelectedExtras,
       })
 
       toast.success(
@@ -314,7 +307,7 @@ export default function WalkInComponent() {
                   CATEGORY
                 </label>
                 <select
-                  value={category}
+                  value={effectiveCategory}
                   onChange={(e) => setCategory(e.target.value)}
                   disabled={isLoadingCatelog}
                   className="w-full px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-medium text-base focus:outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
@@ -356,7 +349,7 @@ export default function WalkInComponent() {
                       type="button"
                       onClick={() => setVehicleClass(cls.id)}
                       className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all cursor-pointer border ${
-                        vehicleClass === cls.id
+                        effectiveVehicleClass === cls.id
                           ? "bg-primary/10 text-primary border-primary/80 shadow-md shadow-primary/10"
                           : "bg-muted text-muted-foreground border-border hover:border-border/80"
                       }`}
@@ -425,7 +418,7 @@ export default function WalkInComponent() {
 
                   <div className="space-y-2.5">
                     {availableExtras.map((ex) => {
-                      const isChecked = selectedExtras.includes(ex.id)
+                      const isChecked = effectiveSelectedExtras.includes(ex.id)
                       return (
                         <div
                           key={ex.id}

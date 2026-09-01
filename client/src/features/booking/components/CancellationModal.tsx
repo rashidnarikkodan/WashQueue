@@ -51,6 +51,7 @@ export default function CancellationModal({
   const [selectedReason, setSelectedReason] = useState("Booked by mistake")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [nowMs] = useState(() => Date.now())
 
   if (!isOpen || !booking) return null
 
@@ -63,18 +64,17 @@ export default function CancellationModal({
 
   const rawWindowStart = booking.scheduling?.windowStart || booking.windowStart
   const windowStartMs = rawWindowStart ? new Date(rawWindowStart).getTime() : null
-  const nowMs = Date.now()
   const diffMs = windowStartMs !== null ? windowStartMs - nowMs : null
   const hoursRemaining = diffMs !== null ? diffMs / (1000 * 60 * 60) : null
 
-  let policyTier: "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND" = "FULL_REFUND"
-  let refundPercentage = 100
-  let deductionLabel = "Cancellation Fee"
-  let policyTitle = "Full Refund Eligible"
-  let policyExplanation = ""
-  let timeRemainingFormatted = ""
+  let policyTier: "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND"
+  let refundPercentage: number
+  let deductionLabel: string
+  let policyTitle: string
+  let policyExplanation: string
 
   if (hoursRemaining !== null) {
+    let timeRemainingFormatted: string
     if (hoursRemaining <= 0) {
       timeRemainingFormatted = "slot commenced"
     } else if (hoursRemaining < 1) {

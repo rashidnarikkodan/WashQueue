@@ -45,12 +45,17 @@ export default function PromptModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue)
+
+  if (isOpen !== prevIsOpen || defaultValue !== prevDefaultValue) {
+    setPrevIsOpen(isOpen)
+    setPrevDefaultValue(defaultValue)
     if (isOpen) {
       setValue(defaultValue || "")
       setError(null)
     }
-  }, [isOpen, defaultValue])
+  }
 
   useEffect(() => {
     const dialog = dialogRef.current

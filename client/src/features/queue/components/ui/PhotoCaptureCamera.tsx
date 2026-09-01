@@ -51,7 +51,9 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     if (mediaStreamRef.current) {
       try {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop())
-      } catch {}
+      } catch {
+        // Ignore errors when stopping media stream tracks
+      }
       mediaStreamRef.current = null
     }
 
@@ -60,7 +62,9 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
         const stream = videoRef.current.srcObject as MediaStream
         stream.getTracks().forEach((track) => track.stop())
         videoRef.current.srcObject = null
-      } catch {}
+      } catch {
+        // Ignore errors when stopping video tracks
+      }
     }
 
     setIsCameraActive(false)

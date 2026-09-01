@@ -105,9 +105,11 @@ export default function LocationPickerMap({
 
   const { resolvedTheme } = useTheme()
   const themeMapStyle: MapStyleMode = resolvedTheme === "light" ? "streets" : "dark"
-  const hasUserOverriddenStyleRef = useRef(false)
 
-  const [currentMode, setCurrentMode] = useState<MapStyleMode>(themeMapStyle)
+  const [userSelectedMode, setUserSelectedMode] = useState<MapStyleMode | null>(null)
+  const currentMode: MapStyleMode = userSelectedMode ?? themeMapStyle
+  const activeStyleRef = useRef<MapStyleMode>(themeMapStyle)
+
   const [showStyleMenu, setShowStyleMenu] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -242,37 +244,22 @@ export default function LocationPickerMap({
   }, [])
 
   const handleStyleChange = (mode: MapStyleMode) => {
-    if (!mapRef.current) return
-    hasUserOverriddenStyleRef.current = true
-    setCurrentMode(mode)
+    setUserSelectedMode(mode)
     setShowStyleMenu(false)
-
-    const map = mapRef.current
-    const targetStyle = MAP_STYLES[mode]
-
-    map.setStyle(targetStyle)
-
-    map.once("style.load", () => {
-      if (markerRef.current) {
-        markerRef.current.addTo(map)
-      }
-    })
   }
 
   useEffect(() => {
-    if (!mapRef.current || hasUserOverriddenStyleRef.current) return
-    if (themeMapStyle === currentMode) return
-
-    setCurrentMode(themeMapStyle)
     const map = mapRef.current
-    map.setStyle(MAP_STYLES[themeMapStyle])
+    if (!map || activeStyleRef.current === currentMode) return
+
+    activeStyleRef.current = currentMode
+    map.setStyle(MAP_STYLES[currentMode])
     map.once("style.load", () => {
       if (markerRef.current) {
         markerRef.current.addTo(map)
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [themeMapStyle])
+  }, [currentMode])
 
   useEffect(() => {
     if (!mapRef.current || !markerRef.current) return

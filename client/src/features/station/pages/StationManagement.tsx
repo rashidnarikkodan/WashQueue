@@ -104,10 +104,10 @@ export default function StationManagement({ role: explicitRole }: StationManagem
         })
       }
     }
-  }, [isAdmin, activeTab, currentPage, searchQuery, limit, user?.ownerId, user?.id])
+  }, [isAdmin, activeTab, currentPage, searchQuery, limit, user?.ownerId, user?.id, fetchStations])
 
   useEffect(() => {
-    loadStations()
+    void loadStations()
   }, [loadStations])
 
   const updateParams = (newParams: Record<string, string | null | number | boolean>) => {

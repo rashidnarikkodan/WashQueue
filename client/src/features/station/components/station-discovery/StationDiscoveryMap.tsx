@@ -58,9 +58,11 @@ export default function StationDiscoveryMap({
 
   const { resolvedTheme } = useTheme()
   const themeMapStyle: MapStyleMode = resolvedTheme === "light" ? "streets" : "dark"
-  const hasUserOverriddenStyleRef = useRef(false)
 
-  const [currentMode, setCurrentMode] = useState<MapStyleMode>(themeMapStyle)
+  const [userSelectedMode, setUserSelectedMode] = useState<MapStyleMode | null>(null)
+  const currentMode: MapStyleMode = userSelectedMode ?? themeMapStyle
+  const activeStyleRef = useRef<MapStyleMode>(themeMapStyle)
+
   const [showStyleMenu, setShowStyleMenu] = useState(false)
   const [selectedStation, setSelectedStation] = useState<Station | null>(null)
 
@@ -182,31 +184,21 @@ export default function StationDiscoveryMap({
 
   const handleStyleChange = (mode: MapStyleMode) => {
     if (!mapRef.current) return
-    hasUserOverriddenStyleRef.current = true
-    setCurrentMode(mode)
+    setUserSelectedMode(mode)
     setShowStyleMenu(false)
-
-    const map = mapRef.current
-    map.setStyle(MAP_STYLES[mode])
-
-    map.once("style.load", () => {
-      markersRef.current.forEach((m) => m.addTo(map))
-      if (userMarkerRef.current) userMarkerRef.current.addTo(map)
-    })
   }
 
   useEffect(() => {
-    if (!mapRef.current || hasUserOverriddenStyleRef.current) return
-    if (themeMapStyle === currentMode) return
-
-    setCurrentMode(themeMapStyle)
     const map = mapRef.current
-    map.setStyle(MAP_STYLES[themeMapStyle])
+    if (!map || activeStyleRef.current === currentMode) return
+
+    activeStyleRef.current = currentMode
+    map.setStyle(MAP_STYLES[currentMode])
     map.once("style.load", () => {
       markersRef.current.forEach((m) => m.addTo(map))
       if (userMarkerRef.current) userMarkerRef.current.addTo(map)
     })
-  }, [themeMapStyle, currentMode])
+  }, [currentMode])
 
   const handleRecenterUser = () => {
     if (mapRef.current && userLocation) {

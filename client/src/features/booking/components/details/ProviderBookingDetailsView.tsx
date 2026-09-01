@@ -73,7 +73,6 @@ export default function ProviderBookingDetailsView({
 
   useEffect(() => {
     if (!isServiceStarted || booking.status === "CANCELLED" || booking.status === "NO_SHOW") {
-      setElapsedSeconds(0)
       return
     }
 
@@ -106,14 +105,19 @@ export default function ProviderBookingDetailsView({
     booking.updatedAt,
   ])
 
+  const actualElapsedSeconds =
+    !isServiceStarted || booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+      ? 0
+      : elapsedSeconds
+
   const formattedTimer = useMemo(() => {
-    const hrs = Math.floor(elapsedSeconds / 3600)
-    const mins = Math.floor((elapsedSeconds % 3600) / 60)
-    const secs = elapsedSeconds % 60
+    const hrs = Math.floor(actualElapsedSeconds / 3600)
+    const mins = Math.floor((actualElapsedSeconds % 3600) / 60)
+    const secs = actualElapsedSeconds % 60
     const pad = (n: number) => n.toString().padStart(2, "0")
     if (hrs > 0) return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
     return `${pad(mins)}:${pad(secs)}`
-  }, [elapsedSeconds])
+  }, [actualElapsedSeconds])
 
   const timelineSteps = useMemo(() => {
     const historyMap = new Map<string, string>()

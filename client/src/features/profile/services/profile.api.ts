@@ -27,7 +27,9 @@ export const profileApi = {
               authUser.phone = onboarding.details.phone
             }
           }
-        } catch {}
+        } catch {
+          // Onboarding status might not be available or initialized yet
+        }
       }
 
       return {

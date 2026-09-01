@@ -29,6 +29,7 @@ export default function RescheduleModal({
   onSuccess,
 }: RescheduleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [nowMs] = useState(() => Date.now())
 
   const {
     selectedDate,
@@ -70,7 +71,7 @@ export default function RescheduleModal({
   const isMaxLimitReached = rescheduleCount >= 2
 
   const isEligible = currentWindowStart
-    ? currentWindowStart.getTime() - Date.now() >= 24 * 60 * 60 * 1000
+    ? currentWindowStart.getTime() - nowMs >= 24 * 60 * 60 * 1000
     : false
 
   const isSameAsCurrentSlot = booking.scheduling?.timeWindowId === selectedSlotId

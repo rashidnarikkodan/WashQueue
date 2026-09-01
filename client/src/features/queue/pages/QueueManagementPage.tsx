@@ -81,7 +81,9 @@ export default function ManagerQueuePage() {
           try {
             const liveQ = await bookingApi.getLiveQueue(activeStation.stationId)
             setLiveQueueData(liveQ)
-          } catch {}
+          } catch {
+            // Live queue data optional or not yet active; ignore error
+          }
 
           const res = await bookingApi.getUserBookings({
             stationId: activeStation.stationId,
@@ -132,14 +134,18 @@ export default function ManagerQueuePage() {
     }
   }, [fetchStationAndQueue])
 
+  const currentStationId = stationInfo?.stationId
+
   const applyRealtimeBookingUpdate = useCallback(
     async (bookingId?: string) => {
-      if (!stationInfo?.stationId) return
+      if (!currentStationId) return
 
       try {
-        const liveQ = await bookingApi.getLiveQueue(stationInfo.stationId)
+        const liveQ = await bookingApi.getLiveQueue(currentStationId)
         setLiveQueueData(liveQ)
-      } catch {}
+      } catch {
+        // Ignore real-time live queue sync errors
+      }
 
       if (!bookingId) return
 
@@ -156,7 +162,7 @@ export default function ManagerQueuePage() {
         console.error("Failed to sync booking from real-time event:", err)
       }
     },
-    [stationInfo?.stationId]
+    [currentStationId]
   )
 
   useEffect(() => {

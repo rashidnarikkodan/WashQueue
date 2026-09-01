@@ -77,6 +77,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       setManagerAssignment(assigned)
       setPendingInvitation(pending)
     } catch {
+      // Failed to load manager assignment or pending invitations
     } finally {
       setLoading(false)
     }
@@ -103,12 +104,16 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         setManagerAssignment(assigned)
         setPendingInvitation(pending)
       } catch {
+        // Failed to fetch manager assignments on load
       } finally {
         if (isMounted) setLoading(false)
       }
     }
 
-    fetchData()
+    void Promise.resolve().then(async () => {
+      if (!isMounted) return
+      await fetchData()
+    })
 
     return () => {
       isMounted = false

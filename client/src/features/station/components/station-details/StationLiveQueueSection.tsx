@@ -39,6 +39,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
   const [queueData, setQueueData] = useState<PublicQueueData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [nowMs] = useState(() => Date.now())
 
   const fetchLiveQueue = useCallback(async () => {
     if (!stationId) return
@@ -57,7 +58,11 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
   useEffect(() => {
     if (!stationId) return
 
-    fetchLiveQueue()
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await fetchLiveQueue()
+    })
 
     const socket = getSocketClient()
     socket.emit("join_station", { stationId })
@@ -75,6 +80,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
     socket.on("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
 
     return () => {
+      ignore = true
       socket.emit("leave_station", { stationId })
       socket.off("QUEUE_UPDATED", handleRealtimeQueueUpdate)
       socket.off("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
@@ -95,7 +101,7 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
     if (!serviceStartedAt) return "In Service"
     const elapsedMinutes = Math.max(
       1,
-      Math.floor((Date.now() - new Date(serviceStartedAt).getTime()) / (1000 * 60))
+      Math.floor((nowMs - new Date(serviceStartedAt).getTime()) / (1000 * 60))
     )
     return `${elapsedMinutes}m elapsed`
   }

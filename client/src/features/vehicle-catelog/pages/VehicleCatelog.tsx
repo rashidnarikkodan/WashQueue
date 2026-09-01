@@ -131,7 +131,9 @@ export default function VehicleCatelog() {
         await deleteClass(id)
       }
       setDeleteConfirmTarget(null)
-    } catch {}
+    } catch {
+      // Error is already notified by store action toast; ignore here
+    }
   }
 
   const handleToggleCategoryStatusClick = async (cat: VehicleCategory, e: React.MouseEvent) => {

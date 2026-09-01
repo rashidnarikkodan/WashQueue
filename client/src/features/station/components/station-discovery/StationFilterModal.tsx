@@ -77,16 +77,19 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
           setFilterMetadata(metaData)
         }
       } catch {
+        // Ignore metadata fetch errors; fall back to default filter options
       } finally {
         setLoadingMetadata(false)
       }
     }
 
     if (isOpen) {
-      fetchMetadata()
-      if (isAuthenticated && vehicles.length === 0) {
-        loadVehicles()
-      }
+      void Promise.resolve().then(async () => {
+        await fetchMetadata()
+        if (isAuthenticated && vehicles.length === 0) {
+          await loadVehicles()
+        }
+      })
     }
   }, [isOpen, isAuthenticated, vehicles.length, loadVehicles])
 

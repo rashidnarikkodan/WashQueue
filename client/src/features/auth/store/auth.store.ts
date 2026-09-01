@@ -165,6 +165,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       await authApi.logout()
     } catch {
+      // Ignore errors on logout endpoint and proceed with clearing local session
     } finally {
       set({
         user: null,

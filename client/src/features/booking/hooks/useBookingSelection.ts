@@ -24,6 +24,7 @@ export function useBookingSelection({ station, stationId }: UseBookingSelectionP
       const data = await vehicleApi.getVehicles()
       setVehicles(data)
     } catch {
+      // Failed to load user vehicles; fallback to empty state
     } finally {
       setIsVehiclesLoading(false)
     }

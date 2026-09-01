@@ -77,7 +77,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
       osc.start()
       osc.stop(ctx.currentTime + 0.12)
-    } catch {}
+    } catch {
+      // Ignore Web Audio API initialization or playback errors
+    }
   }, [isAudioEnabled])
 
   const parseQrContent = useCallback((rawText: string): string => {
@@ -91,7 +93,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         const bookingIdParam = url.searchParams.get("bookingId") || url.searchParams.get("id")
         if (tokenParam) return tokenParam
         if (bookingIdParam) return bookingIdParam
-      } catch {}
+      } catch {
+        // Fall through to plain text parsing if URL parsing fails
+      }
     }
 
     if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
@@ -100,7 +104,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (parsed.qrToken) return String(parsed.qrToken)
         if (parsed.token) return String(parsed.token)
         if (parsed.bookingId) return String(parsed.bookingId)
-      } catch {}
+      } catch {
+        // Fall through to plain text parsing if JSON parsing fails
+      }
     }
 
     return trimmed
@@ -129,7 +135,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       playScanBeep()
       try {
         if (navigator.vibrate) navigator.vibrate(80)
-      } catch {}
+      } catch {
+        // Ignore vibration error on unsupported platforms
+      }
 
       setLastScannedResult(parsedText)
       onScanSuccess(parsedText)
@@ -174,7 +182,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             track.stop()
             track.enabled = false
           })
-        } catch {}
+        } catch {
+          // Ignore errors when stopping media stream tracks
+        }
       }
       videoRef.current.srcObject = null
     }
@@ -206,7 +216,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           }
         ).BarcodeDetector
         nativeDetector = new DetectorClass({ formats: ["qr_code"] })
-      } catch {}
+      } catch {
+        // BarcodeDetector not supported in browser environment
+      }
     }
 
     let lastProcessedAt = 0
@@ -240,7 +252,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
                 animFrameIdRef.current = requestAnimationFrame(scanFrame)
                 return
               }
-            } catch {}
+            } catch {
+              // Ignore native barcode detection frame error and fall back to jsQR
+            }
           }
 
           ctx.drawImage(video, 0, 0, vWidth, vHeight)
@@ -270,7 +284,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             animFrameIdRef.current = requestAnimationFrame(scanFrame)
             return
           }
-        } catch {}
+        } catch {
+          // Ignore frame decode error
+        }
       }
 
       if (isScanningRef.current) {
@@ -370,12 +386,15 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
   }, [])
 
   useEffect(() => {
-    if (!isCameraEnabled) {
-      stopCamera()
-      return
-    }
-    startCamera()
+    if (!isCameraEnabled) return
+
+    let ignore = false
+    void Promise.resolve().then(async () => {
+      if (ignore) return
+      await startCamera()
+    })
     return () => {
+      ignore = true
       stopCamera()
     }
   }, [isCameraEnabled, startCamera, stopCamera])

@@ -39,6 +39,7 @@ export default function CustomerBookingDetailsView({
   onOpenRescheduleModal,
 }: CustomerBookingDetailsViewProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const [nowMs] = useState(() => Date.now())
 
   const handleDownloadInvoice = async () => {
     try {
@@ -97,7 +98,6 @@ export default function CustomerBookingDetailsView({
   const estimatedWashDuration =
     booking.estimatedServiceDurationMinutes || durationBreakdown.totalEstimatedMinutes
 
-  const nowMs = Date.now()
   const serviceStartMs = booking.serviceStartedAt
     ? new Date(booking.serviceStartedAt).getTime()
     : booking.checkedInAt
@@ -115,7 +115,7 @@ export default function CustomerBookingDetailsView({
     !booking.isWalkIn &&
     !isMaxReschedulesReached &&
     booking.scheduling?.windowStart &&
-    new Date(booking.scheduling.windowStart).getTime() - Date.now() >= 24 * 60 * 60 * 1000
+    new Date(booking.scheduling.windowStart).getTime() - nowMs >= 24 * 60 * 60 * 1000
   )
 
   return (
