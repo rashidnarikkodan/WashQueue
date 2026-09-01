@@ -12,16 +12,6 @@ export interface CreateBookingInput {
   paymentMethod?: PaymentMethod
 }
 
-interface OwnerBookingQuery {
-  page: number
-  limit: number
-  status: string
-  stationId: string
-  search: string
-  startDate: string
-  endDate: string
-}
-
 export interface InspectionChecklistItem {
   key: string
   label: string
