@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const AdminLayout = lazy(() => import("../layouts/AdminLayout"))
 const UserManagement = lazy(() => import("../../features/users/pages/UserManagement"))
 const UserDetails = lazy(() => import("../../features/users/pages/UserDetails"))
 const OwnerApproval = lazy(() => import("../../features/users/pages/OwnerApproval"))
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
 const StationManagement = lazy(() => import("../../features/station/pages/StationManagement"))
 const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))

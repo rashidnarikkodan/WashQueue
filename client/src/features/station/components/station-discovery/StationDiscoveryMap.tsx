@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTheme } from "next-themes"
-import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { Layers, Globe, Moon, Sun, Crosshair, ArrowRight, X } from "lucide-react"
 import type { Station } from "../../types"
+
+const maplibregl = await import("maplibre-gl")
 
 export type MapStyleMode = "dark" | "satellite" | "streets"
 

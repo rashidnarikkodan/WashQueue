@@ -1,11 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react"
-import { Navigate } from "react-router-dom"
-const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
-import StationManagement from "@/features/station/pages/StationManagement"
-import AddEditStation from "@/features/station/pages/AddEditStation"
-import ManagerQueuePage from "@/features/queue/pages/QueueManagementPage"
+import { Navigate } from "react-router-dom"
+const ManagerQueuePage = lazy(() => import("@/features/queue/pages/QueueManagementPage"))
+const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStation"))
+const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
+const StationManagement = lazy(() => import("@/features/station/pages/StationManagement"))
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
 const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))

@@ -1,5 +1,8 @@
-import { lazy } from "react"
 /* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+import { useAuthStore } from "../../features/auth/store/auth.store"
+import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 import { Navigate } from "react-router-dom"
 const MainLayout = lazy(() => import("../layouts/MainLayout"))
 const Landing = lazy(() => import("../../features/home/pages/Landing"))
@@ -9,13 +12,11 @@ const StationDiscovery = lazy(() => import("../../features/station/pages/Station
 const VehicleDetails = lazy(() => import("../../features/vehicle/pages/VehicleDetails"))
 const ProfilePage = lazy(() => import("../../features/profile/pages/ProfilePage"))
 const BookmarksPage = lazy(() => import("../../features/station/pages/BookmarksPage"))
-import { useAuthStore } from "../../features/auth/store/auth.store"
-import { ROLE, VIEW_MODE } from "../../shared/constants/role.const"
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
 const Booking = lazy(() => import("@/features/booking/pages/Booking"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 const WalletPage = lazy(() => import("@/features/wallet/pages/WalletPage"))
+const ProtectedRoute = lazy(() => import("./ProtectedRoute"))
 
 const RootPathResolver = () => {
   const { isAuthenticated, user, isLoading, activeViewMode } = useAuthStore()
@@ -53,8 +54,6 @@ const RootPathResolver = () => {
       return <Home />
   }
 }
-
-import ProtectedRoute from "./ProtectedRoute"
 
 export const mainRoutes = {
   path: APP_ROUTES.HOME,

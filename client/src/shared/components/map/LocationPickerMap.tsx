@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useTheme } from "next-themes"
-import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import {
   Search,
@@ -14,6 +13,8 @@ import {
   Moon,
   Sun,
 } from "lucide-react"
+
+const maplibregl = await import("maplibre-gl")
 
 export interface LocationChangeData {
   latitude: number

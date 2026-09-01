@@ -1,8 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react"
-const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
-
+const ManagerLayout = lazy(() => import("../layouts/ManagerLayout"))
 const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
@@ -10,7 +9,7 @@ const ManagerQueuePage = lazy(() => import("@/features/queue/pages/QueueManageme
 const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
 const ManagerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
 const ManagerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
-import AddEditStation from "@/features/station/pages/AddEditStation"
+const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStation"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
