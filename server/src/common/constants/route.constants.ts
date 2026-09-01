@@ -103,4 +103,7 @@ export const API_ROUTES = {
     CREDIT: "/credit",
     DEBIT: "/debit",
   },
+  SETTLEMENTS: {
+    ROOT: "/api/settlements",
+  },
 } as const

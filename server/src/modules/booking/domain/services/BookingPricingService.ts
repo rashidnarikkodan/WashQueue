@@ -1,5 +1,7 @@
 import { PaymentMethod, PricingSnapshot, SettlementSnapshot } from "../entities/Booking"
 
+import { calculatePlatformCommission } from "@/configs/commission.config"
+
 export interface CalculatePricingInput {
   basePrice: number
   extraServices: Array<{ serviceId: string; name: string; price: number }>
@@ -41,9 +43,10 @@ export class BookingPricingService {
       cashAmount = 0
     }
 
-    const commissionRate = input.platformCommissionRate ?? 0.10
-    const platformCommission = Math.min(Number((totalPrice * commissionRate).toFixed(2)), 150)
-    const stationSettlement = Number((totalPrice - platformCommission).toFixed(2))
+    const { platformCommission, stationSettlement } = calculatePlatformCommission(
+      totalPrice,
+      input.platformCommissionRate
+    )
 
     return {
       pricingSnapshot: {

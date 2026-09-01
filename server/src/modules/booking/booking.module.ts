@@ -25,6 +25,16 @@ import { createBookingRouter } from "./presentation/routers/booking.routes"
 import { SettlementRepository } from "./infrastructure/repositories/settlement.repository"
 import { CreateSettlementUseCase } from "./application/use-cases/create-settlement.use-case"
 import { ProcessSettlementUseCase } from "./application/use-cases/process-settlement.use-case"
+import { GetOwnerSettlementSummaryUseCase } from "./application/use-cases/get-owner-settlement-summary.use-case"
+import { GetOwnerSettlementsUseCase } from "./application/use-cases/get-owner-settlements.use-case"
+import { GetOwnerEarningsHistoryUseCase } from "./application/use-cases/get-owner-earnings-history.use-case"
+import { GetAdminSettlementsUseCase } from "./application/use-cases/get-admin-settlements.use-case"
+import { GetAdminSettlementMetricsUseCase } from "./application/use-cases/get-admin-settlement-metrics.use-case"
+import { GetSettlementByIdUseCase } from "./application/use-cases/get-settlement-by-id.use-case"
+import { RetrySettlementUseCase } from "./application/use-cases/retry-settlement.use-case"
+import { ManageSettlementHoldUseCase } from "./application/use-cases/manage-settlement-hold.use-case"
+import { SettlementController } from "./presentation/controllers/settlement.controller"
+import { createSettlementRouter } from "./presentation/routers/settlement.routes"
 import { ownerRepository } from "../owner/owner.module"
 import { RazorpayTransferService } from "@/infrastructure/payment/razorpay-transfer.service"
 
@@ -67,8 +77,63 @@ export const createSettlementUseCase = new CreateSettlementUseCase(settlementRep
 export const processSettlementUseCase = new ProcessSettlementUseCase(
   settlementRepository,
   ownerRepository,
-  transferService
+  transferService,
+  bookingRepository
 )
+
+export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(
+  settlementRepository,
+  ownerRepository
+)
+
+export const getOwnerSettlementsUseCase = new GetOwnerSettlementsUseCase(
+  settlementRepository,
+  ownerRepository,
+  bookingRepository
+)
+
+export const getOwnerEarningsHistoryUseCase = new GetOwnerEarningsHistoryUseCase(
+  ownerRepository,
+  bookingRepository,
+  settlementRepository
+)
+
+export const getAdminSettlementsUseCase = new GetAdminSettlementsUseCase(
+  settlementRepository,
+  bookingRepository
+)
+
+export const getAdminSettlementMetricsUseCase = new GetAdminSettlementMetricsUseCase(
+  settlementRepository
+)
+
+export const getSettlementByIdUseCase = new GetSettlementByIdUseCase(
+  settlementRepository,
+  ownerRepository,
+  bookingRepository
+)
+
+export const retrySettlementUseCase = new RetrySettlementUseCase(
+  settlementRepository,
+  processSettlementUseCase
+)
+
+export const manageSettlementHoldUseCase = new ManageSettlementHoldUseCase(
+  settlementRepository
+)
+
+export const settlementController = new SettlementController(
+  getOwnerSettlementSummaryUseCase,
+  getOwnerSettlementsUseCase,
+  getOwnerEarningsHistoryUseCase,
+  getAdminSettlementsUseCase,
+  getAdminSettlementMetricsUseCase,
+  getSettlementByIdUseCase,
+  retrySettlementUseCase,
+  manageSettlementHoldUseCase
+)
+
+export const settlementRouter = createSettlementRouter(settlementController)
 
 // CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue
 // service (and CancelBookingUseCase optionally on the payment module's refund use-case).

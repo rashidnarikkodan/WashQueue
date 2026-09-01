@@ -123,6 +123,7 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
         const settlement = await this.createSettlementUseCase.execute({
           ownerId: domainBooking.ownerId,
           bookingId: domainBooking.id,
+          stationId: domainBooking.stationId,
           stationSettlementAmount: domainBooking.settlement.stationSettlement,
           platformCommission: domainBooking.settlement.platformCommission,
           totalAmount: domainBooking.pricingSnapshot.totalPrice,
@@ -131,9 +132,10 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
         if (settlement.id) {
           await this.processSettlementUseCase.execute(settlement.id)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unknown settlement error"
         logger.error(
-          `Failed to process financial settlement for booking ${domainBooking.id}: ${err.message}`
+          `Failed to process financial settlement for booking ${domainBooking.id}: ${message}`
         )
       }
     }
