@@ -14,8 +14,8 @@ export interface IManagerAssignment extends Document {
 
 const managerAssignmentSchema = new Schema<IManagerAssignment>(
   {
-    managerUserId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    stationId: { type: Schema.Types.ObjectId, ref: "Station", required: true, index: true },
+    managerUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    stationId: { type: Schema.Types.ObjectId, ref: "Station", required: true },
     ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     permissions: [{ type: String, required: true }],
     status: {

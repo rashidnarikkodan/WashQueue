@@ -10,6 +10,7 @@ const StationManagement = lazy(() => import("../../features/station/pages/Statio
 const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const AdminSettlementMonitoring = lazy(() => import("@/features/settlement/pages/AdminSettlementMonitoring"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -70,6 +71,10 @@ export const adminRoutes = {
     {
       path: "reports",
       element: <>Reports &amp; Analytics</>,
+    },
+    {
+      path: "settlements",
+      element: <AdminSettlementMonitoring />,
     },
     {
       path: "settings",

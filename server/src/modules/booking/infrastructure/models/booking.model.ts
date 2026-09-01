@@ -236,6 +236,7 @@ const bookingSchema = new Schema<IBookingDocument>(
     settlement: {
       platformCommission: { type: Number, required: true, default: 0 },
       stationSettlement: { type: Number, required: true, default: 0 },
+      status: { type: String, enum:["ON_HOLD","SETTLED"], default: null },
     },
 
     preServiceInspection: {

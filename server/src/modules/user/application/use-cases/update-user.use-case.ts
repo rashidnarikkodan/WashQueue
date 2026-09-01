@@ -3,7 +3,6 @@ import { User } from "../../domain/entities/User"
 import { UpdateUserInput } from "../dto/update-user.dto"
 import { IUpdateUserUseCase } from "../interfaces/user-usecases.interfaces"
 import { ICacheService } from "@/core/application/interfaces/cache.interface"
-import { IOwnerVerificationStatusService } from "@/modules/owner/application/interfaces/owner-verification-status.interface"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
 
@@ -12,8 +11,7 @@ const BLOCKED_USER_TTL_SECONDS = 30 * 24 * 60 * 60
 export class UpdateUserUseCase implements IUpdateUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly cacheService: ICacheService,
-    private readonly ownerVerificationStatusService: IOwnerVerificationStatusService
+    private readonly cacheService: ICacheService
   ) {}
 
   async execute(id: string, updates: UpdateUserInput): Promise<User | null> {
@@ -40,20 +38,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
       }
     }
 
-    if (user.role === ROLE.OWNER) {
-      await this.ownerVerificationStatusService.handleVerificationStatusChange({
-        userId: id,
-        userEmail: user.email,
-        userName: user.name,
-        updates: {
-          isVerified: updates.isVerified,
-          onboardingStep: updates.onboardingStep,
-          rejectionReason: updates.rejectionReason,
-          phone: updates.phone,
-        },
-      })
-    }
-
     return updatedUser
   }
 }
+

@@ -11,9 +11,9 @@ export function deriveOnlinePaymentMethod(
   return PaymentMethod.ONLINE
 }
 
-export function derivePaymentStatus(paymentMethod: PaymentMethod, isWalkIn: boolean): PaymentStatus {
+export function derivePaymentStatus(paymentMethod: PaymentMethod): PaymentStatus {
   if (paymentMethod === PaymentMethod.PAY_AT_STATION) {
-    return isWalkIn ? PaymentStatus.PAID : PaymentStatus.PENDING
+    return PaymentStatus.PENDING
   }
   return PaymentStatus.PAID
 }

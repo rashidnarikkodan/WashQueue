@@ -1,4 +1,9 @@
-import { bookingRepository, bookingStatusLogRepository } from "@/modules/booking/booking.module"
+import {
+  bookingRepository,
+  bookingStatusLogRepository,
+  createSettlementUseCase,
+  processSettlementUseCase,
+} from "@/modules/booking/booking.module"
 import { managerAssignmentRepository } from "@/modules/manager/manager.module"
 import { stationRepository } from "@/modules/station/station.module"
 import { bookingNotificationService } from "@/modules/notification/notification.module"
@@ -77,7 +82,9 @@ const completeHandoverUseCase = new CompleteHandoverUseCase(
   stationRepository,
   managerAssignmentRepository,
   bookingRedisQueueService,
-  bookingNotificationService
+  bookingNotificationService,
+  createSettlementUseCase,
+  processSettlementUseCase
 )
 
 export const stallBookingUseCase = new StallBookingUseCase(

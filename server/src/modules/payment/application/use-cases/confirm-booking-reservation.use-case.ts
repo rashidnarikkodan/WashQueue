@@ -158,7 +158,7 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus: derivePaymentStatus(reservation.paymentMethod, false),
+      paymentStatus: derivePaymentStatus(reservation.paymentMethod),
       paymentMethod:
         reservation.paymentMethod === PaymentMethod.PAY_AT_STATION
           ? PaymentMethod.PAY_AT_STATION

@@ -28,6 +28,7 @@ export const APP_ROUTES = {
     NOTIFICATIONS: "/admin/notifications",
     REPORTS: "/admin/reports",
     SETTINGS: "/admin/settings",
+    SETTLEMENTS: "/admin/settlements",
   },
   MANAGER: {
     ROOT: "/manager",

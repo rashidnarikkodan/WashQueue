@@ -33,6 +33,8 @@ interface OwnerProps {
 
   rejectionReason?: string
 
+  transferId?: string
+
   createdAt?: Date
   updatedAt?: Date
 }
@@ -140,6 +142,10 @@ export class Owner {
     return this.props.rejectionReason
   }
 
+  get transferId(): string | undefined {
+    return this.props.transferId
+  }
+
   get createdAt(): Date | undefined {
     return this.props.createdAt
   }
@@ -162,6 +168,11 @@ export class Owner {
     this.props.isVerified = true
     this.props.verifiedAt = new Date()
     this.props.rejectionReason = undefined
+    this.touch()
+  }
+
+  setTransferId(transferId: string): void {
+    this.props.transferId = transferId
     this.touch()
   }
 
@@ -271,6 +282,7 @@ export class Owner {
   toJSON() {
     return {
       ...this.props,
+      transferId: this.transferId,
       hasStation: this.hasStation,
       hasMobileService: this.hasMobileService,
       mobileActive: this.mobileActive,

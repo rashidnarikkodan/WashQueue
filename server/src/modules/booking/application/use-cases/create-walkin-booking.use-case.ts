@@ -89,7 +89,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       )
     }
 
-    const paymentMethod = input.paymentMethod || PaymentMethod.PAY_AT_STATION
+    const paymentMethod = input.paymentMethod || PaymentMethod.NO_PAYMENT
     const pricingResult = BookingPricingService.calculate({
       basePrice,
       extraServices: selectedExtraServices,
@@ -139,7 +139,7 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
         qrTokenHash: qrResult.qrTokenHash,
         qrExpiresAt: qrResult.qrExpiresAt,
       },
-      paymentStatus: derivePaymentStatus(paymentMethod, true),
+      paymentStatus: derivePaymentStatus(paymentMethod),
       paymentMethod,
       depositAmount: pricingResult.depositAmount,
       cashAmount: pricingResult.cashAmount,

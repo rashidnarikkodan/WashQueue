@@ -447,7 +447,7 @@ export const bookingApi = {
         stationId: input.stationId,
         timeWindowId: input.timeWindowId,
         serviceType: input.serviceType,
-        paymentMethod: PAYMENT_METHOD.PAY_AT_STATION,
+        paymentMethod: PAYMENT_METHOD.NO_PAYMENT,
         extraServiceIds: input.extraServiceIds || [],
         customer:
           input.customer ||

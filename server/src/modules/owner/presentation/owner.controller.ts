@@ -16,6 +16,7 @@ import {
   ICreateOwnerUseCase,
   IGetOwnerUseCase,
   IUpdateOwnerUseCase,
+  IApproveOwnerUseCase,
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
 import { OnboardingStepRequestMapper } from "../application/mappers/onboarding-step.mapper"
@@ -28,6 +29,7 @@ export class OwnerController {
     private readonly createOwnerUseCase: ICreateOwnerUseCase,
     private readonly getOwnerUseCase: IGetOwnerUseCase,
     private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
+    private readonly approveOwnerUseCase: IApproveOwnerUseCase,
     private readonly onboardingStepMapper: OnboardingStepRequestMapper
   ) { }
 
@@ -116,5 +118,32 @@ export class OwnerController {
     }
 
     success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS)
+  }
+
+  approveOwner = async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params
+    if (!id) {
+      throw new AppError("Owner ID or User ID is required", HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const { isApproved, isVerified, action, rejectionReason } = req.body || {}
+    const approved =
+      isApproved !== undefined
+        ? isApproved
+        : isVerified !== undefined
+          ? isVerified
+          : action === "APPROVE"
+
+    const updatedOwner = await this.approveOwnerUseCase.execute({
+      ownerIdOrUserId: id,
+      isApproved: Boolean(approved),
+      rejectionReason,
+    })
+
+    const message = approved
+      ? "Owner application approved successfully"
+      : "Owner application rejected successfully"
+
+    success(res, updatedOwner.toJSON(), HTTP_STATUS.OK, message)
   }
 }

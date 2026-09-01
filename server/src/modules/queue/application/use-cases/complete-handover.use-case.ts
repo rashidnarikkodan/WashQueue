@@ -11,6 +11,8 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/queue-usecases.interface"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
+import { ICreateSettlementUseCase, IProcessSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
+import logger from "@/configs/logger.config"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
   constructor(
@@ -19,7 +21,9 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
     private readonly stationRepository: IStationRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly redisQueueService: IBookingQueueService,
-    private readonly notificationService: IBookingNotificationService
+    private readonly notificationService: IBookingNotificationService,
+    private readonly createSettlementUseCase: ICreateSettlementUseCase,
+    private readonly processSettlementUseCase: IProcessSettlementUseCase,
   ) {}
 
   async execute(managerUserId: string, bookingId: string, notes?: string): Promise<BookingResponseDTO> {
@@ -113,6 +117,28 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
     await this.notificationService.notify("WASH_COMPLETED", domainBooking)
+
+    if (domainBooking.settlement?.stationSettlement) {
+      try {
+        const settlement = await this.createSettlementUseCase.execute({
+          ownerId: domainBooking.ownerId,
+          bookingId: domainBooking.id,
+          stationId: domainBooking.stationId,
+          stationSettlementAmount: domainBooking.settlement.stationSettlement,
+          platformCommission: domainBooking.settlement.platformCommission,
+          totalAmount: domainBooking.pricingSnapshot.totalPrice,
+        })
+
+        if (settlement.id) {
+          await this.processSettlementUseCase.execute(settlement.id)
+        }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unknown settlement error"
+        logger.error(
+          `Failed to process financial settlement for booking ${domainBooking.id}: ${message}`
+        )
+      }
+    }
 
     return BookingDTOMapper.toDTO(domainBooking)
   }
