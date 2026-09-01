@@ -39,7 +39,6 @@ export const API_ROUTES = {
   },
   BOOKINGS: {
     ROOT: "/bookings",
-    OWNER_BOOKINGS: (ownerId: string) => `/bookings/owners/${ownerId}`,
     BY_ID: (id: string) => `/bookings/${id}`,
     CANCEL: (id: string) => `/bookings/${id}/cancel`,
     RESCHEDULE: (id: string) => `/bookings/${id}/reschedule`,

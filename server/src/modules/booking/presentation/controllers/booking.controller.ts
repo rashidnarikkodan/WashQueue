@@ -72,14 +72,6 @@ export class BookingController {
     success(res, result, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }
 
-  getOwnerBooking = async (req: AuthenticatedRequest, res: Response) => {
-    const { query } = req
-    const { ownerId } = req.params
-    console.log("query :-", query)
-    console.log("Owner ID :- ", ownerId)
-    success(res, [], HTTP_STATUS.OK, "Test passed")
-  }
-
   cancel = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.user?.userId
     if (!userId) {

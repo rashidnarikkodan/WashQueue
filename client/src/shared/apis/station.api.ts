@@ -27,7 +27,6 @@ export const stationApi = {
 
   getStations: async (query: GetStationsQuery = {}): Promise<GetStationsResponse> => {
     try {
-      console.log(query)
       const response = await api.get(API_ROUTES.STATIONS.ROOT, {
         params: query,
       })

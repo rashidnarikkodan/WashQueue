@@ -92,9 +92,6 @@ export class StationController {
     const query = req.query || {}
 
     const userId = req.user?.userId || ""
-
-    console.log(query)
-
     const { stations, total, statusCounts } = await this.getStationsUseCase.execute(query, userId)
 
     const page = Math.max(1, Number(query.page))

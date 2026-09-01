@@ -230,17 +230,6 @@ export const bookingApi = {
     }
   },
 
-  getOwnerBookings: async (ownerId: string, query: OwnerBookingQuery) => {
-    try {
-      const res = await api.get(API_ROUTES.BOOKINGS.OWNER_BOOKINGS(ownerId), {
-        params: query,
-      })
-      return res.data.data
-    } catch (error) {
-      handleApiError(error, "Get Owners Booking Failed")
-    }
-  },
-
   cancelBooking: async (bookingId: string, reason: string): Promise<BookingResponse> => {
     try {
       const response = await api.patch(API_ROUTES.BOOKINGS.CANCEL(bookingId), { reason })

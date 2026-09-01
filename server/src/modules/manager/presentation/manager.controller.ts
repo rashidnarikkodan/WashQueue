@@ -46,9 +46,6 @@ export class ManagerController {
   selfAssignManager = async (req: AuthenticatedRequest, res: Response) => {
     const ownerUserId = req.user!.userId
     const { stationId } = req.body
-
-    console.log(stationId, ownerUserId)
-
     const result = await this.selfAssignManagerUseCase.execute({ ownerUserId, stationId })
     success(res, result, HTTP_STATUS.CREATED, "")
   }

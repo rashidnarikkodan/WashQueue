@@ -10,7 +10,6 @@ import {
   createWalkInBookingSchema,
   getBookingListQuerySchema,
   bookingIdParamSchema,
-  getOwnerBookingListQuerySchema,
 } from "../schema/booking.schema"
 import { ROLE } from "@/common/constants/role.constants"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
@@ -25,11 +24,6 @@ export const createBookingRouter = (bookingController: BookingController): Route
     "/",
     validateRequest(getBookingListQuerySchema, "query"),
     asyncHandler(bookingController.getUserBookings)
-  )
-  router.get(
-    "/owners/:ownerId",
-    validateRequest(getOwnerBookingListQuerySchema, "query"),
-    asyncHandler(bookingController.getOwnerBooking)
   )
   router.get(
     "/:bookingId",

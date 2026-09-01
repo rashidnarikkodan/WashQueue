@@ -59,15 +59,6 @@ export const getBookingListQuerySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 })
-export const getOwnerBookingListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().max(100).optional().default(10),
-  status: z.nativeEnum(BookingStatus).optional(),
-  stationId: z.string().optional(),
-  search: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-})
 
 export const bookingIdParamSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
