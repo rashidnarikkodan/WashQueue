@@ -7,9 +7,9 @@ import errorMiddleware from "./infrastructure/http/middleware/error.middleware"
 import authRouter from "./modules/auth/auth.module"
 import userRouter from "@/modules/user/user.module"
 import ownerRouter from "@/modules/owner/owner.module"
-import vehicleRouter from "@/modules/vehicle-catelog/vehicle.module"
+import vehicleCatelogRouter from "@/modules/vehicle-catelog/vehicle.module"
 import stationRouter from "@/modules/station/station.module"
-import userVehicleRouter from "@/modules/vehicle/vehicle.module"
+import vehicleRouter from "@/modules/vehicle/vehicle.module"
 import managerRouter from "@/modules/manager/manager.module"
 import bookingRouter from "@/bootstrap/module-composition"
 import queueRouter from "@/modules/queue/queue.module"
@@ -36,9 +36,9 @@ app.use(loggerMiddleware)
 app.use(API_ROUTES.AUTH.ROOT, authRouter)
 app.use(API_ROUTES.USERS.ROOT, userRouter)
 app.use(API_ROUTES.OWNER.ROOT, ownerRouter)
-app.use(API_ROUTES.VEHICLE_CATALOG.ROOT, vehicleRouter)
+app.use(API_ROUTES.VEHICLE_CATALOG.ROOT, vehicleCatelogRouter)
 app.use(API_ROUTES.STATIONS.ROOT, stationRouter)
-app.use(API_ROUTES.VEHICLES.ROOT, userVehicleRouter)
+app.use(API_ROUTES.VEHICLES.ROOT, vehicleRouter)
 app.use(API_ROUTES.MANAGERS.ROOT, managerRouter)
 app.use(API_ROUTES.BOOKINGS.ROOT, bookingRouter)
 app.use(API_ROUTES.BOOKINGS.ROOT, invoiceRouter)
