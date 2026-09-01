@@ -81,6 +81,11 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: BarChart3,
   },
   {
+    name: "Settlement Monitoring",
+    path: "/admin/settlements",
+    icon: CreditCard,
+  },
+  {
     name: "System Settings",
     path: "/admin/settings",
     icon: Settings,

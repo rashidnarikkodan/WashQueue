@@ -14,6 +14,7 @@ const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetail
 const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
 const OwnerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
 const OwnerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
+const OwnerFinancialRecords = lazy(() => import("@/features/owner/pages/OwnerFinancialRecords"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -89,7 +90,7 @@ export const ownerRoutes = {
     },
     {
       path: "financial-records",
-      element: <>Financial Records</>,
+      element: <OwnerFinancialRecords />,
     },
     {
       path: "analytics",

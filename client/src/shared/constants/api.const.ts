@@ -67,4 +67,17 @@ export const API_ROUTES = {
     TOPUP_VERIFY: "/wallet/topup/verify",
     PAY: "/wallet/pay",
   },
+  SETTLEMENTS: {
+    ROOT: "/settlements",
+    OWNER_SUMMARY: "/settlements/owner/summary",
+    OWNER_SETTLEMENTS: "/settlements/owner",
+    OWNER_EARNINGS: "/settlements/owner/earnings",
+    OWNER_BY_ID: (id: string) => `/settlements/owner/${id}`,
+    ADMIN_LIST: "/settlements/admin",
+    ADMIN_METRICS: "/settlements/admin/metrics",
+    ADMIN_BY_ID: (id: string) => `/settlements/admin/${id}`,
+    ADMIN_RETRY: (id: string) => `/settlements/admin/${id}/retry`,
+    ADMIN_HOLD: (id: string) => `/settlements/admin/${id}/hold`,
+    ADMIN_RELEASE: (id: string) => `/settlements/admin/${id}/release`,
+  },
 } as const
