@@ -1,4 +1,4 @@
-import { Station, StationProps } from "../../domain/entities/Station"
+import { Station } from "../../domain/entities/Station"
 import { CreateStationInput } from "../dtos/create-station.dto"
 import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"

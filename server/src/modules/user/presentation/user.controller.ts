@@ -39,6 +39,15 @@ export class UserController {
     private readonly toggleBookmarkUseCase: IToggleBookmarkUseCase
   ) {}
 
+  private extractUserId(req: Request): string {
+    const rawId = req.params.id
+    const candidateId = Array.isArray(rawId) ? rawId[0] : rawId
+    if (!candidateId || typeof candidateId !== "string" || !candidateId.trim()) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED)
+    }
+    return candidateId.trim()
+  }
+
   getUsers = async (req: Request, res: Response) => {
     const query = req.query as unknown as z.infer<typeof usersQuerySchema>
     const data = await this.getUsersUseCase.execute(query)
@@ -46,8 +55,7 @@ export class UserController {
   }
 
   getUser = async (req: Request, res: Response) => {
-    const { id } = req.params
-    if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED)
+    const id = this.extractUserId(req)
     const user = await this.getUserUseCase.execute(id)
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
@@ -56,11 +64,10 @@ export class UserController {
   }
 
   updateUser = async (req: AuthenticatedRequest, res: Response) => {
-    const { id } = req.params
+    const id = this.extractUserId(req)
     const currentUserId = req.user?.userId
     const currentUserRole = req.user?.role
 
-    if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED)
     if (currentUserId !== id && currentUserRole !== ROLE.ADMIN) {
       throw new ForbiddenError("You are not authorized to update this profile")
     }

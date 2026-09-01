@@ -13,20 +13,23 @@ export const createRequireManagerPermissionMiddleware = (
   stationRepository: IStationRepository
 ) => {
   return (requiredPermission?: ManagerPermission) => {
-    return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    return async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           throw new UnauthorizedError("Authentication required")
         }
 
-        const stationId =
-          req.params.stationId ||
-          (req.headers["x-station-id"] as string) ||
-          (req.query.stationId as string)
+        const rawStationId =
+          req.params.stationId ??
+          req.headers["x-station-id"] ??
+          req.query.stationId
+        const candidateStationId = Array.isArray(rawStationId) ? rawStationId[0] : rawStationId
 
-        if (!stationId) {
+        if (!candidateStationId || typeof candidateStationId !== "string" || !candidateStationId.trim()) {
           throw new ForbiddenError("Station context is required for manager authorization")
         }
+
+        const stationId = candidateStationId.trim()
 
         const station = await stationRepository.findById(stationId)
         if (station) {

@@ -5,7 +5,7 @@ import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { RoleType } from "@/common/constants/role.constants"
 
 export const authorize = (...allowedRoles: RoleType[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
     if (!req.user) {
       throw new UnauthorizedError("Authentication required")
     }

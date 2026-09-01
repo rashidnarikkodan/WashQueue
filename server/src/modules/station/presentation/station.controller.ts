@@ -5,7 +5,6 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
-import { AppError } from "@/common/errors/app-error"
 import {
   ICreateStationUseCase,
   IUpdateStationUseCase,
@@ -199,10 +198,7 @@ export class StationController {
   }
 
   configureSlotConfig = async (req: AuthenticatedRequest, res: Response) => {
-    const stationId = req.params.stationId || req.params.id
-    if (!stationId) {
-      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
-    }
+    const stationId = this.stationMapper.extractStationId(req)
     const validated = configureSlotConfigSchema.parse(req.body)
 
     const result = await this.configureSlotConfigUseCase.execute({
@@ -214,28 +210,19 @@ export class StationController {
   }
 
   getSlotConfig = async (req: Request, res: Response) => {
-    const stationId = req.params.stationId || req.params.id
-    if (!stationId) {
-      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
-    }
+    const stationId = this.stationMapper.extractStationId(req)
     const result = await this.getSlotConfigUseCase.execute(stationId)
     success(res, result, HTTP_STATUS.OK, "Slot configuration fetched successfully")
   }
 
   getBookingCalendar = async (req: Request, res: Response) => {
-    const stationId = req.params.stationId || req.params.id
-    if (!stationId) {
-      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
-    }
+    const stationId = this.stationMapper.extractStationId(req)
     const result = await this.getBookingCalendarUseCase.execute(stationId)
     success(res, result, HTTP_STATUS.OK, "Booking calendar fetched successfully")
   }
 
   getAvailableTimeWindows = async (req: Request, res: Response) => {
-    const stationId = req.params.stationId || req.params.id
-    if (!stationId) {
-      throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
-    }
+    const stationId = this.stationMapper.extractStationId(req)
     const { date } = getAvailableTimeWindowsQuerySchema.parse(req.query)
 
     const result = await this.getAvailableTimeWindowsUseCase.execute(stationId, date)

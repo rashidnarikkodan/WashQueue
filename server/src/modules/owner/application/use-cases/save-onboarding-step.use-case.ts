@@ -1,7 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
-import { ITokenService } from "@/modules/auth/application/interfaces"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { ROLE } from "@/common/constants/role.constants"
 import {
@@ -16,7 +15,6 @@ import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constant
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository
   ) {}
 
@@ -99,24 +97,10 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       bankProofUrl: savedOwner.bankProofUrl,
     }
 
-    let tokens: { accessToken: string; refreshToken: string } | undefined
-
     if (userDoc.role !== ROLE.OWNER) {
-      const tokenPayload = {
-        userId: userDoc.id || userId,
-        role: ROLE.OWNER,
-        email: userDoc.email,
-      }
-
-      // const accessToken = this.tokenService.generateAccessToken(tokenPayload)
-      // const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
-
       const userUpdateFields: Partial<User> = {
         role: ROLE.OWNER,
-        // refreshToken: refreshToken,
       }
-
-      // tokens = { accessToken, refreshToken }
 
       await this.userRepository.update(userId, userUpdateFields)
     }
@@ -125,7 +109,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       step,
       details: mergedDetails,
       isSubmitted: step === 4,
-      // tokens,
     }
   }
 }

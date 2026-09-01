@@ -27,8 +27,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly stationRepository: IStationRepository,
-    private readonly stationPricingRepository: IStationPricingRepository,
-    private readonly extraServiceRepository: IExtraServiceRepository,
+    stationPricingRepository: IStationPricingRepository,
+    extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
     private readonly notificationService: IBookingNotificationService

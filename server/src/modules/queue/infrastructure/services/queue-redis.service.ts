@@ -118,7 +118,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
         return await this.reconcileStationQueue(stationId, { syncRedis: true })
       }
 
-      const waitingBookingIds = await redis.zrange(queueKey, 0, -1)
+      const waitingBookingIds = await redis.zrange(queueKey, 0, "-1")
       const activeBookingIds = await redis.smembers(activeKey)
 
       const totalActiveAndWaiting = waitingBookingIds.length + activeBookingIds.length

@@ -121,10 +121,12 @@ export class OwnerController {
   }
 
   approveOwner = async (req: AuthenticatedRequest, res: Response) => {
-    const { id } = req.params
-    if (!id) {
+    const rawId = req.params.id
+    const candidateId = Array.isArray(rawId) ? rawId[0] : rawId
+    if (!candidateId || typeof candidateId !== "string" || !candidateId.trim()) {
       throw new AppError("Owner ID or User ID is required", HTTP_STATUS.BAD_REQUEST)
     }
+    const id = candidateId.trim()
 
     const { isApproved, isVerified, action, rejectionReason } = req.body || {}
     const approved =

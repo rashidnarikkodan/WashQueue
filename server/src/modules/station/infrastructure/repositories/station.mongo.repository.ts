@@ -10,7 +10,6 @@ import { StationMapper } from "../mappers/station.mapper"
 import { PipelineStage, Types } from "mongoose"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
 import { StationPricingModel } from "../models/station-pricing.model"
-import { ExtraServiceModel } from "../models/extra-service.model"
 import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
 import {
   StationRankingService,

@@ -6,7 +6,7 @@ import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
-import { IHashService, IOtpService, ITokenService, IVerifyOtpUseCase } from "../interfaces"
+import { IHashService, ITokenService, IVerifyOtpUseCase } from "../interfaces"
 import { AuthOutput, VerifyOtpInput } from "../dto"
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
@@ -14,7 +14,6 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     private readonly userRepository: IUserRepository,
     private readonly otpRepository: IOtpRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
-    private readonly otpService: IOtpService,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
   ) {}

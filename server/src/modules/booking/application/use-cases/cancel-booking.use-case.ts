@@ -1,6 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus } from "../../domain/entities/Booking"
+import { BookingStatus } from "../../domain/entities/Booking"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "../../domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
@@ -9,7 +9,6 @@ import { IBookingNotificationService } from "@/modules/notification/notification
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { CancelBookingInput } from "../dtos/cancel-booking.dto"
 import { BookingResponseDTO } from "../dtos/booking-response.dto"
-import { Booking } from "../../domain/entities/Booking"
 import { ICancelBookingUseCase } from "../interfaces/booking-usecases.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
@@ -23,31 +22,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase,
     private readonly transactionRunner?: ITransactionRunner
   ) {}
-
-  private calculateRefundAmount(
-    booking: Booking,
-    isStaffCancellation: boolean,
-    now: Date
-  ): number {
-    const paidAmount =
-      booking.paymentStatus === PaymentStatus.PAID
-        ? booking.pricingSnapshot?.totalPrice || booking.depositAmount || 0
-        : booking.depositAmount || 0
-
-    if (paidAmount <= 0) return 0
-    if (isStaffCancellation) return paidAmount
-
-    const windowStartMs = new Date(booking.scheduling.windowStart).getTime()
-    const hoursRemaining = (windowStartMs - now.getTime()) / (1000 * 60 * 60)
-
-    if (hoursRemaining >= 24) {
-      return paidAmount
-    } else if (hoursRemaining >= 2) {
-      return Math.round(paidAmount * 0.5)
-    } else {
-      return 0
-    }
-  }
 
   async execute(
     userId: string,

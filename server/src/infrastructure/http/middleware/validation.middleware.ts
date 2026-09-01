@@ -5,7 +5,7 @@ import { ValidationError } from "@/common/errors/validation-error"
 type SchemaTarget = "body" | "query" | "params"
 
 export const validateRequest = (schema: z.ZodSchema, target: SchemaTarget = "body") => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req[target])
 
     if (!result.success) {

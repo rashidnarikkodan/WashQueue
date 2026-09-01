@@ -51,7 +51,7 @@ export class VehicleController {
     }
 
     const { id } = req.params
-    if (!id) {
+    if (!id || typeof id !== "string") {
       throw new AppError("Vehicle ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
@@ -73,7 +73,7 @@ export class VehicleController {
     }
 
     const { id } = req.params
-    if (!id) {
+    if (!id || typeof id !== "string") {
       throw new AppError("Vehicle ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
@@ -88,7 +88,7 @@ export class VehicleController {
     }
 
     const { id } = req.params
-    if (!id) {
+    if (!id || typeof id !== "string") {
       throw new AppError("Vehicle ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
@@ -113,7 +113,7 @@ export class VehicleController {
     }
 
     const { id } = req.params
-    if (!id) {
+    if (!id || typeof id !== "string") {
       throw new AppError("Vehicle ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 

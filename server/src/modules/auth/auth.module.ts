@@ -44,7 +44,6 @@ const verifyOtpUseCase = new VerifyOtpUseCase(
   userRepository,
   otpRepository,
   refreshTokenRepository,
-  otpService,
   tokenService,
   hashService
 )

@@ -1,3 +1,4 @@
+import { Request } from "express"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
@@ -14,12 +15,13 @@ export interface ReviewStationRequestInput {
 export class StationRequestMapper {
   constructor(private readonly stepParserFactory: StationStepParserFactory) {}
 
-  extractStationId(req: AuthenticatedRequest): string {
-    const { stationId } = req.params
-    if (!stationId) {
+  extractStationId(req: Request | AuthenticatedRequest): string {
+    const rawStationId = req.params.stationId || req.params.id
+    const candidateStationId = Array.isArray(rawStationId) ? rawStationId[0] : rawStationId
+    if (!candidateStationId || typeof candidateStationId !== "string" || !candidateStationId.trim()) {
       throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
     }
-    return stationId
+    return candidateStationId.trim()
   }
 
   extractReviewInput(req: AuthenticatedRequest): ReviewStationRequestInput {

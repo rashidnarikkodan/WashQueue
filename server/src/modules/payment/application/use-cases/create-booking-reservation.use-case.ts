@@ -39,8 +39,8 @@ export class CreateBookingReservationUseCase implements ICreateBookingReservatio
 
   constructor(
     private readonly stationRepository: IStationRepository,
-    private readonly stationPricingRepository: IStationPricingRepository,
-    private readonly extraServiceRepository: IExtraServiceRepository,
+    stationPricingRepository: IStationPricingRepository,
+    extraServiceRepository: IExtraServiceRepository,
     private readonly timeWindowRepository: ITimeWindowRepository,
     private readonly vehicleRepository: IVehicleRepository,
     private readonly reservationRepository: IBookingReservationRepository,
