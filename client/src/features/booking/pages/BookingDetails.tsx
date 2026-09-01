@@ -222,13 +222,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         ? "/manager/dashboard"
         : "/"
 
-  const rootLabel = isAdmin
-    ? "Admin"
-    : isOwner
-      ? "Owner"
-      : isManager
-        ? "Manager"
-        : "Home"
+  const rootLabel = isAdmin ? "Admin" : isOwner ? "Owner" : isManager ? "Manager" : "Home"
 
   const bookingsListPath = isAdmin
     ? "/admin/bookings"

@@ -27,7 +27,12 @@ export interface Booking {
   slotTime: string
   windowStart?: string
   scheduling?: { windowStart?: string; windowEnd?: string }
-  pricingSnapshot?: { totalPrice?: number; basePrice?: number; extraPrice?: number; currency?: string }
+  pricingSnapshot?: {
+    totalPrice?: number
+    basePrice?: number
+    extraPrice?: number
+    currency?: string
+  }
   amount: number
   paymentStatus: PaymentStatus
   status: BookingStatus
@@ -57,7 +62,7 @@ export type Window = {
 }
 
 export type Calender = {
-    minDate: string
-    maxDate: string
-    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
-  } 
+  minDate: string
+  maxDate: string
+  dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
+}

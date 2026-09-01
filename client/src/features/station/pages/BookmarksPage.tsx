@@ -124,51 +124,57 @@ export default function BookmarksPage() {
 
         {!isLoading && !error && stations.length > 0 && (
           <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((station, pageIndex) => {
-              const globalIndex = (currentPage - 1) * PAGE_SIZE + pageIndex
-              const stationId =
-                station.id || (station as unknown as { _id?: string })._id || `station-${globalIndex}`
-              const primaryImage =
-                station.images?.find((img) => img.isPrimary)?.url || station.images?.[0]?.url || ""
-              const formattedAddress = station.address
-                ? `${station.address.street || ""}${
-                    station.address.city ? `, ${station.address.city}` : ""
-                  }`
-                : "Address not available"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stations
+                .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+                .map((station, pageIndex) => {
+                  const globalIndex = (currentPage - 1) * PAGE_SIZE + pageIndex
+                  const stationId =
+                    station.id ||
+                    (station as unknown as { _id?: string })._id ||
+                    `station-${globalIndex}`
+                  const primaryImage =
+                    station.images?.find((img) => img.isPrimary)?.url ||
+                    station.images?.[0]?.url ||
+                    ""
+                  const formattedAddress = station.address
+                    ? `${station.address.street || ""}${
+                        station.address.city ? `, ${station.address.city}` : ""
+                      }`
+                    : "Address not available"
 
-              return (
-                <StationCard
-                  key={stationId}
-                  id={stationId}
-                  name={station.name || "Wash Station"}
-                  image={primaryImage}
-                  address={formattedAddress}
-                  status={station.status}
-                  rating={station.rating || 0}
-                  reviewCount={station.reviewCount || 0}
-                  queueCount={station.queueDepth ?? 0}
-                  baysCount={station.slotConfig?.bays || 0}
-                  services={station.amenities || []}
-                  distanceKm={station.distanceKm}
-                  isFavorite={true}
-                  onFavoriteToggle={() => handleToggleBookmark(stationId)}
-                  onClick={() => navigate(`/stations/${stationId}`)}
-                />
-              )
-            })}
-          </div>
-          <Pagination
-            meta={{
-              total: stations.length,
-              page: currentPage,
-              limit: PAGE_SIZE,
-              totalPages: Math.max(1, Math.ceil(stations.length / PAGE_SIZE)),
-              hasNextPage: currentPage * PAGE_SIZE < stations.length,
-              hasPrevPage: currentPage > 1,
-            }}
-            onPageChange={setCurrentPage}
-          />
+                  return (
+                    <StationCard
+                      key={stationId}
+                      id={stationId}
+                      name={station.name || "Wash Station"}
+                      image={primaryImage}
+                      address={formattedAddress}
+                      status={station.status}
+                      rating={station.rating || 0}
+                      reviewCount={station.reviewCount || 0}
+                      queueCount={station.queueDepth ?? 0}
+                      baysCount={station.slotConfig?.bays || 0}
+                      services={station.amenities || []}
+                      distanceKm={station.distanceKm}
+                      isFavorite={true}
+                      onFavoriteToggle={() => handleToggleBookmark(stationId)}
+                      onClick={() => navigate(`/stations/${stationId}`)}
+                    />
+                  )
+                })}
+            </div>
+            <Pagination
+              meta={{
+                total: stations.length,
+                page: currentPage,
+                limit: PAGE_SIZE,
+                totalPages: Math.max(1, Math.ceil(stations.length / PAGE_SIZE)),
+                hasNextPage: currentPage * PAGE_SIZE < stations.length,
+                hasPrevPage: currentPage > 1,
+              }}
+              onPageChange={setCurrentPage}
+            />
           </>
         )}
       </div>

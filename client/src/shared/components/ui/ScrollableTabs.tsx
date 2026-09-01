@@ -232,4 +232,3 @@ export const ScrollableTabs: React.FC<ScrollableTabsProps> = ({
 }
 
 export default ScrollableTabs
-

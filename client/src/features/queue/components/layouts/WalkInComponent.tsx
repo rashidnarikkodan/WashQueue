@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  Car,
-  Sparkles,
-  CheckCircle2,
-  Clock,
-  Printer,
-  Check,
-  Loader2,
-} from "lucide-react"
+import { Car, Sparkles, CheckCircle2, Clock, Printer, Check, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
 import { bookingApi } from "@/shared/apis/booking.api"
@@ -242,9 +234,7 @@ export default function WalkInComponent() {
     )
   }, [timeWindows, currentSlot])
 
-  const slotCapacity = currentSlot
-    ? currentSlot.bookedCount + currentSlot.remainingCapacity
-    : 0
+  const slotCapacity = currentSlot ? currentSlot.bookedCount + currentSlot.remainingCapacity : 0
 
   const handleCreateWalkIn = async () => {
     if (!stationInfo?.stationId) {
@@ -462,7 +452,7 @@ export default function WalkInComponent() {
                             +₹{ex.price}
                           </span>
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 </div>
@@ -522,8 +512,8 @@ export default function WalkInComponent() {
                 {currentSlot?.status === "FULL"
                   ? "FULL"
                   : timeWindows.length > 0
-                  ? "AVAILABLE"
-                  : "AUTO"}
+                    ? "AVAILABLE"
+                    : "AUTO"}
               </span>
             </div>
 
@@ -558,8 +548,8 @@ export default function WalkInComponent() {
                         currentSlot.status === "FULL"
                           ? "bg-amber-500/20 text-amber-500 border border-amber-500/30"
                           : currentSlot.status === "OPEN"
-                          ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
-                          : "bg-muted text-muted-foreground border border-border"
+                            ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                            : "bg-muted text-muted-foreground border border-border"
                       }`}
                     >
                       {currentSlot.status}

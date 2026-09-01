@@ -137,12 +137,12 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
   }, [facingMode, selectedCameraId, stopAllMediaTracks])
 
   useEffect(() => {
-  return () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl)
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
     }
-  }
-}, [previewUrl])
+  }, [previewUrl])
 
   useEffect(() => {
     let isMounted = true
@@ -254,78 +254,74 @@ export const PhotoCaptureCamera: React.FC<PhotoCaptureCameraProps> = ({
     }
   }
 
-const handleShutter = () => {
-  const video = videoRef.current
+  const handleShutter = () => {
+    const video = videoRef.current
 
-  if (!video || !video.videoWidth || !video.videoHeight) {
-    return
-  }
-
-  let width = video.videoWidth
-  let height = video.videoHeight
-
-  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-    if (width > height) {
-      height = Math.round((height * MAX_DIMENSION) / width)
-      width = MAX_DIMENSION
-    } else {
-      width = Math.round((width * MAX_DIMENSION) / height)
-      height = MAX_DIMENSION
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      return
     }
-  }
 
-  const canvas = document.createElement("canvas")
+    let width = video.videoWidth
+    let height = video.videoHeight
 
-  canvas.width = width
-  canvas.height = height
-
-  const ctx = canvas.getContext("2d")
-
-  if (!ctx) {
-    toast.error("Failed to capture photo")
-    return
-  }
-
-  ctx.save()
-
-  ctx.scale(-1, 1)
-  ctx.drawImage(video, -width, 0, width, height)
-
-  ctx.restore()
-
-  canvas.toBlob(
-    (blob) => {
-      if (!blob) {
-        toast.error("Failed to encode photo")
-        return
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      if (width > height) {
+        height = Math.round((height * MAX_DIMENSION) / width)
+        width = MAX_DIMENSION
+      } else {
+        width = Math.round((width * MAX_DIMENSION) / height)
+        height = MAX_DIMENSION
       }
+    }
 
-      const file = new File(
-        [blob],
-        `vehicle-photo-${Date.now()}.jpg`,
-        {
-          type: "image/jpeg",
+    const canvas = document.createElement("canvas")
+
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext("2d")
+
+    if (!ctx) {
+      toast.error("Failed to capture photo")
+      return
+    }
+
+    ctx.save()
+
+    ctx.scale(-1, 1)
+    ctx.drawImage(video, -width, 0, width, height)
+
+    ctx.restore()
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          toast.error("Failed to encode photo")
+          return
         }
-      )
 
-      const previewUrl = URL.createObjectURL(file)
+        const file = new File([blob], `vehicle-photo-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        })
 
-      setCapturedFile(file)
-      setPreviewUrl(previewUrl)
-    },
-    "image/jpeg",
-    JPEG_QUALITY
-  )
-}
+        const previewUrl = URL.createObjectURL(file)
 
-const handleRetake = () => {
-  if (previewUrl) {
-    URL.revokeObjectURL(previewUrl)
+        setCapturedFile(file)
+        setPreviewUrl(previewUrl)
+      },
+      "image/jpeg",
+      JPEG_QUALITY
+    )
   }
 
-  setPreviewUrl(null)
-  setCapturedFile(null)
-}
+  const handleRetake = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    setPreviewUrl(null)
+    setCapturedFile(null)
+  }
   const handleUsePhoto = () => {
     if (!capturedFile) return
     onCapture(capturedFile)
@@ -354,11 +350,7 @@ const handleRetake = () => {
         <div className="p-5">
           <div className="relative aspect-[4/3] rounded-2xl bg-black overflow-hidden flex flex-col items-center justify-center shadow-lg">
             {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Captured preview"
-                className="w-full h-full object-cover"
-              />
+              <img src={previewUrl} alt="Captured preview" className="w-full h-full object-cover" />
             ) : (
               <video
                 ref={videoRef}

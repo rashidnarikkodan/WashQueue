@@ -78,7 +78,7 @@ export interface Station {
   estimatedWaitMins?: number
   queueDepth?: number
   isOpen?: boolean
-  isFavorite?:boolean
+  isFavorite?: boolean
   createdAt: string
   updatedAt: string
 }

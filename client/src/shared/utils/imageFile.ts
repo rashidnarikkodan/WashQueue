@@ -1,9 +1,7 @@
 const MAX_DIMENSION = 1280
 const JPEG_QUALITY = 0.7
 
-export function readImageFileAsResizedBlob(
-  file: File
-): Promise<Blob> {
+export function readImageFileAsResizedBlob(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file)
     const img = new Image()

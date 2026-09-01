@@ -73,31 +73,28 @@ export default function Header({ role }: { role?: string }) {
         </div>
 
         <div className="col-span-1 flex justify-center max-w-lg mx-auto w-full">
-
-              <nav className="hidden md:flex items-center gap-6">
-                {activeLinks.map((link) => {
-                  const isActive = pathname === link.path
-                  return (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
-                        isActive ? "text-foreground font-semibold" : "text-muted-foreground"
-                      }`}
-                    >
-                      {link.name}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-primary" />
-                      )}
-                    </Link>
-                  )
-                })}
-              </nav>
-            
+          <nav className="hidden md:flex items-center gap-6">
+            {activeLinks.map((link) => {
+              const isActive = pathname === link.path
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                    isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                  }`}
+                >
+                  {link.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-primary" />
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
         </div>
 
-        <div className="col-span-1 flex justify-end items-center gap-3">        
-
+        <div className="col-span-1 flex justify-end items-center gap-3">
           {isAuthenticated && isCustomer && (
             <Link
               to={APP_ROUTES.BOOKMARKS}

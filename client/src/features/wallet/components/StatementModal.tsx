@@ -25,11 +25,7 @@ export const StatementModal: React.FC<StatementModalProps> = ({
       tx.category === "TOP_UP" ||
       tx.category === "CASHBACK"
     const isRefund = tx.category === "REFUND" || tx.type === "REFUND"
-    const defaultTitle = isRefund
-      ? "Refund"
-      : isCredit
-      ? "Wallet Credit"
-      : "Payment"
+    const defaultTitle = isRefund ? "Refund" : isCredit ? "Wallet Credit" : "Payment"
 
     return (
       <div
@@ -52,9 +48,7 @@ export const StatementModal: React.FC<StatementModalProps> = ({
           </div>
 
           <div>
-            <h4 className="text-sm font-bold text-foreground">
-              {tx.description || defaultTitle}
-            </h4>
+            <h4 className="text-sm font-bold text-foreground">{tx.description || defaultTitle}</h4>
             <p className="text-xs text-muted-foreground">
               {new Date(tx.createdAt).toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -69,11 +63,7 @@ export const StatementModal: React.FC<StatementModalProps> = ({
         </div>
 
         <div className="text-right">
-          <p
-            className={`text-sm font-bold ${
-              isCredit ? "text-emerald-500" : "text-rose-500"
-            }`}
-          >
+          <p className={`text-sm font-bold ${isCredit ? "text-emerald-500" : "text-rose-500"}`}>
             {isCredit ? "+" : "-"}₹{tx.amount.toFixed(2)}
           </p>
           <span
@@ -81,8 +71,8 @@ export const StatementModal: React.FC<StatementModalProps> = ({
               tx.status === "COMPLETED"
                 ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                 : tx.status === "FAILED"
-                ? "bg-destructive/10 text-destructive border border-destructive/20"
-                : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                  ? "bg-destructive/10 text-destructive border border-destructive/20"
+                  : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
             }`}
           >
             {tx.status}
@@ -111,7 +101,9 @@ export const StatementModal: React.FC<StatementModalProps> = ({
 
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
           {isLoading ? (
-            <div className="py-12 text-center text-muted-foreground text-sm">Loading statement...</div>
+            <div className="py-12 text-center text-muted-foreground text-sm">
+              Loading statement...
+            </div>
           ) : transactions.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground text-sm">
               No transactions to show.

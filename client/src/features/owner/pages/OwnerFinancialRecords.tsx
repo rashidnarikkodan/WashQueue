@@ -527,7 +527,9 @@ export default function OwnerFinancialRecords() {
                     Payout Account Setup Required
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Your station payouts are currently held safely until your payout account is linked. Please finish onboarding verification to enable automated bank transfers.
+                    Your station payouts are currently held safely until your payout account is
+                    linked. Please finish onboarding verification to enable automated bank
+                    transfers.
                   </p>
                 </div>
               </div>
@@ -601,4 +603,3 @@ export default function OwnerFinancialRecords() {
     </div>
   )
 }
-

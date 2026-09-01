@@ -57,9 +57,7 @@ export default function BusinessDetailsCard({ profile }: BusinessDetailsCardProp
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
           HEADQUARTERS
         </span>
-        <p className="text-lg font-normal text-foreground">
-          {profile.headquarters || "N/A"}
-        </p>
+        <p className="text-lg font-normal text-foreground">{profile.headquarters || "N/A"}</p>
       </div>
     </div>
   )

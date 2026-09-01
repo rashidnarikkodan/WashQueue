@@ -85,9 +85,7 @@ export const walletApi = {
     }
   },
 
-  async getTransactions(
-    query?: GetTransactionsQuery
-  ): Promise<PaginatedTransactionsResponse> {
+  async getTransactions(query?: GetTransactionsQuery): Promise<PaginatedTransactionsResponse> {
     try {
       const response = await api.get<PaginatedTransactionsResponse>(
         API_ROUTES.WALLET.TRANSACTIONS,
@@ -101,10 +99,7 @@ export const walletApi = {
 
   async createTopUpOrder(amount: number): Promise<TopUpOrderResponse["data"]> {
     try {
-      const response = await api.post<TopUpOrderResponse>(
-        API_ROUTES.WALLET.TOPUP_ORDER,
-        { amount }
-      )
+      const response = await api.post<TopUpOrderResponse>(API_ROUTES.WALLET.TOPUP_ORDER, { amount })
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to create top-up order")
@@ -114,9 +109,9 @@ export const walletApi = {
   async verifyTopUpPayment(input: VerifyTopUpInput): Promise<WalletTransactionItem> {
     try {
       const response = await api.post<{
-        success: boolean;
-        message: string;
-        data: WalletTransactionItem;
+        success: boolean
+        message: string
+        data: WalletTransactionItem
       }>(API_ROUTES.WALLET.TOPUP_VERIFY, input)
       return response.data.data
     } catch (error) {
@@ -127,9 +122,9 @@ export const walletApi = {
   async payWithWallet(input: PayWithWalletInput): Promise<WalletTransactionItem> {
     try {
       const response = await api.post<{
-        success: boolean;
-        message: string;
-        data: WalletTransactionItem;
+        success: boolean
+        message: string
+        data: WalletTransactionItem
       }>(API_ROUTES.WALLET.PAY, input)
       return response.data.data
     } catch (error) {

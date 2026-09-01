@@ -124,7 +124,9 @@ const Sidebar = ({ items }: Props) => {
         `}
       >
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/40 md:hidden px-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Navigation</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Navigation
+          </span>
           <button
             type="button"
             onClick={() => setIsOpenMobile(false)}
@@ -209,4 +211,3 @@ const Sidebar = ({ items }: Props) => {
 }
 
 export default Sidebar
-

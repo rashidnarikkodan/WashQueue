@@ -39,7 +39,7 @@ export const API_ROUTES = {
   },
   BOOKINGS: {
     ROOT: "/bookings",
-    OWNER_BOOKINGS:(ownerId:string)=>`/bookings/owners/${ownerId}`,
+    OWNER_BOOKINGS: (ownerId: string) => `/bookings/owners/${ownerId}`,
     BY_ID: (id: string) => `/bookings/${id}`,
     CANCEL: (id: string) => `/bookings/${id}/cancel`,
     RESCHEDULE: (id: string) => `/bookings/${id}/reschedule`,
@@ -55,7 +55,7 @@ export const API_ROUTES = {
     INSPECTION_UPLOAD_SIGNATURE: "/bookings/inspection-photos/upload-signature",
   },
   PAYMENT: {
-    ROOT:'/payment',
+    ROOT: "/payment",
     CREATE_ORDER: "/payment/create-order",
     VERIFY_PAYMENT: "/payment/verify-payment",
   },

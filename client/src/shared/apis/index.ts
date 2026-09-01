@@ -9,4 +9,3 @@ export * from "./booking.api"
 export * from "./manager.api"
 export * from "./payment.api"
 export * from "./places.api"
-

@@ -3,7 +3,12 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { Plus, Mail, Phone, MapPin, Layers, Star } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import StationCard from "@/shared/components/cards/StationCard"
-import { DataTable, DataTableToolbar, type Column, type TabConfig } from "@/shared/components/data-table"
+import {
+  DataTable,
+  DataTableToolbar,
+  type Column,
+  type TabConfig,
+} from "@/shared/components/data-table"
 import Pagination from "@/shared/components/ui/Pagination"
 import { useStationStore } from "../store/station.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -12,19 +17,47 @@ import { STATION_STATUS, type Station } from "../types"
 const ADMIN_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
   { id: STATION_STATUS.DRAFT, label: "Draft", activeColor: "border-blue-500 text-blue-500" },
-  { id: STATION_STATUS.PENDING_REVIEW, label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
-  { id: STATION_STATUS.ACTIVE, label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
-  { id: STATION_STATUS.SUSPENDED, label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
+  {
+    id: STATION_STATUS.PENDING_REVIEW,
+    label: "Pending Review",
+    activeColor: "border-amber-500 text-amber-500",
+  },
+  {
+    id: STATION_STATUS.ACTIVE,
+    label: "Active",
+    activeColor: "border-emerald-500 text-emerald-500",
+  },
+  {
+    id: STATION_STATUS.SUSPENDED,
+    label: "Suspended",
+    activeColor: "border-amber-500 text-amber-500",
+  },
   { id: STATION_STATUS.REJECTED, label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
 const OWNER_TABS: TabConfig[] = [
   { id: "all", label: "All Stations" },
   { id: STATION_STATUS.DRAFT, label: "Draft", activeColor: "border-blue-500 text-blue-500" },
-  { id: STATION_STATUS.PENDING_REVIEW, label: "Pending Review", activeColor: "border-amber-500 text-amber-500" },
-  { id: STATION_STATUS.ACTIVE, label: "Active", activeColor: "border-emerald-500 text-emerald-500" },
-  { id: STATION_STATUS.INACTIVE, label: "Inactive", activeColor: "border-slate-400 text-slate-400" },
-  { id: STATION_STATUS.SUSPENDED, label: "Suspended", activeColor: "border-amber-500 text-amber-500" },
+  {
+    id: STATION_STATUS.PENDING_REVIEW,
+    label: "Pending Review",
+    activeColor: "border-amber-500 text-amber-500",
+  },
+  {
+    id: STATION_STATUS.ACTIVE,
+    label: "Active",
+    activeColor: "border-emerald-500 text-emerald-500",
+  },
+  {
+    id: STATION_STATUS.INACTIVE,
+    label: "Inactive",
+    activeColor: "border-slate-400 text-slate-400",
+  },
+  {
+    id: STATION_STATUS.SUSPENDED,
+    label: "Suspended",
+    activeColor: "border-amber-500 text-amber-500",
+  },
   { id: STATION_STATUS.REJECTED, label: "Rejected", activeColor: "border-red-500 text-red-500" },
 ]
 
@@ -52,7 +85,6 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const limit = 10
 
   const loadStations = useCallback(async () => {
-
     if (isAdmin) {
       await fetchStations({
         page: currentPage,
@@ -287,10 +319,11 @@ export default function StationManagement({ role: explicitRole }: StationManagem
               ? "Account pending admin approval"
               : "Create Station"
           }
-          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${!isAdmin && user && !user.isVerified
+          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
+            !isAdmin && user && !user.isVerified
               ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
               : "bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            }`}
+          }`}
         >
           <Plus className="w-4 h-4" />
           <span>Create Station</span>

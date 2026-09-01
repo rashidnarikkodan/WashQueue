@@ -77,8 +77,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
       osc.start()
       osc.stop(ctx.currentTime + 0.12)
-    } catch {
-    }
+    } catch {}
   }, [isAudioEnabled])
 
   const parseQrContent = useCallback((rawText: string): string => {
@@ -92,8 +91,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         const bookingIdParam = url.searchParams.get("bookingId") || url.searchParams.get("id")
         if (tokenParam) return tokenParam
         if (bookingIdParam) return bookingIdParam
-      } catch {
-      }
+      } catch {}
     }
 
     if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
@@ -102,8 +100,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (parsed.qrToken) return String(parsed.qrToken)
         if (parsed.token) return String(parsed.token)
         if (parsed.bookingId) return String(parsed.bookingId)
-      } catch {
-      }
+      } catch {}
     }
 
     return trimmed
@@ -120,10 +117,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       if (!parsedText) return
 
       const now = Date.now()
-      if (
-        parsedText === lastScannedTextRef.current &&
-        now - lastScannedTimeRef.current < 2500
-      ) {
+      if (parsedText === lastScannedTextRef.current && now - lastScannedTimeRef.current < 2500) {
         return
       }
 
@@ -135,8 +129,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
       playScanBeep()
       try {
         if (navigator.vibrate) navigator.vibrate(80)
-      } catch {
-      }
+      } catch {}
 
       setLastScannedResult(parsedText)
       onScanSuccess(parsedText)
@@ -181,8 +174,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             track.stop()
             track.enabled = false
           })
-        } catch {
-        }
+        } catch {}
       }
       videoRef.current.srcObject = null
     }
@@ -202,7 +194,8 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
     interface BarcodeResult {
       rawValue?: string
     }
-    let nativeDetector: { detect: (target: ImageBitmapSource) => Promise<BarcodeResult[]> } | null = null
+    let nativeDetector: { detect: (target: ImageBitmapSource) => Promise<BarcodeResult[]> } | null =
+      null
     if ("BarcodeDetector" in window) {
       try {
         const DetectorClass = (
@@ -213,8 +206,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           }
         ).BarcodeDetector
         nativeDetector = new DetectorClass({ formats: ["qr_code"] })
-      } catch {
-      }
+      } catch {}
     }
 
     let lastProcessedAt = 0
@@ -248,8 +240,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
                 animFrameIdRef.current = requestAnimationFrame(scanFrame)
                 return
               }
-            } catch {
-            }
+            } catch {}
           }
 
           ctx.drawImage(video, 0, 0, vWidth, vHeight)
@@ -279,8 +270,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             animFrameIdRef.current = requestAnimationFrame(scanFrame)
             return
           }
-        } catch {
-        }
+        } catch {}
       }
 
       if (isScanningRef.current) {
@@ -345,7 +335,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
 
       const errorObj = err as { name?: string; message?: string }
       if (errorObj?.name === "NotAllowedError" || errorObj?.name === "PermissionDeniedError") {
-        setCameraError("Camera permission denied. Please allow camera access in your browser settings.")
+        setCameraError(
+          "Camera permission denied. Please allow camera access in your browser settings."
+        )
       } else if (errorObj?.name === "NotFoundError" || errorObj?.name === "DevicesNotFoundError") {
         setCameraError("No camera hardware found on this system.")
       } else if (errorObj?.name === "NotReadableError" || errorObj?.name === "TrackStartError") {
@@ -425,10 +417,17 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         if (nextMode === "environment") {
           return lbl.includes("back") || lbl.includes("environment") || lbl.includes("rear")
         } else {
-          return lbl.includes("front") || lbl.includes("user") || lbl.includes("selfie") || lbl.includes("facetime")
+          return (
+            lbl.includes("front") ||
+            lbl.includes("user") ||
+            lbl.includes("selfie") ||
+            lbl.includes("facetime")
+          )
         }
       })
-      setSelectedCameraId(match ? match.id : cameras.find((c) => c.id !== selectedCameraId)?.id || "")
+      setSelectedCameraId(
+        match ? match.id : cameras.find((c) => c.id !== selectedCameraId)?.id || ""
+      )
     } else {
       setSelectedCameraId("")
     }
@@ -561,7 +560,9 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
         {isCameraEnabled && isInitializing && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xs flex flex-col items-center justify-center space-y-3 z-20">
             <RefreshCw className="h-8 w-8 text-primary animate-spin" />
-            <p className="text-xs font-semibold text-slate-300">Initializing High-Speed Camera...</p>
+            <p className="text-xs font-semibold text-slate-300">
+              Initializing High-Speed Camera...
+            </p>
           </div>
         )}
 
@@ -612,12 +613,10 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
             }`}
             title={isCameraEnabled ? "Turn Off Camera" : "Turn On Camera"}
           >
-            {isCameraEnabled ? (
-              <CameraOff className="h-4 w-4" />
-            ) : (
-              <Camera className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{isCameraEnabled ? "Stop Camera" : "Start Camera"}</span>
+            {isCameraEnabled ? <CameraOff className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+            <span className="hidden sm:inline">
+              {isCameraEnabled ? "Stop Camera" : "Start Camera"}
+            </span>
           </button>
 
           {isCameraEnabled && (

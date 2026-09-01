@@ -86,7 +86,6 @@ export default function LoginForm() {
       toast.warning("Your account is not verified. Redirecting to verification...")
       navigate("/verify-email")
     }
-
   }, [state, navigate])
 
   return (

@@ -90,10 +90,8 @@ export default function Booking() {
 
       {/* Main 12-Column Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
         {/* Left Column: 8 Columns (Booking Steps Flow) */}
         <div className="lg:col-span-8 flex flex-col gap-10">
-          
           {/* Step 1: Vehicle Selection */}
           <VehicleSelectionStep
             vehicles={vehicles}

@@ -131,9 +131,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       }
     } else {
       navigate(
-        currentRole === VIEW_MODE.CUSTOMER
-          ? "/owner/onboarding"
-          : `/${currentRole}/dashboard`
+        currentRole === VIEW_MODE.CUSTOMER ? "/owner/onboarding" : `/${currentRole}/dashboard`
       )
     }
   }
@@ -199,7 +197,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-foreground">My Profile</span>
-                  <span className="block text-[11px] text-muted-foreground">Account details & settings</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Account details & settings
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
@@ -216,7 +216,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-foreground">My Garage</span>
-                  <span className="block text-[11px] text-muted-foreground">Manage saved vehicles</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Manage saved vehicles
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
@@ -233,7 +235,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-foreground">My Bookings</span>
-                  <span className="block text-[11px] text-muted-foreground">Track wash history & queue</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Track wash history & queue
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
@@ -250,7 +254,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-foreground">Wallet & Refunds</span>
-                  <span className="block text-[11px] text-muted-foreground">Balance & transaction logs</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Balance & transaction logs
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
@@ -266,7 +272,9 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-foreground">Help & Support</span>
-                  <span className="block text-[11px] text-muted-foreground">Customer support center</span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    Customer support center
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />

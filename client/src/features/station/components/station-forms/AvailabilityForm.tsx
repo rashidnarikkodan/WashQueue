@@ -455,7 +455,7 @@ export default function AvailabilityForm({
             placeholder="7"
             value={
               formData.maxAdvanceBookingDays === 0 ||
-                (formData.maxAdvanceBookingDays as unknown) === ""
+              (formData.maxAdvanceBookingDays as unknown) === ""
                 ? ""
                 : formData.maxAdvanceBookingDays
             }

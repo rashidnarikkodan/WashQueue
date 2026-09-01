@@ -120,12 +120,10 @@ export default function CancellationModal({
   const refundAmount = Math.round((totalAmount * refundPercentage) / 100)
   const nonRefundableAmount = totalAmount - refundAmount
 
-  const stationName =
-    booking.stationDetails?.name || booking.stationName || "Wash Station"
-  const vehicleName =
-    booking.vehicleDetails?.brand
-      ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
-      : booking.vehicleType || booking.vehicleModel || "Vehicle"
+  const stationName = booking.stationDetails?.name || booking.stationName || "Wash Station"
+  const vehicleName = booking.vehicleDetails?.brand
+    ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
+    : booking.vehicleType || booking.vehicleModel || "Vehicle"
   const serviceName = booking.serviceType ? `${booking.serviceType} Wash` : "Wash Service"
   const formattedSlotTime =
     booking.slotTime ||
@@ -169,7 +167,8 @@ export default function CancellationModal({
             </h1>
 
             <p className="text-muted-foreground text-sm sm:text-base text-center max-w-[448px] leading-relaxed">
-              This action may affect your queue position and refund eligibility. This cannot be undone.
+              This action may affect your queue position and refund eligibility. This cannot be
+              undone.
             </p>
           </div>
 
@@ -233,8 +232,8 @@ export default function CancellationModal({
                     policyTier === "FULL_REFUND"
                       ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                       : policyTier === "PARTIAL_REFUND"
-                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                      : "bg-destructive/10 text-destructive border-destructive/20"
+                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                        : "bg-destructive/10 text-destructive border-destructive/20"
                   }`}
                 >
                   {refundPercentage}% Refund ({policyTier.replace("_", " ")})
@@ -278,12 +277,8 @@ export default function CancellationModal({
             <div className="p-4.5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-left">
               <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div className="space-y-1 text-xs">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm">
-                  {policyTitle}
-                </h4>
-                <p className="text-muted-foreground leading-relaxed">
-                  {policyExplanation}
-                </p>
+                <h4 className="font-bold text-foreground text-xs sm:text-sm">{policyTitle}</h4>
+                <p className="text-muted-foreground leading-relaxed">{policyExplanation}</p>
               </div>
             </div>
 
@@ -316,7 +311,8 @@ export default function CancellationModal({
             <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <p className="text-xs text-destructive leading-relaxed font-medium">
-                Once cancelled, your queue position will be lost and cannot be restored. Other customers may take your slot immediately.
+                Once cancelled, your queue position will be lost and cannot be restored. Other
+                customers may take your slot immediately.
               </p>
             </div>
           </div>
@@ -364,7 +360,8 @@ export default function CancellationModal({
             </h1>
 
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-              We’ve updated our schedule. Your reservation slot has been released back into the queue.
+              We’ve updated our schedule. Your reservation slot has been released back into the
+              queue.
             </p>
           </div>
 
@@ -382,11 +379,16 @@ export default function CancellationModal({
                   <>
                     {refundPercentage === 100 ? (
                       <>
-                        Full refund of <strong className="text-emerald-500">₹{refundAmount}</strong> (100% refund for cancelling &gt;24h in advance) is credited back to your wallet instantly.
+                        Full refund of <strong className="text-emerald-500">₹{refundAmount}</strong>{" "}
+                        (100% refund for cancelling &gt;24h in advance) is credited back to your
+                        wallet instantly.
                       </>
                     ) : (
                       <>
-                        50% partial refund of <strong className="text-emerald-500">₹{refundAmount}</strong> (₹{nonRefundableAmount} fee retained for cancelling 2–24h prior) is credited back to your wallet instantly.
+                        50% partial refund of{" "}
+                        <strong className="text-emerald-500">₹{refundAmount}</strong> (₹
+                        {nonRefundableAmount} fee retained for cancelling 2–24h prior) is credited
+                        back to your wallet instantly.
                       </>
                     )}
                   </>
@@ -417,7 +419,12 @@ export default function CancellationModal({
 
           <div className="w-full max-w-[544px] pt-6 border-t border-border flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
             <span>TRANSACTION ID: {booking.bookingNumber || "WQ-9823-X1"}</span>
-            <span>ISSUED: {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()}</span>
+            <span>
+              ISSUED:{" "}
+              {new Date()
+                .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                .toUpperCase()}
+            </span>
           </div>
         </div>
       )}

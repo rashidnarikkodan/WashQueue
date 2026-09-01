@@ -149,7 +149,8 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
           <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm space-y-2">
             <h4 className="font-bold text-foreground">Google Managed Account</h4>
             <p className="leading-relaxed text-muted-foreground">
-              Your account is authenticated via Google OAuth 2.0 Single Sign-On. Passwords and security credentials are managed directly through your Google Account.
+              Your account is authenticated via Google OAuth 2.0 Single Sign-On. Passwords and
+              security credentials are managed directly through your Google Account.
             </p>
           </div>
           <div className="flex justify-end pt-2 border-t border-border">

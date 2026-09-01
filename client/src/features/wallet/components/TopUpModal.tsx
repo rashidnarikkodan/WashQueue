@@ -79,7 +79,8 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
         <div className="bg-muted/60 border border-border rounded-xl p-3.5 text-xs text-muted-foreground flex items-start gap-2.5">
           <AlertCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
           <span>
-            Funds will be immediately credited to your WashQueue wallet upon successful Razorpay payment.
+            Funds will be immediately credited to your WashQueue wallet upon successful Razorpay
+            payment.
           </span>
         </div>
 

@@ -42,12 +42,16 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
   const stats: StatItem[] = useMemo(() => {
     const totalCount = isOwnerScopedToOwnStations
       ? filteredBookings.length
-      : pagination?.total ?? filteredBookings.length
-    const confirmedCount = filteredBookings.filter((b) => b.status === BOOKING_STATUS.CONFIRMED).length
+      : (pagination?.total ?? filteredBookings.length)
+    const confirmedCount = filteredBookings.filter(
+      (b) => b.status === BOOKING_STATUS.CONFIRMED
+    ).length
     const inProgressCount = filteredBookings.filter(
       (b) => b.status === BOOKING_STATUS.CHECKED_IN || b.status === BOOKING_STATUS.IN_SERVICE
     ).length
-    const completedCount = filteredBookings.filter((b) => b.status === BOOKING_STATUS.COMPLETED).length
+    const completedCount = filteredBookings.filter(
+      (b) => b.status === BOOKING_STATUS.COMPLETED
+    ).length
     const totalRevenue = filteredBookings
       .filter((b) => b.status === BOOKING_STATUS.COMPLETED)
       .reduce((sum, b) => sum + (b.amount || 0), 0)
@@ -136,7 +140,14 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         color: "indigo",
       },
     ]
-  }, [filteredBookings, pagination?.total, isManager, isOwner, isOwnerScopedToOwnStations, managedStation])
+  }, [
+    filteredBookings,
+    pagination?.total,
+    isManager,
+    isOwner,
+    isOwnerScopedToOwnStations,
+    managedStation,
+  ])
 
   const basePath = isAdmin
     ? "/admin/bookings"
@@ -157,7 +168,9 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
 
   const paginationMeta = useMemo(() => {
     const limit = pagination?.limit ?? 10
-    const total = isOwnerScopedToOwnStations ? filteredBookings.length : pagination?.total ?? filteredBookings.length
+    const total = isOwnerScopedToOwnStations
+      ? filteredBookings.length
+      : (pagination?.total ?? filteredBookings.length)
     const totalPages = Math.max(1, Math.ceil(total / limit))
     return {
       total,

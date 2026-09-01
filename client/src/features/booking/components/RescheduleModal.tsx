@@ -165,7 +165,8 @@ export default function RescheduleModal({
               <div className="text-xs space-y-1">
                 <p className="font-bold text-destructive">Maximum Limit Reached (2 / 2)</p>
                 <p className="text-destructive/80">
-                  This booking has already been rescheduled 2 times. Further rescheduling is not permitted.
+                  This booking has already been rescheduled 2 times. Further rescheduling is not
+                  permitted.
                 </p>
               </div>
             </div>

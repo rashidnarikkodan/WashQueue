@@ -105,7 +105,9 @@ export default function QRCodePass({
               <div className="text-[9px] font-black uppercase tracking-widest text-primary-foreground/80">
                 WASHQUEUE PASS
               </div>
-              <h4 className="text-xs font-extrabold text-primary-foreground tracking-tight">{title}</h4>
+              <h4 className="text-xs font-extrabold text-primary-foreground tracking-tight">
+                {title}
+              </h4>
             </div>
           </div>
 

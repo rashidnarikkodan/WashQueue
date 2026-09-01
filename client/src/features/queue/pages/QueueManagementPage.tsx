@@ -70,7 +70,7 @@ export default function ManagerQueuePage() {
       if (!silent) setIsLoading(true)
       try {
         const stations = await managerApi.getManagedStation()
-        
+
         if (stations && stations.length > 0) {
           const activeStation = stations[0]
           setStationInfo({

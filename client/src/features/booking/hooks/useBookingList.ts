@@ -22,7 +22,7 @@ export function useBookingList({
 }: UseBookingListOptions = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuthStore()
-  const ownerId = isOwner ? user?.ownerId ?? user?.id : undefined
+  const ownerId = isOwner ? (user?.ownerId ?? user?.id) : undefined
 
   const [ownerStations, setOwnerStations] = useState<{ id: string; name: string }[]>([])
 
@@ -103,7 +103,16 @@ export function useBookingList({
       userName: user?.name,
       userPhone: user?.phone,
     })
-  }, [loadBookings, activeTab, selectedStationId, searchQuery, page, user?.name, user?.phone, refetch])
+  }, [
+    loadBookings,
+    activeTab,
+    selectedStationId,
+    searchQuery,
+    page,
+    user?.name,
+    user?.phone,
+    refetch,
+  ])
 
   useEffect(() => {
     if (isManager) {

@@ -36,8 +36,7 @@ export default function ProviderBookingDetailsView({
     booking.customerDetails?.name ||
     booking.walkInCustomer?.name ||
     (booking.isWalkIn ? "Walk-In Customer" : "Customer")
-  const customerPhone =
-    booking.customerDetails?.phone || booking.walkInCustomer?.phone || "N/A"
+  const customerPhone = booking.customerDetails?.phone || booking.walkInCustomer?.phone || "N/A"
   const vehicleName = booking.vehicleDetails?.nickname
     ? booking.vehicleDetails.nickname
     : booking.vehicleDetails?.brand
@@ -65,11 +64,11 @@ export default function ProviderBookingDetailsView({
 
   const isServiceStarted = Boolean(
     booking.serviceStartedAt ||
-      booking.checkedInAt ||
-      booking.status === "IN_SERVICE" ||
-      booking.status === "SERVICE_COMPLETED" ||
-      booking.status === "AWAITING_HANDOVER" ||
-      booking.status === "COMPLETED"
+    booking.checkedInAt ||
+    booking.status === "IN_SERVICE" ||
+    booking.status === "SERVICE_COMPLETED" ||
+    booking.status === "AWAITING_HANDOVER" ||
+    booking.status === "COMPLETED"
   )
 
   useEffect(() => {
@@ -155,15 +154,18 @@ export default function ProviderBookingDetailsView({
       const recordedTime = historyMap.get(stg.key)
       const stageIdx = order.indexOf(stg.key)
       const active = currentStatus === stg.key
-      const done = recordedTime ? true : currentIdx >= stageIdx && currentIdx !== -1 && !isCancelled && !isNoShow
+      const done = recordedTime
+        ? true
+        : currentIdx >= stageIdx && currentIdx !== -1 && !isCancelled && !isNoShow
 
       return {
         label: stg.label,
-        time: isCancelled && !recordedTime
-          ? "Cancelled"
-          : isNoShow && !recordedTime
-            ? "No-Show"
-            : recordedTime || (active ? "In Progress" : done ? "Done" : "Pending"),
+        time:
+          isCancelled && !recordedTime
+            ? "Cancelled"
+            : isNoShow && !recordedTime
+              ? "No-Show"
+              : recordedTime || (active ? "In Progress" : done ? "Done" : "Pending"),
         done,
         active,
         isCancelled: isCancelled && !recordedTime,
@@ -413,7 +415,11 @@ export default function ProviderBookingDetailsView({
                         rel="noopener noreferrer"
                         className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                       >
-                        <img src={photo.secured_url} alt={`Pre-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
+                        <img
+                          src={photo.secured_url}
+                          alt={`Pre-inspection angle ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       </a>
                     ))}
                   </div>
@@ -442,7 +448,8 @@ export default function ProviderBookingDetailsView({
             ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
               <div className="p-4 rounded-xl border border-border bg-muted/40">
                 <p className="text-xs text-muted-foreground">
-                  Wash booking was cancelled before service was initiated. Pre-inspection was not required.
+                  Wash booking was cancelled before service was initiated. Pre-inspection was not
+                  required.
                 </p>
               </div>
             ) : (
@@ -466,7 +473,9 @@ export default function ProviderBookingDetailsView({
 
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-border pb-4">
-              <h3 className="text-base font-bold text-foreground">Post-Service Quality Inspection</h3>
+              <h3 className="text-base font-bold text-foreground">
+                Post-Service Quality Inspection
+              </h3>
               <span
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
                   booking.status === "CANCELLED" || booking.status === "NO_SHOW"
@@ -519,40 +528,47 @@ export default function ProviderBookingDetailsView({
                         rel="noopener noreferrer"
                         className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
                       >
-                        <img src={photo.secured_url} alt={`Post-inspection angle ${idx + 1}`} className="w-full h-full object-cover" />
+                        <img
+                          src={photo.secured_url}
+                          alt={`Post-inspection angle ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       </a>
                     ))}
                   </div>
                 )}
 
-                {booking.postServiceInspection.checklist && booking.postServiceInspection.checklist.length > 0 && (
-                  <div className="space-y-1.5">
-                    {booking.postServiceInspection.checklist.map((item) => (
-                      <div
-                        key={item.key}
-                        className="p-3 rounded-lg border border-border bg-muted/40 space-y-1"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-foreground truncate">
-                            {item.label}
-                          </span>
-                          <span
-                            className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
-                              item.passed
-                                ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                                : "bg-destructive/10 text-destructive border border-destructive/20"
-                            }`}
-                          >
-                            {item.passed ? "Passed" : "Issue Flagged"}
-                          </span>
+                {booking.postServiceInspection.checklist &&
+                  booking.postServiceInspection.checklist.length > 0 && (
+                    <div className="space-y-1.5">
+                      {booking.postServiceInspection.checklist.map((item) => (
+                        <div
+                          key={item.key}
+                          className="p-3 rounded-lg border border-border bg-muted/40 space-y-1"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold text-foreground truncate">
+                              {item.label}
+                            </span>
+                            <span
+                              className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                                item.passed
+                                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                  : "bg-destructive/10 text-destructive border border-destructive/20"
+                              }`}
+                            >
+                              {item.passed ? "Passed" : "Issue Flagged"}
+                            </span>
+                          </div>
+                          {item.remark && (
+                            <p className="text-[11px] text-muted-foreground italic">
+                              "{item.remark}"
+                            </p>
+                          )}
                         </div>
-                        {item.remark && (
-                          <p className="text-[11px] text-muted-foreground italic">"{item.remark}"</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
 
                 <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
                   <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
@@ -578,7 +594,9 @@ export default function ProviderBookingDetailsView({
             )}
           </div>
 
-          {(booking.status === "CANCELLED" || booking.cancellation || (booking.statusHistory && booking.statusHistory.some(l => l.reason || l.notes))) && (
+          {(booking.status === "CANCELLED" ||
+            booking.cancellation ||
+            (booking.statusHistory && booking.statusHistory.some((l) => l.reason || l.notes))) && (
             <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
               <div className="flex items-center gap-2 text-amber-500 border-b border-border pb-3">
                 <AlertTriangle size={20} />
@@ -589,7 +607,8 @@ export default function ProviderBookingDetailsView({
                 <div className="p-4 rounded-2xl border border-destructive/20 bg-destructive/10 space-y-1">
                   <h4 className="text-sm font-bold text-destructive">Booking Cancelled</h4>
                   <p className="text-xs text-foreground leading-relaxed">
-                    Reason: {booking.cancellation?.cancellationReason || "No cancellation reason provided."}
+                    Reason:{" "}
+                    {booking.cancellation?.cancellationReason || "No cancellation reason provided."}
                   </p>
                   {booking.cancellation?.cancelledAt && (
                     <span className="text-[10px] text-muted-foreground font-mono block pt-1">
@@ -599,23 +618,36 @@ export default function ProviderBookingDetailsView({
                 </div>
               )}
 
-              {booking.statusHistory && booking.statusHistory.filter(l => l.reason || l.notes).length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block">
-                    Recorded Log Notes
-                  </span>
-                  {booking.statusHistory.filter(l => l.reason || l.notes).map((log) => (
-                    <div key={log.id} className="p-3 rounded-xl border border-border bg-muted/40 text-xs space-y-0.5">
-                      <div className="flex items-center justify-between text-muted-foreground text-[10px]">
-                        <span className="font-bold text-foreground">Status: {log.toStatus ? log.toStatus.replace("_", " ") : "UPDATED"}</span>
-                        <span>{new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                      </div>
-                      {log.reason && <p className="text-amber-500 font-medium">{log.reason}</p>}
-                      {log.notes && <p className="text-muted-foreground italic">{log.notes}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {booking.statusHistory &&
+                booking.statusHistory.filter((l) => l.reason || l.notes).length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest block">
+                      Recorded Log Notes
+                    </span>
+                    {booking.statusHistory
+                      .filter((l) => l.reason || l.notes)
+                      .map((log) => (
+                        <div
+                          key={log.id}
+                          className="p-3 rounded-xl border border-border bg-muted/40 text-xs space-y-0.5"
+                        >
+                          <div className="flex items-center justify-between text-muted-foreground text-[10px]">
+                            <span className="font-bold text-foreground">
+                              Status: {log.toStatus ? log.toStatus.replace("_", " ") : "UPDATED"}
+                            </span>
+                            <span>
+                              {new Date(log.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          {log.reason && <p className="text-amber-500 font-medium">{log.reason}</p>}
+                          {log.notes && <p className="text-muted-foreground italic">{log.notes}</p>}
+                        </div>
+                      ))}
+                  </div>
+                )}
             </div>
           )}
         </div>
@@ -706,11 +738,16 @@ export default function ProviderBookingDetailsView({
                   </span>
                 </div>
                 <p className="text-xs text-foreground">
-                  {booking.cancellation?.cancellationReason || "Cancelled by customer before service."}
+                  {booking.cancellation?.cancellationReason ||
+                    "Cancelled by customer before service."}
                 </p>
                 {booking.cancellation?.cancelledAt && (
                   <span className="text-[10px] text-muted-foreground font-mono block">
-                    Cancelled: {new Date(booking.cancellation.cancelledAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    Cancelled:{" "}
+                    {new Date(booking.cancellation.cancelledAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                 )}
               </div>
@@ -734,7 +771,8 @@ export default function ProviderBookingDetailsView({
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Vehicle scheduled for {formattedDates.timeStr}. Check-in will start execution tracking.
+                  Vehicle scheduled for {formattedDates.timeStr}. Check-in will start execution
+                  tracking.
                 </p>
               </div>
             )}
@@ -835,7 +873,9 @@ export default function ProviderBookingDetailsView({
               </button>
             )}
 
-            {(booking.status === "CONFIRMED" || booking.status === "PENDING" || booking.status === "CHECKED_IN") && (
+            {(booking.status === "CONFIRMED" ||
+              booking.status === "PENDING" ||
+              booking.status === "CHECKED_IN") && (
               <button
                 type="button"
                 onClick={() => onAdvanceStatus("NO_SHOW")}

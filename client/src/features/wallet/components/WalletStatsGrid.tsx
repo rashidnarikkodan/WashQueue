@@ -22,12 +22,16 @@ export const WalletStatsGrid: React.FC<WalletStatsGridProps> = ({
 
       <div className="rounded-2xl bg-card p-5 border border-border space-y-1 shadow-sm">
         <span className="text-xs font-medium text-muted-foreground">Total Spent</span>
-        <p className="text-xl sm:text-2xl font-bold text-foreground">₹{totalSpentAmount.toFixed(2)}</p>
+        <p className="text-xl sm:text-2xl font-bold text-foreground">
+          ₹{totalSpentAmount.toFixed(2)}
+        </p>
       </div>
 
       <div className="rounded-2xl bg-card p-5 border border-border space-y-1 shadow-sm">
         <span className="text-xs font-medium text-muted-foreground">Total Refunds</span>
-        <p className="text-xl sm:text-2xl font-bold text-foreground">₹{totalRefundAmount.toFixed(2)}</p>
+        <p className="text-xl sm:text-2xl font-bold text-foreground">
+          ₹{totalRefundAmount.toFixed(2)}
+        </p>
       </div>
 
       <div className="rounded-2xl bg-card p-5 border border-border space-y-1 shadow-sm">

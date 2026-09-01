@@ -36,4 +36,3 @@ export default function CheckInPage({ defaultTab = "CHECK_IN" }: CheckInPageProp
     </div>
   )
 }
-

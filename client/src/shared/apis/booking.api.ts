@@ -232,11 +232,10 @@ export const bookingApi = {
 
   getOwnerBookings: async (ownerId: string, query: OwnerBookingQuery) => {
     try {
-      const res = await api.get(API_ROUTES.BOOKINGS.OWNER_BOOKINGS(ownerId),{
-        params:query,
+      const res = await api.get(API_ROUTES.BOOKINGS.OWNER_BOOKINGS(ownerId), {
+        params: query,
       })
       return res.data.data
-
     } catch (error) {
       handleApiError(error, "Get Owners Booking Failed")
     }

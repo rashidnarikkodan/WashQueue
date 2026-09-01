@@ -238,10 +238,11 @@ export default function StationDiscoveryMap({
               <button
                 type="button"
                 onClick={() => handleStyleChange("dark")}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${currentMode === "dark"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "dark"
                     ? "bg-primary/10 text-primary border border-primary/30"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                }`}
               >
                 <Moon size={14} className="text-primary" />
                 <span>Dark Vector</span>
@@ -250,10 +251,11 @@ export default function StationDiscoveryMap({
               <button
                 type="button"
                 onClick={() => handleStyleChange("satellite")}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${currentMode === "satellite"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "satellite"
                     ? "bg-primary/10 text-primary border border-primary/30"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                }`}
               >
                 <Globe size={14} className="text-emerald-400" />
                 <span>Satellite Imagery</span>
@@ -262,10 +264,11 @@ export default function StationDiscoveryMap({
               <button
                 type="button"
                 onClick={() => handleStyleChange("streets")}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${currentMode === "streets"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all cursor-pointer ${
+                  currentMode === "streets"
                     ? "bg-primary/10 text-primary border border-primary/30"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                }`}
               >
                 <Sun size={14} className="text-amber-400" />
                 <span>Streets Light</span>

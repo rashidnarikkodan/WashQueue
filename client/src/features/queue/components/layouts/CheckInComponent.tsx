@@ -1,14 +1,7 @@
 import { toast } from "sonner"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  QrCode,
-  Keyboard,
-  CheckCircle2,
-  HelpCircle,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react"
+import { QrCode, Keyboard, CheckCircle2, HelpCircle, ArrowRight, Sparkles } from "lucide-react"
 import { bookingApi } from "@/shared/apis/booking.api"
 import { QrCameraScanner } from "../ui/QrCameraScanner"
 import type { BookingResponse } from "@/shared/apis/booking.api"
@@ -74,10 +67,7 @@ export default function CheckInComponent() {
             </span>
           </div>
 
-          <QrCameraScanner
-            onScanSuccess={handleQrScanSuccess}
-            isProcessing={isSubmitting}
-          />
+          <QrCameraScanner onScanSuccess={handleQrScanSuccess} isProcessing={isSubmitting} />
 
           <div className="text-xs text-muted-foreground flex items-center gap-2 pt-2">
             <Sparkles className="h-4 w-4 text-primary shrink-0" />
@@ -126,7 +116,8 @@ export default function CheckInComponent() {
               <span>Need Assistance?</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              If the customer lost their QR pass, ask for their 10-digit phone number or registration number to search active booking records.
+              If the customer lost their QR pass, ask for their 10-digit phone number or
+              registration number to search active booking records.
             </p>
           </div>
         </div>
@@ -150,18 +141,23 @@ export default function CheckInComponent() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vehicle:</span>
                 <span className="font-bold text-foreground">
-                  {confirmedBooking.vehicleDetails?.brand || "Car"} {confirmedBooking.vehicleDetails?.model || ""}
+                  {confirmedBooking.vehicleDetails?.brand || "Car"}{" "}
+                  {confirmedBooking.vehicleDetails?.model || ""}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Reg No:</span>
                 <span className="font-mono font-bold text-primary">
-                  {confirmedBooking.vehicleDetails?.registrationNumber || confirmedBooking.walkInVehicle?.registrationNumber || "MH 12 AB 1234"}
+                  {confirmedBooking.vehicleDetails?.registrationNumber ||
+                    confirmedBooking.walkInVehicle?.registrationNumber ||
+                    "MH 12 AB 1234"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Wash Package:</span>
-                <span className="font-bold text-foreground">{confirmedBooking.serviceType} WASH</span>
+                <span className="font-bold text-foreground">
+                  {confirmedBooking.serviceType} WASH
+                </span>
               </div>
             </div>
 

@@ -6,10 +6,7 @@ interface BuildUserFiltersOptions {
   setStatusFilter: (status: string) => void
 }
 
-export function buildUserFilters({
-  statusFilter,
-  setStatusFilter,
-}: BuildUserFiltersOptions): {
+export function buildUserFilters({ statusFilter, setStatusFilter }: BuildUserFiltersOptions): {
   selectFilters: SelectFilter[]
 } {
   const selectFilters: SelectFilter[] = [

@@ -186,10 +186,11 @@ const StationDiscovery = () => {
             onClick={userLocation ? handleClearLocation : handleGetLocation}
             disabled={isLocating}
             title={userLocation ? "Clear location filter" : "Find stations near me"}
-            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${userLocation
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
+              userLocation
                 ? "bg-primary/10 border-primary text-primary shadow-sm"
                 : "bg-card border-border hover:bg-muted text-foreground"
-              }`}
+            }`}
           >
             {isLocating ? (
               <Loader2 className="w-4 h-4 text-primary animate-spin" />
@@ -231,10 +232,11 @@ const StationDiscovery = () => {
 
           <button
             onClick={() => setIsFilterModalOpen(true)}
-            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${activeFilterCount > 0
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
+              activeFilterCount > 0
                 ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
                 : "bg-card border-border hover:bg-muted text-foreground"
-              }`}
+            }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
             <span>Filters</span>
@@ -278,10 +280,11 @@ const StationDiscovery = () => {
                 vehicleClassId: undefined,
               }))
             }
-            className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold shrink-0 transition-all cursor-pointer ${!filters.selectedVehicleId
+            className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold shrink-0 transition-all cursor-pointer ${
+              !filters.selectedVehicleId
                 ? "bg-primary/10 border-primary text-primary shadow-sm"
                 : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+            }`}
           >
             All Vehicles
           </button>
@@ -298,10 +301,11 @@ const StationDiscovery = () => {
                     vehicleCategory: isSelected ? "all" : v.categoryId,
                   }))
                 }
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 transition-all cursor-pointer ${isSelected
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                  isSelected
                     ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-card border-border text-foreground hover:bg-muted"
-                  }`}
+                }`}
               >
                 <Car className="w-3.5 h-3.5" />
                 <span>{v.nickname || `${v.brand} ${v.model}`}</span>

@@ -68,7 +68,9 @@ export function StationQASection({ stationName, questions = [] }: StationQASecti
                     </span>
                     <span className="text-xs text-muted-foreground">{item.answer.answeredAt}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{item.answer.text}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {item.answer.text}
+                  </p>
                 </div>
               )}
             </div>

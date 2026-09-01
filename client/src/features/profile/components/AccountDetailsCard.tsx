@@ -8,10 +8,10 @@ interface AccountDetailsCardProps {
 export default function AccountDetailsCard({ profile }: AccountDetailsCardProps) {
   const formattedMemberSince = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    })
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
     : "Jan 04, 2026"
 
   const getAuthProviderDetails = (provider?: string) => {
@@ -97,7 +97,9 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
               <p className="text-base font-bold text-foreground leading-tight">
                 {authDetails.label}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5 break-words">{authDetails.description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                {authDetails.description}
+              </p>
             </div>
           </div>
         </div>

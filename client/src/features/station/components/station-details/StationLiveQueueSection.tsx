@@ -135,7 +135,9 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
       {isLoading && !queueData ? (
         <div className="p-8 rounded-2xl border border-border bg-card/60 text-center space-y-3">
           <RefreshCw size={24} className="animate-spin text-primary mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">Connecting to station live queue...</p>
+          <p className="text-xs text-muted-foreground font-medium">
+            Connecting to station live queue...
+          </p>
         </div>
       ) : error ? (
         <div className="p-6 rounded-2xl border border-destructive/20 bg-destructive/5 text-center space-y-2">
@@ -150,7 +152,8 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           <div className="space-y-1">
             <h4 className="text-base font-bold text-foreground">All Washing Bays Available</h4>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              There are currently 0 vehicles waiting in queue. Drive in or book now for immediate service across {totalBays} service bay{totalBays > 1 ? "s" : ""}.
+              There are currently 0 vehicles waiting in queue. Drive in or book now for immediate
+              service across {totalBays} service bay{totalBays > 1 ? "s" : ""}.
             </p>
           </div>
           <div className="pt-1">

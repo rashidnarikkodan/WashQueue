@@ -131,8 +131,7 @@ export default function VehicleCatelog() {
         await deleteClass(id)
       }
       setDeleteConfirmTarget(null)
-    } catch {
-    }
+    } catch {}
   }
 
   const handleToggleCategoryStatusClick = async (cat: VehicleCategory, e: React.MouseEvent) => {

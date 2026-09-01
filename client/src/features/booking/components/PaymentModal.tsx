@@ -47,7 +47,9 @@ export default function PaymentModal({
             <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
               Choose Payment Method
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Complete your booking securely</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Complete your booking securely
+            </p>
           </div>
           <button
             type="button"
@@ -82,14 +84,18 @@ export default function PaymentModal({
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-foreground">UPI Payment</h3>
-                <p className="text-xs text-muted-foreground">Pay using GPay, PhonePe, Paytm, or BHIM</p>
+                <p className="text-xs text-muted-foreground">
+                  Pay using GPay, PhonePe, Paytm, or BHIM
+                </p>
               </div>
               <div
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                   selectedMethod === "upi" ? "border-primary bg-primary" : "border-border"
                 }`}
               >
-                {selectedMethod === "upi" && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
+                {selectedMethod === "upi" && (
+                  <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                )}
               </div>
             </div>
 
@@ -145,7 +151,9 @@ export default function PaymentModal({
                             useWalletWithUpi ? "translate-x-6" : "translate-x-1"
                           }`}
                         >
-                          {useWalletWithUpi && <Check size={10} className="text-emerald-700 stroke-[3]" />}
+                          {useWalletWithUpi && (
+                            <Check size={10} className="text-emerald-700 stroke-[3]" />
+                          )}
                         </span>
                       </button>
                     </div>
@@ -168,7 +176,9 @@ export default function PaymentModal({
                       <Wallet size={13} />
                       <span>Wallet balance is ₹0.00</span>
                     </span>
-                    <span className="text-[10px] text-muted-foreground/70">Top-up from profile to save</span>
+                    <span className="text-[10px] text-muted-foreground/70">
+                      Top-up from profile to save
+                    </span>
                   </div>
                 )}
               </div>
@@ -196,7 +206,9 @@ export default function PaymentModal({
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-foreground">Wallet Direct</h3>
                 {isLoadingWallet ? (
-                  <span className="text-[10px] text-muted-foreground animate-pulse">Checking...</span>
+                  <span className="text-[10px] text-muted-foreground animate-pulse">
+                    Checking...
+                  </span>
                 ) : walletBalance !== null ? (
                   <span
                     className={`text-xs font-bold ${
@@ -209,7 +221,9 @@ export default function PaymentModal({
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {walletBalance !== null && walletBalance < totalAmount ? (
-                  <span className="text-destructive font-medium">Insufficient full balance (use UPI split above)</span>
+                  <span className="text-destructive font-medium">
+                    Insufficient full balance (use UPI split above)
+                  </span>
                 ) : (
                   "Direct 100% payment from your app wallet"
                 )}
@@ -220,7 +234,9 @@ export default function PaymentModal({
                 selectedMethod === "wallet" ? "border-primary bg-primary" : "border-border"
               }`}
             >
-              {selectedMethod === "wallet" && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
+              {selectedMethod === "wallet" && (
+                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+              )}
             </div>
           </div>
         </div>

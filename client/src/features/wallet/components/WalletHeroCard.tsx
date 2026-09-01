@@ -1,11 +1,5 @@
 import React from "react"
-import {
-  Wallet as WalletIcon,
-  PlusCircle,
-  FileText,
-  Building2,
-  CheckCircle2,
-} from "lucide-react"
+import { Wallet as WalletIcon, PlusCircle, FileText, Building2, CheckCircle2 } from "lucide-react"
 import type { WalletData } from "@/shared/apis/wallet.api"
 
 interface WalletHeroCardProps {
@@ -43,7 +37,9 @@ export const WalletHeroCard: React.FC<WalletHeroCardProps> = ({
               ? "₹..."
               : `₹${wallet?.balance != null ? wallet.balance.toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "0.00"}`}
           </span>
-          <span className="text-xs text-muted-foreground font-medium">{wallet?.currency || "INR"}</span>
+          <span className="text-xs text-muted-foreground font-medium">
+            {wallet?.currency || "INR"}
+          </span>
         </div>
 
         <p className="text-xs text-muted-foreground">

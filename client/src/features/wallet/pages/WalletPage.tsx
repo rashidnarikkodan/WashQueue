@@ -228,7 +228,9 @@ export default function WalletPage() {
 
   const totalRefundAmount = useMemo(() => {
     return transactions
-      .filter((tx) => (tx.category === "REFUND" || tx.type === "REFUND") && tx.status === "COMPLETED")
+      .filter(
+        (tx) => (tx.category === "REFUND" || tx.type === "REFUND") && tx.status === "COMPLETED"
+      )
       .reduce((acc, tx) => acc + tx.amount, 0)
   }, [transactions])
 

@@ -81,7 +81,9 @@ export default function CustomerBookingDetailsView({
   const totalPrice = booking.pricingSnapshot?.totalPrice ?? 0
   const basePrice = booking.pricingSnapshot?.basePrice ?? 0
   const extraPrice = booking.pricingSnapshot?.extraPrice ?? 0
-  const paymentMethodStr = booking.paymentMethod ? booking.paymentMethod.replace("_", " ") : "ONLINE"
+  const paymentMethodStr = booking.paymentMethod
+    ? booking.paymentMethod.replace("_", " ")
+    : "ONLINE"
   const paymentStatusStr = booking.paymentStatus || "PENDING"
   const bookingStatusStr = booking.status ? booking.status.replace("_", " ") : "PENDING"
 
@@ -110,10 +112,10 @@ export default function CustomerBookingDetailsView({
 
   const canReschedule = Boolean(
     (booking.status === "CONFIRMED" || booking.status === "PENDING") &&
-      !booking.isWalkIn &&
-      !isMaxReschedulesReached &&
-      booking.scheduling?.windowStart &&
-      new Date(booking.scheduling.windowStart).getTime() - Date.now() >= 24 * 60 * 60 * 1000
+    !booking.isWalkIn &&
+    !isMaxReschedulesReached &&
+    booking.scheduling?.windowStart &&
+    new Date(booking.scheduling.windowStart).getTime() - Date.now() >= 24 * 60 * 60 * 1000
   )
 
   return (
@@ -351,7 +353,9 @@ export default function CustomerBookingDetailsView({
               ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
                 <div className="px-4 py-2 rounded-2xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-bold flex items-center gap-2">
                   <XCircle size={16} />
-                  <span>{booking.status === "CANCELLED" ? "Booking Cancelled" : "Slot Expired"}</span>
+                  <span>
+                    {booking.status === "CANCELLED" ? "Booking Cancelled" : "Slot Expired"}
+                  </span>
                 </div>
               ) : (
                 <div className="px-4 py-2 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold flex items-center gap-2">
@@ -382,7 +386,8 @@ export default function CustomerBookingDetailsView({
                   +{durationBreakdown.extraServicesMinutes} mins
                 </span>
                 <p className="text-[11px] text-muted-foreground">
-                  {booking.extraServices?.length || 0} extra service{booking.extraServices?.length === 1 ? "" : "s"}
+                  {booking.extraServices?.length || 0} extra service
+                  {booking.extraServices?.length === 1 ? "" : "s"}
                 </p>
               </div>
 
@@ -415,7 +420,11 @@ export default function CustomerBookingDetailsView({
                   </span>
                 </div>
                 <p className="text-muted-foreground text-[11px] sm:text-xs">
-                  Your booking secures your service slot window (<strong>{formattedDates.timeStr}</strong>). Once you arrive at the station and complete check-in (via QR scan / pre-inspection), your vehicle is entered into the live operational queue. The dynamic waiting time is calculated in real time based on active bay availability and vehicles ahead in line.
+                  Your booking secures your service slot window (
+                  <strong>{formattedDates.timeStr}</strong>). Once you arrive at the station and
+                  complete check-in (via QR scan / pre-inspection), your vehicle is entered into the
+                  live operational queue. The dynamic waiting time is calculated in real time based
+                  on active bay availability and vehicles ahead in line.
                 </p>
               </div>
             </div>
@@ -526,7 +535,8 @@ export default function CustomerBookingDetailsView({
                       "{booking.postServiceInspection.notes || "No additional notes recorded"}"
                     </p>
                     <span className="text-[10px] text-muted-foreground block pt-1">
-                      Handed over {new Date(booking.postServiceInspection.capturedAt).toLocaleString()}
+                      Handed over{" "}
+                      {new Date(booking.postServiceInspection.capturedAt).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -704,7 +714,10 @@ export default function CustomerBookingDetailsView({
                 className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
-                  <LifeBuoy size={16} className="text-amber-500 group-hover:rotate-45 transition-transform duration-300" />
+                  <LifeBuoy
+                    size={16}
+                    className="text-amber-500 group-hover:rotate-45 transition-transform duration-300"
+                  />
                   <span>Raise a Ticket / Issue</span>
                 </div>
                 <ChevronRight size={14} className="text-muted-foreground" />

@@ -32,8 +32,7 @@ export function DataTableToolbar({
 }: DataTableToolbarProps) {
   const hasFilters =
     (selectFilters && selectFilters.length > 0) || (toggleFilters && toggleFilters.length > 0)
-  const computedSearchColSpan =
-    searchColSpan || (hasFilters ? "md:col-span-2" : "md:col-span-6")
+  const computedSearchColSpan = searchColSpan || (hasFilters ? "md:col-span-2" : "md:col-span-6")
 
   const hasContent = Boolean(onSearchChange || tabs.length > 0 || hasFilters)
   if (!hasContent) return null

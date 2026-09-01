@@ -29,15 +29,7 @@ interface GroupedOperatingHour {
 function groupOperatingHours(operatingHours?: Station["operatingHours"]): GroupedOperatingHour[] {
   if (!operatingHours || operatingHours.length === 0) return []
 
-  const dayOrder = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ]
+  const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 

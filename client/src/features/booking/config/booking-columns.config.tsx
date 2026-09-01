@@ -102,8 +102,10 @@ export function getCustomerColumns({ onNavigate }: CustomerColumnHandlers): Colu
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
         if (b.status === BOOKING_STATUS.CONFIRMED)
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === BOOKING_STATUS.CANCELLED) badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
-        if (b.status === BOOKING_STATUS.NO_SHOW) badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        if (b.status === BOOKING_STATUS.CANCELLED)
+          badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === BOOKING_STATUS.NO_SHOW)
+          badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span
@@ -243,8 +245,10 @@ export function getManagementColumns({
           badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"
         if (b.status === BOOKING_STATUS.CONFIRMED)
           badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-        if (b.status === BOOKING_STATUS.CANCELLED) badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
-        if (b.status === BOOKING_STATUS.NO_SHOW) badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
+        if (b.status === BOOKING_STATUS.CANCELLED)
+          badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"
+        if (b.status === BOOKING_STATUS.NO_SHOW)
+          badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/20"
 
         return (
           <span

@@ -369,7 +369,7 @@ export default function AddVehicleModal({
           <FormInput
             label="Reg Plate"
             type="text"
-            className='uppercase'
+            className="uppercase"
             placeholder="e.g. KL11AB1234"
             value={registrationNumber}
             onChange={(e) => setRegistrationNumber(e.target.value)}

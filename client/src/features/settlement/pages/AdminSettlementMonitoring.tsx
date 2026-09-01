@@ -368,7 +368,8 @@ export default function AdminSettlementMonitoring() {
             Settlement & Financial Monitoring
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Audit platform commission revenues, provider payout transfers, and resolve held/failed transactions.
+            Audit platform commission revenues, provider payout transfers, and resolve held/failed
+            transactions.
           </p>
         </div>
 

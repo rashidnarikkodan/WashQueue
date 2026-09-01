@@ -11,9 +11,7 @@ interface PositionedFile {
   file: File
 }
 
-export async function inspectionImagesUpload(
-  photos: PositionedFile[]
-): Promise<CloudinaryImage[]> {
+export async function inspectionImagesUpload(photos: PositionedFile[]): Promise<CloudinaryImage[]> {
   const { signature, timestamp, folder, apiKey, cloudName } =
     await bookingApi.getInspectionUploadSignature()
 
@@ -26,13 +24,10 @@ export async function inspectionImagesUpload(
       formData.append("signature", signature)
       formData.append("folder", folder)
 
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      })
 
       if (!response.ok) {
         throw new Error(`Failed to upload ${position} photo`)

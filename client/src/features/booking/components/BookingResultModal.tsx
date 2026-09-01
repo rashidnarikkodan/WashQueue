@@ -67,8 +67,8 @@ export default function BookingResultModal({
   const displayErrorMessage = isSlotUnavailable
     ? "This time slot just filled up or is no longer available. Please choose another time slot."
     : isRefundInitiated
-    ? "Your payment succeeded, but the 10-minute hold window expired before confirmation. A full refund has been automatically initiated to your account."
-    : errorMessage || "The payment transaction was cancelled or declined. No charges were made."
+      ? "Your payment succeeded, but the 10-minute hold window expired before confirmation. A full refund has been automatically initiated to your account."
+      : errorMessage || "The payment transaction was cancelled or declined. No charges were made."
 
   const handleViewDetails = () => {
     onClose()
@@ -91,10 +91,10 @@ export default function BookingResultModal({
           isSuccess
             ? "bg-emerald-500"
             : isSlotUnavailable
-            ? "bg-amber-500"
-            : isRefundInitiated
-            ? "bg-primary"
-            : "bg-destructive"
+              ? "bg-amber-500"
+              : isRefundInitiated
+                ? "bg-primary"
+                : "bg-destructive"
         }`}
       />
 
@@ -103,10 +103,10 @@ export default function BookingResultModal({
           isSuccess
             ? "border-emerald-500/30 shadow-emerald-950/20"
             : isSlotUnavailable
-            ? "border-amber-500/30 shadow-amber-950/20"
-            : isRefundInitiated
-            ? "border-primary/30 shadow-primary/20"
-            : "border-destructive/30 shadow-destructive/20"
+              ? "border-amber-500/30 shadow-amber-950/20"
+              : isRefundInitiated
+                ? "border-primary/30 shadow-primary/20"
+                : "border-destructive/30 shadow-destructive/20"
         }`}
       >
         <div className="flex justify-center pt-2">
@@ -115,10 +115,10 @@ export default function BookingResultModal({
               isSuccess
                 ? "bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-500 ring-8 ring-emerald-500/10 shadow-emerald-500/20"
                 : isSlotUnavailable
-                ? "bg-amber-500/15 border-2 border-amber-500/40 text-amber-500 ring-8 ring-amber-500/10 shadow-amber-500/20"
-                : isRefundInitiated
-                ? "bg-primary/15 border-2 border-primary/40 text-primary ring-8 ring-primary/10 shadow-primary/20"
-                : "bg-destructive/15 border-2 border-destructive/40 text-destructive ring-8 ring-destructive/10 shadow-destructive/20"
+                  ? "bg-amber-500/15 border-2 border-amber-500/40 text-amber-500 ring-8 ring-amber-500/10 shadow-amber-500/20"
+                  : isRefundInitiated
+                    ? "bg-primary/15 border-2 border-primary/40 text-primary ring-8 ring-primary/10 shadow-primary/20"
+                    : "bg-destructive/15 border-2 border-destructive/40 text-destructive ring-8 ring-destructive/10 shadow-destructive/20"
             }`}
           >
             {isSuccess ? (
@@ -138,10 +138,10 @@ export default function BookingResultModal({
             {isSuccess
               ? "Payment Successful"
               : isSlotUnavailable
-              ? "Slot Unavailable"
-              : isRefundInitiated
-              ? "Refund Initiated"
-              : "Payment Failed"}
+                ? "Slot Unavailable"
+                : isRefundInitiated
+                  ? "Refund Initiated"
+                  : "Payment Failed"}
           </h2>
 
           <div className="flex items-center justify-center">
@@ -150,10 +150,10 @@ export default function BookingResultModal({
                 isSuccess
                   ? "bg-primary/10 border-primary/20 text-primary"
                   : isSlotUnavailable
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                  : isRefundInitiated
-                  ? "bg-primary/10 border-primary/30 text-primary"
-                  : "bg-destructive/10 border-destructive/30 text-destructive"
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                    : isRefundInitiated
+                      ? "bg-primary/10 border-primary/30 text-primary"
+                      : "bg-destructive/10 border-destructive/30 text-destructive"
               }`}
             >
               {isSuccess ? (
@@ -243,8 +243,8 @@ export default function BookingResultModal({
                 {isSlotUnavailable
                   ? "Availability Notice"
                   : isRefundInitiated
-                  ? "Refund Notice"
-                  : "Failure Reason"}
+                    ? "Refund Notice"
+                    : "Failure Reason"}
               </span>
               <p className="text-foreground leading-relaxed text-xs">{displayErrorMessage}</p>
             </div>

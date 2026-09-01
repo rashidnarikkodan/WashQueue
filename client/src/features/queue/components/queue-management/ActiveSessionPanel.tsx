@@ -69,12 +69,10 @@ export function ActiveSessionPanel({
               <Sparkles className="h-10 w-10 animate-pulse" />
             </div>
             <div className="space-y-1.5 max-w-sm">
-              <h3 className="text-lg font-bold text-foreground">
-                Select a Vehicle from the Queue
-              </h3>
+              <h3 className="text-lg font-bold text-foreground">Select a Vehicle from the Queue</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Click any vehicle in the live queue on the left to control the wash session,
-                inspect photos, or complete handover.
+                Click any vehicle in the live queue on the left to control the wash session, inspect
+                photos, or complete handover.
               </p>
             </div>
           </div>

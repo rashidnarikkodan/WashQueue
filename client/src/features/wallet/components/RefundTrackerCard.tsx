@@ -5,9 +5,7 @@ interface RefundTrackerCardProps {
   totalRefundAmount: number
 }
 
-export const RefundTrackerCard: React.FC<RefundTrackerCardProps> = ({
-  totalRefundAmount,
-}) => {
+export const RefundTrackerCard: React.FC<RefundTrackerCardProps> = ({ totalRefundAmount }) => {
   return (
     <div className="flex flex-col justify-between gap-4">
       <div className="rounded-2xl bg-card p-5 border border-border flex items-center justify-between shadow-sm">

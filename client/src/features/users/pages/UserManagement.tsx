@@ -38,7 +38,10 @@ const UserManagement = () => {
   const searchQuery = searchParams.get("q") || ""
   const roleFilter = searchParams.get("role") || "all"
   const statusFilter = searchParams.get("status") || FILTER_STATUS.ALL
-  const activeTab = roleFilter === "customer" || roleFilter === "owner" || roleFilter === 'manager' ? roleFilter : "all"
+  const activeTab =
+    roleFilter === "customer" || roleFilter === "owner" || roleFilter === "manager"
+      ? roleFilter
+      : "all"
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 5
 

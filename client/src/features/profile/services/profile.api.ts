@@ -27,8 +27,7 @@ export const profileApi = {
               authUser.phone = onboarding.details.phone
             }
           }
-        } catch {
-        }
+        } catch {}
       }
 
       return {

@@ -71,7 +71,6 @@ export default function SignupForm() {
       toast.success(state.message || "Registration successful!")
       navigate("/verify-email")
     }
-
   }, [state, navigate])
 
   return (

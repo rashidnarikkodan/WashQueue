@@ -53,11 +53,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
       tx.category === "TOP_UP" ||
       tx.category === "CASHBACK"
     const isRefund = tx.category === "REFUND" || tx.type === "REFUND"
-    const defaultTitle = isRefund
-      ? "Refund"
-      : isCredit
-      ? "Wallet Credit"
-      : "Payment"
+    const defaultTitle = isRefund ? "Refund" : isCredit ? "Wallet Credit" : "Payment"
 
     return (
       <div
@@ -80,9 +76,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
           </div>
 
           <div>
-            <h4 className="text-sm font-bold text-foreground">
-              {tx.description || defaultTitle}
-            </h4>
+            <h4 className="text-sm font-bold text-foreground">{tx.description || defaultTitle}</h4>
             <p className="text-xs text-muted-foreground">
               {new Date(tx.createdAt).toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -97,11 +91,7 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
         </div>
 
         <div className="text-right">
-          <p
-            className={`text-sm font-bold ${
-              isCredit ? "text-emerald-500" : "text-rose-500"
-            }`}
-          >
+          <p className={`text-sm font-bold ${isCredit ? "text-emerald-500" : "text-rose-500"}`}>
             {isCredit ? "+" : "-"}₹{tx.amount.toFixed(2)}
           </p>
           <span
@@ -109,8 +99,8 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
               tx.status === "COMPLETED"
                 ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                 : tx.status === "FAILED"
-                ? "bg-destructive/10 text-destructive border border-destructive/20"
-                : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                  ? "bg-destructive/10 text-destructive border border-destructive/20"
+                  : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
             }`}
           >
             {tx.status}

@@ -60,4 +60,3 @@ export const ownerApi = {
     return response.data
   },
 }
-

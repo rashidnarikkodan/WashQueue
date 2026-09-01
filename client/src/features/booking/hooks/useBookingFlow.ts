@@ -100,7 +100,6 @@ export function useBookingFlow(stationId: string | null) {
 
   const canSubmit = bookingIntent !== null
 
-
   //to handle successfully completed online payment and open success/error modal
   const handleOnlinePaymentSuccess = useCallback((booking?: BookingResponse) => {
     setIsPaymentModalOpen(false)

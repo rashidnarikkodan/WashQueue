@@ -290,7 +290,9 @@ export function StationDetails({ role }: CommonStationDetailProps) {
         <div className="p-5 border border-destructive/30 bg-destructive/10 rounded-2xl flex items-start gap-4 shadow-xl">
           <AlertTriangle className="w-6 h-6 text-destructive shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="text-base font-extrabold text-destructive">Application Status: Rejected</h3>
+            <h3 className="text-base font-extrabold text-destructive">
+              Application Status: Rejected
+            </h3>
             <p className="text-xs text-destructive/90 leading-relaxed">
               <strong>Reason:</strong> {station.rejectionReason}
             </p>

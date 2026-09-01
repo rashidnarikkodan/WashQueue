@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import {
-  CheckCircle2,
-  Camera,
-  Check,
-  Upload,
-} from "lucide-react"
+import { CheckCircle2, Camera, Check, Upload } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi } from "@/shared/apis/booking.api"
 import type { BookingResponse, InspectionChecklistItem } from "@/shared/apis/booking.api"
@@ -45,7 +40,11 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
   { key: "glass", label: "Glass & Mirrored Surfaces", group: "EXTERIOR INTEGRITY" },
   { key: "dashboard", label: "Dashboard & Console Dusting", group: "INTERIOR SANITIZATION" },
   { key: "seats", label: "Seats & Upholstery Check", group: "INTERIOR SANITIZATION" },
-  { key: "specialRequest", label: "Special Request Fulfillment", group: "FINAL QUALITY VERIFICATION" },
+  {
+    key: "specialRequest",
+    label: "Special Request Fulfillment",
+    group: "FINAL QUALITY VERIFICATION",
+  },
 ]
 
 const CHECKLIST_GROUPS = Array.from(new Set(CHECKLIST_ITEMS.map((item) => item.group)))
@@ -55,7 +54,7 @@ export default function ManagerPostInspectionPage() {
   const navigate = useNavigate()
   const basePath = useQueueBasePath()
   const [booking, setBooking] = useState<BookingResponse | null>(null)
-  
+
   const [capturedPhotos, setCapturedPhotos] = useState<Record<PhotoSlot, CapturedPhoto | null>>({
     front: null,
     rear: null,
@@ -74,7 +73,7 @@ export default function ManagerPostInspectionPage() {
     seats: true,
     specialRequest: true,
   })
-  
+
   const [remarks, setRemarks] = useState<Record<string, string>>({})
   const [remarkModalItem, setRemarkModalItem] = useState<{
     key: string
@@ -240,7 +239,9 @@ export default function ManagerPostInspectionPage() {
       }))
       await bookingApi.savePostInspection(booking.id, {
         photos: uploadedPhotos,
-        notes: handoverNotes || "Post-service vehicle quality inspection verified & handed over to customer",
+        notes:
+          handoverNotes ||
+          "Post-service vehicle quality inspection verified & handed over to customer",
         checklist: checklistPayload,
       })
       toast.success("✓ Inspection verified & vehicle handover completed!")
@@ -255,15 +256,20 @@ export default function ManagerPostInspectionPage() {
   }
 
   const bookingIdStr = booking?.bookingNumber || ""
-  const customerName = booking?.customerDetails?.name || booking?.walkInCustomer?.name || (booking?.isWalkIn ? "Walk-In Customer" : "Customer")
+  const customerName =
+    booking?.customerDetails?.name ||
+    booking?.walkInCustomer?.name ||
+    (booking?.isWalkIn ? "Walk-In Customer" : "Customer")
   const vehicleName = booking?.vehicleDetails?.brand
     ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
     : "Vehicle"
-  const plate = booking?.vehicleDetails?.registrationNumber || booking?.walkInVehicle?.registrationNumber || "N/A"
+  const plate =
+    booking?.vehicleDetails?.registrationNumber ||
+    booking?.walkInVehicle?.registrationNumber ||
+    "N/A"
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 space-y-8 max-w-[1600px] mx-auto">
-      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
@@ -281,9 +287,7 @@ export default function ManagerPostInspectionPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
         <div className="lg:col-span-7 space-y-6">
-          
           <div className="rounded-3xl bg-card border border-border p-6 space-y-6 text-card-foreground shadow-md">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
@@ -303,24 +307,34 @@ export default function ManagerPostInspectionPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">VEHICLE</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                  VEHICLE
+                </span>
                 <p className="font-bold text-foreground text-sm">{vehicleName}</p>
                 <p className="text-muted-foreground text-[11px]">{plate}</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">WASH TYPE</span>
-                <p className="font-bold text-foreground text-sm">{booking?.serviceType || "Full"} Wash</p>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                  WASH TYPE
+                </span>
+                <p className="font-bold text-foreground text-sm">
+                  {booking?.serviceType || "Full"} Wash
+                </p>
                 <p className="text-muted-foreground text-[11px]">Exterior + Interior</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">STARTED</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                  STARTED
+                </span>
                 <p className="font-bold text-foreground text-sm">10:02 AM</p>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">DURATION</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                  DURATION
+                </span>
                 <p className="font-bold text-foreground text-sm">43 Mins</p>
               </div>
             </div>
@@ -386,18 +400,17 @@ export default function ManagerPostInspectionPage() {
                 </div>
               </div>
             ))}
-
           </div>
-
         </div>
 
         <div className="lg:col-span-5 space-y-6">
-          
           <div className="rounded-3xl bg-card border border-border p-6 space-y-4 text-card-foreground shadow-md">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <Camera className="h-5 w-5 text-primary" />
-                <h3 className="text-base font-bold text-foreground">Post-Service Photos (4 Angles)</h3>
+                <h3 className="text-base font-bold text-foreground">
+                  Post-Service Photos (4 Angles)
+                </h3>
               </div>
               <span className="text-xs font-bold text-primary uppercase tracking-wider">
                 {Object.values(capturedPhotos).filter(Boolean).length} / 4 CAPTURED
@@ -419,7 +432,11 @@ export default function ManagerPostInspectionPage() {
                     >
                       {photoUrl ? (
                         <>
-                          <img src={photoUrl.previewUrl} alt={slot.title} className="w-full h-full object-cover rounded-lg" />
+                          <img
+                            src={photoUrl.previewUrl}
+                            alt={slot.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
                           <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
                             <button
                               type="button"
@@ -457,7 +474,9 @@ export default function ManagerPostInspectionPage() {
                       ) : (
                         <div className="space-y-1">
                           <Camera className="h-4 w-4 text-primary mx-auto" />
-                          <span className="text-[10px] font-bold text-foreground block uppercase">{slot.key} PHOTO</span>
+                          <span className="text-[10px] font-bold text-foreground block uppercase">
+                            {slot.key} PHOTO
+                          </span>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -537,8 +556,8 @@ export default function ManagerPostInspectionPage() {
             <div className="flex flex-col items-stretch gap-2 pt-2">
               {booking?.status === "IN_SERVICE" && !allPhotosCaptured && (
                 <p className="text-xs font-semibold text-warning text-right">
-                  {missingPhotoSlots.length} angle photo{missingPhotoSlots.length > 1 ? "s" : ""} still needed:{" "}
-                  {missingPhotoSlots.map((s) => s.title).join(", ")}
+                  {missingPhotoSlots.length} angle photo{missingPhotoSlots.length > 1 ? "s" : ""}{" "}
+                  still needed: {missingPhotoSlots.map((s) => s.title).join(", ")}
                 </p>
               )}
               {!allChecklistReviewed && (
@@ -554,14 +573,14 @@ export default function ManagerPostInspectionPage() {
                   className="flex-1 py-3.5 rounded-xl bg-success text-success-foreground hover:opacity-90 disabled:opacity-50 font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Check className="h-4 w-4 stroke-[3]" />
-                  <span>{isSubmitting ? "Completing Handover..." : "Complete Inspection & Handover"}</span>
+                  <span>
+                    {isSubmitting ? "Completing Handover..." : "Complete Inspection & Handover"}
+                  </span>
                 </button>
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
 
       {activeCameraSlot && (
@@ -604,7 +623,6 @@ export default function ManagerPostInspectionPage() {
         className="hidden"
         onChange={handleFileSelected}
       />
-
     </div>
   )
 }

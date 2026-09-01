@@ -61,8 +61,8 @@ export function SettlementDetailModal({
   const commissionPercent = settlement.platformCommissionRate
     ? `${(settlement.platformCommissionRate * 100).toFixed(0)}%`
     : settlement.totalAmount > 0
-    ? `${((settlement.platformCommission / settlement.totalAmount) * 100).toFixed(0)}%`
-    : "10%"
+      ? `${((settlement.platformCommission / settlement.totalAmount) * 100).toFixed(0)}%`
+      : "10%"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -71,9 +71,7 @@ export function SettlementDetailModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">
-                Settlement Statement
-              </h3>
+              <h3 className="text-lg font-bold text-foreground">Settlement Statement</h3>
               {getStatusBadge(settlement.status)}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 font-mono">
@@ -99,7 +97,8 @@ export function SettlementDetailModal({
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {settlement.holdReason === "MISSING_PAYOUT_ACCOUNT"
                     ? "Your station payout is on hold because a verified bank or payment transfer account is not yet configured. Payouts will resume automatically once setup is complete."
-                    : settlement.holdReason || "This settlement is currently on hold by platform administrator."}
+                    : settlement.holdReason ||
+                      "This settlement is currently on hold by platform administrator."}
                 </p>
               </div>
             </div>
@@ -147,9 +146,7 @@ export function SettlementDetailModal({
                 </span>
               </div>
               <div className="pt-3 border-t border-border flex items-center justify-between">
-                <span className="font-bold text-foreground">
-                  Net Station Settlement
-                </span>
+                <span className="font-bold text-foreground">Net Station Settlement</span>
                 <span className="text-xl font-extrabold text-emerald-500">
                   ₹{settlement.stationSettlementAmount.toFixed(2)}
                 </span>

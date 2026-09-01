@@ -125,18 +125,17 @@ export function useBookingPayment(isModalOpen = false) {
           useWallet: shouldUseWallet,
           ...(bookingIntentData
             ? {
-              stationId: bookingIntentData.stationId,
-              vehicleId: bookingIntentData.vehicleId,
-              timeWindowId: bookingIntentData.timeWindowId,
-              serviceType: (bookingIntentData.serviceType === "FULL_WASH" ||
+                stationId: bookingIntentData.stationId,
+                vehicleId: bookingIntentData.vehicleId,
+                timeWindowId: bookingIntentData.timeWindowId,
+                serviceType: (bookingIntentData.serviceType === "FULL_WASH" ||
                 bookingIntentData.serviceType === "full"
-                ? "FULL"
-                : bookingIntentData.serviceType) as "HALF" | "FULL",
-              extraServiceIds: bookingIntentData.extraServiceIds,
-              paymentMethod: (bookingIntentData.paymentMethod || PAYMENT_METHOD.ONLINE) as
-                | "ONLINE"
-                | "PAY_AT_STATION",
-            }
+                  ? "FULL"
+                  : bookingIntentData.serviceType) as "HALF" | "FULL",
+                extraServiceIds: bookingIntentData.extraServiceIds,
+                paymentMethod: (bookingIntentData.paymentMethod || PAYMENT_METHOD.ONLINE) as
+                  "ONLINE" | "PAY_AT_STATION",
+              }
             : {}),
         }
 
