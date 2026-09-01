@@ -198,7 +198,6 @@ export default function QRCodePass({
               value={value}
               size={145}
               level="H"
-              includeMargin={true}
               fgColor="#070b14"
               bgColor="#ffffff"
             />
