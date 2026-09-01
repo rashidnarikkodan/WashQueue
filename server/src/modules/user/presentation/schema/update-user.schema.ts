@@ -7,4 +7,3 @@ export const updateUserSchema = z.object({
   phone: z.string().optional(),
   isVerified: z.boolean().optional(),
 })
-

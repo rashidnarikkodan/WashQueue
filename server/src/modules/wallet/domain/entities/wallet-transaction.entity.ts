@@ -3,11 +3,7 @@ import { Money } from "../value-objects/money.vo"
 export type TransactionType = "CREDIT" | "DEBIT" | "REFUND"
 
 export type TransactionCategory =
-  | "TOP_UP"
-  | "BOOKING_PAYMENT"
-  | "REFUND"
-  | "CASHBACK"
-  | "ADMIN_ADJUSTMENT"
+  "TOP_UP" | "BOOKING_PAYMENT" | "REFUND" | "CASHBACK" | "ADMIN_ADJUSTMENT"
 
 export type TransactionStatus = "COMPLETED" | "PENDING" | "FAILED"
 

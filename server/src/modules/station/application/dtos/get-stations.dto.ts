@@ -14,8 +14,7 @@ export const StationSortBy = {
 } as const
 
 export type StationSortBy =
-  | keyof typeof StationSortBy
-  | (typeof StationSortBy)[keyof typeof StationSortBy]
+  keyof typeof StationSortBy | (typeof StationSortBy)[keyof typeof StationSortBy]
 
 export const STATION_SORT_BY = StationSortBy
 

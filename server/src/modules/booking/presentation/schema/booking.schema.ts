@@ -19,10 +19,7 @@ export const createWalkInBookingSchema = z.object({
   stationId: z.string().regex(objectIdRegex, "Invalid station ID"),
   timeWindowId: z.string().regex(objectIdRegex, "Invalid time window ID").optional(),
   serviceType: z.enum(["HALF", "FULL"]),
-  paymentMethod: z
-    .nativeEnum(PaymentMethod)
-    .optional()
-    .default(PaymentMethod.NO_PAYMENT),
+  paymentMethod: z.nativeEnum(PaymentMethod).optional().default(PaymentMethod.NO_PAYMENT),
   extraServiceIds: z
     .array(z.string().regex(objectIdRegex, "Invalid extra service ID"))
     .optional()
@@ -75,4 +72,3 @@ export const getOwnerBookingListQuerySchema = z.object({
 export const bookingIdParamSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
 })
-

@@ -22,16 +22,14 @@ export class PDFInvoiceService implements IPDFInvoiceService {
       try {
         const category = await this.vehicleCategoryRepository.findById(categoryId)
         if (category && category.name) categoryName = category.name
-      } catch {
-      }
+      } catch {}
     }
 
     if (classId) {
       try {
         const vehicleClass = await this.vehicleClassRepository.findById(classId)
         if (vehicleClass && vehicleClass.name) className = vehicleClass.name
-      } catch {
-      }
+      } catch {}
     }
 
     return new Promise((resolve, reject) => {

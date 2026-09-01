@@ -28,8 +28,7 @@ export class StationRedisHydrationService {
               isOpen: parsed.isOpen ?? this.checkIsOpen(station),
             })
             return
-          } catch {
-          }
+          } catch {}
         }
 
         const props = station.getProps()

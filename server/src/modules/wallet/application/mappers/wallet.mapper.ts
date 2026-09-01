@@ -15,9 +15,7 @@ export class WalletMapper {
     }
   }
 
-  public static transactionToDTO(
-    transaction: WalletTransaction
-  ): WalletTransactionDTO {
+  public static transactionToDTO(transaction: WalletTransaction): WalletTransactionDTO {
     return {
       id: transaction.id || "",
       walletId: transaction.walletId,

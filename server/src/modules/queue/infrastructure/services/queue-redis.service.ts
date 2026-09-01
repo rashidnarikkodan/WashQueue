@@ -2,7 +2,10 @@ import redis from "@/infrastructure/cache/redis.client"
 import logger from "@/configs/logger.config"
 import { Booking, BookingStatus } from "@/modules/booking/domain/entities/Booking"
 import { IBookingQueueService } from "../../application/interfaces/booking-queue.interface"
-import { OperationalQueueItemDTO, OperationalStationQueueDTO } from "../../application/dtos/operational-queue.dto"
+import {
+  OperationalQueueItemDTO,
+  OperationalStationQueueDTO,
+} from "../../application/dtos/operational-queue.dto"
 import { BookingModel } from "@/modules/booking/infrastructure/models/booking.model"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { BookingMapper } from "@/modules/booking/infrastructure/mappers/booking.mapper"
@@ -47,9 +50,16 @@ export class BookingRedisQueueService implements IBookingQueueService {
         status: booking.status,
         serviceType: booking.serviceType,
         isWalkIn: booking.isWalkIn ? "true" : "false",
-        checkedInAt: (booking.checkedInAt ? new Date(booking.checkedInAt).getTime() : now).toString(),
-        windowStart: booking.scheduling?.windowStart ? new Date(booking.scheduling.windowStart).toISOString() : "",
-        windowEnd: booking.scheduling?.windowEnd ? new Date(booking.scheduling.windowEnd).toISOString() : "",
+        checkedInAt: (booking.checkedInAt
+          ? new Date(booking.checkedInAt).getTime()
+          : now
+        ).toString(),
+        windowStart: booking.scheduling?.windowStart
+          ? new Date(booking.scheduling.windowStart).toISOString()
+          : "",
+        windowEnd: booking.scheduling?.windowEnd
+          ? new Date(booking.scheduling.windowEnd).toISOString()
+          : "",
       })
 
       const queueDepth = await redis.zcard(queueKey)
@@ -62,7 +72,10 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
       logger.info({ bookingId, stationId, score }, "[RedisQueue] Booking pushed to waiting queue")
     } catch (error) {
-      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Redis failure during pushToStationQueue")
+      logger.error(
+        { error, bookingId: booking.id },
+        "[RedisQueue] Redis failure during pushToStationQueue"
+      )
     }
   }
 
@@ -82,11 +95,20 @@ export class BookingRedisQueueService implements IBookingQueueService {
         await redis.sadd(activeKey, bookingId)
         await redis.hset(bookingKey, {
           status: booking.status,
-          serviceStartedAt: (booking.serviceStartedAt ? new Date(booking.serviceStartedAt).getTime() : now).toString(),
+          serviceStartedAt: (booking.serviceStartedAt
+            ? new Date(booking.serviceStartedAt).getTime()
+            : now
+          ).toString(),
         })
-      } else if ([BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER].includes(booking.status)) {
+      } else if (
+        [BookingStatus.SERVICE_COMPLETED, BookingStatus.AWAITING_HANDOVER].includes(booking.status)
+      ) {
         await redis.hset(bookingKey, "status", booking.status)
-      } else if ([BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(booking.status)) {
+      } else if (
+        [BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.NO_SHOW].includes(
+          booking.status
+        )
+      ) {
         await redis.zrem(queueKey, bookingId)
         await redis.srem(activeKey, bookingId)
         await redis.del(bookingKey)
@@ -102,13 +124,22 @@ export class BookingRedisQueueService implements IBookingQueueService {
         updatedAt: now.toString(),
       })
 
-      logger.info({ bookingId, status: booking.status }, "[RedisQueue] Updated booking queue status in Redis")
+      logger.info(
+        { bookingId, status: booking.status },
+        "[RedisQueue] Updated booking queue status in Redis"
+      )
     } catch (error) {
-      logger.error({ error, bookingId: booking.id }, "[RedisQueue] Redis failure during updateQueueStatus")
+      logger.error(
+        { error, bookingId: booking.id },
+        "[RedisQueue] Redis failure during updateQueueStatus"
+      )
     }
   }
 
-  async getOperationalQueue(stationId: string, totalBays: number): Promise<OperationalStationQueueDTO | null> {
+  async getOperationalQueue(
+    stationId: string,
+    totalBays: number
+  ): Promise<OperationalStationQueueDTO | null> {
     try {
       const queueKey = `queue:station:${stationId}:waiting`
       const activeKey = `queue:station:${stationId}:active`
@@ -140,20 +171,35 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
       return await this.reconcileStationQueue(stationId, { syncRedis: false })
     } catch (error) {
-      logger.error({ error, stationId }, "[RedisQueue] Failed to read queue from Redis; falling back to MongoDB reconciliation")
+      logger.error(
+        { error, stationId },
+        "[RedisQueue] Failed to read queue from Redis; falling back to MongoDB reconciliation"
+      )
       return await this.reconcileStationQueue(stationId, { syncRedis: true })
     }
   }
 
-  private computeDynamicServiceDurationMinutes(booking: Booking, historicalAvgMinutes?: number): number {
+  private computeDynamicServiceDurationMinutes(
+    booking: Booking,
+    historicalAvgMinutes?: number
+  ): number {
     const baseMinutes = booking.serviceType === "FULL" ? 40 : 20
     const extraServicesMinutes = (booking.extraServices?.length || 0) * 5
 
     const modelLower = (booking.vehicleDetails?.model || "").toLowerCase()
     let classModifier = 0
-    if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+    if (
+      modelLower.includes("suv") ||
+      modelLower.includes("luxury") ||
+      modelLower.includes("fortuner") ||
+      modelLower.includes("endeavour")
+    ) {
       classModifier = 10
-    } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+    } else if (
+      modelLower.includes("van") ||
+      modelLower.includes("heavy") ||
+      modelLower.includes("truck")
+    ) {
       classModifier = 15
     }
 
@@ -177,7 +223,11 @@ export class BookingRedisQueueService implements IBookingQueueService {
     let totalBays = 1
     const station = await this.stationRepository.findById(stationId)
     const stationProps = station?.getProps()
-    if (stationProps && stationProps.slotConfig && typeof stationProps.slotConfig.bays === "number") {
+    if (
+      stationProps &&
+      stationProps.slotConfig &&
+      typeof stationProps.slotConfig.bays === "number"
+    ) {
       totalBays = Math.max(1, stationProps.slotConfig.bays)
     }
 
@@ -202,8 +252,7 @@ export class BookingRedisQueueService implements IBookingQueueService {
         }, 0)
         historicalAvgMinutes = Math.round(totalDuration / historyDocs.length)
       }
-    } catch {
-    }
+    } catch {}
 
     const activeDocs = await BookingModel.find({
       stationId,
@@ -242,9 +291,13 @@ export class BookingRedisQueueService implements IBookingQueueService {
     const avgDuration = historicalAvgMinutes || 25
 
     const activeItems: OperationalQueueItemDTO[] = activeServicesList.map((b, idx) => {
-      const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
+      const customerName =
+        b.customerDetails?.name ||
+        b.walkInCustomer?.name ||
+        (b.isWalkIn ? "Walk-In Customer" : "Customer")
       const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
-      const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
+      const reg =
+        b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
 
       return {
         bookingId: b.id,
@@ -257,10 +310,16 @@ export class BookingRedisQueueService implements IBookingQueueService {
         customerPhone: phone,
         registrationNumber: reg,
         vehicleModel: b.vehicleDetails?.model || "Standard Vehicle",
-        windowStart: b.scheduling?.windowStart ? new Date(b.scheduling.windowStart).toISOString() : undefined,
-        windowEnd: b.scheduling?.windowEnd ? new Date(b.scheduling.windowEnd).toISOString() : undefined,
+        windowStart: b.scheduling?.windowStart
+          ? new Date(b.scheduling.windowStart).toISOString()
+          : undefined,
+        windowEnd: b.scheduling?.windowEnd
+          ? new Date(b.scheduling.windowEnd).toISOString()
+          : undefined,
         checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toISOString() : undefined,
-        serviceStartedAt: b.serviceStartedAt ? new Date(b.serviceStartedAt).toISOString() : undefined,
+        serviceStartedAt: b.serviceStartedAt
+          ? new Date(b.serviceStartedAt).toISOString()
+          : undefined,
         completedAt: b.completedAt ? new Date(b.completedAt).toISOString() : undefined,
         queuePosition: 0,
         isBayActive: true,
@@ -276,7 +335,9 @@ export class BookingRedisQueueService implements IBookingQueueService {
       const activeB = activeServicesList[i]
       if (activeB) {
         const duration = this.computeDynamicServiceDurationMinutes(activeB, historicalAvgMinutes)
-        const startMs = activeB.serviceStartedAt ? new Date(activeB.serviceStartedAt).getTime() : nowMs
+        const startMs = activeB.serviceStartedAt
+          ? new Date(activeB.serviceStartedAt).getTime()
+          : nowMs
         const elapsedMinutes = Math.max(0, (nowMs - startMs) / (1000 * 60))
         const remainingMinutes = Math.max(1, Math.round(duration - elapsedMinutes))
         bayFinishMinutes.push(remainingMinutes)
@@ -287,9 +348,13 @@ export class BookingRedisQueueService implements IBookingQueueService {
 
     const waitingItems: OperationalQueueItemDTO[] = waitingList.map((b, idx) => {
       const position = idx + 1
-      const customerName = b.customerDetails?.name || b.walkInCustomer?.name || (b.isWalkIn ? "Walk-In Customer" : "Customer")
+      const customerName =
+        b.customerDetails?.name ||
+        b.walkInCustomer?.name ||
+        (b.isWalkIn ? "Walk-In Customer" : "Customer")
       const phone = b.customerDetails?.phone || b.walkInCustomer?.phone || ""
-      const reg = b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
+      const reg =
+        b.vehicleDetails?.registrationNumber || b.walkInVehicle?.registrationNumber || "N/A"
 
       bayFinishMinutes.sort((x, y) => x - y)
       const estimatedWaitMinutes = bayFinishMinutes[0] ?? 0
@@ -309,8 +374,12 @@ export class BookingRedisQueueService implements IBookingQueueService {
         customerPhone: phone,
         registrationNumber: reg,
         vehicleModel: b.vehicleDetails?.model || "Standard Vehicle",
-        windowStart: b.scheduling?.windowStart ? new Date(b.scheduling.windowStart).toISOString() : undefined,
-        windowEnd: b.scheduling?.windowEnd ? new Date(b.scheduling.windowEnd).toISOString() : undefined,
+        windowStart: b.scheduling?.windowStart
+          ? new Date(b.scheduling.windowStart).toISOString()
+          : undefined,
+        windowEnd: b.scheduling?.windowEnd
+          ? new Date(b.scheduling.windowEnd).toISOString()
+          : undefined,
         checkedInAt: b.checkedInAt ? new Date(b.checkedInAt).toISOString() : undefined,
         queuePosition: position,
         isBayActive: false,
@@ -339,7 +408,10 @@ export class BookingRedisQueueService implements IBookingQueueService {
           reconciledAt: Date.now().toString(),
         })
       } catch (err) {
-        logger.warn({ error: err, stationId }, "[RedisQueue] Redis resync failed during reconciliation (non-critical)")
+        logger.warn(
+          { error: err, stationId },
+          "[RedisQueue] Redis resync failed during reconciliation (non-critical)"
+        )
       }
     }
 
@@ -404,7 +476,8 @@ export class BookingRedisQueueService implements IBookingQueueService {
             fromStatus: BookingStatus.CHECKED_IN,
             toStatus: BookingStatus.NO_SHOW,
             changedBy: "SYSTEM_BACKGROUND_JOB",
-            reason: "Auto-marked NO_SHOW: vehicle stayed CHECKED_IN for over 24 hours without progressing to service",
+            reason:
+              "Auto-marked NO_SHOW: vehicle stayed CHECKED_IN for over 24 hours without progressing to service",
             createdAt: domainBooking.updatedAt,
           })
         )

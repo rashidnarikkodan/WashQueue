@@ -1,9 +1,15 @@
-import { FindBookingsFilter, IBookingRepository } from "../../domain/repositories/booking.repository"
+import {
+  FindBookingsFilter,
+  IBookingRepository,
+} from "../../domain/repositories/booking.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { BookingDTOMapper } from "../mappers/booking-dto.mapper"
 import { BookingListResponseDTO } from "../dtos/booking-response.dto"
-import { GetBookingsFilterInput, IGetUserBookingsUseCase } from "../interfaces/booking-usecases.interface"
+import {
+  GetBookingsFilterInput,
+  IGetUserBookingsUseCase,
+} from "../interfaces/booking-usecases.interface"
 import { buildPaginationMeta } from "@/common/utils/pagination"
 
 export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
@@ -100,4 +106,3 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     }
   }
 }
-

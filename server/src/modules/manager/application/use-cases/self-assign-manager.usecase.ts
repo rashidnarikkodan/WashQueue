@@ -6,7 +6,11 @@ import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { StationProps } from "@/modules/station/domain/entities/Station"
-import { ManagerAssignment, ManagerAssignmentStatus, ManagerPermission } from "../../domain/entities/ManagerAssignment"
+import {
+  ManagerAssignment,
+  ManagerAssignmentStatus,
+  ManagerPermission,
+} from "../../domain/entities/ManagerAssignment"
 
 const ALL_MANAGER_PERMISSIONS = Object.values(ManagerPermission)
 

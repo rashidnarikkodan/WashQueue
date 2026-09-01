@@ -31,7 +31,7 @@ export class OwnerController {
     private readonly updateOwnerUseCase: IUpdateOwnerUseCase,
     private readonly approveOwnerUseCase: IApproveOwnerUseCase,
     private readonly onboardingStepMapper: OnboardingStepRequestMapper
-  ) { }
+  ) {}
 
   getOnboardingStatus = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
@@ -111,7 +111,10 @@ export class OwnerController {
       throw new AppError(ERROR_MESSAGES.USER_ID_REQUIRED, HTTP_STATUS.BAD_REQUEST)
     }
 
-    const data = await this.updateOwnerUseCase.execute(userId, req.body as z.infer<typeof updateOwnerSchema>)
+    const data = await this.updateOwnerUseCase.execute(
+      userId,
+      req.body as z.infer<typeof updateOwnerSchema>
+    )
 
     if (!data) {
       throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)

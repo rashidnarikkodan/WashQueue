@@ -49,8 +49,7 @@ export class GetSettlementByIdUseCase implements IGetSettlementByIdUseCase {
         stationName = booking.stationDetails?.name
         customerName = booking.walkInCustomer?.name || booking.customerDetails?.name
         vehicleRegNumber =
-          booking.walkInVehicle?.registrationNumber ||
-          booking.vehicleDetails?.registrationNumber
+          booking.walkInVehicle?.registrationNumber || booking.vehicleDetails?.registrationNumber
         serviceName = booking.serviceType
         paymentMethod = booking.paymentMethod
       }

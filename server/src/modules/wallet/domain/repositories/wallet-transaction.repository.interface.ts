@@ -23,13 +23,7 @@ export interface PaginatedLedgerResult {
 
 export interface IWalletTransactionRepository {
   create(transaction: WalletTransaction): Promise<WalletTransaction>
-  findByWalletId(
-    walletId: string,
-    options?: LedgerFilterOptions
-  ): Promise<PaginatedLedgerResult>
-  findByUserId(
-    userId: string,
-    options?: LedgerFilterOptions
-  ): Promise<PaginatedLedgerResult>
+  findByWalletId(walletId: string, options?: LedgerFilterOptions): Promise<PaginatedLedgerResult>
+  findByUserId(userId: string, options?: LedgerFilterOptions): Promise<PaginatedLedgerResult>
   findByReferenceId(referenceId: string): Promise<WalletTransaction | null>
 }

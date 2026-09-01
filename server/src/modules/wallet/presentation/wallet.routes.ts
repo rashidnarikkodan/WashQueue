@@ -20,11 +20,31 @@ export const createWalletRouter = (walletController: WalletController): Router =
   router.use(authenticate)
 
   router.get("/", asyncHandler(walletController.getBalance))
-  router.get("/transactions", validateRequest(getLedgerQuerySchema, "query"), asyncHandler(walletController.getLedger))
-  router.get("/export", validateRequest(getLedgerQuerySchema, "query"), asyncHandler(walletController.exportTransactions))
-  router.post("/topup/order", validateRequest(createTopUpOrderSchema), asyncHandler(walletController.createTopUpOrder))
-  router.post("/topup/verify", validateRequest(verifyTopUpPaymentSchema), asyncHandler(walletController.verifyTopUpPayment))
-  router.post("/pay", validateRequest(payWithWalletSchema), asyncHandler(walletController.payWithWallet))
+  router.get(
+    "/transactions",
+    validateRequest(getLedgerQuerySchema, "query"),
+    asyncHandler(walletController.getLedger)
+  )
+  router.get(
+    "/export",
+    validateRequest(getLedgerQuerySchema, "query"),
+    asyncHandler(walletController.exportTransactions)
+  )
+  router.post(
+    "/topup/order",
+    validateRequest(createTopUpOrderSchema),
+    asyncHandler(walletController.createTopUpOrder)
+  )
+  router.post(
+    "/topup/verify",
+    validateRequest(verifyTopUpPaymentSchema),
+    asyncHandler(walletController.verifyTopUpPayment)
+  )
+  router.post(
+    "/pay",
+    validateRequest(payWithWalletSchema),
+    asyncHandler(walletController.payWithWallet)
+  )
 
   router.post(
     "/credit",

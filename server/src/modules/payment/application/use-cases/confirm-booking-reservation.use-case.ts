@@ -74,7 +74,10 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       )
 
       if (!isMatch) {
-        throw new AppError("Payment signature mismatch. Verification failed.", HTTP_STATUS.BAD_REQUEST)
+        throw new AppError(
+          "Payment signature mismatch. Verification failed.",
+          HTTP_STATUS.BAD_REQUEST
+        )
       }
     }
 
@@ -90,7 +93,11 @@ export class ConfirmBookingReservationUseCase implements IConfirmBookingReservat
       }
     }
 
-    if (reservation.status === "RELEASED" || reservation.status === "EXPIRED_REFUND_NEEDED" || reservation.isExpired) {
+    if (
+      reservation.status === "RELEASED" ||
+      reservation.status === "EXPIRED_REFUND_NEEDED" ||
+      reservation.isExpired
+    ) {
       reservation.markExpiredRefund(razorpay_payment_id)
       await this.reservationRepository.save(reservation)
       throw new AppError(

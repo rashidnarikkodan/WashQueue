@@ -1,7 +1,11 @@
 import { ISavePostInspectionUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, InspectionChecklistItem, InspectionPhoto } from "@/modules/booking/domain/entities/Booking"
+import {
+  BookingStatus,
+  InspectionChecklistItem,
+  InspectionPhoto,
+} from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -21,7 +25,14 @@ export interface SavePostInspectionInput {
 
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 
-const REQUIRED_CHECKLIST_KEYS = ["paintGloss", "wheels", "glass", "dashboard", "seats", "specialRequest"]
+const REQUIRED_CHECKLIST_KEYS = [
+  "paintGloss",
+  "wheels",
+  "glass",
+  "dashboard",
+  "seats",
+  "specialRequest",
+]
 
 export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
   constructor(
@@ -141,7 +152,9 @@ export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
       fromStatus,
       toStatus: BookingStatus.COMPLETED,
       changedBy: managerUserId,
-      reason: notes ? `Post-inspection & vehicle handover completed: ${notes}` : "Post-service inspection verified & vehicle handed over to customer",
+      reason: notes
+        ? `Post-inspection & vehicle handover completed: ${notes}`
+        : "Post-service inspection verified & vehicle handed over to customer",
       createdAt: now,
     })
     await this.bookingStatusLogRepository.save(statusLog)

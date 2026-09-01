@@ -81,9 +81,6 @@ export class StationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
-
-  
-
   async findById(id: string): Promise<Station | null> {
     if (Types.ObjectId.isValid(id)) {
       const doc = await this.model.findById(id).exec()
@@ -247,7 +244,6 @@ export class StationMongoRepository
         if (prices.length > 0) startingPrice = Math.min(...prices)
       }
 
-
       const item: HydratedStationItem & { halfWashPrice?: number; fullWashPrice?: number } = {
         station,
         distanceKm: (station as unknown as { distanceKm?: number }).distanceKm,
@@ -386,8 +382,7 @@ export class StationMongoRepository
             possibleIds.push(userObjId)
           }
         }
-      } catch {
-      }
+      } catch {}
 
       match.ownerId = { $in: possibleIds }
     }
@@ -419,8 +414,6 @@ export class StationMongoRepository
     if (minRating !== undefined && minRating > 0) {
       match.rating = { $gte: minRating }
     }
-
-
 
     //search result filter
     const q = filter.search

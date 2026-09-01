@@ -5,9 +5,7 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { ROLE } from "@/common/constants/role.constants"
 
-export const createSettlementRouter = (
-  settlementController: SettlementController
-): Router => {
+export const createSettlementRouter = (settlementController: SettlementController): Router => {
   const router = Router()
 
   router.use(authenticate)

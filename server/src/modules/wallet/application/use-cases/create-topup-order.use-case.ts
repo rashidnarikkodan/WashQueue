@@ -13,10 +13,7 @@ export class CreateTopUpOrderUseCase implements ICreateTopUpOrderUseCase {
     currency: string = "INR"
   ): Promise<TopUpOrderDTO> {
     if (isNaN(amount) || amount < 1) {
-      throw new AppError(
-        "Top-up amount must be at least ₹1",
-        HTTP_STATUS.BAD_REQUEST
-      )
+      throw new AppError("Top-up amount must be at least ₹1", HTTP_STATUS.BAD_REQUEST)
     }
 
     return this.paymentGateway.createTopUpOrder(userId, amount, currency)

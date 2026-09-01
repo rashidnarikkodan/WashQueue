@@ -30,10 +30,7 @@ export class SavePreInspectionAndCheckInUseCase implements ISavePreInspectionAnd
     private readonly managerAssignmentRepository: IManagerAssignmentRepository
   ) {}
 
-  async execute(
-    managerUserId: string,
-    input: SavePreInspectionInput
-  ): Promise<BookingResponseDTO> {
+  async execute(managerUserId: string, input: SavePreInspectionInput): Promise<BookingResponseDTO> {
     const { bookingId, photos = [], notes = "" } = input
 
     if (!bookingId) {
@@ -112,7 +109,9 @@ export class SavePreInspectionAndCheckInUseCase implements ISavePreInspectionAnd
       fromStatus: BookingStatus.CONFIRMED,
       toStatus: BookingStatus.CHECKED_IN,
       changedBy: managerUserId,
-      reason: notes ? `Pre-service inspection logged: ${notes}` : "Pre-service inspection completed",
+      reason: notes
+        ? `Pre-service inspection logged: ${notes}`
+        : "Pre-service inspection completed",
       createdAt: now,
     })
     await this.bookingStatusLogRepository.save(statusLog)

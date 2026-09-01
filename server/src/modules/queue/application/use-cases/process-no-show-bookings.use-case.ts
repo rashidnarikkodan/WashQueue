@@ -16,7 +16,7 @@ export class ProcessNoShowBookingsUseCase implements IProcessNoShowBookingsUseCa
     private readonly bookingRepository: IBookingRepository,
     private readonly bookingStatusLogRepository: IBookingStatusLogRepository,
     private readonly redisQueueService: IBookingQueueService,
-    private readonly notificationService: IBookingNotificationService,
+    private readonly notificationService: IBookingNotificationService
   ) {}
 
   async execute(gracePeriodMinutes: number = 15): Promise<ProcessNoShowResult> {
@@ -37,7 +37,10 @@ export class ProcessNoShowBookingsUseCase implements IProcessNoShowBookingsUseCa
       try {
         booking.markNoShow()
       } catch (err) {
-        logger.warn({ error: err, bookingId }, "[NoShowJob] Booking is no longer eligible for NO_SHOW; skipping")
+        logger.warn(
+          { error: err, bookingId },
+          "[NoShowJob] Booking is no longer eligible for NO_SHOW; skipping"
+        )
         continue
       }
 

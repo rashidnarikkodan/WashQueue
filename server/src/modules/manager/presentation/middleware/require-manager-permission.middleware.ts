@@ -20,12 +20,14 @@ export const createRequireManagerPermissionMiddleware = (
         }
 
         const rawStationId =
-          req.params.stationId ??
-          req.headers["x-station-id"] ??
-          req.query.stationId
+          req.params.stationId ?? req.headers["x-station-id"] ?? req.query.stationId
         const candidateStationId = Array.isArray(rawStationId) ? rawStationId[0] : rawStationId
 
-        if (!candidateStationId || typeof candidateStationId !== "string" || !candidateStationId.trim()) {
+        if (
+          !candidateStationId ||
+          typeof candidateStationId !== "string" ||
+          !candidateStationId.trim()
+        ) {
           throw new ForbiddenError("Station context is required for manager authorization")
         }
 

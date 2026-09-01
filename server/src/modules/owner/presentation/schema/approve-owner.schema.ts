@@ -20,9 +20,7 @@ export const approveOwnerSchema = z
   .refine(
     (data) => {
       const isReject =
-        data.isApproved === false ||
-        data.isVerified === false ||
-        data.action === "REJECT"
+        data.isApproved === false || data.isVerified === false || data.action === "REJECT"
       if (isReject) {
         return !!data.rejectionReason && data.rejectionReason.trim().length > 0
       }

@@ -5,7 +5,10 @@ import { StationStatus } from "../../domain/entities/Station"
 import { ConfigureSlotConfigInput, SlotConfigResponseDTO } from "../dtos/slot-config.dto"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { IConfigureSlotConfigUseCase, IGenerateTimeWindowsUseCase } from "../interfaces/station-usecases.interface"
+import {
+  IConfigureSlotConfigUseCase,
+  IGenerateTimeWindowsUseCase,
+} from "../interfaces/station-usecases.interface"
 import { randomUUID } from "node:crypto"
 
 export class ConfigureSlotConfigUseCase implements IConfigureSlotConfigUseCase {

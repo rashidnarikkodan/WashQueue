@@ -7,7 +7,9 @@ let task: ScheduledTask | null = null
 export function startReservationCleanupJob(cronExpression: string = "* * * * *"): void {
   if (task) return
 
-  logger.info(`[BackgroundJob] Starting reservation cleanup cron job with schedule: ${cronExpression}`)
+  logger.info(
+    `[BackgroundJob] Starting reservation cleanup cron job with schedule: ${cronExpression}`
+  )
 
   task = cron.schedule(cronExpression, async () => {
     try {

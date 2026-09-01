@@ -249,10 +249,10 @@ export const getStationsQuery = z.object({
   minRating: z.coerce.number().optional(),
   vehicleCategory: z.string().optional(),
   vehicleClassId: z.string().optional(),
-  status: z.enum([...Object.values(StationStatus),'all']).optional(),
+  status: z.enum([...Object.values(StationStatus), "all"]).optional(),
   sortBy: z.string().optional(),
   search: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  ownerId: z.string().optional()
+  ownerId: z.string().optional(),
 })

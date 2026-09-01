@@ -1,4 +1,8 @@
-import { BookingStatus, PaymentStatus, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
+import {
+  BookingStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@/modules/booking/domain/entities/Booking"
 
 export type RefundType = "FULL_REFUND" | "PARTIAL_REFUND" | "NO_REFUND"
 export type RefundMethod = "WALLET_REFUND" | "ORIGINAL_PAYMENT_REFUND" | "NONE"
@@ -112,7 +116,8 @@ export class RefundPolicyEngine {
         refundMethod: "WALLET_REFUND",
         refundAmount: partialAmount,
         percentage: 50,
-        reason: "50% partial refund issued for cancellation made between 2 and 24 hours prior to booking",
+        reason:
+          "50% partial refund issued for cancellation made between 2 and 24 hours prior to booking",
       }
     } else {
       return {

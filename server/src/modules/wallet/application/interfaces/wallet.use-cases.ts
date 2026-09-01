@@ -11,11 +11,7 @@ import { LedgerFilterOptions } from "../../domain/repositories/wallet-transactio
 import { PaginatedLedgerDTO } from "../use-cases/get-transaction-ledger.use-case"
 
 export interface ICreateTopUpOrderUseCase {
-  execute(
-    userId: string,
-    amount: number,
-    currency?: string
-  ): Promise<TopUpOrderDTO>
+  execute(userId: string, amount: number, currency?: string): Promise<TopUpOrderDTO>
 }
 
 export interface ICreditWalletUseCase {
@@ -27,10 +23,7 @@ export interface IDebitWalletUseCase {
 }
 
 export interface IGetTransactionLedgerUseCase {
-  execute(
-    userId: string,
-    options?: LedgerFilterOptions
-  ): Promise<PaginatedLedgerDTO>
+  execute(userId: string, options?: LedgerFilterOptions): Promise<PaginatedLedgerDTO>
 }
 
 export interface IGetWalletBalanceUseCase {
@@ -46,9 +39,5 @@ export interface IRefundWalletUseCase {
 }
 
 export interface IVerifyTopUpPaymentUseCase {
-  execute(
-    userId: string,
-    amount: number,
-    dto: VerifyTopUpPaymentDTO
-  ): Promise<WalletTransactionDTO>
+  execute(userId: string, amount: number, dto: VerifyTopUpPaymentDTO): Promise<WalletTransactionDTO>
 }

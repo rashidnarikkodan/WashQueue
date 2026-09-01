@@ -56,7 +56,11 @@ export class SocketServerService {
 
         if (token) {
           try {
-            const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as { userId?: string; id?: string; role?: string }
+            const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as {
+              userId?: string
+              id?: string
+              role?: string
+            }
             const userId = decoded.userId || decoded.id
             if (userId) {
               ;(socket as Socket & { user?: SocketUserPayload }).user = {
@@ -64,8 +68,7 @@ export class SocketServerService {
                 role: decoded.role,
               }
             }
-          } catch {
-          }
+          } catch {}
         }
         next()
       } catch (err) {

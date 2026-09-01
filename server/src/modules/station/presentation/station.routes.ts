@@ -11,8 +11,12 @@ import { API_ROUTES } from "@/common/constants/route.constants"
 export const createRouter = (stationController: StationController): Router => {
   const router = Router()
 
-
-  router.get(API_ROUTES.STATIONS.LIST, optionalAuthenticate, validateRequest(getStationsQuery,'query'), asyncHandler(stationController.getStations))
+  router.get(
+    API_ROUTES.STATIONS.LIST,
+    optionalAuthenticate,
+    validateRequest(getStationsQuery, "query"),
+    asyncHandler(stationController.getStations)
+  )
 
   router.get(API_ROUTES.STATIONS.FILTER_OPTIONS, asyncHandler(stationController.getFilterOptions))
 
@@ -23,7 +27,6 @@ export const createRouter = (stationController: StationController): Router => {
   router.get("/:stationId/slot-config", asyncHandler(stationController.getSlotConfig))
 
   router.get(API_ROUTES.STATIONS.BY_ID, asyncHandler(stationController.getById))
-
 
   router.use(authenticate)
 
@@ -46,7 +49,6 @@ export const createRouter = (stationController: StationController): Router => {
   router.post(API_ROUTES.STATIONS.SUBMIT, asyncHandler(stationController.submitForReview))
 
   router.patch(API_ROUTES.STATIONS.TOGGLE_ACTIVE, asyncHandler(stationController.toggleActive))
-
 
   router.patch(
     API_ROUTES.STATIONS.REVIEW,

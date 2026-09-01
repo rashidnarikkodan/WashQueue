@@ -21,7 +21,10 @@ export class BookingDTOMapper {
             changedBy: lProps.changedBy,
             reason: lProps.reason,
             notes: lProps.notes,
-            createdAt: lProps.createdAt instanceof Date ? lProps.createdAt.toISOString() : String(lProps.createdAt),
+            createdAt:
+              lProps.createdAt instanceof Date
+                ? lProps.createdAt.toISOString()
+                : String(lProps.createdAt),
           }
         })
       : undefined
@@ -98,9 +101,18 @@ export class BookingDTOMapper {
         const extra = (props.extraServices?.length || 0) * 5
         const modelLower = (props.vehicleDetails?.model || "").toLowerCase()
         let classMod = 0
-        if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+        if (
+          modelLower.includes("suv") ||
+          modelLower.includes("luxury") ||
+          modelLower.includes("fortuner") ||
+          modelLower.includes("endeavour")
+        ) {
           classMod = 10
-        } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+        } else if (
+          modelLower.includes("van") ||
+          modelLower.includes("heavy") ||
+          modelLower.includes("truck")
+        ) {
           classMod = 15
         }
         return base + extra + classMod
@@ -110,9 +122,18 @@ export class BookingDTOMapper {
         const extra = (props.extraServices?.length || 0) * 5
         const modelLower = (props.vehicleDetails?.model || "").toLowerCase()
         let classMod = 0
-        if (modelLower.includes("suv") || modelLower.includes("luxury") || modelLower.includes("fortuner") || modelLower.includes("endeavour")) {
+        if (
+          modelLower.includes("suv") ||
+          modelLower.includes("luxury") ||
+          modelLower.includes("fortuner") ||
+          modelLower.includes("endeavour")
+        ) {
           classMod = 10
-        } else if (modelLower.includes("van") || modelLower.includes("heavy") || modelLower.includes("truck")) {
+        } else if (
+          modelLower.includes("van") ||
+          modelLower.includes("heavy") ||
+          modelLower.includes("truck")
+        ) {
           classMod = 15
         }
         return {
@@ -127,4 +148,3 @@ export class BookingDTOMapper {
     }
   }
 }
-

@@ -17,11 +17,7 @@ export interface IProcessSettlementUseCase {
 }
 
 export interface IGetOwnerSettlementSummaryUseCase {
-  execute(
-    userId: string,
-    startDate?: Date,
-    endDate?: Date
-  ): Promise<OwnerEarningsSummaryDTO>
+  execute(userId: string, startDate?: Date, endDate?: Date): Promise<OwnerEarningsSummaryDTO>
 }
 
 export interface IGetOwnerSettlementsUseCase {
@@ -32,17 +28,11 @@ export interface IGetOwnerSettlementsUseCase {
 }
 
 export interface IGetOwnerEarningsHistoryUseCase {
-  execute(
-    userId: string,
-    page?: number,
-    limit?: number
-  ): Promise<SettlementPaginationDTO<unknown>>
+  execute(userId: string, page?: number, limit?: number): Promise<SettlementPaginationDTO<unknown>>
 }
 
 export interface IGetAdminSettlementsUseCase {
-  execute(
-    filters: SettlementFilterOptions
-  ): Promise<SettlementPaginationDTO<SettlementResponseDTO>>
+  execute(filters: SettlementFilterOptions): Promise<SettlementPaginationDTO<SettlementResponseDTO>>
 }
 
 export interface IGetAdminSettlementMetricsUseCase {

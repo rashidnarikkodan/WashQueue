@@ -1,6 +1,10 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
-import { Settlement, SettlementHoldReason, SettlementStatus } from "../../domain/entities/Settlement"
+import {
+  Settlement,
+  SettlementHoldReason,
+  SettlementStatus,
+} from "../../domain/entities/Settlement"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
 import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
@@ -88,7 +92,9 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     )
 
     if (!guardedSettlement) {
-      throw new ConflictError("Settlement is already processing or has already reached final status")
+      throw new ConflictError(
+        "Settlement is already processing or has already reached final status"
+      )
     }
 
     try {
@@ -105,7 +111,9 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
           `Settlement ${guardedSettlement.id} successfully settled with transfer ${transferResult.transferId}`
         )
       } else {
-        guardedSettlement.markFailed(`Transfer failed with provider status: ${transferResult.status}`)
+        guardedSettlement.markFailed(
+          `Transfer failed with provider status: ${transferResult.status}`
+        )
         if (transferResult.transferId) {
           guardedSettlement.setTransferId(transferResult.transferId)
         }
@@ -114,11 +122,10 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
         )
       }
     } catch (error: unknown) {
-      const errMessage = error instanceof Error ? error.message : "Failed to execute payment transfer"
+      const errMessage =
+        error instanceof Error ? error.message : "Failed to execute payment transfer"
       guardedSettlement.markFailed(errMessage)
-      logger.error(
-        `Error executing transfer for settlement ${guardedSettlement.id}: ${errMessage}`
-      )
+      logger.error(`Error executing transfer for settlement ${guardedSettlement.id}: ${errMessage}`)
     }
 
     return await this.settlementRepository.save(guardedSettlement)

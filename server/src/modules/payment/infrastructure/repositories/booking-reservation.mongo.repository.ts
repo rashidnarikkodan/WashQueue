@@ -16,7 +16,9 @@ export class BookingReservationMongoRepository implements IBookingReservationRep
       return BookingReservationMapper.toDomain(updated!)
     }
 
-    const doc = (await BookingReservationModel.create([raw], { session: session as ClientSession }))[0]!
+    const doc = (
+      await BookingReservationModel.create([raw], { session: session as ClientSession })
+    )[0]!
     return BookingReservationMapper.toDomain(doc)
   }
 
@@ -55,11 +57,7 @@ export class BookingReservationMongoRepository implements IBookingReservationRep
       update.razorpayPaymentId = razorpayPaymentId
     }
 
-    const doc = await BookingReservationModel.findByIdAndUpdate(
-      id,
-      { $set: update },
-      { new: true }
-    )
+    const doc = await BookingReservationModel.findByIdAndUpdate(id, { $set: update }, { new: true })
     return doc ? BookingReservationMapper.toDomain(doc) : null
   }
 }

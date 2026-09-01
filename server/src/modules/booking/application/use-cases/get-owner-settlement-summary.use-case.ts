@@ -33,8 +33,7 @@ export class GetOwnerSettlementSummaryUseCase implements IGetOwnerSettlementSumm
     let accountNumberMasked: string | undefined
     if (owner.accountNumber) {
       const acc = owner.accountNumber.trim()
-      accountNumberMasked =
-        acc.length > 4 ? `•••• •••• ${acc.slice(-4)}` : `•••• ${acc}`
+      accountNumberMasked = acc.length > 4 ? `•••• •••• ${acc.slice(-4)}` : `•••• ${acc}`
     }
 
     return {

@@ -9,18 +9,15 @@ export class DebitWalletUseCase {
   public async execute(input: DebitWalletInputDTO): Promise<WalletTransactionDTO> {
     const moneyAmount = new Money(input.amount)
 
-    const result = await this.walletRepository.executeAtomicOperation(
-      input.userId,
-      (wallet) => {
-        return wallet.debit(
-          moneyAmount,
-          input.category,
-          input.description,
-          input.referenceId,
-          input.metadata
-        )
-      }
-    )
+    const result = await this.walletRepository.executeAtomicOperation(input.userId, (wallet) => {
+      return wallet.debit(
+        moneyAmount,
+        input.category,
+        input.description,
+        input.referenceId,
+        input.metadata
+      )
+    })
 
     return WalletMapper.transactionToDTO(result.transaction)
   }

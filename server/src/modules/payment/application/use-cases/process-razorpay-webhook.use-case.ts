@@ -22,7 +22,10 @@ export interface RazorpayWebhookPayload {
   }
 }
 
-import { IConfirmBookingReservationUseCase, IProcessRazorpayWebhookUseCase } from "../interfaces/payment-usecases.interface"
+import {
+  IConfirmBookingReservationUseCase,
+  IProcessRazorpayWebhookUseCase,
+} from "../interfaces/payment-usecases.interface"
 
 export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUseCase {
   constructor(
@@ -31,7 +34,10 @@ export class ProcessRazorpayWebhookUseCase implements IProcessRazorpayWebhookUse
     private readonly paymentGateway: IPaymentGatewayService
   ) {}
 
-  async execute(rawBody: string, signature: string): Promise<{ success: boolean; message: string }> {
+  async execute(
+    rawBody: string,
+    signature: string
+  ): Promise<{ success: boolean; message: string }> {
     if (!this.paymentGateway.verifyWebhookSignature(rawBody, signature)) {
       return { success: false, message: "Invalid webhook signature" }
     }

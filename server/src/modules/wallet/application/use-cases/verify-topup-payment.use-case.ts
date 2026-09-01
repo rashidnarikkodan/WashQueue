@@ -25,15 +25,10 @@ export class VerifyTopUpPaymentUseCase implements IVerifyTopUpPaymentUseCase {
     )
 
     if (!isValidSignature) {
-      throw new AppError(
-        "Invalid payment signature verification failed",
-        HTTP_STATUS.BAD_REQUEST
-      )
+      throw new AppError("Invalid payment signature verification failed", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const existingTx = await this.transactionRepository.findByReferenceId(
-      dto.razorpayPaymentId
-    )
+    const existingTx = await this.transactionRepository.findByReferenceId(dto.razorpayPaymentId)
     if (existingTx) {
       throw new AppError(
         "This payment has already been credited to your wallet",

@@ -32,8 +32,7 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
       if (typeof responseBody === "string") {
         parsedResponseBody = JSON.parse(responseBody)
       }
-    } catch {
-    }
+    } catch {}
 
     const logData = {
       method: req.method,

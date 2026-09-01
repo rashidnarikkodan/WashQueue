@@ -8,18 +8,13 @@ import {
 
 export interface ISettlementRepository extends IBaseRepository<Settlement> {
   findByBookingId(bookingId: string): Promise<Settlement | null>
-  findMany(
-    filters: SettlementFilterOptions
-  ): Promise<{ settlements: Settlement[]; total: number }>
+  findMany(filters: SettlementFilterOptions): Promise<{ settlements: Settlement[]; total: number }>
   getOwnerAggregatedEarnings(
     ownerId: string,
     startDate?: Date,
     endDate?: Date
   ): Promise<Omit<OwnerEarningsSummaryDTO, "payoutAccountStatus">>
-  getAdminAggregatedMetrics(
-    startDate?: Date,
-    endDate?: Date
-  ): Promise<AdminSettlementMetricsDTO>
+  getAdminAggregatedMetrics(startDate?: Date, endDate?: Date): Promise<AdminSettlementMetricsDTO>
   updateStatusWithGuard(
     id: string,
     newStatus: SettlementStatus,

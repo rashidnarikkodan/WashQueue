@@ -33,7 +33,9 @@ export class CreateSettlementUseCase implements ICreateSettlementUseCase {
       // Handle race condition where another request created the record concurrently
       const err = error as { code?: number; message?: string }
       if (err?.code === 11000 || err?.message?.includes("E11000")) {
-        logger.info(`Duplicate settlement caught for booking ${data.bookingId}, returning existing record`)
+        logger.info(
+          `Duplicate settlement caught for booking ${data.bookingId}, returning existing record`
+        )
         const existingSettlement = await this.settlementRepository.findByBookingId(data.bookingId)
         if (existingSettlement) {
           return existingSettlement

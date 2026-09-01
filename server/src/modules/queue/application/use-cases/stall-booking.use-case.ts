@@ -47,7 +47,10 @@ export class StallBookingUseCase implements IStallBookingUseCase {
 
     booking.stall(reason.trim(), managerUserId)
 
-    const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, allowedEntryStatuses)
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+      booking,
+      allowedEntryStatuses
+    )
 
     if (!domainBooking) {
       throw new AppError("Failed to transition booking to STALLED state", HTTP_STATUS.CONFLICT)

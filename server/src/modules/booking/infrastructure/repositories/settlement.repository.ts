@@ -52,10 +52,7 @@ export class SettlementRepository
 
     if (filters.search && filters.search.trim()) {
       const searchRegex = new RegExp(filters.search.trim(), "i")
-      query.$or = [
-        { bookingId: searchRegex },
-        { transferId: searchRegex },
-      ]
+      query.$or = [{ bookingId: searchRegex }, { transferId: searchRegex }]
     }
 
     const page = Math.max(Number(filters.page) || 1, 1)
@@ -97,17 +94,29 @@ export class SettlementRepository
           totalNetEarnings: { $sum: "$stationSettlementAmount" },
           settledAmount: {
             $sum: {
-              $cond: [{ $eq: ["$status", SettlementStatus.SETTLED] }, "$stationSettlementAmount", 0],
+              $cond: [
+                { $eq: ["$status", SettlementStatus.SETTLED] },
+                "$stationSettlementAmount",
+                0,
+              ],
             },
           },
           pendingAmount: {
             $sum: {
-              $cond: [{ $eq: ["$status", SettlementStatus.PENDING] }, "$stationSettlementAmount", 0],
+              $cond: [
+                { $eq: ["$status", SettlementStatus.PENDING] },
+                "$stationSettlementAmount",
+                0,
+              ],
             },
           },
           processingAmount: {
             $sum: {
-              $cond: [{ $eq: ["$status", SettlementStatus.PROCESSING] }, "$stationSettlementAmount", 0],
+              $cond: [
+                { $eq: ["$status", SettlementStatus.PROCESSING] },
+                "$stationSettlementAmount",
+                0,
+              ],
             },
           },
           heldAmount: {
@@ -160,7 +169,11 @@ export class SettlementRepository
           totalGrossVolume: { $sum: "$totalAmount" },
           totalSettledAmount: {
             $sum: {
-              $cond: [{ $eq: ["$status", SettlementStatus.SETTLED] }, "$stationSettlementAmount", 0],
+              $cond: [
+                { $eq: ["$status", SettlementStatus.SETTLED] },
+                "$stationSettlementAmount",
+                0,
+              ],
             },
           },
           totalPendingAmount: {

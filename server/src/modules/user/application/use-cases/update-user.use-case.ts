@@ -41,4 +41,3 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
     return updatedUser
   }
 }
-

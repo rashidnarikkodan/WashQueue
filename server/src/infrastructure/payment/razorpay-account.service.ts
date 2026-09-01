@@ -26,7 +26,10 @@ export class PaymentAccountService implements IPaymentAccountService {
 
     const rawPhone = String(params.phone || "").replace(/\D/g, "")
     if (!rawPhone) {
-      throw new AppError("Phone number is required to create payment account", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "Phone number is required to create payment account",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
     const phone = rawPhone.length >= 10 ? rawPhone.slice(-10) : rawPhone
 
@@ -40,7 +43,10 @@ export class PaymentAccountService implements IPaymentAccountService {
 
     const contactName = params.contact_name?.trim()
     if (!contactName) {
-      throw new AppError("Contact name is required to create payment account", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "Contact name is required to create payment account",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     // Build structured Route linked account payload strictly from provided data
@@ -77,9 +83,7 @@ export class PaymentAccountService implements IPaymentAccountService {
     }
 
     try {
-      const account = (await this.razorpay.accounts.create(
-        requestBody as any
-      )) as { id: string }
+      const account = (await this.razorpay.accounts.create(requestBody as any)) as { id: string }
 
       if (!account || !account.id) {
         throw new Error("Razorpay did not return a valid account ID")
@@ -89,9 +93,7 @@ export class PaymentAccountService implements IPaymentAccountService {
       return account.id
     } catch (error: any) {
       const errorMsg =
-        error?.error?.description ||
-        error?.message ||
-        "Failed to create Razorpay account"
+        error?.error?.description || error?.message || "Failed to create Razorpay account"
 
       logger.error(
         `Razorpay account creation error: ${errorMsg} (code: ${error?.error?.code || "UNKNOWN"})`

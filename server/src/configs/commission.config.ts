@@ -5,7 +5,7 @@ export interface PlatformCommissionConfig {
 }
 
 export const PLATFORM_COMMISSION_CONFIG: PlatformCommissionConfig = {
-  defaultRate: Number(process.env.PLATFORM_COMMISSION_RATE) || 0.10,
+  defaultRate: Number(process.env.PLATFORM_COMMISSION_RATE) || 0.1,
   maxCap: Number(process.env.PLATFORM_COMMISSION_CAP) || 150,
   minCommission: 0,
 }
@@ -25,8 +25,12 @@ export function calculatePlatformCommission(
   customRate?: number,
   customCap?: number
 ): CommissionCalculationResult {
-  const rate = customRate !== undefined && customRate >= 0 ? customRate : PLATFORM_COMMISSION_CONFIG.defaultRate
-  const cap = customCap !== undefined && customCap >= 0 ? customCap : PLATFORM_COMMISSION_CONFIG.maxCap
+  const rate =
+    customRate !== undefined && customRate >= 0
+      ? customRate
+      : PLATFORM_COMMISSION_CONFIG.defaultRate
+  const cap =
+    customCap !== undefined && customCap >= 0 ? customCap : PLATFORM_COMMISSION_CONFIG.maxCap
 
   const uncappedCommission = Number((totalGrossAmount * rate).toFixed(2))
   const platformCommission = Math.max(

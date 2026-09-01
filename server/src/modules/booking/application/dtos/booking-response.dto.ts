@@ -133,4 +133,3 @@ export interface BookingListResponseDTO {
   bookings: BookingResponseDTO[]
   pagination: PaginationMeta
 }
-

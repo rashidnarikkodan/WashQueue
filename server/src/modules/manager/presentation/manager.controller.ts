@@ -17,7 +17,7 @@ import {
   IGetManagedStationUseCase,
   IVerifyInvitationTokenUseCase,
   ISelfAssignManagerUseCase,
-} from '../application/interfaces/manager-usecases.interface'
+} from "../application/interfaces/manager-usecases.interface"
 
 export class ManagerController {
   constructor(
@@ -49,8 +49,8 @@ export class ManagerController {
 
     console.log(stationId, ownerUserId)
 
-    const result = await this.selfAssignManagerUseCase.execute({ownerUserId,stationId})
-    success(res, result, HTTP_STATUS.CREATED, '')
+    const result = await this.selfAssignManagerUseCase.execute({ ownerUserId, stationId })
+    success(res, result, HTTP_STATUS.CREATED, "")
   }
 
   getOwnerManagers = async (req: AuthenticatedRequest, res: Response) => {
@@ -142,4 +142,3 @@ export class ManagerController {
     success(res, stations, HTTP_STATUS.OK, "Managed stations retrieved successfully")
   }
 }
-

@@ -66,4 +66,3 @@ export interface IBookingRepository {
     newPaymentStatus: PaymentStatus
   ): Promise<Booking | null>
 }
-

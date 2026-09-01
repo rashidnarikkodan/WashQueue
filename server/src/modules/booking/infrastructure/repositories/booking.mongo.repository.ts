@@ -181,13 +181,11 @@ export class BookingMongoRepository implements IBookingRepository {
         if (matchingUsers.length > 0) {
           orConditions.push({ userId: { $in: matchingUsers.map((u) => u._id) } })
         }
-      } catch {
-      }
+      } catch {}
 
       try {
-        const { VehicleModel } = await import(
-          "@/modules/vehicle/infrastructure/models/vehicle.model"
-        )
+        const { VehicleModel } =
+          await import("@/modules/vehicle/infrastructure/models/vehicle.model")
         const matchingVehicles = await VehicleModel.find({
           $or: [
             { registrationNumber: searchRegex },
@@ -201,8 +199,7 @@ export class BookingMongoRepository implements IBookingRepository {
         if (matchingVehicles.length > 0) {
           orConditions.push({ vehicleId: { $in: matchingVehicles.map((v) => v._id) } })
         }
-      } catch {
-      }
+      } catch {}
 
       query.$or = orConditions
     }

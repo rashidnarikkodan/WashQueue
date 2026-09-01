@@ -72,7 +72,7 @@ export const API_ROUTES = {
     REMOVE: "/:assignmentId",
     RESEND_INVITATION: "/invitations/:invitationId/resend",
     CANCEL_INVITATION: "/invitations/:invitationId",
-    SELF_ASSIGN: "/self-assign"
+    SELF_ASSIGN: "/self-assign",
   },
   BOOKINGS: {
     ROOT: "/api/bookings",

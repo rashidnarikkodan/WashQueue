@@ -35,7 +35,7 @@ export interface IStationRepository extends IBaseRepository<Station> {
   findByName(name: string): Promise<Station | null>
   findByIds(ids: string[]): Promise<Station[]>
   findAll(
-    filter: StationFilter,
+    filter: StationFilter
   ): Promise<{ stations: Station[]; total: number; statusCounts?: StationStatusCounts }>
   findNearby(filter: NearbyStationFilter): Promise<Station[]>
   findStationManagedByOwner(

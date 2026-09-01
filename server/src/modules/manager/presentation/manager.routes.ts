@@ -21,14 +21,14 @@ export const createManagerRouter = (managerController: ManagerController): Route
     validateRequest(acceptInvitationSchema),
     asyncHandler(managerController.acceptInvitation)
   )
-  
+
   router.post(
     API_ROUTES.MANAGERS.REJECT_INVITATION,
     asyncHandler(managerController.rejectInvitation)
   )
-  
+
   router.use(authenticate)
-  
+
   router.post(
     API_ROUTES.MANAGERS.SELF_ASSIGN,
     authorize("owner"),
@@ -44,7 +44,7 @@ export const createManagerRouter = (managerController: ManagerController): Route
 
   router.get(
     API_ROUTES.MANAGERS.STATION,
-    authorize("manager","owner"),
+    authorize("manager", "owner"),
     asyncHandler(managerController.getManagedStations)
   )
 

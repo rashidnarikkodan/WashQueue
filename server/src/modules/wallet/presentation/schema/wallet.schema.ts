@@ -22,13 +22,7 @@ export const payWithWalletSchema = z.object({
 export const creditWalletSchema = z.object({
   userId: z.string().min(1, "userId is required"),
   amount: z.number().min(0.01, "Amount must be greater than 0"),
-  category: z.enum([
-    "TOP_UP",
-    "BOOKING_PAYMENT",
-    "REFUND",
-    "CASHBACK",
-    "ADMIN_ADJUSTMENT",
-  ]),
+  category: z.enum(["TOP_UP", "BOOKING_PAYMENT", "REFUND", "CASHBACK", "ADMIN_ADJUSTMENT"]),
   description: z.string().min(1, "Description is required"),
   referenceId: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
@@ -37,13 +31,7 @@ export const creditWalletSchema = z.object({
 export const debitWalletSchema = z.object({
   userId: z.string().min(1, "userId is required"),
   amount: z.number().min(0.01, "Amount must be greater than 0"),
-  category: z.enum([
-    "TOP_UP",
-    "BOOKING_PAYMENT",
-    "REFUND",
-    "CASHBACK",
-    "ADMIN_ADJUSTMENT",
-  ]),
+  category: z.enum(["TOP_UP", "BOOKING_PAYMENT", "REFUND", "CASHBACK", "ADMIN_ADJUSTMENT"]),
   description: z.string().min(1, "Description is required"),
   referenceId: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),

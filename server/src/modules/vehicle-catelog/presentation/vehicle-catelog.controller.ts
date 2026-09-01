@@ -40,7 +40,7 @@ export class VehicleCatelogController {
 
   getCategory = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Category ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Category ID is required")
     const category = await this.getCategoryUseCase.execute(id)
     success(res, category, HTTP_STATUS.OK, SUCCESS_MESSAGES.CATEGORY_RETRIEVED_SUCCESS)
   }
@@ -52,14 +52,14 @@ export class VehicleCatelogController {
 
   updateCategory = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Category ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Category ID is required")
     const category = await this.updateCategoryUseCase.execute(id, req.body)
     success(res, category, HTTP_STATUS.OK, SUCCESS_MESSAGES.CATEGORY_UPDATED_SUCCESS)
   }
 
   deleteCategory = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Category ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Category ID is required")
     await this.deleteCategoryUseCase.execute(id)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.CATEGORY_DELETED_SUCCESS)
   }
@@ -71,7 +71,7 @@ export class VehicleCatelogController {
 
   getClass = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Class ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Class ID is required")
     const vehicleClass = await this.getClassUseCase.execute(id)
     success(res, vehicleClass, HTTP_STATUS.OK, SUCCESS_MESSAGES.CLASS_RETRIEVED_SUCCESS)
   }
@@ -84,14 +84,14 @@ export class VehicleCatelogController {
 
   updateClass = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Class ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Class ID is required")
     const vehicleClass = await this.updateClassUseCase.execute(id, req.body)
     success(res, vehicleClass, HTTP_STATUS.OK, SUCCESS_MESSAGES.CLASS_UPDATED_SUCCESS)
   }
 
   deleteClass = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
-    if (!id || typeof id !== 'string') throw new NotFoundError("Class ID is required")
+    if (!id || typeof id !== "string") throw new NotFoundError("Class ID is required")
     await this.deleteClassUseCase.execute(id)
     success(res, null, HTTP_STATUS.OK, SUCCESS_MESSAGES.CLASS_DELETED_SUCCESS)
   }

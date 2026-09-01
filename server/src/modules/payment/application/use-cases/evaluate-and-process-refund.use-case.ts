@@ -97,7 +97,10 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
         })
         transactionId = walletResult?.id || `tx_refund_${Date.now()}`
       } catch (err) {
-        logger.error({ error: err, bookingId: domainBooking.id }, "[Refund] Failed to process wallet refund")
+        logger.error(
+          { error: err, bookingId: domainBooking.id },
+          "[Refund] Failed to process wallet refund"
+        )
       }
     }
 
@@ -127,7 +130,10 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
           reason: policyResult.reason,
         })
       } catch (err) {
-        logger.error({ error: err, bookingId: domainBooking.id }, "[Refund] Failed to send refund notification")
+        logger.error(
+          { error: err, bookingId: domainBooking.id },
+          "[Refund] Failed to send refund notification"
+        )
       }
     }
 

@@ -10,18 +10,15 @@ export class CreditWalletUseCase implements ICreditWalletUseCase {
   public async execute(input: CreditWalletInputDTO): Promise<WalletTransactionDTO> {
     const moneyAmount = new Money(input.amount)
 
-    const result = await this.walletRepository.executeAtomicOperation(
-      input.userId,
-      (wallet) => {
-        return wallet.credit(
-          moneyAmount,
-          input.category,
-          input.description,
-          input.referenceId,
-          input.metadata
-        )
-      }
-    )
+    const result = await this.walletRepository.executeAtomicOperation(input.userId, (wallet) => {
+      return wallet.credit(
+        moneyAmount,
+        input.category,
+        input.description,
+        input.referenceId,
+        input.metadata
+      )
+    })
 
     return WalletMapper.transactionToDTO(result.transaction)
   }

@@ -2,7 +2,11 @@ import { BookingReservationMongoRepository } from "./infrastructure/repositories
 import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
 import { sharedRazorpayService } from "@/infrastructure/payment/razorpay.service"
 import { bookingNotificationService } from "@/modules/notification/notification.module"
-import { bookingRepository, bookingStatusLogRepository, getBookingUseCase } from "@/modules/booking/booking.module"
+import {
+  bookingRepository,
+  bookingStatusLogRepository,
+  getBookingUseCase,
+} from "@/modules/booking/booking.module"
 
 import {
   stationRepository,
@@ -11,7 +15,10 @@ import {
   timeWindowRepository,
 } from "@/modules/station/station.module"
 import { vehicleRepository } from "@/modules/vehicle/vehicle.module"
-import { vehicleCategoryRepository, vehicleClassRepository } from "@/modules/vehicle-catelog/vehicle.module"
+import {
+  vehicleCategoryRepository,
+  vehicleClassRepository,
+} from "@/modules/vehicle-catelog/vehicle.module"
 import {
   creditWalletUseCase,
   refundWalletUseCase,
@@ -35,7 +42,10 @@ import { createInvoiceRouter } from "./presentation/routers/invoice.routes"
 
 export const bookingReservationRepository = new BookingReservationMongoRepository()
 const transactionRunner = new MongooseTransactionRunner()
-export const pdfInvoiceService = new PDFInvoiceService(vehicleCategoryRepository, vehicleClassRepository)
+export const pdfInvoiceService = new PDFInvoiceService(
+  vehicleCategoryRepository,
+  vehicleClassRepository
+)
 
 export const createBookingReservationUseCase = new CreateBookingReservationUseCase(
   stationRepository,

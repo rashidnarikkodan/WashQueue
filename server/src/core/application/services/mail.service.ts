@@ -128,7 +128,11 @@ export class MailService implements IMailService {
     const subject = `WashQueue - Station Manager Invitation for ${data.stationName}`
     const greeting = data.managerName ? `Dear ${data.managerName},` : "Hello,"
     const text = `${greeting}\n\nYou have been invited to manage ${data.stationName} on WashQueue!\n\nPlease accept your invitation by clicking this link: ${inviteUrl}\n\nThis invitation will expire in 7 days.\n\nBest regards,\nThe WashQueue Team`
-    const html = getManagerInvitationEmailHtml({ greeting, stationName: data.stationName, inviteUrl })
+    const html = getManagerInvitationEmailHtml({
+      greeting,
+      stationName: data.stationName,
+      inviteUrl,
+    })
 
     if (this.transporter && this.isSmtpConfigured()) {
       try {
@@ -146,8 +150,6 @@ export class MailService implements IMailService {
       }
     }
 
-    logger.info(
-      `[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Link: ${inviteUrl}`
-    )
+    logger.info(`[DEV FALLBACK] Send email to: ${email} | Subject: ${subject} | Link: ${inviteUrl}`)
   }
 }

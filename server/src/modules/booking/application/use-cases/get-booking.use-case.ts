@@ -33,4 +33,3 @@ export class GetBookingUseCase implements IGetBookingUseCase {
     return BookingDTOMapper.toDTO(booking, undefined, statusLogs)
   }
 }
-

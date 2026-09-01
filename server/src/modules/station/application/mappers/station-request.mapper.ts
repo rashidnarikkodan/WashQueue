@@ -18,7 +18,11 @@ export class StationRequestMapper {
   extractStationId(req: Request | AuthenticatedRequest): string {
     const rawStationId = req.params.stationId || req.params.id
     const candidateStationId = Array.isArray(rawStationId) ? rawStationId[0] : rawStationId
-    if (!candidateStationId || typeof candidateStationId !== "string" || !candidateStationId.trim()) {
+    if (
+      !candidateStationId ||
+      typeof candidateStationId !== "string" ||
+      !candidateStationId.trim()
+    ) {
       throw new AppError("Station ID is required", HTTP_STATUS.BAD_REQUEST)
     }
     return candidateStationId.trim()

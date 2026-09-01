@@ -15,7 +15,6 @@ import {
 import { getBookingListQuerySchema } from "../schema/booking.schema"
 import { BookingStatus } from "../../domain/entities/Booking"
 
-
 export class BookingController {
   constructor(
     private readonly createBookingUseCase: ICreateBookingUseCase,
@@ -73,12 +72,12 @@ export class BookingController {
     success(res, result, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }
 
-  getOwnerBooking = async (req:AuthenticatedRequest,res:Response)=>{
-    const { query } = req;
-    const { ownerId } = req.params;
-    console.log("query :-",query)
-    console.log("Owner ID :- ",ownerId)
-    success(res,[],HTTP_STATUS.OK,'Test passed')
+  getOwnerBooking = async (req: AuthenticatedRequest, res: Response) => {
+    const { query } = req
+    const { ownerId } = req.params
+    console.log("query :-", query)
+    console.log("Owner ID :- ", ownerId)
+    success(res, [], HTTP_STATUS.OK, "Test passed")
   }
 
   cancel = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

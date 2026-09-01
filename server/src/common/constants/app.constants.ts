@@ -1,4 +1,3 @@
-
 export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   SIGNUP_SUCCESS: "User registered. Please check your email for the OTP.",

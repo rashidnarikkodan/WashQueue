@@ -11,7 +11,5 @@ export interface TransferResult {
 }
 
 export interface ITransferService {
-  transfer(
-    params: CreateTransferParams
-  ): Promise<TransferResult>
+  transfer(params: CreateTransferParams): Promise<TransferResult>
 }

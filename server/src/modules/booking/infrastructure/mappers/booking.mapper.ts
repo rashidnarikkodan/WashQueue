@@ -181,7 +181,9 @@ export class BookingMapper {
             stalledAt: doc.stalledInfo.stalledAt || new Date(),
             previousStatus: doc.stalledInfo.previousStatus,
             resolution: doc.stalledInfo.resolution,
-            resolvedBy: doc.stalledInfo.resolvedBy ? doc.stalledInfo.resolvedBy.toString() : undefined,
+            resolvedBy: doc.stalledInfo.resolvedBy
+              ? doc.stalledInfo.resolvedBy.toString()
+              : undefined,
             resolvedAt: doc.stalledInfo.resolvedAt,
           }
         : null,

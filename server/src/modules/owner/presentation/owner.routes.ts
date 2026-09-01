@@ -50,4 +50,3 @@ export const createOwnerRouter = (ownerController: OwnerController): Router => {
 
   return router
 }
-

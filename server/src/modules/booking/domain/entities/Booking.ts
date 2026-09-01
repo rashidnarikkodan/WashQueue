@@ -165,7 +165,7 @@ export interface BookingProps {
 }
 
 export class Booking {
-  constructor(private readonly props: BookingProps) { }
+  constructor(private readonly props: BookingProps) {}
 
   get id(): string {
     return this.props.id
@@ -383,7 +383,7 @@ export class Booking {
     const nowMs = now.getTime()
     const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 
-    return (windowStartMs - nowMs) >= TWENTY_FOUR_HOURS_MS
+    return windowStartMs - nowMs >= TWENTY_FOUR_HOURS_MS
   }
 
   reschedule(newScheduling: SchedulingDetails, now: Date = new Date()): void {
@@ -421,7 +421,9 @@ export class Booking {
 
   completePreInspection(inspection: InspectionRecord, byUserId: string): void {
     if (!this.canTransitionTo(BookingStatus.CHECKED_IN)) {
-      throw new Error(`Cannot complete pre-service inspection for booking in status ${this.props.status}`)
+      throw new Error(
+        `Cannot complete pre-service inspection for booking in status ${this.props.status}`
+      )
     }
     const now = new Date()
     this.props.status = BookingStatus.CHECKED_IN
@@ -532,9 +534,15 @@ export class Booking {
 
   resolveStall(resolution: string, resolvedBy: string, targetStatus: BookingStatus): void {
     if (this.props.status !== BookingStatus.STALLED) {
-      throw new Error(`Only STALLED bookings can be resolved. Current status is ${this.props.status}`)
+      throw new Error(
+        `Only STALLED bookings can be resolved. Current status is ${this.props.status}`
+      )
     }
-    const allowedTargets = [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE, BookingStatus.CANCELLED]
+    const allowedTargets = [
+      BookingStatus.CHECKED_IN,
+      BookingStatus.IN_SERVICE,
+      BookingStatus.CANCELLED,
+    ]
     if (!allowedTargets.includes(targetStatus)) {
       throw new Error(
         "Invalid recovery target status. Allowed target recovery statuses are CHECKED_IN, IN_SERVICE, or CANCELLED"

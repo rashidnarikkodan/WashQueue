@@ -56,7 +56,10 @@ export const createBookingUseCase = new CreateBookingUseCase(
   bookingNotificationService
 )
 
-export const getBookingUseCase = new GetBookingUseCase(bookingRepository, bookingStatusLogRepository)
+export const getBookingUseCase = new GetBookingUseCase(
+  bookingRepository,
+  bookingStatusLogRepository
+)
 export const getUserBookingsUseCase = new GetUserBookingsUseCase(
   bookingRepository,
   managerAssignmentRepository,
@@ -118,9 +121,7 @@ export const retrySettlementUseCase = new RetrySettlementUseCase(
   processSettlementUseCase
 )
 
-export const manageSettlementHoldUseCase = new ManageSettlementHoldUseCase(
-  settlementRepository
-)
+export const manageSettlementHoldUseCase = new ManageSettlementHoldUseCase(settlementRepository)
 
 export const settlementController = new SettlementController(
   getOwnerSettlementSummaryUseCase,

@@ -45,7 +45,10 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     }
 
     if (booking.status === BookingStatus.CANCELLED || booking.status === BookingStatus.NO_SHOW) {
-      throw new AppError(`Booking is already ${booking.status.toLowerCase()}`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Booking is already ${booking.status.toLowerCase()}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const isStaffCancellation =
@@ -55,7 +58,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     const fromStatus = booking.status
 
     const cancellationReason =
-      input.reason || (isStaffCancellation ? "Cancelled by station manager" : "Cancelled by customer")
+      input.reason ||
+      (isStaffCancellation ? "Cancelled by station manager" : "Cancelled by customer")
 
     booking.cancel(cancellationReason, userId)
 

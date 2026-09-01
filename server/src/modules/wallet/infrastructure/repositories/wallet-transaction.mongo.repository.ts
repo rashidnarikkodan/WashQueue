@@ -76,10 +76,7 @@ export class WalletTransactionMongoRepository implements IWalletTransactionRepos
     }
 
     const [docs, total] = await Promise.all([
-      WalletTransactionModel.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
+      WalletTransactionModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       WalletTransactionModel.countDocuments(filter),
     ])
 

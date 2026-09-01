@@ -67,9 +67,7 @@ export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryU
           stationName: b.stationDetails?.name || "Station",
           serviceType: b.serviceType,
           vehicleRegNumber:
-            b.walkInVehicle?.registrationNumber ||
-            b.vehicleDetails?.registrationNumber ||
-            "N/A",
+            b.walkInVehicle?.registrationNumber || b.vehicleDetails?.registrationNumber || "N/A",
           customerName: b.walkInCustomer?.name || b.customerDetails?.name || "Customer",
           completedAt: (b.completedAt || new Date()).toISOString(),
           grossAmount: b.pricingSnapshot.totalPrice,

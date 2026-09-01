@@ -41,8 +41,7 @@ export class GetStationFilterOptionsUseCase implements IGetStationFilterOptionsU
       if (cached) {
         return JSON.parse(cached) as StationFilterOptionsDTO
       }
-    } catch {
-    }
+    } catch {}
 
     const [categories, classes, priceBounds] = await Promise.all([
       this.vehicleCategoryRepository.findAll(),
@@ -72,8 +71,7 @@ export class GetStationFilterOptionsUseCase implements IGetStationFilterOptionsU
 
     try {
       await this.cacheService.set(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS)
-    } catch {
-    }
+    } catch {}
 
     return payload
   }

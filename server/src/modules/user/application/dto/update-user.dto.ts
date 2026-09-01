@@ -5,4 +5,3 @@ export interface UpdateUserInput {
   phone?: string
   isVerified?: boolean
 }
-

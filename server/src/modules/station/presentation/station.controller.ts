@@ -44,7 +44,7 @@ export class StationController {
     private readonly getBookingCalendarUseCase: IGetBookingCalendarUseCase,
     private readonly getAvailableTimeWindowsUseCase: IGetAvailableTimeWindowsUseCase,
     private readonly getStationFilterOptionsUseCase: IGetStationFilterOptionsUseCase
-  ) { }
+  ) {}
 
   create = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
@@ -88,11 +88,10 @@ export class StationController {
     success(res, payload, HTTP_STATUS.OK, "Filter options retrieved successfully")
   }
 
-
   getStations = async (req: AuthenticatedRequest, res: Response) => {
     const query = req.query || {}
 
-    const userId = req.user?.userId || ''
+    const userId = req.user?.userId || ""
 
     console.log(query)
 

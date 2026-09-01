@@ -64,14 +64,20 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       input.extraServiceIds
     )
 
-    let timeWindow = input.timeWindowId ? await this.timeWindowRepository.findById(input.timeWindowId) : null
+    let timeWindow = input.timeWindowId
+      ? await this.timeWindowRepository.findById(input.timeWindowId)
+      : null
     if (!timeWindow) {
       const todayStr = new Date().toISOString().split("T")[0] || ""
-      const todayWindows = await this.timeWindowRepository.findByStationIdAndDate(station.id, todayStr)
+      const todayWindows = await this.timeWindowRepository.findByStationIdAndDate(
+        station.id,
+        todayStr
+      )
       if (todayWindows && todayWindows.length > 0) {
         const nowMs = Date.now()
         const activeWin = todayWindows.find(
-          (w) => new Date(w.windowStart).getTime() <= nowMs && new Date(w.windowEnd).getTime() > nowMs
+          (w) =>
+            new Date(w.windowStart).getTime() <= nowMs && new Date(w.windowEnd).getTime() > nowMs
         )
         timeWindow = activeWin || todayWindows[0] || null
       }
@@ -81,7 +87,9 @@ export class CreateWalkInBookingUseCase implements ICreateWalkInBookingUseCase {
       throw new AppError("Selected time window not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    const reservedWindow = await this.timeWindowRepository.reserveWalkInCapacityAtomically(timeWindow.id)
+    const reservedWindow = await this.timeWindowRepository.reserveWalkInCapacityAtomically(
+      timeWindow.id
+    )
     if (!reservedWindow) {
       throw new AppError(
         "Walk-in slot capacity is fully occupied for this time window. Please select another time window.",

@@ -26,7 +26,10 @@ export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCa
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase
   ) {}
 
-  async execute(managerUserId: string, input: ResolveStalledBookingInput): Promise<BookingResponseDTO> {
+  async execute(
+    managerUserId: string,
+    input: ResolveStalledBookingInput
+  ): Promise<BookingResponseDTO> {
     const { bookingId, resolution, targetStatus } = input
 
     if (!bookingId || !resolution?.trim()) {
@@ -39,7 +42,10 @@ export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCa
     }
 
     if (booking.status !== BookingStatus.STALLED) {
-      throw new AppError(`Only STALLED bookings can be resolved. Current status is ${booking.status}`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Only STALLED bookings can be resolved. Current status is ${booking.status}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const previousStatus = booking.stalledInfo?.previousStatus || BookingStatus.CHECKED_IN
@@ -47,7 +53,11 @@ export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCa
       ? (targetStatus as BookingStatus)
       : (previousStatus as BookingStatus)
 
-    const allowedTargets = [BookingStatus.CHECKED_IN, BookingStatus.IN_SERVICE, BookingStatus.CANCELLED]
+    const allowedTargets = [
+      BookingStatus.CHECKED_IN,
+      BookingStatus.IN_SERVICE,
+      BookingStatus.CANCELLED,
+    ]
     if (!allowedTargets.includes(finalTargetStatus)) {
       throw new AppError(
         `Invalid recovery target status. Allowed target recovery statuses are CHECKED_IN, IN_SERVICE, or CANCELLED`,
@@ -57,7 +67,10 @@ export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCa
 
     booking.resolveStall(resolution.trim(), managerUserId, finalTargetStatus)
 
-    const domainBooking = await this.bookingRepository.updateWithStatusGuard(booking, BookingStatus.STALLED)
+    const domainBooking = await this.bookingRepository.updateWithStatusGuard(
+      booking,
+      BookingStatus.STALLED
+    )
 
     if (!domainBooking) {
       throw new AppError("Failed to resolve stalled booking", HTTP_STATUS.CONFLICT)

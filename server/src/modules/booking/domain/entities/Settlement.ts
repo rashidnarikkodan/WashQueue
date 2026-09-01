@@ -72,14 +72,10 @@ export class Settlement {
       throw new Error("Station settlement amount cannot be negative")
     }
 
-    const calculatedSettlement = Number(
-      (props.totalAmount - props.platformCommission).toFixed(2)
-    )
+    const calculatedSettlement = Number((props.totalAmount - props.platformCommission).toFixed(2))
 
     if (Math.abs(props.stationSettlementAmount - calculatedSettlement) > 0.01) {
-      throw new Error(
-        "Station settlement amount must equal total amount minus platform commission"
-      )
+      throw new Error("Station settlement amount must equal total amount minus platform commission")
     }
   }
 

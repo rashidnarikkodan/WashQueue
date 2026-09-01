@@ -31,7 +31,10 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase {
     }
 
     if (data.currentPassword === data.newPassword) {
-      throw new AppError("New password cannot be the same as current password", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "New password cannot be the same as current password",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const user = await this.userRepository.findById(userId)
@@ -47,14 +50,20 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase {
       throw new AppError(ERROR_MESSAGES.INVALID_CREDENTIALS, HTTP_STATUS.BAD_REQUEST)
     }
 
-    const isCurrentPasswordValid = await this.hashService.verify(user.password, data.currentPassword)
+    const isCurrentPasswordValid = await this.hashService.verify(
+      user.password,
+      data.currentPassword
+    )
     if (!isCurrentPasswordValid) {
       throw new AppError("Incorrect current password", HTTP_STATUS.BAD_REQUEST)
     }
 
     const isSameAsCurrent = await this.hashService.verify(user.password, data.newPassword)
     if (isSameAsCurrent) {
-      throw new AppError("New password cannot be the same as current password", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "New password cannot be the same as current password",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     const hashedPassword = await this.hashService.hash(data.newPassword)

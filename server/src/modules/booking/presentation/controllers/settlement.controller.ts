@@ -150,10 +150,7 @@ export class SettlementController {
     const parsedStart = startDate ? new Date(startDate) : undefined
     const parsedEnd = endDate ? new Date(endDate) : undefined
 
-    const metrics = await this.getAdminSettlementMetricsUseCase.execute(
-      parsedStart,
-      parsedEnd
-    )
+    const metrics = await this.getAdminSettlementMetricsUseCase.execute(parsedStart, parsedEnd)
     success(res, metrics, HTTP_STATUS.OK, "Admin settlement metrics retrieved successfully")
   }
 

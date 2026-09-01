@@ -55,17 +55,19 @@ export class GetPublicStationQueueUseCase implements IGetPublicStationQueueUseCa
       queueData = await this.redisQueueService.reconcileStationQueue(stationId)
     }
 
-    const activeServices: PublicQueueItemDTO[] = (queueData.activeServices || []).map((item, idx) => ({
-      id: item.bookingId,
-      bookingNumber: item.bookingNumber,
-      bayNumber: item.assignedBayNumber || (idx % totalBays) + 1,
-      vehicle: item.vehicleModel || "Vehicle",
-      package: item.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash",
-      serviceType: item.serviceType,
-      status: item.status === "SERVICE_COMPLETED" ? "Finishing Up" : "Washing",
-      serviceStartedAt: item.serviceStartedAt,
-      isBayActive: true,
-    }))
+    const activeServices: PublicQueueItemDTO[] = (queueData.activeServices || []).map(
+      (item, idx) => ({
+        id: item.bookingId,
+        bookingNumber: item.bookingNumber,
+        bayNumber: item.assignedBayNumber || (idx % totalBays) + 1,
+        vehicle: item.vehicleModel || "Vehicle",
+        package: item.serviceType === "FULL" ? "Complete Full Wash" : "Express Half Wash",
+        serviceType: item.serviceType,
+        status: item.status === "SERVICE_COMPLETED" ? "Finishing Up" : "Washing",
+        serviceStartedAt: item.serviceStartedAt,
+        isBayActive: true,
+      })
+    )
 
     const waitingQueue: PublicQueueItemDTO[] = (queueData.waitingQueue || []).map((item) => ({
       id: item.bookingId,

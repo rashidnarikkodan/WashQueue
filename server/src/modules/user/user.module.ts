@@ -16,10 +16,7 @@ const cacheService = new RedisCacheService()
 
 const getUsersUseCase = new GetUsersUseCase(userRepository)
 const getUserUseCase = new GetUserUseCase(userRepository, ownerRepository)
-const updateUserUseCase = new UpdateUserUseCase(
-  userRepository,
-  cacheService
-)
+const updateUserUseCase = new UpdateUserUseCase(userRepository, cacheService)
 const getBookmarksUseCase = new GetBookmarksUseCase(userRepository, stationRepository)
 const toggleBookmarkUseCase = new ToggleBookmarkUseCase(userRepository)
 

@@ -33,8 +33,12 @@ export class BookingReservationMapper {
     const raw = entity.toObject()
     const obj: Record<string, unknown> = {
       userId: Types.ObjectId.isValid(raw.userId) ? new Types.ObjectId(raw.userId) : raw.userId,
-      stationId: Types.ObjectId.isValid(raw.stationId) ? new Types.ObjectId(raw.stationId) : raw.stationId,
-      vehicleId: Types.ObjectId.isValid(raw.vehicleId) ? new Types.ObjectId(raw.vehicleId) : raw.vehicleId,
+      stationId: Types.ObjectId.isValid(raw.stationId)
+        ? new Types.ObjectId(raw.stationId)
+        : raw.stationId,
+      vehicleId: Types.ObjectId.isValid(raw.vehicleId)
+        ? new Types.ObjectId(raw.vehicleId)
+        : raw.vehicleId,
       timeWindowId: Types.ObjectId.isValid(raw.timeWindowId)
         ? new Types.ObjectId(raw.timeWindowId)
         : raw.timeWindowId,

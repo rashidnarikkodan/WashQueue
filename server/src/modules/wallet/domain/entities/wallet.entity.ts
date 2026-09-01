@@ -1,10 +1,7 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Money } from "../value-objects/money.vo"
-import {
-  WalletTransaction,
-  TransactionCategory,
-} from "./wallet-transaction.entity"
+import { WalletTransaction, TransactionCategory } from "./wallet-transaction.entity"
 
 export type WalletStatus = "ACTIVE" | "SUSPENDED" | "LOCKED"
 
@@ -89,10 +86,7 @@ export class Wallet {
     this.ensureActive()
 
     if (amount.isNegative() || amount.isZero()) {
-      throw new AppError(
-        "Credit amount must be greater than zero",
-        HTTP_STATUS.BAD_REQUEST
-      )
+      throw new AppError("Credit amount must be greater than zero", HTTP_STATUS.BAD_REQUEST)
     }
 
     const balanceBefore = this._balance
@@ -131,10 +125,7 @@ export class Wallet {
     this.ensureActive()
 
     if (amount.isNegative() || amount.isZero()) {
-      throw new AppError(
-        "Debit amount must be greater than zero",
-        HTTP_STATUS.BAD_REQUEST
-      )
+      throw new AppError("Debit amount must be greater than zero", HTTP_STATUS.BAD_REQUEST)
     }
 
     if (this._balance.isLessThan(amount)) {

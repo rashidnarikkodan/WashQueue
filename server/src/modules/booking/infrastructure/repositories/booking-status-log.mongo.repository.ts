@@ -7,7 +7,9 @@ import { BookingStatusLogMapper } from "../mappers/booking-status-log.mapper"
 export class BookingStatusLogMongoRepository implements IBookingStatusLogRepository {
   async save(log: BookingStatusLog, session?: unknown): Promise<BookingStatusLog> {
     const raw = BookingStatusLogMapper.toPersistence(log)
-    const doc = (await BookingStatusLogModel.create([raw], { session: session as ClientSession }))[0]!
+    const doc = (
+      await BookingStatusLogModel.create([raw], { session: session as ClientSession })
+    )[0]!
     return BookingStatusLogMapper.toDomain(doc)
   }
 

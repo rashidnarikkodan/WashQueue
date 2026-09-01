@@ -2,7 +2,11 @@ import { IValidateQRForCheckInUseCase } from "../interfaces/queue-usecases.inter
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import logger from "@/configs/logger.config"
-import { BookingStatus, PaymentStatus, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
+import {
+  BookingStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { QRTokenService } from "@/modules/booking/domain/services/QRTokenService"
 import { BookingDTOMapper } from "@/modules/booking/application/mappers/booking-dto.mapper"
@@ -40,8 +44,7 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
         } else if (parsed.id) {
           searchStr = parsed.id
         }
-      } catch {
-      }
+      } catch {}
     }
 
     let booking = null
@@ -49,8 +52,7 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
     try {
       const qrHash = QRTokenService.hashToken(searchStr)
       booking = await this.bookingRepository.findByQrTokenHash(qrHash)
-    } catch {
-    }
+    } catch {}
 
     if (!booking) {
       booking = await this.bookingRepository.findByBookingNumber(searchStr)
@@ -65,7 +67,10 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
     }
 
     if (!booking) {
-      throw new AppError(`Invalid or unknown QR pass / Booking ID (${searchStr})`, HTTP_STATUS.NOT_FOUND)
+      throw new AppError(
+        `Invalid or unknown QR pass / Booking ID (${searchStr})`,
+        HTTP_STATUS.NOT_FOUND
+      )
     }
 
     const now = new Date()
@@ -74,19 +79,31 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
     }
 
     if (booking.status === BookingStatus.CHECKED_IN || booking.checkedInAt) {
-      throw new AppError("This booking QR pass has already been used and checked in", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "This booking QR pass has already been used and checked in",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     if (booking.status === BookingStatus.IN_SERVICE || booking.status === BookingStatus.COMPLETED) {
-      throw new AppError(`Vehicle is already ${booking.status.replace("_", " ")}`, HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        `Vehicle is already ${booking.status.replace("_", " ")}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     if (booking.status === BookingStatus.CANCELLED || Boolean(booking.cancellation?.cancelledAt)) {
-      throw new AppError("This booking has been cancelled and cannot be checked in", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "This booking has been cancelled and cannot be checked in",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     if (booking.status === BookingStatus.NO_SHOW) {
-      throw new AppError("This booking was marked NO_SHOW as customer missed their time window", HTTP_STATUS.BAD_REQUEST)
+      throw new AppError(
+        "This booking was marked NO_SHOW as customer missed their time window",
+        HTTP_STATUS.BAD_REQUEST
+      )
     }
 
     if (booking.status !== BookingStatus.CONFIRMED) {
@@ -132,15 +149,20 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
               fromStatus,
               toStatus: BookingStatus.NO_SHOW,
               changedBy: managerUserId,
-              reason: "Auto-marked NO_SHOW: customer's time window expired (+10m grace period) before QR check-in was scanned",
+              reason:
+                "Auto-marked NO_SHOW: customer's time window expired (+10m grace period) before QR check-in was scanned",
               createdAt: now,
             })
           )
           await this.notificationService.notify("BOOKING_NO_SHOW", booking, {
-            reason: "Auto-marked NO_SHOW: time window expired (+10m grace period) before QR check-in",
+            reason:
+              "Auto-marked NO_SHOW: time window expired (+10m grace period) before QR check-in",
           })
         } catch (err) {
-          logger.warn({ error: err, bookingId: booking.id }, "[ValidateQR] Failed to mark booking as NO_SHOW")
+          logger.warn(
+            { error: err, bookingId: booking.id },
+            "[ValidateQR] Failed to mark booking as NO_SHOW"
+          )
         }
 
         throw new AppError(

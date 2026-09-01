@@ -2,7 +2,10 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { Settlement, SettlementStatus } from "../../domain/entities/Settlement"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
-import { IProcessSettlementUseCase, IRetrySettlementUseCase } from "../interfaces/settlement.usecases"
+import {
+  IProcessSettlementUseCase,
+  IRetrySettlementUseCase,
+} from "../interfaces/settlement.usecases"
 
 export class RetrySettlementUseCase implements IRetrySettlementUseCase {
   constructor(
@@ -25,7 +28,10 @@ export class RetrySettlementUseCase implements IRetrySettlementUseCase {
     }
 
     // Reset status to PENDING if HELD or FAILED so processing can cleanly execute
-    if (settlement.status === SettlementStatus.HELD || settlement.status === SettlementStatus.FAILED) {
+    if (
+      settlement.status === SettlementStatus.HELD ||
+      settlement.status === SettlementStatus.FAILED
+    ) {
       await this.settlementRepository.updateStatusWithGuard(
         settlement.id!,
         SettlementStatus.PENDING,

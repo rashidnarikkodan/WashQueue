@@ -15,18 +15,10 @@ export interface PaginatedLedgerDTO {
 }
 
 export class GetTransactionLedgerUseCase implements IGetTransactionLedgerUseCase {
-  constructor(
-    private readonly transactionRepository: IWalletTransactionRepository
-  ) {}
+  constructor(private readonly transactionRepository: IWalletTransactionRepository) {}
 
-  public async execute(
-    userId: string,
-    options?: LedgerFilterOptions
-  ): Promise<PaginatedLedgerDTO> {
-    const result = await this.transactionRepository.findByUserId(
-      userId,
-      options
-    )
+  public async execute(userId: string, options?: LedgerFilterOptions): Promise<PaginatedLedgerDTO> {
+    const result = await this.transactionRepository.findByUserId(userId, options)
 
     return {
       transactions: result.transactions.map(WalletMapper.transactionToDTO),

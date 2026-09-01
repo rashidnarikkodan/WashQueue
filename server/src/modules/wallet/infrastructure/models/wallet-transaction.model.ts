@@ -81,7 +81,10 @@ WalletTransactionSchema.index(
   { userId: 1, referenceId: 1, type: 1 },
   {
     unique: true,
-    partialFilterExpression: { referenceId: { $exists: true, $type: "string" }, status: "COMPLETED" },
+    partialFilterExpression: {
+      referenceId: { $exists: true, $type: "string" },
+      status: "COMPLETED",
+    },
   }
 )
 

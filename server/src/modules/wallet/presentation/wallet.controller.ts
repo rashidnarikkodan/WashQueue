@@ -86,11 +86,7 @@ export class WalletController {
 
     const { amount, currency } = req.body
 
-    const order = await this.createTopUpOrderUseCase.execute(
-      userId,
-      amount,
-      currency
-    )
+    const order = await this.createTopUpOrderUseCase.execute(userId, amount, currency)
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -204,7 +200,9 @@ export class WalletController {
     })
 
     const BOM = "\uFEFF"
-    let csv = BOM + "Transaction ID,Date & Time,Description,Type,Category,Amount (INR),Status,Reference ID\n"
+    let csv =
+      BOM +
+      "Transaction ID,Date & Time,Description,Type,Category,Amount (INR),Status,Reference ID\n"
 
     result.transactions.forEach((tx) => {
       const dateStr = new Date(tx.createdAt).toLocaleString("en-IN")
@@ -214,7 +212,10 @@ export class WalletController {
     })
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8")
-    res.setHeader("Content-Disposition", `attachment; filename="wallet-transactions-${Date.now()}.csv"`)
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="wallet-transactions-${Date.now()}.csv"`
+    )
     res.status(HTTP_STATUS.OK).send(csv)
   }
 }

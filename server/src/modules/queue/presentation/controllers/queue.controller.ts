@@ -34,7 +34,12 @@ export class QueueController {
   getPublicStationQueue = async (req: Request, res: Response): Promise<void> => {
     const { stationId } = req.params as { stationId: string }
     const publicQueueData = await this.getPublicStationQueueUseCase.execute(stationId)
-    success(res, publicQueueData, HTTP_STATUS.OK, "Public station live queue retrieved successfully")
+    success(
+      res,
+      publicQueueData,
+      HTTP_STATUS.OK,
+      "Public station live queue retrieved successfully"
+    )
   }
 
   getOperationalQueue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -58,7 +63,10 @@ export class QueueController {
     success(res, booking, HTTP_STATUS.OK, "QR Code validated successfully")
   }
 
-  getInspectionUploadSignature = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getInspectionUploadSignature = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     const managerUserId = req.user?.userId
     if (!managerUserId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
@@ -71,13 +79,18 @@ export class QueueController {
       env.CLOUDINARY_API_SECRET
     )
 
-    success(res, {
-      signature,
-      timestamp,
-      folder,
-      apiKey: env.CLOUDINARY_API_KEY,
-      cloudName: env.CLOUDINARY_CLOUD_NAME,
-    }, HTTP_STATUS.OK, "Cloudinary upload signature generated")
+    success(
+      res,
+      {
+        signature,
+        timestamp,
+        folder,
+        apiKey: env.CLOUDINARY_API_KEY,
+        cloudName: env.CLOUDINARY_CLOUD_NAME,
+      },
+      HTTP_STATUS.OK,
+      "Cloudinary upload signature generated"
+    )
   }
 
   submitPreInspection = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -131,7 +144,12 @@ export class QueueController {
       bookingId,
       req.body?.notes
     )
-    success(res, booking, HTTP_STATUS.OK, "Vehicle handover completed & booking closed successfully")
+    success(
+      res,
+      booking,
+      HTTP_STATUS.OK,
+      "Vehicle handover completed & booking closed successfully"
+    )
   }
 
   stallBooking = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

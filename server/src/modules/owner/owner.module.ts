@@ -26,10 +26,7 @@ const onboardingStepMapper = new OnboardingStepRequestMapper(mediaUploadService)
 const createOwnerUseCase = new CreateOwnerUseCase(ownerRepository, userRepository)
 const getOwnerUseCase = new GetOwnerUseCase(ownerRepository)
 const updateOwnerUseCase = new UpdateOwnerUseCase(ownerRepository)
-const saveOnboardingStepUseCase = new SaveOnboardingStepUseCase(
-  ownerRepository,
-  userRepository
-)
+const saveOnboardingStepUseCase = new SaveOnboardingStepUseCase(ownerRepository, userRepository)
 const getOnboardingStatusUseCase = new GetOnboardingStatusUseCase(ownerRepository)
 const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   ownerRepository,

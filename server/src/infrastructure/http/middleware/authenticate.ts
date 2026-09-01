@@ -88,7 +88,6 @@ export const optionalAuthenticate = async (
         req.user = decoded
       }
     }
-  } catch {
-  }
+  } catch {}
   next()
 }

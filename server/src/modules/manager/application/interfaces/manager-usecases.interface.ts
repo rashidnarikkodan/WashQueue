@@ -115,5 +115,5 @@ export interface IVerifyInvitationTokenUseCase {
 }
 
 export interface ISelfAssignManagerUseCase {
-  execute(data:{stationId:string,ownerUserId:string}): Promise<StationProps>
+  execute(data: { stationId: string; ownerUserId: string }): Promise<StationProps>
 }

@@ -244,7 +244,7 @@ export const QrCameraScanner: React.FC<QrCameraScannerProps> = ({
           }
 
           ctx.drawImage(video, 0, 0, vWidth, vHeight)
-          let imageData = ctx.getImageData(0, 0, vWidth, vHeight)
+          const imageData = ctx.getImageData(0, 0, vWidth, vHeight)
           let code = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: "attemptBoth",
           })

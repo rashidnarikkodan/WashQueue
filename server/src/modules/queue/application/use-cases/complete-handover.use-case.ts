@@ -1,6 +1,10 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, PaymentStatus, PaymentMethod } from "@/modules/booking/domain/entities/Booking"
+import {
+  BookingStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -11,7 +15,10 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/queue-usecases.interface"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
-import { ICreateSettlementUseCase, IProcessSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
+import {
+  ICreateSettlementUseCase,
+  IProcessSettlementUseCase,
+} from "@/modules/booking/application/interfaces/settlement.usecases"
 import logger from "@/configs/logger.config"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
@@ -23,10 +30,14 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
     private readonly createSettlementUseCase: ICreateSettlementUseCase,
-    private readonly processSettlementUseCase: IProcessSettlementUseCase,
+    private readonly processSettlementUseCase: IProcessSettlementUseCase
   ) {}
 
-  async execute(managerUserId: string, bookingId: string, notes?: string): Promise<BookingResponseDTO> {
+  async execute(
+    managerUserId: string,
+    bookingId: string,
+    notes?: string
+  ): Promise<BookingResponseDTO> {
     if (!bookingId) {
       throw new AppError("Booking ID is required", HTTP_STATUS.BAD_REQUEST)
     }

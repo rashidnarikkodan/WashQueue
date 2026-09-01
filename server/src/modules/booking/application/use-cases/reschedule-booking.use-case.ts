@@ -40,10 +40,7 @@ export class RescheduleBookingUseCase implements IRescheduleBookingUseCase {
       throw new AppError("Walk-in bookings cannot be rescheduled", HTTP_STATUS.BAD_REQUEST)
     }
 
-    if (
-      booking.status !== BookingStatus.PENDING &&
-      booking.status !== BookingStatus.CONFIRMED
-    ) {
+    if (booking.status !== BookingStatus.PENDING && booking.status !== BookingStatus.CONFIRMED) {
       throw new AppError(
         `Cannot reschedule booking in status ${booking.status}`,
         HTTP_STATUS.BAD_REQUEST
