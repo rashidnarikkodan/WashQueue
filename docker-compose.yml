@@ -1,0 +1,19 @@
+services:
+  server:
+    build: ./server
+    container_name: washqueue-server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./server/.env.docker
+    networks:
+      - washqueue
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    networks:
+      - washqueue
+
+networks:
+  washqueue:
