@@ -1,0 +1,4 @@
+pnpm --dir server run lint
+pnpm --dir server format:check
+pnpm --dir client run lint
+pnpm --dir client format:check
