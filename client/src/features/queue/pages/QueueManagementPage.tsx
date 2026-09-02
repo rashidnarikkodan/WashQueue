@@ -315,7 +315,22 @@ export default function ManagerQueuePage() {
         toast.success("✓ Wash service started! Vehicle moved to Bay.")
       } else if (targetStatus === "COMPLETED") {
         updated = await bookingApi.completeHandover(selectedBooking.id)
-        toast.success("✓ Vehicle handover completed & booking closed!")
+        const outcome = updated.settlementOutcome
+        if (!outcome) {
+          toast.success("✓ Vehicle handover completed & booking closed!")
+        } else if (outcome.status === "SETTLED") {
+          toast.success("✓ Handover completed & payout transferred to owner!")
+        } else if (outcome.status === "HELD") {
+          toast.warning(
+            `Handover completed. Payout on hold: ${outcome.holdReason || "payout account not linked"}`
+          )
+        } else if (outcome.status === "FAILED") {
+          toast.warning(
+            `Handover completed, but payout transfer failed: ${outcome.failureReason || "unknown error"}`
+          )
+        } else {
+          toast.success("✓ Handover completed. Payout is being processed.")
+        }
       } else {
         updated = await bookingApi.advanceStatus(selectedBooking.id, targetStatus)
         toast.success(`Booking status updated to ${targetStatus.replace("_", " ")}`)

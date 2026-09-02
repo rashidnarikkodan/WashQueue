@@ -100,6 +100,13 @@ export interface BookingResponse {
     cancelledBy?: string
     cancelledAt?: string
   } | null
+  settlementOutcome?: {
+    status: string
+    amount?: number
+    transferId?: string
+    holdReason?: string
+    failureReason?: string
+  }
   rawQrToken?: string
   preServiceInspection?: {
     photos: InspectionPhoto[]

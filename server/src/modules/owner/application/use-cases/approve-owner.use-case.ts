@@ -10,6 +10,11 @@ import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
 
+// This marketplace only onboards laundry/car-wash service businesses, so the Razorpay
+// Route category/subcategory is fixed rather than collected per owner.
+const RAZORPAY_BUSINESS_CATEGORY = "services"
+const RAZORPAY_BUSINESS_SUBCATEGORY = "laundry_services"
+
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
@@ -76,14 +81,39 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
           pan = gst.substring(2, 12)
         }
 
+        const street1 = owner.street1?.trim()
+        const city = owner.city?.trim()
+        const state = owner.state?.trim()
+        const postalCode = owner.postalCode?.trim()
+        if (!street1 || !city || !state || !postalCode) {
+          throw new AppError(
+            "Owner business address is required to create payment account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+
         const transferId = await this.paymentAccountService.createAccount({
           email,
           phone,
           legal_business_name: businessName,
           business_type: gst ? "proprietorship" : "individual",
           contact_name: legalName,
-          reference_id: owner.id || String(owner.userId),
+          reference_id: (owner.id || String(owner.userId)).slice(-20),
           customer_facing_business_name: businessName,
+          profile: {
+            category: RAZORPAY_BUSINESS_CATEGORY,
+            subcategory: RAZORPAY_BUSINESS_SUBCATEGORY,
+            addresses: {
+              registered: {
+                street1,
+                street2: owner.street2?.trim() || undefined,
+                city,
+                state,
+                postal_code: postalCode,
+                country: owner.country?.trim() || "IN",
+              },
+            },
+          },
           ...(gst || pan
             ? {
                 legal_info: {

@@ -24,6 +24,24 @@ const step1Schema = z.object({
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "ID proof type is required",
   }),
+  street1: z
+    .string({ message: "Address line 1 is required" })
+    .trim()
+    .min(2, "Address line 1 must be at least 2 characters"),
+  street2: z.string().trim().optional().or(z.literal("")),
+  city: z
+    .string({ message: "City is required" })
+    .trim()
+    .min(2, "City must be at least 2 characters"),
+  state: z
+    .string({ message: "State is required" })
+    .trim()
+    .min(2, "State must be at least 2 characters"),
+  postalCode: z
+    .string({ message: "Postal code is required" })
+    .trim()
+    .regex(/^\d{6}$/, "Postal code must be exactly 6 digits"),
+  country: z.string().trim().optional().default("IN"),
 })
 
 const step2Schema = z.object({

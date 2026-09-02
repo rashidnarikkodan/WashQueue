@@ -5,6 +5,12 @@ export interface IOwnerOnboardingDetails {
   businessName?: string
   businessType?: string
   gstNumber?: string
+  street1?: string
+  street2?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  country?: string
   idProofType?: string
   idProofUrl?: string
   businessLicenseUrl?: string

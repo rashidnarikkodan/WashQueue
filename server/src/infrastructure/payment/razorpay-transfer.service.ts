@@ -4,6 +4,7 @@ import {
   TransferResult,
 } from "@/core/application/interfaces/transfer.interface"
 import { env } from "process"
+import logger from "@/configs/logger.config"
 import Razorpay from "razorpay"
 
 export class RazorpayTransferService implements ITransferService {
@@ -17,14 +18,25 @@ export class RazorpayTransferService implements ITransferService {
   }
 
   async transfer(params: CreateTransferParams): Promise<TransferResult> {
-    const transfer = await this.razorpay.transfers.create({
-      amount: params.amountInPaise,
-      currency: params.currency ?? "INR",
-      account: params.recipientId, // need to give account of owner or who u transfer to
-    })
-    return {
-      transferId: transfer.id,
-      status: transfer.status === "processed" ? "SUCCESS" : "FAILED",
+    try {
+      const transfer = await this.razorpay.transfers.create({
+        amount: params.amountInPaise,
+        currency: params.currency ?? "INR",
+        account: params.recipientId,
+      })
+      return {
+        transferId: transfer.id,
+        status: transfer.status === "processed" ? "SUCCESS" : "FAILED",
+      }
+    } catch (error: any) {
+      const errorMsg =
+        error?.error?.description || error?.message || "Failed to execute payment transfer"
+
+      logger.error(
+        `Razorpay transfer creation error: ${errorMsg} (code: ${error?.error?.code || "UNKNOWN"})`
+      )
+
+      throw new Error(errorMsg)
     }
   }
 }

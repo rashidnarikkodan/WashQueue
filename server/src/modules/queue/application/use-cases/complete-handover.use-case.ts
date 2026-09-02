@@ -129,9 +129,11 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
 
     await this.notificationService.notify("WASH_COMPLETED", domainBooking)
 
+    const bookingDTO = BookingDTOMapper.toDTO(domainBooking)
+
     if (domainBooking.settlement?.stationSettlement) {
       try {
-        const settlement = await this.createSettlementUseCase.execute({
+        let settlement = await this.createSettlementUseCase.execute({
           ownerId: domainBooking.ownerId,
           bookingId: domainBooking.id,
           stationId: domainBooking.stationId,
@@ -141,16 +143,28 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
         })
 
         if (settlement.id) {
-          await this.processSettlementUseCase.execute(settlement.id)
+          settlement = await this.processSettlementUseCase.execute(settlement.id)
+        }
+
+        bookingDTO.settlementOutcome = {
+          status: settlement.status,
+          amount: settlement.stationSettlementAmount,
+          transferId: settlement.transferId,
+          holdReason: settlement.holdReason,
+          failureReason: settlement.failureReason,
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown settlement error"
         logger.error(
           `Failed to process financial settlement for booking ${domainBooking.id}: ${message}`
         )
+        bookingDTO.settlementOutcome = {
+          status: "FAILED",
+          failureReason: message,
+        }
       }
     }
 
-    return BookingDTOMapper.toDTO(domainBooking)
+    return bookingDTO
   }
 }

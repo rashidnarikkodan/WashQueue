@@ -8,6 +8,12 @@ interface OnboardingDetailsSummaryProps {
     businessName?: string
     businessType?: string
     gstNumber?: string
+    street1?: string
+    street2?: string
+    city?: string
+    state?: string
+    postalCode?: string
+    country?: string
     idProofType?: string
     idProofUrl?: string
     accountHolderName?: string
@@ -147,6 +153,24 @@ const OnboardingDetailsSummary = ({
               <span className="text-slate-200 font-bold uppercase">{details.gstNumber}</span>
             </div>
           )}
+          <div className="md:col-span-3">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+              Business Address
+            </span>
+            <span className="text-slate-200 font-bold">
+              {details.street1
+                ? [
+                    details.street1,
+                    details.street2,
+                    details.city,
+                    details.state,
+                    details.postalCode,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
+                : "Not Provided"}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">

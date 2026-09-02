@@ -125,6 +125,13 @@ export interface BookingResponseDTO {
     vehicleClassModifierMinutes: number
     totalEstimatedMinutes: number
   }
+  settlementOutcome?: {
+    status: string
+    amount?: number
+    transferId?: string
+    holdReason?: string
+    failureReason?: string
+  }
   createdAt: string
   updatedAt: string
 }

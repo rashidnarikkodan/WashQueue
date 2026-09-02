@@ -144,12 +144,32 @@ export class QueueController {
       bookingId,
       req.body?.notes
     )
-    success(
-      res,
-      booking,
-      HTTP_STATUS.OK,
-      "Vehicle handover completed & booking closed successfully"
-    )
+
+    let message = "Vehicle handover completed & booking closed successfully"
+    const settlementOutcome = booking.settlementOutcome
+    if (settlementOutcome) {
+      switch (settlementOutcome.status) {
+        case "SETTLED":
+          message = "Handover completed & payout transferred to owner successfully"
+          break
+        case "HELD":
+          message =
+            "Handover completed. Payout is on hold: " +
+            (settlementOutcome.holdReason || "owner payout account not linked")
+          break
+        case "FAILED":
+          message =
+            "Handover completed, but the payout transfer failed: " +
+            (settlementOutcome.failureReason || "unknown error")
+          break
+        case "PROCESSING":
+        case "PENDING":
+          message = "Handover completed. Payout is being processed"
+          break
+      }
+    }
+
+    success(res, booking, HTTP_STATUS.OK, message)
   }
 
   stallBooking = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

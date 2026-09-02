@@ -10,6 +10,13 @@ interface OwnerProps {
   businessEmail?: string
   phone?: string
 
+  street1?: string
+  street2?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  country?: string
+
   hasStation?: boolean
   hasMobileService?: boolean
   mobileActive?: boolean
@@ -72,6 +79,30 @@ export class Owner {
 
   get phone(): string | undefined {
     return this.props.phone
+  }
+
+  get street1(): string | undefined {
+    return this.props.street1
+  }
+
+  get street2(): string | undefined {
+    return this.props.street2
+  }
+
+  get city(): string | undefined {
+    return this.props.city
+  }
+
+  get state(): string | undefined {
+    return this.props.state
+  }
+
+  get postalCode(): string | undefined {
+    return this.props.postalCode
+  }
+
+  get country(): string | undefined {
+    return this.props.country
   }
 
   get hasStation(): boolean {
@@ -194,6 +225,12 @@ export class Owner {
     businessEmail?: string
     phone?: string
     whatsapp?: string
+    street1?: string
+    street2?: string
+    city?: string
+    state?: string
+    postalCode?: string
+    country?: string
   }): void {
     this.props.legalFullName = data.legalFullName
     this.props.businessName = data.businessName
@@ -201,6 +238,12 @@ export class Owner {
     this.props.businessEmail = data.businessEmail
     this.props.phone = data.phone
     this.props.whatsapp = data.whatsapp
+    this.props.street1 = data.street1
+    this.props.street2 = data.street2
+    this.props.city = data.city
+    this.props.state = data.state
+    this.props.postalCode = data.postalCode
+    this.props.country = data.country
 
     this.touch()
   }

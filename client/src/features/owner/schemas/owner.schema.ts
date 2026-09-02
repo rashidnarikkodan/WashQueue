@@ -17,6 +17,14 @@ export const step1Schema = z.object({
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "Please select an ID proof type",
   }),
+  street1: z.string().trim().min(2, "Address line 1 must be at least 2 characters"),
+  street2: z.string().trim().optional().or(z.literal("")),
+  city: z.string().trim().min(2, "City must be at least 2 characters"),
+  state: z.string().trim().min(2, "State must be at least 2 characters"),
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Postal code must be exactly 6 digits"),
 })
 
 export const step2Schema = z.object({
