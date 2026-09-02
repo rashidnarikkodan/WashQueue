@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "tsx watch -r tsconfig-paths/register src/server.ts",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "build": "esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server.js",
     "start": "node dist/server.js",
     "lint": "eslint .",
@@ -49,6 +49,7 @@
     "@types/nodemailer": "^8.0.1",
     "@types/pdfkit": "^0.17.6",
     "esbuild": "^0.28.2",
+    "eslint": "^10.9.1",
     "prettier": "^3.9.6",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
