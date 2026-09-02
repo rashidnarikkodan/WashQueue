@@ -47,7 +47,7 @@ app.use(API_ROUTES.PAYMENT.ROOT, paymentRouter)
 app.use(API_ROUTES.WALLET.ROOT, walletRouter)
 app.use(API_ROUTES.SETTLEMENTS.ROOT, settlementRouter)
 
-app.use(notFoundMiddleware)
+   app.use(notFoundMiddleware)
 app.use(errorMiddleware)
 
 export default app
