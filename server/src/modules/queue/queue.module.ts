@@ -73,7 +73,9 @@ const savePostInspectionUseCase = new SavePostInspectionUseCase(
   stationRepository,
   managerAssignmentRepository,
   bookingRedisQueueService,
-  bookingNotificationService
+  bookingNotificationService,
+  createSettlementUseCase,
+  processSettlementUseCase
 )
 
 const completeHandoverUseCase = new CompleteHandoverUseCase(

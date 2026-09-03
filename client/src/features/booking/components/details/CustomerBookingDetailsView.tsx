@@ -20,6 +20,7 @@ import {
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { toast } from "sonner"
+import { Link } from "react-router-dom"
 
 interface CustomerBookingDetailsViewProps {
   booking: BookingResponse
@@ -160,9 +161,11 @@ export default function CustomerBookingDetailsView({
                   </span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                  {stationName}
-                </h2>
+                <Link to={`/stations/${booking.stationId}`}>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight hover:text-primary">
+                    {stationName}
+                  </h2>
+                </Link>
                 <p className="text-xs text-primary font-medium flex items-center gap-1.5">
                   <Clock size={13} />
                   <span>Slot Window: {formattedDates.timeStr}</span>

@@ -131,15 +131,26 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
 
     const bookingDTO = BookingDTOMapper.toDTO(domainBooking)
 
-    if (domainBooking.settlement?.stationSettlement) {
+    const settlementSnapshot = domainBooking.settlement || {
+      platformCommission: 0,
+      stationSettlement: domainBooking.pricingSnapshot?.totalPrice ?? 0,
+    }
+
+    if (settlementSnapshot.stationSettlement >= 0) {
       try {
+        const ownerId =
+          domainBooking.ownerId ||
+          station.getProps().ownerId ||
+          station.ownerId ||
+          domainBooking.createdByUserId
+
         let settlement = await this.createSettlementUseCase.execute({
-          ownerId: domainBooking.ownerId,
+          ownerId,
           bookingId: domainBooking.id,
           stationId: domainBooking.stationId,
-          stationSettlementAmount: domainBooking.settlement.stationSettlement,
-          platformCommission: domainBooking.settlement.platformCommission,
-          totalAmount: domainBooking.pricingSnapshot.totalPrice,
+          stationSettlementAmount: settlementSnapshot.stationSettlement,
+          platformCommission: settlementSnapshot.platformCommission,
+          totalAmount: domainBooking.pricingSnapshot?.totalPrice ?? 0,
         })
 
         if (settlement.id) {
@@ -156,6 +167,7 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown settlement error"
         logger.error(
+          { err, bookingId: domainBooking.id },
           `Failed to process financial settlement for booking ${domainBooking.id}: ${message}`
         )
         bookingDTO.settlementOutcome = {

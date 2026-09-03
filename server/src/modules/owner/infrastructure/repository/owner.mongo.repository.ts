@@ -14,6 +14,9 @@ export class OwnerMongoRepository
   }
 
   async findByUserId(userId: string): Promise<Owner | null> {
+    if (!userId || !Types.ObjectId.isValid(userId)) {
+      return null
+    }
     const doc = await this.model.findOne({ userId: new Types.ObjectId(userId) }).exec()
     return doc ? this.mapper.toDomain(doc) : null
   }

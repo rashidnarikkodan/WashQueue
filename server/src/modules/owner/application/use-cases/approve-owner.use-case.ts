@@ -92,6 +92,16 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
           )
         }
 
+        const accountNumber = owner.accountNumber?.trim()
+        const ifscCode = owner.ifscCode?.trim()
+        const accountHolderName = owner.accountHolderName?.trim() || legalName
+        if (!accountNumber || !ifscCode) {
+          throw new AppError(
+            "Owner bank account details are required to create payment account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+
         const transferId = await this.paymentAccountService.createAccount({
           email,
           phone,
@@ -126,6 +136,12 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
             ownerId: owner.id || "",
             userId: String(owner.userId),
           },
+          bankAccount: {
+            account_number: accountNumber,
+            ifsc_code: ifscCode,
+            beneficiary_name: accountHolderName,
+          },
+          pan,
         })
 
         owner.setTransferId(transferId)

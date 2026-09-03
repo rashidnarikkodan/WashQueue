@@ -21,6 +21,12 @@ export interface PaymentAccountLegalInfo {
   gst?: string
 }
 
+export interface BankAccountDetails {
+  account_number: string
+  ifsc_code: string
+  beneficiary_name: string
+}
+
 export interface CreatePaymentAccountParams {
   email: string
   phone: string
@@ -33,6 +39,8 @@ export interface CreatePaymentAccountParams {
   profile?: PaymentAccountProfile
   legal_info?: PaymentAccountLegalInfo
   notes?: Record<string, string | number>
+  bankAccount: BankAccountDetails
+  pan?: string
 }
 
 export interface IPaymentAccountService {

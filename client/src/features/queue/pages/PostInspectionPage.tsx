@@ -237,14 +237,29 @@ export default function ManagerPostInspectionPage() {
         passed: Boolean(checklist[item.key]),
         remark: remarks[item.key]?.trim() || undefined,
       }))
-      await bookingApi.savePostInspection(booking.id, {
+      const updated = await bookingApi.savePostInspection(booking.id, {
         photos: uploadedPhotos,
         notes:
           handoverNotes ||
           "Post-service vehicle quality inspection verified & handed over to customer",
         checklist: checklistPayload,
       })
-      toast.success("✓ Inspection verified & vehicle handover completed!")
+      const outcome = updated?.settlementOutcome
+      if (!outcome) {
+        toast.success("✓ Inspection verified & vehicle handover completed!")
+      } else if (outcome.status === "SETTLED") {
+        toast.success("✓ Handover completed & payout transferred to owner!")
+      } else if (outcome.status === "HELD") {
+        toast.warning(
+          `Handover completed. Payout on hold: ${outcome.holdReason || "payout account not linked"}`
+        )
+      } else if (outcome.status === "FAILED") {
+        toast.warning(
+          `Handover completed, but payout transfer failed: ${outcome.failureReason || "unknown error"}`
+        )
+      } else {
+        toast.success("✓ Handover completed. Payout is being processed.")
+      }
       navigate(`${basePath}/queues`)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }

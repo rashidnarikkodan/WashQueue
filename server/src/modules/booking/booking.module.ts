@@ -36,7 +36,9 @@ import { ManageSettlementHoldUseCase } from "./application/use-cases/manage-sett
 import { SettlementController } from "./presentation/controllers/settlement.controller"
 import { createSettlementRouter } from "./presentation/routers/settlement.routes"
 import { ownerRepository } from "../owner/owner.module"
+import { userRepository } from "../user/user.module"
 import { RazorpayTransferService } from "@/infrastructure/payment/razorpay-transfer.service"
+import { paymentAccountService } from "@/infrastructure/payment/razorpay-account.service"
 
 import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
@@ -81,7 +83,9 @@ export const processSettlementUseCase = new ProcessSettlementUseCase(
   settlementRepository,
   ownerRepository,
   transferService,
-  bookingRepository
+  bookingRepository,
+  paymentAccountService,
+  userRepository
 )
 
 export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(

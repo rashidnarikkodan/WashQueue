@@ -82,6 +82,15 @@ export class PaymentAccountService implements IPaymentAccountService {
       requestBody.notes = params.notes
     }
 
+    const bankAccount = params.bankAccount
+    if (!bankAccount?.account_number || !bankAccount?.ifsc_code || !bankAccount?.beneficiary_name) {
+      throw new AppError(
+        "Bank account details are required to create payment account",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    let accountId: string
     try {
       const account = (await this.razorpay.accounts.create(requestBody as any)) as { id: string }
 
@@ -89,8 +98,8 @@ export class PaymentAccountService implements IPaymentAccountService {
         throw new Error("Razorpay did not return a valid account ID")
       }
 
-      logger.info(`Razorpay Route account created successfully: ${account.id}`)
-      return account.id
+      accountId = account.id
+      logger.info(`Razorpay Route account created successfully: ${accountId}`)
     } catch (error: any) {
       const errorMsg =
         error?.error?.description || error?.message || "Failed to create Razorpay account"
@@ -104,6 +113,69 @@ export class PaymentAccountService implements IPaymentAccountService {
         HTTP_STATUS.BAD_REQUEST
       )
     }
+
+    try {
+      // The SDK's type declares `kyc` as mandatory, but Razorpay's actual API accepts a
+      // stakeholder without PAN (KYC can be completed later) — cast to bypass that mismatch.
+      await this.razorpay.stakeholders.create(accountId, {
+        name: contactName,
+        email,
+        phone: { primary: phone },
+        ...(params.pan ? { kyc: { pan: params.pan } } : {}),
+        ...(params.profile?.addresses?.registered
+          ? {
+              addresses: {
+                residential: {
+                  street: [
+                    params.profile.addresses.registered.street1,
+                    params.profile.addresses.registered.street2,
+                  ]
+                    .filter(Boolean)
+                    .join(", "),
+                  city: params.profile.addresses.registered.city,
+                  state: params.profile.addresses.registered.state,
+                  postal_code: params.profile.addresses.registered.postal_code,
+                  country: params.profile.addresses.registered.country,
+                },
+              },
+            }
+          : {}),
+      } as unknown as Parameters<Razorpay["stakeholders"]["create"]>[1])
+
+      const product = await this.razorpay.products.requestProductConfiguration(accountId, {
+        product_name: "route",
+        tnc_accepted: true,
+      })
+
+      if (!product?.id) {
+        throw new Error("Razorpay did not return a valid product configuration ID")
+      }
+
+      await this.razorpay.products.edit(accountId, product.id, {
+        settlements: {
+          account_number: bankAccount.account_number,
+          ifsc_code: bankAccount.ifsc_code,
+          beneficiary_name: bankAccount.beneficiary_name,
+        },
+        tnc_accepted: true,
+      })
+
+      logger.info(`Razorpay Route account ${accountId} configured for settlements`)
+    } catch (error: any) {
+      const errorMsg =
+        error?.error?.description || error?.message || "Failed to configure Razorpay payout account"
+
+      logger.error(
+        `Razorpay Route configuration error for account ${accountId}: ${errorMsg} (code: ${error?.error?.code || "UNKNOWN"})`
+      )
+
+      throw new AppError(
+        `Failed to configure Razorpay payout account: ${errorMsg}`,
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
+    return accountId
   }
 }
 

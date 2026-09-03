@@ -16,6 +16,12 @@ import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-r
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
+import {
+  ICreateSettlementUseCase,
+  IProcessSettlementUseCase,
+} from "@/modules/booking/application/interfaces/settlement.usecases"
+import logger from "@/configs/logger.config"
+
 export interface SavePostInspectionInput {
   bookingId: string
   photos?: InspectionPhoto[]
@@ -41,7 +47,9 @@ export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
     private readonly stationRepository: IStationRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly redisQueueService: IBookingQueueService,
-    private readonly notificationService: IBookingNotificationService
+    private readonly notificationService: IBookingNotificationService,
+    private readonly createSettlementUseCase: ICreateSettlementUseCase,
+    private readonly processSettlementUseCase: IProcessSettlementUseCase
   ) {}
 
   async execute(
@@ -163,6 +171,54 @@ export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
 
     await this.notificationService.notify("WASH_COMPLETED", domainBooking)
 
-    return BookingDTOMapper.toDTO(domainBooking)
+    const bookingDTO = BookingDTOMapper.toDTO(domainBooking)
+
+    const settlementSnapshot = domainBooking.settlement || {
+      platformCommission: 0,
+      stationSettlement: domainBooking.pricingSnapshot?.totalPrice ?? 0,
+    }
+
+    if (settlementSnapshot.stationSettlement >= 0) {
+      try {
+        const ownerId =
+          domainBooking.ownerId ||
+          station.getProps().ownerId ||
+          station.ownerId ||
+          domainBooking.createdByUserId
+
+        let settlement = await this.createSettlementUseCase.execute({
+          ownerId,
+          bookingId: domainBooking.id,
+          stationId: domainBooking.stationId,
+          stationSettlementAmount: settlementSnapshot.stationSettlement,
+          platformCommission: settlementSnapshot.platformCommission,
+          totalAmount: domainBooking.pricingSnapshot?.totalPrice ?? 0,
+        })
+
+        if (settlement.id) {
+          settlement = await this.processSettlementUseCase.execute(settlement.id)
+        }
+
+        bookingDTO.settlementOutcome = {
+          status: settlement.status,
+          amount: settlement.stationSettlementAmount,
+          transferId: settlement.transferId,
+          holdReason: settlement.holdReason,
+          failureReason: settlement.failureReason,
+        }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unknown settlement error"
+        logger.error(
+          { err, bookingId: domainBooking.id },
+          `Failed to process financial settlement for booking ${domainBooking.id}: ${message}`
+        )
+        bookingDTO.settlementOutcome = {
+          status: "FAILED",
+          failureReason: message,
+        }
+      }
+    }
+
+    return bookingDTO
   }
 }

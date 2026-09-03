@@ -1,4 +1,4 @@
-import { Model, Document } from "mongoose"
+import { Model, Document, Types } from "mongoose"
 import { HasId, IBaseRepository, IMapper } from "@/core/domain/repository.interface"
 
 export abstract class BaseRepository<
@@ -11,6 +11,9 @@ export abstract class BaseRepository<
   ) {}
 
   async findById(id: string): Promise<TDomain | null> {
+    if (!id || typeof id !== "string" || !Types.ObjectId.isValid(id)) {
+      return null
+    }
     const doc = await this.model.findById(id).exec()
     return doc ? this.mapper.toDomain(doc) : null
   }

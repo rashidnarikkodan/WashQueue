@@ -3,7 +3,7 @@ import {
   ITransferService,
   TransferResult,
 } from "@/core/application/interfaces/transfer.interface"
-import { env } from "process"
+import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import Razorpay from "razorpay"
 
@@ -24,9 +24,13 @@ export class RazorpayTransferService implements ITransferService {
         currency: params.currency ?? "INR",
         account: params.recipientId,
       })
+      const isSuccess =
+        transfer.status === "processed" ||
+        transfer.status === "created" ||
+        transfer.status === "pending"
       return {
         transferId: transfer.id,
-        status: transfer.status === "processed" ? "SUCCESS" : "FAILED",
+        status: isSuccess ? "SUCCESS" : "FAILED",
       }
     } catch (error: any) {
       const errorMsg =
