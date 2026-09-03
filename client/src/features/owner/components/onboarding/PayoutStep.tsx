@@ -93,6 +93,7 @@ export default function PayoutStep({
                 { value: "HDFC Bank", label: "HDFC Bank" },
                 { value: "ICICI Bank", label: "ICICI Bank" },
                 { value: "Axis Bank", label: "Axis Bank" },
+                { value: "Kerala Gramin Bank", label: "Kerala Gramin Bank" },
               ]}
               error={fieldErrors.bankName}
             />

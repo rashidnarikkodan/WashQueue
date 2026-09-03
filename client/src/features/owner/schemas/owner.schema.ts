@@ -5,15 +5,20 @@ export const step1Schema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit phone number"),
   whatsapp: z
     .string()
     .trim()
-    .regex(/^\d{10}$/, "WhatsApp number must be exactly 10 digits")
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit WhatsApp number")
     .optional()
     .or(z.literal("")),
   businessName: z.string().trim().min(2, "Business name must be at least 2 characters"),
-  gstNumber: z.string().trim().optional().or(z.literal("")),
+  gstNumber: z
+    .string()
+    .trim()
+    .regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, "Enter a valid GSTIN")
+    .optional()
+    .or(z.literal("")),
   idProofType: z.enum(["aadhar", "pan", "passport", "dl"], {
     message: "Please select an ID proof type",
   }),

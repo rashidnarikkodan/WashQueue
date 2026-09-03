@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "tsx watch -r tsconfig-paths/register src/server.ts",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "build": "esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server.js",
     "start": "node dist/server.js",
     "lint": "eslint .",
@@ -54,6 +55,8 @@
     "prettier": "^3.9.6",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.11"
   }
 }

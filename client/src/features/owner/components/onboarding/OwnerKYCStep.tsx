@@ -95,6 +95,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter phone number"
               prefix="🇮🇳 +91"
+              maxLength={10}
               error={fieldErrors.phone}
             />
           </div>
@@ -108,6 +109,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter phone number"
               prefix="🇮🇳 +91"
+              maxLength={10}
               error={fieldErrors.whatsapp}
             />
           </div>
@@ -147,6 +149,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter GST number (optional)"
               leftIcon={<FileText size={16} />}
+              maxLength={15}
               error={fieldErrors.gstNumber}
             />
           </div>
