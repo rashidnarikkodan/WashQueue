@@ -86,7 +86,13 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     }
 
     // Attempt auto-creation of linked payout account if owner has bank details but missing transferId
-    if (!owner.transferId && this.paymentAccountService && this.userRepository && owner.accountNumber && owner.ifscCode) {
+    if (
+      !owner.transferId &&
+      this.paymentAccountService &&
+      this.userRepository &&
+      owner.accountNumber &&
+      owner.ifscCode
+    ) {
       try {
         const user = await this.userRepository.findById(owner.userId)
         const legalName = owner.legalFullName?.trim() || user?.name?.trim() || "Owner"
