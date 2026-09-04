@@ -37,7 +37,8 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       ifscCode: mongooseDoc.ifscCode,
       bankProofUrl: mongooseDoc.bankProofUrl,
       rejectionReason: mongooseDoc.rejectionReason,
-      transferId: mongooseDoc.transferId,
+      razorpayContactId: mongooseDoc.razorpayContactId,
+      razorpayFundAccountId: mongooseDoc.razorpayFundAccountId,
     })
   }
 
@@ -124,8 +125,11 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     if (domainEntity.rejectionReason !== undefined) {
       raw.rejectionReason = domainEntity.rejectionReason
     }
-    if (domainEntity.transferId !== undefined) {
-      raw.transferId = domainEntity.transferId
+    if (domainEntity.razorpayContactId !== undefined) {
+      raw.razorpayContactId = domainEntity.razorpayContactId
+    }
+    if (domainEntity.razorpayFundAccountId !== undefined) {
+      raw.razorpayFundAccountId = domainEntity.razorpayFundAccountId
     }
     return raw
   }

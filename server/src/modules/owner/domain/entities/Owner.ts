@@ -1,4 +1,4 @@
-interface OwnerProps {
+export interface OwnerProps {
   id?: string
   userId: string
 
@@ -40,7 +40,8 @@ interface OwnerProps {
 
   rejectionReason?: string
 
-  transferId?: string
+  razorpayContactId?: string
+  razorpayFundAccountId?: string
 
   createdAt?: Date
   updatedAt?: Date
@@ -173,8 +174,12 @@ export class Owner {
     return this.props.rejectionReason
   }
 
-  get transferId(): string | undefined {
-    return this.props.transferId
+  get razorpayContactId(): string | undefined {
+    return this.props.razorpayContactId
+  }
+
+  get razorpayFundAccountId(): string | undefined {
+    return this.props.razorpayFundAccountId
   }
 
   get createdAt(): Date | undefined {
@@ -202,8 +207,13 @@ export class Owner {
     this.touch()
   }
 
-  setTransferId(transferId: string): void {
-    this.props.transferId = transferId
+  setRazorpayContactId(contactId: string): void {
+    this.props.razorpayContactId = contactId
+    this.touch()
+  }
+
+  setRazorpayFundAccountId(fundAccountId: string): void {
+    this.props.razorpayFundAccountId = fundAccountId
     this.touch()
   }
 
@@ -325,7 +335,8 @@ export class Owner {
   toJSON() {
     return {
       ...this.props,
-      transferId: this.transferId,
+      razorpayContactId: this.razorpayContactId,
+      razorpayFundAccountId: this.razorpayFundAccountId,
       hasStation: this.hasStation,
       hasMobileService: this.hasMobileService,
       mobileActive: this.mobileActive,
