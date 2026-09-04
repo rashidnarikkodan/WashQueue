@@ -149,7 +149,7 @@ export class QueueController {
     const settlementOutcome = booking.settlementOutcome
     if (settlementOutcome) {
       switch (settlementOutcome.status) {
-        case "SETTLED":
+        case "PROCESSED":
           message = "Handover completed & payout transferred to owner successfully"
           break
         case "HELD":
@@ -164,7 +164,7 @@ export class QueueController {
           break
         case "PROCESSING":
         case "PENDING":
-          message = "Handover completed. Payout is being processed"
+          message = "Handover completed. Payout will be processed shortly"
           break
       }
     }
