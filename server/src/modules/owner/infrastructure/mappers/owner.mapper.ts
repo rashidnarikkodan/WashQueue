@@ -14,12 +14,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       whatsapp: mongooseDoc.whatsapp,
       businessEmail: mongooseDoc.businessEmail,
       phone: mongooseDoc.phone,
-      street1: mongooseDoc.street1,
-      street2: mongooseDoc.street2,
-      city: mongooseDoc.city,
-      state: mongooseDoc.state,
-      postalCode: mongooseDoc.postalCode,
-      country: mongooseDoc.country,
       isVerified: mongooseDoc.isVerified,
       isManager: mongooseDoc.isManager,
       verifiedAt: mongooseDoc.verifiedAt,
@@ -64,24 +58,6 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.phone !== undefined) {
       raw.phone = domainEntity.phone
-    }
-    if (domainEntity.street1 !== undefined) {
-      raw.street1 = domainEntity.street1
-    }
-    if (domainEntity.street2 !== undefined) {
-      raw.street2 = domainEntity.street2
-    }
-    if (domainEntity.city !== undefined) {
-      raw.city = domainEntity.city
-    }
-    if (domainEntity.state !== undefined) {
-      raw.state = domainEntity.state
-    }
-    if (domainEntity.postalCode !== undefined) {
-      raw.postalCode = domainEntity.postalCode
-    }
-    if (domainEntity.country !== undefined) {
-      raw.country = domainEntity.country
     }
     if (domainEntity.isVerified !== undefined) {
       raw.isVerified = domainEntity.isVerified

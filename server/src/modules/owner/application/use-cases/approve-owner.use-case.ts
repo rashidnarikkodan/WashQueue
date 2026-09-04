@@ -3,12 +3,11 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IMailService } from "@/core/application/interfaces/mail.interface"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
-import { AppError } from "@/common/errors/app-error"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
+import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
@@ -42,57 +41,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     if (isApproved) {
       owner.verify()
 
-      // Create the owner's RazorpayX payout destination (contact + fund account) once, during
-      // approval, so settlement processing never has to create it on the critical path.
-      if (!owner.razorpayFundAccountId) {
-        const legalName = owner.legalFullName?.trim() || user.name?.trim()
-        const email = (owner.businessEmail || user.email)?.trim()
-        const phone = (owner.phone || user.phone)?.trim()
-        const accountNumber = owner.accountNumber?.trim()
-        const ifscCode = owner.ifscCode?.trim()
-        const accountHolderName = owner.accountHolderName?.trim() || legalName
-
-        if (!legalName) {
-          throw new AppError(
-            "Owner full name is required to create payout account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-        if (!email) {
-          throw new AppError(
-            "Owner email is required to create payout account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-        if (!phone) {
-          throw new AppError(
-            "Owner phone is required to create payout account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-        if (!accountNumber || !ifscCode) {
-          throw new AppError(
-            "Owner bank account details are required to create payout account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const destination = await this.payoutProvider.ensurePayoutDestination({
-          id: owner.id || String(owner.userId),
-          legalFullName: legalName,
-          businessName: owner.businessName,
-          accountHolderName,
-          businessEmail: email,
-          phone,
-          accountNumber,
-          ifscCode,
-          razorpayContactId: owner.razorpayContactId,
-          razorpayFundAccountId: owner.razorpayFundAccountId,
-        })
-
-        owner.setRazorpayContactId(destination.contactId)
-        owner.setRazorpayFundAccountId(destination.fundAccountId)
-      }
+      await ensureOwnerPayoutAccount(owner, this.payoutProvider, user.name, user.email, user.phone)
 
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })
@@ -100,7 +49,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       try {
         await this.mailService.sendOwnerApprovalEmail(user.email, displayName)
       } catch {
-        // Log mail error if any, but do not fail the transaction
+        // log error if needed
       }
     } else {
       const reason =
@@ -115,7 +64,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       try {
         await this.mailService.sendOwnerRejectionEmail(user.email, displayName, reason)
       } catch {
-        // Log mail error if any, but do not fail the transaction
+        // log error if needed
       }
     }
 

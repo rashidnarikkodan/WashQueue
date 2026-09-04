@@ -31,7 +31,8 @@ const getOnboardingStatusUseCase = new GetOnboardingStatusUseCase(ownerRepositor
 const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   ownerRepository,
   tokenService,
-  userRepository
+  userRepository,
+  razorpayXPayoutProvider
 )
 const approveOwnerUseCase = new ApproveOwnerUseCase(
   ownerRepository,
