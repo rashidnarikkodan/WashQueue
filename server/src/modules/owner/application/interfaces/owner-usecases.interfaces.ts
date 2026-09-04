@@ -3,14 +3,7 @@ export interface IOwnerOnboardingDetails {
   phone?: string
   whatsapp?: string
   businessName?: string
-  businessType?: string
   gstNumber?: string
-  street1?: string
-  street2?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
   idProofType?: string
   idProofUrl?: string
   businessLicenseUrl?: string

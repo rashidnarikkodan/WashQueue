@@ -8,12 +8,6 @@ export interface IOwner extends Document {
   whatsapp?: string
   businessEmail?: string
   phone?: string
-  street1?: string
-  street2?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
   isVerified?: boolean
   isManager?: boolean
   verifiedAt?: Date
@@ -67,31 +61,6 @@ const ownerSchema = new Schema<IOwner>(
     phone: {
       type: String,
       trim: true,
-    },
-    street1: {
-      type: String,
-      trim: true,
-    },
-    street2: {
-      type: String,
-      trim: true,
-    },
-    city: {
-      type: String,
-      trim: true,
-    },
-    state: {
-      type: String,
-      trim: true,
-    },
-    postalCode: {
-      type: String,
-      trim: true,
-    },
-    country: {
-      type: String,
-      trim: true,
-      default: "IN",
     },
     isVerified: {
       type: Boolean,

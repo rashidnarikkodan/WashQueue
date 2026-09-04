@@ -34,7 +34,7 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   ownerRepository,
   tokenService,
   userRepository,
-  notificationDispatcherService
+  razorpayXPayoutProvider
 )
 const approveOwnerUseCase = new ApproveOwnerUseCase(
   ownerRepository,

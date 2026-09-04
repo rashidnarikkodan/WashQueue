@@ -7,14 +7,16 @@ import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interface
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
+import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
+import logger from "@/configs/logger.config"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute(userId: string): Promise<{
@@ -60,7 +62,26 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     }
 
-    const savedOwner = await this.ownerRepository.save(owner)
+    // Attempt to create the owner's RazorpayX payout destination now, while they're present to
+    // fix a bad IFSC/account number immediately — rather than waiting until admin approval days
+    // later. Not fatal here: ApproveOwnerUseCase still hard-requires it before final approval,
+    // and ProcessSettlementUseCase has its own lazy fallback — this is just the earliest attempt.
+    try {
+      await ensureOwnerPayoutAccount(
+        owner,
+        this.payoutProvider,
+        userDoc.name,
+        userDoc.email,
+        userDoc.phone
+      )
+    } catch (err: unknown) {
+      logger.warn(
+        { err, ownerId: owner.id },
+        "Failed to create RazorpayX payout destination during onboarding submission; will retry at approval time"
+      )
+    }
+
+    await this.ownerRepository.save(owner)
 
     const tokenPayload = {
       userId: userDoc.id || userId,
