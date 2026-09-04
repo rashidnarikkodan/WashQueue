@@ -28,7 +28,12 @@ export interface IGetOwnerSettlementsUseCase {
 }
 
 export interface IGetOwnerEarningsHistoryUseCase {
-  execute(userId: string, page?: number, limit?: number): Promise<SettlementPaginationDTO<unknown>>
+  execute(
+    userId: string,
+    page?: number,
+    limit?: number,
+    search?: string
+  ): Promise<SettlementPaginationDTO<unknown>>
 }
 
 export interface IGetAdminSettlementsUseCase {
