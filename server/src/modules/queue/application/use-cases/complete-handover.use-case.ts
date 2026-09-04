@@ -134,11 +134,7 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
 
     if (settlementSnapshot.stationSettlement >= 0) {
       try {
-        const ownerId =
-          domainBooking.ownerId ||
-          station.getProps().ownerId ||
-          station.ownerId ||
-          domainBooking.createdByUserId
+        const ownerId = domainBooking.ownerId || station.getProps().ownerId || station.ownerId
 
         const settlement = await this.createSettlementUseCase.execute({
           ownerId,
@@ -149,8 +145,6 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
           totalAmount: domainBooking.pricingSnapshot?.totalPrice ?? 0,
         })
 
-        // Payout to the owner is processed asynchronously by the settlement worker, not on the
-        // handover request path — a slow/failing payout provider must never block a handover.
         bookingDTO.settlementOutcome = {
           status: settlement.status,
           amount: settlement.stationSettlementAmount,

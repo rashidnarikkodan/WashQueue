@@ -27,8 +27,6 @@ export class ProcessPendingSettlementsUseCase implements IProcessPendingSettleme
       try {
         await this.processSettlementUseCase.execute(settlement.id)
       } catch (err: unknown) {
-        // A ConflictError here just means another worker claimed it between our query and this
-        // call — expected under concurrency, not a failure of the job itself.
         logger.warn(
           { err, settlementId: settlement.id },
           "Failed to process pending settlement in background job"

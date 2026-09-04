@@ -4,7 +4,7 @@ import { processPendingSettlementsUseCase } from "@/modules/booking/booking.modu
 
 let task: ScheduledTask | null = null
 
-export function startProcessPendingSettlementsJob(cronExpression: string = "* * * * *"): void {
+export function startProcessPendingSettlementsJob(cronExpression: string = "*/5 * * * *"): void {
   if (task) return
 
   logger.info(
