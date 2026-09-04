@@ -67,7 +67,8 @@ export class BookingController {
         search,
         status: query.status ? (query.status as BookingStatus) : undefined,
       },
-      role
+      role,
+      query.mine
     )
     success(res, result, HTTP_STATUS.OK, "User bookings retrieved successfully")
   }

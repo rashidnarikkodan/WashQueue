@@ -25,7 +25,8 @@ export interface IGetUserBookingsUseCase {
   execute(
     userId: string,
     filter?: GetBookingsFilterInput,
-    role?: string
+    role?: string,
+    forceOwnScope?: boolean
   ): Promise<BookingListResponseDTO>
 }
 

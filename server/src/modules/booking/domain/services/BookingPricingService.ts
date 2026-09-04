@@ -43,10 +43,10 @@ export class BookingPricingService {
       cashAmount = 0
     }
 
-    const { platformCommission, stationSettlement } = calculatePlatformCommission(
-      totalPrice,
-      input.platformCommissionRate
-    )
+    // no platform commission for walkin booking
+    const { platformCommission, stationSettlement } = input.isWalkIn
+      ? { platformCommission: 0, stationSettlement: totalPrice }
+      : calculatePlatformCommission(totalPrice, input.platformCommissionRate)
 
     return {
       pricingSnapshot: {
