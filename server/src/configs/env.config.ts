@@ -25,6 +25,8 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string(),
   RAZORPAY_KEY_ID: z.string(),
   RAZORPAY_KEY_SECRET: z.string(),
+  RAZORPAYX_ACCOUNT_NUMBER: z.string(),
+  RAZORPAYX_WEBHOOK_SECRET: z.string(),
 })
 const env = envSchema.parse(process.env)
 

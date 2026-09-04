@@ -11,6 +11,9 @@ importers:
       argon2:
         specifier: ^0.45.1
         version: 0.45.1
+      axios:
+        specifier: ^1.20.0
+        version: 1.20.0(debug@4.4.3)
       cloudinary:
         specifier: ^2.11.0
         version: 2.11.0
