@@ -39,8 +39,8 @@ export class GetOwnerSettlementSummaryUseCase implements IGetOwnerSettlementSumm
     return {
       ...aggregated,
       payoutAccountStatus: {
-        hasLinkedAccount: Boolean(owner.transferId),
-        transferId: owner.transferId,
+        hasLinkedAccount: Boolean(owner.razorpayFundAccountId),
+        razorpayFundAccountId: owner.razorpayFundAccountId,
         bankName: owner.bankName,
         accountHolderName: owner.accountHolderName,
         accountNumberMasked,

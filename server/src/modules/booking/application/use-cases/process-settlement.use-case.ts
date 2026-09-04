@@ -5,24 +5,27 @@ import {
   SettlementHoldReason,
   SettlementStatus,
 } from "../../domain/entities/Settlement"
+import { Payout, PayoutStatus, PAYOUT_PROVIDER_RAZORPAY_X } from "../../domain/entities/Payout"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { IPayoutRepository } from "../../domain/repositories/payout.repository"
 import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
-import { ITransferService } from "@/core/application/interfaces/transfer.interface"
-import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
-import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import {
+  IPayoutProvider,
+  PayoutProviderResult,
+} from "@/core/application/interfaces/payout-provider.interface"
 import { PaymentMethod } from "@/common/constants/payment.constants"
+import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import logger from "@/configs/logger.config"
 
 export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
   constructor(
     private readonly settlementRepository: ISettlementRepository,
+    private readonly payoutRepository: IPayoutRepository,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly transferService: ITransferService,
-    private readonly bookingRepository?: IBookingRepository,
-    private readonly paymentAccountService?: IPaymentAccountService,
-    private readonly userRepository?: IUserRepository
+    private readonly payoutProvider: IPayoutProvider,
+    private readonly bookingRepository?: IBookingRepository
   ) {}
 
   async execute(settlementId: string): Promise<Settlement> {
@@ -31,8 +34,8 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       throw new NotFoundError("Settlement record not found")
     }
 
-    // Idempotency: Already settled
-    if (settlement.status === SettlementStatus.SETTLED) {
+    // Idempotency: Already processed
+    if (settlement.status === SettlementStatus.PROCESSED) {
       return settlement
     }
 
@@ -64,12 +67,14 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       settlement.markFailed("Owner associated with this settlement was not found")
       await this.settlementRepository.save(settlement)
       logger.warn(
-        `Settlement ${settlement.id} marked FAILED: Owner ${settlement.ownerId} not found`
+        { settlementId: settlement.id, ownerId: settlement.ownerId },
+        "Settlement marked FAILED: owner not found"
       )
       return settlement
     }
 
-    // Check if booking was cash / walk-in where funds were collected directly by station
+    // Cash / walk-in bookings where funds were collected directly by the station never move
+    // through a payout — mark the amount owed as settled immediately, no Payout record needed.
     if (booking) {
       const isOfflineCash =
         booking.isWalkIn ||
@@ -77,87 +82,53 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
         (booking.paymentMethod === PaymentMethod.PAY_AT_STATION && booking.depositAmount === 0)
 
       if (isOfflineCash) {
-        settlement.markSettled("OFFLINE_CASH_COLLECTED")
+        settlement.markProcessed()
         logger.info(
-          `Settlement ${settlement.id} settled as OFFLINE_CASH_COLLECTED for booking ${booking.id}`
+          { settlementId: settlement.id, bookingId: booking.id },
+          "Settlement processed: offline cash collected by station, no payout required"
         )
         return await this.settlementRepository.save(settlement)
       }
     }
 
-    // Attempt auto-creation of linked payout account if owner has bank details but missing transferId
-    if (
-      !owner.transferId &&
-      this.paymentAccountService &&
-      this.userRepository &&
-      owner.accountNumber &&
-      owner.ifscCode
-    ) {
+    // Ensure the owner has a RazorpayX payout destination (contact + fund account). This is
+    // normally created once during owner-approval; this is a resilience fallback for owners
+    // who added bank details after approval. ensurePayoutDestination never recreates existing ids.
+    if (!owner.razorpayFundAccountId && owner.accountNumber && owner.ifscCode) {
       try {
-        const user = await this.userRepository.findById(owner.userId)
-        const legalName = owner.legalFullName?.trim() || user?.name?.trim() || "Owner"
-        const businessName = owner.businessName?.trim() || legalName
-        const email = (owner.businessEmail || user?.email)?.trim()
-        const phone = (owner.phone || user?.phone)?.trim()
-        const street1 = owner.street1?.trim() || "Main Street"
-        const city = owner.city?.trim() || "City"
-        const state = owner.state?.trim() || "State"
-        const postalCode = owner.postalCode?.trim() || "000000"
-
-        if (email && phone) {
-          const transferId = await this.paymentAccountService.createAccount({
-            email,
-            phone,
-            legal_business_name: businessName,
-            business_type: owner.gstNumber ? "proprietorship" : "individual",
-            contact_name: legalName,
-            reference_id: (owner.id || String(owner.userId)).slice(-20),
-            customer_facing_business_name: businessName,
-            profile: {
-              category: "services",
-              subcategory: "laundry_services",
-              addresses: {
-                registered: {
-                  street1,
-                  street2: owner.street2?.trim() || undefined,
-                  city,
-                  state,
-                  postal_code: postalCode,
-                  country: owner.country?.trim() || "IN",
-                },
-              },
-            },
-            notes: {
-              ownerId: owner.id || "",
-              userId: String(owner.userId),
-            },
-            bankAccount: {
-              account_number: owner.accountNumber,
-              ifsc_code: owner.ifscCode,
-              beneficiary_name: owner.accountHolderName || legalName,
-            },
-          })
-
-          if (transferId) {
-            owner.setTransferId(transferId)
-            await this.ownerRepository.save(owner)
-            logger.info(`Auto-created Razorpay linked account ${transferId} for owner ${owner.id}`)
-          }
-        }
-      } catch (accErr: unknown) {
+        const destination = await this.payoutProvider.ensurePayoutDestination({
+          id: owner.id!,
+          legalFullName: owner.legalFullName,
+          businessName: owner.businessName,
+          accountHolderName: owner.accountHolderName,
+          businessEmail: owner.businessEmail,
+          phone: owner.phone,
+          accountNumber: owner.accountNumber,
+          ifscCode: owner.ifscCode,
+          razorpayContactId: owner.razorpayContactId,
+          razorpayFundAccountId: owner.razorpayFundAccountId,
+        })
+        owner.setRazorpayContactId(destination.contactId)
+        owner.setRazorpayFundAccountId(destination.fundAccountId)
+        await this.ownerRepository.save(owner)
+        logger.info(
+          { ownerId: owner.id, fundAccountId: destination.fundAccountId },
+          "RazorpayX payout destination resolved for owner during settlement processing"
+        )
+      } catch (err: unknown) {
         logger.warn(
-          { err: accErr, ownerId: owner.id },
-          "Failed to auto-create Razorpay linked account during settlement processing"
+          { err, ownerId: owner.id },
+          "Failed to resolve RazorpayX payout destination during settlement processing"
         )
       }
     }
 
-    // Check if owner has a linked transfer/payout account
-    if (!owner.transferId) {
+    if (!owner.razorpayFundAccountId) {
       settlement.markHeld(SettlementHoldReason.MISSING_PAYOUT_ACCOUNT)
       await this.settlementRepository.save(settlement)
       logger.warn(
-        `Settlement ${settlement.id} marked HELD: Owner ${settlement.ownerId} has no linked payout transfer account`
+        { settlementId: settlement.id, ownerId: owner.id },
+        "Settlement marked HELD: owner has no RazorpayX payout destination"
       )
       return settlement
     }
@@ -165,11 +136,11 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     const amountInPaise = Math.round(settlement.stationSettlementAmount * 100)
 
     if (amountInPaise <= 0) {
-      settlement.markSettled("ZERO_AMOUNT_SETTLED")
+      settlement.markProcessed()
       return await this.settlementRepository.save(settlement)
     }
 
-    // Atomically transition status to PROCESSING with concurrency guard
+    // Atomically claim the settlement so two concurrent workers can never both process it.
     const guardedSettlement = await this.settlementRepository.updateStatusWithGuard(
       settlement.id!,
       SettlementStatus.PROCESSING,
@@ -182,37 +153,86 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       )
     }
 
-    try {
-      const transferResult = await this.transferService.transfer({
-        amountInPaise,
-        currency: guardedSettlement.currency || "INR",
-        recipientId: owner.transferId,
-        referenceId: guardedSettlement.id || `settle_${guardedSettlement.bookingId}`,
-      })
+    const payout = await this.getOrCreatePayout(guardedSettlement, owner.id!, amountInPaise)
+    guardedSettlement.setPayoutId(payout.id!)
 
-      if (transferResult.status === "SUCCESS") {
-        guardedSettlement.markSettled(transferResult.transferId)
-        logger.info(
-          `Settlement ${guardedSettlement.id} successfully settled with transfer ${transferResult.transferId}`
-        )
+    logger.info(
+      { settlementId: guardedSettlement.id, payoutId: payout.id, ownerId: owner.id },
+      "Settlement claimed for payout processing"
+    )
+
+    try {
+      let providerResult: PayoutProviderResult
+      if (payout.razorpayPayoutId) {
+        // A payout was already created against the provider (or the create call previously
+        // succeeded but our own persistence step was interrupted) — reconcile, never re-create.
+        providerResult = await this.payoutProvider.getPayout(payout.razorpayPayoutId)
       } else {
-        guardedSettlement.markFailed(
-          `Transfer failed with provider status: ${transferResult.status}`
-        )
-        if (transferResult.transferId) {
-          guardedSettlement.setTransferId(transferResult.transferId)
-        }
-        logger.error(
-          `Settlement ${guardedSettlement.id} transfer failed with status ${transferResult.status}`
+        logger.info({ payoutId: payout.id }, "Payout creation attempted")
+        providerResult = await this.payoutProvider.createPayout({
+          fundAccountId: owner.razorpayFundAccountId,
+          amountInPaise,
+          currency: guardedSettlement.currency,
+          referenceId: payout.idempotencyKey,
+          narration: `Settlement payout for booking ${guardedSettlement.bookingId}`,
+        })
+        payout.attachProviderReference(providerResult.providerPayoutId)
+        logger.info(
+          { payoutId: payout.id, providerPayoutId: providerResult.providerPayoutId },
+          "Payout created"
         )
       }
+
+      applyPayoutOutcome(payout, guardedSettlement, providerResult)
     } catch (error: unknown) {
-      const errMessage =
-        error instanceof Error ? error.message : "Failed to execute payment transfer"
+      const errMessage = error instanceof Error ? error.message : "Failed to create payout"
+      // The provider call's outcome is uncertain (timeout / lost response) as well as permanent
+      // failures both land here. The payout row is left as-is (no razorpayPayoutId means a retry
+      // will safely re-attempt with the same idempotency key; a permanent failure still requires
+      // manual owner-data correction before retrying).
       guardedSettlement.markFailed(errMessage)
-      logger.error(`Error executing transfer for settlement ${guardedSettlement.id}: ${errMessage}`)
+      logger.error(
+        { err: error, settlementId: guardedSettlement.id, payoutId: payout.id },
+        "Payout processing failed for settlement"
+      )
     }
 
+    await this.payoutRepository.save(payout)
     return await this.settlementRepository.save(guardedSettlement)
+  }
+
+  private async getOrCreatePayout(
+    settlement: Settlement,
+    ownerId: string,
+    amountInPaise: number
+  ): Promise<Payout> {
+    const existing = await this.payoutRepository.findBySettlementId(settlement.id!)
+    if (existing) {
+      return existing
+    }
+
+    const payout = new Payout({
+      settlementId: settlement.id!,
+      ownerId,
+      provider: PAYOUT_PROVIDER_RAZORPAY_X,
+      amount: amountInPaise / 100,
+      currency: settlement.currency,
+      status: PayoutStatus.PENDING,
+      idempotencyKey: `settlement:${settlement.id}`,
+      createdAt: new Date(),
+    })
+
+    try {
+      return await this.payoutRepository.save(payout)
+    } catch (error: unknown) {
+      const err = error as { code?: number; message?: string }
+      if (err?.code === 11000 || err?.message?.includes("E11000")) {
+        const raced = await this.payoutRepository.findBySettlementId(settlement.id!)
+        if (raced) {
+          return raced
+        }
+      }
+      throw error
+    }
   }
 }

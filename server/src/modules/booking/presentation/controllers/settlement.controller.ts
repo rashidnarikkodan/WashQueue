@@ -88,12 +88,13 @@ export class SettlementController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const { page = "1", limit = "10" } = req.query as Record<string, string | undefined>
+    const { page = "1", limit = "10", search } = req.query as Record<string, string | undefined>
 
     const result = await this.getOwnerEarningsHistoryUseCase.execute(
       userId,
       parseInt(page, 10) || 1,
-      parseInt(limit, 10) || 10
+      parseInt(limit, 10) || 10,
+      search?.trim() || undefined
     )
 
     success(res, result, HTTP_STATUS.OK, "Owner earnings history retrieved successfully")

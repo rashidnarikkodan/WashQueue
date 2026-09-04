@@ -52,7 +52,7 @@ export class SettlementRepository
 
     if (filters.search && filters.search.trim()) {
       const searchRegex = new RegExp(filters.search.trim(), "i")
-      query.$or = [{ bookingId: searchRegex }, { transferId: searchRegex }]
+      query.$or = [{ bookingId: searchRegex }]
     }
 
     const page = Math.max(Number(filters.page) || 1, 1)
@@ -95,7 +95,7 @@ export class SettlementRepository
           settledAmount: {
             $sum: {
               $cond: [
-                { $eq: ["$status", SettlementStatus.SETTLED] },
+                { $eq: ["$status", SettlementStatus.PROCESSED] },
                 "$stationSettlementAmount",
                 0,
               ],
@@ -170,7 +170,7 @@ export class SettlementRepository
           totalSettledAmount: {
             $sum: {
               $cond: [
-                { $eq: ["$status", SettlementStatus.SETTLED] },
+                { $eq: ["$status", SettlementStatus.PROCESSED] },
                 "$stationSettlementAmount",
                 0,
               ],
@@ -216,7 +216,7 @@ export class SettlementRepository
             $sum: { $cond: [{ $eq: ["$status", SettlementStatus.FAILED] }, 1, 0] },
           },
           settledCount: {
-            $sum: { $cond: [{ $eq: ["$status", SettlementStatus.SETTLED] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ["$status", SettlementStatus.PROCESSED] }, 1, 0] },
           },
         },
       },
@@ -249,12 +249,12 @@ export class SettlementRepository
     }
 
     if (updates) {
-      if (updates.transferId !== undefined) updateObj.transferId = updates.transferId
+      if (updates.payoutId !== undefined) updateObj.payoutId = updates.payoutId
       if (updates.holdReason !== undefined) updateObj.holdReason = updates.holdReason
       if (updates.failureReason !== undefined) updateObj.failureReason = updates.failureReason
       if (updates.retryCount !== undefined) updateObj.retryCount = updates.retryCount
       if (updates.lastRetriedAt !== undefined) updateObj.lastRetriedAt = updates.lastRetriedAt
-      if (updates.settledAt !== undefined) updateObj.settledAt = updates.settledAt
+      if (updates.processedAt !== undefined) updateObj.processedAt = updates.processedAt
     }
 
     const doc = await this.model

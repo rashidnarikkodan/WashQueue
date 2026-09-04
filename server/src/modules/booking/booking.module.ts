@@ -23,6 +23,7 @@ import { RescheduleBookingUseCase } from "./application/use-cases/reschedule-boo
 import { BookingController } from "./presentation/controllers/booking.controller"
 import { createBookingRouter } from "./presentation/routers/booking.routes"
 import { SettlementRepository } from "./infrastructure/repositories/settlement.repository"
+import { PayoutRepository } from "./infrastructure/repositories/payout.repository"
 import { CreateSettlementUseCase } from "./application/use-cases/create-settlement.use-case"
 import { ProcessSettlementUseCase } from "./application/use-cases/process-settlement.use-case"
 import { GetOwnerSettlementSummaryUseCase } from "./application/use-cases/get-owner-settlement-summary.use-case"
@@ -33,12 +34,16 @@ import { GetAdminSettlementMetricsUseCase } from "./application/use-cases/get-ad
 import { GetSettlementByIdUseCase } from "./application/use-cases/get-settlement-by-id.use-case"
 import { RetrySettlementUseCase } from "./application/use-cases/retry-settlement.use-case"
 import { ManageSettlementHoldUseCase } from "./application/use-cases/manage-settlement-hold.use-case"
+import { HandlePayoutWebhookUseCase } from "./application/use-cases/handle-payout-webhook.use-case"
+import { ProcessPendingSettlementsUseCase } from "./application/use-cases/process-pending-settlements.use-case"
 import { SettlementController } from "./presentation/controllers/settlement.controller"
+import { PayoutWebhookController } from "./presentation/controllers/payout-webhook.controller"
 import { createSettlementRouter } from "./presentation/routers/settlement.routes"
 import { ownerRepository } from "../owner/owner.module"
-import { userRepository } from "../user/user.module"
-import { RazorpayTransferService } from "@/infrastructure/payment/razorpay-transfer.service"
-import { paymentAccountService } from "@/infrastructure/payment/razorpay-account.service"
+import {
+  razorpayXPayoutProvider,
+  verifyRazorpayXWebhookSignature,
+} from "@/infrastructure/payment/razorpayx-payout.service"
 
 import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
@@ -77,15 +82,14 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
 )
 
 export const settlementRepository = new SettlementRepository()
-export const transferService = new RazorpayTransferService()
+export const payoutRepository = new PayoutRepository()
 export const createSettlementUseCase = new CreateSettlementUseCase(settlementRepository)
 export const processSettlementUseCase = new ProcessSettlementUseCase(
   settlementRepository,
+  payoutRepository,
   ownerRepository,
-  transferService,
-  bookingRepository,
-  paymentAccountService,
-  userRepository
+  razorpayXPayoutProvider,
+  bookingRepository
 )
 
 export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(
@@ -127,6 +131,20 @@ export const retrySettlementUseCase = new RetrySettlementUseCase(
 
 export const manageSettlementHoldUseCase = new ManageSettlementHoldUseCase(settlementRepository)
 
+export const processPendingSettlementsUseCase = new ProcessPendingSettlementsUseCase(
+  settlementRepository,
+  processSettlementUseCase
+)
+
+export const handlePayoutWebhookUseCase = new HandlePayoutWebhookUseCase(
+  payoutRepository,
+  settlementRepository,
+  razorpayXPayoutProvider,
+  verifyRazorpayXWebhookSignature
+)
+
+export const payoutWebhookController = new PayoutWebhookController(handlePayoutWebhookUseCase)
+
 export const settlementController = new SettlementController(
   getOwnerSettlementSummaryUseCase,
   getOwnerSettlementsUseCase,
@@ -138,7 +156,10 @@ export const settlementController = new SettlementController(
   manageSettlementHoldUseCase
 )
 
-export const settlementRouter = createSettlementRouter(settlementController)
+export const settlementRouter = createSettlementRouter(
+  settlementController,
+  payoutWebhookController
+)
 
 // CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue
 // service (and CancelBookingUseCase optionally on the payment module's refund use-case).

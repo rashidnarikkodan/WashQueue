@@ -1,3 +1,4 @@
+import { Types } from "mongoose"
 import { IMapper } from "@/core/domain/repository.interface"
 import { Settlement } from "../../domain/entities/Settlement"
 import { ISettlementDocument } from "../models/settlement.model"
@@ -15,14 +16,14 @@ export class SettlementMapper implements IMapper<Settlement, ISettlementDocument
       stationSettlementAmount: doc.stationSettlementAmount,
       currency: doc.currency || "INR",
       status: doc.status,
-      transferId: doc.transferId,
+      payoutId: doc.payoutId?.toString(),
       holdReason: doc.holdReason,
       failureReason: doc.failureReason,
       retryCount: doc.retryCount || 0,
       lastRetriedAt: doc.lastRetriedAt,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      settledAt: doc.settledAt,
+      processedAt: doc.processedAt,
     })
   }
 
@@ -38,13 +39,13 @@ export class SettlementMapper implements IMapper<Settlement, ISettlementDocument
       stationSettlementAmount: props.stationSettlementAmount,
       currency: props.currency || "INR",
       status: props.status,
-      transferId: props.transferId,
+      payoutId: props.payoutId ? new Types.ObjectId(props.payoutId) : undefined,
       holdReason: props.holdReason,
       failureReason: props.failureReason,
       retryCount: props.retryCount,
       lastRetriedAt: props.lastRetriedAt,
       createdAt: props.createdAt,
-      settledAt: props.settledAt,
+      processedAt: props.processedAt,
     }
   }
 }
