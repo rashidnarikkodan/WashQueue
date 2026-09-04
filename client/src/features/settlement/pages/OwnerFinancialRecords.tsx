@@ -8,7 +8,7 @@ import {
   type Settlement,
   type OwnerEarningsSummary,
 } from "@/shared/apis/settlement.api"
-import { SettlementDetailModal } from "../components/SettlementDetailModal"
+import { SettlementDetailModal } from "../../owner/components/SettlementDetailModal"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
@@ -307,7 +307,7 @@ export default function OwnerFinancialRecords() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            Provider Financial Records & Payouts
+            Financial Records & Payouts
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Monitor gross booking revenues, platform commission deductions, and bank settlements.
