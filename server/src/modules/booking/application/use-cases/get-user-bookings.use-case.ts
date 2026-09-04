@@ -22,7 +22,8 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
   async execute(
     userId: string,
     filterInput?: GetBookingsFilterInput,
-    role?: string
+    role?: string,
+    forceOwnScope: boolean = false
   ): Promise<BookingListResponseDTO> {
     const normRole = role ? role.toUpperCase() : ""
 
@@ -41,6 +42,19 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       upcomingOnly,
       historyOnly,
       noShowOnly,
+    }
+
+    // A caller asking for "my bookings" (e.g. the customer's own booking list) must always be
+    // scoped strictly to their own userId, regardless of any owner/manager/admin role they also
+    // hold — never fall through to the role-based station/global branches below.
+    if (forceOwnScope) {
+      queryFilter.userId = userId
+      const result = await this.bookingRepository.findBookings(queryFilter)
+
+      return {
+        bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
+        pagination: buildPaginationMeta({ total: result.total, page, limit }),
+      }
     }
 
     if (normRole === "ADMIN") {

@@ -15,6 +15,8 @@ export interface LoadBookingsParams {
   limit?: number
   userName?: string
   userPhone?: string
+  /** Forces the result to be scoped strictly to the caller's own userId, regardless of role. */
+  mine?: boolean
 }
 
 interface BookingStore {
@@ -90,6 +92,10 @@ export const useBookingStore = create<BookingStore>((set) => ({
       const apiParams: Record<string, unknown> = {
         page,
         limit,
+      }
+
+      if (opts.mine) {
+        apiParams.mine = true
       }
 
       if (q && q.trim()) {
