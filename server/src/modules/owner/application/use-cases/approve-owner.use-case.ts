@@ -8,19 +8,14 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
-import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
-
-// This marketplace only onboards laundry/car-wash service businesses, so the Razorpay
-// Route category/subcategory is fixed rather than collected per owner.
-const RAZORPAY_BUSINESS_CATEGORY = "services"
-const RAZORPAY_BUSINESS_SUBCATEGORY = "laundry_services"
+import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
-    private readonly paymentAccountService: IPaymentAccountService
+    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute({
@@ -47,104 +42,56 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     if (isApproved) {
       owner.verify()
 
-      // Create payment account for owner on Razorpay Route if not already present
-      if (!owner.transferId) {
+      // Create the owner's RazorpayX payout destination (contact + fund account) once, during
+      // approval, so settlement processing never has to create it on the critical path.
+      if (!owner.razorpayFundAccountId) {
         const legalName = owner.legalFullName?.trim() || user.name?.trim()
-        if (!legalName) {
-          throw new AppError(
-            "Owner full name is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const businessName = owner.businessName?.trim() || legalName
         const email = (owner.businessEmail || user.email)?.trim()
-        if (!email) {
-          throw new AppError(
-            "Owner email is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
         const phone = (owner.phone || user.phone)?.trim()
-        if (!phone) {
-          throw new AppError(
-            "Owner phone is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        // Extract PAN from GST number if GST has valid 15-character format
-        const gst = owner.gstNumber?.trim().toUpperCase()
-        let pan: string | undefined
-        if (gst && gst.length === 15) {
-          pan = gst.substring(2, 12)
-        }
-
-        const street1 = owner.street1?.trim()
-        const city = owner.city?.trim()
-        const state = owner.state?.trim()
-        const postalCode = owner.postalCode?.trim()
-        if (!street1 || !city || !state || !postalCode) {
-          throw new AppError(
-            "Owner business address is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
         const accountNumber = owner.accountNumber?.trim()
         const ifscCode = owner.ifscCode?.trim()
         const accountHolderName = owner.accountHolderName?.trim() || legalName
+
+        if (!legalName) {
+          throw new AppError(
+            "Owner full name is required to create payout account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+        if (!email) {
+          throw new AppError(
+            "Owner email is required to create payout account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
+        if (!phone) {
+          throw new AppError(
+            "Owner phone is required to create payout account",
+            HTTP_STATUS.BAD_REQUEST
+          )
+        }
         if (!accountNumber || !ifscCode) {
           throw new AppError(
-            "Owner bank account details are required to create payment account",
+            "Owner bank account details are required to create payout account",
             HTTP_STATUS.BAD_REQUEST
           )
         }
 
-        const transferId = await this.paymentAccountService.createAccount({
-          email,
+        const destination = await this.payoutProvider.ensurePayoutDestination({
+          id: owner.id || String(owner.userId),
+          legalFullName: legalName,
+          businessName: owner.businessName,
+          accountHolderName,
+          businessEmail: email,
           phone,
-          legal_business_name: businessName,
-          business_type: gst ? "proprietorship" : "individual",
-          contact_name: legalName,
-          reference_id: (owner.id || String(owner.userId)).slice(-20),
-          customer_facing_business_name: businessName,
-          profile: {
-            category: RAZORPAY_BUSINESS_CATEGORY,
-            subcategory: RAZORPAY_BUSINESS_SUBCATEGORY,
-            addresses: {
-              registered: {
-                street1,
-                street2: owner.street2?.trim() || undefined,
-                city,
-                state,
-                postal_code: postalCode,
-                country: owner.country?.trim() || "IN",
-              },
-            },
-          },
-          ...(gst || pan
-            ? {
-                legal_info: {
-                  ...(gst ? { gst } : {}),
-                  ...(pan ? { pan } : {}),
-                },
-              }
-            : {}),
-          notes: {
-            ownerId: owner.id || "",
-            userId: String(owner.userId),
-          },
-          bankAccount: {
-            account_number: accountNumber,
-            ifsc_code: ifscCode,
-            beneficiary_name: accountHolderName,
-          },
-          pan,
+          accountNumber,
+          ifscCode,
+          razorpayContactId: owner.razorpayContactId,
+          razorpayFundAccountId: owner.razorpayFundAccountId,
         })
 
-        owner.setTransferId(transferId)
+        owner.setRazorpayContactId(destination.contactId)
+        owner.setRazorpayFundAccountId(destination.fundAccountId)
       }
 
       await this.ownerRepository.save(owner)

@@ -31,7 +31,8 @@ export interface IOwner extends Document {
   ifscCode?: string
   bankProofUrl?: string
   rejectionReason?: string
-  transferId?: string
+  razorpayContactId?: string
+  razorpayFundAccountId?: string
 }
 
 const ownerSchema = new Schema<IOwner>(
@@ -118,7 +119,13 @@ const ownerSchema = new Schema<IOwner>(
     ifscCode: { type: String },
     bankProofUrl: { type: String },
     rejectionReason: { type: String },
-    transferId: {
+    razorpayContactId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
+    razorpayFundAccountId: {
       type: String,
       trim: true,
       sparse: true,
