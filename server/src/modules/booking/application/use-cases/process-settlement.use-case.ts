@@ -17,6 +17,7 @@ import {
 } from "@/core/application/interfaces/payout-provider.interface"
 import { PaymentMethod } from "@/common/constants/payment.constants"
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
+import { ensureOwnerPayoutAccount } from "@/modules/owner/application/services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"
 
 export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
@@ -46,20 +47,14 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
 
     let owner = null
     if (settlement.ownerId) {
-      owner = await this.ownerRepository.findByUserId(settlement.ownerId)
-      if (!owner) {
-        owner = await this.ownerRepository.findById(settlement.ownerId)
-      }
+      owner = await this.ownerRepository.findById(settlement.ownerId)
     }
 
     let booking = null
     if (this.bookingRepository && settlement.bookingId) {
       booking = await this.bookingRepository.findById(settlement.bookingId)
       if (!owner && booking?.ownerId) {
-        owner = await this.ownerRepository.findByUserId(booking.ownerId)
-        if (!owner) {
-          owner = await this.ownerRepository.findById(booking.ownerId)
-        }
+        owner = await this.ownerRepository.findById(booking.ownerId)
       }
     }
 
@@ -73,8 +68,7 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       return settlement
     }
 
-    // Cash / walk-in bookings where funds were collected directly by the station never move
-    // through a payout — mark the amount owed as settled immediately, no Payout record needed.
+    // for walkin or in hand cash bookings - need to mark processed with no issues
     if (booking) {
       const isOfflineCash =
         booking.isWalkIn ||
@@ -91,28 +85,12 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       }
     }
 
-    // Ensure the owner has a RazorpayX payout destination (contact + fund account). This is
-    // normally created once during owner-approval; this is a resilience fallback for owners
-    // who added bank details after approval. ensurePayoutDestination never recreates existing ids.
-    if (!owner.razorpayFundAccountId && owner.accountNumber && owner.ifscCode) {
+    if (!owner.razorpayFundAccountId) {
       try {
-        const destination = await this.payoutProvider.ensurePayoutDestination({
-          id: owner.id!,
-          legalFullName: owner.legalFullName,
-          businessName: owner.businessName,
-          accountHolderName: owner.accountHolderName,
-          businessEmail: owner.businessEmail,
-          phone: owner.phone,
-          accountNumber: owner.accountNumber,
-          ifscCode: owner.ifscCode,
-          razorpayContactId: owner.razorpayContactId,
-          razorpayFundAccountId: owner.razorpayFundAccountId,
-        })
-        owner.setRazorpayContactId(destination.contactId)
-        owner.setRazorpayFundAccountId(destination.fundAccountId)
+        await ensureOwnerPayoutAccount(owner, this.payoutProvider)
         await this.ownerRepository.save(owner)
         logger.info(
-          { ownerId: owner.id, fundAccountId: destination.fundAccountId },
+          { ownerId: owner.id, fundAccountId: owner.razorpayFundAccountId },
           "RazorpayX payout destination resolved for owner during settlement processing"
         )
       } catch (err: unknown) {
@@ -140,7 +118,6 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       return await this.settlementRepository.save(settlement)
     }
 
-    // Atomically claim the settlement so two concurrent workers can never both process it.
     const guardedSettlement = await this.settlementRepository.updateStatusWithGuard(
       settlement.id!,
       SettlementStatus.PROCESSING,
@@ -164,8 +141,6 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     try {
       let providerResult: PayoutProviderResult
       if (payout.razorpayPayoutId) {
-        // A payout was already created against the provider (or the create call previously
-        // succeeded but our own persistence step was interrupted) — reconcile, never re-create.
         providerResult = await this.payoutProvider.getPayout(payout.razorpayPayoutId)
       } else {
         logger.info({ payoutId: payout.id }, "Payout creation attempted")
@@ -186,10 +161,6 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       applyPayoutOutcome(payout, guardedSettlement, providerResult)
     } catch (error: unknown) {
       const errMessage = error instanceof Error ? error.message : "Failed to create payout"
-      // The provider call's outcome is uncertain (timeout / lost response) as well as permanent
-      // failures both land here. The payout row is left as-is (no razorpayPayoutId means a retry
-      // will safely re-attempt with the same idempotency key; a permanent failure still requires
-      // manual owner-data correction before retrying).
       guardedSettlement.markFailed(errMessage)
       logger.error(
         { err: error, settlementId: guardedSettlement.id, payoutId: payout.id },

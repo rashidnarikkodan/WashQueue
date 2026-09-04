@@ -47,7 +47,7 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
     } else if (res.statusCode >= 400) {
       logger.warn(logData, msg)
     } else {
-      logger.info(logData, msg)
+      // logger.info(logData, msg)
     }
   })
 

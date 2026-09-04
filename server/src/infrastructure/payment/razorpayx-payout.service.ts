@@ -151,6 +151,20 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
         utr: response.data.utr || undefined,
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        logger.error(
+          {
+            status: error.response?.status,
+            data: error.response?.data,
+            url: error.config?.url,
+            baseURL: error.config?.baseURL,
+            method: error.config?.method,
+            headers: error.response?.headers,
+          },
+          "RazorpayX raw API error"
+        )
+      }
+
       throw this.toProviderError(error, "Failed to create RazorpayX payout")
     }
   }
@@ -189,8 +203,6 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
         `RazorpayX API error: ${fallbackMessage}`
       )
 
-      // Timeouts and 5xx are transient/provider-side; 4xx indicates a permanently invalid request
-      // (bad fund account, validation failure) and must never be blindly retried.
       const retryable = !statusCode || statusCode >= 500 || error.code === "ECONNABORTED"
       return new PayoutProviderError(description, retryable)
     }
