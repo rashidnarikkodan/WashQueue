@@ -247,7 +247,7 @@ export default function ManagerPostInspectionPage() {
       const outcome = updated?.settlementOutcome
       if (!outcome) {
         toast.success("✓ Inspection verified & vehicle handover completed!")
-      } else if (outcome.status === "SETTLED") {
+      } else if (outcome.status === "PROCESSED") {
         toast.success("✓ Handover completed & payout transferred to owner!")
       } else if (outcome.status === "HELD") {
         toast.warning(

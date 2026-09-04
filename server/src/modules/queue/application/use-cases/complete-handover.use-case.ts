@@ -15,10 +15,7 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/queue-usecases.interface"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
-import {
-  ICreateSettlementUseCase,
-  IProcessSettlementUseCase,
-} from "@/modules/booking/application/interfaces/settlement.usecases"
+import { ICreateSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
 import logger from "@/configs/logger.config"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
@@ -29,8 +26,7 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
-    private readonly createSettlementUseCase: ICreateSettlementUseCase,
-    private readonly processSettlementUseCase: IProcessSettlementUseCase
+    private readonly createSettlementUseCase: ICreateSettlementUseCase
   ) {}
 
   async execute(
@@ -144,7 +140,7 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
           station.ownerId ||
           domainBooking.createdByUserId
 
-        let settlement = await this.createSettlementUseCase.execute({
+        const settlement = await this.createSettlementUseCase.execute({
           ownerId,
           bookingId: domainBooking.id,
           stationId: domainBooking.stationId,
@@ -153,14 +149,12 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
           totalAmount: domainBooking.pricingSnapshot?.totalPrice ?? 0,
         })
 
-        if (settlement.id) {
-          settlement = await this.processSettlementUseCase.execute(settlement.id)
-        }
-
+        // Payout to the owner is processed asynchronously by the settlement worker, not on the
+        // handover request path — a slow/failing payout provider must never block a handover.
         bookingDTO.settlementOutcome = {
           status: settlement.status,
           amount: settlement.stationSettlementAmount,
-          transferId: settlement.transferId,
+          payoutId: settlement.payoutId,
           holdReason: settlement.holdReason,
           failureReason: settlement.failureReason,
         }

@@ -103,7 +103,7 @@ export interface BookingResponse {
   settlementOutcome?: {
     status: string
     amount?: number
-    transferId?: string
+    payoutId?: string
     holdReason?: string
     failureReason?: string
   }
