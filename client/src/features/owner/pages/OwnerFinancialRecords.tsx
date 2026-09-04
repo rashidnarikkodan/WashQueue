@@ -1,16 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react"
-import {
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  ArrowUpRight,
-  RefreshCw,
-  Eye,
-  ShieldCheck,
-  ShieldAlert,
-  TrendingUp,
-  Receipt,
-} from "lucide-react"
+import { CheckCircle, Clock, AlertCircle, RefreshCw, Eye, TrendingUp, Receipt } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { SettlementStatusBadge } from "@/shared/components/badges"
@@ -18,10 +7,8 @@ import {
   settlementApi,
   type Settlement,
   type OwnerEarningsSummary,
-  type EarningsItem,
 } from "@/shared/apis/settlement.api"
 import { SettlementDetailModal } from "../components/SettlementDetailModal"
-import { useNavigate } from "react-router-dom"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
@@ -33,23 +20,21 @@ import {
   type PaginationMeta,
 } from "@/shared/components/data-table"
 
-type TabType = "SETTLEMENTS" | "EARNINGS"
-
-const MAIN_TABS: TabConfig[] = [
-  { id: "SETTLEMENTS", label: "Settlement Payouts" },
-  { id: "EARNINGS", label: "Washes & Revenue Breakdown" },
+const SETTLEMENT_TABS: TabConfig[] = [
+  { id: "ALL", label: "All Settlements" },
+  { id: "PENDING", label: "Pending", activeColor: "border-amber-500 text-amber-500" },
+  { id: "HELD", label: "Held", activeColor: "border-purple-500 text-purple-500" },
+  { id: "PROCESSED", label: "Processed", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: "FAILED", label: "Failed", activeColor: "border-rose-500 text-rose-500" },
 ]
 
 export default function OwnerFinancialRecords() {
-  const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<TabType>("SETTLEMENTS")
   const [dateFilter, setDateFilter] = useState<string>("ALL")
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
   const [searchQuery, setSearchQuery] = useState("")
 
   const [summary, setSummary] = useState<OwnerEarningsSummary | null>(null)
   const [settlements, setSettlements] = useState<Settlement[]>([])
-  const [earnings, setEarnings] = useState<EarningsItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
     total: 0,
@@ -89,52 +74,35 @@ export default function OwnerFinancialRecords() {
     }
   }, [dateParams])
 
-  // Fetch settlements or earnings depending on active tab
+  // Fetch settlements based on active status tab and filters
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
-      if (activeTab === "SETTLEMENTS") {
-        const res = await settlementApi.getOwnerSettlements({
-          status: statusFilter === "ALL" ? undefined : statusFilter,
-          search: searchQuery.trim() || undefined,
-          page: paginationMeta.page,
-          limit: 10,
-          ...dateParams,
-        })
-        setSettlements(res.data)
-        setPaginationMeta({
-          total: res.pagination.total,
-          page: res.pagination.page,
-          limit: res.pagination.limit,
-          totalPages: res.pagination.totalPages,
-          hasNextPage: res.pagination.page < res.pagination.totalPages,
-          hasPrevPage: res.pagination.page > 1,
-        })
-      } else {
-        const res = await settlementApi.getOwnerEarnings({
-          page: paginationMeta.page,
-          limit: 10,
-          search: searchQuery.trim() || undefined,
-        })
-        setEarnings(res.data)
-        setPaginationMeta({
-          total: res.pagination.total,
-          page: res.pagination.page,
-          limit: res.pagination.limit,
-          totalPages: res.pagination.totalPages,
-          hasNextPage: res.pagination.page < res.pagination.totalPages,
-          hasPrevPage: res.pagination.page > 1,
-        })
-      }
+      const res = await settlementApi.getOwnerSettlements({
+        status: statusFilter === "ALL" ? undefined : statusFilter,
+        search: searchQuery.trim() || undefined,
+        page: paginationMeta.page,
+        limit: 10,
+        ...dateParams,
+      })
+      setSettlements(res.data)
+      setPaginationMeta({
+        total: res.pagination.total,
+        page: res.pagination.page,
+        limit: res.pagination.limit,
+        totalPages: res.pagination.totalPages,
+        hasNextPage: res.pagination.page < res.pagination.totalPages,
+        hasPrevPage: res.pagination.page > 1,
+      })
       setLoadError(null)
     } catch {
-      const message = "Failed to load financial records"
+      const message = "Failed to load settlement records"
       setLoadError(message)
       toast.error(message)
     } finally {
       setIsLoading(false)
     }
-  }, [activeTab, dateParams, statusFilter, searchQuery, paginationMeta.page])
+  }, [dateParams, statusFilter, searchQuery, paginationMeta.page])
 
   useEffect(() => {
     let ignore = false
@@ -167,18 +135,13 @@ export default function OwnerFinancialRecords() {
     setPaginationMeta((prev) => ({ ...prev, page }))
   }
 
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId as TabType)
+  const handleStatusTabChange = (tabId: string) => {
+    setStatusFilter(tabId)
     setPaginationMeta((prev) => ({ ...prev, page: 1 }))
   }
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q)
-    setPaginationMeta((prev) => ({ ...prev, page: 1 }))
-  }
-
-  const handleStatusFilterChange = (val: string) => {
-    setStatusFilter(val)
     setPaginationMeta((prev) => ({ ...prev, page: 1 }))
   }
 
@@ -242,24 +205,6 @@ export default function OwnerFinancialRecords() {
         { label: "Last 7 Days", value: "7_DAYS" },
       ],
     },
-    ...(activeTab === "SETTLEMENTS"
-      ? [
-          {
-            id: "status",
-            label: "Status",
-            value: statusFilter,
-            onChange: handleStatusFilterChange,
-            options: [
-              { label: "All Statuses", value: "ALL" },
-              { label: "Pending", value: "PENDING" },
-              { label: "Held", value: "HELD" },
-              { label: "Processed", value: "PROCESSED" },
-              { label: "Failed", value: "FAILED" },
-              { label: "Reversed", value: "REVERSED" },
-            ],
-          },
-        ]
-      : []),
   ]
 
   const settlementColumns: Column<Settlement>[] = [
@@ -349,85 +294,6 @@ export default function OwnerFinancialRecords() {
     },
   ]
 
-  const earningsColumns: Column<EarningsItem>[] = [
-    {
-      id: "completedAt",
-      header: "Completed At",
-      cell: (e) => (
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
-          {new Date(e.completedAt).toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      id: "bookingNumber",
-      header: "Booking #",
-      cell: (e) => (
-        <span className="font-mono font-semibold text-foreground whitespace-nowrap">
-          {e.bookingNumber}
-        </span>
-      ),
-    },
-    {
-      id: "stationName",
-      header: "Station",
-      cell: (e) => (
-        <span className="text-foreground font-medium whitespace-nowrap">{e.stationName}</span>
-      ),
-    },
-    {
-      id: "customerVehicle",
-      header: "Customer / Vehicle",
-      cell: (e) => (
-        <div className="text-xs whitespace-nowrap">
-          <span className="font-medium text-foreground block">{e.customerName}</span>
-          <span className="text-muted-foreground font-mono">{e.vehicleRegNumber}</span>
-        </div>
-      ),
-    },
-    {
-      id: "grossAmount",
-      header: "Gross Total",
-      cell: (e) => (
-        <span className="font-semibold text-foreground whitespace-nowrap">
-          ₹{e.grossAmount.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      id: "platformCommission",
-      header: "Commission",
-      cell: (e) => (
-        <span className="font-medium text-destructive whitespace-nowrap">
-          - ₹{e.platformCommission.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      id: "netEarnings",
-      header: "Net Earned",
-      cell: (e) => (
-        <span className="font-bold text-emerald-500 whitespace-nowrap">
-          ₹{e.netEarnings.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      id: "paymentMethod",
-      header: "Payment Method",
-      cell: (e) => (
-        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-          {e.paymentMethod}
-        </span>
-      ),
-    },
-    {
-      id: "settlementStatus",
-      header: "Payout Status",
-      cell: (e) => <SettlementStatusBadge status={e.settlementStatus} />,
-    },
-  ]
-
   return (
     <div className="space-y-6">
       {/* Breadcrumb & Header */}
@@ -458,59 +324,6 @@ export default function OwnerFinancialRecords() {
         </button>
       </div>
 
-      {/* Payout Account Status Banner */}
-      {summary && (
-        <>
-          {summary.payoutAccountStatus.hasLinkedAccount ? (
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-emerald-500/20 text-emerald-500 rounded-xl">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground">
-                    Payout Transfer Account Connected
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {summary.payoutAccountStatus.bankName || "Bank Account"}:{" "}
-                    <span className="font-mono text-foreground font-medium">
-                      {summary.payoutAccountStatus.accountNumberMasked || "Active"}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 rounded-full">
-                Active & Verified
-              </span>
-            </div>
-          ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-amber-500/20 text-amber-500 rounded-xl shrink-0">
-                  <ShieldAlert className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground">
-                    Payout Account Setup Required
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Your station payouts are currently held safely until your payout account is
-                    linked. Please finish onboarding verification to enable automated bank
-                    transfers.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate(APP_ROUTES.OWNER.ONBOARDING)}
-                className="px-4 py-2 text-xs font-bold text-amber-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-sm shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                Complete Onboarding <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
       {/* Stats HUD Cards */}
       <StatsHUD stats={statItems} columns={5} />
 
@@ -518,47 +331,26 @@ export default function OwnerFinancialRecords() {
       <DataTableToolbar
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
-        searchLabel={activeTab === "SETTLEMENTS" ? "Search Settlements" : "Search Earnings"}
-        searchPlaceholder={
-          activeTab === "SETTLEMENTS"
-            ? "Search booking # or payout ref..."
-            : "Search booking # or vehicle..."
-        }
-        tabs={MAIN_TABS}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
+        searchLabel="Search Settlements"
+        searchPlaceholder="Search booking # or payout ref..."
+        tabs={SETTLEMENT_TABS}
+        activeTab={statusFilter}
+        onTabChange={handleStatusTabChange}
         selectFilters={selectFilters}
       />
 
-      {/* Tab 1: Settlements Table */}
-      {activeTab === "SETTLEMENTS" && (
-        <DataTable<Settlement>
-          columns={settlementColumns}
-          data={settlements}
-          rowKey={(s) => s.id}
-          isLoading={isLoading}
-          loadingText="Loading settlement records..."
-          errorMsg={loadError}
-          emptyMessage="No settlement records found matching current criteria."
-          pagination={paginationMeta}
-          onPageChange={handlePageChange}
-        />
-      )}
-
-      {/* Tab 2: Washes Breakdown Table */}
-      {activeTab === "EARNINGS" && (
-        <DataTable<EarningsItem>
-          columns={earningsColumns}
-          data={earnings}
-          rowKey={(e) => e.bookingId}
-          isLoading={isLoading}
-          loadingText="Loading wash earnings..."
-          errorMsg={loadError}
-          emptyMessage="No completed bookings found."
-          pagination={paginationMeta}
-          onPageChange={handlePageChange}
-        />
-      )}
+      {/* Settlements Table */}
+      <DataTable<Settlement>
+        columns={settlementColumns}
+        data={settlements}
+        rowKey={(s) => s.id}
+        isLoading={isLoading}
+        loadingText="Loading settlement records..."
+        errorMsg={loadError}
+        emptyMessage="No settlement records found matching current criteria."
+        pagination={paginationMeta}
+        onPageChange={handlePageChange}
+      />
 
       {/* Statement Detail Modal */}
       <SettlementDetailModal
