@@ -13,10 +13,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
+import { SettlementStatusBadge } from "@/shared/components/badges"
 import {
   settlementApi,
   type Settlement,
-  type SettlementStatus,
   type OwnerEarningsSummary,
   type EarningsItem,
 } from "@/shared/apis/settlement.api"
@@ -62,6 +62,7 @@ export default function OwnerFinancialRecords() {
 
   const [selectedSettlement, setSelectedSettlement] = useState<Settlement | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   // Calculate start/end dates from filter
   const dateParams = useMemo(() => {
@@ -113,19 +114,9 @@ export default function OwnerFinancialRecords() {
         const res = await settlementApi.getOwnerEarnings({
           page: paginationMeta.page,
           limit: 10,
+          search: searchQuery.trim() || undefined,
         })
-        let items = res.data
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase().trim()
-          items = items.filter(
-            (item) =>
-              item.bookingNumber.toLowerCase().includes(q) ||
-              item.customerName?.toLowerCase().includes(q) ||
-              item.vehicleRegNumber?.toLowerCase().includes(q) ||
-              item.stationName?.toLowerCase().includes(q)
-          )
-        }
-        setEarnings(items)
+        setEarnings(res.data)
         setPaginationMeta({
           total: res.pagination.total,
           page: res.pagination.page,
@@ -135,8 +126,11 @@ export default function OwnerFinancialRecords() {
           hasPrevPage: res.pagination.page > 1,
         })
       }
+      setLoadError(null)
     } catch {
-      toast.error("Failed to load financial records")
+      const message = "Failed to load financial records"
+      setLoadError(message)
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -191,30 +185,6 @@ export default function OwnerFinancialRecords() {
   const handleDateFilterChange = (val: string) => {
     setDateFilter(val)
     setPaginationMeta((prev) => ({ ...prev, page: 1 }))
-  }
-
-  const getStatusBadge = (status: SettlementStatus | string) => {
-    switch (status) {
-      case "SETTLED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-            <CheckCircle className="w-3 h-3" /> Settled
-          </span>
-        )
-      case "FAILED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-rose-500/10 text-rose-500 border-rose-500/20">
-            <AlertCircle className="w-3 h-3" /> Failed
-          </span>
-        )
-      case "PENDING":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-amber-500/10 text-amber-500 border-amber-500/20">
-            <Clock className="w-3 h-3" /> Pending
-          </span>
-        )
-    }
   }
 
   const statItems: StatItem[] = [
@@ -282,8 +252,10 @@ export default function OwnerFinancialRecords() {
             options: [
               { label: "All Statuses", value: "ALL" },
               { label: "Pending", value: "PENDING" },
-              { label: "Settled", value: "SETTLED" },
+              { label: "Held", value: "HELD" },
+              { label: "Processed", value: "PROCESSED" },
               { label: "Failed", value: "FAILED" },
+              { label: "Reversed", value: "REVERSED" },
             ],
           },
         ]
@@ -348,14 +320,14 @@ export default function OwnerFinancialRecords() {
     {
       id: "status",
       header: "Status",
-      cell: (s) => getStatusBadge(s.status),
+      cell: (s) => <SettlementStatusBadge status={s.status} />,
     },
     {
-      id: "transferId",
-      header: "Transfer Ref",
+      id: "payoutId",
+      header: "Payout Ref",
       cell: (s) => (
-        <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-[120px] block">
-          {s.transferId || "—"}
+        <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-30 block">
+          {s.payoutId || "—"}
         </span>
       ),
     },
@@ -452,7 +424,7 @@ export default function OwnerFinancialRecords() {
     {
       id: "settlementStatus",
       header: "Payout Status",
-      cell: (e) => getStatusBadge(e.settlementStatus),
+      cell: (e) => <SettlementStatusBadge status={e.settlementStatus} />,
     },
   ]
 
@@ -503,12 +475,7 @@ export default function OwnerFinancialRecords() {
                     {summary.payoutAccountStatus.bankName || "Bank Account"}:{" "}
                     <span className="font-mono text-foreground font-medium">
                       {summary.payoutAccountStatus.accountNumberMasked || "Active"}
-                    </span>{" "}
-                    (Route Account:{" "}
-                    <span className="font-mono text-[11px] text-foreground font-medium">
-                      {summary.payoutAccountStatus.transferId}
                     </span>
-                    )
                   </p>
                 </div>
               </div>
@@ -554,7 +521,7 @@ export default function OwnerFinancialRecords() {
         searchLabel={activeTab === "SETTLEMENTS" ? "Search Settlements" : "Search Earnings"}
         searchPlaceholder={
           activeTab === "SETTLEMENTS"
-            ? "Search booking # or transfer ref..."
+            ? "Search booking # or payout ref..."
             : "Search booking # or vehicle..."
         }
         tabs={MAIN_TABS}
@@ -571,6 +538,7 @@ export default function OwnerFinancialRecords() {
           rowKey={(s) => s.id}
           isLoading={isLoading}
           loadingText="Loading settlement records..."
+          errorMsg={loadError}
           emptyMessage="No settlement records found matching current criteria."
           pagination={paginationMeta}
           onPageChange={handlePageChange}
@@ -585,6 +553,7 @@ export default function OwnerFinancialRecords() {
           rowKey={(e) => e.bookingId}
           isLoading={isLoading}
           loadingText="Loading wash earnings..."
+          errorMsg={loadError}
           emptyMessage="No completed bookings found."
           pagination={paginationMeta}
           onPageChange={handlePageChange}

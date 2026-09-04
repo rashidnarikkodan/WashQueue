@@ -1,7 +1,5 @@
 import {
   X,
-  CheckCircle,
-  Clock,
   AlertTriangle,
   RefreshCw,
   Building2,
@@ -9,8 +7,10 @@ import {
   Car,
   CreditCard,
   ShieldAlert,
+  RotateCcw,
 } from "lucide-react"
-import type { Settlement, SettlementStatus } from "@/shared/apis/settlement.api"
+import { SettlementStatusBadge } from "@/shared/components/badges"
+import type { Settlement } from "@/shared/apis/settlement.api"
 
 interface SettlementDetailModalProps {
   settlement: Settlement | null
@@ -31,33 +31,6 @@ export function SettlementDetailModal({
 }: SettlementDetailModalProps) {
   if (!isOpen || !settlement) return null
 
-  const getStatusBadge = (status: SettlementStatus) => {
-    switch (status) {
-      case "SETTLED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-            <CheckCircle className="w-3.5 h-3.5" />
-            Settled
-          </span>
-        )
-      case "FAILED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-500 border border-rose-500/20">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            Payout Failed
-          </span>
-        )
-      case "PENDING":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-            <Clock className="w-3.5 h-3.5" />
-            Pending Settlement
-          </span>
-        )
-    }
-  }
-
   const commissionPercent = settlement.platformCommissionRate
     ? `${(settlement.platformCommissionRate * 100).toFixed(0)}%`
     : settlement.totalAmount > 0
@@ -72,7 +45,7 @@ export function SettlementDetailModal({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-foreground">Settlement Statement</h3>
-              {getStatusBadge(settlement.status)}
+              <SettlementStatusBadge status={settlement.status} size="md" />
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 font-mono">
               Ref: {settlement.id || settlement.bookingId}
@@ -125,6 +98,19 @@ export function SettlementDetailModal({
             </div>
           )}
 
+          {settlement.status === "REVERSED" && (
+            <div className="p-4 rounded-xl bg-slate-500/10 border border-slate-500/20 text-slate-600 dark:text-slate-300 flex items-start gap-3">
+              <RotateCcw className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold">Payout Reversed</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {settlement.failureReason ||
+                    "This payout was previously processed but was later reversed by the bank or payment gateway."}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Financial Breakdown Card */}
           <div className="p-5 rounded-2xl bg-muted/40 border border-border/80 space-y-4">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -159,19 +145,19 @@ export function SettlementDetailModal({
             <div className="p-4 rounded-xl bg-card border border-border space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                 <CreditCard className="w-4 h-4 text-primary" />
-                <span>Transfer Info</span>
+                <span>Payout Info</span>
               </div>
               <div className="text-sm">
-                <p className="text-xs text-muted-foreground">Transfer Reference ID</p>
+                <p className="text-xs text-muted-foreground">Payout Reference</p>
                 <p className="font-mono font-medium text-foreground truncate">
-                  {settlement.transferId || "Not generated yet"}
+                  {settlement.payoutId || "Not generated yet"}
                 </p>
               </div>
               <div className="text-sm">
-                <p className="text-xs text-muted-foreground">Settled At</p>
+                <p className="text-xs text-muted-foreground">Processed At</p>
                 <p className="font-medium text-foreground">
-                  {settlement.settledAt
-                    ? new Date(settlement.settledAt).toLocaleString()
+                  {settlement.processedAt
+                    ? new Date(settlement.processedAt).toLocaleString()
                     : "Pending Payout"}
                 </p>
               </div>

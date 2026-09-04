@@ -8,13 +8,17 @@ import {
   TrendingUp,
   RotateCcw,
   Receipt,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
+import PromptModal from "@/shared/components/ui/PromptModal"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { SettlementStatusBadge } from "@/shared/components/badges"
 import {
   settlementApi,
   type Settlement,
-  type SettlementStatus,
   type AdminSettlementMetrics,
 } from "@/shared/apis/settlement.api"
 import { SettlementDetailModal } from "@/features/owner/components/SettlementDetailModal"
@@ -32,9 +36,12 @@ import {
 const SETTLEMENT_TABS: TabConfig[] = [
   { id: "ALL", label: "All Settlements" },
   { id: "PENDING", label: "Pending", activeColor: "border-amber-500 text-amber-500" },
-  { id: "SETTLED", label: "Settled", activeColor: "border-emerald-500 text-emerald-500" },
+  { id: "HELD", label: "Held", activeColor: "border-purple-500 text-purple-500" },
+  { id: "PROCESSED", label: "Processed", activeColor: "border-emerald-500 text-emerald-500" },
   { id: "FAILED", label: "Failed", activeColor: "border-rose-500 text-rose-500" },
 ]
+
+const HOLDABLE_STATUSES = new Set(["PENDING", "PROCESSING", "FAILED"])
 
 export default function AdminSettlementMonitoring() {
   const [dateFilter, setDateFilter] = useState<string>("ALL")
@@ -56,6 +63,12 @@ export default function AdminSettlementMonitoring() {
   const [selectedSettlement, setSelectedSettlement] = useState<Settlement | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [retryingId, setRetryingId] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  const [holdTarget, setHoldTarget] = useState<Settlement | null>(null)
+  const [isHolding, setIsHolding] = useState(false)
+  const [releaseTarget, setReleaseTarget] = useState<Settlement | null>(null)
+  const [isReleasing, setIsReleasing] = useState(false)
 
   const dateParams = useMemo(() => {
     if (dateFilter === "7_DAYS") {
@@ -99,8 +112,11 @@ export default function AdminSettlementMonitoring() {
         hasNextPage: res.pagination.page < res.pagination.totalPages,
         hasPrevPage: res.pagination.page > 1,
       })
+      setLoadError(null)
     } catch {
-      toast.error("Failed to load settlements")
+      const message = "Failed to load settlements"
+      setLoadError(message)
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -171,27 +187,39 @@ export default function AdminSettlementMonitoring() {
     }
   }
 
-  const getStatusBadge = (status: SettlementStatus) => {
-    switch (status) {
-      case "SETTLED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-            <CheckCircle className="w-3 h-3" /> Settled
-          </span>
-        )
-      case "FAILED":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-rose-500/10 text-rose-500 border-rose-500/20">
-            <AlertTriangle className="w-3 h-3" /> Failed
-          </span>
-        )
-      case "PENDING":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-amber-500/10 text-amber-500 border-amber-500/20">
-            <Clock className="w-3 h-3" /> Pending
-          </span>
-        )
+  const handleHoldSettlement = async (reason: string) => {
+    if (!holdTarget) return
+    setIsHolding(true)
+    try {
+      await settlementApi.holdSettlement(holdTarget.id, reason)
+      toast.success("Settlement placed on hold")
+      setHoldTarget(null)
+      handleRefresh()
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to place settlement on hold"
+      toast.error(message)
+    } finally {
+      setIsHolding(false)
+    }
+  }
+
+  const handleReleaseSettlement = async () => {
+    if (!releaseTarget) return
+    setIsReleasing(true)
+    try {
+      await settlementApi.releaseSettlement(releaseTarget.id)
+      toast.success("Settlement hold released")
+      setReleaseTarget(null)
+      handleRefresh()
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to release settlement hold"
+      toast.error(message)
+    } finally {
+      setIsReleasing(false)
     }
   }
 
@@ -310,14 +338,14 @@ export default function AdminSettlementMonitoring() {
     {
       id: "status",
       header: "Status",
-      cell: (s) => getStatusBadge(s.status),
+      cell: (s) => <SettlementStatusBadge status={s.status} />,
     },
     {
-      id: "transferId",
-      header: "Transfer Ref",
+      id: "payoutId",
+      header: "Payout Ref",
       cell: (s) => (
-        <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-[120px] block">
-          {s.transferId || "—"}
+        <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-30 block">
+          {s.payoutId || "—"}
         </span>
       ),
     },
@@ -336,6 +364,26 @@ export default function AdminSettlementMonitoring() {
             >
               <RotateCcw className={`w-3.5 h-3.5 ${retryingId === s.id ? "animate-spin" : ""}`} />
               Retry
+            </button>
+          )}
+          {HOLDABLE_STATUSES.has(s.status) && (
+            <button
+              onClick={() => setHoldTarget(s)}
+              title="Hold this settlement"
+              className="p-1.5 text-xs font-bold text-purple-500 hover:bg-purple-500/10 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              Hold
+            </button>
+          )}
+          {s.status === "HELD" && (
+            <button
+              onClick={() => setReleaseTarget(s)}
+              title="Release hold and resume processing"
+              className="p-1.5 text-xs font-bold text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Release
             </button>
           )}
           <button
@@ -391,7 +439,7 @@ export default function AdminSettlementMonitoring() {
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         searchLabel="Search Settlements"
-        searchPlaceholder="Booking number or transfer ref..."
+        searchPlaceholder="Booking number or payout ref..."
         tabs={SETTLEMENT_TABS}
         activeTab={statusFilter}
         onTabChange={handleStatusTabChange}
@@ -405,6 +453,7 @@ export default function AdminSettlementMonitoring() {
         rowKey={(s) => s.id}
         isLoading={isLoading}
         loadingText="Fetching settlement ledger..."
+        errorMsg={loadError}
         emptyMessage="No settlement records found matching current criteria."
         pagination={paginationMeta}
         onPageChange={handlePageChange}
@@ -421,6 +470,38 @@ export default function AdminSettlementMonitoring() {
           setIsModalOpen(false)
           setSelectedSettlement(null)
         }}
+      />
+
+      {/* Hold Settlement Modal */}
+      <PromptModal
+        isOpen={Boolean(holdTarget)}
+        onClose={() => setHoldTarget(null)}
+        onSubmit={handleHoldSettlement}
+        title="Hold Settlement"
+        description={`Provide a reason for holding the payout for booking ${
+          holdTarget?.bookingNumber || holdTarget?.bookingId.slice(0, 10)
+        }.`}
+        label="Hold Reason"
+        placeholder="e.g. Dispute under review"
+        inputType="textarea"
+        confirmText="Hold Settlement"
+        variant="warning"
+        isLoading={isHolding}
+        required
+      />
+
+      {/* Release Hold Confirmation */}
+      <ConfirmationModal
+        isOpen={Boolean(releaseTarget)}
+        onClose={() => setReleaseTarget(null)}
+        onConfirm={handleReleaseSettlement}
+        title="Release Settlement Hold?"
+        message={`This will move the settlement for booking ${
+          releaseTarget?.bookingNumber || releaseTarget?.bookingId.slice(0, 10)
+        } back to PENDING so it can be processed for payout again.`}
+        confirmText="Release Hold"
+        confirmVariant="success"
+        isLoading={isReleasing}
       />
     </div>
   )
