@@ -29,18 +29,18 @@ export class NotificationController {
   ) {}
 
   getAll = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const result = await this.getNotificationsUseCase.execute(userId, req.query)
+    const result = await this.getNotificationsUseCase.execute(recipientId, req.query)
     success(res, result, HTTP_STATUS.OK, "Notifications retrieved successfully")
   }
 
   getById = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
@@ -49,19 +49,19 @@ export class NotificationController {
       throw new AppError("Notification ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const result = await this.getNotificationByIdUseCase.execute(id, userId)
+    const result = await this.getNotificationByIdUseCase.execute(id, recipientId)
     success(res, result, HTTP_STATUS.OK, "Notification retrieved successfully")
   }
 
   create = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.body.userId || req.user?.userId
-    if (!userId) {
+    const recipientId = req.body.recipientId || req.body.userId || req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
     const dto = {
       ...req.body,
-      userId,
+      recipientId,
     }
 
     const result = await this.createNotificationUseCase.execute(dto)
@@ -69,8 +69,8 @@ export class NotificationController {
   }
 
   markAsRead = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
@@ -79,23 +79,23 @@ export class NotificationController {
       throw new AppError("Notification ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const result = await this.markNotificationAsReadUseCase.execute(id, userId)
+    const result = await this.markNotificationAsReadUseCase.execute(id, recipientId)
     success(res, result, HTTP_STATUS.OK, "Notification marked as read")
   }
 
   markAllAsRead = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const result = await this.markAllNotificationsAsReadUseCase.execute(userId)
+    const result = await this.markAllNotificationsAsReadUseCase.execute(recipientId)
     success(res, result, HTTP_STATUS.OK, "All notifications marked as read")
   }
 
   markAsActioned = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
@@ -104,13 +104,13 @@ export class NotificationController {
       throw new AppError("Notification ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    const result = await this.markNotificationAsActionedUseCase.execute(id, userId)
+    const result = await this.markNotificationAsActionedUseCase.execute(id, recipientId)
     success(res, result, HTTP_STATUS.OK, "Notification marked as actioned")
   }
 
   delete = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
@@ -119,17 +119,17 @@ export class NotificationController {
       throw new AppError("Notification ID is required", HTTP_STATUS.BAD_REQUEST)
     }
 
-    await this.deleteNotificationUseCase.execute(id, userId)
+    await this.deleteNotificationUseCase.execute(id, recipientId)
     success(res, null, HTTP_STATUS.OK, "Notification deleted successfully")
   }
 
   getUnreadCount = async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user?.userId
-    if (!userId) {
+    const recipientId = req.user?.userId
+    if (!recipientId) {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
-    const result = await this.getUnreadNotificationCountUseCase.execute(userId)
+    const result = await this.getUnreadNotificationCountUseCase.execute(recipientId)
     success(res, result, HTTP_STATUS.OK, "Unread count retrieved successfully")
   }
 }

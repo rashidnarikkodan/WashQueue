@@ -13,7 +13,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
 
     const notification = new Notification({
       id: "",
-      userId: dto.userId,
+      recipientId: dto.recipientId || dto.userId || "",
       type: dto.type,
       title: dto.title,
       channel: dto.channel || "IN_APP",

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { Navigate, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Bell } from "lucide-react"
 
 import { useNotificationStore } from "../store/notification.store"

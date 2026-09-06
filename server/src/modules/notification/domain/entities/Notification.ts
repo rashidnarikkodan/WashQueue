@@ -6,7 +6,7 @@ import {
 
 export interface NotificationProps {
   id: string
-  userId: string
+  recipientId: string
   type: NotificationType
   title: string
   channel: NotificationChannel
@@ -27,8 +27,8 @@ export class Notification {
     return this.props.id
   }
 
-  get userId(): string {
-    return this.props.userId
+  get recipientId(): string {
+    return this.props.recipientId
   }
 
   get type(): NotificationType {

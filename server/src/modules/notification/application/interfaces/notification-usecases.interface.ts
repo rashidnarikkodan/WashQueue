@@ -7,29 +7,29 @@ export interface ICreateNotificationUseCase {
 }
 
 export interface IGetNotificationsUseCase {
-  execute(userId: string, query?: GetNotificationsQueryDto): Promise<PaginatedNotificationsDto>
+  execute(recipientId: string, query?: GetNotificationsQueryDto): Promise<PaginatedNotificationsDto>
 }
 
 export interface IGetNotificationByIdUseCase {
-  execute(id: string, userId: string): Promise<NotificationResponseDto>
+  execute(id: string, recipientId: string): Promise<NotificationResponseDto>
 }
 
 export interface IMarkNotificationAsReadUseCase {
-  execute(id: string, userId: string): Promise<NotificationResponseDto>
+  execute(id: string, recipientId: string): Promise<NotificationResponseDto>
 }
 
 export interface IMarkAllNotificationsAsReadUseCase {
-  execute(userId: string): Promise<{ updatedCount: number }>
+  execute(recipientId: string): Promise<{ updatedCount: number }>
 }
 
 export interface IMarkNotificationAsActionedUseCase {
-  execute(id: string, userId: string): Promise<NotificationResponseDto>
+  execute(id: string, recipientId: string): Promise<NotificationResponseDto>
 }
 
 export interface IDeleteNotificationUseCase {
-  execute(id: string, userId: string): Promise<void>
+  execute(id: string, recipientId: string): Promise<void>
 }
 
 export interface IGetUnreadNotificationCountUseCase {
-  execute(userId: string): Promise<{ unreadCount: number }>
+  execute(recipientId: string): Promise<{ unreadCount: number }>
 }

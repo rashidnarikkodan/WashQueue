@@ -17,12 +17,12 @@ describe("Notification Module Unit Tests", () => {
       save: vi.fn(),
       delete: vi.fn(),
       update: vi.fn(),
-      findByUserId: vi.fn(),
-      countUnreadByUserId: vi.fn(),
-      markAllAsReadByUserId: vi.fn(),
+      findByRecipientId: vi.fn(),
+      countUnreadByRecipientId: vi.fn(),
+      markAllAsReadByRecipientId: vi.fn(),
       markAsRead: vi.fn(),
       markAsActioned: vi.fn(),
-      deleteByIdAndUserId: vi.fn(),
+      deleteByIdAndRecipientId: vi.fn(),
     }
   })
 
@@ -30,7 +30,7 @@ describe("Notification Module Unit Tests", () => {
     it("should create entity and toggle read and actioned state", () => {
       const notification = new Notification({
         id: "notif-123",
-        userId: "user-456",
+        recipientId: "user-456",
         type: "BOOKING",
         title: "Booking Confirmed",
         channel: "IN_APP",
@@ -61,7 +61,7 @@ describe("Notification Module Unit Tests", () => {
     it("should save and return notification response", async () => {
       const createdEntity = new Notification({
         id: "notif-1",
-        userId: "user-1",
+        recipientId: "user-1",
         type: "QUEUE",
         title: "Position Update",
         channel: "IN_APP",
@@ -77,7 +77,7 @@ describe("Notification Module Unit Tests", () => {
 
       const useCase = new CreateNotificationUseCase(mockRepo)
       const result = await useCase.execute({
-        userId: "user-1",
+        recipientId: "user-1",
         type: "QUEUE",
         title: "Position Update",
         message: "You are #2 in line",
@@ -94,7 +94,7 @@ describe("Notification Module Unit Tests", () => {
     it("should return paginated notifications", async () => {
       const notif = new Notification({
         id: "notif-1",
-        userId: "user-1",
+        recipientId: "user-1",
         type: "PAYMENT",
         title: "Payment Received",
         channel: "IN_APP",
@@ -106,7 +106,7 @@ describe("Notification Module Unit Tests", () => {
         createdAt: new Date(),
       })
 
-      vi.mocked(mockRepo.findByUserId).mockResolvedValue({
+      vi.mocked(mockRepo.findByRecipientId).mockResolvedValue({
         notifications: [notif],
         total: 1,
         unreadCount: 1,
@@ -125,7 +125,7 @@ describe("Notification Module Unit Tests", () => {
     it("should mark notification as read", async () => {
       const notif = new Notification({
         id: "notif-1",
-        userId: "user-1",
+        recipientId: "user-1",
         type: "SYSTEM",
         title: "Maintenance",
         channel: "IN_APP",
@@ -151,7 +151,7 @@ describe("Notification Module Unit Tests", () => {
     it("should mark notification as actioned", async () => {
       const notif = new Notification({
         id: "notif-1",
-        userId: "user-1",
+        recipientId: "user-1",
         type: "SYSTEM",
         title: "Maintenance",
         channel: "IN_APP",
@@ -175,23 +175,23 @@ describe("Notification Module Unit Tests", () => {
 
   describe("GetUnreadNotificationCountUseCase", () => {
     it("should return unread count", async () => {
-      vi.mocked(mockRepo.countUnreadByUserId).mockResolvedValue(5)
+      vi.mocked(mockRepo.countUnreadByRecipientId).mockResolvedValue(5)
 
       const useCase = new GetUnreadNotificationCountUseCase(mockRepo)
       const result = await useCase.execute("user-1")
 
       expect(result.unreadCount).toBe(5)
-      expect(mockRepo.countUnreadByUserId).toHaveBeenCalledWith("user-1")
+      expect(mockRepo.countUnreadByRecipientId).toHaveBeenCalledWith("user-1")
     })
   })
 
   describe("DeleteNotificationUseCase", () => {
     it("should delete notification", async () => {
-      vi.mocked(mockRepo.deleteByIdAndUserId).mockResolvedValue(true)
+      vi.mocked(mockRepo.deleteByIdAndRecipientId).mockResolvedValue(true)
 
       const useCase = new DeleteNotificationUseCase(mockRepo)
       await expect(useCase.execute("notif-1", "user-1")).resolves.toBeUndefined()
-      expect(mockRepo.deleteByIdAndUserId).toHaveBeenCalledWith("notif-1", "user-1")
+      expect(mockRepo.deleteByIdAndRecipientId).toHaveBeenCalledWith("notif-1", "user-1")
     })
   })
 })

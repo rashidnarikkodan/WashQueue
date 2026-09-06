@@ -9,13 +9,13 @@ export interface PaginatedNotificationResult {
 }
 
 export interface INotificationRepository extends IBaseRepository<Notification> {
-  findByUserId(
-    userId: string,
+  findByRecipientId(
+    recipientId: string,
     filter?: NotificationQueryFilter
   ): Promise<PaginatedNotificationResult>
-  countUnreadByUserId(userId: string): Promise<number>
-  markAllAsReadByUserId(userId: string): Promise<number>
-  markAsRead(id: string, userId: string): Promise<Notification | null>
-  markAsActioned(id: string, userId: string): Promise<Notification | null>
-  deleteByIdAndUserId(id: string, userId: string): Promise<boolean>
+  countUnreadByRecipientId(recipientId: string): Promise<number>
+  markAllAsReadByRecipientId(recipientId: string): Promise<number>
+  markAsRead(id: string, recipientId: string): Promise<Notification | null>
+  markAsActioned(id: string, recipientId: string): Promise<Notification | null>
+  deleteByIdAndRecipientId(id: string, recipientId: string): Promise<boolean>
 }

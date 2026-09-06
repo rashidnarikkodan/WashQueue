@@ -17,12 +17,12 @@ export class NotificationMongoRepository
     super(NotificationModel, new NotificationMapper())
   }
 
-  async findByUserId(
-    userId: string,
+  async findByRecipientId(
+    recipientId: string,
     filter?: NotificationQueryFilter
   ): Promise<PaginatedNotificationResult> {
-    const userObjectId = new Types.ObjectId(userId)
-    const query: Record<string, unknown> = { userId: userObjectId, isDeleted: false }
+    const recipientObjectId = new Types.ObjectId(recipientId)
+    const query: Record<string, unknown> = { recipientId: recipientObjectId, isDeleted: false }
 
     if (filter?.isRead !== undefined) {
       query.isRead = filter.isRead
@@ -39,7 +39,9 @@ export class NotificationMongoRepository
     const [docs, total, unreadCount] = await Promise.all([
       this.model.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
       this.model.countDocuments(query).exec(),
-      this.model.countDocuments({ userId: userObjectId, isRead: false, isDeleted: false }).exec(),
+      this.model
+        .countDocuments({ recipientId: recipientObjectId, isRead: false, isDeleted: false })
+        .exec(),
     ])
 
     return {
@@ -49,20 +51,20 @@ export class NotificationMongoRepository
     }
   }
 
-  async countUnreadByUserId(userId: string): Promise<number> {
+  async countUnreadByRecipientId(recipientId: string): Promise<number> {
     return this.model
       .countDocuments({
-        userId: new Types.ObjectId(userId),
+        recipientId: new Types.ObjectId(recipientId),
         isRead: false,
         isDeleted: false,
       })
       .exec()
   }
 
-  async markAllAsReadByUserId(userId: string): Promise<number> {
+  async markAllAsReadByRecipientId(recipientId: string): Promise<number> {
     const result = await this.model
       .updateMany(
-        { userId: new Types.ObjectId(userId), isRead: false, isDeleted: false },
+        { recipientId: new Types.ObjectId(recipientId), isRead: false, isDeleted: false },
         { $set: { isRead: true } }
       )
       .exec()
@@ -70,12 +72,16 @@ export class NotificationMongoRepository
     return result.modifiedCount
   }
 
-  async markAsRead(id: string, userId: string): Promise<Notification | null> {
+  async markAsRead(id: string, recipientId: string): Promise<Notification | null> {
     if (!Types.ObjectId.isValid(id)) return null
 
     const doc = await this.model
       .findOneAndUpdate(
-        { _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId), isDeleted: false },
+        {
+          _id: new Types.ObjectId(id),
+          recipientId: new Types.ObjectId(recipientId),
+          isDeleted: false,
+        },
         { $set: { isRead: true } },
         { returnDocument: "after" }
       )
@@ -84,12 +90,16 @@ export class NotificationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
-  async markAsActioned(id: string, userId: string): Promise<Notification | null> {
+  async markAsActioned(id: string, recipientId: string): Promise<Notification | null> {
     if (!Types.ObjectId.isValid(id)) return null
 
     const doc = await this.model
       .findOneAndUpdate(
-        { _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId), isDeleted: false },
+        {
+          _id: new Types.ObjectId(id),
+          recipientId: new Types.ObjectId(recipientId),
+          isDeleted: false,
+        },
         { $set: { isActioned: true } },
         { returnDocument: "after" }
       )
@@ -98,14 +108,14 @@ export class NotificationMongoRepository
     return doc ? this.mapper.toDomain(doc) : null
   }
 
-  async deleteByIdAndUserId(id: string, userId: string): Promise<boolean> {
+  async deleteByIdAndRecipientId(id: string, recipientId: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) return false
 
     const result = await this.model
       .updateOne(
         {
           _id: new Types.ObjectId(id),
-          userId: new Types.ObjectId(userId),
+          recipientId: new Types.ObjectId(recipientId),
           isDeleted: false,
         },
         {

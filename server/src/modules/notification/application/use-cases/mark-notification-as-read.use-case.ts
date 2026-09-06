@@ -7,8 +7,8 @@ import { IMarkNotificationAsReadUseCase } from "../interfaces/notification-useca
 export class MarkNotificationAsReadUseCase implements IMarkNotificationAsReadUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
-  async execute(id: string, userId: string): Promise<NotificationResponseDto> {
-    const updated = await this.notificationRepository.markAsRead(id, userId)
+  async execute(id: string, recipientId: string): Promise<NotificationResponseDto> {
+    const updated = await this.notificationRepository.markAsRead(id, recipientId)
 
     if (!updated) {
       throw new AppError("Notification not found", HTTP_STATUS.NOT_FOUND)

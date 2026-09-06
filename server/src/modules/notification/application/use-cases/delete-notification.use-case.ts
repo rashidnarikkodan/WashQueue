@@ -6,8 +6,8 @@ import { IDeleteNotificationUseCase } from "../interfaces/notification-usecases.
 export class DeleteNotificationUseCase implements IDeleteNotificationUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
-  async execute(id: string, userId: string): Promise<void> {
-    const deleted = await this.notificationRepository.deleteByIdAndUserId(id, userId)
+  async execute(id: string, recipientId: string): Promise<void> {
+    const deleted = await this.notificationRepository.deleteByIdAndRecipientId(id, recipientId)
 
     if (!deleted) {
       throw new AppError("Notification not found", HTTP_STATUS.NOT_FOUND)

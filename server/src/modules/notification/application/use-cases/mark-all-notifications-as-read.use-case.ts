@@ -4,8 +4,8 @@ import { IMarkAllNotificationsAsReadUseCase } from "../interfaces/notification-u
 export class MarkAllNotificationsAsReadUseCase implements IMarkAllNotificationsAsReadUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
-  async execute(userId: string): Promise<{ updatedCount: number }> {
-    const updatedCount = await this.notificationRepository.markAllAsReadByUserId(userId)
+  async execute(recipientId: string): Promise<{ updatedCount: number }> {
+    const updatedCount = await this.notificationRepository.markAllAsReadByRecipientId(recipientId)
     return { updatedCount }
   }
 }

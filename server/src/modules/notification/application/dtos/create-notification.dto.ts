@@ -5,7 +5,8 @@ import {
 } from "../../domain/types/notification.types"
 
 export interface CreateNotificationDto {
-  userId: string
+  recipientId: string
+  userId?: string
   type: NotificationType
   title: string
   channel?: NotificationChannel

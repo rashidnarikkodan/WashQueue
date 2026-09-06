@@ -24,6 +24,10 @@ export const getNotificationsQuerySchema = z.object({
 })
 
 export const createNotificationSchema = z.object({
+  recipientId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid Recipient ID")
+    .optional(),
   userId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid User ID")

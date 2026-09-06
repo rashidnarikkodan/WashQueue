@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose"
 
 export interface INotificationDocument extends Document {
-  userId: Types.ObjectId
+  recipientId: Types.ObjectId
   type: string
   title: string
   channel: string
@@ -17,7 +17,7 @@ export interface INotificationDocument extends Document {
 
 const notificationSchema = new Schema<INotificationDocument>(
   {
-    userId: {
+    recipientId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -73,7 +73,7 @@ const notificationSchema = new Schema<INotificationDocument>(
   }
 )
 
-notificationSchema.index({ userId: 1, isDeleted: 1, createdAt: -1 })
-notificationSchema.index({ userId: 1, isDeleted: 1, isRead: 1 })
+notificationSchema.index({ recipientId: 1, isDeleted: 1, createdAt: -1 })
+notificationSchema.index({ recipientId: 1, isDeleted: 1, isRead: 1 })
 
 export const NotificationModel = model<INotificationDocument>("Notification", notificationSchema)

@@ -7,8 +7,8 @@ import { IMarkNotificationAsActionedUseCase } from "../interfaces/notification-u
 export class MarkNotificationAsActionedUseCase implements IMarkNotificationAsActionedUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
-  async execute(id: string, userId: string): Promise<NotificationResponseDto> {
-    const updated = await this.notificationRepository.markAsActioned(id, userId)
+  async execute(id: string, recipientId: string): Promise<NotificationResponseDto> {
+    const updated = await this.notificationRepository.markAsActioned(id, recipientId)
 
     if (!updated) {
       throw new AppError("Notification not found", HTTP_STATUS.NOT_FOUND)
