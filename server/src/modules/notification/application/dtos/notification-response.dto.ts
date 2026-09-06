@@ -17,4 +17,5 @@ export interface NotificationResponseDto {
   isActioned: boolean
   createdAt: Date
   updatedAt?: Date
+  expiresAt?: Date
 }

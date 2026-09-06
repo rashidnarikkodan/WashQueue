@@ -41,6 +41,7 @@ export const createNotificationSchema = z.object({
     .union([z.string(), z.record(z.string(), z.unknown())])
     .optional()
     .default("{}"),
+  expiresAt: z.union([z.string(), z.date()]).optional(),
 })
 
 export const notificationIdParamSchema = z.object({

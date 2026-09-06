@@ -11,6 +11,11 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
     const stringifiedData =
       typeof dto.data === "object" ? JSON.stringify(dto.data) : dto.data || "{}"
 
+    const now = new Date()
+    const expiresAt = dto.expiresAt
+      ? new Date(dto.expiresAt)
+      : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+
     const notification = new Notification({
       id: "",
       recipientId: dto.recipientId || dto.userId || "",
@@ -22,7 +27,8 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
       data: stringifiedData,
       isRead: false,
       isActioned: false,
-      createdAt: new Date(),
+      createdAt: now,
+      expiresAt,
     })
 
     const saved = await this.notificationRepository.save(notification)

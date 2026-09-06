@@ -13,4 +13,5 @@ export interface CreateNotificationDto {
   actionType?: NotificationActionType
   message: string
   data?: string | Record<string, unknown>
+  expiresAt?: Date | string
 }

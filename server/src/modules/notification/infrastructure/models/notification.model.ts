@@ -13,6 +13,7 @@ export interface INotificationDocument extends Document {
   isDeleted: boolean
   createdAt: Date
   updatedAt: Date
+  expiresAt: Date
 }
 
 const notificationSchema = new Schema<INotificationDocument>(
@@ -67,6 +68,10 @@ const notificationSchema = new Schema<INotificationDocument>(
       default: false,
       index: true,
     },
+    expiresAt: {
+      type: Date,
+      default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
   },
   {
     timestamps: true,
@@ -75,5 +80,6 @@ const notificationSchema = new Schema<INotificationDocument>(
 
 notificationSchema.index({ recipientId: 1, isDeleted: 1, createdAt: -1 })
 notificationSchema.index({ recipientId: 1, isDeleted: 1, isRead: 1 })
+notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
 export const NotificationModel = model<INotificationDocument>("Notification", notificationSchema)

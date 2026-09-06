@@ -18,6 +18,7 @@ export interface NotificationProps {
   isDeleted?: boolean
   createdAt: Date
   updatedAt?: Date
+  expiresAt?: Date
 }
 
 export class Notification {
@@ -29,6 +30,10 @@ export class Notification {
 
   get recipientId(): string {
     return this.props.recipientId
+  }
+
+  get expiresAt(): Date | undefined {
+    return this.props.expiresAt
   }
 
   get type(): NotificationType {

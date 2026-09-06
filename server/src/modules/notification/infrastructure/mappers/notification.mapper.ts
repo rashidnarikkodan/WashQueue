@@ -24,6 +24,7 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
       isDeleted: raw.isDeleted ?? false,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
+      expiresAt: raw.expiresAt,
     }
     return new Notification(props)
   }
@@ -63,6 +64,9 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
       }
       if (data.isDeleted !== undefined) {
         persist.isDeleted = data.isDeleted
+      }
+      if (data.expiresAt !== undefined) {
+        persist.expiresAt = data.expiresAt
       }
     }
 

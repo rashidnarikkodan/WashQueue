@@ -28,6 +28,7 @@ describe("Notification Module Unit Tests", () => {
 
   describe("Notification Entity", () => {
     it("should create entity and toggle read and actioned state", () => {
+      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       const notification = new Notification({
         id: "notif-123",
         recipientId: "user-456",
@@ -40,11 +41,13 @@ describe("Notification Module Unit Tests", () => {
         isRead: false,
         isActioned: false,
         createdAt: new Date(),
+        expiresAt: expiry,
       })
 
       expect(notification.isRead).toBe(false)
       expect(notification.isActioned).toBe(false)
       expect(notification.isDeleted).toBe(false)
+      expect(notification.expiresAt).toEqual(expiry)
 
       notification.markAsRead()
       expect(notification.isRead).toBe(true)
@@ -58,7 +61,7 @@ describe("Notification Module Unit Tests", () => {
   })
 
   describe("CreateNotificationUseCase", () => {
-    it("should save and return notification response", async () => {
+    it("should save and return notification response with 1 month expiresAt", async () => {
       const createdEntity = new Notification({
         id: "notif-1",
         recipientId: "user-1",
@@ -71,11 +74,13 @@ describe("Notification Module Unit Tests", () => {
         isRead: false,
         isActioned: false,
         createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       })
 
-      vi.mocked(mockRepo.save).mockResolvedValue(createdEntity)
+      vi.mocked(mockRepo.save).mockImplementation(async (entity) => entity)
 
       const useCase = new CreateNotificationUseCase(mockRepo)
+      const before = Date.now()
       const result = await useCase.execute({
         recipientId: "user-1",
         type: "QUEUE",
@@ -84,8 +89,12 @@ describe("Notification Module Unit Tests", () => {
         data: { queuePosition: 2 },
       })
 
-      expect(result.id).toBe("notif-1")
       expect(result.type).toBe("QUEUE")
+      expect(result.expiresAt).toBeDefined()
+      const expectedMin = before + 29 * 24 * 60 * 60 * 1000
+      const expectedMax = Date.now() + 31 * 24 * 60 * 60 * 1000
+      expect(result.expiresAt!.getTime()).toBeGreaterThanOrEqual(expectedMin)
+      expect(result.expiresAt!.getTime()).toBeLessThanOrEqual(expectedMax)
       expect(mockRepo.save).toHaveBeenCalledTimes(1)
     })
   })
