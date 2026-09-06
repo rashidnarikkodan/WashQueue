@@ -9,8 +9,8 @@ import {
 } from "../../domain/types/notification.types"
 import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
 import { ROLE } from "@/common/constants/role.constants"
-import { Station as StationModel } from "@/modules/station/infrastructure/models/station.model"
-import { ManagerAssignment as ManagerAssignmentModel } from "@/modules/manager/infrastructure/models/manager-assignment.model"
+import { StationModel } from "@/modules/station/infrastructure/models/station.model"
+import { ManagerAssignmentModel } from "@/modules/manager/infrastructure/models/manager-assignment.model"
 
 export interface DispatchNotificationOptions {
   recipientId: string
