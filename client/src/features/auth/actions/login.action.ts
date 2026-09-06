@@ -1,13 +1,10 @@
 import { getErrorMessage } from "@/shared/utils/error"
-import { authApi } from "../services/auth.api"
+import { authApi } from "@/shared/apis/auth.api"
 import type { LoginState } from "../types"
 
 export type { LoginState } from "../types"
 
-export async function loginAction(
-  _prevState: LoginState,
-  formData: FormData
-): Promise<LoginState> {
+export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   let email = ""
   try {
     email = formData.get("email")?.toString().trim() || ""
@@ -15,7 +12,6 @@ export async function loginAction(
 
     const errors: LoginState["errors"] = {}
 
-    // validation
     if (!email) {
       errors.email = ["Email is required"]
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -36,7 +32,6 @@ export async function loginAction(
       }
     }
 
-    // API call
     const user = await authApi.login(email, password)
 
     return {
@@ -47,7 +42,7 @@ export async function loginAction(
   } catch (error: unknown) {
     return {
       success: false,
-      message: getErrorMessage(error,'Failed to Login'),
+      message: getErrorMessage(error, "Failed to Login"),
       email,
     }
   }

@@ -2,7 +2,7 @@ import z from "zod"
 
 export const createOwnerSchema = z.object({
   legalFullName: z.string().min(1, "Legal full name is required").trim(),
-  phone:z.string().trim().min(10,"Valid phone number is required"),
+  phone: z.string().trim().min(10, "Valid phone number is required"),
   businessName: z.string().min(1, "Business name is required").trim(),
   gstNumber: z.string().trim().optional(),
   whatsapp: z.string().trim().optional(),

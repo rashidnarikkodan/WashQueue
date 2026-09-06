@@ -1,0 +1,22 @@
+export enum BookingStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  CHECKED_IN = "CHECKED_IN",
+  IN_SERVICE = "IN_SERVICE",
+  SERVICE_COMPLETED = "SERVICE_COMPLETED",
+  AWAITING_HANDOVER = "AWAITING_HANDOVER",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  NO_SHOW = "NO_SHOW",
+  STALLED = "STALLED",
+}
+
+export enum ServiceType {
+  HALF = "HALF",
+  FULL = "FULL",
+}
+
+export const BOOKING = {
+  STATUS: BookingStatus,
+  SERVICE_TYPE: ServiceType,
+} as const

@@ -8,6 +8,7 @@ import { signupSchema } from "./schema/signup.schema"
 import { verifyOtpSchema } from "./schema/verify-otp.schema"
 import { forgotPasswordSchema } from "./schema/forgot-password.schema"
 import { resetPasswordSchema } from "./schema/reset-password.schema"
+import { changePasswordSchema } from "./schema/change-password.schema"
 import { resendOtpSchema } from "./schema/resend-otp.schema"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
@@ -16,43 +17,29 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   router.post(
     API_ROUTES.AUTH.SIGNUP,
-    validateRequest(signupSchema, 'body'),
+    validateRequest(signupSchema, "body"),
     asyncHandler(authController.signup)
   )
 
   router.post(
     API_ROUTES.AUTH.LOGIN,
-    validateRequest(loginSchema, 'body'),
+    validateRequest(loginSchema, "body"),
     asyncHandler(authController.login)
   )
 
   router.post(
     API_ROUTES.AUTH.VERIFY_OTP,
-    validateRequest(verifyOtpSchema, 'body'),
+    validateRequest(verifyOtpSchema, "body"),
     asyncHandler(authController.verifyOtp)
   )
 
-  router.post(
-    API_ROUTES.AUTH.GOOGLE,
-    asyncHandler(authController.googleAuth)
-  )
+  router.post(API_ROUTES.AUTH.GOOGLE, asyncHandler(authController.googleAuth))
 
-  router.post(
-    API_ROUTES.AUTH.REFRESH_TOKEN,
-    asyncHandler(authController.refreshToken)
-  )
+  router.post(API_ROUTES.AUTH.REFRESH_TOKEN, asyncHandler(authController.refreshToken))
 
-  router.get(
-    API_ROUTES.AUTH.ME,
-    authenticate,
-    asyncHandler(authController.me)
-  )
+  router.get(API_ROUTES.AUTH.ME, authenticate, asyncHandler(authController.me))
 
-  router.post(
-    API_ROUTES.AUTH.LOGOUT,
-    authenticate,
-    asyncHandler(authController.logout)
-  )
+  router.post(API_ROUTES.AUTH.LOGOUT, authenticate, asyncHandler(authController.logout))
 
   router.post(
     API_ROUTES.AUTH.FORGOT_PASSWORD,
@@ -66,6 +53,13 @@ export const createAuthRouter = (authController: AuthController): Router => {
     asyncHandler(authController.resetPassword)
   )
 
+  router.patch(
+    API_ROUTES.AUTH.CHANGE_PASSWORD,
+    authenticate,
+    validateRequest(changePasswordSchema, "body"),
+    asyncHandler(authController.changePassword)
+  )
+
   router.post(
     API_ROUTES.AUTH.RESEND_OTP,
     validateRequest(resendOtpSchema, "body"),
@@ -74,5 +68,3 @@ export const createAuthRouter = (authController: AuthController): Router => {
 
   return router
 }
-
-

@@ -14,19 +14,16 @@ export class CreateOwnerUseCase implements ICreateOwnerUseCase {
   ) {}
 
   async execute(input: CreateOwnerInput): Promise<Owner> {
-    // 1. Verify user exists
     const user = await this.userRepository.findById(input.userId)
     if (!user) {
       throw new AppError("User not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    // 2. Check if owner profile already exists for this user
     const existingOwner = await this.ownerRepository.findByUserId(input.userId)
     if (existingOwner) {
       throw new AppError("Owner profile already exists for this user", HTTP_STATUS.CONFLICT)
     }
 
-    // 3. Create the owner entity
     const owner = new Owner({
       userId: input.userId,
       legalFullName: input.legalFullName,
@@ -39,7 +36,6 @@ export class CreateOwnerUseCase implements ICreateOwnerUseCase {
 
     const savedOwner = await this.ownerRepository.save(owner)
 
-    // 4. Update user's role to ROLE.OWNER
     await this.userRepository.updateRole(input.userId, ROLE.OWNER)
 
     return savedOwner

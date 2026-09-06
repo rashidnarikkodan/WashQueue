@@ -1,19 +1,18 @@
-import { MapPin, CheckCircle, User as UserIcon } from "lucide-react";
-import type { User } from "../../types";
+import { CheckCircle, User as UserIcon } from "lucide-react"
+import type { User } from "../../types"
 
 interface PersonalInformationCardProps {
-  user: User;
+  user: User
 }
 
 export default function PersonalInformationCard({ user }: PersonalInformationCardProps) {
-  // If owner, check onboardingDetails for fullName and phone.
-  const fullName = user.onboardingDetails?.fullName as string || user.name || "N/A";
-  const phone = user.onboardingDetails?.phone as string || user.phone || "Not Registered";
+  const fullName = (user.onboardingDetails?.fullName as string) || user.name || "N/A"
+  const phone = (user.onboardingDetails?.phone as string) || user.phone || "Not Registered"
 
   return (
-    <div className="border border-border bg-[#111726]/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
+    <div className="border border-border bg-card/60 backdrop-blur-md rounded-3xl p-5 xl:p-6 shadow-xl relative">
       <div className="flex items-center gap-2 mb-6">
-        <UserIcon size={18} className="text-[#ADC6FF]" />
+        <UserIcon size={18} className="text-primary" />
         <h2 className="text-base font-black uppercase text-foreground tracking-widest">
           Personal Information
         </h2>
@@ -57,24 +56,16 @@ export default function PersonalInformationCard({ user }: PersonalInformationCar
           </p>
           <p className="font-semibold text-foreground">{phone}</p>
         </div>
-
-        <div className="md:col-span-2">
-          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
-            Registered Address
-          </p>
-          <p className="text-muted-foreground leading-relaxed flex items-start gap-1.5">
-            <MapPin size={14} className="text-muted-foreground shrink-0 mt-0.5" />
-            <span>Not Registered</span>
-          </p>
-        </div>
       </div>
 
       <div className="mt-5 pt-4 border-t border-border/40">
         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
           Biography
         </p>
-        <p className="text-xs text-slate-450 leading-relaxed italic">No biography registered.</p>
+        <p className="text-xs text-muted-foreground leading-relaxed italic">
+          No biography registered.
+        </p>
       </div>
     </div>
-  );
+  )
 }

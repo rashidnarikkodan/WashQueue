@@ -14,3 +14,11 @@ export interface IGetUserUseCase {
 export interface IUpdateUserUseCase {
   execute(id: string, updates: UpdateUserInput): Promise<User | null>
 }
+
+export interface IGetBookmarksUseCase {
+  execute(userId: string): Promise<unknown[]>
+}
+
+export interface IToggleBookmarkUseCase {
+  execute(userId: string, stationId: string): Promise<User | null>
+}

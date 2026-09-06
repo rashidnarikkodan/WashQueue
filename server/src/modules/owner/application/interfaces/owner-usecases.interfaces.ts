@@ -3,7 +3,6 @@ export interface IOwnerOnboardingDetails {
   phone?: string
   whatsapp?: string
   businessName?: string
-  businessType?: string
   gstNumber?: string
   idProofType?: string
   idProofUrl?: string
@@ -50,6 +49,7 @@ export interface ISubmitOnboardingUseCase {
 import { Owner } from "../../domain/entities/Owner"
 import { CreateOwnerInput } from "../dto/create-owner.dto"
 import { UpdateOwnerInput } from "../dto/update-owner.dto"
+import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 
 export interface ICreateOwnerUseCase {
   execute(input: CreateOwnerInput): Promise<Owner>
@@ -61,4 +61,8 @@ export interface IGetOwnerUseCase {
 
 export interface IUpdateOwnerUseCase {
   execute(userId: string, input: UpdateOwnerInput): Promise<Owner | null>
+}
+
+export interface IApproveOwnerUseCase {
+  execute(input: ApproveOwnerInput): Promise<Owner>
 }

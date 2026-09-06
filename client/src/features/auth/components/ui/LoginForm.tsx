@@ -8,7 +8,7 @@ import FormInput from "../../../../shared/components/form/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
 import { loginAction, type LoginState } from "../../actions/login.action"
-import { useAuthStore } from "../../store/authStore"
+import { useAuthStore } from "../../store/auth.store"
 import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
 
 const initialState: LoginState = {
@@ -25,7 +25,6 @@ export default function LoginForm() {
       const success = await loginWithGoogle(tokenResponse.access_token)
       if (success) {
         const user = useAuthStore.getState().user
-        console.log("Google login response user:", user)
         if (user?.isNewUser) {
           navigate("/setup-account")
         } else {
@@ -45,26 +44,21 @@ export default function LoginForm() {
     },
     onError: () => {
       toast.error("Google login failed")
-    }
+    },
   })
 
-  const [state, formAction] = useActionState(
-    loginAction,
-    initialState
-  )
+  const [state, formAction] = useActionState(loginAction, initialState)
 
-  // Sync validation errors to local state
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalErrors({
       email: state.errors?.email?.[0] || "",
-      password: state.errors?.password?.[0] || ""
-    });
-  }, [state.errors]);
+      password: state.errors?.password?.[0] || "",
+    })
+  }, [state.errors])
 
   useEffect(() => {
     if (state.success && state.user) {
-      // Sync auth state to Zustand store and localStorage for persistence
       useAuthStore.setState({
         user: state.user,
         isAuthenticated: true,
@@ -87,13 +81,11 @@ export default function LoginForm() {
       }
     } else if (state.message === "Account is not verified") {
       if (state.email) {
-        localStorage.setItem("wq_temp_email", state.email);
+        localStorage.setItem("wq_temp_email", state.email)
       }
-      toast.warning("Your account is not verified. Redirecting to verification...");
-      navigate("/verify-email");
+      toast.warning("Your account is not verified. Redirecting to verification...")
+      navigate("/verify-email")
     }
-
-    // Error is handled via inline message box inside form
   }, [state, navigate])
 
   return (
@@ -108,10 +100,7 @@ export default function LoginForm() {
         </p>
       </div>
 
-      <SocialButton
-        label="Sign in with Google"
-        onClick={() => handleGoogleLogin()}
-      />
+      <SocialButton label="Sign in with Google" onClick={() => handleGoogleLogin()} />
 
       <div className="flex items-center justify-between gap-4 py-2">
         <div className="flex-1 h-[1px] bg-border/80"></div>
@@ -124,7 +113,7 @@ export default function LoginForm() {
       </div>
 
       <form action={formAction} className="space-y-4" noValidate>
-        {(!state.success && state.message) && (
+        {!state.success && state.message && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
             <AlertCircle className="h-4.5 w-4.5 text-red-400 shrink-0" />
             <span>{state.message}</span>
@@ -140,10 +129,9 @@ export default function LoginForm() {
           defaultValue={state.email || ""}
           error={localErrors.email}
           onChange={(e) => {
-            const val = e.target.value;
-            // Instantly clear email format error as soon as they type a valid email format
+            const val = e.target.value
             if (/\S+@\S+\.\S+/.test(val) || val.trim() === "") {
-              setLocalErrors(prev => ({ ...prev, email: "" }));
+              setLocalErrors((prev) => ({ ...prev, email: "" }))
             }
           }}
           autoComplete="username"
@@ -158,10 +146,9 @@ export default function LoginForm() {
           placeholder="••••••••"
           error={localErrors.password}
           onChange={(e) => {
-            const val = e.target.value;
-            // Instantly clear password error as soon as it meets the min length condition (8 chars)
+            const val = e.target.value
             if (val.length >= 8 || val.trim() === "") {
-              setLocalErrors(prev => ({ ...prev, password: "" }));
+              setLocalErrors((prev) => ({ ...prev, password: "" }))
             }
           }}
           autoComplete="current-password"

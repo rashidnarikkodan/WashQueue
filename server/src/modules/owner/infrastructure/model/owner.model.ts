@@ -9,11 +9,11 @@ export interface IOwner extends Document {
   businessEmail?: string
   phone?: string
   isVerified?: boolean
+  isManager?: boolean
   verifiedAt?: Date
   createdAt: Date
   updatedAt: Date
 
-  // onboarding fields
   onboardingStep: number
   idProofType?: string
   idProofUrl?: string
@@ -25,6 +25,8 @@ export interface IOwner extends Document {
   ifscCode?: string
   bankProofUrl?: string
   rejectionReason?: string
+  razorpayContactId?: string
+  razorpayFundAccountId?: string
 }
 
 const ownerSchema = new Schema<IOwner>(
@@ -64,6 +66,10 @@ const ownerSchema = new Schema<IOwner>(
       type: Boolean,
       default: false,
     },
+    isManager: {
+      type: Boolean,
+      default: false,
+    },
     verifiedAt: {
       type: Date,
     },
@@ -82,6 +88,18 @@ const ownerSchema = new Schema<IOwner>(
     ifscCode: { type: String },
     bankProofUrl: { type: String },
     rejectionReason: { type: String },
+    razorpayContactId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
+    razorpayFundAccountId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
   },
   {
     timestamps: true,

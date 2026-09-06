@@ -1,37 +1,36 @@
-import { FileText, ChevronRight, ShieldCheck } from "lucide-react";
+import { FileText, ChevronRight, ShieldCheck } from "lucide-react"
 
 interface OnboardingDetailsSummaryProps {
   details: {
-    fullName?: string;
-    phone?: string;
-    whatsapp?: string;
-    businessName?: string;
-    businessType?: string;
-    gstNumber?: string;
-    idProofType?: string;
-    idProofUrl?: string;
-    accountHolderName?: string;
-    bankName?: string;
-    accountNumber?: string;
-    ifscCode?: string;
-    bankProofUrl?: string;
-    businessLicenseUrl?: string;
-    gstCertificateUrl?: string;
-  };
-  email?: string;
-  idProofFile?: File | null;
-  bankProofFile?: File | null;
-  businessLicenseFile?: File | null;
-  gstCertificateFile?: File | null;
-  onEditStep?: (step: number) => void;
+    fullName?: string
+    phone?: string
+    whatsapp?: string
+    businessName?: string
+    gstNumber?: string
+    idProofType?: string
+    idProofUrl?: string
+    accountHolderName?: string
+    bankName?: string
+    accountNumber?: string
+    ifscCode?: string
+    bankProofUrl?: string
+    businessLicenseUrl?: string
+    gstCertificateUrl?: string
+  }
+  email?: string
+  idProofFile?: File | null
+  bankProofFile?: File | null
+  businessLicenseFile?: File | null
+  gstCertificateFile?: File | null
+  onEditStep?: (step: number) => void
 }
 
 const getApiUrl = (path?: string) => {
-  if (!path) return "";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base = import.meta.env.VITE_API_URL || "http://localhost:3000";
-  return `${base}${path}`;
-};
+  if (!path) return ""
+  if (path.startsWith("http://") || path.startsWith("https://")) return path
+  const base = import.meta.env.VITE_API_URL || "http://localhost:3000"
+  return `${base}${path}`
+}
 
 const OnboardingDetailsSummary = ({
   details,
@@ -42,20 +41,16 @@ const OnboardingDetailsSummary = ({
   gstCertificateFile = null,
   onEditStep,
 }: OnboardingDetailsSummaryProps) => {
-  const renderDocumentPreview = (
-    label: string,
-    file: File | null,
-    url?: string
-  ) => {
-    const previewUrl = file ? URL.createObjectURL(file) : url ? getApiUrl(url) : null;
-    const fileName = file ? file.name : url ? "Attached Document" : null;
+  const renderDocumentPreview = (label: string, file: File | null, url?: string) => {
+    const previewUrl = file ? URL.createObjectURL(file) : url ? getApiUrl(url) : null
+    const fileName = file ? file.name : url ? "Attached Document" : null
 
     if (!previewUrl) {
       return (
         <div className="p-3.5 bg-red-500/5 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold text-center">
           Missing Document
         </div>
-      );
+      )
     }
 
     return (
@@ -70,9 +65,7 @@ const OnboardingDetailsSummary = ({
             <FileText size={16} />
           </div>
           <div className="text-left min-w-0">
-            <span className="text-xs font-bold text-slate-200 block truncate">
-              {label}
-            </span>
+            <span className="text-xs font-bold text-slate-200 block truncate">{label}</span>
             <span className="text-[10px] text-slate-500 font-semibold truncate block max-w-[180px]">
               {fileName}
             </span>
@@ -80,12 +73,11 @@ const OnboardingDetailsSummary = ({
         </div>
         <ChevronRight size={14} className="text-slate-500" />
       </a>
-    );
-  };
+    )
+  }
 
   return (
     <div className="space-y-6 pt-2 text-left">
-      {/* Section 1: Owner & Business Identity */}
       <div className="border border-slate-800/80 rounded-2xl p-5 space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -142,7 +134,9 @@ const OnboardingDetailsSummary = ({
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
               Business Name
             </span>
-            <span className="text-slate-200 font-bold">{details.businessName || "Not Provided"}</span>
+            <span className="text-slate-200 font-bold">
+              {details.businessName || "Not Provided"}
+            </span>
           </div>
           {details.gstNumber && (
             <div>
@@ -154,7 +148,6 @@ const OnboardingDetailsSummary = ({
           )}
         </div>
 
-        {/* Identity & Legal Docs verification proof */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
@@ -163,7 +156,9 @@ const OnboardingDetailsSummary = ({
             <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-850 rounded-xl">
               <FileText size={18} className="text-primary" />
               <div>
-                <p className="font-bold text-white capitalize">{details.idProofType || "None"} Card</p>
+                <p className="font-bold text-white capitalize">
+                  {details.idProofType || "None"} Card
+                </p>
                 <p className="text-[10px] text-slate-500">Legal ID Verification</p>
               </div>
             </div>
@@ -178,7 +173,6 @@ const OnboardingDetailsSummary = ({
         </div>
       </div>
 
-      {/* Section 2: Payout Details */}
       <div className="border border-slate-800/80 rounded-2xl p-5 space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -205,7 +199,9 @@ const OnboardingDetailsSummary = ({
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
               Account Holder Name
             </span>
-            <span className="text-slate-200 font-bold">{details.accountHolderName || "Not Provided"}</span>
+            <span className="text-slate-200 font-bold">
+              {details.accountHolderName || "Not Provided"}
+            </span>
           </div>
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
@@ -217,17 +213,20 @@ const OnboardingDetailsSummary = ({
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
               Account Number
             </span>
-            <span className="text-slate-200 font-bold font-mono">{details.accountNumber || "Not Provided"}</span>
+            <span className="text-slate-200 font-bold font-mono">
+              {details.accountNumber || "Not Provided"}
+            </span>
           </div>
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
               IFSC Code
             </span>
-            <span className="text-slate-200 font-bold uppercase font-mono">{details.ifscCode || "Not Provided"}</span>
+            <span className="text-slate-200 font-bold uppercase font-mono">
+              {details.ifscCode || "Not Provided"}
+            </span>
           </div>
         </div>
 
-        {/* Bank Proof preview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
           <div>
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
@@ -251,8 +250,10 @@ const OnboardingDetailsSummary = ({
         </div>
       </div>
 
-      {/* Section 3: Optional Business Verification (License/GST certificates) */}
-      {(details.businessLicenseUrl || details.gstCertificateUrl || businessLicenseFile || gstCertificateFile) && (
+      {(details.businessLicenseUrl ||
+        details.gstCertificateUrl ||
+        businessLicenseFile ||
+        gstCertificateFile) && (
         <div className="border border-slate-800/80 rounded-2xl p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -275,30 +276,36 @@ const OnboardingDetailsSummary = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Business License */}
             {(details.businessLicenseUrl || businessLicenseFile) && (
               <div>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">
                   Business License
                 </span>
-                {renderDocumentPreview("Business License", businessLicenseFile, details.businessLicenseUrl)}
+                {renderDocumentPreview(
+                  "Business License",
+                  businessLicenseFile,
+                  details.businessLicenseUrl
+                )}
               </div>
             )}
 
-            {/* GST Certificate */}
             {(details.gstCertificateUrl || gstCertificateFile) && (
               <div>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2 text-left">
                   GST Certificate
                 </span>
-                {renderDocumentPreview("GST Certificate", gstCertificateFile, details.gstCertificateUrl)}
+                {renderDocumentPreview(
+                  "GST Certificate",
+                  gstCertificateFile,
+                  details.gstCertificateUrl
+                )}
               </div>
             )}
           </div>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default OnboardingDetailsSummary;
+export default OnboardingDetailsSummary

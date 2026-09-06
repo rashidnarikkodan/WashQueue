@@ -11,8 +11,8 @@ import { ROLE } from "@/common/constants/role.constants"
 export class GetMeUseCase implements IGetMeUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly ownerRepository: IOwnerRepository,
-  ) { }
+    private readonly ownerRepository: IOwnerRepository
+  ) {}
 
   async execute(userId: string): Promise<AuthUser> {
     const user = await this.userRepository.findById(userId)
@@ -26,12 +26,14 @@ export class GetMeUseCase implements IGetMeUseCase {
 
     let isVerified = user.isVerified
     let onboardingStep = 1
+    let ownerId: string | undefined = undefined
 
     if (user.role === ROLE.OWNER) {
       const owner = await this.ownerRepository.findByUserId(userId)
       if (owner) {
         isVerified = owner.isVerified ?? false
         onboardingStep = owner.onboardingStep ?? 1
+        ownerId = owner.id
       }
     }
 
@@ -45,6 +47,8 @@ export class GetMeUseCase implements IGetMeUseCase {
       walletBalance: user.walletBalance,
       isVerified,
       onboardingStep,
+      authProvider: user.authProvider,
+      ownerId,
     }
   }
 }

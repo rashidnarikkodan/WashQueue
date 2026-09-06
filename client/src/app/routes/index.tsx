@@ -1,14 +1,17 @@
-// src/app/routes/index.tsx
+/* eslint-disable react-refresh/only-export-components */
 
-import { createBrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react"
+import { createBrowserRouter } from "react-router-dom"
 
-import { authRoutes } from "./auth.routes";
-import { mainRoutes } from "./main.routes";
-import { ownerRoutes } from "./owner.routes";
-import { managerRoutes } from "./manager.routes";
-import { adminRoutes } from "./admin.routes";
-import ErrorBoundary from "../../shared/pages/ErrorBoundary";
-import NotFoundPage from "../../shared/pages/NotFoundPage";
+import { authRoutes } from "./auth.routes"
+import { mainRoutes } from "./main.routes"
+import { ownerRoutes } from "./owner.routes"
+import { managerRoutes } from "./manager.routes"
+import { adminRoutes } from "./admin.routes"
+import ErrorBoundary from "../../shared/pages/ErrorBoundary"
+import Loading from "../../shared/components/ui/Loading"
+
+const NotFoundPage = lazy(() => import("../../shared/pages/NotFoundPage"))
 
 export const router = createBrowserRouter([
   {
@@ -32,8 +35,12 @@ export const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
   },
   {
-    path: '*',
-    element: <NotFoundPage />,
+    path: "*",
+    element: (
+      <Suspense fallback={<Loading fullScreen />}>
+        <NotFoundPage />
+      </Suspense>
+    ),
     errorElement: <ErrorBoundary />,
-  }
-]);
+  },
+])

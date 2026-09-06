@@ -1,8 +1,18 @@
-import AdminLayout from "../layouts/AdminLayout";
-import UserManagement from "../../features/users/pages/UserManagement";
-import UserDetails from "../../features/users/pages/UserDetails";
-import OwnerApproval from "../../features/users/pages/OwnerApproval";
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
+const AdminLayout = lazy(() => import("../layouts/AdminLayout"))
+const UserManagement = lazy(() => import("../../features/users/pages/UserManagement"))
+const UserDetails = lazy(() => import("../../features/users/pages/UserDetails"))
+const OwnerApproval = lazy(() => import("../../features/users/pages/OwnerApproval"))
+const VehicleCatelog = lazy(() => import("@/features/vehicle-catelog/pages/VehicleCatelog"))
+const StationManagement = lazy(() => import("../../features/station/pages/StationManagement"))
+const StationDetailsAdmin = lazy(() => import("../../features/station/pages/StationDetails"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const AdminSettlementMonitoring = lazy(
+  () => import("@/features/settlement/pages/AdminSettlementMonitoring")
+)
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -26,15 +36,23 @@ export const adminRoutes = {
     },
     {
       path: "stations",
-      element: <>Station Management</>,
+      element: <StationManagement />,
+    },
+    {
+      path: "stations/:id",
+      element: <StationDetailsAdmin />,
     },
     {
       path: "categories",
-      element: <>Vehicle Category Management</>,
+      element: <VehicleCatelog />,
     },
     {
       path: "bookings",
-      element: <>Booking Monitoring</>,
+      element: <BookingManagement role="admin" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails role="admin" />,
     },
     {
       path: "queues",
@@ -42,7 +60,7 @@ export const adminRoutes = {
     },
     {
       path: "reviews",
-      element: <>Reviews & Ratings Moderation</>,
+      element: <>Reviews &amp; Ratings Moderation</>,
     },
     {
       path: "fraud",
@@ -54,11 +72,15 @@ export const adminRoutes = {
     },
     {
       path: "reports",
-      element: <>Reports & Analytics</>,
+      element: <>Reports &amp; Analytics</>,
+    },
+    {
+      path: "settlements",
+      element: <AdminSettlementMonitoring />,
     },
     {
       path: "settings",
       element: <>System Settings</>,
     },
   ],
-};
+}

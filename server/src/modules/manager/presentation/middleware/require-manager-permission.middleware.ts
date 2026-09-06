@@ -1,0 +1,73 @@
+import { Response, NextFunction } from "express"
+import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { ManagerPermission } from "../../domain/entities/ManagerAssignment"
+import { IManagerAssignmentRepository } from "../../domain/repositories/manager-assignment.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
+import { Types } from "mongoose"
+
+export const createRequireManagerPermissionMiddleware = (
+  managerAssignmentRepository: IManagerAssignmentRepository,
+  stationRepository: IStationRepository
+) => {
+  return (requiredPermission?: ManagerPermission) => {
+    return async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+      try {
+        if (!req.user) {
+          throw new UnauthorizedError("Authentication required")
+        }
+
+        const rawStationId =
+          req.params.stationId ?? req.headers["x-station-id"] ?? req.query.stationId
+        const candidateStationId = Array.isArray(rawStationId) ? rawStationId[0] : rawStationId
+
+        if (
+          !candidateStationId ||
+          typeof candidateStationId !== "string" ||
+          !candidateStationId.trim()
+        ) {
+          throw new ForbiddenError("Station context is required for manager authorization")
+        }
+
+        const stationId = candidateStationId.trim()
+
+        const station = await stationRepository.findById(stationId)
+        if (station) {
+          const ownerDoc = await OwnerModel.findOne({
+            userId: new Types.ObjectId(req.user.userId),
+          }).exec()
+          const isOwner =
+            station.ownerId.toString() === req.user.userId ||
+            (ownerDoc && station.ownerId.toString() === ownerDoc._id.toString())
+
+          if (isOwner) {
+            return next()
+          }
+        }
+
+        const assignment = await managerAssignmentRepository.findByUserAndStation(
+          req.user.userId,
+          stationId
+        )
+
+        if (!assignment) {
+          throw new ForbiddenError("You do not have a manager assignment for this station")
+        }
+
+        if (!assignment.isActive) {
+          throw new ForbiddenError("Your manager assignment for this station is suspended")
+        }
+
+        if (requiredPermission && !assignment.hasPermission(requiredPermission)) {
+          throw new ForbiddenError(`Insufficient permission. Required: ${requiredPermission}`)
+        }
+
+        next()
+      } catch (error) {
+        next(error)
+      }
+    }
+  }
+}

@@ -1,14 +1,11 @@
-import type { SelectFilter, ToggleFilter } from "./types";
+import type { SelectFilter, ToggleFilter } from "./types"
 
 interface FilterBarProps {
-  selectFilters?: SelectFilter[];
-  toggleFilters?: ToggleFilter[];
+  selectFilters?: SelectFilter[]
+  toggleFilters?: ToggleFilter[]
 }
 
-const FilterBar = ({
-  selectFilters = [],
-  toggleFilters = [],
-}: FilterBarProps) => (
+const FilterBar = ({ selectFilters = [], toggleFilters = [] }: FilterBarProps) => (
   <>
     {selectFilters.map((filter) => (
       <div key={filter.id} className="space-y-2">
@@ -60,6 +57,6 @@ const FilterBar = ({
       </div>
     )}
   </>
-);
+)
 
-export default FilterBar;
+export default FilterBar

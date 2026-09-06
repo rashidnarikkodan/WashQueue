@@ -21,4 +21,3 @@ export const verifyOtpSchema: z.ZodType<VerifyOtpInput> = z
       otp: data.otp || data.code || "",
     }
   })
-

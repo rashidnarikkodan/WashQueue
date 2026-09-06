@@ -1,10 +1,13 @@
-import AuthLayout from "../layouts/AuthLayout";
-import AuthPage from "../../features/auth/pages/AuthPage";
-import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
-import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage";
-import OTPPage from "../../features/auth/pages/OTPPage";
-import SetupAccountPage from "../../features/auth/pages/SetupAccountPage";
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
+const AuthLayout = lazy(() => import("../layouts/AuthLayout"))
+const AuthPage = lazy(() => import("../../features/auth/pages/AuthPage"))
+const ForgotPasswordPage = lazy(() => import("../../features/auth/pages/ForgotPasswordPage"))
+const ResetPasswordPage = lazy(() => import("../../features/auth/pages/ResetPasswordPage"))
+const OTPPage = lazy(() => import("../../features/auth/pages/OTPPage"))
+const SetupAccountPage = lazy(() => import("../../features/auth/pages/SetupAccountPage"))
+const AcceptInvitationPage = lazy(() => import("../../features/auth/pages/AcceptInvitationPage"))
 
 export const authRoutes = {
   path: APP_ROUTES.HOME,
@@ -34,5 +37,9 @@ export const authRoutes = {
       path: "setup-account",
       element: <SetupAccountPage />,
     },
+    {
+      path: "accept-invitation",
+      element: <AcceptInvitationPage />,
+    },
   ],
-};
+}

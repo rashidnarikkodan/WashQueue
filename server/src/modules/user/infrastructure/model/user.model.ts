@@ -15,6 +15,7 @@ export interface IUser extends Document {
   authProvider: AuthProvider
   isBlocked: boolean
   isVerified: boolean
+  bookmarks: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -47,6 +48,7 @@ const userSchema = new Schema<IUser>(
       default: AUTH_PROVIDER.LOCAL,
     },
     isBlocked: { type: Boolean, default: false },
+    bookmarks: { type: [String], default: [] },
   },
   {
     timestamps: true,

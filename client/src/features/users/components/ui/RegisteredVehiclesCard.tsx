@@ -1,8 +1,8 @@
-import { Car } from "lucide-react";
-import type { Vehicle } from "../../types";
+import { Car } from "lucide-react"
+import type { Vehicle } from "../../types"
 
 interface RegisteredVehiclesCardProps {
-  vehicles: Vehicle[];
+  vehicles: Vehicle[]
 }
 
 export default function RegisteredVehiclesCard({ vehicles }: RegisteredVehiclesCardProps) {
@@ -44,5 +44,5 @@ export default function RegisteredVehiclesCard({ vehicles }: RegisteredVehiclesC
         )}
       </div>
     </div>
-  );
+  )
 }

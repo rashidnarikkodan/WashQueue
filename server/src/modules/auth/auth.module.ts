@@ -1,5 +1,5 @@
 import { userRepository } from "../user/user.module"
-import { MailService } from "./infrastructure/services/mail.service"
+import { MailService } from "../../core/application/services/mail.service"
 import { OtpService } from "./infrastructure/services/otp.service"
 import { TokenService } from "./infrastructure/services/token.service"
 import { Argon2HashService } from "./infrastructure/services/hash.service"
@@ -16,15 +16,14 @@ import { GoogleAuthUseCase } from "./application/use-cases/google-auth.use-case"
 import { GetMeUseCase } from "./application/use-cases/get-me.use-case"
 import { ForgotPasswordUseCase } from "./application/use-cases/forgot-password.use-case"
 import { ResetPasswordUseCase } from "./application/use-cases/reset-password.use-case"
+import { ChangePasswordUseCase } from "./application/use-cases/change-password.use-case"
 import { ResendOtpUseCase } from "./application/use-cases/resend-otp.use-case"
 
-// router and controller
 import { AuthController } from "./presentation/auth.controller"
 import { createAuthRouter } from "./presentation/auth.routes"
 
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
 
-// infrastructures/repositories
 const otpRepository = new OtpRedisRepository()
 const refreshTokenRepository = new RefreshTokenMongoRepository()
 const ownerRepository = new OwnerMongoRepository()
@@ -34,16 +33,61 @@ const otpService = new OtpService(otpRepository)
 const tokenService = new TokenService()
 const hashService = new Argon2HashService()
 
-const signupUseCase = new SignupUseCase(userRepository, otpRepository, otpService, mailService, hashService)
-const verifyOtpUseCase = new VerifyOtpUseCase(userRepository, otpRepository, refreshTokenRepository, otpService, tokenService, hashService)
-const loginUseCase = new LoginUseCase(userRepository, refreshTokenRepository, tokenService, hashService, otpRepository, otpService, mailService)
-const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const signupUseCase = new SignupUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService,
+  hashService
+)
+const verifyOtpUseCase = new VerifyOtpUseCase(
+  userRepository,
+  otpRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService
+)
+const loginUseCase = new LoginUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService,
+  otpRepository,
+  otpService,
+  mailService
+)
+const refreshTokenUseCase = new RefreshTokenUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService
+)
 const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
-const googleAuthUseCase = new GoogleAuthUseCase(userRepository, refreshTokenRepository, tokenService, hashService)
+const googleAuthUseCase = new GoogleAuthUseCase(
+  userRepository,
+  refreshTokenRepository,
+  tokenService,
+  hashService
+)
 const getMeUseCase = new GetMeUseCase(userRepository, ownerRepository)
-const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, otpRepository, otpService, mailService)
+const forgotPasswordUseCase = new ForgotPasswordUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService
+)
 const resetPasswordUseCase = new ResetPasswordUseCase(userRepository, otpRepository, hashService)
-const resendOtpUseCase = new ResendOtpUseCase(userRepository, otpRepository, otpService, mailService)
+const changePasswordUseCase = new ChangePasswordUseCase(
+  userRepository,
+  refreshTokenRepository,
+  hashService
+)
+const resendOtpUseCase = new ResendOtpUseCase(
+  userRepository,
+  otpRepository,
+  otpService,
+  mailService
+)
 
 const authController = new AuthController(
   loginUseCase,
@@ -55,6 +99,7 @@ const authController = new AuthController(
   getMeUseCase,
   forgotPasswordUseCase,
   resetPasswordUseCase,
+  changePasswordUseCase,
   resendOtpUseCase
 )
 
@@ -71,9 +116,8 @@ export {
   refreshTokenUseCase,
   logoutUseCase,
   getMeUseCase,
+  changePasswordUseCase,
   authController,
   authRouter,
 }
 export default authRouter
-
-

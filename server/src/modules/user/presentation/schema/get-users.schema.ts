@@ -9,9 +9,7 @@ export const usersQuerySchema: z.ZodType<GetUsersQuery> = z.object({
 
   search: z.string().trim().optional(),
 
-  role: z
-    .enum([ROLE.CUSTOMER, ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN])
-    .optional(),
+  role: z.enum([ROLE.CUSTOMER, ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN]).optional(),
 
   isBlocked: z
     .enum(["true", "false"])
@@ -23,11 +21,7 @@ export const usersQuerySchema: z.ZodType<GetUsersQuery> = z.object({
     .transform((value) => value === "true")
     .optional(),
 
-  sortBy: z
-    .enum(["createdAt", "name", "email"])
-    .default("createdAt"),
+  sortBy: z.enum(["createdAt", "name", "email"]).default("createdAt"),
 
-  sortOrder: z
-    .enum(["asc", "desc"])
-    .default("desc"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 })

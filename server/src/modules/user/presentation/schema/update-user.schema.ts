@@ -6,6 +6,4 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional(),
   isVerified: z.boolean().optional(),
-  onboardingStep: z.number().optional(),
-  rejectionReason: z.string().optional(),
 })

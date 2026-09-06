@@ -7,11 +7,7 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  const allowedMimeTypes = [
-    "image/jpeg",
-    "image/png",
-    "application/pdf",
-  ]
+  const allowedMimeTypes = ["image/jpeg", "image/png", "application/pdf"]
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true)
@@ -20,11 +16,11 @@ const fileFilter = (
   }
 }
 
-const upload  = multer({
+const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB
+    fileSize: 10 * 1024 * 1024,
   },
 })
 
@@ -34,3 +30,7 @@ export const onboardingUpload = upload.fields([
   { name: "gstCertificateFile", maxCount: 1 },
   { name: "bankProofFile", maxCount: 1 },
 ])
+
+export const stationUpload = upload.array("images", 10)
+
+export const vehicleUpload = upload.single("image")

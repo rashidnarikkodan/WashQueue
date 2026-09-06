@@ -15,10 +15,11 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       businessEmail: mongooseDoc.businessEmail,
       phone: mongooseDoc.phone,
       isVerified: mongooseDoc.isVerified,
+      isManager: mongooseDoc.isManager,
       verifiedAt: mongooseDoc.verifiedAt,
       createdAt: mongooseDoc.createdAt,
       updatedAt: mongooseDoc.updatedAt,
-      
+
       onboardingStep: mongooseDoc.onboardingStep,
       idProofType: mongooseDoc.idProofType,
       idProofUrl: mongooseDoc.idProofUrl,
@@ -30,6 +31,8 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
       ifscCode: mongooseDoc.ifscCode,
       bankProofUrl: mongooseDoc.bankProofUrl,
       rejectionReason: mongooseDoc.rejectionReason,
+      razorpayContactId: mongooseDoc.razorpayContactId,
+      razorpayFundAccountId: mongooseDoc.razorpayFundAccountId,
     })
   }
 
@@ -58,6 +61,9 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.isVerified !== undefined) {
       raw.isVerified = domainEntity.isVerified
+    }
+    if (domainEntity.isManager !== undefined) {
+      raw.isManager = domainEntity.isManager
     }
     if (domainEntity.verifiedAt !== undefined) {
       raw.verifiedAt = domainEntity.verifiedAt
@@ -94,6 +100,12 @@ export class OwnerMapper implements IMapper<Owner, IOwner> {
     }
     if (domainEntity.rejectionReason !== undefined) {
       raw.rejectionReason = domainEntity.rejectionReason
+    }
+    if (domainEntity.razorpayContactId !== undefined) {
+      raw.razorpayContactId = domainEntity.razorpayContactId
+    }
+    if (domainEntity.razorpayFundAccountId !== undefined) {
+      raw.razorpayFundAccountId = domainEntity.razorpayFundAccountId
     }
     return raw
   }

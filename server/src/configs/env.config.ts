@@ -8,9 +8,9 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   MONGODB_URI: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
-  ACCESS_TOKEN_EXPIRES_IN: z.coerce.number(), // 15 mins in seconds
+  ACCESS_TOKEN_EXPIRES_IN: z.coerce.number(),
   REFRESH_TOKEN_SECRET: z.string(),
-  REFRESH_TOKEN_EXPIRES_IN: z.coerce.number(), // 7 days in seconds
+  REFRESH_TOKEN_EXPIRES_IN: z.coerce.number(),
   REDIS_HOST: z.string().default("120.0.0.1"),
   REDIS_PORT: z.coerce.number().default(6379),
   SMTP_HOST: z.string().optional(),
@@ -22,7 +22,11 @@ const envSchema = z.object({
   CLIENT_URL: z.string(),
   CLOUDINARY_CLOUD_NAME: z.string(),
   CLOUDINARY_API_KEY: z.string(),
-  CLOUDINARY_API_SECRET: z.string()
+  CLOUDINARY_API_SECRET: z.string(),
+  RAZORPAY_KEY_ID: z.string(),
+  RAZORPAY_KEY_SECRET: z.string(),
+  RAZORPAYX_ACCOUNT_NUMBER: z.string(),
+  RAZORPAYX_WEBHOOK_SECRET: z.string(),
 })
 const env = envSchema.parse(process.env)
 

@@ -1,5 +1,5 @@
-import { authApi } from "../services/auth.api"
-import { getErrorMessage } from "../../../shared/utils/error"
+import { authApi } from "@/shared/apis/auth.api"
+import { getErrorMessage } from "@/shared/utils/error"
 import type { SignupState } from "../types"
 
 export type { SignupState } from "../types"
@@ -18,7 +18,6 @@ export async function signupAction(
 
     const errors: SignupState["errors"] = {}
 
-    // validation
     if (!name) {
       errors.name = ["Name is required"]
     }
@@ -66,8 +65,7 @@ export async function signupAction(
       }
     }
 
-    // API call
-    await authApi.signup(name,email,password)
+    await authApi.signup(name, email, password)
 
     return {
       success: true,

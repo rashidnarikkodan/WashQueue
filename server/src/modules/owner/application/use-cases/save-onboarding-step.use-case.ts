@@ -1,7 +1,6 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
-import { ITokenService } from "@/modules/auth/application/interfaces"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { ROLE } from "@/common/constants/role.constants"
 import {
@@ -11,12 +10,12 @@ import {
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { User } from "@/modules/user/domain/entities/User"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
-    private readonly tokenService: ITokenService,
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: IUserRepository
   ) {}
 
   async execute(
@@ -27,9 +26,8 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     step: number
     details: IOwnerOnboardingDetails
     isSubmitted: boolean
-    tokens?: { accessToken: string; refreshToken: string }
+    // tokens?: { accessToken: string; refreshToken: string }
   }> {
-    // Fetch existing onboarding details to merge (preserve previous step data)
     const userDoc = await this.userRepository.findById(userId)
 
     if (!userDoc) {
@@ -41,7 +39,7 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       owner = new Owner({
         userId,
         phone: userDoc.phone,
-        onboardingStep: 1,
+        onboardingStep: ONBOARDING_STEP.FIRST_STEP,
         isVerified: false,
       })
     }
@@ -55,16 +53,27 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       businessName: details.businessName !== undefined ? details.businessName : owner.businessName,
       gstNumber: details.gstNumber !== undefined ? details.gstNumber : owner.gstNumber,
       whatsapp: details.whatsapp !== undefined ? details.whatsapp : owner.whatsapp,
-      businessEmail: details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
+      businessEmail:
+        details.businessEmail !== undefined ? details.businessEmail : owner.businessEmail,
       isVerified: owner.isVerified,
       verifiedAt: owner.verifiedAt,
       idProofType: details.idProofType !== undefined ? details.idProofType : owner.idProofType,
       idProofUrl: details.idProofUrl !== undefined ? details.idProofUrl : owner.idProofUrl,
-      businessLicenseUrl: details.businessLicenseUrl !== undefined ? details.businessLicenseUrl : owner.businessLicenseUrl,
-      gstCertificateUrl: details.gstCertificateUrl !== undefined ? details.gstCertificateUrl : owner.gstCertificateUrl,
-      accountHolderName: details.accountHolderName !== undefined ? details.accountHolderName : owner.accountHolderName,
+      businessLicenseUrl:
+        details.businessLicenseUrl !== undefined
+          ? details.businessLicenseUrl
+          : owner.businessLicenseUrl,
+      gstCertificateUrl:
+        details.gstCertificateUrl !== undefined
+          ? details.gstCertificateUrl
+          : owner.gstCertificateUrl,
+      accountHolderName:
+        details.accountHolderName !== undefined
+          ? details.accountHolderName
+          : owner.accountHolderName,
       bankName: details.bankName !== undefined ? details.bankName : owner.bankName,
-      accountNumber: details.accountNumber !== undefined ? details.accountNumber : owner.accountNumber,
+      accountNumber:
+        details.accountNumber !== undefined ? details.accountNumber : owner.accountNumber,
       ifscCode: details.ifscCode !== undefined ? details.ifscCode : owner.ifscCode,
       bankProofUrl: details.bankProofUrl !== undefined ? details.bankProofUrl : owner.bankProofUrl,
     })
@@ -88,24 +97,10 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       bankProofUrl: savedOwner.bankProofUrl,
     }
 
-    let tokens: { accessToken: string; refreshToken: string } | undefined
-
     if (userDoc.role !== ROLE.OWNER) {
-      const tokenPayload = {
-        userId: userDoc.id || userId,
-        role: ROLE.OWNER,
-        email: userDoc.email,
-      }
-
-      const accessToken = this.tokenService.generateAccessToken(tokenPayload)
-      const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
-
       const userUpdateFields: Partial<User> = {
         role: ROLE.OWNER,
-        refreshToken: refreshToken,
       }
-
-      tokens = { accessToken, refreshToken }
 
       await this.userRepository.update(userId, userUpdateFields)
     }
@@ -114,7 +109,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       step,
       details: mergedDetails,
       isSubmitted: step === 4,
-      tokens,
     }
   }
 }

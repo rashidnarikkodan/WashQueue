@@ -1,46 +1,127 @@
-import { Request, Response } from "express";
+import { Request, Response } from "express"
 import {
-    IGetUsersUseCase,
-    IGetUserUseCase,
-    IUpdateUserUseCase
-} from "../application/interfaces/user-usecases.interfaces";
-import { usersQuerySchema } from "./schema/get-users.schema";
-import success from "@/common/utils/success";
-import { HTTP_STATUS } from "@/common/constants/http.constants";
-import { NotFoundError } from "@/common/errors/not-found-error";
-import { SUCCESS_MESSAGES } from "@/common/constants/app.constants";
-import { ERROR_MESSAGES } from "@/common/constants/error.constants";
+  IGetUsersUseCase,
+  IGetUserUseCase,
+  IUpdateUserUseCase,
+  IGetBookmarksUseCase,
+  IToggleBookmarkUseCase,
+} from "../application/interfaces/user-usecases.interfaces"
+import { usersQuerySchema } from "./schema/get-users.schema"
+import { z } from "zod"
+import success from "@/common/utils/success"
+import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { NotFoundError } from "@/common/errors/not-found-error"
+import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+
+import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
+import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { ROLE } from "@/common/constants/role.constants"
+
+const ADMIN_ONLY_UPDATE_FIELDS = ["isBlocked", "isVerified"] as const
+
+interface ExportUserRecord {
+  id?: string
+  _id?: string
+  name?: string
+  email?: string
+  role?: string
+  isBlocked?: boolean
+  createdAt?: string | Date
+}
 
 export class UserController {
-    constructor(
-        private readonly getUsersUseCase: IGetUsersUseCase,
-        private readonly getUserUseCase: IGetUserUseCase,
-        private readonly updateUserUseCase: IUpdateUserUseCase,
-    ) { }
+  constructor(
+    private readonly getUsersUseCase: IGetUsersUseCase,
+    private readonly getUserUseCase: IGetUserUseCase,
+    private readonly updateUserUseCase: IUpdateUserUseCase,
+    private readonly getBookmarksUseCase: IGetBookmarksUseCase,
+    private readonly toggleBookmarkUseCase: IToggleBookmarkUseCase
+  ) {}
 
-    getUsers = async (req: Request, res: Response) => {
-        const query = usersQuerySchema.parse(req.query);
-        const data = await this.getUsersUseCase.execute(query);
-        success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.USERS_RETRIEVED_SUCCESS);
+  private extractUserId(req: Request): string {
+    const rawId = req.params.id
+    const candidateId = Array.isArray(rawId) ? rawId[0] : rawId
+    if (!candidateId || typeof candidateId !== "string" || !candidateId.trim()) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED)
+    }
+    return candidateId.trim()
+  }
+
+  getUsers = async (req: Request, res: Response) => {
+    const query = req.query as unknown as z.infer<typeof usersQuerySchema>
+    const data = await this.getUsersUseCase.execute(query)
+    success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.USERS_RETRIEVED_SUCCESS)
+  }
+
+  getUser = async (req: Request, res: Response) => {
+    const id = this.extractUserId(req)
+    const user = await this.getUserUseCase.execute(id)
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
+    }
+    success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
+  }
+
+  updateUser = async (req: AuthenticatedRequest, res: Response) => {
+    const id = this.extractUserId(req)
+    const currentUserId = req.user?.userId
+    const currentUserRole = req.user?.role
+
+    if (currentUserId !== id && currentUserRole !== ROLE.ADMIN) {
+      throw new ForbiddenError("You are not authorized to update this profile")
     }
 
-    getUser = async (req: Request, res: Response) => {
-        const { id } = req.params;
-        if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED);
-        const user = await this.getUserUseCase.execute(id);
-        if (!user) {
-            throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
-        }
-        success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS);
+    const updates = { ...req.body }
+    if (currentUserRole !== ROLE.ADMIN) {
+      for (const field of ADMIN_ONLY_UPDATE_FIELDS) {
+        delete updates[field]
+      }
     }
 
-    updateUser = async (req: Request, res: Response) => {
-        const { id } = req.params;
-        if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_ID_REQUIRED);
-        const user = await this.updateUserUseCase.execute(id, req.body);
-        if (!user) {
-            throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
-        }
-        success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS);
+    const user = await this.updateUserUseCase.execute(id, updates)
+    if (!user) {
+      throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
     }
+    success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS)
+  }
+
+  getBookmarks = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) throw new ForbiddenError("User authentication required")
+    const stations = await this.getBookmarksUseCase.execute(userId)
+    success(res, stations, HTTP_STATUS.OK, "Bookmarks retrieved successfully")
+  }
+
+  toggleBookmark = async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.user?.userId
+    if (!userId) throw new ForbiddenError("User authentication required")
+    const { stationId } = req.body
+    if (!stationId) throw new NotFoundError("Station ID is required")
+    const user = await this.toggleBookmarkUseCase.execute(userId, stationId)
+    success(res, user, HTTP_STATUS.OK, "Bookmarks updated successfully")
+  }
+
+  exportUsers = async (req: Request, res: Response) => {
+    const validatedQuery = req.query as unknown as z.infer<typeof usersQuerySchema>
+    const query = { ...validatedQuery, page: 1, limit: 10000 }
+    const data = await this.getUsersUseCase.execute(query)
+    const users = data.users || []
+
+    const headers = ["ID", "Name", "Email", "Role", "Blocked Status", "Joined Date"]
+    const rows = users.map((u: ExportUserRecord) => [
+      u.id || u._id || "",
+      `"${(u.name || "").replace(/"/g, '""')}"`,
+      `"${(u.email || "").replace(/"/g, '""')}"`,
+      u.role || "customer",
+      u.isBlocked ? "BLOCKED" : "ACTIVE",
+      u.createdAt ? new Date(u.createdAt).toISOString().split("T")[0] : "",
+    ])
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8")
+    res.setHeader("Content-Disposition", 'attachment; filename="users-export.csv"')
+    res.status(HTTP_STATUS.OK).send(csvContent)
+  }
 }

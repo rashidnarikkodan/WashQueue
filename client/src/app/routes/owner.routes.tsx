@@ -1,8 +1,22 @@
-import { Navigate } from "react-router-dom";
-import OwnerLayout from "../layouts/OwnerLayout";
-import { APP_ROUTES } from "../../shared/constants/appRoutes.const";
-import OwnerOnboarding from "@/features/owner/pages/OwnerOnboarding";
-import OwnerDashboard from "@/features/owner/pages/OwnerDashboard";
+/* eslint-disable react-refresh/only-export-components */
+import { lazy } from "react"
+import { APP_ROUTES } from "../../shared/constants/appRoutes.const"
+import { Navigate } from "react-router-dom"
+const ManagerQueuePage = lazy(() => import("@/features/queue/pages/QueueManagementPage"))
+const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStation"))
+const OwnerLayout = lazy(() => import("../layouts/OwnerLayout"))
+const StationManagement = lazy(() => import("@/features/station/pages/StationManagement"))
+const StationDetail = lazy(() => import("@/features/station/pages/StationDetails"))
+const OwnerOnboarding = lazy(() => import("@/features/owner/pages/OwnerOnboarding"))
+const OwnerDashboard = lazy(() => import("@/features/owner/pages/OwnerDashboard"))
+const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
+const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
+const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
+const OwnerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
+const OwnerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
+const OwnerFinancialRecords = lazy(
+  () => import("@/features/settlement/pages/OwnerFinancialRecords")
+)
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -21,20 +35,64 @@ export const ownerRoutes = {
       element: <OwnerDashboard />,
     },
     {
+      path: "queue",
+      element: <ManagerQueuePage />,
+    },
+    {
       path: "queues",
-      element: <>Queue Management</>,
+      element: <ManagerQueuePage />,
+    },
+    {
+      path: "check-in",
+      element: <CheckInPage />,
+    },
+    {
+      path: "walk-ins",
+      element: <CheckInPage defaultTab="WALK_IN" />,
+    },
+    {
+      path: "pre-inspection",
+      element: <OwnerPreInspectionPage />,
+    },
+    {
+      path: "post-inspection",
+      element: <OwnerPostInspectionPage />,
     },
     {
       path: "bookings",
-      element: <>Bookings</>,
+      element: <BookingManagement role="owner" />,
+    },
+    {
+      path: "bookings/:id",
+      element: <BookingDetails role="owner" />,
+    },
+    {
+      path: "bookings/:id/pre-inspection",
+      element: <OwnerPreInspectionPage />,
+    },
+    {
+      path: "bookings/:id/post-inspection",
+      element: <OwnerPostInspectionPage />,
     },
     {
       path: "stations",
-      element: <>My Stations</>,
+      element: <StationManagement />,
+    },
+    {
+      path: "stations/new",
+      element: <AddEditStation />,
+    },
+    {
+      path: "stations/:stationId/edit",
+      element: <AddEditStation />,
+    },
+    {
+      path: "stations/:stationId",
+      element: <StationDetail role="owner" />,
     },
     {
       path: "financial-records",
-      element: <>Financial Records</>,
+      element: <OwnerFinancialRecords />,
     },
     {
       path: "analytics",
@@ -48,10 +106,5 @@ export const ownerRoutes = {
       path: "notifications",
       element: <>Notifications</>,
     },
-    {
-      path: "team",
-      element: <>Team & Managers</>,
-    },
-
   ],
-};
+}

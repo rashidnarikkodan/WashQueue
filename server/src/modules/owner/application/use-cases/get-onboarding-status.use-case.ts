@@ -3,6 +3,7 @@ import {
   IOwnerOnboardingDetails,
 } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 
 export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
   constructor(private readonly ownerRepository: IOwnerRepository) {}
@@ -42,7 +43,7 @@ export class GetOnboardingStatusUseCase implements IGetOnboardingStatusUseCase {
     return {
       step: owner.onboardingStep ?? 1,
       details,
-      isSubmitted: owner.onboardingStep === 4,
+      isSubmitted: owner.onboardingStep === ONBOARDING_STEP.IN_REVIEW,
     }
   }
 }

@@ -1,31 +1,31 @@
-import { ChevronRight } from "lucide-react";
-import { User, Building2, ShieldCheck, FileText } from "lucide-react";
-import FormInput from "../../../../shared/components/form/FormInput";
-import FormSelect from "../../../../shared/components/form/FormSelect";
-import FormUpload from "../../../../shared/components/form/FormUpload";
-import type { OnboardingDetails } from "../../services/owner.api";
+import { ChevronRight } from "lucide-react"
+import { User, Building2, ShieldCheck, FileText } from "lucide-react"
+import FormInput from "../../../../shared/components/form/FormInput"
+import FormSelect from "../../../../shared/components/form/FormSelect"
+import FormUpload from "../../../../shared/components/form/FormUpload"
+import type { OnboardingDetails } from "@/shared/apis/owner.api"
 
 interface OwnerKYCStepProps {
   formData: {
-    fullName: string;
-    phone: string;
-    whatsapp: string;
-    businessName: string;
-    gstNumber: string;
-    idProofType: string;
-  };
-  fieldErrors: Record<string, string>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  idProofFile: File | null;
-  onIdProofChange: (file: File | null) => void;
-  businessLicenseFile: File | null;
-  onBusinessLicenseChange: (file: File | null) => void;
-  gstCertificateFile: File | null;
-  onGstCertificateChange: (file: File | null) => void;
-  savedDetails: OnboardingDetails;
-  onCancel: () => void;
-  onContinue: () => void;
-  isLoading: boolean;
+    fullName: string
+    phone: string
+    whatsapp: string
+    businessName: string
+    gstNumber: string
+    idProofType: string
+  }
+  fieldErrors: Record<string, string>
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  idProofFile: File | null
+  onIdProofChange: (file: File | null) => void
+  businessLicenseFile: File | null
+  onBusinessLicenseChange: (file: File | null) => void
+  gstCertificateFile: File | null
+  onGstCertificateChange: (file: File | null) => void
+  savedDetails: OnboardingDetails
+  onCancel: () => void
+  onContinue: () => void
+  isLoading: boolean
 }
 
 export default function OwnerKYCStep({
@@ -45,7 +45,6 @@ export default function OwnerKYCStep({
 }: OwnerKYCStepProps) {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Header */}
       <div className="space-y-1">
         <span className="text-[10px] sm:text-xs font-bold text-primary tracking-widest uppercase block">
           STEP 1 OF 3
@@ -60,7 +59,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Personal Information */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <User size={16} className="text-primary" />
@@ -92,6 +90,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter phone number"
               prefix="🇮🇳 +91"
+              maxLength={10}
               error={fieldErrors.phone}
             />
           </div>
@@ -105,6 +104,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter phone number"
               prefix="🇮🇳 +91"
+              maxLength={10}
               error={fieldErrors.whatsapp}
             />
           </div>
@@ -113,7 +113,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Business Information */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Building2 size={16} className="text-primary" />
@@ -145,6 +144,7 @@ export default function OwnerKYCStep({
               onChange={onChange}
               placeholder="Enter GST number (optional)"
               leftIcon={<FileText size={16} />}
+              maxLength={15}
               error={fieldErrors.gstNumber}
             />
           </div>
@@ -153,7 +153,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Identity Verification */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <ShieldCheck size={16} className="text-primary" />
@@ -192,7 +191,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/40" />
 
-      {/* Business Verification (Optional) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -229,7 +227,6 @@ export default function OwnerKYCStep({
 
       <div className="h-[1px] bg-slate-800/60" />
 
-      {/* Footer Actions */}
       <div className="flex justify-between items-center pt-2 select-none">
         <button
           type="button"
@@ -253,5 +250,5 @@ export default function OwnerKYCStep({
         </button>
       </div>
     </div>
-  );
+  )
 }

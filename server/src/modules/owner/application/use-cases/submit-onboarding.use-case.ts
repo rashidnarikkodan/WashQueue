@@ -6,12 +6,17 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
+import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
+import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
+import logger from "@/configs/logger.config"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
+    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute(userId: string): Promise<{
@@ -29,7 +34,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       owner = new Owner({
         userId,
         phone: userDoc.phone,
-        onboardingStep: 4,
+        onboardingStep: ONBOARDING_STEP.IN_REVIEW,
         isVerified: false,
       })
     } else {
@@ -37,7 +42,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
         id: owner.id,
         userId,
         phone: owner.phone,
-        onboardingStep: 4,
+        onboardingStep: ONBOARDING_STEP.IN_REVIEW,
         legalFullName: owner.legalFullName,
         businessName: owner.businessName,
         gstNumber: owner.gstNumber,
@@ -57,9 +62,27 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     }
 
+    // Attempt to create the owner's RazorpayX payout destination now, while they're present to
+    // fix a bad IFSC/account number immediately — rather than waiting until admin approval days
+    // later. Not fatal here: ApproveOwnerUseCase still hard-requires it before final approval,
+    // and ProcessSettlementUseCase has its own lazy fallback — this is just the earliest attempt.
+    try {
+      await ensureOwnerPayoutAccount(
+        owner,
+        this.payoutProvider,
+        userDoc.name,
+        userDoc.email,
+        userDoc.phone
+      )
+    } catch (err: unknown) {
+      logger.warn(
+        { err, ownerId: owner.id },
+        "Failed to create RazorpayX payout destination during onboarding submission; will retry at approval time"
+      )
+    }
+
     await this.ownerRepository.save(owner)
 
-    // Mark step=4 to flag submission pending admin review
     const tokenPayload = {
       userId: userDoc.id || userId,
       role: userDoc.role,

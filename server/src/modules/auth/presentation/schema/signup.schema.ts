@@ -25,4 +25,3 @@ export const signupSchema: z.ZodType<SignupInput> = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   })
-

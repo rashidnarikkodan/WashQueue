@@ -8,14 +8,13 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { IHashService, IRefreshTokenUseCase, ITokenService } from "../interfaces"
 
-
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
     private readonly hashService: IHashService
-  ) { }
+  ) {}
 
   async execute(refreshToken: string) {
     if (!refreshToken) {
@@ -34,7 +33,6 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new AppError(ERROR_MESSAGES.ACCOUNT_BLOCKED, HTTP_STATUS.FORBIDDEN)
       }
 
-      // Verify incoming refresh token against hashed refresh token stored in DB using repository and entity
       const activeToken = await this.refreshTokenRepository.findByUserId(user.id!)
       if (!activeToken) {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
@@ -45,16 +43,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
         throw new UnauthorizedError(ERROR_MESSAGES.INVALID_OR_EXPIRED_REFRESH_TOKEN)
       }
 
-      // Map payload and generate tokens
       const tokenPayload = TokenPayloadMapper.toTokenPayload(user)
 
       const newAccessToken = this.tokenService.generateAccessToken(tokenPayload)
       const newRefreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-      // Hash the new refresh token for safe storage
       const hashedNewRefreshToken = await this.hashService.hash(newRefreshToken)
 
-      // Save hashed refresh token
       await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedNewRefreshToken))
 
       return {

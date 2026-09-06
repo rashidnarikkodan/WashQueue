@@ -1,5 +1,3 @@
-
-
 export const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: "Invalid Credentials",
   ACCOUNT_BLOCKED: "Account Blocked",
@@ -33,4 +31,3 @@ export const ERROR_MESSAGES = {
   OWNER_ALREADY_EXISTS: "Owner profile already exists for this user",
   OWNER_NOT_FOUND: "Owner profile not found",
 } as const
-

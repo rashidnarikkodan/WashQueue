@@ -4,11 +4,8 @@ import { ValidationError } from "@/common/errors/validation-error"
 
 type SchemaTarget = "body" | "query" | "params"
 
-export const validateRequest = (
-  schema: z.ZodSchema,
-  target: SchemaTarget = "body"
-) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateRequest = (schema: z.ZodSchema, target: SchemaTarget = "body") => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req[target])
 
     if (!result.success) {
@@ -20,7 +17,17 @@ export const validateRequest = (
       throw new ValidationError("Validation failed", details)
     }
 
-    req[target] = result.data
+    if (target === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      })
+    } else {
+      req[target] = result.data
+    }
+
     next()
   }
 }

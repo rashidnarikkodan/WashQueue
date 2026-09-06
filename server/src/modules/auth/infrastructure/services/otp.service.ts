@@ -18,4 +18,3 @@ export class OtpService implements IOtpService {
     return isValid
   }
 }
-

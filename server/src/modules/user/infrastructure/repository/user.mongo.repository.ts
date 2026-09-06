@@ -13,11 +13,14 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    // Normalise email search (lowercase)
     const userDoc = await this.model.findOne({ email: email.toLowerCase() }).exec()
     return userDoc ? this.mapper.toDomain(userDoc) : null
   }
-  async recordLoginSuccess(userId: string, hashedRefreshToken: string, timestamp: Date): Promise<void> {
+  async recordLoginSuccess(
+    userId: string,
+    hashedRefreshToken: string,
+    timestamp: Date
+  ): Promise<void> {
     await UserModel.updateOne(
       { _id: userId },
       {
@@ -86,23 +89,11 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
     ).exec()
   }
 
-
-
   async getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse> {
-    const {
-      page,
-      limit,
-      search,
-      role,
-      isBlocked,
-      isVerified,
-      sortBy,
-      sortOrder,
-    } = query
+    const { page, limit, search, role, isBlocked, isVerified, sortBy, sortOrder } = query
 
     const filter: Record<string, unknown> = {}
 
-    // verified filter
     if (typeof isVerified === "boolean") {
       const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
       const ownersList = await OwnerModel.find({ isVerified }).select("userId").lean().exec()
@@ -110,7 +101,6 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       filter._id = { $in: ownerUserIds }
     }
 
-    // search
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -118,32 +108,22 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
       ]
     }
 
-    // role filter
     if (role) {
       filter.role = role
     }
 
-    // blocked filter
     if (typeof isBlocked === "boolean") {
       filter.isBlocked = isBlocked
     }
 
-    // sorting
     const sort: Record<string, 1 | -1> = {
       [sortBy]: sortOrder === "asc" ? 1 : -1,
     }
 
-    // pagination
     const { skip } = getPagination({ page, limit })
 
     const [users, total, totalAll, active, blocked, owners] = await Promise.all([
-      UserModel.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .select("-password")
-        .lean()
-        .exec(),
+      UserModel.find(filter).sort(sort).skip(skip).limit(limit).select("-password").lean().exec(),
 
       UserModel.countDocuments(filter).exec(),
       UserModel.countDocuments({}).exec(),
@@ -160,13 +140,14 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
 
     const domainUsers = users.map((user) => UserMapper.toUserSummaryDto(this.mapper.toDomain(user)))
 
-    // Resolve owner onboarding details & verification status for users with OWNER role
     const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
     const ownerUserIds = domainUsers.filter((u) => u.role === ROLE.OWNER).map((u) => u.id)
     if (ownerUserIds.length > 0) {
-      const ownersList = await OwnerModel.find({ userId: { $in: ownerUserIds } }).lean().exec()
+      const ownersList = await OwnerModel.find({ userId: { $in: ownerUserIds } })
+        .lean()
+        .exec()
       const ownersMap = new Map(ownersList.map((o) => [o.userId.toString(), o]))
-      
+
       domainUsers.forEach((u) => {
         if (u.role === ROLE.OWNER) {
           const ownerDoc = ownersMap.get(u.id)
@@ -203,8 +184,26 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
         active,
         blocked,
         owners,
-      }
+      },
     }
   }
 
+  async toggleBookmark(userId: string, stationId: string): Promise<User | null> {
+    const userDoc = await UserModel.findById(userId).exec()
+    if (!userDoc) return null
+
+    if (!userDoc.bookmarks) {
+      userDoc.bookmarks = []
+    }
+
+    const index = userDoc.bookmarks.indexOf(stationId)
+    if (index > -1) {
+      userDoc.bookmarks.splice(index, 1)
+    } else {
+      userDoc.bookmarks.push(stationId)
+    }
+
+    await userDoc.save()
+    return this.mapper.toDomain(userDoc)
+  }
 }

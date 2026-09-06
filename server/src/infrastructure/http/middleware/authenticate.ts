@@ -12,17 +12,19 @@ export interface AuthenticatedRequest extends Request {
   }
 }
 
-export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+) => {
   try {
     let token: string | undefined
 
-    // 1. Try to read from Authorization header
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1]
     }
 
-    // 2. Try to read from cookies
     if (!token && req.cookies) {
       token = req.cookies.accessToken
     }
@@ -46,7 +48,6 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
       throw new UnauthorizedError("Invalid or expired authentication token")
     }
 
-    // Check Redis blacklist for blocked users
     const isBlacklisted = await redis.get(`blocked:${decoded.userId}`)
     if (isBlacklisted) {
       throw new UnauthorizedError("Your account has been suspended by the administrator")
@@ -57,4 +58,36 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
   } catch (error) {
     next(error)
   }
+}
+
+export const optionalAuthenticate = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+) => {
+  try {
+    let token: string | undefined
+
+    const authHeader = req.headers.authorization
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1]
+    }
+
+    if (!token && req.cookies) {
+      token = req.cookies.accessToken
+    }
+
+    if (token) {
+      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as {
+        userId: string
+        role: string
+        email: string
+      }
+      const isBlacklisted = await redis.get(`blocked:${decoded.userId}`)
+      if (!isBlacklisted) {
+        req.user = decoded
+      }
+    }
+  } catch {}
+  next()
 }

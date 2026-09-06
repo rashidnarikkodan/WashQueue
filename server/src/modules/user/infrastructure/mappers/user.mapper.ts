@@ -19,6 +19,7 @@ export class UserMapper implements IMapper<User, IUser> {
       authProvider: mongooseDoc.authProvider,
       isBlocked: mongooseDoc.isBlocked,
       isVerified: mongooseDoc.isVerified,
+      bookmarks: mongooseDoc.bookmarks ?? [],
       createdAt: mongooseDoc.createdAt,
       updatedAt: mongooseDoc.updatedAt,
     })
@@ -38,6 +39,7 @@ export class UserMapper implements IMapper<User, IUser> {
       authProvider: domainEntity.authProvider,
       isBlocked: domainEntity.isBlocked,
       isVerified: domainEntity.isVerified,
+      bookmarks: domainEntity.bookmarks,
     }
     return raw
   }
@@ -61,6 +63,7 @@ export class UserMapper implements IMapper<User, IUser> {
       avatar: user.avatar,
       lastLoginAt: user.lastLoginAt,
       walletBalance: user.walletBalance,
+      bookmarks: user.bookmarks,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     }
