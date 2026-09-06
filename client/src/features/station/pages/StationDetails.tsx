@@ -372,7 +372,11 @@ export function StationDetails({ role }: CommonStationDetailProps) {
 
           {currentRole === ROLE.CUSTOMER && (
             <>
-              <StationReviewsSection rating={station.rating} reviewCount={station.reviewCount} />
+              <StationReviewsSection
+                stationId={station.id}
+                rating={station.rating}
+                reviewCount={station.reviewCount}
+              />
               <StationQASection stationName={station.name} />
             </>
           )}

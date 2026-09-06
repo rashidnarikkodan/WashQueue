@@ -17,6 +17,7 @@ import paymentRouter, { invoiceRouter } from "@/modules/payment/payment.module"
 import walletRouter from "@/modules/wallet/wallet.module"
 import { settlementRouter } from "@/modules/booking/booking.module"
 import { notificationRouter } from "@/modules/notification/notification.module"
+import reviewRouter from "@/modules/review/review.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
@@ -48,6 +49,7 @@ app.use(API_ROUTES.PAYMENT.ROOT, paymentRouter)
 app.use(API_ROUTES.WALLET.ROOT, walletRouter)
 app.use(API_ROUTES.SETTLEMENTS.ROOT, settlementRouter)
 app.use(API_ROUTES.NOTIFICATIONS.ROOT, notificationRouter)
+app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

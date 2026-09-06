@@ -123,7 +123,19 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
 
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    await this.notificationService.notify("WASH_COMPLETED", domainBooking)
+    await this.notificationService.notify("HANDOVER_COMPLETED", domainBooking, {
+      stationName: station.getProps().name,
+      stationImage: station.getProps().images?.[0]?.url,
+      slotDate: domainBooking.scheduling?.windowStart
+        ? new Date(domainBooking.scheduling.windowStart).toLocaleDateString()
+        : undefined,
+      slotStartTime: domainBooking.scheduling?.windowStart
+        ? new Date(domainBooking.scheduling.windowStart).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : undefined,
+    })
 
     const bookingDTO = BookingDTOMapper.toDTO(domainBooking)
 

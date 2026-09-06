@@ -63,6 +63,7 @@ export interface BookingResponse {
     name?: string
     city?: string
     phone?: string
+    images?: Array<{ url: string; isPrimary?: boolean; caption?: string }>
   }
   vehicleDetails?: {
     nickname?: string

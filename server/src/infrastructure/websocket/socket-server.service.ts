@@ -86,6 +86,23 @@ export class SocketServerService {
         logger.info({ socketId: socket.id, userRoom }, "[SocketIO] Socket joined user room")
       }
 
+      socket.on("join_user", (data: { userId: string }) => {
+        if (data?.userId) {
+          const userRoom = `user:${data.userId}`
+          socket.join(userRoom)
+          logger.info(
+            { socketId: socket.id, userRoom },
+            "[SocketIO] Socket joined user room via join_user"
+          )
+        }
+      })
+
+      socket.on("leave_user", (data: { userId: string }) => {
+        if (data?.userId) {
+          socket.leave(`user:${data.userId}`)
+        }
+      })
+
       socket.on("join_station", (data: { stationId: string }) => {
         if (data?.stationId) {
           const stationRoom = `station:${data.stationId}`

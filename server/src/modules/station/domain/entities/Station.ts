@@ -276,6 +276,12 @@ export class Station {
     this.touch()
   }
 
+  updateRating(averageRating: number, reviewCount: number): void {
+    this.props.rating = averageRating
+    this.props.reviewCount = reviewCount
+    this.touch()
+  }
+
   private touch(): void {
     this.props.updatedAt = new Date()
   }

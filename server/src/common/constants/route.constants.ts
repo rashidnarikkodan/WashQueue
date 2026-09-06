@@ -117,4 +117,12 @@ export const API_ROUTES = {
     DELETE: "/:id",
     UNREAD_COUNT: "/unread-count",
   },
+  REVIEWS: {
+    ROOT: "/api/reviews",
+    CREATE: "/",
+    BY_ID: "/:id",
+    BY_STATION: "/station/:stationId",
+    BY_BOOKING: "/booking/:bookingId",
+    MY_REVIEWS: "/my-reviews",
+  },
 } as const
