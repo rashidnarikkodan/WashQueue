@@ -79,4 +79,12 @@ export const API_ROUTES = {
     ADMIN_HOLD: (id: string) => `/settlements/admin/${id}/hold`,
     ADMIN_RELEASE: (id: string) => `/settlements/admin/${id}/release`,
   },
+  NOTIFICATIONS: {
+    ROOT: "/notifications",
+    UNREAD_COUNT: "/notifications/unread-count",
+    READ_ALL: "/notifications/read-all",
+    BY_ID: (id: string) => `/notifications/${id}`,
+    MARK_READ: (id: string) => `/notifications/${id}/read`,
+    MARK_ACTIONED: (id: string) => `/notifications/${id}/actioned`,
+  },
 } as const
