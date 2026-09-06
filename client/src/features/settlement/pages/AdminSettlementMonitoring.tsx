@@ -172,7 +172,6 @@ export default function AdminSettlementMonitoring() {
     setRetryingId(settlementId)
     try {
       const updated = await settlementApi.retrySettlement(settlementId)
-      toast.success("Settlement payout retry initiated")
       if (selectedSettlement?.id === settlementId) {
         setSelectedSettlement(updated)
       }

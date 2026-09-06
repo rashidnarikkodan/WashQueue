@@ -1,5 +1,15 @@
 import { PayoutStatus } from "@/modules/booking/domain/entities/Payout"
 
+export class PayoutProviderError extends Error {
+  constructor(
+    message: string,
+    public readonly retryable: boolean
+  ) {
+    super(message)
+    this.name = "PayoutProviderError"
+  }
+}
+
 export interface OwnerPayoutProfile {
   id: string
   legalFullName?: string

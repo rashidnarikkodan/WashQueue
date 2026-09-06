@@ -10,16 +10,34 @@ import {
   EnsurePayoutDestinationResult,
   IPayoutProvider,
   OwnerPayoutProfile,
+  PayoutProviderError,
   PayoutProviderResult,
 } from "@/core/application/interfaces/payout-provider.interface"
 
-export class PayoutProviderError extends Error {
-  constructor(
-    message: string,
-    public readonly retryable: boolean
-  ) {
-    super(message)
-  }
+// RazorpayX field limits enforced here (the API boundary) so no caller has to know them:
+// narration <=30 chars, letters/digits/space only; reference_id <=40 chars; the
+// X-Payout-Idempotency header <=36 chars; both restricted to letters/digits/hyphen/underscore/space;
+// contact/bank_account names 3-50 / 3-120 chars, can't end in a character other than a letter/digit/".".
+function sanitizeNarration(narration: string): string {
+  const cleaned = narration.replace(/[^a-zA-Z0-9 ]/g, "").trim()
+  return (cleaned || "Settlement payout").slice(0, 30)
+}
+
+function sanitizeReferenceId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_ -]/g, "").slice(0, 40)
+}
+
+function sanitizeIdempotencyKey(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_ -]/g, "").slice(0, 36)
+}
+
+function sanitizeBeneficiaryName(name: string, maxLength: number): string {
+  const cleaned = name
+    .replace(/[^a-zA-Z0-9 '\-_/().]/g, "")
+    .trim()
+    .replace(/[^a-zA-Z0-9.]+$/, "")
+    .slice(0, maxLength)
+  return cleaned.length >= 3 ? cleaned : "Owner"
 }
 
 function mapRazorpayStatusWord(status: string): PayoutStatus {
@@ -70,7 +88,10 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
         )
       }
 
-      const name = owner.legalFullName?.trim() || owner.businessName?.trim() || "Owner"
+      const name = sanitizeBeneficiaryName(
+        owner.legalFullName?.trim() || owner.businessName?.trim() || "Owner",
+        50
+      )
 
       try {
         const response = await this.client.post("/contacts", {
@@ -101,7 +122,10 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
           contact_id: contactId,
           account_type: "bank_account",
           bank_account: {
-            name: owner.accountHolderName?.trim() || owner.legalFullName?.trim() || "Owner",
+            name: sanitizeBeneficiaryName(
+              owner.accountHolderName?.trim() || owner.legalFullName?.trim() || "Owner",
+              120
+            ),
             ifsc: owner.ifscCode,
             account_number: owner.accountNumber,
           },
@@ -117,6 +141,10 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
   }
 
   async createPayout(params: CreatePayoutParams): Promise<PayoutProviderResult> {
+    const referenceId = sanitizeReferenceId(params.referenceId)
+    const idempotencyKey = sanitizeIdempotencyKey(params.referenceId)
+    const narration = sanitizeNarration(params.narration ?? "WashQueue owner settlement")
+
     try {
       const response = await this.client.post(
         "/payouts",
@@ -128,17 +156,17 @@ export class RazorpayXPayoutProvider implements IPayoutProvider {
           mode: "IMPS",
           purpose: "payout",
           queue_if_low_balance: true,
-          reference_id: params.referenceId,
-          narration: params.narration ?? "WashQueue owner settlement",
+          reference_id: referenceId,
+          narration,
         },
         {
-          headers: { "X-Payout-Idempotency": params.referenceId },
+          headers: { "X-Payout-Idempotency": idempotencyKey },
         }
       )
 
       logger.info(
         {
-          referenceId: params.referenceId,
+          referenceId,
           providerPayoutId: response.data.id,
           status: response.data.status,
         },

@@ -10,6 +10,8 @@ export interface IPayoutDocument extends Document {
   currency: string
   status: PayoutStatus
   idempotencyKey: string
+  attempts: number
+  lastAttemptRetryable?: boolean
   failureReason?: string
   processedAt?: Date
   failedAt?: Date
@@ -73,6 +75,15 @@ const payoutSchema = new Schema<IPayoutDocument>(
       required: true,
       unique: true,
       trim: true,
+    },
+
+    attempts: {
+      type: Number,
+      default: 0,
+    },
+
+    lastAttemptRetryable: {
+      type: Boolean,
     },
 
     failureReason: {
