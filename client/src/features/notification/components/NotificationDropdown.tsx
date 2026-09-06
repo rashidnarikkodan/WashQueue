@@ -1,0 +1,202 @@
+import { useState, useRef, useEffect, useMemo, useCallback } from "react"
+import { Navigate, useNavigate } from "react-router-dom"
+import { Bell } from "lucide-react"
+
+import { useNotificationStore } from "../store/notification.store"
+import { useAuthStore } from "@/features/auth/store/auth.store"
+import { ROLE } from "@/shared/constants/role.const"
+import type { NotificationDto, NotificationType } from "@/shared/types/notification.types"
+import type { NotificationTabType } from "../types"
+
+import { NotificationHeader } from "./NotificationHeader"
+import { NotificationFilterTabs } from "./NotificationFilterTabs"
+import { NotificationItemCard } from "./NotificationItemCard"
+import { NotificationSkeletonList } from "./NotificationSkeletonList"
+import { NotificationEmptyState } from "./NotificationEmptyState"
+
+export function NotificationDropdown() {
+  const navigate = useNavigate()
+  const { user } = useAuthStore()
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    fetchNotifications,
+    fetchUnreadCount,
+    markAsRead,
+    markAllAsRead,
+    markAsActioned,
+    deleteNotification,
+  } = useNotificationStore()
+
+  const [isOpen, setIsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState<NotificationTabType>("all")
+
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Fetch unread counter periodically
+  useEffect(() => {
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [fetchUnreadCount])
+
+  // Fetch notifications when opened or when tab changes
+  const loadData = useCallback(() => {
+    const isReadFilter = activeTab === "unread" ? false : undefined
+    const typeFilter =
+      activeTab !== "all" && activeTab !== "unread" ? (activeTab as NotificationType) : undefined
+
+    fetchNotifications({
+      isRead: isReadFilter,
+      type: typeFilter,
+      limit: 30,
+    })
+  }, [activeTab, fetchNotifications])
+
+  useEffect(() => {
+    if (isOpen) {
+      loadData()
+    }
+  }, [isOpen, loadData])
+
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Filter notifications by search text
+  const filteredNotifications = useMemo(() => {
+    if (!searchQuery.trim()) return notifications
+
+    const q = searchQuery.toLowerCase()
+    return notifications.filter(
+      (n) => n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q)
+    )
+  }, [notifications, searchQuery])
+
+  const parseNotificationData = (raw: string | undefined): Record<string, unknown> => {
+    if (!raw) return {}
+    try {
+      if (typeof raw === "object") return raw as Record<string, unknown>
+      return JSON.parse(raw)
+    } catch {
+      return {}
+    }
+  }
+
+  const handleNotificationClick = async (n: NotificationDto) => {
+    if (!n.isRead) {
+      await markAsRead(n.id)
+    }
+
+    if (n.actionType === "NAVIGATE") {
+      const data = parseNotificationData(n.data)
+      setIsOpen(false)
+
+      if (typeof data.url === "string") {
+        navigate(data.url)
+        return
+      }
+
+      if (n.type === "BOOKING") {
+        if (data.bookingId) {
+          const basePath = user?.role === ROLE.OWNER ? "/owner/bookings" : "/bookings"
+          navigate(`${basePath}/${data.bookingId}`)
+        } else {
+          navigate(user?.role === ROLE.OWNER ? "/owner/bookings" : "/bookings")
+        }
+      } else if (n.type === "QUEUE") {
+        navigate(user?.role === ROLE.OWNER ? "/owner/queues" : "/queue")
+      } else if (n.type === "PAYMENT") {
+        navigate(user?.role === ROLE.OWNER ? "/owner/financial-records" : "/wallet")
+      }
+    }
+  }
+
+  const handleActionClick = async (e: React.MouseEvent, n: NotificationDto) => {
+    e.stopPropagation()
+    await markAsActioned(n.id)
+    handleNotificationClick(n)
+  }
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    await deleteNotification(id)
+  }
+
+  return (
+    <div className="relative" ref={containerRef}>
+      {/* Bell Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
+        aria-label="View notifications"
+        title="Notifications"
+      >
+        <Bell className="h-4.5 w-4.5" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-extrabold text-primary-foreground shadow-sm animate-in zoom-in-50">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Main Notification Dropdown Modal */}
+      {isOpen && (
+        <div className="absolute right-0 mt-3 w-[440px] md:w-[480px] max-w-[92vw] origin-top-right rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+          {/* Header with Title, Actions & Search */}
+          <NotificationHeader
+            unreadCount={unreadCount}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onMarkAllAsRead={markAllAsRead}
+            onClose={() => setIsOpen(false)}
+          />
+
+          {/* Filter Tabs */}
+          <div className="px-5 pt-3 pb-1 border-b border-border/40 bg-muted/10">
+            <NotificationFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+
+          {/* Scrollable Notification Item List */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 max-h-[440px] scrollbar-none">
+            {isLoading ? (
+              <NotificationSkeletonList count={3} />
+            ) : filteredNotifications.length > 0 ? (
+              filteredNotifications.map((n) => (
+                <NotificationItemCard
+                  key={n.id}
+                  notification={n}
+                  onClick={handleNotificationClick}
+                  onActionClick={handleActionClick}
+                  onDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <NotificationEmptyState searchQuery={searchQuery} activeTab={activeTab} />
+            )}
+          </div>
+
+          {/* Footer Bar */}
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border/40 bg-muted/10 text-xs font-semibold text-muted-foreground">
+            <Link to={"/notifications"}>Notification history</Link>
+            {unreadCount > 0 && (
+              <span className="text-primary font-bold">{unreadCount} unread</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default NotificationDropdown
