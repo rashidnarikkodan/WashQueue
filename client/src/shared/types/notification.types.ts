@@ -5,6 +5,7 @@ export type NotificationActionType = "NAVIGATE" | "RELOAD" | "DISMISS" | "NONE"
 export interface NotificationDto {
   id: string
   recipientId: string
+  senderId?: string
   userId?: string
   type: NotificationType
   title: string

@@ -32,6 +32,10 @@ export const createNotificationSchema = z.object({
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid User ID")
     .optional(),
+  senderId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "Invalid Sender ID")
+    .optional(),
   type: z.enum(["BOOKING", "PAYMENT", "QUEUE", "SYSTEM"]),
   title: z.string().min(1, "Title is required").max(150),
   channel: z.string().min(1).max(50).optional().default("IN_APP"),

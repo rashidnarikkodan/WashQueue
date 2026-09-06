@@ -7,6 +7,7 @@ import {
 export interface CreateNotificationDto {
   recipientId: string
   userId?: string
+  senderId?: string
   type: NotificationType
   title: string
   channel?: NotificationChannel

@@ -7,6 +7,7 @@ import {
 export interface NotificationProps {
   id: string
   recipientId: string
+  senderId?: string
   type: NotificationType
   title: string
   channel: NotificationChannel
@@ -30,6 +31,10 @@ export class Notification {
 
   get recipientId(): string {
     return this.props.recipientId
+  }
+
+  get senderId(): string | undefined {
+    return this.props.senderId
   }
 
   get expiresAt(): Date | undefined {

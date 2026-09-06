@@ -83,6 +83,7 @@ describe("Notification Module Unit Tests", () => {
       const before = Date.now()
       const result = await useCase.execute({
         recipientId: "user-1",
+        senderId: "admin-999",
         type: "QUEUE",
         title: "Position Update",
         message: "You are #2 in line",
@@ -90,6 +91,7 @@ describe("Notification Module Unit Tests", () => {
       })
 
       expect(result.type).toBe("QUEUE")
+      expect(result.senderId).toBe("admin-999")
       expect(result.expiresAt).toBeDefined()
       const expectedMin = before + 29 * 24 * 60 * 60 * 1000
       const expectedMax = Date.now() + 31 * 24 * 60 * 60 * 1000

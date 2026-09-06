@@ -59,9 +59,12 @@ export class NotificationController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
+    const senderId = req.user?.userId || req.body.senderId
+
     const dto = {
       ...req.body,
       recipientId,
+      senderId,
     }
 
     const result = await this.createNotificationUseCase.execute(dto)

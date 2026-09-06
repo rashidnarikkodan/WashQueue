@@ -13,6 +13,7 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
     const props: NotificationProps = {
       id: raw._id.toString(),
       recipientId: raw.recipientId.toString(),
+      senderId: raw.senderId ? raw.senderId.toString() : undefined,
       type: raw.type as NotificationType,
       title: raw.title,
       channel: raw.channel as NotificationChannel,
@@ -37,6 +38,9 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
     if (data) {
       if (data.recipientId) {
         persist.recipientId = new Types.ObjectId(data.recipientId)
+      }
+      if (data.senderId) {
+        persist.senderId = new Types.ObjectId(data.senderId)
       }
       if (data.type !== undefined) {
         persist.type = data.type

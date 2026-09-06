@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from "mongoose"
 
 export interface INotificationDocument extends Document {
   recipientId: Types.ObjectId
+  senderId?: Types.ObjectId | null
   type: string
   title: string
   channel: string
@@ -22,6 +23,12 @@ const notificationSchema = new Schema<INotificationDocument>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
+    },
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
       index: true,
     },
     type: {
