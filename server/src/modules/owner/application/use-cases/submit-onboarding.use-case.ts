@@ -7,12 +7,14 @@ import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interface
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
-    private readonly userRepository: IUserRepository
+    private readonly userRepository: IUserRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(userId: string): Promise<{
@@ -58,7 +60,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     }
 
-    await this.ownerRepository.save(owner)
+    const savedOwner = await this.ownerRepository.save(owner)
 
     const tokenPayload = {
       userId: userDoc.id || userId,
@@ -70,6 +72,39 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
     await this.userRepository.update(userId, { refreshToken })
+
+    if (this.notificationDispatcher) {
+      try {
+        // 1. Notify Owner User
+        await this.notificationDispatcher.dispatch({
+          recipientId: userId,
+          type: "SYSTEM",
+          title: "Partner Application Submitted",
+          message:
+            "Your onboarding application has been submitted and is currently in review by an administrator.",
+          data: {
+            ownerId: savedOwner.id,
+            url: "/owner/onboarding",
+          },
+          actionType: "NAVIGATE",
+        })
+
+        // 2. Notify Platform Admins
+        await this.notificationDispatcher.dispatchToAdmins({
+          type: "SYSTEM",
+          title: "New Partner Application",
+          message: `${savedOwner.legalFullName || userDoc.name || "A partner"} submitted an onboarding application for review.`,
+          data: {
+            ownerId: savedOwner.id,
+            applicantName: savedOwner.legalFullName || userDoc.name,
+            url: "/admin/owners",
+          },
+          actionType: "NAVIGATE",
+        })
+      } catch {
+        // Non-blocking
+      }
+    }
 
     return {
       success: true,

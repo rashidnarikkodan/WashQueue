@@ -15,6 +15,9 @@ const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
 const OwnerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
 const OwnerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
 const OwnerFinancialRecords = lazy(() => import("@/features/owner/pages/OwnerFinancialRecords"))
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -102,7 +105,7 @@ export const ownerRoutes = {
     },
     {
       path: "notifications",
-      element: <>Notifications</>,
+      element: <NotificationCenterPage />,
     },
   ],
 }

@@ -6,11 +6,13 @@ import { Station, StationStatus } from "../../domain/entities/Station"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IToggleActiveStationUseCase } from "../interfaces/station-usecases.interface"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class ToggleActiveStationUseCase implements IToggleActiveStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
-    private readonly ownerRepository: IOwnerRepository
+    private readonly ownerRepository: IOwnerRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(stationId: string, userId: string): Promise<Station> {
@@ -35,12 +37,39 @@ export class ToggleActiveStationUseCase implements IToggleActiveStationUseCase {
       )
     }
 
+    const isNowActive = station.status === StationStatus.INACTIVE
     if (station.status === StationStatus.ACTIVE) {
       station.updateStatus(StationStatus.INACTIVE)
     } else {
       station.updateStatus(StationStatus.ACTIVE)
     }
 
-    return this.stationRepository.save(station)
+    const savedStation = await this.stationRepository.save(station)
+
+    if (this.notificationDispatcher) {
+      try {
+        await this.notificationDispatcher.dispatchToStationStakeholders({
+          stationId: savedStation.id,
+          notifyOwner: true,
+          notifyManagers: true,
+          defaultPayload: {
+            type: "SYSTEM",
+            title: isNowActive ? "Station Reactivated" : "Station Deactivated",
+            message: `Station '${savedStation.name}' is now ${isNowActive ? "active and accepting bookings" : "temporarily inactive"}.`,
+            data: {
+              stationId: savedStation.id,
+              stationName: savedStation.name,
+              status: savedStation.status,
+              url: "/owner/stations",
+            },
+            actionType: "NAVIGATE",
+          },
+        })
+      } catch {
+        // Non-blocking
+      }
+    }
+
+    return savedStation
   }
 }

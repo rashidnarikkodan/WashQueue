@@ -106,4 +106,15 @@ export const API_ROUTES = {
   SETTLEMENTS: {
     ROOT: "/api/settlements",
   },
+  NOTIFICATIONS: {
+    ROOT: "/api/notifications",
+    LIST: "/",
+    GET_BY_ID: "/:id",
+    CREATE: "/",
+    MARK_AS_READ: "/:id/read",
+    MARK_ALL_READ: "/read-all",
+    MARK_AS_ACTIONED: "/:id/actioned",
+    DELETE: "/:id",
+    UNREAD_COUNT: "/unread-count",
+  },
 } as const

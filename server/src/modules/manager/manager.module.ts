@@ -34,20 +34,24 @@ export const managerAssignmentRepository: IManagerAssignmentRepository =
 const managerInvitationRepository = new MongoManagerInvitationRepository()
 const ownerRepository = new OwnerMongoRepository()
 
+import { notificationDispatcherService } from "../notification/notification.module"
+
 const inviteManagerUseCase = new InviteManagerUseCase(
   stationRepository,
   userRepository,
   managerAssignmentRepository,
   managerInvitationRepository,
   ownerRepository,
-  mailService
+  mailService,
+  notificationDispatcherService
 )
 
 const acceptInvitationUseCase = new AcceptInvitationUseCase(
   managerInvitationRepository,
   managerAssignmentRepository,
   userRepository,
-  stationRepository
+  stationRepository,
+  notificationDispatcherService
 )
 
 const rejectInvitationUseCase = new RejectInvitationUseCase(managerInvitationRepository)

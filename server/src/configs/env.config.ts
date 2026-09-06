@@ -4,7 +4,7 @@ configDotenv()
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(["development", "production"]),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   LOG_LEVEL: z.string().default("info"),
   MONGODB_URI: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
@@ -25,6 +25,8 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string(),
   RAZORPAY_KEY_ID: z.string(),
   RAZORPAY_KEY_SECRET: z.string(),
+  PLATFORM_COMMISSION_RATE: z.coerce.number().default(0.1),
+  PLATFORM_COMMISSION_CAP: z.coerce.number().default(150),
 })
 const env = envSchema.parse(process.env)
 

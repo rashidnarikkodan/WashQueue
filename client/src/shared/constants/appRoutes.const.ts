@@ -65,4 +65,5 @@ export const APP_ROUTES = {
   },
   PROFILE: "/profile",
   WALLET: "/wallet",
+  NOTIFICATIONS: "/notifications",
 } as const

@@ -9,6 +9,8 @@ import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
 import { Otp } from "../../domain/entities/otp.entity"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { ROLE } from "@/common/constants/role.constants"
 
 import {
   IHashService,
@@ -27,7 +29,8 @@ export class LoginUseCase implements ILoginUseCase {
     private readonly hashService: IHashService,
     private readonly otpRepository: IOtpRepository,
     private readonly otpService: IOtpService,
-    private readonly mailService: IMailService
+    private readonly mailService: IMailService,
+    private readonly ownerRepository?: IOwnerRepository
   ) {}
 
   async execute(data: LoginInput): Promise<AuthOutput> {
@@ -74,6 +77,19 @@ export class LoginUseCase implements ILoginUseCase {
     const hashedRefreshToken = await this.hashService.hash(refreshToken)
     await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
 
+    let isVerified: boolean = user.isVerified
+    let onboardingStep: number | undefined = undefined
+    let ownerId: string | undefined = undefined
+
+    if (user.role === ROLE.OWNER && this.ownerRepository) {
+      const owner = await this.ownerRepository.findByUserId(user.id!)
+      if (owner) {
+        isVerified = owner.isVerified ?? false
+        onboardingStep = owner.onboardingStep ?? 1
+        ownerId = owner.id
+      }
+    }
+
     return {
       user: {
         id: user.id!,
@@ -83,8 +99,10 @@ export class LoginUseCase implements ILoginUseCase {
         avatar: user.avatar,
         phone: user.phone,
         walletBalance: user.walletBalance,
-        isVerified: user.isVerified,
+        isVerified,
+        onboardingStep,
         authProvider: user.authProvider,
+        ownerId,
       },
       tokens: {
         accessToken,

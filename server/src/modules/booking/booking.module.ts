@@ -76,6 +76,8 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
   transactionRunner
 )
 
+import { notificationDispatcherService } from "../notification/notification.module"
+
 export const settlementRepository = new SettlementRepository()
 export const transferService = new RazorpayTransferService()
 export const createSettlementUseCase = new CreateSettlementUseCase(settlementRepository)
@@ -85,7 +87,8 @@ export const processSettlementUseCase = new ProcessSettlementUseCase(
   transferService,
   bookingRepository,
   paymentAccountService,
-  userRepository
+  userRepository,
+  notificationDispatcherService
 )
 
 export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(

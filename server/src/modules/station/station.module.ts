@@ -110,12 +110,18 @@ const getStationUseCase = new GetStationUseCase(
   extraServiceRepository
 )
 const getStationsUseCase = new GetStationsUseCase(stationRepository, userRepository)
+import { notificationDispatcherService } from "../notification/notification.module"
+
 const submitStationUseCase = new SubmitStationUseCase(
   stationRepository,
   ownerRepository,
-  stationPricingRepository
+  stationPricingRepository,
+  notificationDispatcherService
 )
-const reviewStationUseCase = new ReviewStationUseCase(stationRepository)
+const reviewStationUseCase = new ReviewStationUseCase(
+  stationRepository,
+  notificationDispatcherService
+)
 const deleteStationUseCase = new DeleteStationUseCase(
   stationRepository,
   stationPricingRepository,
@@ -124,7 +130,8 @@ const deleteStationUseCase = new DeleteStationUseCase(
 )
 const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
   stationRepository,
-  ownerRepository
+  ownerRepository,
+  notificationDispatcherService
 )
 
 const vehicleCategoryRepository = new VehicleCategoryMongoRepository()

@@ -16,6 +16,9 @@ const Booking = lazy(() => import("@/features/booking/pages/Booking"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 const WalletPage = lazy(() => import("@/features/wallet/pages/WalletPage"))
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
 const ProtectedRoute = lazy(() => import("./ProtectedRoute"))
 
 const RootPathResolver = () => {
@@ -124,6 +127,14 @@ export const mainRoutes = {
       element: (
         <ProtectedRoute>
           <WalletPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "notifications",
+      element: (
+        <ProtectedRoute>
+          <NotificationCenterPage />
         </ProtectedRoute>
       ),
     },

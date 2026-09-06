@@ -9,6 +9,7 @@ import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 // This marketplace only onboards laundry/car-wash service businesses, so the Razorpay
 // Route category/subcategory is fixed rather than collected per owner.
@@ -20,7 +21,8 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
-    private readonly paymentAccountService: IPaymentAccountService
+    private readonly paymentAccountService: IPaymentAccountService,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute({
@@ -150,6 +152,25 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })
 
+      if (this.notificationDispatcher) {
+        try {
+          await this.notificationDispatcher.dispatch({
+            recipientId: owner.userId,
+            type: "SYSTEM",
+            title: "Partner Application Approved! 🚀",
+            message:
+              "Welcome to the WashQueue Partner network! Your onboarding application has been verified and approved. You can now configure and submit your stations.",
+            data: {
+              ownerId: owner.id,
+              url: "/owner/stations",
+            },
+            actionType: "NAVIGATE",
+          })
+        } catch {
+          // Non-blocking
+        }
+      }
+
       try {
         await this.mailService.sendOwnerApprovalEmail(user.email, displayName)
       } catch {
@@ -164,6 +185,25 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       owner.setOnboardingStep(ONBOARDING_STEP.FIRST_STEP)
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: false })
+
+      if (this.notificationDispatcher) {
+        try {
+          await this.notificationDispatcher.dispatch({
+            recipientId: owner.userId,
+            type: "SYSTEM",
+            title: "Partner Application Update",
+            message: `Your partner application requires changes: ${reason}`,
+            data: {
+              ownerId: owner.id,
+              rejectionReason: reason,
+              url: "/owner/onboarding",
+            },
+            actionType: "NAVIGATE",
+          })
+        } catch {
+          // Non-blocking
+        }
+      }
 
       try {
         await this.mailService.sendOwnerRejectionEmail(user.email, displayName, reason)
