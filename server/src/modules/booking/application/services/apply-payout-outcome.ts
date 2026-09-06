@@ -7,11 +7,6 @@ export interface PayoutOutcome {
   failureReason?: string
 }
 
-/**
- * Applies a payout provider result (from a create/get call or a webhook event) to both the
- * Payout and Settlement entities via their own guarded transition methods. Centralized so the
- * synchronous processing path and the webhook path can never apply conflicting state rules.
- */
 export function applyPayoutOutcome(
   payout: Payout,
   settlement: Settlement,

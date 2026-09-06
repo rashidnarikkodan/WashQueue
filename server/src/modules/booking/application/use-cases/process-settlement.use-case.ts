@@ -13,6 +13,7 @@ import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repo
 import { IBookingRepository } from "../../domain/repositories/booking.repository"
 import {
   IPayoutProvider,
+  PayoutProviderError,
   PayoutProviderResult,
 } from "@/core/application/interfaces/payout-provider.interface"
 import { PaymentMethod } from "@/common/constants/payment.constants"
@@ -143,20 +144,28 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       if (payout.razorpayPayoutId) {
         providerResult = await this.payoutProvider.getPayout(payout.razorpayPayoutId)
       } else {
-        logger.info({ payoutId: payout.id }, "Payout creation attempted")
-        providerResult = await this.payoutProvider.createPayout({
-          fundAccountId: owner.razorpayFundAccountId,
-          amountInPaise,
-          currency: guardedSettlement.currency,
-          referenceId: payout.idempotencyKey,
-          narration: `Settlement payout for booking ${guardedSettlement.bookingId}`,
-        })
+        const idempotencySuffix = payout.nextIdempotencySuffix()
+        logger.info({ payoutId: payout.id, idempotencySuffix }, "Payout creation attempted")
+        try {
+          providerResult = await this.payoutProvider.createPayout({
+            fundAccountId: owner.razorpayFundAccountId,
+            amountInPaise,
+            currency: guardedSettlement.currency,
+            referenceId: `${payout.idempotencyKey}-${idempotencySuffix}`,
+            narration: `Settlement ${String(guardedSettlement.bookingId).slice(-8)}`,
+          })
+        } catch (err: unknown) {
+          payout.recordAttemptOutcome(err instanceof PayoutProviderError ? err.retryable : false)
+          throw err
+        }
         payout.attachProviderReference(providerResult.providerPayoutId)
         logger.info(
           { payoutId: payout.id, providerPayoutId: providerResult.providerPayoutId },
           "Payout created"
         )
       }
+
+      logger.info(providerResult)
 
       applyPayoutOutcome(payout, guardedSettlement, providerResult)
     } catch (error: unknown) {
@@ -189,7 +198,7 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       amount: amountInPaise / 100,
       currency: settlement.currency,
       status: PayoutStatus.PENDING,
-      idempotencyKey: `settlement:${settlement.id}`,
+      idempotencyKey: `stl-${settlement.id}`,
       createdAt: new Date(),
     })
 

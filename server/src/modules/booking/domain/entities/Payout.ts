@@ -24,6 +24,8 @@ export interface PayoutProps {
 
   status: PayoutStatus
   idempotencyKey: string
+  attempts?: number
+  lastAttemptRetryable?: boolean
 
   failureReason?: string
 
@@ -40,7 +42,7 @@ export class Payout {
 
   constructor(props: PayoutProps) {
     this.validate(props)
-    this.props = { ...props, currency: props.currency || "INR" }
+    this.props = { ...props, currency: props.currency || "INR", attempts: props.attempts ?? 0 }
   }
 
   private validate(props: PayoutProps): void {
@@ -92,6 +94,27 @@ export class Payout {
 
   get idempotencyKey(): string {
     return this.props.idempotencyKey
+  }
+
+  get attempts(): number {
+    return this.props.attempts ?? 0
+  }
+
+  get lastAttemptRetryable(): boolean | undefined {
+    return this.props.lastAttemptRetryable
+  }
+
+  nextIdempotencySuffix(): number {
+    if (this.props.attempts === 0 || this.props.lastAttemptRetryable === false) {
+      this.props.attempts = (this.props.attempts ?? 0) + 1
+    }
+    this.props.updatedAt = new Date()
+    return this.props.attempts!
+  }
+
+  recordAttemptOutcome(retryable: boolean): void {
+    this.props.lastAttemptRetryable = retryable
+    this.props.updatedAt = new Date()
   }
 
   get failureReason(): string | undefined {

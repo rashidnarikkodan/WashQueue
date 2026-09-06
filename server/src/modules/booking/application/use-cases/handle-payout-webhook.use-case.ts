@@ -59,8 +59,6 @@ export class HandlePayoutWebhookUseCase implements IHandlePayoutWebhookUseCase {
       return { success: false, message: "Webhook payload missing required payout fields" }
     }
 
-    // Razorpay's payload does not always guarantee an "id" field for the event envelope itself;
-    // fall back to a deterministic composite key so retried/duplicate deliveries still dedupe.
     const eventId = event.id || `${razorpayPayoutId}:${event.event}:${event.created_at ?? ""}`
 
     const isNewEvent = await this.recordEventOnce(eventId, event.event)
@@ -116,7 +114,6 @@ export class HandlePayoutWebhookUseCase implements IHandlePayoutWebhookUseCase {
     return { success: true }
   }
 
-  /** Returns true if this is the first time this event id has been seen. */
   private async recordEventOnce(eventId: string, eventType: string): Promise<boolean> {
     try {
       await WebhookEventModel.create({ provider: PROVIDER, eventId, eventType })
