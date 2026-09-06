@@ -3,12 +3,12 @@ import { Money } from "../../domain/value-objects/money.vo"
 import { CreditWalletInputDTO, WalletTransactionDTO } from "../dtos/wallet.dto"
 import { WalletMapper } from "../mappers/wallet.mapper"
 import { ICreditWalletUseCase } from "../interfaces/wallet.use-cases"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class CreditWalletUseCase implements ICreditWalletUseCase {
   constructor(
     private readonly walletRepository: IWalletRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   public async execute(input: CreditWalletInputDTO): Promise<WalletTransactionDTO> {

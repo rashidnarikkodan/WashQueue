@@ -4,12 +4,12 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Station } from "../../domain/entities/Station"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IReviewStationUseCase } from "../interfaces/station-usecases.interface"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class ReviewStationUseCase implements IReviewStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(

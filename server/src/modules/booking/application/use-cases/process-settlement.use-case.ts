@@ -20,7 +20,7 @@ import { PaymentMethod } from "@/common/constants/payment.constants"
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import { ensureOwnerPayoutAccount } from "@/modules/owner/application/services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
   constructor(
@@ -29,7 +29,7 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly payoutProvider: IPayoutProvider,
     private readonly bookingRepository?: IBookingRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(settlementId: string): Promise<Settlement> {

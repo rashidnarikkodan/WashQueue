@@ -14,7 +14,7 @@ import {
   IAcceptInvitationUseCase,
   AcceptInvitationInput,
 } from "../interfaces/manager-usecases.interface"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 const isDuplicateKeyError = (error: unknown): boolean =>
   typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
@@ -25,7 +25,7 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly userRepository: IUserRepository,
     private readonly stationRepository?: IStationRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(input: AcceptInvitationInput): Promise<{

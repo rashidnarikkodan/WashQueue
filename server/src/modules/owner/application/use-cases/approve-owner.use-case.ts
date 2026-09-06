@@ -6,7 +6,7 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 
@@ -16,7 +16,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
     private readonly payoutProvider: IPayoutProvider,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute({

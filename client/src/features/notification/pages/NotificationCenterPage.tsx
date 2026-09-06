@@ -12,6 +12,7 @@ import { NotificationCenterHeader } from "../components/NotificationCenterHeader
 import { NotificationCenterCard } from "../components/NotificationCenterCard"
 import { NotificationSkeletonList } from "../components/NotificationSkeletonList"
 import { NotificationEmptyState } from "../components/NotificationEmptyState"
+import { getSocketClient } from "@/shared/services/socket.client"
 
 const NOTIFICATION_TABS: TabConfig[] = [
   { id: "all", label: "All" },
@@ -36,6 +37,7 @@ export function NotificationCenterPage() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    addNotification,
   } = useNotificationStore()
 
   const [activeTab, setActiveTab] = useState<string>("all")
@@ -79,6 +81,20 @@ export function NotificationCenterPage() {
     loadData()
     fetchUnreadCount()
   }, [loadData, fetchUnreadCount])
+
+  useEffect(() => {
+    const socket = getSocketClient()
+
+    function handleNewNotification(notification: NotificationDto) {
+      addNotification(notification)
+    }
+
+    socket.on("NOTIFICATION_RECEIVED", handleNewNotification)
+
+    return () => {
+      socket.off("NOTIFICATION_RECEIVED", handleNewNotification)
+    }
+  }, [addNotification])
 
   // Filter notifications in-memory by search query
   const filteredNotifications = useMemo(() => {

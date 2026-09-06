@@ -7,7 +7,7 @@ import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interface
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"
@@ -18,7 +18,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
     private readonly payoutProvider: IPayoutProvider,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(userId: string): Promise<{
