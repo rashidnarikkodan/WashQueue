@@ -8,14 +8,14 @@ import { IStationRepository } from "../../domain/repositories/station.repository
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { ISubmitStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class SubmitStationUseCase implements ISubmitStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
     private readonly ownerRepository: IOwnerRepository,
     private readonly stationPricingRepository: IStationPricingRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(stationId: string, userId: string): Promise<Station> {

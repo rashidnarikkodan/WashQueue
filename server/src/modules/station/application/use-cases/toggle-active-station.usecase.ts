@@ -6,13 +6,13 @@ import { Station, StationStatus } from "../../domain/entities/Station"
 import { IStationRepository } from "../../domain/repositories/station.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IToggleActiveStationUseCase } from "../interfaces/station-usecases.interface"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class ToggleActiveStationUseCase implements IToggleActiveStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(stationId: string, userId: string): Promise<Station> {

@@ -17,7 +17,7 @@ import {
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 
 const isDuplicateKeyError = (error: unknown): boolean =>
   typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
@@ -30,7 +30,7 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     private readonly managerInvitationRepository: IManagerInvitationRepository,
     private readonly ownerRepository: IOwnerRepository,
     private readonly mailService?: IMailService,
-    private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(ownerUserId: string, input: InviteManagerInput): Promise<InviteManagerResponse> {

@@ -31,8 +31,10 @@ import { GetStationFilterOptionsUseCase } from "./application/use-cases/get-stat
 import { VehicleCategoryMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-category.mongo.repository"
 import { VehicleClassMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-class.mongo.repository"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
-
 import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
+
+//from module notification
+import { notificationDispatcherService } from "../notification/notification.module"
 
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
@@ -110,7 +112,6 @@ const getStationUseCase = new GetStationUseCase(
   extraServiceRepository
 )
 const getStationsUseCase = new GetStationsUseCase(stationRepository, userRepository)
-import { notificationDispatcherService } from "../notification/notification.module"
 
 const submitStationUseCase = new SubmitStationUseCase(
   stationRepository,

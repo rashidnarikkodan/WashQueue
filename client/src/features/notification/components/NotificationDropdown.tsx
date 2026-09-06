@@ -13,6 +13,7 @@ import { NotificationFilterTabs } from "./NotificationFilterTabs"
 import { NotificationItemCard } from "./NotificationItemCard"
 import { NotificationSkeletonList } from "./NotificationSkeletonList"
 import { NotificationEmptyState } from "./NotificationEmptyState"
+import { getSocketClient } from "@/shared/services/socket.client"
 
 export function NotificationDropdown() {
   const navigate = useNavigate()
@@ -27,6 +28,7 @@ export function NotificationDropdown() {
     markAllAsRead,
     markAsActioned,
     deleteNotification,
+    addNotification,
   } = useNotificationStore()
 
   const [isOpen, setIsOpen] = useState(false)
@@ -147,6 +149,20 @@ export function NotificationDropdown() {
     e.stopPropagation()
     await deleteNotification(id)
   }
+
+  useEffect(() => {
+    const socket = getSocketClient()
+
+    function handleNewNotification(notification: NotificationDto) {
+      addNotification(notification)
+    }
+
+    socket.on("NOTIFICATION_RECEIVED", handleNewNotification)
+
+    return () => {
+      socket.off("NOTIFICATION_RECEIVED", handleNewNotification)
+    }
+  }, [addNotification])
 
   return (
     <div className="relative" ref={containerRef}>

@@ -2,43 +2,24 @@ import logger from "@/configs/logger.config"
 import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 import { Notification } from "../../domain/entities/Notification"
 import { INotificationRepository } from "../../domain/repositories/notification.repository.interface"
-import {
-  NotificationType,
-  NotificationChannel,
-  NotificationActionType,
-} from "../../domain/types/notification.types"
+
 import { User as UserModel } from "@/modules/user/infrastructure/model/user.model"
 import { ROLE } from "@/common/constants/role.constants"
 import { StationModel } from "@/modules/station/infrastructure/models/station.model"
+import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
 import { ManagerAssignmentModel } from "@/modules/manager/infrastructure/models/manager-assignment.model"
+import {
+  INotificationDispatcherService,
+  DispatchNotificationOptions,
+  DispatchStationStakeholdersOptions,
+} from "../../application/interfaces/notification-services.interface"
 
-export interface DispatchNotificationOptions {
-  recipientId: string
-  senderId?: string
-  type: NotificationType
-  title: string
-  message: string
-  data?: Record<string, unknown> | string
-  channel?: NotificationChannel
-  actionType?: NotificationActionType
-  expiresAt?: Date
-}
+export type { DispatchNotificationOptions, DispatchStationStakeholdersOptions }
 
-export interface DispatchStationStakeholdersOptions {
-  stationId: string
-  notifyOwner?: boolean
-  notifyManagers?: boolean
-  ownerPayload?: Partial<Omit<DispatchNotificationOptions, "recipientId">>
-  managerPayload?: Partial<Omit<DispatchNotificationOptions, "recipientId">>
-  defaultPayload: Omit<DispatchNotificationOptions, "recipientId">
-}
-
-export class NotificationDispatcherService {
+export class NotificationDispatcherService implements INotificationDispatcherService {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
-  /**
-   * Dispatches a single persistent notification to a specific recipient and emits a real-time WebSocket event.
-   */
+  // Dispatches a single persistent notification to a specific recipient and emits a real-time WebSocket event.
   async dispatch(options: DispatchNotificationOptions): Promise<Notification | null> {
     try {
       if (!options.recipientId) {
@@ -101,9 +82,7 @@ export class NotificationDispatcherService {
     }
   }
 
-  /**
-   * Dispatches notifications to multiple recipients in parallel.
-   */
+  // Dispatches notifications to multiple recipients in parallel.
   async dispatchToUsers(
     recipientIds: string[],
     options: Omit<DispatchNotificationOptions, "recipientId">
@@ -120,9 +99,7 @@ export class NotificationDispatcherService {
     return results.filter((n): n is Notification => n !== null)
   }
 
-  /**
-   * Dispatches a notification to all administrators in the system.
-   */
+  // Dispatches a notification to all administrators in the system.
   async dispatchToAdmins(
     options: Omit<DispatchNotificationOptions, "recipientId">
   ): Promise<Notification[]> {
@@ -142,9 +119,7 @@ export class NotificationDispatcherService {
     }
   }
 
-  /**
-   * Dispatches notifications to stakeholders of a station (Owner and/or active Managers).
-   */
+  // Dispatches notifications to stakeholders of a station (Owner and/or active Managers).
   async dispatchToStationStakeholders(options: DispatchStationStakeholdersOptions): Promise<void> {
     try {
       const {
@@ -169,10 +144,16 @@ export class NotificationDispatcherService {
 
       // 1. Notify Station Owner
       if (notifyOwner && stationDoc.ownerId) {
+        let ownerUserId = stationDoc.ownerId.toString()
+        const ownerDoc = await OwnerModel.findById(stationDoc.ownerId).lean().exec()
+        if (ownerDoc && ownerDoc.userId) {
+          ownerUserId = ownerDoc.userId.toString()
+        }
+
         const payload: DispatchNotificationOptions = {
           ...defaultPayload,
           ...ownerPayload,
-          recipientId: stationDoc.ownerId.toString(),
+          recipientId: ownerUserId,
           data: {
             stationId: stationDoc._id.toString(),
             stationName: stationDoc.name,

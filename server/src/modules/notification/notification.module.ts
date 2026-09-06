@@ -1,6 +1,7 @@
 import { BookingNotificationService } from "./infrastructure/services/booking-notification.service"
 import { NotificationMongoRepository } from "./infrastructure/repositories/notification.mongo.repository"
 import { NotificationDispatcherService } from "./infrastructure/services/notification-dispatcher.service"
+import { INotificationDispatcherService } from "./application/interfaces/notification-services.interface"
 import { CreateNotificationUseCase } from "./application/use-cases/create-notification.use-case"
 import { GetNotificationsUseCase } from "./application/use-cases/get-notifications.use-case"
 import { GetNotificationByIdUseCase } from "./application/use-cases/get-notification-by-id.use-case"
@@ -16,9 +17,8 @@ import { createNotificationRouter } from "./presentation/notification.routes"
 export const notificationRepository = new NotificationMongoRepository()
 
 // Notification Dispatcher Service (Persistent + WebSocket Events)
-export const notificationDispatcherService = new NotificationDispatcherService(
-  notificationRepository
-)
+export const notificationDispatcherService: INotificationDispatcherService =
+  new NotificationDispatcherService(notificationRepository)
 
 // Use Cases (Application Layer)
 export const createNotificationUseCase = new CreateNotificationUseCase(notificationRepository)
@@ -60,8 +60,9 @@ export const bookingNotificationService = new BookingNotificationService(
 
 export type {
   IBookingNotificationService,
+  INotificationDispatcherService,
   NotificationEventType,
-} from "./application/interfaces/booking-notification.interface"
+} from "./application/interfaces/notification-services.interface"
 
 export * from "./domain/types/notification.types"
 export * from "./domain/entities/Notification"

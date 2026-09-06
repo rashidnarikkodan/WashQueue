@@ -3,15 +3,15 @@ import { Booking } from "@/modules/booking/domain/entities/Booking"
 import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 import {
   IBookingNotificationService,
+  INotificationDispatcherService,
   NotificationEventType,
-} from "../../application/interfaces/booking-notification.interface"
-import { NotificationDispatcherService } from "./notification-dispatcher.service"
+} from "../../application/interfaces/notification-services.interface"
 import { NotificationType } from "../../domain/types/notification.types"
 
 export type { NotificationEventType }
 
 export class BookingNotificationService implements IBookingNotificationService {
-  constructor(private readonly dispatcher?: NotificationDispatcherService) {}
+  constructor(private readonly dispatcher?: INotificationDispatcherService) {}
 
   async notify(
     eventType: NotificationEventType,
