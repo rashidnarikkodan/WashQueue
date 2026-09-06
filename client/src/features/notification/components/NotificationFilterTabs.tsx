@@ -7,7 +7,6 @@ interface NotificationFilterTabsProps {
 
 const TABS: { key: NotificationTabType; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
   { key: "BOOKING", label: "Bookings" },
   { key: "PAYMENT", label: "Payments" },
   { key: "QUEUE", label: "Queue" },

@@ -69,14 +69,15 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   markAsRead: async (id: string) => {
-    // Optimistic update
+    // Optimistic update: remove from unread notifications list
     const previousNotifications = get().notifications
     const target = previousNotifications.find((n) => n.id === id)
-    if (!target || target.isRead) return
+    if (!target) return
 
     set((state) => ({
-      notifications: state.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      notifications: state.notifications.filter((n) => n.id !== id),
       unreadCount: Math.max(0, state.unreadCount - 1),
+      total: Math.max(0, state.total - 1),
     }))
 
     try {
@@ -86,6 +87,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       set({
         notifications: previousNotifications,
         unreadCount: get().unreadCount + 1,
+        total: previousNotifications.length,
       })
     }
   },
@@ -93,21 +95,23 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   markAllAsRead: async () => {
     const previousNotifications = get().notifications
     const previousUnread = get().unreadCount
-    if (previousUnread === 0) return
+    if (previousNotifications.length === 0 && previousUnread === 0) return
 
-    // Optimistic update
-    set((state) => ({
-      notifications: state.notifications.map((n) => ({ ...n, isRead: true })),
+    // Optimistic update: clear unread list
+    set({
+      notifications: [],
       unreadCount: 0,
-    }))
+      total: 0,
+    })
 
     try {
       await notificationApi.markAllAsRead()
     } catch {
-      // Revert
+      // Revert if API fails
       set({
         notifications: previousNotifications,
         unreadCount: previousUnread,
+        total: previousNotifications.length,
       })
     }
   },

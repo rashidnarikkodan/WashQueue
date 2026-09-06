@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { Bell, Trash2, Settings } from "lucide-react"
+import { Bell, CheckCheck, Settings } from "lucide-react"
 
 import { useNotificationStore } from "../store/notification.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -42,14 +42,12 @@ export function NotificationDropdown() {
     return () => clearInterval(interval)
   }, [fetchUnreadCount])
 
-  // Fetch notifications when opened or when tab changes
+  // Fetch only unread notifications when opened or when tab changes
   const loadData = useCallback(() => {
-    const isReadFilter = activeTab === "unread" ? false : undefined
-    const typeFilter =
-      activeTab !== "all" && activeTab !== "unread" ? (activeTab as NotificationType) : undefined
+    const typeFilter = activeTab !== "all" ? (activeTab as NotificationType) : undefined
 
     fetchNotifications({
-      isRead: isReadFilter,
+      isRead: false,
       type: typeFilter,
       limit: 30,
     })
@@ -72,12 +70,13 @@ export function NotificationDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Filter notifications by search text
+  // Filter unread notifications by search text
   const filteredNotifications = useMemo(() => {
-    if (!searchQuery.trim()) return notifications
+    const unreadOnly = notifications.filter((n) => !n.isRead)
+    if (!searchQuery.trim()) return unreadOnly
 
     const q = searchQuery.toLowerCase()
-    return notifications.filter(
+    return unreadOnly.filter(
       (n) => n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q)
     )
   }, [notifications, searchQuery])
@@ -130,10 +129,6 @@ export function NotificationDropdown() {
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
     await deleteNotification(id)
-  }
-
-  const handleClearAll = async () => {
-    await markAllAsRead()
   }
 
   return (
@@ -193,11 +188,12 @@ export function NotificationDropdown() {
           <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/20">
             <button
               type="button"
-              onClick={handleClearAll}
-              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0 && filteredNotifications.length === 0}
+              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Trash2 className="h-4 w-4" />
-              Clear All
+              <CheckCheck className="h-4 w-4" />
+              Mark All
             </button>
             <button
               type="button"
