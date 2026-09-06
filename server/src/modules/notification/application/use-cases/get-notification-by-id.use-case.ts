@@ -10,7 +10,7 @@ export class GetNotificationByIdUseCase implements IGetNotificationByIdUseCase {
   async execute(id: string, userId: string): Promise<NotificationResponseDto> {
     const notification = await this.notificationRepository.findById(id)
 
-    if (!notification || notification.userId !== userId) {
+    if (!notification || notification.userId !== userId || notification.isDeleted) {
       throw new AppError("Notification not found", HTTP_STATUS.NOT_FOUND)
     }
 

@@ -15,6 +15,7 @@ export interface NotificationProps {
   data: string
   isRead: boolean
   isActioned: boolean
+  isDeleted?: boolean
   createdAt: Date
   updatedAt?: Date
 }
@@ -62,6 +63,10 @@ export class Notification {
     return this.props.isActioned
   }
 
+  get isDeleted(): boolean {
+    return this.props.isDeleted ?? false
+  }
+
   get createdAt(): Date {
     return this.props.createdAt
   }
@@ -80,6 +85,10 @@ export class Notification {
 
   markAsActioned(): void {
     this.props.isActioned = true
+  }
+
+  softDelete(): void {
+    this.props.isDeleted = true
   }
 
   get data(): NotificationProps {

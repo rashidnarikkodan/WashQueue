@@ -21,6 +21,7 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
       data: raw.data,
       isRead: raw.isRead,
       isActioned: raw.isActioned,
+      isDeleted: raw.isDeleted ?? false,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     }
@@ -59,6 +60,9 @@ export class NotificationMapper implements IMapper<Notification, INotificationDo
       }
       if (data.isActioned !== undefined) {
         persist.isActioned = data.isActioned
+      }
+      if (data.isDeleted !== undefined) {
+        persist.isDeleted = data.isDeleted
       }
     }
 

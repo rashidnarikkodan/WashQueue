@@ -44,12 +44,16 @@ describe("Notification Module Unit Tests", () => {
 
       expect(notification.isRead).toBe(false)
       expect(notification.isActioned).toBe(false)
+      expect(notification.isDeleted).toBe(false)
 
       notification.markAsRead()
       expect(notification.isRead).toBe(true)
 
       notification.markAsActioned()
       expect(notification.isActioned).toBe(true)
+
+      notification.softDelete()
+      expect(notification.isDeleted).toBe(true)
     })
   })
 

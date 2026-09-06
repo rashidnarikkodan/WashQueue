@@ -10,6 +10,7 @@ export interface INotificationDocument extends Document {
   data: string
   isRead: boolean
   isActioned: boolean
+  isDeleted: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -61,13 +62,18 @@ const notificationSchema = new Schema<INotificationDocument>(
       type: Boolean,
       default: false,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
   }
 )
 
-notificationSchema.index({ userId: 1, createdAt: -1 })
-notificationSchema.index({ userId: 1, isRead: 1 })
+notificationSchema.index({ userId: 1, isDeleted: 1, createdAt: -1 })
+notificationSchema.index({ userId: 1, isDeleted: 1, isRead: 1 })
 
 export const NotificationModel = model<INotificationDocument>("Notification", notificationSchema)
