@@ -4,7 +4,7 @@ import { Bell, CheckCheck, Settings } from "lucide-react"
 
 import { useNotificationStore } from "../store/notification.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
-import { ROLE } from "@/shared/constants/role.const"
+import { ROLE, VIEW_MODE } from "@/shared/constants/role.const"
 import type { NotificationDto, NotificationType } from "@/shared/types/notification.types"
 import type { NotificationTabType } from "../types"
 
@@ -16,7 +16,7 @@ import { NotificationEmptyState } from "./NotificationEmptyState"
 
 export function NotificationDropdown() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, activeViewMode } = useAuthStore()
   const {
     notifications,
     unreadCount,
@@ -106,16 +106,33 @@ export function NotificationDropdown() {
       }
 
       if (n.type === "BOOKING") {
-        if (data.bookingId) {
-          const basePath = user?.role === ROLE.OWNER ? "/owner/bookings" : "/bookings"
-          navigate(`${basePath}/${data.bookingId}`)
-        } else {
-          navigate(user?.role === ROLE.OWNER ? "/owner/bookings" : "/bookings")
-        }
+        const basePath =
+          user?.role === ROLE.ADMIN
+            ? "/admin/bookings"
+            : activeViewMode === VIEW_MODE.OWNER
+              ? "/owner/bookings"
+              : activeViewMode === VIEW_MODE.MANAGER
+                ? "/manager/bookings"
+                : "/bookings"
+        navigate(data.bookingId ? `${basePath}/${data.bookingId}` : basePath)
       } else if (n.type === "QUEUE") {
-        navigate(user?.role === ROLE.OWNER ? "/owner/queues" : "/queue")
+        if (user?.role === ROLE.ADMIN) {
+          navigate("/admin/queues")
+        } else if (activeViewMode === VIEW_MODE.OWNER) {
+          navigate("/owner/queues")
+        } else if (activeViewMode === VIEW_MODE.MANAGER) {
+          navigate("/manager/queue")
+        } else {
+          navigate("/queue")
+        }
       } else if (n.type === "PAYMENT") {
-        navigate(user?.role === ROLE.OWNER ? "/owner/financial-records" : "/wallet")
+        if (user?.role === ROLE.ADMIN) {
+          navigate("/admin/settlements")
+        } else if (activeViewMode === VIEW_MODE.OWNER) {
+          navigate("/owner/financial-records")
+        } else {
+          navigate("/wallet")
+        }
       }
     }
   }
@@ -199,12 +216,20 @@ export function NotificationDropdown() {
               type="button"
               onClick={() => {
                 setIsOpen(false)
-                navigate(user?.role === ROLE.OWNER ? "/owner/profile" : "/profile")
+                if (user?.role === ROLE.ADMIN) {
+                  navigate("/admin/notifications")
+                } else if (activeViewMode === VIEW_MODE.OWNER) {
+                  navigate("/owner/notifications")
+                } else if (activeViewMode === VIEW_MODE.MANAGER) {
+                  navigate("/manager/notifications")
+                } else {
+                  navigate("/notifications")
+                }
               }}
               className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
             >
               <Settings className="h-4 w-4" />
-              Notification Settings
+              Notification Center
             </button>
           </div>
         </div>

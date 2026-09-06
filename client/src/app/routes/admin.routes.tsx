@@ -13,6 +13,9 @@ const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetail
 const AdminSettlementMonitoring = lazy(
   () => import("@/features/settlement/pages/AdminSettlementMonitoring")
 )
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -68,7 +71,7 @@ export const adminRoutes = {
     },
     {
       path: "notifications",
-      element: <>Notifications Management</>,
+      element: <NotificationCenterPage />,
     },
     {
       path: "reports",

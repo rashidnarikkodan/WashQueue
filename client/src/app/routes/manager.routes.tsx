@@ -10,6 +10,9 @@ const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
 const ManagerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
 const ManagerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
 const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStation"))
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -70,6 +73,10 @@ export const managerRoutes = {
     {
       path: "station/:stationId/edit",
       element: <AddEditStation />,
+    },
+    {
+      path: "notifications",
+      element: <NotificationCenterPage />,
     },
   ],
 }
