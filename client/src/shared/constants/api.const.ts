@@ -87,4 +87,11 @@ export const API_ROUTES = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     MARK_ACTIONED: (id: string) => `/notifications/${id}/actioned`,
   },
+  REVIEWS: {
+    ROOT: "/reviews",
+    BY_ID: (id: string) => `/reviews/${id}`,
+    BY_STATION: (stationId: string) => `/reviews/station/${stationId}`,
+    BY_BOOKING: (bookingId: string) => `/reviews/booking/${bookingId}`,
+    MY_REVIEWS: "/reviews/my-reviews",
+  },
 } as const

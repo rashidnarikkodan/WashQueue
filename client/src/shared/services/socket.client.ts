@@ -41,3 +41,17 @@ export function unsubscribeFromStation(stationId: string): void {
     socket.emit("leave_station", { stationId })
   }
 }
+
+export function subscribeToUser(userId: string): void {
+  const socket = getSocketClient()
+  if (socket && userId) {
+    socket.emit("join_user", { userId })
+  }
+}
+
+export function unsubscribeFromUser(userId: string): void {
+  const socket = getSocketClient()
+  if (socket && userId) {
+    socket.emit("leave_user", { userId })
+  }
+}
