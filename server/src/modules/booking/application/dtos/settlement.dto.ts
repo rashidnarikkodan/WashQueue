@@ -33,12 +33,12 @@ export interface SettlementResponseDTO {
   stationSettlementAmount: number
   currency: string
   status: SettlementStatus
-  transferId?: string
+  payoutId?: string
   holdReason?: string
   failureReason?: string
   retryCount: number
   lastRetriedAt?: string
-  settledAt?: string
+  processedAt?: string
   createdAt: string
   updatedAt?: string
 
@@ -63,7 +63,7 @@ export interface OwnerEarningsSummaryDTO {
   completedBookingsCount: number
   payoutAccountStatus: {
     hasLinkedAccount: boolean
-    transferId?: string
+    razorpayFundAccountId?: string
     bankName?: string
     accountNumberMasked?: string
     accountHolderName?: string

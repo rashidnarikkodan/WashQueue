@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { RefreshCw, Building2 } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
@@ -32,7 +32,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     isLoading,
     error,
     managedStation,
-    isFetchingManagerStation,
     updateParams,
     handleRefresh,
   } = useBookingList({ isManager, isOwner, isAdmin })
@@ -213,39 +212,6 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          {isOwner && ownerStations.length > 0 && (
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
-              <Building2 size={15} className="text-primary shrink-0" />
-              <select
-                value={selectedStationId}
-                onChange={(e) => updateParams({ stationId: e.target.value, page: 1 })}
-                className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer pr-1"
-              >
-                <option value="ALL" className="bg-card text-foreground">
-                  All Stations ({ownerStations.length})
-                </option>
-                {ownerStations.map((st) => (
-                  <option key={st.id} value={st.id} className="bg-card text-foreground">
-                    {st.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {isManager && (
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card border border-border text-xs font-bold text-foreground shadow-xs">
-              <Building2 size={15} className="text-primary shrink-0" />
-              <span>
-                {isFetchingManagerStation
-                  ? "Loading Station..."
-                  : managedStation
-                    ? managedStation.stationName
-                    : "Assigned Station"}
-              </span>
-            </div>
-          )}
-
           <button
             type="button"
             onClick={handleRefresh}

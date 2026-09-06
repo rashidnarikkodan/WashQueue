@@ -13,7 +13,7 @@ import { createOwnerRouter } from "./presentation/owner.routes"
 import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { MailService } from "@/core/application/services/mail.service"
-import { paymentAccountService } from "@/infrastructure/payment/razorpay-account.service"
+import { razorpayXPayoutProvider } from "@/infrastructure/payment/razorpayx-payout.service"
 import { OnboardingStepRequestMapper } from "./application/mappers/onboarding-step.mapper"
 
 export const ownerRepository = new OwnerMongoRepository()
@@ -35,6 +35,7 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   tokenService,
   userRepository,
   notificationDispatcherService
+  razorpayXPayoutProvider
 )
 const approveOwnerUseCase = new ApproveOwnerUseCase(
   ownerRepository,
@@ -42,6 +43,7 @@ const approveOwnerUseCase = new ApproveOwnerUseCase(
   mailService,
   paymentAccountService,
   notificationDispatcherService
+  razorpayXPayoutProvider
 )
 
 const ownerController = new OwnerController(

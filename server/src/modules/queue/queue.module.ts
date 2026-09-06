@@ -2,7 +2,6 @@ import {
   bookingRepository,
   bookingStatusLogRepository,
   createSettlementUseCase,
-  processSettlementUseCase,
 } from "@/modules/booking/booking.module"
 import { managerAssignmentRepository } from "@/modules/manager/manager.module"
 import { stationRepository } from "@/modules/station/station.module"
@@ -74,8 +73,7 @@ const savePostInspectionUseCase = new SavePostInspectionUseCase(
   managerAssignmentRepository,
   bookingRedisQueueService,
   bookingNotificationService,
-  createSettlementUseCase,
-  processSettlementUseCase
+  createSettlementUseCase
 )
 
 const completeHandoverUseCase = new CompleteHandoverUseCase(
@@ -85,8 +83,7 @@ const completeHandoverUseCase = new CompleteHandoverUseCase(
   managerAssignmentRepository,
   bookingRedisQueueService,
   bookingNotificationService,
-  createSettlementUseCase,
-  processSettlementUseCase
+  createSettlementUseCase
 )
 
 export const stallBookingUseCase = new StallBookingUseCase(

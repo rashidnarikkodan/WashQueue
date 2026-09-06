@@ -58,6 +58,7 @@ export const getBookingListQuerySchema = z.object({
   search: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  mine: z.coerce.boolean().optional().default(false),
 })
 
 export const bookingIdParamSchema = z.object({

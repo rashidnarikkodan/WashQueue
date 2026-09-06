@@ -1,7 +1,8 @@
 import { api } from "../config/axios"
 import { API_ROUTES } from "../constants/api.const"
 
-export type SettlementStatus = "PENDING" | "PROCESSING" | "SETTLED" | "HELD" | "FAILED"
+export type SettlementStatus =
+  "PENDING" | "PROCESSING" | "PROCESSED" | "HELD" | "FAILED" | "REVERSED"
 
 export interface Settlement {
   id: string
@@ -14,12 +15,12 @@ export interface Settlement {
   stationSettlementAmount: number
   currency: string
   status: SettlementStatus
-  transferId?: string
+  payoutId?: string
   holdReason?: string
   failureReason?: string
   retryCount: number
   lastRetriedAt?: string
-  settledAt?: string
+  processedAt?: string
   createdAt: string
   updatedAt?: string
 
@@ -33,7 +34,6 @@ export interface Settlement {
 
 export interface PayoutAccountStatus {
   hasLinkedAccount: boolean
-  transferId?: string
   bankName?: string
   accountNumberMasked?: string
   accountHolderName?: string
@@ -65,7 +65,7 @@ export interface EarningsItem {
   netEarnings: number
   paymentMethod: string
   settlementStatus: string
-  transferId?: string
+  payoutId?: string
 }
 
 export interface AdminSettlementMetrics {
@@ -126,6 +126,7 @@ export const settlementApi = {
   getOwnerEarnings: async (params?: {
     page?: number
     limit?: number
+    search?: string
   }): Promise<PaginatedResult<EarningsItem>> => {
     const response = await api.get(API_ROUTES.SETTLEMENTS.OWNER_EARNINGS, {
       params,

@@ -6,6 +6,7 @@ import logger from "./configs/logger.config"
 import redis from "./infrastructure/cache/redis.client"
 import { startReservationCleanupJob } from "./infrastructure/jobs/reservation-cleanup.job"
 import { startNoShowCleanupJob } from "./infrastructure/jobs/no-show-cleanup.job"
+import { startProcessPendingSettlementsJob } from "./infrastructure/jobs/process-pending-settlements.job"
 
 import { createServer } from "http"
 import { SocketServerService } from "./infrastructure/websocket/socket-server.service"
@@ -18,6 +19,7 @@ async function startServer() {
 
     startReservationCleanupJob()
     startNoShowCleanupJob()
+    startProcessPendingSettlementsJob()
 
     const httpServer = createServer(app)
     SocketServerService.getInstance().init(httpServer)

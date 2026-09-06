@@ -1,12 +1,18 @@
 import { Router } from "express"
 import { SettlementController } from "../controllers/settlement.controller"
+import { PayoutWebhookController } from "../controllers/payout-webhook.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { authorize } from "@/infrastructure/http/middleware/authorize"
 import { ROLE } from "@/common/constants/role.constants"
 
-export const createSettlementRouter = (settlementController: SettlementController): Router => {
+export const createSettlementRouter = (
+  settlementController: SettlementController,
+  payoutWebhookController: PayoutWebhookController
+): Router => {
   const router = Router()
+
+  router.post("/webhook/razorpayx", asyncHandler(payoutWebhookController.handleWebhook))
 
   router.use(authenticate)
 

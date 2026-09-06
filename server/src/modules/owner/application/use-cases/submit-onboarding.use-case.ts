@@ -8,6 +8,9 @@ import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
+import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
+import logger from "@/configs/logger.config"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
   constructor(
@@ -15,6 +18,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
     private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute(userId: string): Promise<{
@@ -61,6 +65,22 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     }
 
     const savedOwner = await this.ownerRepository.save(owner)
+    try {
+      await ensureOwnerPayoutAccount(
+        owner,
+        this.payoutProvider,
+        userDoc.name,
+        userDoc.email,
+        userDoc.phone
+      )
+    } catch (err: unknown) {
+      logger.warn(
+        { err, ownerId: owner.id },
+        "Failed to create RazorpayX payout destination during onboarding submission; will retry at approval time"
+      )
+    }
+
+    await this.ownerRepository.save(owner)
 
     const tokenPayload = {
       userId: userDoc.id || userId,

@@ -3,18 +3,16 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IMailService } from "@/core/application/interfaces/mail.interface"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
-import { AppError } from "@/common/errors/app-error"
-import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
 import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
-// This marketplace only onboards laundry/car-wash service businesses, so the Razorpay
-// Route category/subcategory is fixed rather than collected per owner.
 const RAZORPAY_BUSINESS_CATEGORY = "services"
 const RAZORPAY_BUSINESS_SUBCATEGORY = "laundry_services"
+import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
+import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
@@ -23,6 +21,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     private readonly mailService: IMailService,
     private readonly paymentAccountService: IPaymentAccountService,
     private readonly notificationDispatcher?: NotificationDispatcherService
+    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute({
@@ -49,105 +48,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     if (isApproved) {
       owner.verify()
 
-      // Create payment account for owner on Razorpay Route if not already present
-      if (!owner.transferId) {
-        const legalName = owner.legalFullName?.trim() || user.name?.trim()
-        if (!legalName) {
-          throw new AppError(
-            "Owner full name is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const businessName = owner.businessName?.trim() || legalName
-        const email = (owner.businessEmail || user.email)?.trim()
-        if (!email) {
-          throw new AppError(
-            "Owner email is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const phone = (owner.phone || user.phone)?.trim()
-        if (!phone) {
-          throw new AppError(
-            "Owner phone is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        // Extract PAN from GST number if GST has valid 15-character format
-        const gst = owner.gstNumber?.trim().toUpperCase()
-        let pan: string | undefined
-        if (gst && gst.length === 15) {
-          pan = gst.substring(2, 12)
-        }
-
-        const street1 = owner.street1?.trim()
-        const city = owner.city?.trim()
-        const state = owner.state?.trim()
-        const postalCode = owner.postalCode?.trim()
-        if (!street1 || !city || !state || !postalCode) {
-          throw new AppError(
-            "Owner business address is required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const accountNumber = owner.accountNumber?.trim()
-        const ifscCode = owner.ifscCode?.trim()
-        const accountHolderName = owner.accountHolderName?.trim() || legalName
-        if (!accountNumber || !ifscCode) {
-          throw new AppError(
-            "Owner bank account details are required to create payment account",
-            HTTP_STATUS.BAD_REQUEST
-          )
-        }
-
-        const transferId = await this.paymentAccountService.createAccount({
-          email,
-          phone,
-          legal_business_name: businessName,
-          business_type: gst ? "proprietorship" : "individual",
-          contact_name: legalName,
-          reference_id: (owner.id || String(owner.userId)).slice(-20),
-          customer_facing_business_name: businessName,
-          profile: {
-            category: RAZORPAY_BUSINESS_CATEGORY,
-            subcategory: RAZORPAY_BUSINESS_SUBCATEGORY,
-            addresses: {
-              registered: {
-                street1,
-                street2: owner.street2?.trim() || undefined,
-                city,
-                state,
-                postal_code: postalCode,
-                country: owner.country?.trim() || "IN",
-              },
-            },
-          },
-          ...(gst || pan
-            ? {
-                legal_info: {
-                  ...(gst ? { gst } : {}),
-                  ...(pan ? { pan } : {}),
-                },
-              }
-            : {}),
-          notes: {
-            ownerId: owner.id || "",
-            userId: String(owner.userId),
-          },
-          bankAccount: {
-            account_number: accountNumber,
-            ifsc_code: ifscCode,
-            beneficiary_name: accountHolderName,
-          },
-          pan,
-        })
-
-        owner.setTransferId(transferId)
-      }
+      await ensureOwnerPayoutAccount(owner, this.payoutProvider, user.name, user.email, user.phone)
 
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })
@@ -174,7 +75,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       try {
         await this.mailService.sendOwnerApprovalEmail(user.email, displayName)
       } catch {
-        // Log mail error if any, but do not fail the transaction
+        // log error if needed
       }
     } else {
       const reason =
@@ -208,7 +109,7 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       try {
         await this.mailService.sendOwnerRejectionEmail(user.email, displayName, reason)
       } catch {
-        // Log mail error if any, but do not fail the transaction
+        // log error if needed
       }
     }
 

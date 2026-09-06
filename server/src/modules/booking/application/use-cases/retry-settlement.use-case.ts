@@ -19,7 +19,7 @@ export class RetrySettlementUseCase implements IRetrySettlementUseCase {
       throw new NotFoundError("Settlement record not found")
     }
 
-    if (settlement.status === SettlementStatus.SETTLED) {
+    if (settlement.status === SettlementStatus.PROCESSED) {
       throw new ConflictError("Settlement is already settled")
     }
 

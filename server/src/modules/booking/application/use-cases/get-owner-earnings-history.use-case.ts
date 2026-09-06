@@ -19,7 +19,7 @@ export interface OwnerEarningsItemDTO {
   netEarnings: number
   paymentMethod: string
   settlementStatus: string
-  transferId?: string
+  payoutId?: string
 }
 
 export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryUseCase {
@@ -32,7 +32,8 @@ export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryU
   async execute(
     userId: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    search?: string
   ): Promise<SettlementPaginationDTO<OwnerEarningsItemDTO>> {
     let owner = await this.ownerRepository.findByUserId(userId)
     if (!owner) {
@@ -48,17 +49,18 @@ export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryU
       status: BookingStatus.COMPLETED,
       page,
       limit,
+      search,
     })
 
     const earningsItems: OwnerEarningsItemDTO[] = await Promise.all(
       bookings.map(async (b) => {
         let settlementStatus = "PENDING"
-        let transferId: string | undefined
+        let payoutId: string | undefined
 
         const settlement = await this.settlementRepository.findByBookingId(b.id)
         if (settlement) {
           settlementStatus = settlement.status
-          transferId = settlement.transferId
+          payoutId = settlement.payoutId
         }
 
         return {
@@ -75,7 +77,7 @@ export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryU
           netEarnings: b.settlement?.stationSettlement || 0,
           paymentMethod: b.paymentMethod,
           settlementStatus,
-          transferId,
+          payoutId,
         }
       })
     )

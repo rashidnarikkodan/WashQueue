@@ -13,7 +13,7 @@ export class ManageSettlementHoldUseCase implements IManageSettlementHoldUseCase
       throw new NotFoundError("Settlement record not found")
     }
 
-    if (settlement.status === SettlementStatus.SETTLED) {
+    if (settlement.status === SettlementStatus.PROCESSED) {
       throw new ConflictError("Cannot hold an already settled payout")
     }
 

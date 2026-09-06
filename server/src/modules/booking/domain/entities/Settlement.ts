@@ -1,9 +1,10 @@
 export enum SettlementStatus {
   PENDING = "PENDING",
   PROCESSING = "PROCESSING",
-  SETTLED = "SETTLED",
+  PROCESSED = "PROCESSED",
   HELD = "HELD",
   FAILED = "FAILED",
+  REVERSED = "REVERSED",
 }
 
 export enum SettlementHoldReason {
@@ -27,7 +28,7 @@ export interface SettlementProps {
   currency?: string
 
   status: SettlementStatus
-  transferId?: string
+  payoutId?: string
 
   holdReason?: string
   failureReason?: string
@@ -36,7 +37,7 @@ export interface SettlementProps {
 
   createdAt: Date
   updatedAt?: Date
-  settledAt?: Date
+  processedAt?: Date
 }
 
 export class Settlement {
@@ -119,8 +120,8 @@ export class Settlement {
     return this.props.status
   }
 
-  get transferId(): string | undefined {
-    return this.props.transferId
+  get payoutId(): string | undefined {
+    return this.props.payoutId
   }
 
   get holdReason(): string | undefined {
@@ -147,16 +148,16 @@ export class Settlement {
     return this.props.updatedAt
   }
 
-  get settledAt(): Date | undefined {
-    return this.props.settledAt
+  get processedAt(): Date | undefined {
+    return this.props.processedAt
   }
 
   getProps(): SettlementProps {
     return { ...this.props }
   }
 
-  setTransferId(transferId: string): void {
-    this.props.transferId = transferId
+  setPayoutId(payoutId: string): void {
+    this.props.payoutId = payoutId
   }
 
   markProcessing(): void {
@@ -168,17 +169,17 @@ export class Settlement {
     this.props.updatedAt = new Date()
   }
 
-  markSettled(transferId?: string, settledAt: Date = new Date()): void {
+  markProcessed(payoutId?: string, processedAt: Date = new Date()): void {
     const allowed = [SettlementStatus.PENDING, SettlementStatus.PROCESSING]
     if (!allowed.includes(this.props.status)) {
-      throw new Error(`Settlement cannot be settled from ${this.props.status} status`)
+      throw new Error(`Settlement cannot be marked PROCESSED from ${this.props.status} status`)
     }
 
-    if (transferId) {
-      this.props.transferId = transferId
+    if (payoutId) {
+      this.props.payoutId = payoutId
     }
-    this.props.status = SettlementStatus.SETTLED
-    this.props.settledAt = settledAt
+    this.props.status = SettlementStatus.PROCESSED
+    this.props.processedAt = processedAt
     this.props.holdReason = undefined
     this.props.failureReason = undefined
     this.props.updatedAt = new Date()
@@ -215,6 +216,16 @@ export class Settlement {
 
     this.props.status = SettlementStatus.PENDING
     this.props.holdReason = undefined
+    this.props.updatedAt = new Date()
+  }
+
+  markReversed(reason?: string): void {
+    if (this.props.status !== SettlementStatus.PROCESSED) {
+      throw new Error(`Settlement cannot be reversed from ${this.props.status} status`)
+    }
+
+    this.props.status = SettlementStatus.REVERSED
+    this.props.failureReason = reason
     this.props.updatedAt = new Date()
   }
 }

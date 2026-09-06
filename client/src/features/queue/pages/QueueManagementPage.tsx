@@ -318,7 +318,7 @@ export default function ManagerQueuePage() {
         const outcome = updated.settlementOutcome
         if (!outcome) {
           toast.success("✓ Vehicle handover completed & booking closed!")
-        } else if (outcome.status === "SETTLED") {
+        } else if (outcome.status === "PROCESSED") {
           toast.success("✓ Handover completed & payout transferred to owner!")
         } else if (outcome.status === "HELD") {
           toast.warning(

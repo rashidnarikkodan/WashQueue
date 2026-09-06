@@ -8,12 +8,6 @@ export interface IOwner extends Document {
   whatsapp?: string
   businessEmail?: string
   phone?: string
-  street1?: string
-  street2?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
   isVerified?: boolean
   isManager?: boolean
   verifiedAt?: Date
@@ -31,7 +25,8 @@ export interface IOwner extends Document {
   ifscCode?: string
   bankProofUrl?: string
   rejectionReason?: string
-  transferId?: string
+  razorpayContactId?: string
+  razorpayFundAccountId?: string
 }
 
 const ownerSchema = new Schema<IOwner>(
@@ -67,31 +62,6 @@ const ownerSchema = new Schema<IOwner>(
       type: String,
       trim: true,
     },
-    street1: {
-      type: String,
-      trim: true,
-    },
-    street2: {
-      type: String,
-      trim: true,
-    },
-    city: {
-      type: String,
-      trim: true,
-    },
-    state: {
-      type: String,
-      trim: true,
-    },
-    postalCode: {
-      type: String,
-      trim: true,
-    },
-    country: {
-      type: String,
-      trim: true,
-      default: "IN",
-    },
     isVerified: {
       type: Boolean,
       default: false,
@@ -118,7 +88,13 @@ const ownerSchema = new Schema<IOwner>(
     ifscCode: { type: String },
     bankProofUrl: { type: String },
     rejectionReason: { type: String },
-    transferId: {
+    razorpayContactId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      index: true,
+    },
+    razorpayFundAccountId: {
       type: String,
       trim: true,
       sparse: true,

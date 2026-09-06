@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react"
-import { User, Building2, ShieldCheck, FileText, MapPin } from "lucide-react"
+import { User, Building2, ShieldCheck, FileText } from "lucide-react"
 import FormInput from "../../../../shared/components/form/FormInput"
 import FormSelect from "../../../../shared/components/form/FormSelect"
 import FormUpload from "../../../../shared/components/form/FormUpload"
@@ -12,11 +12,6 @@ interface OwnerKYCStepProps {
     whatsapp: string
     businessName: string
     gstNumber: string
-    street1: string
-    street2: string
-    city: string
-    state: string
-    postalCode: string
     idProofType: string
   }
   fieldErrors: Record<string, string>
@@ -151,81 +146,6 @@ export default function OwnerKYCStep({
               leftIcon={<FileText size={16} />}
               maxLength={15}
               error={fieldErrors.gstNumber}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="h-[1px] bg-slate-800/40" />
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <MapPin size={16} className="text-primary" />
-          <h3 className="text-sm font-black text-slate-200 uppercase tracking-wider">
-            Business Address
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="md:col-span-1">
-            <FormInput
-              label="Address Line 1"
-              type="text"
-              name="street1"
-              value={formData.street1}
-              onChange={onChange}
-              placeholder="Building, street"
-              leftIcon={<MapPin size={16} />}
-              error={fieldErrors.street1}
-            />
-          </div>
-
-          <div className="md:col-span-1">
-            <FormInput
-              label="Address Line 2 (optional)"
-              type="text"
-              name="street2"
-              value={formData.street2}
-              onChange={onChange}
-              placeholder="Area, landmark"
-              leftIcon={<MapPin size={16} />}
-              error={fieldErrors.street2}
-            />
-          </div>
-
-          <div className="md:col-span-1">
-            <FormInput
-              label="City"
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={onChange}
-              placeholder="Enter city"
-              error={fieldErrors.city}
-            />
-          </div>
-
-          <div className="md:col-span-1">
-            <FormInput
-              label="State"
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={onChange}
-              placeholder="Enter state"
-              error={fieldErrors.state}
-            />
-          </div>
-
-          <div className="md:col-span-1">
-            <FormInput
-              label="Postal Code"
-              type="text"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={onChange}
-              placeholder="6-digit PIN code"
-              error={fieldErrors.postalCode}
             />
           </div>
         </div>

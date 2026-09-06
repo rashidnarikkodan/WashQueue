@@ -27,6 +27,8 @@ const envSchema = z.object({
   RAZORPAY_KEY_SECRET: z.string(),
   PLATFORM_COMMISSION_RATE: z.coerce.number().default(0.1),
   PLATFORM_COMMISSION_CAP: z.coerce.number().default(150),
+  RAZORPAYX_ACCOUNT_NUMBER: z.string(),
+  RAZORPAYX_WEBHOOK_SECRET: z.string(),
 })
 const env = envSchema.parse(process.env)
 
