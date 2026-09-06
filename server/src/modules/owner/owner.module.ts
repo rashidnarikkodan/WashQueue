@@ -34,16 +34,15 @@ const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   ownerRepository,
   tokenService,
   userRepository,
+  razorpayXPayoutProvider,
   notificationDispatcherService
-  razorpayXPayoutProvider
 )
 const approveOwnerUseCase = new ApproveOwnerUseCase(
   ownerRepository,
   userRepository,
   mailService,
-  paymentAccountService,
+  razorpayXPayoutProvider,
   notificationDispatcherService
-  razorpayXPayoutProvider
 )
 
 const ownerController = new OwnerController(
