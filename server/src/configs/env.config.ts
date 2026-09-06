@@ -4,7 +4,7 @@ configDotenv()
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(["development", "production"]),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   LOG_LEVEL: z.string().default("info"),
   MONGODB_URI: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),

@@ -8,12 +8,14 @@ import { IStationRepository } from "../../domain/repositories/station.repository
 import { IStationPricingRepository } from "../../domain/repositories/station-pricing.repository"
 import { ISubmitStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class SubmitStationUseCase implements ISubmitStationUseCase {
   constructor(
     private readonly stationRepository: IStationRepository,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly stationPricingRepository: IStationPricingRepository
+    private readonly stationPricingRepository: IStationPricingRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(stationId: string, userId: string): Promise<Station> {
@@ -44,58 +46,66 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
     const props = station.getProps()
     const errors: { field: string; message: string }[] = []
 
-    if (!props.name || props.name.trim() === "") {
+    if (!props.name || !props.name.trim()) {
       errors.push({ field: "name", message: "Station name is required" })
     }
-    if (!props.contact?.phone || props.contact.phone.trim() === "") {
-      errors.push({ field: "contact.phone", message: "Contact phone is required" })
+    if (!props.contactPhone || !props.contactPhone.trim()) {
+      errors.push({ field: "contactPhone", message: "Contact phone is required" })
     }
-    if (!props.contact?.email || props.contact.email.trim() === "") {
-      errors.push({ field: "contact.email", message: "Contact email is required" })
-    }
-    if (!props.address?.street || props.address.street.trim() === "") {
-      errors.push({ field: "address.street", message: "Street address is required" })
-    }
-    if (!props.address?.city || props.address.city.trim() === "") {
-      errors.push({ field: "address.city", message: "City is required" })
-    }
-    if (!props.address?.state || props.address.state.trim() === "") {
-      errors.push({ field: "address.state", message: "State is required" })
-    }
-    if (!props.address?.country || props.address.country.trim() === "") {
-      errors.push({ field: "address.country", message: "Country is required" })
-    }
-    if (!props.address?.pincode || props.address.pincode.trim() === "") {
-      errors.push({ field: "address.pincode", message: "Pincode is required" })
+    if (!props.contactEmail || !props.contactEmail.trim()) {
+      errors.push({ field: "contactEmail", message: "Contact email is required" })
     }
 
-    if (
-      !props.location ||
-      typeof props.location.latitude !== "number" ||
-      typeof props.location.longitude !== "number" ||
-      (props.location.latitude === 0 && props.location.longitude === 0)
-    ) {
+    const loc = props.location
+    if (!loc) {
+      errors.push({ field: "location", message: "Location information is required" })
+    } else {
+      if (!loc.address || !loc.address.trim()) {
+        errors.push({ field: "location.address", message: "Address is required" })
+      }
+      if (!loc.city || !loc.city.trim()) {
+        errors.push({ field: "location.city", message: "City is required" })
+      }
+      if (!loc.state || !loc.state.trim()) {
+        errors.push({ field: "location.state", message: "State is required" })
+      }
+      if (!loc.zipCode || !loc.zipCode.trim()) {
+        errors.push({ field: "location.zipCode", message: "Zip code is required" })
+      }
+      if (
+        !loc.coordinates ||
+        typeof loc.coordinates.latitude !== "number" ||
+        typeof loc.coordinates.longitude !== "number" ||
+        isNaN(loc.coordinates.latitude) ||
+        isNaN(loc.coordinates.longitude)
+      ) {
+        errors.push({
+          field: "location.coordinates",
+          message: "Valid coordinates (latitude and longitude) are required",
+        })
+      }
+    }
+
+    const opHours = props.operatingHours
+    if (!opHours || Object.keys(opHours).length === 0) {
       errors.push({
-        field: "location",
-        message: "Valid location coordinates (latitude and longitude) are required",
+        field: "operatingHours",
+        message: "Operating hours must be specified for at least one day",
       })
-    }
-
-    if (!props.images || props.images.length === 0) {
-      errors.push({ field: "images", message: "At least one station image is required" })
-    }
-
-    if (!props.operatingHours || props.operatingHours.length === 0) {
-      errors.push({ field: "operatingHours", message: "Operating hours must be configured" })
+    } else {
+      const hasOpenDay = Object.values(opHours).some((h) => h.isOpen)
+      if (!hasOpenDay) {
+        errors.push({
+          field: "operatingHours",
+          message: "Station must be open on at least one day of the week",
+        })
+      }
     }
 
     const slot = props.slotConfig
     if (!slot) {
       errors.push({ field: "slotConfig", message: "Slot configuration is required" })
     } else {
-      if (typeof slot.bays !== "number" || slot.bays <= 0) {
-        errors.push({ field: "slotConfig.bays", message: "Bays must be at least 1" })
-      }
       if (typeof slot.windowDurationMins !== "number" || slot.windowDurationMins <= 0) {
         errors.push({
           field: "slotConfig.windowDurationMins",
@@ -146,6 +156,42 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
 
     station.submit()
 
-    return this.stationRepository.save(station)
+    const savedStation = await this.stationRepository.save(station)
+
+    if (this.notificationDispatcher) {
+      try {
+        // 1. Notify Owner
+        await this.notificationDispatcher.dispatch({
+          recipientId: userId,
+          type: "SYSTEM",
+          title: "Station Submitted for Verification",
+          message: `Your station '${savedStation.name}' has been submitted for admin review.`,
+          data: {
+            stationId: savedStation.id,
+            stationName: savedStation.name,
+            url: "/owner/stations",
+          },
+          actionType: "NAVIGATE",
+        })
+
+        // 2. Notify Platform Admins
+        await this.notificationDispatcher.dispatchToAdmins({
+          type: "SYSTEM",
+          title: "New Station Awaiting Approval",
+          message: `Station '${savedStation.name}' was submitted for review.`,
+          data: {
+            stationId: savedStation.id,
+            stationName: savedStation.name,
+            ownerId: owner.id,
+            url: "/admin/stations",
+          },
+          actionType: "NAVIGATE",
+        })
+      } catch {
+        // Non-blocking
+      }
+    }
+
+    return savedStation
   }
 }

@@ -66,7 +66,7 @@ export function NotificationCenterCard({
 
   const referenceTag =
     (parsedData.referenceNumber as string) ||
-    (parsedData.bookingId ? `#WQ-${String(parsedData.bookingId).slice(-4).toUpperCase()}` : null) ||
+    (parsedData.bookingId ? `WQ-${String(parsedData.bookingId).toUpperCase()}` : null) ||
     (parsedData.transactionId
       ? `#TRX-${String(parsedData.transactionId).slice(-4).toUpperCase()}`
       : null) ||

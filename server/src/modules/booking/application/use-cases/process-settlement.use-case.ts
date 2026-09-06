@@ -14,6 +14,7 @@ import { IPaymentAccountService } from "@/core/application/interfaces/payment-ac
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { PaymentMethod } from "@/common/constants/payment.constants"
 import logger from "@/configs/logger.config"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
   constructor(
@@ -22,7 +23,8 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     private readonly transferService: ITransferService,
     private readonly bookingRepository?: IBookingRepository,
     private readonly paymentAccountService?: IPaymentAccountService,
-    private readonly userRepository?: IUserRepository
+    private readonly userRepository?: IUserRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(settlementId: string): Promise<Settlement> {
@@ -195,6 +197,26 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
         logger.info(
           `Settlement ${guardedSettlement.id} successfully settled with transfer ${transferResult.transferId}`
         )
+
+        if (this.notificationDispatcher && owner.userId) {
+          try {
+            await this.notificationDispatcher.dispatch({
+              recipientId: owner.userId,
+              type: "PAYMENT",
+              title: `Settlement Payout Processed (₹${guardedSettlement.stationSettlementAmount})`,
+              message: `Payout of ₹${guardedSettlement.stationSettlementAmount} has been processed for booking #${guardedSettlement.bookingId}.`,
+              data: {
+                settlementId: guardedSettlement.id,
+                bookingId: guardedSettlement.bookingId,
+                amount: guardedSettlement.stationSettlementAmount,
+                url: "/owner/financial-records",
+              },
+              actionType: "NAVIGATE",
+            })
+          } catch {
+            // Non-blocking
+          }
+        }
       } else {
         guardedSettlement.markFailed(
           `Transfer failed with provider status: ${transferResult.status}`

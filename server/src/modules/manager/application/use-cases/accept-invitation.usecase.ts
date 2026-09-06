@@ -14,6 +14,7 @@ import {
   IAcceptInvitationUseCase,
   AcceptInvitationInput,
 } from "../interfaces/manager-usecases.interface"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 const isDuplicateKeyError = (error: unknown): boolean =>
   typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
@@ -23,7 +24,8 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
     private readonly managerInvitationRepository: IManagerInvitationRepository,
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly userRepository: IUserRepository,
-    private readonly stationRepository?: IStationRepository
+    private readonly stationRepository?: IStationRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(input: AcceptInvitationInput): Promise<{
@@ -132,6 +134,25 @@ export class AcceptInvitationUseCase implements IAcceptInvitationUseCase {
 
     if (this.stationRepository && invitation.stationId && userId) {
       await this.stationRepository.setManagerId(invitation.stationId, userId)
+    }
+
+    if (this.notificationDispatcher && invitation.ownerId) {
+      try {
+        await this.notificationDispatcher.dispatch({
+          recipientId: invitation.ownerId,
+          type: "SYSTEM",
+          title: "Manager Invitation Accepted",
+          message: `${user.name || user.email} has accepted your invitation and is now active as manager.`,
+          data: {
+            stationId: invitation.stationId,
+            managerUserId: userId,
+            url: "/owner/managers",
+          },
+          actionType: "NAVIGATE",
+        })
+      } catch {
+        // Non-blocking
+      }
     }
 
     return {

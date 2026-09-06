@@ -205,4 +205,27 @@ describe("Notification Module Unit Tests", () => {
       expect(mockRepo.deleteByIdAndRecipientId).toHaveBeenCalledWith("notif-1", "user-1")
     })
   })
+
+  describe("NotificationDispatcherService & BookingNotificationService", () => {
+    it("should dispatch persistent notification and emit socket event", async () => {
+      const { NotificationDispatcherService } =
+        await import("../infrastructure/services/notification-dispatcher.service")
+      const dispatcher = new NotificationDispatcherService(mockRepo)
+
+      vi.mocked(mockRepo.save).mockImplementation(async (entity) => entity)
+
+      const dispatched = await dispatcher.dispatch({
+        recipientId: "user-999",
+        type: "BOOKING",
+        title: "Test Booking Confirmed",
+        message: "Your booking is ready",
+        data: { bookingId: "b-123" },
+      })
+
+      expect(dispatched).toBeDefined()
+      expect(dispatched?.recipientId).toBe("user-999")
+      expect(dispatched?.title).toBe("Test Booking Confirmed")
+      expect(mockRepo.save).toHaveBeenCalled()
+    })
+  })
 })

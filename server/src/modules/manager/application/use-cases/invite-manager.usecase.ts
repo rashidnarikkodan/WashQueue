@@ -17,6 +17,7 @@ import {
 
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
+import { NotificationDispatcherService } from "@/modules/notification/notification.module"
 
 const isDuplicateKeyError = (error: unknown): boolean =>
   typeof error === "object" && error !== null && (error as { code?: number }).code === 11000
@@ -28,7 +29,8 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
     private readonly managerAssignmentRepository: IManagerAssignmentRepository,
     private readonly managerInvitationRepository: IManagerInvitationRepository,
     private readonly ownerRepository: IOwnerRepository,
-    private readonly mailService?: IMailService
+    private readonly mailService?: IMailService,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(ownerUserId: string, input: InviteManagerInput): Promise<InviteManagerResponse> {
@@ -126,6 +128,25 @@ export class InviteManagerUseCase implements IInviteManagerUseCase {
 
       try {
         const createdAssignment = await this.managerAssignmentRepository.create(newAssignment)
+
+        if (this.notificationDispatcher) {
+          try {
+            await this.notificationDispatcher.dispatch({
+              recipientId: existingUser.id,
+              type: "SYSTEM",
+              title: "Station Manager Access Granted",
+              message: `You have been assigned to manage '${station.getProps().name}'. You can now oversee queue operations and check-ins.`,
+              data: {
+                stationId: station.id,
+                stationName: station.getProps().name,
+                url: "/manager/dashboard",
+              },
+              actionType: "NAVIGATE",
+            })
+          } catch {
+            // Non-blocking
+          }
+        }
 
         return {
           type: "ASSIGNED",

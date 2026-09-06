@@ -1,5 +1,6 @@
 import { BookingNotificationService } from "./infrastructure/services/booking-notification.service"
 import { NotificationMongoRepository } from "./infrastructure/repositories/notification.mongo.repository"
+import { NotificationDispatcherService } from "./infrastructure/services/notification-dispatcher.service"
 import { CreateNotificationUseCase } from "./application/use-cases/create-notification.use-case"
 import { GetNotificationsUseCase } from "./application/use-cases/get-notifications.use-case"
 import { GetNotificationByIdUseCase } from "./application/use-cases/get-notification-by-id.use-case"
@@ -13,6 +14,11 @@ import { createNotificationRouter } from "./presentation/notification.routes"
 
 // Repository (Data Access)
 export const notificationRepository = new NotificationMongoRepository()
+
+// Notification Dispatcher Service (Persistent + WebSocket Events)
+export const notificationDispatcherService = new NotificationDispatcherService(
+  notificationRepository
+)
 
 // Use Cases (Application Layer)
 export const createNotificationUseCase = new CreateNotificationUseCase(notificationRepository)
@@ -47,8 +53,10 @@ export const notificationController = new NotificationController(
 // Router
 export const notificationRouter = createNotificationRouter(notificationController)
 
-// Backward compatible booking notification service
-export const bookingNotificationService = new BookingNotificationService()
+// Booking notification service wired with dispatcher
+export const bookingNotificationService = new BookingNotificationService(
+  notificationDispatcherService
+)
 
 export type {
   IBookingNotificationService,
@@ -62,5 +70,6 @@ export * from "./application/interfaces/notification-usecases.interface"
 export * from "./application/dtos/create-notification.dto"
 export * from "./application/dtos/get-notifications.dto"
 export * from "./application/dtos/notification-response.dto"
+export { NotificationDispatcherService } from "./infrastructure/services/notification-dispatcher.service"
 
 export default notificationRouter

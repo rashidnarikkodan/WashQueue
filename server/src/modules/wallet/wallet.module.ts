@@ -18,9 +18,13 @@ export const walletTransactionRepository = new WalletTransactionMongoRepository(
 export const walletPaymentGateway = sharedRazorpayService
 
 import { RefundWalletUseCase } from "./application/use-cases/refund-wallet.use-case"
+import { notificationDispatcherService } from "../notification/notification.module"
 
 export const getWalletBalanceUseCase = new GetWalletBalanceUseCase(walletRepository)
-export const creditWalletUseCase = new CreditWalletUseCase(walletRepository)
+export const creditWalletUseCase = new CreditWalletUseCase(
+  walletRepository,
+  notificationDispatcherService
+)
 export const debitWalletUseCase = new DebitWalletUseCase(walletRepository)
 export const refundWalletUseCase = new RefundWalletUseCase(walletRepository)
 export const getTransactionLedgerUseCase = new GetTransactionLedgerUseCase(
