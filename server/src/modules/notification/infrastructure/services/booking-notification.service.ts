@@ -90,6 +90,17 @@ export class BookingNotificationService implements IBookingNotificationService {
     if (!this.dispatcher) return
 
     const refNumber = booking.bookingNumber || `WQ-${booking.id.slice(-6).toUpperCase()}`
+    const slotDate = booking.scheduling?.windowStart
+      ? new Date(booking.scheduling.windowStart).toLocaleDateString()
+      : undefined
+    const slotStartTime = booking.scheduling?.windowStart
+      ? new Date(booking.scheduling.windowStart).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : undefined
+    const totalPrice = booking.pricingSnapshot?.totalPrice ?? 0
+
     const baseData = {
       bookingId: booking.id,
       bookingNumber: refNumber,
@@ -113,21 +124,21 @@ export class BookingNotificationService implements IBookingNotificationService {
         userTitle = `Booking Confirmed (${refNumber})`
         userMessage = `Your ${booking.serviceType || "car wash"} booking at station is confirmed. You can track queue status in real time.`
         stakeholderTitle = `New Booking (${refNumber})`
-        stakeholderMessage = `New ${booking.serviceType || "service"} booking reserved for ${booking.slotDate || "scheduled date"} (${booking.slotStartTime || ""}).`
+        stakeholderMessage = `New ${booking.serviceType || "service"} booking reserved for ${slotDate || "scheduled date"}${slotStartTime ? ` (${slotStartTime})` : ""}.`
         break
 
       case "BOOKING_CANCELLED":
         userTitle = `Booking Cancelled (${refNumber})`
         userMessage = `Your booking has been cancelled.${metadata?.refundAmount ? ` Refund of ₹${metadata.refundAmount} has been processed.` : ""}`
         stakeholderTitle = `Booking Cancelled (${refNumber})`
-        stakeholderMessage = `Booking ${refNumber} for ${booking.slotDate || "scheduled slot"} was cancelled by customer.`
+        stakeholderMessage = `Booking ${refNumber} for ${slotDate || "scheduled slot"} was cancelled by customer.`
         break
 
       case "BOOKING_RESCHEDULED":
         userTitle = `Booking Rescheduled (${refNumber})`
-        userMessage = `Your booking was rescheduled to ${booking.slotDate || "new date"} at ${booking.slotStartTime || "new time"}.`
+        userMessage = `Your booking was rescheduled to ${slotDate || "new date"} at ${slotStartTime || "new time"}.`
         stakeholderTitle = `Booking Rescheduled (${refNumber})`
-        stakeholderMessage = `Customer rescheduled booking ${refNumber} to ${booking.slotDate || "date"} at ${booking.slotStartTime || "time"}.`
+        stakeholderMessage = `Customer rescheduled booking ${refNumber} to ${slotDate || "date"} at ${slotStartTime || "time"}.`
         break
 
       case "CUSTOMER_CHECKED_IN":
@@ -186,8 +197,8 @@ export class BookingNotificationService implements IBookingNotificationService {
       case "REFUND_COMPLETED":
       case "REFUND_PROCESSED":
         notifType = "PAYMENT"
-        userTitle = `Refund Credited (₹${metadata?.refundAmount || metadata?.amount || booking.totalPrice})`
-        userMessage = `Refund of ₹${metadata?.refundAmount || metadata?.amount || booking.totalPrice} has been credited to your wallet for booking ${refNumber}.`
+        userTitle = `Refund Credited (₹${metadata?.refundAmount || metadata?.amount || totalPrice})`
+        userMessage = `Refund of ₹${metadata?.refundAmount || metadata?.amount || totalPrice} has been credited to your wallet for booking ${refNumber}.`
         break
 
       default:

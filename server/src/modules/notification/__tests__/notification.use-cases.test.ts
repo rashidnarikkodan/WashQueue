@@ -62,21 +62,6 @@ describe("Notification Module Unit Tests", () => {
 
   describe("CreateNotificationUseCase", () => {
     it("should save and return notification response with 1 month expiresAt", async () => {
-      const createdEntity = new Notification({
-        id: "notif-1",
-        recipientId: "user-1",
-        type: "QUEUE",
-        title: "Position Update",
-        channel: "IN_APP",
-        actionType: "NONE",
-        message: "You are #2 in line",
-        data: JSON.stringify({ queuePosition: 2 }),
-        isRead: false,
-        isActioned: false,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      })
-
       vi.mocked(mockRepo.save).mockImplementation(async (entity) => entity)
 
       const useCase = new CreateNotificationUseCase(mockRepo)

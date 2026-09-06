@@ -189,11 +189,11 @@ export class NotificationDispatcherService {
           stationId: stationDoc._id,
           status: "ACTIVE",
         })
-          .select("userId")
+          .select("managerUserId")
           .lean()
           .exec()
 
-        const managerUserIds = managerAssignments.map((a) => a.userId.toString())
+        const managerUserIds = managerAssignments.map((a) => a.managerUserId.toString())
         if (managerUserIds.length > 0) {
           const payloadOptions: Omit<DispatchNotificationOptions, "recipientId"> = {
             ...defaultPayload,

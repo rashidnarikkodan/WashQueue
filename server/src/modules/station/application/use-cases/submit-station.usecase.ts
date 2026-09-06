@@ -49,51 +49,56 @@ export class SubmitStationUseCase implements ISubmitStationUseCase {
     if (!props.name || !props.name.trim()) {
       errors.push({ field: "name", message: "Station name is required" })
     }
-    if (!props.contactPhone || !props.contactPhone.trim()) {
-      errors.push({ field: "contactPhone", message: "Contact phone is required" })
+    if (!props.contact?.phone || !props.contact.phone.trim()) {
+      errors.push({ field: "contact.phone", message: "Contact phone is required" })
     }
-    if (!props.contactEmail || !props.contactEmail.trim()) {
-      errors.push({ field: "contactEmail", message: "Contact email is required" })
+    if (!props.contact?.email || !props.contact.email.trim()) {
+      errors.push({ field: "contact.email", message: "Contact email is required" })
+    }
+
+    const addr = props.address
+    if (!addr) {
+      errors.push({ field: "address", message: "Address information is required" })
+    } else {
+      if (!addr.street || !addr.street.trim()) {
+        errors.push({ field: "address.street", message: "Street address is required" })
+      }
+      if (!addr.city || !addr.city.trim()) {
+        errors.push({ field: "address.city", message: "City is required" })
+      }
+      if (!addr.state || !addr.state.trim()) {
+        errors.push({ field: "address.state", message: "State is required" })
+      }
+      if (!addr.pincode || !addr.pincode.trim()) {
+        errors.push({ field: "address.pincode", message: "Pincode is required" })
+      }
     }
 
     const loc = props.location
     if (!loc) {
-      errors.push({ field: "location", message: "Location information is required" })
+      errors.push({ field: "location", message: "Location coordinates are required" })
     } else {
-      if (!loc.address || !loc.address.trim()) {
-        errors.push({ field: "location.address", message: "Address is required" })
-      }
-      if (!loc.city || !loc.city.trim()) {
-        errors.push({ field: "location.city", message: "City is required" })
-      }
-      if (!loc.state || !loc.state.trim()) {
-        errors.push({ field: "location.state", message: "State is required" })
-      }
-      if (!loc.zipCode || !loc.zipCode.trim()) {
-        errors.push({ field: "location.zipCode", message: "Zip code is required" })
-      }
       if (
-        !loc.coordinates ||
-        typeof loc.coordinates.latitude !== "number" ||
-        typeof loc.coordinates.longitude !== "number" ||
-        isNaN(loc.coordinates.latitude) ||
-        isNaN(loc.coordinates.longitude)
+        typeof loc.latitude !== "number" ||
+        typeof loc.longitude !== "number" ||
+        isNaN(loc.latitude) ||
+        isNaN(loc.longitude)
       ) {
         errors.push({
-          field: "location.coordinates",
+          field: "location",
           message: "Valid coordinates (latitude and longitude) are required",
         })
       }
     }
 
     const opHours = props.operatingHours
-    if (!opHours || Object.keys(opHours).length === 0) {
+    if (!opHours || opHours.length === 0) {
       errors.push({
         field: "operatingHours",
         message: "Operating hours must be specified for at least one day",
       })
     } else {
-      const hasOpenDay = Object.values(opHours).some((h) => h.isOpen)
+      const hasOpenDay = opHours.some((h) => !h.isClosed)
       if (!hasOpenDay) {
         errors.push({
           field: "operatingHours",

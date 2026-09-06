@@ -125,6 +125,66 @@ export class Station {
     return this.props.holidays || []
   }
 
+  get name(): string {
+    return this.props.name
+  }
+
+  get description(): string {
+    return this.props.description
+  }
+
+  get contact(): StationContact {
+    return this.props.contact
+  }
+
+  get location(): StationLocation {
+    return this.props.location
+  }
+
+  get address(): StationAddress {
+    return this.props.address
+  }
+
+  get images(): StationImage[] {
+    return this.props.images || []
+  }
+
+  get slotConfig(): SlotConfiguration {
+    return this.props.slotConfig
+  }
+
+  get amenities(): string[] {
+    return this.props.amenities || []
+  }
+
+  get rating(): number {
+    return this.props.rating
+  }
+
+  get reviewCount(): number {
+    return this.props.reviewCount
+  }
+
+  get verifiedAt(): Date | undefined {
+    return this.props.verifiedAt
+  }
+
+  get rejectionReason(): string | undefined {
+    return this.props.rejectionReason
+  }
+
+  get isActive(): boolean {
+    return this.props.isActive
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt
+  }
+
   getProps(): StationProps {
     return { ...this.props }
   }
