@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { Bell } from "lucide-react"
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
+import { Bell, Trash2, Settings } from "lucide-react"
 
 import { useNotificationStore } from "../store/notification.store"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -132,6 +132,10 @@ export function NotificationDropdown() {
     await deleteNotification(id)
   }
 
+  const handleClearAll = async () => {
+    await markAllAsRead()
+  }
+
   return (
     <div className="relative" ref={containerRef}>
       {/* Bell Trigger Button */}
@@ -144,31 +148,30 @@ export function NotificationDropdown() {
       >
         <Bell className="h-4.5 w-4.5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-extrabold text-primary-foreground shadow-sm animate-in zoom-in-50">
-            {unreadCount > 99 ? "99+" : unreadCount}
+          <span className="absolute top-0.5 right-0.5 flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
         )}
       </button>
 
       {/* Main Notification Dropdown Modal */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[440px] md:w-[480px] max-w-[92vw] origin-top-right rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
-          {/* Header with Title, Actions & Search */}
-          <NotificationHeader
-            unreadCount={unreadCount}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onMarkAllAsRead={markAllAsRead}
-            onClose={() => setIsOpen(false)}
-          />
-
-          {/* Filter Tabs */}
-          <div className="px-5 pt-3 pb-1 border-b border-border/40 bg-muted/10">
+        <div className="absolute right-0 mt-3 w-[450px] md:w-[500px] max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
+          {/* Header & Filter Section */}
+          <div className="flex flex-col p-6 pb-4 gap-4 border-b border-border/40">
+            <NotificationHeader
+              unreadCount={unreadCount}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onMarkAllAsRead={markAllAsRead}
+              onClose={() => setIsOpen(false)}
+            />
             <NotificationFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
 
-          {/* Scrollable Notification Item List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 max-h-[440px] scrollbar-none">
+          {/* Notification Cards List */}
+          <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[450px]">
             {isLoading ? (
               <NotificationSkeletonList count={3} />
             ) : filteredNotifications.length > 0 ? (
@@ -182,16 +185,31 @@ export function NotificationDropdown() {
                 />
               ))
             ) : (
-              <NotificationEmptyState searchQuery={searchQuery} activeTab={activeTab} />
+              <NotificationEmptyState />
             )}
           </div>
 
-          {/* Footer Bar */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-border/40 bg-muted/10 text-xs font-semibold text-muted-foreground">
-            <Link to={"/notifications"}>Notification history</Link>
-            {unreadCount > 0 && (
-              <span className="text-primary font-bold">{unreadCount} unread</span>
-            )}
+          {/* Footer Section */}
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/20">
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear All
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                navigate(user?.role === ROLE.OWNER ? "/owner/profile" : "/profile")
+              }}
+              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            >
+              <Settings className="h-4 w-4" />
+              Notification Settings
+            </button>
           </div>
         </div>
       )}

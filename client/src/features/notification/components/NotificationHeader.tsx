@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, X, Search } from "lucide-react"
+import { Bell, Check, X, Search } from "lucide-react"
 
 interface NotificationHeaderProps {
   unreadCount: number
@@ -16,67 +16,54 @@ export function NotificationHeader({
   onClose,
 }: NotificationHeaderProps) {
   return (
-    <div className="flex flex-col p-5 pb-3 gap-3.5 border-b border-border/50 bg-muted/20">
-      {/* Top Title & Quick Actions */}
+    <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
-            <Bell className="h-5 w-5" />
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Bell className="h-5.5 w-5.5" />
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-foreground leading-tight">Notifications</h2>
-            <p className="text-xs text-muted-foreground">
-              {unreadCount > 0
-                ? `${unreadCount} unread message${unreadCount > 1 ? "s" : ""}`
-                : "All caught up"}
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {unreadCount > 0 && (
             <button
-              type="button"
               onClick={onMarkAllAsRead}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10 rounded-xl transition-all cursor-pointer border border-primary/20 shadow-xs"
-              title="Mark all notifications as read"
+              className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50 transition-all cursor-pointer"
+              title="Mark all as read"
             >
-              <CheckCheck className="h-3.5 w-3.5" />
-              <span>Mark all read</span>
+              <Check className="h-5 w-5" />
             </button>
           )}
           <button
-            type="button"
             onClick={onClose}
-            className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Close notifications panel"
+            className="p-2 text-red-500/80 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-all cursor-pointer"
+            title="Close panel"
           >
-            <X className="h-4.5 w-4.5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative flex items-center bg-muted/40 border border-border/70 rounded-xl px-3 py-2 text-sm text-foreground focus-within:border-primary/60 focus-within:bg-muted/60 transition-all">
-        <Search className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
+      {/* Search Input */}
+      <div className="relative flex items-center bg-muted/50 border border-border/60 rounded-xl px-3 py-2 text-sm text-foreground focus-within:border-primary/50 transition-colors">
+        <Search className="h-4.5 w-4.5 text-muted-foreground mr-2" />
         <input
           type="text"
-          placeholder="Search notification messages..."
+          placeholder="Search notifications..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="bg-transparent border-none outline-none text-xs text-foreground placeholder-muted-foreground w-full"
+          className="bg-transparent border-none outline-none text-sm text-foreground placeholder-muted-foreground w-full"
         />
         {searchQuery && (
           <button
-            type="button"
             onClick={() => onSearchChange("")}
             className="text-muted-foreground hover:text-foreground cursor-pointer"
-            aria-label="Clear search"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>
-    </div>
+    </>
   )
 }
