@@ -6,11 +6,7 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { Owner } from "../../domain/entities/Owner"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
-import { IPaymentAccountService } from "@/core/application/interfaces/payment-account.interface"
 import { NotificationDispatcherService } from "@/modules/notification/notification.module"
-
-const RAZORPAY_BUSINESS_CATEGORY = "services"
-const RAZORPAY_BUSINESS_SUBCATEGORY = "laundry_services"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 
@@ -19,9 +15,8 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
-    private readonly paymentAccountService: IPaymentAccountService,
+    private readonly payoutProvider: IPayoutProvider,
     private readonly notificationDispatcher?: NotificationDispatcherService
-    private readonly payoutProvider: IPayoutProvider
   ) {}
 
   async execute({

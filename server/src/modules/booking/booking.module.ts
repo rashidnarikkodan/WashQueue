@@ -90,11 +90,9 @@ export const processSettlementUseCase = new ProcessSettlementUseCase(
   settlementRepository,
   payoutRepository,
   ownerRepository,
-  bookingRepository,
-  userRepository,
-  notificationDispatcherService
   razorpayXPayoutProvider,
-  bookingRepository
+  bookingRepository,
+  notificationDispatcherService
 )
 
 export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(
