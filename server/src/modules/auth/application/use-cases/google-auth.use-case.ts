@@ -17,6 +17,8 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { ROLE } from "@/common/constants/role.constants"
 import { AUTH_PROVIDER } from "@/common/constants/authProvider"
 
+import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+
 export class GoogleAuthUseCase implements IGoogleAuthUseCase {
   private client: OAuth2Client | null = null
 
@@ -24,7 +26,8 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     private readonly userRepository: IUserRepository,
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly tokenService: ITokenService,
-    private readonly hashService: IHashService
+    private readonly hashService: IHashService,
+    private readonly ownerRepository?: IOwnerRepository
   ) {
     if (env.GOOGLE_CLIENT_ID) {
       this.client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
@@ -124,15 +127,30 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
 
     logger.info(`Google auth: User=${user.email}, isNewUser=${isNewUser}`)
 
+    let isVerified: boolean = user.isVerified
+    let onboardingStep: number | undefined = undefined
+    let ownerId: string | undefined = undefined
+
+    if (user.role === ROLE.OWNER && this.ownerRepository) {
+      const owner = await this.ownerRepository.findByUserId(user.id!)
+      if (owner) {
+        isVerified = owner.isVerified ?? false
+        onboardingStep = owner.onboardingStep ?? 1
+        ownerId = owner.id
+      }
+    }
+
     return {
       user: {
         id: user.id!,
         name: user.name,
         email: user.email,
         role: user.role,
-        isVerified: user.isVerified,
+        isVerified,
+        onboardingStep,
         isNewUser,
         authProvider: user.authProvider,
+        ownerId,
       },
       tokens: {
         accessToken,

@@ -367,7 +367,10 @@ export class StationMongoRepository
         const ownerDoc = await OwnerModel.findOne({
           $or: [
             ...(Types.ObjectId.isValid(ownerIdStr)
-              ? [{ _id: new Types.ObjectId(ownerIdStr) }]
+              ? [
+                  { _id: new Types.ObjectId(ownerIdStr) },
+                  { userId: new Types.ObjectId(ownerIdStr) },
+                ]
               : []),
           ],
         }).exec()
