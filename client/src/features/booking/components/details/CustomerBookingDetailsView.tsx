@@ -16,11 +16,14 @@ import {
   Camera,
   ClipboardCheck,
   LifeBuoy,
+  Star,
 } from "lucide-react"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { toast } from "sonner"
 import { Link } from "react-router-dom"
+import { useReviewModalStore } from "@/features/review/store/review-modal.store"
+import { BookingReviewCard } from "@/features/review/components/BookingReviewCard"
 
 interface CustomerBookingDetailsViewProps {
   booking: BookingResponse
@@ -41,6 +44,7 @@ export default function CustomerBookingDetailsView({
 }: CustomerBookingDetailsViewProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [nowMs] = useState(() => Date.now())
+  const openReviewModal = useReviewModalStore((state) => state.openReviewModal)
 
   const handleDownloadInvoice = async () => {
     try {
@@ -242,6 +246,27 @@ export default function CustomerBookingDetailsView({
 
             <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-border">
               <div className="flex flex-wrap items-center gap-3">
+                {booking.status === "COMPLETED" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openReviewModal({
+                        bookingId: booking.id,
+                        stationId: booking.stationId,
+                        stationName,
+                        stationImage: booking.stationDetails?.images?.[0]?.url,
+                        serviceType: serviceName,
+                        dateTime: `${formattedDates.dateStr} • ${formattedDates.timeStr}`,
+                        bookingNumber: booking.bookingNumber,
+                      })
+                    }}
+                    className="px-5 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                  >
+                    <Star size={15} className="fill-amber-400 text-amber-400" />
+                    <span>Rate Experience</span>
+                  </button>
+                )}
+
                 {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
                   <>
                     <button
@@ -546,6 +571,18 @@ export default function CustomerBookingDetailsView({
               )}
             </div>
           )}
+
+          {/* User Review Section for Completed Bookings */}
+          <BookingReviewCard
+            bookingId={booking.id}
+            stationId={booking.stationId}
+            stationName={stationName}
+            stationImage={booking.stationDetails?.images?.[0]?.url}
+            serviceType={serviceName}
+            dateTime={`${formattedDates.dateStr} • ${formattedDates.timeStr}`}
+            bookingNumber={booking.bookingNumber}
+            bookingStatus={booking.status}
+          />
 
           <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
             <div className="flex items-center gap-2 border-b border-border pb-4">
