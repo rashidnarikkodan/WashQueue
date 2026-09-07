@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { toast } from "sonner"
 import { authApi } from "../../../shared/apis/auth.api"
 import type { ViewModeType } from "../../../shared/constants/role.const"
-import { VIEW_MODE } from "../../../shared/constants/role.const"
+import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
 import { getErrorMessage } from "../../../shared/utils/error"
 import type { AuthUser } from "../types"
 
@@ -24,6 +24,20 @@ interface AuthStore {
   refreshUser: () => Promise<void>
 }
 
+const resolveViewModeForUser = (
+  user: AuthUser | null,
+  currentMode?: string | null
+): ViewModeType => {
+  if (!user) return VIEW_MODE.CUSTOMER
+  if (user.role === ROLE.OWNER && user.onboardingStep && user.onboardingStep >= 4) {
+    return (currentMode as ViewModeType) || VIEW_MODE.OWNER
+  }
+  if (user.role === ROLE.MANAGER) {
+    return (currentMode as ViewModeType) || VIEW_MODE.MANAGER
+  }
+  return VIEW_MODE.CUSTOMER
+}
+
 const getInitialState = (): {
   user: AuthUser | null
   isAuthenticated: boolean
@@ -32,12 +46,13 @@ const getInitialState = (): {
   try {
     const storedUser = localStorage.getItem("wq_user")
     const storedAuth = localStorage.getItem("wq_auth")
-    const storedViewMode = localStorage.getItem("wq_view_mode") || VIEW_MODE.OWNER
+    const storedViewMode = localStorage.getItem("wq_view_mode")
     if (storedUser && storedAuth === "true") {
+      const parsedUser = JSON.parse(storedUser)
       return {
-        user: JSON.parse(storedUser),
+        user: parsedUser,
         isAuthenticated: true,
-        activeViewMode: storedViewMode as ViewModeType,
+        activeViewMode: resolveViewModeForUser(parsedUser, storedViewMode),
       }
     }
   } catch (e) {
@@ -69,14 +84,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     try {
       const user = await authApi.login(email, password)
+      const resolvedMode = resolveViewModeForUser(user)
 
       set({
         user,
         isAuthenticated: true,
         isLoading: false,
+        activeViewMode: resolvedMode,
       })
       localStorage.setItem("wq_user", JSON.stringify(user))
       localStorage.setItem("wq_auth", "true")
+      localStorage.setItem("wq_view_mode", resolvedMode)
       toast.success(`Welcome back, ${user.name}!`)
       return true
     } catch (e: unknown) {
@@ -91,15 +109,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     try {
       const loggedInUser = await authApi.loginWithGoogle(token)
+      const resolvedMode = resolveViewModeForUser(loggedInUser)
 
       set({
         user: loggedInUser,
         isAuthenticated: true,
         isLoading: false,
+        activeViewMode: resolvedMode,
       })
 
       localStorage.setItem("wq_user", JSON.stringify(loggedInUser))
       localStorage.setItem("wq_auth", "true")
+      localStorage.setItem("wq_view_mode", resolvedMode)
       toast.success(`Welcome back, ${loggedInUser.name}!`)
       return true
     } catch (e: unknown) {
@@ -141,14 +162,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const user = await authApi.verifyOTP(email, code)
       if (user) {
+        const resolvedMode = resolveViewModeForUser(user)
         set({
           user,
           isAuthenticated: true,
           isLoading: false,
           tempUser: null,
+          activeViewMode: resolvedMode,
         })
         localStorage.setItem("wq_user", JSON.stringify(user))
         localStorage.setItem("wq_auth", "true")
+        localStorage.setItem("wq_view_mode", resolvedMode)
         localStorage.removeItem("wq_temp_email")
         return true
       }
@@ -223,9 +247,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   refreshUser: async () => {
     try {
       const user = await authApi.me()
-      set({ user, isAuthenticated: true })
+      const currentMode = get().activeViewMode
+      const resolvedMode = resolveViewModeForUser(user, currentMode)
+      set({ user, isAuthenticated: true, activeViewMode: resolvedMode })
       localStorage.setItem("wq_user", JSON.stringify(user))
       localStorage.setItem("wq_auth", "true")
+      localStorage.setItem("wq_view_mode", resolvedMode)
     } catch (e) {
       console.error("Failed to refresh user session:", e)
     }

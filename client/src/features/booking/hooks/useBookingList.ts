@@ -56,8 +56,80 @@ export function useBookingList({
   const searchQuery = searchParams.get("q") ?? ""
   const activeTab = (searchParams.get("tab") as BookingStatus) ?? "ALL"
   const selectedStationId = searchParams.get("stationId") ?? "ALL"
+  const dateFilter = searchParams.get("dateFilter") ?? "ALL"
   const page = Number(searchParams.get("page") ?? "1")
   const refetch = searchParams.get("refetch")
+
+  const { startDate, endDate } = useMemo(() => {
+    if (dateFilter === "TODAY") {
+      const now = new Date()
+      const start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,
+        0,
+        0,
+        0
+      ).toISOString()
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59,
+        999
+      ).toISOString()
+      return { startDate: start, endDate: end }
+    }
+    if (dateFilter === "TOMORROW") {
+      const now = new Date()
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+      const start = new Date(
+        tomorrow.getFullYear(),
+        tomorrow.getMonth(),
+        tomorrow.getDate(),
+        0,
+        0,
+        0,
+        0
+      ).toISOString()
+      const end = new Date(
+        tomorrow.getFullYear(),
+        tomorrow.getMonth(),
+        tomorrow.getDate(),
+        23,
+        59,
+        59,
+        999
+      ).toISOString()
+      return { startDate: start, endDate: end }
+    }
+    if (dateFilter === "THIS_WEEK") {
+      const now = new Date()
+      const start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - now.getDay(),
+        0,
+        0,
+        0,
+        0
+      ).toISOString()
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + (6 - now.getDay()),
+        23,
+        59,
+        59,
+        999
+      ).toISOString()
+      return { startDate: start, endDate: end }
+    }
+    return { startDate: undefined, endDate: undefined }
+  }, [dateFilter])
 
   useEffect(() => {
     if (!isAdmin && !isOwner) return
@@ -108,6 +180,8 @@ export function useBookingList({
       userName: user?.name,
       userPhone: user?.phone,
       mine,
+      startDate,
+      endDate,
     })
   }, [
     loadBookings,
@@ -118,6 +192,8 @@ export function useBookingList({
     user?.name,
     user?.phone,
     mine,
+    startDate,
+    endDate,
     refetch,
   ])
 
@@ -158,6 +234,8 @@ export function useBookingList({
         userName: user?.name,
         userPhone: user?.phone,
         mine,
+        startDate,
+        endDate,
       })
     }
   }
@@ -170,6 +248,7 @@ export function useBookingList({
     searchQuery,
     activeTab,
     selectedStationId,
+    dateFilter,
     ownerStations,
     page,
 

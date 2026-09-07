@@ -7,6 +7,7 @@ import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interface
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
+import { ROLE } from "@/common/constants/role.constants"
 import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
@@ -82,16 +83,18 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
 
     await this.ownerRepository.save(owner)
 
+    const targetRole = ROLE.OWNER
+
     const tokenPayload = {
       userId: userDoc.id || userId,
-      role: userDoc.role,
+      role: targetRole,
       email: userDoc.email,
     }
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    await this.userRepository.update(userId, { refreshToken })
+    await this.userRepository.update(userId, { role: targetRole, refreshToken })
 
     if (this.notificationDispatcher) {
       try {

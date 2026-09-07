@@ -35,6 +35,14 @@ export default function OwnerOnboarding() {
     }
     return () => {
       useOwnerStore.setState({ isFetchingStatus: true })
+      const state = useAuthStore.getState()
+      if (
+        state.user?.role !== ROLE.OWNER ||
+        !state.user?.onboardingStep ||
+        state.user.onboardingStep < 4
+      ) {
+        state.setActiveViewMode(VIEW_MODE.CUSTOMER)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

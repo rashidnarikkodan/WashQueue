@@ -9,9 +9,10 @@ import Loading from "../../shared/components/ui/Loading"
 import Banner from "../../shared/components/ui/Banner"
 
 const OwnerLayout = () => {
-  const { isAuthenticated, user, isLoading, activeViewMode, setActiveViewMode } = useAuthStore()
+  const { isAuthenticated, user, isLoading, setActiveViewMode } = useAuthStore()
 
   const location = useLocation()
+  const isOnboarding = location.pathname === "/owner/onboarding"
 
   const sidebarItems = useMemo(() => {
     return ownerSideBarItems.filter((item) => {
@@ -23,21 +24,22 @@ const OwnerLayout = () => {
   }, [user?.isManager])
 
   useEffect(() => {
-    if (isAuthenticated && user?.role === ROLE.OWNER && activeViewMode !== VIEW_MODE.OWNER) {
+    if (
+      isAuthenticated &&
+      user?.role === ROLE.OWNER &&
+      user?.onboardingStep &&
+      user.onboardingStep >= 4 &&
+      !isOnboarding
+    ) {
       setActiveViewMode(VIEW_MODE.OWNER)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAuthenticated, user?.role, user?.onboardingStep, isOnboarding, setActiveViewMode])
 
   if (isLoading) {
     return <Loading fullScreen text="Loading Owner Dashboard..." />
   }
 
-  if (
-    !isAuthenticated ||
-    !user ||
-    (user.role !== ROLE.OWNER && location.pathname !== "/owner/onboarding")
-  ) {
+  if (!isAuthenticated || !user || (user.role !== ROLE.OWNER && !isOnboarding)) {
     return <Navigate to="/login" replace />
   }
 
@@ -49,18 +51,20 @@ const OwnerLayout = () => {
     user &&
     user.role === ROLE.OWNER &&
     (!user.onboardingStep || user.onboardingStep < 4) &&
-    location.pathname !== "/owner/onboarding"
+    !isOnboarding
   ) {
     return <Navigate to="/owner/onboarding" replace />
   }
-
-  const isOnboarding = location.pathname === "/owner/onboarding"
 
   if (isOnboarding) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <header className="absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-3 pl-6">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link
+            to="/"
+            onClick={() => setActiveViewMode(VIEW_MODE.CUSTOMER)}
+            className="flex items-center gap-2 group cursor-pointer"
+          >
             <span
               className={`text-xl font-bold italic tracking-tight transition-colors duration-300 text-primary`}
             >

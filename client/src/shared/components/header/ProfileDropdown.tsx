@@ -52,8 +52,11 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
     }
   }
 
+  const isOwnerOnboarded =
+    user.role === ROLE.OWNER && user.onboardingStep !== undefined && user.onboardingStep >= 4
+
   const getCtaContent = () => {
-    if (user.role === ROLE.OWNER) {
+    if (isOwnerOnboarded) {
       if (currentRole === VIEW_MODE.CUSTOMER) {
         return {
           title: "Switch to Owner Mode",
@@ -96,7 +99,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         }
       default:
         return {
-          title: "Become an Owner",
+          title: user.onboardingStep ? "Continue Onboarding" : "Become an Owner",
           desc: "List your service and earn",
         }
     }
@@ -115,7 +118,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
   const handleRoleSwitch = () => {
     setIsOpen(false)
-    if (user.role === ROLE.OWNER) {
+    if (isOwnerOnboarded) {
       if (currentRole === VIEW_MODE.CUSTOMER) {
         setActiveViewMode(VIEW_MODE.OWNER)
         navigate("/owner")

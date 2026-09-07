@@ -2,14 +2,12 @@ import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
-import { ROLE } from "@/common/constants/role.constants"
 import {
   ISaveOnboardingStepUseCase,
   IOwnerOnboardingDetails,
 } from "../interfaces/owner-usecases.interfaces"
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
-import { User } from "@/modules/user/domain/entities/User"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 
 export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
@@ -94,14 +92,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
       accountNumber: savedOwner.accountNumber,
       ifscCode: savedOwner.ifscCode,
       bankProofUrl: savedOwner.bankProofUrl,
-    }
-
-    if (userDoc.role !== ROLE.OWNER) {
-      const userUpdateFields: Partial<User> = {
-        role: ROLE.OWNER,
-      }
-
-      await this.userRepository.update(userId, userUpdateFields)
     }
 
     return {

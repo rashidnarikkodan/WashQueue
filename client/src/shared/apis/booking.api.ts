@@ -147,6 +147,8 @@ export interface GetUserBookingsParams {
   stationId?: string
   ownerId?: string
   q?: string
+  startDate?: string
+  endDate?: string
   /** Forces the result to be scoped strictly to the caller's own userId, regardless of role. */
   mine?: boolean
 }

@@ -25,6 +25,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     searchQuery,
     activeTab,
     selectedStationId,
+    dateFilter,
     ownerStations,
     page,
     pagination,
@@ -58,7 +59,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     if (isManager) {
       return [
         {
-          label: "Total Station Bookings",
+          label: dateFilter === "TODAY" ? "Today's Bookings" : "Total Station Bookings",
           value: totalCount,
           subtext: managedStation ? `At ${managedStation.stationName}` : "Assigned station",
           color: "blue",
@@ -146,6 +147,7 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
     isOwner,
     isOwnerScopedToOwnStations,
     managedStation,
+    dateFilter,
   ])
 
   const basePath = isAdmin
@@ -188,6 +190,49 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
       : isManager
         ? "/manager/dashboard"
         : "/"
+
+  const selectFilters = useMemo(() => {
+    const filters = []
+
+    if (isOwner && ownerStations.length > 0) {
+      filters.push({
+        id: "stationFilter",
+        label: "Filter by Station",
+        value: selectedStationId,
+        onChange: (val: string) => updateParams({ stationId: val, page: 1 }),
+        options: [
+          { label: "All Stations", value: "ALL" },
+          ...ownerStations.map((st) => ({ label: st.name, value: st.id })),
+        ],
+      })
+    }
+
+    filters.push({
+      id: "dateFilter",
+      label: "Filter by Date",
+      value: dateFilter,
+      onChange: (val: string) => updateParams({ dateFilter: val, page: 1 }),
+      options: [
+        { label: "All Dates", value: "ALL" },
+        { label: "Today's Bookings", value: "TODAY" },
+        { label: "Tomorrow", value: "TOMORROW" },
+        { label: "This Week", value: "THIS_WEEK" },
+      ],
+    })
+
+    return filters
+  }, [isOwner, ownerStations, selectedStationId, dateFilter, updateParams])
+
+  const toggleFilters = useMemo(() => {
+    return [
+      {
+        id: "todayOnlyToggle",
+        label: "Today's Bookings",
+        value: dateFilter === "TODAY",
+        onChange: (val: boolean) => updateParams({ dateFilter: val ? "TODAY" : "ALL", page: 1 }),
+      },
+    ]
+  }, [dateFilter, updateParams])
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
@@ -245,22 +290,8 @@ export default function BookingManagementPage({ role = ROLE.MANAGER }: BookingMa
         searchQuery={searchQuery}
         onSearchChange={(q) => updateParams({ q, page: 1 })}
         searchPlaceholder="Search booking ID, customer name, vehicle plate..."
-        selectFilters={
-          isOwner && ownerStations.length > 0
-            ? [
-                {
-                  id: "stationFilter",
-                  label: "Filter by Station",
-                  value: selectedStationId,
-                  onChange: (val) => updateParams({ stationId: val, page: 1 }),
-                  options: [
-                    { label: "All Stations", value: "ALL" },
-                    ...ownerStations.map((st) => ({ label: st.name, value: st.id })),
-                  ],
-                },
-              ]
-            : undefined
-        }
+        selectFilters={selectFilters}
+        toggleFilters={toggleFilters}
       />
 
       <DataTable<Booking>
