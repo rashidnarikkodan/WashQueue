@@ -7,7 +7,12 @@ import {
   ShieldCheck,
   ArrowUpDown,
   Sparkles,
+  Flag,
+  AlertTriangle,
+  X,
+  Loader2,
 } from "lucide-react"
+import { toast } from "sonner"
 import { reviewApi } from "@/shared/apis/review.api"
 import type { ReviewDto } from "@/shared/types/review.types"
 
@@ -18,6 +23,14 @@ interface StationReviewsSectionProps {
 }
 
 type SortOption = "LATEST" | "HIGHEST" | "LOWEST"
+
+const REPORT_REASONS = [
+  { id: "INAPPROPRIATE_CONTENT", label: "Inappropriate or offensive language" },
+  { id: "SPAM", label: "Spam, advertisement, or promotion" },
+  { id: "FAKE_REVIEW", label: "Fake review / Did not experience service" },
+  { id: "HARASSMENT", label: "Harassment or hate speech" },
+  { id: "OTHER", label: "Other issue" },
+]
 
 export function StationReviewsSection({
   stationId,
@@ -32,6 +45,13 @@ export function StationReviewsSection({
   const [totalPages, setTotalPages] = useState<number>(1)
   const [sortBy, setSortBy] = useState<SortOption>("LATEST")
   const limit = 5
+
+  // Report review modal state
+  const [reportingReview, setReportingReview] = useState<ReviewDto | null>(null)
+  const [selectedReason, setSelectedReason] = useState<string>("INAPPROPRIATE_CONTENT")
+  const [customReason, setCustomReason] = useState<string>("")
+  const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false)
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set())
 
   const fetchReviews = useCallback(
     async (page: number, sort: SortOption) => {
@@ -90,6 +110,37 @@ export function StationReviewsSection({
   const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort)
     setCurrentPage(1)
+  }
+
+  const handleOpenReportModal = (review: ReviewDto) => {
+    setReportingReview(review)
+    setSelectedReason("INAPPROPRIATE_CONTENT")
+    setCustomReason("")
+  }
+
+  const handleCloseReportModal = () => {
+    setReportingReview(null)
+    setIsSubmittingReport(false)
+  }
+
+  const handleSubmitReport = async () => {
+    if (!reportingReview) return
+    const reasonText =
+      selectedReason === "OTHER"
+        ? customReason.trim() || "OTHER"
+        : REPORT_REASONS.find((r) => r.id === selectedReason)?.label || selectedReason
+
+    setIsSubmittingReport(true)
+    try {
+      await reviewApi.reportReview(reportingReview.id, reasonText)
+      toast.success("Review reported. Our moderation team will investigate.")
+      setReportedIds((prev) => new Set(prev).add(reportingReview.id))
+      handleCloseReportModal()
+    } catch {
+      toast.error("Failed to submit report. Please check if you are signed in.")
+    } finally {
+      setIsSubmittingReport(false)
+    }
   }
 
   return (
@@ -222,6 +273,7 @@ export function StationReviewsSection({
                     day: "numeric",
                   })
                 : "Recent"
+              const isReported = reportedIds.has(rev.id)
 
               return (
                 <div key={rev.id} className="py-4 space-y-2">
@@ -248,18 +300,38 @@ export function StationReviewsSection({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={13}
+                            className={
+                              i < rev.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-muted-foreground/25 fill-transparent"
+                            }
+                          />
+                        ))}
+                      </div>
+
+                      {/* Report button */}
+                      <button
+                        type="button"
+                        onClick={() => !isReported && handleOpenReportModal(rev)}
+                        disabled={isReported}
+                        title={isReported ? "Already reported" : "Report this review"}
+                        className={`p-1.5 rounded-lg text-xs transition-colors ${
+                          isReported
+                            ? "text-rose-500 opacity-60 cursor-not-allowed"
+                            : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                        }`}
+                      >
+                        <Flag
                           size={13}
-                          className={
-                            i < rev.rating
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/25 fill-transparent"
-                          }
+                          className={isReported ? "fill-rose-500 text-rose-500" : ""}
                         />
-                      ))}
+                      </button>
                     </div>
                   </div>
 
@@ -325,6 +397,101 @@ export function StationReviewsSection({
           </div>
         )}
       </div>
+
+      {/* Report Review Modal */}
+      {reportingReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-card border border-border w-full max-w-md rounded-2xl p-6 shadow-2xl relative space-y-4">
+            <button
+              onClick={handleCloseReportModal}
+              className="absolute top-5 right-5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">Report Review</h3>
+                <p className="text-xs text-muted-foreground">
+                  Help us understand why this review should be moderated.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-medium text-foreground block">
+                Select a reason for reporting:
+              </label>
+              <div className="space-y-1.5">
+                {REPORT_REASONS.map((r) => (
+                  <label
+                    key={r.id}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all text-xs ${
+                      selectedReason === r.id
+                        ? "bg-destructive/10 border-destructive text-foreground font-semibold"
+                        : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/60"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="reportReason"
+                      value={r.id}
+                      checked={selectedReason === r.id}
+                      onChange={(e) => setSelectedReason(e.target.value)}
+                      className="text-destructive focus:ring-destructive"
+                    />
+                    <span>{r.label}</span>
+                  </label>
+                ))}
+              </div>
+
+              {selectedReason === "OTHER" && (
+                <div className="pt-2">
+                  <textarea
+                    rows={3}
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    placeholder="Please explain why you're reporting this review..."
+                    className="w-full p-2.5 bg-background border border-border rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-destructive transition-colors resize-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={handleCloseReportModal}
+                disabled={isSubmittingReport}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitReport}
+                disabled={isSubmittingReport}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-destructive hover:opacity-90 disabled:opacity-50 text-destructive-foreground shadow-xs transition-colors"
+              >
+                {isSubmittingReport ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Flag size={13} />
+                    Submit Report
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

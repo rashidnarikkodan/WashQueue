@@ -41,6 +41,8 @@ export const APP_ROUTES = {
     BOOKING_DETAILS: (id: string | number) => `/manager/bookings/${id}`,
     STATION: "/manager/station",
     STATION_DETAILS: (id: string | number) => `/manager/station/${id}`,
+    FEEDBACK: "/manager/feedback",
+    NOTIFICATIONS: "/manager/notifications",
   },
   OWNER: {
     ROOT: "/owner",

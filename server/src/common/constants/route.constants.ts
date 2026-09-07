@@ -124,5 +124,10 @@ export const API_ROUTES = {
     BY_STATION: "/station/:stationId",
     BY_BOOKING: "/booking/:bookingId",
     MY_REVIEWS: "/my-reviews",
+    ADMIN_MODERATION: "/admin/moderation",
+    TOGGLE_VISIBILITY: "/:id/visibility",
+    REPORT: "/:id/report",
+    DISMISS_REPORTS: "/:id/reports/dismiss",
+    PROVIDER_FEEDBACK: "/provider/feedback",
   },
 } as const

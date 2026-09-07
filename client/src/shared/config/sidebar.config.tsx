@@ -56,9 +56,9 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: ReceiptText,
   },
   {
-    name: "Queue Monitoring",
-    path: "/admin/queues",
-    icon: Hourglass,
+    name: "Settlement Monitoring",
+    path: "/admin/settlements",
+    icon: CreditCard,
   },
   {
     name: "Reviews & Ratings Moderation",
@@ -79,11 +79,6 @@ export const adminSideBarItems: SidebarItem[] = [
     name: "Reports & Analytics",
     path: "/admin/reports",
     icon: BarChart3,
-  },
-  {
-    name: "Settlement Monitoring",
-    path: "/admin/settlements",
-    icon: CreditCard,
   },
   {
     name: "System Settings",

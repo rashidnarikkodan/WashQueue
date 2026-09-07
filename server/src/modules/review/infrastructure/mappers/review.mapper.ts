@@ -22,6 +22,9 @@ export class ReviewMapper implements IMapper<Review, IReview> {
       rating: raw.rating,
       comment: raw.comment ?? "",
       updateCount: raw.update_count ?? 0,
+      isVisible: raw.isVisible ?? true,
+      reportCount: raw.report_count ?? 0,
+      flags: raw.flags ? [...raw.flags] : [],
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     })
@@ -38,6 +41,9 @@ export class ReviewMapper implements IMapper<Review, IReview> {
     if (data?.rating !== undefined) persistence.rating = data.rating
     if (data?.comment !== undefined) persistence.comment = data.comment
     if (data?.updateCount !== undefined) persistence.update_count = data.updateCount
+    if (data?.isVisible !== undefined) persistence.isVisible = data.isVisible
+    if (data?.reportCount !== undefined) persistence.report_count = data.reportCount
+    if (data?.flags !== undefined) persistence.flags = [...data.flags]
     if (data?.id) persistence._id = new Types.ObjectId(data.id)
 
     return persistence

@@ -88,10 +88,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
     switch (currentRole) {
       case ROLE.ADMIN:
-        return {
-          title: "System Analytics",
-          desc: "Monitor platform performance",
-        }
+        return null
       case ROLE.MANAGER:
         return {
           title: "Walk-in Queue",
@@ -178,24 +175,30 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
             <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </Link>
 
-          <div className="p-3 ">
-            <button
-              type="button"
-              onClick={handleRoleSwitch}
-              className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                  <Wrench className="h-4.5 w-4.5" />
+          {cta && (
+            <div className="p-3 ">
+              <button
+                type="button"
+                onClick={handleRoleSwitch}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                    <Wrench className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="text-left">
+                    <>
+                      <span className="block text-xs font-extrabold text-foreground">
+                        {cta.title}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
+                    </>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <span className="block text-xs font-extrabold text-foreground">{cta.title}</span>
-                  <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+                <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          )}
 
           <div className="p-2 space-y-1">
             <button

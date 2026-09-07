@@ -16,6 +16,9 @@ const AdminSettlementMonitoring = lazy(
 const NotificationCenterPage = lazy(
   () => import("@/features/notification/pages/NotificationCenterPage")
 )
+const AdminReviewModerationPage = lazy(
+  () => import("@/features/review/pages/AdminReviewModerationPage")
+)
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -63,7 +66,7 @@ export const adminRoutes = {
     },
     {
       path: "reviews",
-      element: <>Reviews &amp; Ratings Moderation</>,
+      element: <AdminReviewModerationPage />,
     },
     {
       path: "fraud",

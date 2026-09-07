@@ -458,7 +458,6 @@ export default function AdminSettlementMonitoring() {
         onPageChange={handlePageChange}
       />
 
-      {/* Statement Detail Modal */}
       <SettlementDetailModal
         settlement={selectedSettlement}
         isOpen={isModalOpen}

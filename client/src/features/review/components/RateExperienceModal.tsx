@@ -1,9 +1,11 @@
 import React, { useState } from "react"
-import { Star, X, Send, Sparkles, Loader2, CheckCircle2 } from "lucide-react"
+import { Star, X, Send, Sparkles, Loader2, CheckCircle2, Info, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { useReviewModalStore } from "../store/review-modal.store"
 import { reviewApi } from "@/shared/apis/review.api"
 import type { ReviewDto, ReviewPromptData } from "@/shared/types/review.types"
+
+const MAX_REVIEW_EDITS = 2
 
 const RATING_SENTIMENTS = [
   {
@@ -65,6 +67,11 @@ function RateExperienceForm({
   const [comment, setComment] = useState<string>(existingReview?.comment || "")
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
+  const remainingEdits = existingReview
+    ? Math.max(0, MAX_REVIEW_EDITS - (existingReview.updateCount || 0))
+    : MAX_REVIEW_EDITS
+  const isEditLimitReached = Boolean(existingReview && remainingEdits <= 0)
+
   const activeRating = hoverRating !== null ? hoverRating : rating
   const sentiment = RATING_SENTIMENTS.find((s) => s.stars === activeRating) || RATING_SENTIMENTS[4]
 
@@ -77,6 +84,11 @@ function RateExperienceForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!bookingData?.bookingId) return
+
+    if (existingReview && remainingEdits <= 0) {
+      toast.error("You have reached the maximum limit of 2 edits for this review")
+      return
+    }
 
     if (rating < 1 || rating > 5) {
       toast.error("Please select a rating between 1 and 5 stars")
@@ -143,11 +155,58 @@ function RateExperienceForm({
             <Sparkles size={20} className="text-amber-500 fill-amber-500" />
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {existingReview
-              ? "Modify your rating or feedback for this service"
-              : "Help improve WashQueue services with your feedback"}
+            {existingReview ? (
+              <span>
+                Modify your rating or feedback •{" "}
+                <span
+                  className={
+                    remainingEdits === 0
+                      ? "text-rose-600 dark:text-rose-400 font-bold"
+                      : remainingEdits === 1
+                        ? "text-amber-600 dark:text-amber-400 font-bold"
+                        : "text-primary font-bold"
+                  }
+                >
+                  {remainingEdits} edit{remainingEdits === 1 ? "" : "s"} left
+                </span>
+              </span>
+            ) : (
+              "Help improve WashQueue services with your feedback"
+            )}
           </p>
         </div>
+
+        {/* Edit Quota Notice */}
+        {existingReview && (
+          <div>
+            {remainingEdits === 2 && (
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs">
+                <Info size={15} className="shrink-0" />
+                <span>
+                  Reviews can be edited up to 2 times. You have <strong>2 edits left</strong>.
+                </span>
+              </div>
+            )}
+            {remainingEdits === 1 && (
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs">
+                <AlertCircle size={15} className="shrink-0" />
+                <span>
+                  <strong>1 edit left:</strong> Submitting this will be your final edit for this
+                  review.
+                </span>
+              </div>
+            )}
+            {remainingEdits === 0 && (
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs">
+                <AlertCircle size={15} className="shrink-0" />
+                <span>
+                  <strong>Edit limit reached (0 left):</strong> You have reached the maximum of 2
+                  edits for this review.
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Booking / Station Overview Banner */}
         <div className="p-4 rounded-2xl bg-muted/70 border border-border flex items-center justify-between gap-3 shadow-xs">
@@ -269,7 +328,7 @@ function RateExperienceForm({
         <div className="space-y-2 pt-2">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isEditLimitReached}
             className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSubmitting ? (
@@ -277,9 +336,13 @@ function RateExperienceForm({
                 <Loader2 size={18} className="animate-spin" />
                 <span>{existingReview ? "Updating Review..." : "Submitting Review..."}</span>
               </>
+            ) : isEditLimitReached ? (
+              <span>Edit Limit Reached (0 Left)</span>
             ) : (
               <>
-                <span>{existingReview ? "Update Review" : "Submit Review"}</span>
+                <span>
+                  {existingReview ? `Update Review (${remainingEdits} left)` : "Submit Review"}
+                </span>
                 <Send size={16} className="translate-x-0.5" />
               </>
             )}

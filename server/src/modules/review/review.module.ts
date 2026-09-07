@@ -13,6 +13,15 @@ import { DeleteReviewUseCase } from "./application/use-cases/delete-review.use-c
 import { ReviewController } from "./presentation/review.controller"
 import { createReviewRouter } from "./presentation/review.routes"
 
+import { GetAdminModerationReviewsUseCase } from "./application/use-cases/get-admin-moderation-reviews.use-case"
+import { ToggleReviewVisibilityUseCase } from "./application/use-cases/toggle-review-visibility.use-case"
+import {
+  ReportReviewUseCase,
+  DismissReviewReportsUseCase,
+} from "./application/use-cases/moderate-review-flag.use-case"
+
+import { GetProviderFeedbackUseCase } from "./application/use-cases/get-provider-feedback.use-case"
+
 // Repository (Data Access)
 export const reviewRepository = new ReviewMongoRepository()
 
@@ -43,6 +52,19 @@ export const deleteReviewUseCase = new DeleteReviewUseCase(
   reviewRepository,
   stationRatingSyncService
 )
+export const getAdminModerationReviewsUseCase = new GetAdminModerationReviewsUseCase(
+  reviewRepository
+)
+export const toggleReviewVisibilityUseCase = new ToggleReviewVisibilityUseCase(
+  reviewRepository,
+  stationRatingSyncService
+)
+export const reportReviewUseCase = new ReportReviewUseCase(reviewRepository)
+export const dismissReviewReportsUseCase = new DismissReviewReportsUseCase(reviewRepository)
+export const getProviderFeedbackUseCase = new GetProviderFeedbackUseCase(
+  reviewRepository,
+  stationRepository
+)
 
 // Controller (Presentation Layer)
 export const reviewController = new ReviewController(
@@ -52,7 +74,12 @@ export const reviewController = new ReviewController(
   getReviewByBookingUseCase,
   getStationReviewsUseCase,
   getUserReviewsUseCase,
-  deleteReviewUseCase
+  deleteReviewUseCase,
+  getAdminModerationReviewsUseCase,
+  toggleReviewVisibilityUseCase,
+  reportReviewUseCase,
+  dismissReviewReportsUseCase,
+  getProviderFeedbackUseCase
 )
 
 // Router

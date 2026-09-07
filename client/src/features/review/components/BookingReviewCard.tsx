@@ -142,6 +142,9 @@ export function BookingReviewCard({
   }
 
   const sentiment = RATING_SENTIMENTS[review.rating] || RATING_SENTIMENTS[5]
+  const MAX_REVIEW_EDITS = 2
+  const remainingEdits = Math.max(0, MAX_REVIEW_EDITS - (review.updateCount || 0))
+  const canEdit = remainingEdits > 0
 
   return (
     <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-5 text-left">
@@ -163,14 +166,34 @@ export function BookingReviewCard({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenModal}
-          className="px-3.5 py-1.5 rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-        >
-          <Edit3 size={13} className="text-primary" />
-          <span>Edit Review</span>
-        </button>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={handleOpenModal}
+            className="px-3.5 py-1.5 rounded-xl border border-border bg-muted/40 hover:bg-muted text-foreground text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 group"
+            title={`${remainingEdits} edit${remainingEdits === 1 ? "" : "s"} remaining`}
+          >
+            <Edit3 size={13} className="text-primary group-hover:scale-110 transition-transform" />
+            <span>Edit Review</span>
+            <span
+              className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                remainingEdits === 1
+                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                  : "bg-primary/10 text-primary border border-primary/20"
+              }`}
+            >
+              {remainingEdits} left
+            </span>
+          </button>
+        ) : (
+          <div
+            className="px-3 py-1.5 rounded-xl border border-border/60 bg-muted/20 text-muted-foreground text-xs font-semibold flex items-center gap-1.5 cursor-not-allowed select-none opacity-75"
+            title="Maximum of 2 edits reached"
+          >
+            <Edit3 size={13} className="text-muted-foreground/50" />
+            <span>0 edits left</span>
+          </div>
+        )}
       </div>
 
       {/* Rating Stars & Sentiment */}
@@ -192,7 +215,9 @@ export function BookingReviewCard({
           {sentiment.label} ({review.rating}/5)
         </span>
         {review.updateCount > 0 && (
-          <span className="text-[10px] text-muted-foreground font-mono">(edited)</span>
+          <span className="text-[10px] text-muted-foreground font-mono">
+            (edited {review.updateCount}/{MAX_REVIEW_EDITS})
+          </span>
         )}
       </div>
 

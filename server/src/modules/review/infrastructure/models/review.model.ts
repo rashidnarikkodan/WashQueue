@@ -9,6 +9,9 @@ export interface IReview extends Document {
   rating: number
   comment: string
   update_count: number
+  isVisible: boolean
+  report_count: number
+  flags: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -28,14 +31,18 @@ const reviewSchema = new Schema<IReview>(
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, default: "", trim: true },
     update_count: { type: Number, default: 0 },
+    isVisible: { type: Boolean, default: true, index: true },
+    report_count: { type: Number, default: 0, index: true },
+    flags: { type: [String], default: [] },
   },
   {
     timestamps: true,
   }
 )
 
-reviewSchema.index({ stationId: 1, createdAt: -1 })
+reviewSchema.index({ stationId: 1, isVisible: 1, createdAt: -1 })
 reviewSchema.index({ userId: 1, createdAt: -1 })
 reviewSchema.index({ ownerId: 1, createdAt: -1 })
+reviewSchema.index({ report_count: -1 })
 
 export const ReviewModel = model<IReview>("Review", reviewSchema)

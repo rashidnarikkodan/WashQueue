@@ -93,5 +93,10 @@ export const API_ROUTES = {
     BY_STATION: (stationId: string) => `/reviews/station/${stationId}`,
     BY_BOOKING: (bookingId: string) => `/reviews/booking/${bookingId}`,
     MY_REVIEWS: "/reviews/my-reviews",
+    ADMIN_MODERATION: "/reviews/admin/moderation",
+    TOGGLE_VISIBILITY: (id: string) => `/reviews/${id}/visibility`,
+    REPORT: (id: string) => `/reviews/${id}/report`,
+    DISMISS_REPORTS: (id: string) => `/reviews/${id}/reports/dismiss`,
+    PROVIDER_FEEDBACK: "/reviews/provider/feedback",
   },
 } as const

@@ -13,6 +13,7 @@ const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStatio
 const NotificationCenterPage = lazy(
   () => import("@/features/notification/pages/NotificationCenterPage")
 )
+const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/CustomerFeedbackPage"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -61,6 +62,10 @@ export const managerRoutes = {
     {
       path: "queues",
       element: <ManagerQueuePage />,
+    },
+    {
+      path: "feedback",
+      element: <CustomerFeedbackPage />,
     },
     {
       path: "station",

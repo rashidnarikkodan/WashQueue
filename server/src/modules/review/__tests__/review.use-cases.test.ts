@@ -8,6 +8,13 @@ import { GetReviewByBookingUseCase } from "../application/use-cases/get-review-b
 import { GetStationReviewsUseCase } from "../application/use-cases/get-station-reviews.use-case"
 import { GetUserReviewsUseCase } from "../application/use-cases/get-user-reviews.use-case"
 import { DeleteReviewUseCase } from "../application/use-cases/delete-review.use-case"
+import { GetAdminModerationReviewsUseCase } from "../application/use-cases/get-admin-moderation-reviews.use-case"
+import { ToggleReviewVisibilityUseCase } from "../application/use-cases/toggle-review-visibility.use-case"
+import {
+  ReportReviewUseCase,
+  DismissReviewReportsUseCase,
+} from "../application/use-cases/moderate-review-flag.use-case"
+import { GetProviderFeedbackUseCase } from "../application/use-cases/get-provider-feedback.use-case"
 import { StationRatingSyncService } from "../application/services/station-rating-sync.service"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
@@ -35,6 +42,9 @@ describe("Review Module Unit Tests", () => {
       findByUserId: vi.fn(),
       delete: vi.fn(),
       getStationRatingSummary: vi.fn().mockResolvedValue({ averageRating: 4.5, reviewCount: 1 }),
+      findAdminModerationReviews: vi.fn(),
+      getAdminMetrics: vi.fn(),
+      findProviderFeedbackReviews: vi.fn(),
     }
 
     mockBookingRepo = {
@@ -127,6 +137,47 @@ describe("Review Module Unit Tests", () => {
       expect(review.rating).toBe(5)
       expect(review.comment).toBe("Even better after polish")
       expect(review.updateCount).toBe(1)
+    })
+
+    it("should throw error if attempting to update review more than MAX_REVIEW_EDITS (2) times", () => {
+      const review = new Review({
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 4,
+        comment: "Good",
+        updateCount: 2,
+      })
+
+      expect(() => review.updateReview(5, "Try editing 3rd time")).toThrow(
+        "Review can only be edited a maximum of 2 times"
+      )
+    })
+
+    it("should default isVisible to true and allow visibility updates for moderation", () => {
+      const review = new Review({
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 5,
+        comment: "Great wash",
+        updateCount: 0,
+      })
+
+      expect(review.isVisible).toBe(true)
+
+      review.hide()
+      expect(review.isVisible).toBe(false)
+      expect(review.data.isVisible).toBe(false)
+
+      review.show()
+      expect(review.isVisible).toBe(true)
+      expect(review.data.isVisible).toBe(true)
+
+      review.setVisible(false)
+      expect(review.isVisible).toBe(false)
     })
   })
 
@@ -312,6 +363,26 @@ describe("Review Module Unit Tests", () => {
         ForbiddenError
       )
     })
+
+    it("should throw BadRequestError if review has reached MAX_REVIEW_EDITS (2)", async () => {
+      const existingReview = new Review({
+        id: "review-1",
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 3,
+        comment: "Average",
+        updateCount: 2,
+      })
+
+      vi.mocked(mockReviewRepo.findById).mockResolvedValue(existingReview)
+      const useCase = new UpdateReviewUseCase(mockReviewRepo)
+
+      await expect(
+        useCase.execute("user-1", "review-1", { rating: 5, comment: "Third edit" })
+      ).rejects.toThrow(BadRequestError)
+    })
   })
 
   describe("GetReviewByIdUseCase & GetReviewByBookingUseCase", () => {
@@ -473,6 +544,266 @@ describe("Review Module Unit Tests", () => {
       await expect(useCase.execute("other-user", ROLE.CUSTOMER, "review-1")).rejects.toThrow(
         ForbiddenError
       )
+    })
+  })
+
+  describe("Admin Review Moderation & Reporting", () => {
+    it("should allow reporting a review and dismissing reports", async () => {
+      const review = new Review({
+        id: "review-1",
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 1,
+        comment: "Spam content",
+        updateCount: 0,
+        reportCount: 0,
+      })
+
+      vi.mocked(mockReviewRepo.findById).mockResolvedValue(review)
+      vi.mocked(mockReviewRepo.save).mockImplementation(async (r) => r)
+
+      const reportUseCase = new ReportReviewUseCase(mockReviewRepo)
+      const reported = await reportUseCase.execute("review-1", { reason: "SPAM" })
+
+      expect(reported.reportCount).toBe(1)
+      expect(reported.flags).toContain("SPAM")
+
+      const dismissUseCase = new DismissReviewReportsUseCase(mockReviewRepo)
+      const dismissed = await dismissUseCase.execute("review-1")
+
+      expect(dismissed.reportCount).toBe(0)
+      expect(dismissed.flags).toEqual([])
+    })
+
+    it("should toggle review visibility and sync station rating", async () => {
+      const review = new Review({
+        id: "review-1",
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 1,
+        comment: "Abusive review",
+        updateCount: 0,
+        isVisible: true,
+      })
+
+      const mockStation = new Station({
+        id: "station-1",
+        ownerId: "owner-1",
+        name: "Speedy Wash",
+        description: "Test description",
+        status: StationStatus.ACTIVE,
+        rating: 4.5,
+        reviewCount: 1,
+        contact: { phone: "1234567890", email: "test@wash.com" },
+        location: { latitude: 12.9716, longitude: 77.5946 },
+        address: {
+          street: "1st St",
+          city: "City",
+          state: "State",
+          pincode: "123456",
+          country: "Country",
+        },
+        operatingHours: [],
+        holidays: [],
+        slotConfig: {
+          bays: 2,
+          windowDurationMins: 30,
+          capacityPerWindow: 2,
+          walkInReservedSlots: 0,
+          maxAdvanceBookingDays: 7,
+          allowWalkIns: true,
+        },
+        amenities: [],
+        images: [],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      vi.mocked(mockReviewRepo.findById).mockResolvedValue(review)
+      vi.mocked(mockReviewRepo.save).mockImplementation(async (r) => r)
+      vi.mocked(mockStationRepo.findById).mockResolvedValue(mockStation)
+
+      const syncService = new StationRatingSyncService(mockReviewRepo, mockStationRepo)
+      const toggleUseCase = new ToggleReviewVisibilityUseCase(mockReviewRepo, syncService)
+
+      const result = await toggleUseCase.execute("review-1", { isVisible: false })
+
+      expect(result.isVisible).toBe(false)
+      expect(mockReviewRepo.save).toHaveBeenCalled()
+      expect(mockStationRepo.save).toHaveBeenCalled()
+    })
+
+    it("should retrieve admin moderation reviews and metrics", async () => {
+      const review = new Review({
+        id: "review-1",
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 4,
+        comment: "Great experience",
+        updateCount: 0,
+        reportCount: 0,
+      })
+
+      vi.mocked(mockReviewRepo.findAdminModerationReviews).mockResolvedValue({
+        items: [
+          {
+            review,
+            user: { name: "John Doe", email: "john@example.com", avatar: "avatar.jpg" },
+            station: { id: "station-1", name: "Downtown Station", city: "Metro City" },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      })
+
+      vi.mocked(mockReviewRepo.getAdminMetrics).mockResolvedValue({
+        averageRating: 4.6,
+        ratingChange: 0.2,
+        totalReviews: 1420,
+        newThisMonth: 128,
+        lowRatingCount: 23,
+        flaggedCount: 8,
+        mostReviewedStation: { id: "station-1", name: "Downtown Station", reviewCount: 412 },
+        ratingBreakdown: [
+          { stars: 5, count: 1022, percentage: 72 },
+          { stars: 4, count: 255, percentage: 18 },
+          { stars: 3, count: 85, percentage: 6 },
+          { stars: 2, count: 42, percentage: 3 },
+          { stars: 1, count: 16, percentage: 1 },
+        ],
+        topRatedStations: [
+          {
+            id: "station-1",
+            name: "Downtown Station",
+            location: "Metro City",
+            rating: 4.9,
+            reviewCount: 412,
+            performanceTag: "PEAK",
+          },
+        ],
+        lowRatedStations: [],
+      })
+
+      const useCase = new GetAdminModerationReviewsUseCase(mockReviewRepo)
+      const result = await useCase.execute({ page: 1, limit: 10 })
+
+      expect(result.total).toBe(1)
+      expect(result.metrics.averageRating).toBe(4.6)
+      expect(result.reviews[0]?.user?.name).toBe("John Doe")
+      expect(result.reviews[0]?.station?.name).toBe("Downtown Station")
+    })
+  })
+
+  describe("Provider Feedback & Reply Use Cases", () => {
+    it("should retrieve provider feedback for Owner and scope to owner stations", async () => {
+      const mockStation1 = { id: "station-1", name: "Owner Station A" } as Station
+      const mockStation2 = { id: "station-2", name: "Owner Station B" } as Station
+
+      vi.mocked(mockStationRepo.findByOwnerId).mockResolvedValue([mockStation1, mockStation2])
+
+      const review = new Review({
+        id: "review-1",
+        userId: "user-1",
+        ownerId: "owner-1",
+        stationId: "station-1",
+        bookingId: "booking-1",
+        rating: 5,
+        comment: "Great experience!",
+        updateCount: 0,
+      })
+
+      vi.mocked(mockReviewRepo.findProviderFeedbackReviews).mockResolvedValue({
+        items: [
+          {
+            review,
+            user: { name: "Jane Smith", email: "jane@test.com" },
+            station: { id: "station-1", name: "Owner Station A" },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      })
+
+      const useCase = new GetProviderFeedbackUseCase(mockReviewRepo, mockStationRepo)
+      const result = await useCase.execute({
+        userId: "owner-1",
+        userRole: ROLE.OWNER,
+        page: 1,
+        limit: 10,
+      })
+
+      expect(mockStationRepo.findByOwnerId).toHaveBeenCalledWith("owner-1")
+      expect(result.total).toBe(1)
+      expect(result.reviews[0]?.station?.name).toBe("Owner Station A")
+      expect(result.stations).toHaveLength(2)
+    })
+
+    it("should retrieve provider feedback for Manager and scope to manager assigned stations", async () => {
+      const mockStation = { id: "station-assigned-1", name: "Manager Station" } as Station
+
+      vi.mocked(mockStationRepo.findByManagerId).mockResolvedValue([mockStation])
+
+      const review = new Review({
+        id: "review-2",
+        userId: "user-2",
+        ownerId: "owner-1",
+        stationId: "station-assigned-1",
+        bookingId: "booking-2",
+        rating: 4,
+        comment: "Good wash",
+        updateCount: 0,
+      })
+
+      vi.mocked(mockReviewRepo.findProviderFeedbackReviews).mockResolvedValue({
+        items: [
+          {
+            review,
+            user: { name: "Bob", email: "bob@test.com" },
+            station: { id: "station-assigned-1", name: "Manager Station" },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      })
+
+      const useCase = new GetProviderFeedbackUseCase(mockReviewRepo, mockStationRepo)
+      const result = await useCase.execute({
+        userId: "manager-1",
+        userRole: ROLE.MANAGER,
+        page: 1,
+        limit: 10,
+      })
+
+      expect(mockStationRepo.findByManagerId).toHaveBeenCalledWith("manager-1")
+      expect(result.total).toBe(1)
+      expect(result.stations[0]?.name).toBe("Manager Station")
+    })
+
+    it("should return empty result if user has no stations assigned", async () => {
+      vi.mocked(mockStationRepo.findByManagerId).mockResolvedValue([])
+
+      const useCase = new GetProviderFeedbackUseCase(mockReviewRepo, mockStationRepo)
+      const result = await useCase.execute({
+        userId: "manager-empty",
+        userRole: ROLE.MANAGER,
+      })
+
+      expect(result.reviews).toEqual([])
+      expect(result.total).toBe(0)
+      expect(mockReviewRepo.findProviderFeedbackReviews).not.toHaveBeenCalled()
     })
   })
 })
