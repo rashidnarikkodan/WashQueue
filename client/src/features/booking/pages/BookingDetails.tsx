@@ -8,7 +8,7 @@ import CancellationModal from "../components/CancellationModal"
 import RescheduleModal from "../components/RescheduleModal"
 import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
+import ProviderBookingDetailsView from "../components/details/OwnerBookingDetailsView"
 import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
 

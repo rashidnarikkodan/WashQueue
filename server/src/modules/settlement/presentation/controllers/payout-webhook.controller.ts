@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { BadRequestError } from "@/common/errors/bad-request-error"
 import success from "@/common/utils/success"
-import { IHandlePayoutWebhookUseCase } from "../../application/use-cases/handle-payout-webhook.use-case"
+import { IHandlePayoutWebhookUseCase } from "../../application/interfaces/payout-usecases.interface"
 
 export class PayoutWebhookController {
   constructor(private readonly handlePayoutWebhookUseCase: IHandlePayoutWebhookUseCase) {}

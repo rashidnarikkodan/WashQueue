@@ -4,15 +4,10 @@ import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.i
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import WebhookEventModel from "../../infrastructure/models/webhook-event.model"
 import logger from "@/configs/logger.config"
-
-export interface PayoutWebhookResult {
-  success: boolean
-  message?: string
-}
-
-export interface IHandlePayoutWebhookUseCase {
-  execute(rawBody: string, signature: string): Promise<PayoutWebhookResult>
-}
+import {
+  IHandlePayoutWebhookUseCase,
+  PayoutWebhookResult,
+} from "../interfaces/payout-usecases.interface"
 
 const PROVIDER = "RAZORPAY_X"
 

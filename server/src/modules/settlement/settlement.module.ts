@@ -105,6 +105,6 @@ export * from "./domain/entities/Payout"
 export * from "./domain/repositories/settlement.repository.interface"
 export * from "./domain/repositories/payout.repository.interface"
 export * from "./application/dtos/settlement.dto"
-export * from "./application/interfaces/settlement.usecases.interface"
+export * from "./application/interfaces/settlement-usecases.interface"
 
 export default settlementRouter
