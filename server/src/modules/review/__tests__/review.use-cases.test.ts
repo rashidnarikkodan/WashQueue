@@ -12,7 +12,7 @@ import { StationRatingSyncService } from "../application/services/station-rating
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { Booking, BookingStatus } from "@/modules/booking/domain/entities/Booking"
-import { Station } from "@/modules/station/domain/entities/Station"
+import { Station, StationStatus } from "@/modules/station/domain/entities/Station"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { BadRequestError } from "@/common/errors/bad-request-error"
@@ -145,7 +145,7 @@ describe("Review Module Unit Tests", () => {
         ownerId: "owner-1",
         name: "Speedy Wash",
         description: "Test description",
-        status: "ACTIVE" as any,
+        status: StationStatus.ACTIVE,
         rating: 0,
         reviewCount: 0,
         contact: { phone: "1234567890", email: "test@wash.com" },

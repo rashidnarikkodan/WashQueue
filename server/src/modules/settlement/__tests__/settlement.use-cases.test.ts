@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { Settlement, SettlementStatus } from "../domain/entities/Settlement"
 import { ISettlementRepository } from "../domain/repositories/settlement.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
+import { Owner } from "@/modules/owner/domain/entities/Owner"
 import { CreateSettlementUseCase } from "../application/use-cases/create-settlement.use-case"
 import { ManageSettlementHoldUseCase } from "../application/use-cases/manage-settlement-hold.use-case"
 import { RetrySettlementUseCase } from "../application/use-cases/retry-settlement.use-case"
@@ -248,7 +249,7 @@ describe("Settlement Module Unit Tests", () => {
         accountNumber: "123456789012",
       }
 
-      vi.mocked(mockOwnerRepo.findByUserId).mockResolvedValue(mockOwner as any)
+      vi.mocked(mockOwnerRepo.findByUserId).mockResolvedValue(mockOwner as unknown as Owner)
       vi.mocked(mockSettlementRepo.getOwnerAggregatedEarnings).mockResolvedValue({
         totalGrossRevenue: 15000,
         totalPlatformCommission: 1500,
