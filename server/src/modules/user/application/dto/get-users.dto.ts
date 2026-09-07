@@ -1,5 +1,5 @@
 import { PaginationMeta } from "@/common/types/pagination"
-import { RoleType } from "@/common/constants/role.constants"
+import type { RoleType } from "@/common/constants/role.constants"
 
 export interface UserSummaryDto {
   id: string
