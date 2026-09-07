@@ -26,9 +26,6 @@ import { createBookingRouter } from "./presentation/routers/booking.routes"
 import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 
-// Re-export settlement module symbols for backward compatibility
-export * from "@/modules/settlement/settlement.module"
-
 export const bookingRepository = new BookingMongoRepository()
 export const bookingStatusLogRepository = new BookingStatusLogMongoRepository()
 const transactionRunner = new MongooseTransactionRunner()
