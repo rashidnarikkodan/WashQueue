@@ -224,6 +224,8 @@ export function NotificationDropdown() {
                 setIsOpen(false)
                 if (user?.role === ROLE.ADMIN) {
                   navigate("/admin/notifications")
+                } else if (activeViewMode === VIEW_MODE.CUSTOMER) {
+                  navigate("/notifications")
                 } else if (activeViewMode === VIEW_MODE.OWNER) {
                   navigate("/owner/notifications")
                 } else if (activeViewMode === VIEW_MODE.MANAGER) {

@@ -1,3 +1,4 @@
+import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { Booking } from "@/modules/booking/domain/entities/Booking"
 import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
@@ -7,11 +8,19 @@ import {
   NotificationEventType,
 } from "../../application/interfaces/notification-services.interface"
 import { NotificationType } from "../../domain/types/notification.types"
+import { IMailService } from "@/core/application/interfaces/mail.interface"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
 export type { NotificationEventType }
 
 export class BookingNotificationService implements IBookingNotificationService {
-  constructor(private readonly dispatcher?: INotificationDispatcherService) {}
+  constructor(
+    private readonly dispatcher?: INotificationDispatcherService,
+    private readonly mailService?: IMailService,
+    private readonly userRepository?: IUserRepository,
+    private readonly stationRepository?: IStationRepository
+  ) {}
 
   async notify(
     eventType: NotificationEventType,
@@ -74,10 +83,167 @@ export class BookingNotificationService implements IBookingNotificationService {
       if (this.dispatcher) {
         await this.dispatchPersistentNotifications(eventType, booking, metadata)
       }
+
+      // 3. Email Notifications (Confirmation, Payment Receipt, Cancellation/Refund)
+      if (this.mailService && this.userRepository) {
+        await this.dispatchEmailNotifications(eventType, booking, metadata)
+      }
     } catch (error) {
       logger.error(
         { error, eventType, bookingId: booking.id },
         "[BookingNotification] Failed to send notification or socket event"
+      )
+    }
+  }
+
+  private async dispatchEmailNotifications(
+    eventType: NotificationEventType,
+    booking: Booking,
+    metadata?: Record<string, unknown>
+  ): Promise<void> {
+    if (!this.mailService || !this.userRepository || !booking.userId) return
+
+    try {
+      const user = await this.userRepository.findById(booking.userId)
+      if (!user || !user.email) return
+
+      let stationName = "Car Wash Station"
+      if (this.stationRepository && booking.stationId) {
+        const station = await this.stationRepository.findById(booking.stationId)
+        if (station && station.name) {
+          stationName = station.name
+        }
+      }
+
+      const customerName = user.name || "Customer"
+      const refNumber = booking.bookingNumber || `WQ-${booking.id.slice(-6).toUpperCase()}`
+      const slotDate = booking.scheduling?.windowStart
+        ? new Date(booking.scheduling.windowStart).toLocaleDateString()
+        : new Date().toLocaleDateString()
+      const slotStartTime = booking.scheduling?.windowStart
+        ? new Date(booking.scheduling.windowStart).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "Scheduled Time"
+      const totalPrice = booking.pricingSnapshot?.totalPrice ?? 0
+      const paymentMethod = booking.paymentMethod || "ONLINE"
+      const paymentStatus = booking.paymentStatus || "PENDING"
+      const bookingUrl = `${env.CLIENT_URL}/bookings/${booking.id}`
+
+      switch (eventType) {
+        case "BOOKING_CREATED":
+        case "BOOKING_CONFIRMED": {
+          // Send Booking Confirmation Email
+          await this.mailService.sendBookingConfirmationEmail(user.email, {
+            customerName,
+            bookingNumber: refNumber,
+            stationName,
+            serviceType: booking.serviceType || "Standard Wash",
+            scheduledDate: slotDate,
+            scheduledTime: slotStartTime,
+            totalAmount: totalPrice,
+            paymentMethod,
+            paymentStatus,
+            bookingUrl,
+          })
+
+          // If paid online, via wallet, or deposit paid, send payment receipt email
+          if (
+            booking.paymentStatus === "PAID" ||
+            (booking.depositAmount && booking.depositAmount > 0)
+          ) {
+            const paidAmount =
+              booking.paymentStatus === "PAID" ? totalPrice : (booking.depositAmount ?? totalPrice)
+            await this.mailService.sendPaymentReceiptEmail(user.email, {
+              customerName,
+              transactionId: `TXN-${refNumber}`,
+              amount: paidAmount,
+              paymentMethod,
+              paymentStatus: "SUCCESS",
+              date: new Date().toLocaleDateString(),
+              description: `${booking.serviceType || "Car Wash"} at ${stationName}`,
+              bookingNumber: refNumber,
+              stationName,
+              receiptUrl: bookingUrl,
+            })
+          }
+          break
+        }
+
+        case "PAYMENT_SUCCESS":
+        case "PAYMENT_UPDATED": {
+          if (booking.paymentStatus === "PAID") {
+            await this.mailService.sendPaymentReceiptEmail(user.email, {
+              customerName,
+              transactionId: `TXN-${refNumber}`,
+              amount: totalPrice,
+              paymentMethod,
+              paymentStatus: "SUCCESS",
+              date: new Date().toLocaleDateString(),
+              description: `Payment for booking #${refNumber}`,
+              bookingNumber: refNumber,
+              stationName,
+              receiptUrl: bookingUrl,
+            })
+          }
+          break
+        }
+
+        case "BOOKING_CANCELLED": {
+          const refundAmount =
+            typeof metadata?.refundAmount === "number"
+              ? metadata.refundAmount
+              : typeof booking.refundAmount === "number"
+                ? booking.refundAmount
+                : 0
+          const refundMethod = (metadata?.refundType as string) || "WALLET"
+
+          await this.mailService.sendBookingCancellationEmail(user.email, {
+            customerName,
+            bookingNumber: refNumber,
+            stationName,
+            serviceType: booking.serviceType,
+            scheduledDate: slotDate,
+            reason: (metadata?.reason as string) || booking.cancellation?.cancellationReason,
+            refundAmount,
+            refundMethod,
+          })
+          break
+        }
+
+        case "REFUND_COMPLETED":
+        case "REFUND_PROCESSED": {
+          const refundAmount =
+            typeof metadata?.refundAmount === "number"
+              ? metadata.refundAmount
+              : typeof metadata?.amount === "number"
+                ? metadata.amount
+                : typeof booking.refundAmount === "number"
+                  ? booking.refundAmount
+                  : totalPrice
+          const refundMethod = (metadata?.refundType as string) || "WALLET"
+
+          await this.mailService.sendBookingCancellationEmail(user.email, {
+            customerName,
+            bookingNumber: refNumber,
+            stationName,
+            serviceType: booking.serviceType,
+            scheduledDate: slotDate,
+            reason: (metadata?.reason as string) || "Refund processed to wallet",
+            refundAmount,
+            refundMethod,
+          })
+          break
+        }
+
+        default:
+          break
+      }
+    } catch (emailErr) {
+      logger.error(
+        { error: emailErr, eventType, bookingId: booking.id },
+        "[BookingNotification] Failed to send email notification"
       )
     }
   }

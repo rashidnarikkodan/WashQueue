@@ -7,6 +7,19 @@ import { MarkNotificationAsReadUseCase } from "../application/use-cases/mark-not
 import { MarkNotificationAsActionedUseCase } from "../application/use-cases/mark-notification-as-actioned.use-case"
 import { DeleteNotificationUseCase } from "../application/use-cases/delete-notification.use-case"
 import { GetUnreadNotificationCountUseCase } from "../application/use-cases/get-unread-notification-count.use-case"
+import {
+  Booking,
+  BookingStatus,
+  PaymentStatus,
+  PaymentMethod,
+  ServiceType,
+} from "@/modules/booking/domain/entities/Booking"
+import { IMailService } from "@/core/application/interfaces/mail.interface"
+import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
+import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { BookingNotificationService } from "../infrastructure/services/booking-notification.service"
+import { User } from "@/modules/user/domain/entities/User"
+import { ROLE } from "@/common/constants/role.constants"
 
 describe("Notification Module Unit Tests", () => {
   let mockRepo: INotificationRepository
@@ -211,6 +224,196 @@ describe("Notification Module Unit Tests", () => {
       expect(dispatched?.recipientId).toBe("user-999")
       expect(dispatched?.title).toBe("Test Booking Confirmed")
       expect(mockRepo.save).toHaveBeenCalled()
+    })
+
+    it("should send booking confirmation and payment receipt emails via BookingNotificationService", async () => {
+      const mockMailService: IMailService = {
+        sendVerificationEmail: vi.fn(),
+        sendForgotPasswordEmail: vi.fn(),
+        sendOwnerApprovalEmail: vi.fn(),
+        sendOwnerRejectionEmail: vi.fn(),
+        sendManagerInvitationEmail: vi.fn(),
+        sendBookingConfirmationEmail: vi.fn(),
+        sendPaymentReceiptEmail: vi.fn(),
+        sendBookingCancellationEmail: vi.fn(),
+      }
+
+      const mockUser = new User({
+        id: "u-1",
+        name: "Jane Customer",
+        email: "jane@example.com",
+        role: ROLE.CUSTOMER,
+      })
+
+      const mockUserRepo = {
+        findById: vi.fn().mockResolvedValue(mockUser),
+      } as unknown as IUserRepository
+
+      const mockStationRepo = {
+        findById: vi.fn().mockResolvedValue({ id: "st-1", name: "Metro Auto Wash" }),
+      } as unknown as IStationRepository
+
+      const service = new BookingNotificationService(
+        undefined,
+        mockMailService,
+        mockUserRepo,
+        mockStationRepo
+      )
+
+      const mockBooking = new Booking({
+        id: "bk-123",
+        bookingNumber: "WQ-7890",
+        userId: "u-1",
+        ownerId: "own-1",
+        stationId: "st-1",
+        vehicleId: "v-1",
+        vehicleSnapshot: {
+          vehicleCategoryId: "cat-1",
+          vehicleClassId: "cls-1",
+        },
+        serviceType: ServiceType.FULL,
+        pricingSnapshot: {
+          basePrice: 300,
+          extraPrice: 0,
+          totalPrice: 300,
+          currency: "INR",
+        },
+        extraServices: [],
+        paymentMethod: PaymentMethod.WALLET,
+        paymentStatus: PaymentStatus.PAID,
+        depositAmount: 300,
+        cashAmount: 0,
+        refundAmount: 0,
+        settlement: { platformCommission: 30, stationSettlement: 270 },
+        status: BookingStatus.CONFIRMED,
+        isWalkIn: false,
+        createdByUserId: "u-1",
+        qr: {
+          qrTokenHash: "hash-123",
+          qrExpiresAt: new Date(Date.now() + 3600000),
+        },
+        scheduling: {
+          timeWindowId: "tw-1",
+          windowStart: new Date("2026-09-10T10:00:00Z"),
+          windowEnd: new Date("2026-09-10T10:30:00Z"),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      await service.notify("BOOKING_CREATED", mockBooking)
+
+      expect(mockMailService.sendBookingConfirmationEmail).toHaveBeenCalledWith(
+        "jane@example.com",
+        expect.objectContaining({
+          customerName: "Jane Customer",
+          bookingNumber: "WQ-7890",
+          stationName: "Metro Auto Wash",
+          serviceType: ServiceType.FULL,
+          totalAmount: 300,
+        })
+      )
+
+      expect(mockMailService.sendPaymentReceiptEmail).toHaveBeenCalledWith(
+        "jane@example.com",
+        expect.objectContaining({
+          customerName: "Jane Customer",
+          amount: 300,
+          description: "FULL at Metro Auto Wash",
+        })
+      )
+    })
+
+    it("should send booking cancellation & refund email via BookingNotificationService", async () => {
+      const mockMailService: IMailService = {
+        sendVerificationEmail: vi.fn(),
+        sendForgotPasswordEmail: vi.fn(),
+        sendOwnerApprovalEmail: vi.fn(),
+        sendOwnerRejectionEmail: vi.fn(),
+        sendManagerInvitationEmail: vi.fn(),
+        sendBookingConfirmationEmail: vi.fn(),
+        sendPaymentReceiptEmail: vi.fn(),
+        sendBookingCancellationEmail: vi.fn(),
+      }
+
+      const mockUser = new User({
+        id: "u-1",
+        name: "Jane Customer",
+        email: "jane@example.com",
+        role: ROLE.CUSTOMER,
+      })
+
+      const mockUserRepo = {
+        findById: vi.fn().mockResolvedValue(mockUser),
+      } as unknown as IUserRepository
+
+      const mockStationRepo = {
+        findById: vi.fn().mockResolvedValue({ id: "st-1", name: "Metro Auto Wash" }),
+      } as unknown as IStationRepository
+
+      const service = new BookingNotificationService(
+        undefined,
+        mockMailService,
+        mockUserRepo,
+        mockStationRepo
+      )
+
+      const mockBooking = new Booking({
+        id: "bk-123",
+        bookingNumber: "WQ-7890",
+        userId: "u-1",
+        ownerId: "own-1",
+        stationId: "st-1",
+        vehicleId: "v-1",
+        vehicleSnapshot: {
+          vehicleCategoryId: "cat-1",
+          vehicleClassId: "cls-1",
+        },
+        serviceType: ServiceType.FULL,
+        pricingSnapshot: {
+          basePrice: 300,
+          extraPrice: 0,
+          totalPrice: 300,
+          currency: "INR",
+        },
+        extraServices: [],
+        paymentMethod: PaymentMethod.WALLET,
+        paymentStatus: PaymentStatus.REFUNDED,
+        depositAmount: 300,
+        cashAmount: 0,
+        refundAmount: 300,
+        settlement: { platformCommission: 30, stationSettlement: 270 },
+        status: BookingStatus.CANCELLED,
+        isWalkIn: false,
+        createdByUserId: "u-1",
+        qr: {
+          qrTokenHash: "hash-123",
+          qrExpiresAt: new Date(Date.now() + 3600000),
+        },
+        scheduling: {
+          timeWindowId: "tw-1",
+          windowStart: new Date("2026-09-10T10:00:00Z"),
+          windowEnd: new Date("2026-09-10T10:30:00Z"),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      await service.notify("BOOKING_CANCELLED", mockBooking, {
+        refundAmount: 300,
+        reason: "Customer schedule changed",
+      })
+
+      expect(mockMailService.sendBookingCancellationEmail).toHaveBeenCalledWith(
+        "jane@example.com",
+        expect.objectContaining({
+          customerName: "Jane Customer",
+          bookingNumber: "WQ-7890",
+          stationName: "Metro Auto Wash",
+          refundAmount: 300,
+          reason: "Customer schedule changed",
+        })
+      )
     })
   })
 })

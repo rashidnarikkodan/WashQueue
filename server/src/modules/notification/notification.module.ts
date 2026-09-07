@@ -12,6 +12,9 @@ import { DeleteNotificationUseCase } from "./application/use-cases/delete-notifi
 import { GetUnreadNotificationCountUseCase } from "./application/use-cases/get-unread-notification-count.use-case"
 import { NotificationController } from "./presentation/notification.controller"
 import { createNotificationRouter } from "./presentation/notification.routes"
+import { MailService } from "@/core/application/services/mail.service"
+import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
+import { StationMongoRepository } from "../station/infrastructure/repositories/station.mongo.repository"
 
 // Repository (Data Access)
 export const notificationRepository = new NotificationMongoRepository()
@@ -53,9 +56,17 @@ export const notificationController = new NotificationController(
 // Router
 export const notificationRouter = createNotificationRouter(notificationController)
 
-// Booking notification service wired with dispatcher
+// Dependencies for BookingNotificationService
+const mailService = new MailService()
+const userRepository = new UserRepository()
+const stationRepository = new StationMongoRepository()
+
+// Booking notification service wired with dispatcher, mailer, user repo, and station repo
 export const bookingNotificationService = new BookingNotificationService(
-  notificationDispatcherService
+  notificationDispatcherService,
+  mailService,
+  userRepository,
+  stationRepository
 )
 
 export type {
