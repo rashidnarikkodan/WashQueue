@@ -1,5 +1,4 @@
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
 import { Settlement, SettlementProps, SettlementStatus } from "../../domain/entities/Settlement"
 import SettlementModel, { ISettlementDocument } from "../models/settlement.model"
 import { SettlementMapper } from "../mappers/settlement.mapper"
@@ -8,6 +7,7 @@ import {
   OwnerEarningsSummaryDTO,
   SettlementFilterOptions,
 } from "../../application/dtos/settlement.dto"
+import { ISettlementRepository } from "../../settlement.module"
 
 export class SettlementRepository
   extends BaseRepository<Settlement, ISettlementDocument>

@@ -1,8 +1,8 @@
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
-import { IPayoutRepository } from "../../domain/repositories/payout.repository"
 import { Payout, PayoutProps, PayoutStatus } from "../../domain/entities/Payout"
 import PayoutModel, { IPayoutDocument } from "../models/payout.model"
 import { PayoutMapper } from "../mappers/payout.mapper"
+import { IPayoutRepository } from "../../settlement.module"
 
 export class PayoutRepository
   extends BaseRepository<Payout, IPayoutDocument>
