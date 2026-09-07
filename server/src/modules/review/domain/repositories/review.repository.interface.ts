@@ -3,6 +3,7 @@ import { Review } from "../entities/Review"
 export interface FindReviewsOptions {
   page?: number
   limit?: number
+  sortBy?: string
 }
 
 export interface StationReviewsResult {

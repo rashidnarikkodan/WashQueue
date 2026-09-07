@@ -1,15 +1,13 @@
-import { Check, Settings } from "lucide-react"
+import { Check } from "lucide-react"
 
 interface NotificationCenterHeaderProps {
   unreadCount: number
   onMarkAllAsRead: () => void
-  onOpenSettings?: () => void
 }
 
 export function NotificationCenterHeader({
   unreadCount,
   onMarkAllAsRead,
-  onOpenSettings,
 }: NotificationCenterHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
@@ -33,17 +31,6 @@ export function NotificationCenterHeader({
           <Check className="h-4 w-4" />
           Mark All As Read
         </button>
-
-        {onOpenSettings && (
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className="px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold tracking-wider uppercase bg-primary text-primary-foreground hover:opacity-90 transition-all shadow-md shadow-primary/20 flex items-center gap-2 cursor-pointer"
-          >
-            <Settings className="h-4 w-4" />
-            Notification Settings
-          </button>
-        )}
       </div>
     </div>
   )

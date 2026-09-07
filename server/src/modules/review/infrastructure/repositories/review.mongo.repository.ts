@@ -78,9 +78,17 @@ export class ReviewMongoRepository implements IReviewRepository {
 
     const stationObjectId = new Types.ObjectId(stationId)
 
+    let sortCriteria: Record<string, 1 | -1> = { createdAt: -1 }
+    const sortUpper = options.sortBy?.toUpperCase()
+    if (sortUpper === "HIGHEST") {
+      sortCriteria = { rating: -1, createdAt: -1 }
+    } else if (sortUpper === "LOWEST") {
+      sortCriteria = { rating: 1, createdAt: -1 }
+    }
+
     const [docs, total, summary] = await Promise.all([
       ReviewModel.find({ stationId: stationObjectId })
-        .sort({ createdAt: -1 })
+        .sort(sortCriteria)
         .skip(skip)
         .limit(limit)
         .populate("userId", "name avatar email"),

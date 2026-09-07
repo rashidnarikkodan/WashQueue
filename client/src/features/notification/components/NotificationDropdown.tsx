@@ -27,7 +27,6 @@ export function NotificationDropdown() {
     markAsRead,
     markAllAsRead,
     markAsActioned,
-    deleteNotification,
     addNotification,
   } = useNotificationStore()
 
@@ -145,9 +144,9 @@ export function NotificationDropdown() {
     handleNotificationClick(n)
   }
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleMarkAsRead = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
-    await deleteNotification(id)
+    await markAsRead(id)
   }
 
   useEffect(() => {
@@ -209,7 +208,7 @@ export function NotificationDropdown() {
                   notification={n}
                   onClick={handleNotificationClick}
                   onActionClick={handleActionClick}
-                  onDelete={handleDelete}
+                  onMarkAsRead={handleMarkAsRead}
                 />
               ))
             ) : (

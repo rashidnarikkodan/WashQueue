@@ -1,19 +1,19 @@
 import React from "react"
-import { Droplets, Activity, Shield, Sparkles, Bell, Trash2 } from "lucide-react"
+import { Droplets, Activity, Shield, Sparkles, Bell, Check } from "lucide-react"
 import type { NotificationDto, NotificationType } from "@/shared/types/notification.types"
 
 interface NotificationItemCardProps {
   notification: NotificationDto
   onClick: (n: NotificationDto) => void
   onActionClick: (e: React.MouseEvent, n: NotificationDto) => void
-  onDelete: (e: React.MouseEvent, id: string) => void
+  onMarkAsRead?: (e: React.MouseEvent, id: string) => void
 }
 
 export function NotificationItemCard({
   notification: n,
   onClick,
   onActionClick,
-  onDelete,
+  onMarkAsRead,
 }: NotificationItemCardProps) {
   const formatTimeAgo = (dateInput: string | Date | undefined) => {
     if (!dateInput) return "JUST NOW"
@@ -111,15 +111,17 @@ export function NotificationItemCard({
               <span className="text-[9px] font-bold tracking-wider text-muted-foreground uppercase">
                 {formatTimeAgo(n.createdAt)}
               </span>
-              <button
-                type="button"
-                onClick={(e) => onDelete(e, n.id)}
-                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 rounded-md hover:bg-red-500/10 transition-all cursor-pointer"
-                title="Delete notification"
-                aria-label="Delete notification"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              {onMarkAsRead && isUnread && (
+                <button
+                  type="button"
+                  onClick={(e) => onMarkAsRead(e, n.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary rounded-md hover:bg-primary/10 transition-all cursor-pointer"
+                  title="Mark as read"
+                  aria-label="Mark as read"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
 

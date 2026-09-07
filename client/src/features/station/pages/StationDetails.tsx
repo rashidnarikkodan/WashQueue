@@ -16,7 +16,6 @@ import { StationPricingSection } from "../components/station-details/StationPric
 import { StationExtraServicesSection } from "../components/station-details/StationExtraServicesSection"
 import { StationLiveQueueSection } from "../components/station-details/StationLiveQueueSection"
 import { StationReviewsSection } from "../components/station-details/StationReviewsSection"
-import { StationQASection } from "../components/station-details/StationQASection"
 import { StationLocationSection } from "../components/station-details/StationLocationSection"
 import { StationSidebarCard } from "../components/station-details/StationSidebarCard"
 import { StationManagerSection } from "../components/station-details/StationManagerSection"
@@ -371,14 +370,11 @@ export function StationDetails({ role }: CommonStationDetailProps) {
           {currentRole !== ROLE.ADMIN && <StationLiveQueueSection stationId={station.id} />}
 
           {currentRole === ROLE.CUSTOMER && (
-            <>
-              <StationReviewsSection
-                stationId={station.id}
-                rating={station.rating}
-                reviewCount={station.reviewCount}
-              />
-              <StationQASection stationName={station.name} />
-            </>
+            <StationReviewsSection
+              stationId={station.id}
+              rating={station.rating}
+              reviewCount={station.reviewCount}
+            />
           )}
           {currentRole !== ROLE.ADMIN && (
             <StationLocationSection

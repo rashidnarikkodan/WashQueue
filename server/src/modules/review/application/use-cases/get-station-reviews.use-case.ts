@@ -8,7 +8,7 @@ export class GetStationReviewsUseCase implements IGetStationReviewsUseCase {
 
   async execute(
     stationId: string,
-    options?: { page?: number; limit?: number }
+    options?: { page?: number; limit?: number; sortBy?: string }
   ): Promise<StationReviewsResponseDTO> {
     const result = await this.reviewRepository.findByStationId(stationId, options)
     return {

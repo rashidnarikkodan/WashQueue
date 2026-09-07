@@ -218,26 +218,10 @@ export function NotificationCenterPage() {
     await deleteNotification(id)
   }
 
-  const handleOpenSettings = () => {
-    if (user?.role === ROLE.ADMIN) {
-      navigate("/admin/settings")
-    } else if (activeViewMode === VIEW_MODE.OWNER) {
-      navigate("/owner/profile")
-    } else if (activeViewMode === VIEW_MODE.MANAGER) {
-      navigate("/manager/profile")
-    } else {
-      navigate("/profile")
-    }
-  }
-
   return (
     <div className="container mx-auto px-4 md:px-8 py-8 space-y-8 max-w-7xl">
       {/* Top Header */}
-      <NotificationCenterHeader
-        unreadCount={unreadCount}
-        onMarkAllAsRead={markAllAsRead}
-        onOpenSettings={handleOpenSettings}
-      />
+      <NotificationCenterHeader unreadCount={unreadCount} onMarkAllAsRead={markAllAsRead} />
 
       {/* Search & Filter Toolbar */}
       <DataTableToolbar

@@ -50,11 +50,12 @@ export const reviewApi = {
   getStationReviews: async (
     stationId: string,
     page?: number,
-    limit?: number
+    limit?: number,
+    sortBy?: "LATEST" | "HIGHEST" | "LOWEST"
   ): Promise<StationReviewsDto> => {
     try {
       const response = await api.get(API_ROUTES.REVIEWS.BY_STATION(stationId), {
-        params: { page, limit },
+        params: { page, limit, sortBy },
         skipToast: true,
       })
       return (

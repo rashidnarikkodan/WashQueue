@@ -79,8 +79,9 @@ export class ReviewController {
 
     const page = req.query.page ? Number(req.query.page) : undefined
     const limit = req.query.limit ? Number(req.query.limit) : undefined
+    const sortBy = req.query.sortBy as string | undefined
 
-    const result = await this.getStationReviewsUseCase.execute(stationId, { page, limit })
+    const result = await this.getStationReviewsUseCase.execute(stationId, { page, limit, sortBy })
     success(res, result, HTTP_STATUS.OK, "Station reviews retrieved successfully")
   }
 

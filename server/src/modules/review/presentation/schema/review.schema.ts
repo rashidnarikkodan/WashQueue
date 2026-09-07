@@ -22,4 +22,5 @@ export const updateReviewSchema = z.object({
 export const getReviewsQuerySchema = z.object({
   page: z.coerce.number().min(1).optional(),
   limit: z.coerce.number().min(1).max(100).optional(),
+  sortBy: z.enum(["LATEST", "HIGHEST", "LOWEST", "latest", "highest", "lowest"]).optional(),
 })

@@ -25,7 +25,7 @@ export interface IGetReviewByBookingUseCase {
 export interface IGetStationReviewsUseCase {
   execute(
     stationId: string,
-    options?: { page?: number; limit?: number }
+    options?: { page?: number; limit?: number; sortBy?: string }
   ): Promise<StationReviewsResponseDTO>
 }
 
