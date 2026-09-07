@@ -136,4 +136,17 @@ export const API_ROUTES = {
     OWNER: "/owner",
     MANAGER: "/manager",
   },
+  ISSUES: {
+    ROOT: "/api/issues",
+    CREATE: "/",
+    MY_ISSUES: "/my-issues",
+    BY_STATION: "/station/:stationId",
+    ADMIN_ALL: "/admin/all",
+    BY_ID: "/:id",
+    STATUS: "/:id/status",
+    ASSIGN: "/:id/assign",
+    ESCALATE: "/:id/escalate",
+    RESOLVE: "/:id/resolve",
+    CLOSE: "/:id/close",
+  },
 } as const

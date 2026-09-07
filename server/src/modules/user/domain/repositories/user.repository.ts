@@ -1,5 +1,5 @@
 import { User } from "../entities/User"
-import { RoleType } from "@/common/constants/role.constants"
+import type { RoleType } from "@/common/constants/role.constants"
 import { IBaseRepository } from "@/core/domain/repository.interface"
 import { GetUsersQuery, GetUsersResponse } from "../../application/dto/get-users.dto"
 
