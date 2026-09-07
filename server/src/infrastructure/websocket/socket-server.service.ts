@@ -46,6 +46,7 @@ export class SocketServerService {
       pingInterval: 10000,
     })
 
+    // middleware for socket, for auth user
     this.io.use((socket: Socket, next) => {
       try {
         const token =
