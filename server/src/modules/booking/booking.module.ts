@@ -62,12 +62,6 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
   transactionRunner
 )
 
-// CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue
-// service (and CancelBookingUseCase optionally on the payment module's refund use-case).
-// Both of those modules depend back on this module's repos, so building these two eagerly here
-// would create a require() cycle between booking.module.ts and queue.module.ts/payment.module.ts.
-// They're built lazily instead — see @/bootstrap/module-composition.
-
 export function createCreateWalkInBookingUseCase(
   queueService: IBookingQueueService
 ): CreateWalkInBookingUseCase {

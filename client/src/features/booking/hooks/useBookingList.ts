@@ -24,9 +24,6 @@ export function useBookingList({
   const { user } = useAuthStore()
   const ownerId = isOwner ? (user?.ownerId ?? user?.id) : undefined
 
-  // A page that isn't opting into a management view (owner/manager/admin) is always the
-  // customer's personal "My Bookings" list — it must show only bookings the user themself made,
-  // never bookings tied to their owner/manager role, regardless of what role their account holds.
   const mine = !isManager && !isOwner && !isAdmin
 
   const [ownerStations, setOwnerStations] = useState<{ id: string; name: string }[]>([])

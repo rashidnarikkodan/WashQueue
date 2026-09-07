@@ -65,10 +65,6 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     }
 
-    // Attempt to create the owner's RazorpayX payout destination now, while they're present to
-    // fix a bad IFSC/account number immediately — rather than waiting until admin approval days
-    // later. Not fatal here: ApproveOwnerUseCase still hard-requires it before final approval,
-    // and ProcessSettlementUseCase has its own lazy fallback — this is just the earliest attempt.
     try {
       await ensureOwnerPayoutAccount(
         owner,
