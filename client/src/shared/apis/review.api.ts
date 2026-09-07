@@ -42,7 +42,6 @@ export const reviewApi = {
       const response = await api.get(API_ROUTES.REVIEWS.BY_BOOKING(bookingId), { skipToast: true })
       return response.data?.data || null
     } catch {
-      // Return null quietly if not reviewed
       return null
     }
   },

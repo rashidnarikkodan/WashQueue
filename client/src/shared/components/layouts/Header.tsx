@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Menu, X, Heart } from "lucide-react"
-import ThemeToggle from "../header/ThemeToggle"
 import { NotificationDropdown } from "@/features/notification"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
@@ -104,7 +103,6 @@ export default function Header({ role }: { role?: string }) {
               <Heart className="h-4.5 w-4.5" />
             </Link>
           )}
-          <ThemeToggle />
 
           {isAuthenticated && <NotificationDropdown />}
 

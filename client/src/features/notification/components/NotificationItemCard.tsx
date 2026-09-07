@@ -60,15 +60,14 @@ export function NotificationItemCard({
     }
   }
 
-  // Check if image is present in payload data
   let imageUrl: string | undefined
-  try {
-    if (n.data) {
+  if (n.data) {
+    try {
       const parsed = typeof n.data === "string" ? JSON.parse(n.data) : n.data
       imageUrl = parsed?.image || parsed?.imageUrl
+    } catch {
+      imageUrl = undefined
     }
-  } catch {
-    // ignore
   }
 
   const isUnread = !n.isRead
@@ -81,7 +80,6 @@ export function NotificationItemCard({
       }`}
     >
       <div className="flex items-start gap-4">
-        {/* Icon container */}
         <div className="relative shrink-0">
           <div
             className={`flex h-11 w-11 items-center justify-center rounded-xl ${getIconBackground(
@@ -95,7 +93,6 @@ export function NotificationItemCard({
           )}
         </div>
 
-        {/* Content */}
         <div className="flex-1 space-y-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
@@ -125,17 +122,14 @@ export function NotificationItemCard({
             </div>
           </div>
 
-          {/* Message Description */}
           <p className="text-xs text-muted-foreground leading-relaxed">{n.message}</p>
 
-          {/* Promo or Attached Image */}
           {imageUrl && (
             <div className="mt-2.5 rounded-xl overflow-hidden h-28 w-full border border-border/60">
               <img src={imageUrl} alt={n.title} className="w-full h-full object-cover" />
             </div>
           )}
 
-          {/* Card Actions */}
           {n.actionType === "NAVIGATE" && (
             <div className="flex items-center gap-3 pt-2">
               <button

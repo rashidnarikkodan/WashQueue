@@ -72,7 +72,6 @@ export function StationReviewsSection({
   const rating = fetchedRating !== null ? fetchedRating : initialRating
   const reviewCount = fetchedReviewCount !== null ? fetchedReviewCount : initialReviewCount
 
-  // Rating breakdown distribution calculation
   const breakdown = useMemo(() => {
     const counts: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
     reviews.forEach((r) => {
@@ -95,7 +94,6 @@ export function StationReviewsSection({
 
   return (
     <div className="space-y-8 text-left animate-in fade-in duration-300">
-      {/* Section Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
@@ -112,8 +110,6 @@ export function StationReviewsSection({
         </div>
       </div>
 
-      {/* Overview Card: Score + Rating Breakdown (Full Width) */}
-      {/* Left Score Box */}
       <div className="p-2 sm:p-2 rounded-3xl border border-border/80 bg-card/80 backdrop-blur-md shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
           <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-muted/30 border border-border/60 space-y-3">
@@ -141,7 +137,6 @@ export function StationReviewsSection({
             </div>
           </div>
 
-          {/* Right Rating Breakdown Bars */}
           <div className="md:col-span-8 space-y-3 px-8">
             <div className="flex items-center justify-between pb-1">
               <h3 className="text-sm font-bold text-foreground">Rating Breakdown</h3>
@@ -175,9 +170,7 @@ export function StationReviewsSection({
         </div>
       </div>
 
-      {/* Customer Reviews Area */}
       <div className="space-y-4">
-        {/* Subheader & Sort */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-primary" />
@@ -204,7 +197,6 @@ export function StationReviewsSection({
           )}
         </div>
 
-        {/* Reviews List - Minimal & Short, No Heavy Boxes */}
         {isLoading ? (
           <div className="py-12 text-center text-muted-foreground text-xs flex flex-col items-center justify-center gap-2">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -286,7 +278,6 @@ export function StationReviewsSection({
           </div>
         )}
 
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4 border-t border-border/60">
             <span className="text-xs text-muted-foreground">

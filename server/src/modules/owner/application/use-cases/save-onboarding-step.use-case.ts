@@ -26,7 +26,6 @@ export class SaveOnboardingStepUseCase implements ISaveOnboardingStepUseCase {
     step: number
     details: IOwnerOnboardingDetails
     isSubmitted: boolean
-    // tokens?: { accessToken: string; refreshToken: string }
   }> {
     const userDoc = await this.userRepository.findById(userId)
 

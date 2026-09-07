@@ -36,14 +36,12 @@ export function NotificationDropdown() {
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Fetch unread counter periodically
   useEffect(() => {
     fetchUnreadCount()
     const interval = setInterval(fetchUnreadCount, 30000)
     return () => clearInterval(interval)
   }, [fetchUnreadCount])
 
-  // Fetch only unread notifications when opened or when tab changes
   const loadData = useCallback(() => {
     const typeFilter = activeTab !== "all" ? (activeTab as NotificationType) : undefined
 
@@ -60,7 +58,6 @@ export function NotificationDropdown() {
     }
   }, [isOpen, loadData])
 
-  // Handle outside click to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -71,7 +68,6 @@ export function NotificationDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Filter unread notifications by search text
   const filteredNotifications = useMemo(() => {
     const unreadOnly = notifications.filter((n) => !n.isRead)
     if (!searchQuery.trim()) return unreadOnly
@@ -165,7 +161,6 @@ export function NotificationDropdown() {
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* Bell Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -182,10 +177,8 @@ export function NotificationDropdown() {
         )}
       </button>
 
-      {/* Main Notification Dropdown Modal */}
       {isOpen && (
         <div className="absolute right-0 mt-3 w-[450px] md:w-[500px] max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-          {/* Header & Filter Section */}
           <div className="flex flex-col p-6 pb-4 gap-4 border-b border-border/40">
             <NotificationHeader
               unreadCount={unreadCount}
@@ -197,7 +190,6 @@ export function NotificationDropdown() {
             <NotificationFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
 
-          {/* Notification Cards List */}
           <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[450px]">
             {isLoading ? (
               <NotificationSkeletonList count={3} />
@@ -216,7 +208,6 @@ export function NotificationDropdown() {
             )}
           </div>
 
-          {/* Footer Section */}
           <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/20">
             <button
               type="button"

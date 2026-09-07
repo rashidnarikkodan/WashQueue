@@ -32,8 +32,6 @@ import { VehicleCategoryMongoRepository } from "../vehicle-catelog/infrastructur
 import { VehicleClassMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-class.mongo.repository"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
 import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
-
-//from module notification
 import { notificationDispatcherService } from "../notification/notification.module"
 
 export const stationRepository = new StationMongoRepository()

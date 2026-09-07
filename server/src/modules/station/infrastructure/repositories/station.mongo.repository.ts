@@ -396,15 +396,6 @@ export class StationMongoRepository
       match.status = "ACTIVE"
     }
 
-    // if (filter.city) {
-    //   match["address.city"] = { $regex: filter.city, $options: "i" }
-    // }
-    // if (filter.state) {
-    //   match["address.state"] = { $regex: filter.state, $options: "i" }
-    // }
-    // if (filter.country) {
-    //   match["address.country"] = { $regex: filter.country, $options: "i" }
-    // }
     if (filter.isActive !== undefined) {
       match.isActive = filter.isActive
     }
@@ -412,13 +403,11 @@ export class StationMongoRepository
       match.verifiedAt = { $exists: true, $ne: null }
     }
 
-    //rating filter
     const minRating = filter.minRating
     if (minRating !== undefined && minRating > 0) {
       match.rating = { $gte: minRating }
     }
 
-    //search result filter
     const q = filter.search
     if (q && q.trim().length > 0) {
       const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")

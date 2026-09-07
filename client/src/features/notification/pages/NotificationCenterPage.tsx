@@ -47,13 +47,11 @@ export function NotificationCenterPage() {
   const [typeFilter, setTypeFilter] = useState<string>("ALL")
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
 
-  // Sync tab change with internal filters
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
     setCurrentPage(1)
   }
 
-  // Load data from server
   const loadData = useCallback(() => {
     let isRead: boolean | undefined
     if (activeTab === "unread" || statusFilter === "UNREAD") {
@@ -96,7 +94,6 @@ export function NotificationCenterPage() {
     }
   }, [addNotification])
 
-  // Filter notifications in-memory by search query
   const filteredNotifications = useMemo(() => {
     if (!searchQuery.trim()) return notifications
     const q = searchQuery.toLowerCase()
@@ -108,7 +105,6 @@ export function NotificationCenterPage() {
     )
   }, [notifications, searchQuery])
 
-  // Filter configurations for DataTableToolbar
   const selectFilters: SelectFilter[] = [
     {
       id: "typeFilter",
