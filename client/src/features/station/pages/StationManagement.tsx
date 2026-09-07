@@ -82,7 +82,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const searchQuery = searchParams.get("q") || ""
   const activeTab = searchParams.get("tab") || "all"
   const currentPage = Number(searchParams.get("page")) || 1
-  const limit = 10
+  const limit = 12
 
   const loadStations = useCallback(async () => {
     if (isAdmin) {
