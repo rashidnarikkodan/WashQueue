@@ -13,6 +13,7 @@ export interface AuthUser {
   walletBalance?: number
   authProvider?: string
   ownerId?: string
+  isManager?: boolean
 }
 
 export interface LoginState {

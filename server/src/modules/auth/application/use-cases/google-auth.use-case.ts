@@ -130,6 +130,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     let isVerified: boolean = user.isVerified
     let onboardingStep: number | undefined = undefined
     let ownerId: string | undefined = undefined
+    let isManager: boolean | undefined = undefined
 
     if (user.role === ROLE.OWNER && this.ownerRepository) {
       const owner = await this.ownerRepository.findByUserId(user.id!)
@@ -137,6 +138,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         isVerified = owner.isVerified ?? false
         onboardingStep = owner.onboardingStep ?? 1
         ownerId = owner.id
+        isManager = owner.isManager ?? false
       }
     }
 
@@ -151,6 +153,7 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
         isNewUser,
         authProvider: user.authProvider,
         ownerId,
+        isManager,
       },
       tokens: {
         accessToken,

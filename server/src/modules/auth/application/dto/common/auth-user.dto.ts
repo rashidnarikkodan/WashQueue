@@ -13,6 +13,7 @@ export interface AuthUser {
   onboardingStep?: number
   authProvider?: string
   ownerId?: string
+  isManager?: boolean
 }
 
 export interface AuthTokens {

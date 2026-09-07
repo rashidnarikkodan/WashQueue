@@ -132,6 +132,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       await managerApi.selfAssignManager(station.id)
       await loadManagerData()
       await onRefresh()
+      await useAuthStore.getState().refreshUser()
       toast.success("Assigned yourself as manager for this station!")
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
@@ -157,6 +158,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         try {
           setManagerAssignment(null)
           await managerApi.removeManager(targetAssignment.assignmentId)
+          await useAuthStore.getState().refreshUser()
           toast.success("Station manager removed successfully")
         } catch (err: unknown) {
           const errorObj = err as { response?: { data?: { message?: string } } }

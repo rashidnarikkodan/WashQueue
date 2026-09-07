@@ -80,6 +80,7 @@ export class LoginUseCase implements ILoginUseCase {
     let isVerified: boolean = user.isVerified
     let onboardingStep: number | undefined = undefined
     let ownerId: string | undefined = undefined
+    let isManager: boolean | undefined = undefined
 
     if (user.role === ROLE.OWNER && this.ownerRepository) {
       const owner = await this.ownerRepository.findByUserId(user.id!)
@@ -87,6 +88,7 @@ export class LoginUseCase implements ILoginUseCase {
         isVerified = owner.isVerified ?? false
         onboardingStep = owner.onboardingStep ?? 1
         ownerId = owner.id
+        isManager = owner.isManager ?? false
       }
     }
 
@@ -103,6 +105,7 @@ export class LoginUseCase implements ILoginUseCase {
         onboardingStep,
         authProvider: user.authProvider,
         ownerId,
+        isManager,
       },
       tokens: {
         accessToken,
