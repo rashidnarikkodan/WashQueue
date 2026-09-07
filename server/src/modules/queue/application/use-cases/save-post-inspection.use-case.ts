@@ -16,7 +16,7 @@ import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-r
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
-import { ICreateSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
+import { ICreateSettlementUseCase } from "@/modules/settlement/settlement.module"
 import logger from "@/configs/logger.config"
 
 export interface SavePostInspectionInput {

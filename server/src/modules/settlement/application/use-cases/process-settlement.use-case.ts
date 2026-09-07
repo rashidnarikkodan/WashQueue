@@ -10,7 +10,7 @@ import { ISettlementRepository } from "../../domain/repositories/settlement.repo
 import { IPayoutRepository } from "../../domain/repositories/payout.repository"
 import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import {
   IPayoutProvider,
   PayoutProviderError,
@@ -20,7 +20,7 @@ import { PaymentMethod } from "@/common/constants/payment.constants"
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import { ensureOwnerPayoutAccount } from "@/modules/owner/application/services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"
-import { NotificationDispatcherService } from "@/modules/notification/notification.module"
+import { NotificationDispatcherService } from "@/modules/notification/infrastructure/services/notification-dispatcher.service"
 
 export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
   constructor(
@@ -28,7 +28,8 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
     private readonly payoutRepository: IPayoutRepository,
     private readonly ownerRepository: IOwnerRepository,
     private readonly payoutProvider: IPayoutProvider,
-    private readonly bookingRepository?: IBookingRepository
+    private readonly bookingRepository?: IBookingRepository,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(settlementId: string): Promise<Settlement> {
@@ -139,6 +140,26 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       { settlementId: guardedSettlement.id, payoutId: payout.id, ownerId: owner.id },
       "Settlement claimed for payout processing"
     )
+
+    if (this.notificationDispatcher && owner.userId) {
+      try {
+        await this.notificationDispatcher.dispatch({
+          recipientId: owner.userId,
+          type: "PAYMENT",
+          title: `Settlement Payout Processed (₹${guardedSettlement.stationSettlementAmount})`,
+          message: `Payout of ₹${guardedSettlement.stationSettlementAmount} has been processed for booking #${guardedSettlement.bookingId}.`,
+          data: {
+            settlementId: guardedSettlement.id,
+            bookingId: guardedSettlement.bookingId,
+            amount: guardedSettlement.stationSettlementAmount,
+            url: "/owner/financial-records",
+          },
+          actionType: "NAVIGATE",
+        })
+      } catch {
+        // Non-blocking
+      }
+    }
 
     try {
       let providerResult: PayoutProviderResult

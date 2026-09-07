@@ -1,20 +1,22 @@
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
-import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { Owner } from "../../domain/entities/Owner"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
+import { NotificationDispatcherService } from "@/modules/notification/infrastructure/services/notification-dispatcher.service"
 
 export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
   constructor(
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
-    private readonly paymentAccountService: IPaymentAccountService
+    private readonly payoutProvider?: IPayoutProvider,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute({
@@ -41,7 +43,15 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     if (isApproved) {
       owner.verify()
 
-      await ensureOwnerPayoutAccount(owner, this.payoutProvider, user.name, user.email, user.phone)
+      if (this.payoutProvider) {
+        await ensureOwnerPayoutAccount(
+          owner,
+          this.payoutProvider,
+          user.name,
+          user.email,
+          user.phone
+        )
+      }
 
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })

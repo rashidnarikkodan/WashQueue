@@ -1,45 +1,30 @@
-import { NotFoundError } from "@/common/errors/not-found-error"
-import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
 import {
   SettlementFilterOptions,
   SettlementPaginationDTO,
   SettlementResponseDTO,
 } from "../dtos/settlement.dto"
-import { IGetOwnerSettlementsUseCase } from "../interfaces/settlement.usecases"
+import { IGetAdminSettlementsUseCase } from "../interfaces/settlement.usecases"
 
-export class GetOwnerSettlementsUseCase implements IGetOwnerSettlementsUseCase {
+export class GetAdminSettlementsUseCase implements IGetAdminSettlementsUseCase {
   constructor(
     private readonly settlementRepository: ISettlementRepository,
-    private readonly ownerRepository: IOwnerRepository,
     private readonly bookingRepository: IBookingRepository
   ) {}
 
   async execute(
-    userId: string,
     filters: SettlementFilterOptions
   ): Promise<SettlementPaginationDTO<SettlementResponseDTO>> {
-    let owner = await this.ownerRepository.findByUserId(userId)
-    if (!owner) {
-      owner = await this.ownerRepository.findById(userId)
-    }
-
-    if (!owner || !owner.id) {
-      throw new NotFoundError("Owner profile not found for this user")
-    }
-
     const page = Math.max(Number(filters.page) || 1, 1)
     const limit = Math.max(Number(filters.limit) || 10, 1)
 
     const { settlements, total } = await this.settlementRepository.findMany({
       ...filters,
-      ownerId: owner.id,
       page,
       limit,
     })
 
-    // Enrich settlements with booking metadata
     const enriched: SettlementResponseDTO[] = await Promise.all(
       settlements.map(async (s) => {
         let bookingNumber: string | undefined

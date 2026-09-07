@@ -15,7 +15,7 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/queue-usecases.interface"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
-import { ICreateSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
+import { ICreateSettlementUseCase } from "@/modules/settlement/settlement.module"
 import logger from "@/configs/logger.config"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {

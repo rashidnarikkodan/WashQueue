@@ -15,8 +15,8 @@ import bookingRouter from "@/bootstrap/module-composition"
 import queueRouter from "@/modules/queue/queue.module"
 import paymentRouter, { invoiceRouter } from "@/modules/payment/payment.module"
 import walletRouter from "@/modules/wallet/wallet.module"
-import { settlementRouter } from "@/modules/booking/booking.module"
-import { notificationRouter } from "@/modules/notification/notification.module"
+import settlementRouter from "@/modules/settlement/settlement.module"
+import notificationRouter from "@/modules/notification/notification.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()

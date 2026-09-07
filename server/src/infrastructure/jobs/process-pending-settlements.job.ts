@@ -1,6 +1,6 @@
 import cron, { ScheduledTask } from "node-cron"
 import logger from "@/configs/logger.config"
-import { processPendingSettlementsUseCase } from "@/modules/booking/booking.module"
+import { processPendingSettlementsUseCase } from "@/modules/settlement/settlement.module"
 
 let task: ScheduledTask | null = null
 

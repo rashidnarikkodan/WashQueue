@@ -9,6 +9,7 @@ import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
+import { NotificationDispatcherService } from "@/modules/notification/infrastructure/services/notification-dispatcher.service"
 import logger from "@/configs/logger.config"
 
 export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
@@ -16,7 +17,8 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
-    private readonly payoutProvider: IPayoutProvider
+    private readonly payoutProvider: IPayoutProvider,
+    private readonly notificationDispatcher?: NotificationDispatcherService
   ) {}
 
   async execute(userId: string): Promise<{
@@ -81,7 +83,7 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       )
     }
 
-    await this.ownerRepository.save(owner)
+    const savedOwner = await this.ownerRepository.save(owner)
 
     const tokenPayload = {
       userId: userDoc.id || userId,

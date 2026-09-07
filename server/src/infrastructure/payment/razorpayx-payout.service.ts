@@ -4,7 +4,7 @@ import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { PayoutStatus } from "@/modules/booking/domain/entities/Payout"
+import { PayoutStatus } from "@/modules/settlement/domain/entities/Payout"
 import {
   CreatePayoutParams,
   EnsurePayoutDestinationResult,
