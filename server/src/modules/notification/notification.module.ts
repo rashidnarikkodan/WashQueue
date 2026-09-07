@@ -5,9 +5,9 @@ import { INotificationDispatcherService } from "./application/interfaces/notific
 import { CreateNotificationUseCase } from "./application/use-cases/create-notification.use-case"
 import { GetNotificationsUseCase } from "./application/use-cases/get-notifications.use-case"
 import { GetNotificationByIdUseCase } from "./application/use-cases/get-notification-by-id.use-case"
-import { MarkNotificationAsReadUseCase } from "./application/use-cases/mark-notification-as-read.use-case"
-import { MarkAllNotificationsAsReadUseCase } from "./application/use-cases/mark-all-notifications-as-read.use-case"
-import { MarkNotificationAsActionedUseCase } from "./application/use-cases/mark-notification-as-actioned.use-case"
+import { MarkNotificationAsReadUseCase } from "./application/use-cases/mark-read.use-case"
+import { MarkAllNotificationsAsReadUseCase } from "./application/use-cases/mark-all-read.use-case"
+import { MarkNotificationAsActionedUseCase } from "./application/use-cases/mark-actioned.use-case"
 import { DeleteNotificationUseCase } from "./application/use-cases/delete-notification.use-case"
 import { GetUnreadNotificationCountUseCase } from "./application/use-cases/get-unread-notification-count.use-case"
 import { NotificationController } from "./presentation/notification.controller"
@@ -15,6 +15,7 @@ import { createNotificationRouter } from "./presentation/notification.routes"
 import { MailService } from "@/core/application/services/mail.service"
 import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
 import { StationMongoRepository } from "../station/infrastructure/repositories/station.mongo.repository"
+import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 
 // Repository (Data Access)
 export const notificationRepository = new NotificationMongoRepository()
@@ -61,12 +62,13 @@ const mailService = new MailService()
 const userRepository = new UserRepository()
 const stationRepository = new StationMongoRepository()
 
-// Booking notification service wired with dispatcher, mailer, user repo, and station repo
+// Booking notification service wired with dispatcher, mailer, user repo, station repo, and realtime publisher
 export const bookingNotificationService = new BookingNotificationService(
   notificationDispatcherService,
   mailService,
   userRepository,
-  stationRepository
+  stationRepository,
+  SocketServerService.getInstance()
 )
 
 export type {

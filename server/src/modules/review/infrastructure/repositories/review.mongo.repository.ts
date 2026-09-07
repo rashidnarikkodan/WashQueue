@@ -1,4 +1,5 @@
 import { Types } from "mongoose"
+import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 import { Review } from "../../domain/entities/Review"
 import {
   FindReviewsOptions,
@@ -8,52 +9,28 @@ import {
   UserReviewsResult,
 } from "../../domain/repositories/review.repository.interface"
 import { ReviewMapper } from "../mappers/review.mapper"
-import { ReviewModel } from "../models/review.model"
+import { IReview, ReviewModel } from "../models/review.model"
 
-export class ReviewMongoRepository implements IReviewRepository {
+export class ReviewMongoRepository
+  extends BaseRepository<Review, IReview>
+  implements IReviewRepository
+{
+  constructor() {
+    super(ReviewModel, new ReviewMapper())
+  }
+
   async create(review: Review): Promise<Review> {
-    const raw = ReviewMapper.toPersistence(review)
-    const created = await ReviewModel.create(raw)
-    return ReviewMapper.toDomain(created)
-  }
-
-  async update(review: Review): Promise<Review> {
-    const data = review.data
-    if (!data.id) {
-      throw new Error("Cannot update review without an id")
-    }
-
-    const updated = await ReviewModel.findByIdAndUpdate(
-      data.id,
-      {
-        $set: {
-          rating: data.rating,
-          comment: data.comment,
-          update_count: data.updateCount,
-        },
-      },
-      { new: true }
-    )
-
-    if (!updated) {
-      throw new Error("Review not found for update")
-    }
-
-    return ReviewMapper.toDomain(updated)
-  }
-
-  async findById(id: string): Promise<Review | null> {
-    if (!Types.ObjectId.isValid(id)) return null
-    const found = await ReviewModel.findById(id)
-    return found ? ReviewMapper.toDomain(found) : null
+    return this.save(review)
   }
 
   async findByBookingId(bookingId: string): Promise<Review | null> {
     if (!Types.ObjectId.isValid(bookingId)) return null
-    const found = await ReviewModel.findOne({
-      bookingId: new Types.ObjectId(bookingId),
-    })
-    return found ? ReviewMapper.toDomain(found) : null
+    const found = await this.model
+      .findOne({
+        bookingId: new Types.ObjectId(bookingId),
+      })
+      .exec()
+    return found ? this.mapper.toDomain(found) : null
   }
 
   async findByStationId(
@@ -87,16 +64,17 @@ export class ReviewMongoRepository implements IReviewRepository {
     }
 
     const [docs, total, summary] = await Promise.all([
-      ReviewModel.find({ stationId: stationObjectId })
+      this.model
+        .find({ stationId: stationObjectId })
         .sort(sortCriteria)
         .skip(skip)
         .limit(limit)
         .populate("userId", "name avatar email"),
-      ReviewModel.countDocuments({ stationId: stationObjectId }),
+      this.model.countDocuments({ stationId: stationObjectId }),
       this.getStationRatingSummary(stationId),
     ])
 
-    const reviews = docs.map((doc) => ReviewMapper.toDomain(doc))
+    const reviews = docs.map((doc) => this.mapper.toDomain(doc))
 
     return {
       reviews,
@@ -127,11 +105,11 @@ export class ReviewMongoRepository implements IReviewRepository {
     const userObjectId = new Types.ObjectId(userId)
 
     const [docs, total] = await Promise.all([
-      ReviewModel.find({ userId: userObjectId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      ReviewModel.countDocuments({ userId: userObjectId }),
+      this.model.find({ userId: userObjectId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      this.model.countDocuments({ userId: userObjectId }),
     ])
 
-    const reviews = docs.map((doc) => ReviewMapper.toDomain(doc))
+    const reviews = docs.map((doc) => this.mapper.toDomain(doc))
 
     return {
       reviews,
@@ -142,28 +120,21 @@ export class ReviewMongoRepository implements IReviewRepository {
     }
   }
 
-  async delete(id: string): Promise<void> {
-    if (!Types.ObjectId.isValid(id)) return
-    await ReviewModel.findByIdAndDelete(id)
-  }
-
   async getStationRatingSummary(stationId: string): Promise<StationRatingSummary> {
     if (!Types.ObjectId.isValid(stationId)) {
       return { averageRating: 0, reviewCount: 0 }
     }
 
-    const result = await ReviewModel.aggregate<{ _id: null; averageRating: number; count: number }>(
-      [
-        { $match: { stationId: new Types.ObjectId(stationId) } },
-        {
-          $group: {
-            _id: null,
-            averageRating: { $avg: "$rating" },
-            count: { $sum: 1 },
-          },
+    const result = await this.model.aggregate<{ _id: null; averageRating: number; count: number }>([
+      { $match: { stationId: new Types.ObjectId(stationId) } },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+          count: { $sum: 1 },
         },
-      ]
-    )
+      },
+    ])
 
     const first = result[0]
     if (!first) {

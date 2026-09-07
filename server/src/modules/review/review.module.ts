@@ -2,6 +2,7 @@ import { bookingRepository } from "@/modules/booking/booking.module"
 import { stationRepository } from "@/modules/station/station.module"
 import { notificationDispatcherService } from "@/modules/notification/notification.module"
 import { ReviewMongoRepository } from "./infrastructure/repositories/review.mongo.repository"
+import { StationRatingSyncService } from "./application/services/station-rating-sync.service"
 import { CreateReviewUseCase } from "./application/use-cases/create-review.use-case"
 import { UpdateReviewUseCase } from "./application/use-cases/update-review.use-case"
 import { GetReviewByIdUseCase } from "./application/use-cases/get-review-by-id.use-case"
@@ -15,21 +16,33 @@ import { createReviewRouter } from "./presentation/review.routes"
 // Repository (Data Access)
 export const reviewRepository = new ReviewMongoRepository()
 
+// Domain / Application Services
+export const stationRatingSyncService = new StationRatingSyncService(
+  reviewRepository,
+  stationRepository
+)
+
 // Use Cases (Application Layer)
 export const createReviewUseCase = new CreateReviewUseCase(
   reviewRepository,
   bookingRepository,
-  stationRepository,
+  stationRatingSyncService,
   notificationDispatcherService
 )
 
-export const updateReviewUseCase = new UpdateReviewUseCase(reviewRepository, stationRepository)
+export const updateReviewUseCase = new UpdateReviewUseCase(
+  reviewRepository,
+  stationRatingSyncService
+)
 
 export const getReviewByIdUseCase = new GetReviewByIdUseCase(reviewRepository)
 export const getReviewByBookingUseCase = new GetReviewByBookingUseCase(reviewRepository)
 export const getStationReviewsUseCase = new GetStationReviewsUseCase(reviewRepository)
 export const getUserReviewsUseCase = new GetUserReviewsUseCase(reviewRepository)
-export const deleteReviewUseCase = new DeleteReviewUseCase(reviewRepository, stationRepository)
+export const deleteReviewUseCase = new DeleteReviewUseCase(
+  reviewRepository,
+  stationRatingSyncService
+)
 
 // Controller (Presentation Layer)
 export const reviewController = new ReviewController(

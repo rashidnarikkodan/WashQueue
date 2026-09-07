@@ -1,6 +1,6 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
-import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { IStationRatingSyncService } from "../interfaces/station-rating-sync.interface"
 import { IReviewRepository } from "../../domain/repositories/review.repository.interface"
 import { ReviewResponseDTO, UpdateReviewDTO } from "../dtos/review.dto"
 import { IUpdateReviewUseCase } from "../interfaces/review-usecases.interface"
@@ -9,7 +9,7 @@ import { ReviewDTOMapper } from "../mappers/review-dto.mapper"
 export class UpdateReviewUseCase implements IUpdateReviewUseCase {
   constructor(
     private readonly reviewRepository: IReviewRepository,
-    private readonly stationRepository?: IStationRepository
+    private readonly stationRatingSyncService?: IStationRatingSyncService
   ) {}
 
   async execute(
@@ -28,20 +28,11 @@ export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 
     review.updateReview(input.rating, input.comment)
 
-    const updated = await this.reviewRepository.update(review)
+    const updated = await this.reviewRepository.save(review)
 
-    // Update station aggregate rating
-    if (this.stationRepository && review.stationId) {
-      try {
-        const summary = await this.reviewRepository.getStationRatingSummary(review.stationId)
-        const station = await this.stationRepository.findById(review.stationId)
-        if (station) {
-          station.updateRating(summary.averageRating, summary.reviewCount)
-          await this.stationRepository.save(station)
-        }
-      } catch {
-        // Non-blocking station rating update
-      }
+    // Sync station aggregate rating via domain service
+    if (this.stationRatingSyncService && review.stationId) {
+      await this.stationRatingSyncService.syncStationRating(review.stationId)
     }
 
     return ReviewDTOMapper.toDTO(updated)

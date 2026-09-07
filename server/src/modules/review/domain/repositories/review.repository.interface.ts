@@ -1,3 +1,4 @@
+import { IBaseRepository } from "@/core/domain/repository.interface"
 import { Review } from "../entities/Review"
 
 export interface FindReviewsOptions {
@@ -29,13 +30,11 @@ export interface StationRatingSummary {
   reviewCount: number
 }
 
-export interface IReviewRepository {
-  create(review: Review): Promise<Review>
-  update(review: Review): Promise<Review>
-  findById(id: string): Promise<Review | null>
+export interface IReviewRepository extends IBaseRepository<Review> {
+  create?(review: Review): Promise<Review>
+  update(id: string, updates: Partial<Review>): Promise<Review | null>
   findByBookingId(bookingId: string): Promise<Review | null>
   findByStationId(stationId: string, options?: FindReviewsOptions): Promise<StationReviewsResult>
   findByUserId(userId: string, options?: FindReviewsOptions): Promise<UserReviewsResult>
-  delete(id: string): Promise<void>
   getStationRatingSummary(stationId: string): Promise<StationRatingSummary>
 }

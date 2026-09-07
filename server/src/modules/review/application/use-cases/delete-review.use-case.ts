@@ -1,14 +1,14 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
-import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { IStationRatingSyncService } from "../interfaces/station-rating-sync.interface"
 import { IReviewRepository } from "../../domain/repositories/review.repository.interface"
 import { IDeleteReviewUseCase } from "../interfaces/review-usecases.interface"
 
 export class DeleteReviewUseCase implements IDeleteReviewUseCase {
   constructor(
     private readonly reviewRepository: IReviewRepository,
-    private readonly stationRepository?: IStationRepository
+    private readonly stationRatingSyncService?: IStationRatingSyncService
   ) {}
 
   async execute(
@@ -30,18 +30,9 @@ export class DeleteReviewUseCase implements IDeleteReviewUseCase {
 
     await this.reviewRepository.delete(reviewId)
 
-    // Update station rating and review count
-    if (this.stationRepository && review.stationId) {
-      try {
-        const summary = await this.reviewRepository.getStationRatingSummary(review.stationId)
-        const station = await this.stationRepository.findById(review.stationId)
-        if (station) {
-          station.updateRating(summary.averageRating, summary.reviewCount)
-          await this.stationRepository.save(station)
-        }
-      } catch {
-        // Non-blocking station rating update
-      }
+    // Sync station rating and review count via domain service
+    if (this.stationRatingSyncService && review.stationId) {
+      await this.stationRatingSyncService.syncStationRating(review.stationId)
     }
 
     return {

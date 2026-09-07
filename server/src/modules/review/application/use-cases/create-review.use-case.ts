@@ -4,7 +4,7 @@ import { BadRequestError } from "@/common/errors/bad-request-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { BookingStatus } from "@/common/constants/booking.constants"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
-import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
+import { IStationRatingSyncService } from "../interfaces/station-rating-sync.interface"
 import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { Review } from "../../domain/entities/Review"
 import { IReviewRepository } from "../../domain/repositories/review.repository.interface"
@@ -16,7 +16,7 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
   constructor(
     private readonly reviewRepository: IReviewRepository,
     private readonly bookingRepository: IBookingRepository,
-    private readonly stationRepository?: IStationRepository,
+    private readonly stationRatingSyncService?: IStationRatingSyncService,
     private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
@@ -50,20 +50,11 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
       createdAt: new Date(),
     })
 
-    const createdReview = await this.reviewRepository.create(review)
+    const createdReview = await this.reviewRepository.save(review)
 
-    // Update station rating and review count
-    if (this.stationRepository) {
-      try {
-        const summary = await this.reviewRepository.getStationRatingSummary(booking.stationId)
-        const station = await this.stationRepository.findById(booking.stationId)
-        if (station) {
-          station.updateRating(summary.averageRating, summary.reviewCount)
-          await this.stationRepository.save(station)
-        }
-      } catch {
-        // Non-blocking station rating update
-      }
+    // Sync station aggregated rating via domain service
+    if (this.stationRatingSyncService && booking.stationId) {
+      await this.stationRatingSyncService.syncStationRating(booking.stationId)
     }
 
     // Optional notification to owner

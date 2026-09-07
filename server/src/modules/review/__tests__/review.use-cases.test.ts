@@ -8,6 +8,7 @@ import { GetReviewByBookingUseCase } from "../application/use-cases/get-review-b
 import { GetStationReviewsUseCase } from "../application/use-cases/get-station-reviews.use-case"
 import { GetUserReviewsUseCase } from "../application/use-cases/get-user-reviews.use-case"
 import { DeleteReviewUseCase } from "../application/use-cases/delete-review.use-case"
+import { StationRatingSyncService } from "../application/services/station-rating-sync.service"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { Booking, BookingStatus } from "@/modules/booking/domain/entities/Booking"
@@ -25,6 +26,7 @@ describe("Review Module Unit Tests", () => {
 
   beforeEach(() => {
     mockReviewRepo = {
+      save: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       findById: vi.fn(),
@@ -174,7 +176,7 @@ describe("Review Module Unit Tests", () => {
 
       vi.mocked(mockBookingRepo.findById).mockResolvedValue(mockBooking)
       vi.mocked(mockReviewRepo.findByBookingId).mockResolvedValue(null)
-      vi.mocked(mockReviewRepo.create).mockImplementation(async (r) => {
+      vi.mocked(mockReviewRepo.save).mockImplementation(async (r) => {
         return new Review({
           ...r.data,
           id: "review-1",
@@ -182,7 +184,8 @@ describe("Review Module Unit Tests", () => {
       })
       vi.mocked(mockStationRepo.findById).mockResolvedValue(mockStation)
 
-      const useCase = new CreateReviewUseCase(mockReviewRepo, mockBookingRepo, mockStationRepo)
+      const syncService = new StationRatingSyncService(mockReviewRepo, mockStationRepo)
+      const useCase = new CreateReviewUseCase(mockReviewRepo, mockBookingRepo, syncService)
       const result = await useCase.execute("user-1", {
         bookingId: "booking-1",
         rating: 5,
@@ -192,7 +195,7 @@ describe("Review Module Unit Tests", () => {
       expect(result.id).toBe("review-1")
       expect(result.rating).toBe(5)
       expect(result.comment).toBe("Spotless car!")
-      expect(mockReviewRepo.create).toHaveBeenCalled()
+      expect(mockReviewRepo.save).toHaveBeenCalled()
       expect(mockStationRepo.save).toHaveBeenCalled()
     })
 
@@ -277,7 +280,7 @@ describe("Review Module Unit Tests", () => {
       })
 
       vi.mocked(mockReviewRepo.findById).mockResolvedValue(existingReview)
-      vi.mocked(mockReviewRepo.update).mockImplementation(async (r) => r)
+      vi.mocked(mockReviewRepo.save).mockImplementation(async (r) => r)
 
       const useCase = new UpdateReviewUseCase(mockReviewRepo)
       const result = await useCase.execute("user-1", "review-1", {

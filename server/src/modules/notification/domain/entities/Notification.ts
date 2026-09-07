@@ -101,6 +101,14 @@ export class Notification {
     this.props.isDeleted = true
   }
 
+  getProps(): NotificationProps {
+    return { ...this.props }
+  }
+
+  toObject(): NotificationProps {
+    return { ...this.props }
+  }
+
   get data(): NotificationProps {
     return { ...this.props }
   }

@@ -1,3 +1,5 @@
+import { Rating } from "../value-objects/rating.vo"
+
 export interface ReviewProps {
   id?: string
   userId: string
@@ -15,12 +17,11 @@ export class Review {
   private readonly props: ReviewProps
 
   constructor(props: ReviewProps) {
-    if (props.rating < 1 || props.rating > 5) {
-      throw new Error("Rating must be between 1 and 5")
-    }
+    const validatedRating = new Rating(props.rating)
 
     this.props = {
       ...props,
+      rating: validatedRating.val,
       comment: props.comment ? props.comment.trim() : "",
       updateCount: props.updateCount ?? 0,
       createdAt: props.createdAt ?? new Date(),
@@ -69,11 +70,9 @@ export class Review {
   }
 
   updateReview(rating: number, comment?: string): void {
-    if (rating < 1 || rating > 5) {
-      throw new Error("Rating must be between 1 and 5")
-    }
+    const validatedRating = new Rating(rating)
 
-    this.props.rating = rating
+    this.props.rating = validatedRating.val
     if (comment !== undefined) {
       this.props.comment = comment.trim()
     }

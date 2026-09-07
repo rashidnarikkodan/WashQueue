@@ -1,8 +1,17 @@
 import { Review } from "../../domain/entities/Review"
 import { IReview } from "../models/review.model"
+import { IMapper } from "@/core/domain/repository.interface"
 import { Types } from "mongoose"
 
-export class ReviewMapper {
+export class ReviewMapper implements IMapper<Review, IReview> {
+  toDomain(raw: IReview): Review {
+    return ReviewMapper.toDomain(raw)
+  }
+
+  toPersistence(entity: Partial<Review>): Partial<IReview> {
+    return ReviewMapper.toPersistence(entity)
+  }
+
   static toDomain(raw: IReview): Review {
     return new Review({
       id: raw._id.toString(),
@@ -18,21 +27,18 @@ export class ReviewMapper {
     })
   }
 
-  static toPersistence(review: Review): Partial<IReview> {
-    const data = review.data
-    const persistence: Partial<IReview> = {
-      userId: new Types.ObjectId(data.userId),
-      ownerId: new Types.ObjectId(data.ownerId),
-      stationId: new Types.ObjectId(data.stationId),
-      bookingId: new Types.ObjectId(data.bookingId),
-      rating: data.rating,
-      comment: data.comment,
-      update_count: data.updateCount,
-    }
+  static toPersistence(review: Partial<Review>): Partial<IReview> {
+    const data = review instanceof Review ? review.data : review
+    const persistence: Partial<IReview> = {}
 
-    if (data.id) {
-      persistence._id = new Types.ObjectId(data.id)
-    }
+    if (data?.userId) persistence.userId = new Types.ObjectId(data.userId)
+    if (data?.ownerId) persistence.ownerId = new Types.ObjectId(data.ownerId)
+    if (data?.stationId) persistence.stationId = new Types.ObjectId(data.stationId)
+    if (data?.bookingId) persistence.bookingId = new Types.ObjectId(data.bookingId)
+    if (data?.rating !== undefined) persistence.rating = data.rating
+    if (data?.comment !== undefined) persistence.comment = data.comment
+    if (data?.updateCount !== undefined) persistence.update_count = data.updateCount
+    if (data?.id) persistence._id = new Types.ObjectId(data.id)
 
     return persistence
   }

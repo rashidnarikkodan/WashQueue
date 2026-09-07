@@ -1,12 +1,12 @@
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { Booking } from "@/modules/booking/domain/entities/Booking"
-import { SocketServerService } from "@/infrastructure/websocket/socket-server.service"
 import {
   IBookingNotificationService,
   INotificationDispatcherService,
   NotificationEventType,
 } from "../../application/interfaces/notification-services.interface"
+import { IRealtimeEventPublisher } from "../../application/interfaces/realtime-event-publisher.interface"
 import { NotificationType } from "../../domain/types/notification.types"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
@@ -19,7 +19,8 @@ export class BookingNotificationService implements IBookingNotificationService {
     private readonly dispatcher?: INotificationDispatcherService,
     private readonly mailService?: IMailService,
     private readonly userRepository?: IUserRepository,
-    private readonly stationRepository?: IStationRepository
+    private readonly stationRepository?: IStationRepository,
+    private readonly realtimePublisher?: IRealtimeEventPublisher
   ) {}
 
   async notify(
@@ -40,7 +41,6 @@ export class BookingNotificationService implements IBookingNotificationService {
         `[BookingNotification] Dispatching notification & real-time event: ${eventType}`
       )
 
-      const socketService = SocketServerService.getInstance()
       const payload = {
         eventType,
         bookingId: booking.id,
@@ -54,29 +54,31 @@ export class BookingNotificationService implements IBookingNotificationService {
       }
 
       // 1. WebSocket Channel Broadcasts
-      if (booking.stationId) {
-        socketService.emitToStation(booking.stationId, eventType, payload)
-        socketService.emitToStation(booking.stationId, "QUEUE_UPDATED", {
-          stationId: booking.stationId,
-          lastUpdated: new Date().toISOString(),
-        })
-      }
-
-      if (booking.userId) {
-        socketService.emitToUser(booking.userId, eventType, payload)
-        socketService.emitToUser(booking.userId, "QUEUE_POSITION_CHANGED", payload)
-
-        if (eventType === "PAYMENT_SUCCESS" || eventType === "PAYMENT_UPDATED") {
-          socketService.emitToUser(booking.userId, "PAYMENT_UPDATED", payload)
+      if (this.realtimePublisher) {
+        if (booking.stationId) {
+          this.realtimePublisher.emitToStation(booking.stationId, eventType, payload)
+          this.realtimePublisher.emitToStation(booking.stationId, "QUEUE_UPDATED", {
+            stationId: booking.stationId,
+            lastUpdated: new Date().toISOString(),
+          })
         }
-        if (eventType === "REFUND_COMPLETED" || eventType === "REFUND_PROCESSED") {
-          socketService.emitToUser(booking.userId, "REFUND_PROCESSED", payload)
-          socketService.emitToUser(booking.userId, "WALLET_UPDATED", payload)
-        }
-      }
 
-      if (booking.id) {
-        socketService.emitToBooking(booking.id, eventType, payload)
+        if (booking.userId) {
+          this.realtimePublisher.emitToUser(booking.userId, eventType, payload)
+          this.realtimePublisher.emitToUser(booking.userId, "QUEUE_POSITION_CHANGED", payload)
+
+          if (eventType === "PAYMENT_SUCCESS" || eventType === "PAYMENT_UPDATED") {
+            this.realtimePublisher.emitToUser(booking.userId, "PAYMENT_UPDATED", payload)
+          }
+          if (eventType === "REFUND_COMPLETED" || eventType === "REFUND_PROCESSED") {
+            this.realtimePublisher.emitToUser(booking.userId, "REFUND_PROCESSED", payload)
+            this.realtimePublisher.emitToUser(booking.userId, "WALLET_UPDATED", payload)
+          }
+        }
+
+        if (booking.id) {
+          this.realtimePublisher.emitToBooking(booking.id, eventType, payload)
+        }
       }
 
       // 2. Persistent In-App Notifications
