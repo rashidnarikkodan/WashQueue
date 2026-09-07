@@ -22,7 +22,8 @@ export class NotificationMongoRepository
     filter?: NotificationQueryFilter
   ): Promise<PaginatedNotificationResult> {
     const recipientObjectId = new Types.ObjectId(recipientId)
-    const query: Record<string, unknown> = { recipientId: recipientObjectId, isDeleted: false }
+    const isDeleted = filter?.isDeleted !== undefined ? filter.isDeleted : false
+    const query: Record<string, unknown> = { recipientId: recipientObjectId, isDeleted }
 
     if (filter?.isRead !== undefined) {
       query.isRead = filter.isRead

@@ -21,6 +21,7 @@ const NOTIFICATION_TABS: TabConfig[] = [
   { id: "QUEUE", label: "Queue Updates" },
   { id: "PAYMENT", label: "Payments & Refunds" },
   { id: "SYSTEM", label: "System Alerts" },
+  { id: "archived", label: "Archived" },
 ]
 
 export function NotificationCenterPage() {
@@ -53,6 +54,8 @@ export function NotificationCenterPage() {
   }
 
   const loadData = useCallback(() => {
+    const isArchived = activeTab === "archived" || statusFilter === "ARCHIVED"
+
     let isRead: boolean | undefined
     if (activeTab === "unread" || statusFilter === "UNREAD") {
       isRead = false
@@ -61,7 +64,7 @@ export function NotificationCenterPage() {
     }
 
     const type =
-      activeTab !== "all" && activeTab !== "unread"
+      activeTab !== "all" && activeTab !== "unread" && activeTab !== "archived"
         ? (activeTab as NotificationType)
         : typeFilter !== "ALL"
           ? (typeFilter as NotificationType)
@@ -72,6 +75,7 @@ export function NotificationCenterPage() {
       limit,
       isRead,
       type,
+      isDeleted: isArchived,
     })
   }, [activeTab, statusFilter, typeFilter, currentPage, limit, fetchNotifications])
 
@@ -134,6 +138,7 @@ export function NotificationCenterPage() {
         { label: "All Status", value: "ALL" },
         { label: "Unread Only", value: "UNREAD" },
         { label: "Read Only", value: "READ" },
+        { label: "Archived Only", value: "ARCHIVED" },
       ],
     },
   ]

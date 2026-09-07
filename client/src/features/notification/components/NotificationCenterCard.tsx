@@ -164,13 +164,17 @@ export function NotificationCenterCard({
             >
               {badgeText}
             </span>
+            {notification.isDeleted && (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-muted/60 text-muted-foreground border-border/80">
+                Archived
+              </span>
+            )}
           </div>
 
           <p className="text-sm text-muted-foreground/90 leading-relaxed line-clamp-2">
             {notification.message}
           </p>
 
-          {/* Meta Tags Footer */}
           <div className="flex flex-wrap items-center gap-3 pt-1.5 text-xs text-muted-foreground/70">
             {referenceTag && (
               <span className="inline-flex items-center gap-1 font-mono text-muted-foreground/80 bg-muted/40 px-2 py-0.5 rounded-md border border-border/40">
@@ -188,14 +192,13 @@ export function NotificationCenterCard({
         </div>
       </div>
 
-      {/* Right Column: Time & Actions */}
       <div className="flex md:flex-col items-center md:items-end justify-between w-full md:w-auto shrink-0 gap-3 pt-2 md:pt-0 pl-7 md:pl-0">
         <span className="text-xs font-medium text-muted-foreground/70 whitespace-nowrap">
           {formatRelativeTime(notification.createdAt)}
         </span>
 
         <div className="flex items-center gap-1.5 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity">
-          {!notification.isRead && onMarkAsRead && (
+          {!notification.isRead && onMarkAsRead && !notification.isDeleted && (
             <button
               type="button"
               onClick={(e) => onMarkAsRead(e, notification.id)}
@@ -206,7 +209,7 @@ export function NotificationCenterCard({
             </button>
           )}
 
-          {onDelete && (
+          {onDelete && !notification.isDeleted && (
             <button
               type="button"
               onClick={(e) => onDelete(e, notification.id)}

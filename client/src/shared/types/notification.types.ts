@@ -15,6 +15,7 @@ export interface NotificationDto {
   data: string
   isRead: boolean
   isActioned: boolean
+  isDeleted?: boolean
   createdAt: string | Date
   updatedAt?: string | Date
   expiresAt?: string | Date
@@ -34,4 +35,5 @@ export interface GetNotificationsQuery {
   limit?: number
   isRead?: boolean
   type?: NotificationType
+  isDeleted?: boolean
 }

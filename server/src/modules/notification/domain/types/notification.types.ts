@@ -7,6 +7,7 @@ export type NotificationActionType = "NAVIGATE" | "OPEN_MODAL" | "EXTERNAL_LINK"
 export interface NotificationQueryFilter {
   isRead?: boolean
   type?: NotificationType
+  isDeleted?: boolean
   page?: number
   limit?: number
 }

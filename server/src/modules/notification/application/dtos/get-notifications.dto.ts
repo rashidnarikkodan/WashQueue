@@ -4,6 +4,7 @@ import { NotificationResponseDto } from "./notification-response.dto"
 export interface GetNotificationsQueryDto {
   isRead?: boolean
   type?: NotificationType
+  isDeleted?: boolean
   page?: number
   limit?: number
 }

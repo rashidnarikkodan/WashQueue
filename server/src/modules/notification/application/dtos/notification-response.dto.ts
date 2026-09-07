@@ -16,6 +16,7 @@ export interface NotificationResponseDto {
   data: string
   isRead: boolean
   isActioned: boolean
+  isDeleted?: boolean
   createdAt: Date
   updatedAt?: Date
   expiresAt?: Date

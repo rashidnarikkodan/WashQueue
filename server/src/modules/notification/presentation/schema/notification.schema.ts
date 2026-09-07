@@ -8,6 +8,13 @@ export const getNotificationsQuerySchema = z.object({
       return undefined
     }, z.boolean().optional())
     .optional(),
+  isDeleted: z
+    .preprocess((val) => {
+      if (val === "true" || val === true) return true
+      if (val === "false" || val === false) return false
+      return undefined
+    }, z.boolean().optional())
+    .optional(),
   type: z.enum(["BOOKING", "PAYMENT", "QUEUE", "SYSTEM"]).optional(),
   page: z
     .preprocess(
