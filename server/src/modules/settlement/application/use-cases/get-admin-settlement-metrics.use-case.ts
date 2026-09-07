@@ -1,6 +1,6 @@
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { AdminSettlementMetricsDTO } from "../dtos/settlement.dto"
-import { IGetAdminSettlementMetricsUseCase } from "../interfaces/settlement.usecases"
+import { IGetAdminSettlementMetricsUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class GetAdminSettlementMetricsUseCase implements IGetAdminSettlementMetricsUseCase {
   constructor(private readonly settlementRepository: ISettlementRepository) {}

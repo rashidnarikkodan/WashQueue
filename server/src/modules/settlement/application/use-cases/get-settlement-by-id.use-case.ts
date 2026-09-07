@@ -3,9 +3,9 @@ import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { ROLE } from "@/common/constants/role.constants"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { SettlementResponseDTO } from "../dtos/settlement.dto"
-import { IGetSettlementByIdUseCase } from "../interfaces/settlement.usecases"
+import { IGetSettlementByIdUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class GetSettlementByIdUseCase implements IGetSettlementByIdUseCase {
   constructor(

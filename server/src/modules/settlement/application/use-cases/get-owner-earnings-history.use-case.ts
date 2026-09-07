@@ -2,9 +2,9 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { BookingStatus } from "@/common/constants/booking.constants"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { SettlementPaginationDTO } from "../dtos/settlement.dto"
-import { IGetOwnerEarningsHistoryUseCase } from "../interfaces/settlement.usecases"
+import { IGetOwnerEarningsHistoryUseCase } from "../interfaces/settlement-usecases.interface"
 
 export interface OwnerEarningsItemDTO {
   bookingId: string

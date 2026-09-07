@@ -1,11 +1,12 @@
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { Settlement } from "../../domain/entities/Settlement"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import {
   SettlementFilterOptions,
   SettlementPaginationDTO,
   SettlementResponseDTO,
 } from "../dtos/settlement.dto"
-import { IGetAdminSettlementsUseCase } from "../interfaces/settlement.usecases"
+import { IGetAdminSettlementsUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class GetAdminSettlementsUseCase implements IGetAdminSettlementsUseCase {
   constructor(
@@ -26,7 +27,7 @@ export class GetAdminSettlementsUseCase implements IGetAdminSettlementsUseCase {
     })
 
     const enriched: SettlementResponseDTO[] = await Promise.all(
-      settlements.map(async (s) => {
+      settlements.map(async (s: Settlement) => {
         let bookingNumber: string | undefined
         let stationName: string | undefined
         let customerName: string | undefined

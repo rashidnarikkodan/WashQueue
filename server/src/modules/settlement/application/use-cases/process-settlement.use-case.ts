@@ -6,9 +6,9 @@ import {
   SettlementStatus,
 } from "../../domain/entities/Settlement"
 import { Payout, PayoutStatus, PAYOUT_PROVIDER_RAZORPAY_X } from "../../domain/entities/Payout"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
-import { IPayoutRepository } from "../../domain/repositories/payout.repository"
-import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
+import { IPayoutRepository } from "../../domain/repositories/payout.repository.interface"
+import { IProcessSettlementUseCase } from "../interfaces/settlement-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import {

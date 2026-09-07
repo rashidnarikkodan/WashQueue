@@ -7,7 +7,7 @@ import {
   OwnerEarningsSummaryDTO,
   SettlementFilterOptions,
 } from "../../application/dtos/settlement.dto"
-import { ISettlementRepository } from "../../settlement.module"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 
 export class SettlementRepository
   extends BaseRepository<Settlement, ISettlementDocument>

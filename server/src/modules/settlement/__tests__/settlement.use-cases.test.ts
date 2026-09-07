@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { Settlement, SettlementStatus } from "../domain/entities/Settlement"
-import { ISettlementRepository } from "../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../domain/repositories/settlement.repository.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { Owner } from "@/modules/owner/domain/entities/Owner"
 import { CreateSettlementUseCase } from "../application/use-cases/create-settlement.use-case"
@@ -8,7 +8,7 @@ import { ManageSettlementHoldUseCase } from "../application/use-cases/manage-set
 import { RetrySettlementUseCase } from "../application/use-cases/retry-settlement.use-case"
 import { GetOwnerSettlementSummaryUseCase } from "../application/use-cases/get-owner-settlement-summary.use-case"
 import { ProcessPendingSettlementsUseCase } from "../application/use-cases/process-pending-settlements.use-case"
-import { IProcessSettlementUseCase } from "../application/interfaces/settlement.usecases"
+import { IProcessSettlementUseCase } from "../application/interfaces/settlement-usecases.interface"
 import { ConflictError } from "@/common/errors/conflict-error"
 
 describe("Settlement Module Unit Tests", () => {
@@ -125,7 +125,7 @@ describe("Settlement Module Unit Tests", () => {
 
     it("should create and save a new settlement using base repo save()", async () => {
       vi.mocked(mockSettlementRepo.findByBookingId).mockResolvedValue(null)
-      vi.mocked(mockSettlementRepo.save).mockImplementation(async (s) => {
+      vi.mocked(mockSettlementRepo.save).mockImplementation(async (s: Settlement) => {
         return new Settlement({
           ...s.getProps(),
           id: "set-new",

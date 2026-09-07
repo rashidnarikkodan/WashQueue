@@ -13,7 +13,7 @@ import {
   IGetSettlementByIdUseCase,
   IManageSettlementHoldUseCase,
   IRetrySettlementUseCase,
-} from "../../application/interfaces/settlement.usecases"
+} from "../../application/interfaces/settlement-usecases.interface"
 import { SettlementStatus } from "../../domain/entities/Settlement"
 
 export class SettlementController {

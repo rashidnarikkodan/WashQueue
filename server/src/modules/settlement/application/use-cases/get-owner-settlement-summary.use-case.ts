@@ -1,8 +1,8 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { OwnerEarningsSummaryDTO } from "../dtos/settlement.dto"
-import { IGetOwnerSettlementSummaryUseCase } from "../interfaces/settlement.usecases"
+import { IGetOwnerSettlementSummaryUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class GetOwnerSettlementSummaryUseCase implements IGetOwnerSettlementSummaryUseCase {
   constructor(

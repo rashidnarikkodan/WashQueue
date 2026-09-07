@@ -1,13 +1,14 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { Settlement } from "../../domain/entities/Settlement"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import {
   SettlementFilterOptions,
   SettlementPaginationDTO,
   SettlementResponseDTO,
 } from "../dtos/settlement.dto"
-import { IGetOwnerSettlementsUseCase } from "../interfaces/settlement.usecases"
+import { IGetOwnerSettlementsUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class GetOwnerSettlementsUseCase implements IGetOwnerSettlementsUseCase {
   constructor(
@@ -41,7 +42,7 @@ export class GetOwnerSettlementsUseCase implements IGetOwnerSettlementsUseCase {
 
     // Enrich settlements with booking metadata
     const enriched: SettlementResponseDTO[] = await Promise.all(
-      settlements.map(async (s) => {
+      settlements.map(async (s: Settlement) => {
         let bookingNumber: string | undefined
         let stationName: string | undefined
         let customerName: string | undefined

@@ -1,6 +1,6 @@
 import { Settlement, SettlementStatus } from "../../domain/entities/Settlement"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
-import { ICreateSettlementUseCase } from "../interfaces/settlement.usecases"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
+import { ICreateSettlementUseCase } from "../interfaces/settlement-usecases.interface"
 import { CreateSettlementDTO } from "../dtos/settlement.dto"
 import logger from "@/configs/logger.config"
 

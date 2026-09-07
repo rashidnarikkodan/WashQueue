@@ -1,6 +1,6 @@
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { SettlementStatus } from "../../domain/entities/Settlement"
-import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
+import { IProcessSettlementUseCase } from "../interfaces/settlement-usecases.interface"
 import logger from "@/configs/logger.config"
 
 const BATCH_SIZE = 50

@@ -1,8 +1,8 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { Settlement, SettlementStatus } from "../../domain/entities/Settlement"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
-import { IManageSettlementHoldUseCase } from "../interfaces/settlement.usecases"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
+import { IManageSettlementHoldUseCase } from "../interfaces/settlement-usecases.interface"
 
 export class ManageSettlementHoldUseCase implements IManageSettlementHoldUseCase {
   constructor(private readonly settlementRepository: ISettlementRepository) {}

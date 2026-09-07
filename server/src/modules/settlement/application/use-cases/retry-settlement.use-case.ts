@@ -1,11 +1,11 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ConflictError } from "@/common/errors/conflict-error"
 import { Settlement, SettlementStatus } from "../../domain/entities/Settlement"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import {
   IProcessSettlementUseCase,
   IRetrySettlementUseCase,
-} from "../interfaces/settlement.usecases"
+} from "../interfaces/settlement-usecases.interface"
 
 export class RetrySettlementUseCase implements IRetrySettlementUseCase {
   constructor(

@@ -1,5 +1,5 @@
-import { IPayoutRepository } from "../../domain/repositories/payout.repository"
-import { ISettlementRepository } from "../../domain/repositories/settlement.repository"
+import { IPayoutRepository } from "../../domain/repositories/payout.repository.interface"
+import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import WebhookEventModel from "../../infrastructure/models/webhook-event.model"
