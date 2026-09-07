@@ -107,7 +107,6 @@ export const useBookingStore = create<BookingStore>((set) => ({
       if (opts.endDate) {
         apiParams.endDate = opts.endDate
       }
-
       if (q && q.trim()) {
         apiParams.q = q.trim()
       }

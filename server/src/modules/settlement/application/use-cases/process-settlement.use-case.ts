@@ -10,7 +10,7 @@ import { ISettlementRepository } from "../../domain/repositories/settlement.repo
 import { IPayoutRepository } from "../../domain/repositories/payout.repository"
 import { IProcessSettlementUseCase } from "../interfaces/settlement.usecases"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
-import { IBookingRepository } from "../../domain/repositories/booking.repository"
+import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import {
   IPayoutProvider,
   PayoutProviderError,
