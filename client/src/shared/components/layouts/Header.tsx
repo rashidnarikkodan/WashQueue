@@ -5,6 +5,7 @@ import { NotificationDropdown } from "@/features/notification"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
+import ThemeToggle from "../header/ThemeToggle"
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation()
@@ -94,6 +95,7 @@ export default function Header({ role }: { role?: string }) {
         </div>
 
         <div className="col-span-1 flex justify-end items-center gap-3">
+          {!isAuthenticated && <ThemeToggle />}
           {isAuthenticated && isCustomer && (
             <Link
               to={APP_ROUTES.BOOKMARKS}
