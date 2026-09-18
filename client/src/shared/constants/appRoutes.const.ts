@@ -29,6 +29,8 @@ export const APP_ROUTES = {
     REPORTS: "/admin/reports",
     SETTINGS: "/admin/settings",
     SETTLEMENTS: "/admin/settlements",
+    ISSUES: "/admin/issues",
+    ISSUE_DETAILS: (id: string | number) => `/admin/issues/${id}`,
   },
   MANAGER: {
     ROOT: "/manager",
@@ -43,6 +45,8 @@ export const APP_ROUTES = {
     STATION_DETAILS: (id: string | number) => `/manager/station/${id}`,
     FEEDBACK: "/manager/feedback",
     NOTIFICATIONS: "/manager/notifications",
+    ISSUES: "/manager/issues",
+    ISSUE_DETAILS: (id: string | number) => `/manager/issues/${id}`,
   },
   OWNER: {
     ROOT: "/owner",
@@ -56,11 +60,17 @@ export const APP_ROUTES = {
     FEEDBACK: "/owner/feedback",
     NOTIFICATIONS: "/owner/notifications",
     ONBOARDING: "/owner/onboarding",
+    ISSUES: "/owner/issues",
+    ISSUE_DETAILS: (id: string | number) => `/owner/issues/${id}`,
   },
   BOOKINGS: {
     ROOT: "/bookings",
     DETAILS: (id: string | number) => `/bookings/${id}`,
     NEW: "/bookings/new",
+  },
+  ISSUES: {
+    ROOT: "/issues",
+    DETAILS: (id: string | number) => `/issues/${id}`,
   },
   VEHICLES: {
     DETAILS: (id: string | number) => `/vehicles/${id}`,

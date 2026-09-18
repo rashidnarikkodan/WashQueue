@@ -24,6 +24,7 @@ import { toast } from "sonner"
 import { Link } from "react-router-dom"
 import { useReviewModalStore } from "@/features/review/store/review-modal.store"
 import { BookingReviewCard } from "@/features/review/components/BookingReviewCard"
+import CreateIssueModal from "@/features/issue/components/CreateIssueModal"
 
 interface CustomerBookingDetailsViewProps {
   booking: BookingResponse
@@ -44,6 +45,8 @@ export default function CustomerBookingDetailsView({
 }: CustomerBookingDetailsViewProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [nowMs] = useState(() => Date.now())
+  const [isRaiseTicketOpen, setIsRaiseTicketOpen] = useState(false)
+  const [activeIssue, setActiveIssue] = useState<{ id: string } | null>(null)
   const openReviewModal = useReviewModalStore((state) => state.openReviewModal)
 
   const handleDownloadInvoice = async () => {
@@ -748,24 +751,51 @@ export default function CustomerBookingDetailsView({
                 <ChevronRight size={14} className="text-muted-foreground" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => toast.info("Support ticket module will open here.")}
-                className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3">
-                  <LifeBuoy
-                    size={16}
-                    className="text-amber-500 group-hover:rotate-45 transition-transform duration-300"
-                  />
-                  <span>Raise a Ticket / Issue</span>
-                </div>
-                <ChevronRight size={14} className="text-muted-foreground" />
-              </button>
+              {activeIssue ? (
+                <Link
+                  to={`/issues/${activeIssue.id}`}
+                  className="w-full p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-500 hover:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <LifeBuoy size={16} className="text-amber-500" />
+                    <span>View Ticket #{activeIssue.id}</span>
+                  </div>
+                  <ChevronRight size={14} className="text-amber-500" />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsRaiseTicketOpen(true)}
+                  className="w-full p-3.5 rounded-2xl bg-muted/40 border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <LifeBuoy
+                      size={16}
+                      className="text-amber-500 group-hover:rotate-45 transition-transform duration-300"
+                    />
+                    <span>Raise a Ticket / Issue</span>
+                  </div>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {isRaiseTicketOpen && (
+        <CreateIssueModal
+          isOpen={isRaiseTicketOpen}
+          onClose={() => setIsRaiseTicketOpen(false)}
+          bookingId={booking.id}
+          bookingNumber={booking.bookingNumber}
+          stationName={stationName}
+          vehicleName={vehicleName}
+          onSuccess={(created) => {
+            setActiveIssue({ id: created.id })
+          }}
+        />
+      )}
     </div>
   )
 }

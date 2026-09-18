@@ -99,4 +99,16 @@ export const API_ROUTES = {
     DISMISS_REPORTS: (id: string) => `/reviews/${id}/reports/dismiss`,
     PROVIDER_FEEDBACK: "/reviews/provider/feedback",
   },
+  ISSUES: {
+    ROOT: "/issues",
+    MY_ISSUES: "/issues/my-issues",
+    BY_STATION: (stationId: string) => `/issues/station/${stationId}`,
+    ADMIN_ALL: "/issues/admin/all",
+    BY_ID: (id: string) => `/issues/${id}`,
+    STATUS: (id: string) => `/issues/${id}/status`,
+    ASSIGN: (id: string) => `/issues/${id}/assign`,
+    ESCALATE: (id: string) => `/issues/${id}/escalate`,
+    RESOLVE: (id: string) => `/issues/${id}/resolve`,
+    CLOSE: (id: string) => `/issues/${id}/close`,
+  },
 } as const

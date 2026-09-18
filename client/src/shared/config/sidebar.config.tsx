@@ -14,6 +14,7 @@ import {
   Calendar,
   CreditCard,
   Car,
+  LifeBuoy,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -61,6 +62,11 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: CreditCard,
   },
   {
+    name: "Issue Management",
+    path: "/admin/issues",
+    icon: LifeBuoy,
+  },
+  {
     name: "Reviews & Ratings Moderation",
     path: "/admin/reviews",
     icon: MessageSquareMore,
@@ -104,6 +110,11 @@ export const ownerSideBarItems: SidebarItem[] = [
     icon: Calendar,
   },
   {
+    name: "Issue Management",
+    path: "/owner/issues",
+    icon: LifeBuoy,
+  },
+  {
     name: "My Stations",
     path: "/owner/stations",
     icon: Fuel,
@@ -145,6 +156,11 @@ export const managerSideBarItems: SidebarItem[] = [
     name: "Bookings",
     path: "/manager/bookings",
     icon: Calendar,
+  },
+  {
+    name: "Issue Management",
+    path: "/manager/issues",
+    icon: LifeBuoy,
   },
   {
     name: "Customer Feedback",
