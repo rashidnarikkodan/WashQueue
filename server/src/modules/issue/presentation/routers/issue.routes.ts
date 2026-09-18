@@ -19,25 +19,22 @@ import {
 export const createIssueRouter = (issueController: IssueController): Router => {
   const router = Router()
 
-  // Customer creates issue
   router.post(
     API_ROUTES.ISSUES.CREATE,
     authenticate,
-    authorize(ROLE.CUSTOMER),
+    authorize(ROLE.CUSTOMER, ROLE.OWNER),
     validateRequest(createIssueSchema, "body"),
     asyncHandler(issueController.create)
   )
 
-  // Customer fetches their issues
   router.get(
     API_ROUTES.ISSUES.MY_ISSUES,
     authenticate,
-    authorize(ROLE.CUSTOMER),
+    authorize(ROLE.CUSTOMER, ROLE.OWNER),
     validateRequest(issueQuerySchema, "query"),
     asyncHandler(issueController.getMyIssues)
   )
 
-  // Station managers & owners fetch issues for station
   router.get(
     API_ROUTES.ISSUES.BY_STATION,
     authenticate,
@@ -46,7 +43,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.getStationIssues)
   )
 
-  // Admin fetches all platform issues
   router.get(
     API_ROUTES.ISSUES.ADMIN_ALL,
     authenticate,
@@ -55,7 +51,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.getAdminIssues)
   )
 
-  // Get specific issue by ID (Customer, Manager, Owner, Admin)
   router.get(
     API_ROUTES.ISSUES.BY_ID,
     authenticate,
@@ -63,7 +58,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.getById)
   )
 
-  // Update status, manager notes and evidence
   router.patch(
     API_ROUTES.ISSUES.STATUS,
     authenticate,
@@ -72,7 +66,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.updateStatus)
   )
 
-  // Assign manager
   router.patch(
     API_ROUTES.ISSUES.ASSIGN,
     authenticate,
@@ -81,7 +74,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.assign)
   )
 
-  // Escalate to Admin
   router.post(
     API_ROUTES.ISSUES.ESCALATE,
     authenticate,
@@ -90,7 +82,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.escalate)
   )
 
-  // Resolve issue
   router.post(
     API_ROUTES.ISSUES.RESOLVE,
     authenticate,
@@ -99,7 +90,6 @@ export const createIssueRouter = (issueController: IssueController): Router => {
     asyncHandler(issueController.resolve)
   )
 
-  // Close issue
   router.post(
     API_ROUTES.ISSUES.CLOSE,
     authenticate,
