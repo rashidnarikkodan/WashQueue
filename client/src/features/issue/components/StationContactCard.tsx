@@ -6,10 +6,35 @@ interface StationContactCardProps {
 }
 
 export default function StationContactCard({ station }: StationContactCardProps) {
-  const stationName = station?.name || "WashQueue Service Station"
-  const stationCity = station?.city || "Station Support"
-  const stationAddress = station?.address || "Service Bay"
-  const stationPhone = station?.phone || "+91 98765 00000"
+  const stationName = typeof station?.name === "string" ? station.name : "WashQueue Service Station"
+
+  const stationAddress = (() => {
+    const raw = station?.address
+    if (!raw) return ""
+    if (typeof raw === "string") return raw
+    if (typeof raw === "object") {
+      const addrObj = raw as {
+        street?: string
+        city?: string
+        state?: string
+        pincode?: string
+      }
+      const parts = [addrObj.street, addrObj.city, addrObj.state, addrObj.pincode].filter(Boolean)
+      return parts.length > 0 ? parts.join(", ") : ""
+    }
+    return String(raw)
+  })()
+
+  const stationCity = (() => {
+    if (typeof station?.city === "string" && station.city) return station.city
+    if (station?.address && typeof station.address === "object") {
+      const addrObj = station.address as { city?: string }
+      if (addrObj.city) return addrObj.city
+    }
+    return "Station Support"
+  })()
+
+  const stationPhone = typeof station?.phone === "string" ? station.phone : "+91 98765 00000"
 
   const handleCall = () => {
     window.location.href = `tel:${stationPhone.replace(/\s+/g, "")}`
@@ -31,14 +56,14 @@ export default function StationContactCard({ station }: StationContactCardProps)
         </div>
       </div>
 
-      {stationAddress && (
+      {stationAddress ? (
         <div className="p-3 rounded-2xl bg-muted/40 border border-border text-xs text-muted-foreground space-y-1">
           <span className="text-[10px] font-bold text-foreground block uppercase tracking-wider">
             Station Address
           </span>
           <p className="text-[11px] text-muted-foreground leading-relaxed">{stationAddress}</p>
         </div>
-      )}
+      ) : null}
 
       <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-2">
         <div className="flex items-center justify-between text-xs">

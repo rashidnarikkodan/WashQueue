@@ -442,7 +442,7 @@ export default function IssueManagementPage({ role: explicitRole }: IssueManagem
             </p>
             {issue.stationDetails?.name && (
               <span className="text-[11px] text-muted-foreground block truncate">
-                📍 {issue.stationDetails.name}
+                {issue.stationDetails.name}
               </span>
             )}
           </div>
@@ -625,54 +625,53 @@ export default function IssueManagementPage({ role: explicitRole }: IssueManagem
       {/* Stats HUD */}
       <StatsHUD stats={statItems} columns={5} />
 
-      {/* Main DataTable Card */}
-      <div className="rounded-3xl bg-card border border-border shadow-xl overflow-hidden p-6 space-y-6">
-        <DataTableToolbar
-          tabs={ISSUE_TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => {
-            setActiveTab(tabId)
-            setCurrentPage(1)
-          }}
-          searchQuery={searchQuery}
-          onSearchChange={(q) => {
-            setSearchQuery(q)
-            setCurrentPage(1)
-          }}
-          searchPlaceholder="Search by keyword, case ID, customer or details..."
-          selectFilters={selectFilters}
-        />
+      {/* Toolbar & Filter Controls */}
+      <DataTableToolbar
+        tabs={ISSUE_TABS}
+        activeTab={activeTab}
+        onTabChange={(tabId) => {
+          setActiveTab(tabId)
+          setCurrentPage(1)
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q)
+          setCurrentPage(1)
+        }}
+        searchPlaceholder="Search by keyword, case ID, customer or details..."
+        selectFilters={selectFilters}
+      />
 
-        {error ? (
-          <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-3">
-            <AlertTriangle className="w-8 h-8 text-red-400 mx-auto" />
-            <h3 className="text-sm font-bold text-foreground">Error Loading Cases</h3>
-            <p className="text-xs text-muted-foreground">{error}</p>
-            <button
-              type="button"
-              onClick={() => fetchIssues()}
-              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer inline-flex items-center gap-2"
-            >
-              <RefreshCw size={12} />
-              <span>Retry</span>
-            </button>
-          </div>
-        ) : (
-          <DataTable<IssueDto>
-            data={issues}
-            columns={columns}
-            rowKey={(row) => row.id}
-            isLoading={isLoading}
-            emptyMessage={
-              isCustomer
-                ? "You haven't logged any support tickets. If you experienced any issue with a wash, click 'Raise Ticket'."
-                : "No issue cases match the current filter selection."
-            }
-            pagination={paginationMeta}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        )}
-      </div>
+      {/* Main Content Area */}
+      {error ? (
+        <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-3">
+          <AlertTriangle className="w-8 h-8 text-red-400 mx-auto" />
+          <h3 className="text-sm font-bold text-foreground">Error Loading Cases</h3>
+          <p className="text-xs text-muted-foreground">{error}</p>
+          <button
+            type="button"
+            onClick={() => fetchIssues()}
+            className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer inline-flex items-center gap-2"
+          >
+            <RefreshCw size={12} />
+            <span>Retry</span>
+          </button>
+        </div>
+      ) : (
+        <DataTable<IssueDto>
+          data={issues}
+          columns={columns}
+          rowKey={(row) => row.id}
+          isLoading={isLoading}
+          emptyMessage={
+            isCustomer
+              ? "You haven't logged any support tickets. If you experienced any issue with a wash, click 'Raise Ticket'."
+              : "No issue cases match the current filter selection."
+          }
+          pagination={paginationMeta}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      )}
 
       {isCreateModalOpen && (
         <CreateIssueModal

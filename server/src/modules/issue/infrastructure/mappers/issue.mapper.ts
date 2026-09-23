@@ -18,7 +18,15 @@ interface PopulatedStation {
   _id: Types.ObjectId
   name?: string
   city?: string
-  address?: string
+  address?:
+    | string
+    | {
+        street?: string
+        city?: string
+        state?: string
+        country?: string
+        pincode?: string
+      }
   phone?: string
 }
 
@@ -80,10 +88,23 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
     if (rawObj.stationId && typeof rawObj.stationId === "object" && "_id" in rawObj.stationId) {
       const st = rawObj.stationId as PopulatedStation
       stationIdStr = st._id.toString()
+      let addressStr = ""
+      if (typeof st.address === "string") {
+        addressStr = st.address
+      } else if (st.address && typeof st.address === "object") {
+        const parts = [
+          st.address.street,
+          st.address.city,
+          st.address.state,
+          st.address.pincode,
+        ].filter(Boolean)
+        addressStr = parts.join(", ")
+      }
       stationDetails = {
         name: st.name,
-        city: st.city,
-        address: st.address,
+        city:
+          st.city || (typeof st.address === "object" && st.address ? st.address.city : undefined),
+        address: addressStr || (typeof st.address === "string" ? st.address : undefined),
         phone: st.phone,
       }
     }
