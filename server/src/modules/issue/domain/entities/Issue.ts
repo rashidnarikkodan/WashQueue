@@ -17,7 +17,15 @@ export interface CustomerDetailsSnapshot {
 export interface StationDetailsSnapshot {
   name?: string
   city?: string
-  address?: string
+  address?:
+    | string
+    | {
+        street?: string
+        city?: string
+        state?: string
+        country?: string
+        pincode?: string
+      }
   phone?: string
 }
 
