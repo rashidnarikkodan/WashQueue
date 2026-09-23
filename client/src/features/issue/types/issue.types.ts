@@ -47,6 +47,7 @@ export interface IssueHistoryEntry {
   fromStatus: string
   toStatus: string
   actionBy: string
+  actionByName?: string
   reason?: string
   timestamp: string | Date
 }
@@ -115,6 +116,7 @@ export interface IssueDto {
   resolutionNotes?: string | null
   resolvedAt?: string | null
   resolvedBy?: string | null
+  resolvedByName?: string | null
   history: IssueHistoryEntry[]
   customerDetails?: CustomerDetailsSnapshot
   stationDetails?: StationDetailsSnapshot

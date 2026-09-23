@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { X, ArrowUpRight, AlertTriangle, Loader2 } from "lucide-react"
+import { ROLE } from "@/shared/constants/role.const"
 
 interface EscalateIssueModalProps {
   isOpen: boolean
@@ -7,6 +8,7 @@ interface EscalateIssueModalProps {
   onConfirmEscalate: (reason: string) => Promise<void>
   isSubmitting?: boolean
   issueId?: string
+  role?: string
 }
 
 export default function EscalateIssueModal({
@@ -15,10 +17,14 @@ export default function EscalateIssueModal({
   onConfirmEscalate,
   isSubmitting = false,
   issueId,
+  role,
 }: EscalateIssueModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [reason, setReason] = useState("")
   const [error, setError] = useState<string | null>(null)
+
+  const isManager = role === ROLE.MANAGER
+  const targetLabel = isManager ? "Station Owner" : "Platform Admin"
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -65,7 +71,7 @@ export default function EscalateIssueModal({
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-foreground">Escalate to Platform Admin</h3>
+            <h3 className="text-lg font-bold text-foreground">Escalate to {targetLabel}</h3>
             {issueId && <p className="text-xs text-muted-foreground font-mono">Case #{issueId}</p>}
           </div>
         </div>
@@ -81,8 +87,9 @@ export default function EscalateIssueModal({
 
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Escalating this ticket will flag it with highest priority for Central Platform
-          Administrators and notify station management.
+          {isManager
+            ? "Escalating this ticket will flag it for Station Owner review and financial settlement authorization."
+            : "Escalating this ticket will flag it with highest priority for Central Platform Administrators for final arbitration."}
         </p>
 
         <div className="space-y-1.5">
@@ -94,7 +101,11 @@ export default function EscalateIssueModal({
             rows={4}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Explain why this case requires executive platform intervention or arbitration..."
+            placeholder={
+              isManager
+                ? "Explain why this case requires Owner approval (e.g. high compensation claim, customer dispute)..."
+                : "Explain why this case requires Central Platform Admin arbitration..."
+            }
             className="w-full px-4 py-3 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all resize-none placeholder:text-muted-foreground leading-relaxed"
           />
         </div>
@@ -119,7 +130,7 @@ export default function EscalateIssueModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin" />

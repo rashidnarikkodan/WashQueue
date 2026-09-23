@@ -68,6 +68,7 @@ export interface IssueProps {
   resolutionNotes?: string | null
   resolvedAt?: Date | null
   resolvedBy?: string | null
+  resolvedByName?: string | null
   history?: IssueHistoryEntry[]
   customerDetails?: CustomerDetailsSnapshot
   stationDetails?: StationDetailsSnapshot
@@ -175,6 +176,10 @@ export class Issue {
     return this.props.resolvedBy
   }
 
+  get resolvedByName(): string | null | undefined {
+    return this.props.resolvedByName
+  }
+
   get history(): IssueHistoryEntry[] {
     return this.props.history ?? []
   }
@@ -207,7 +212,8 @@ export class Issue {
     fromStatus: IssueStatus,
     toStatus: IssueStatus,
     actionBy: string,
-    reason?: string
+    reason?: string,
+    actionByName?: string
   ) {
     if (!this.props.history) {
       this.props.history = []
@@ -216,6 +222,7 @@ export class Issue {
       fromStatus,
       toStatus,
       actionBy,
+      actionByName,
       reason,
       timestamp: new Date(),
     })

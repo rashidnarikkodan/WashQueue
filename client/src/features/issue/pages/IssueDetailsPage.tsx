@@ -399,6 +399,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
             isSubmitting={isActionSubmitting}
             canManage={canManage}
             isCustomer={isCustomer}
+            role={currentRole}
           />
         </div>
 
@@ -439,6 +440,8 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           onClose={() => setIsEscalateModalOpen(false)}
           onConfirmEscalate={handleConfirmEscalate}
           isSubmitting={isActionSubmitting}
+          issueId={issue.id}
+          role={currentRole}
         />
       )}
 

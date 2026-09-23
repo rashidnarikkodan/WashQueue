@@ -8,6 +8,7 @@ export interface IssueHistoryEntry {
   fromStatus: string
   toStatus: string
   actionBy: string
+  actionByName?: string
   reason?: string
   timestamp: Date
 }
