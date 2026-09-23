@@ -24,7 +24,6 @@ const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/Customer
 const OwnerAnalyticsPage = lazy(() => import("@/features/owner/pages/OwnerAnalyticsPage"))
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
-const OwnerAnalyticsPage = lazy(() => import("@/features/owner/pages/OwnerAnalyticsPage"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,

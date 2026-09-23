@@ -19,8 +19,6 @@ const NotificationCenterPage = lazy(
 const AdminReviewModerationPage = lazy(
   () => import("@/features/review/pages/AdminReviewModerationPage")
 )
-const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
-const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
