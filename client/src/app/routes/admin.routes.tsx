@@ -21,6 +21,8 @@ const AdminReviewModerationPage = lazy(
 )
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
+const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -28,7 +30,7 @@ export const adminRoutes = {
   children: [
     {
       path: "dashboard",
-      element: <>Dashboard</>,
+      element: <AdminDashboard />,
     },
     {
       path: "users",
@@ -88,7 +90,11 @@ export const adminRoutes = {
     },
     {
       path: "reports",
-      element: <>Reports &amp; Analytics</>,
+      element: <AdminAnalyticsPage />,
+    },
+    {
+      path: "analytics",
+      element: <AdminAnalyticsPage />,
     },
     {
       path: "settlements",

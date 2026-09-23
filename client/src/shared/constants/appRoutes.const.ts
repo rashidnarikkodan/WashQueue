@@ -27,6 +27,7 @@ export const APP_ROUTES = {
     FRAUD: "/admin/fraud",
     NOTIFICATIONS: "/admin/notifications",
     REPORTS: "/admin/reports",
+    ANALYTICS: "/admin/reports",
     SETTINGS: "/admin/settings",
     SETTLEMENTS: "/admin/settlements",
     ISSUES: "/admin/issues",

@@ -90,22 +90,18 @@ export default function AddEditStation() {
           longitude: s.location?.longitude || 0,
         })
 
-        if (s.operatingHours && s.operatingHours.length > 0) {
-          setAvailability({
-            operatingHours: s.operatingHours,
-            holidays: s.holidays
-              ? s.holidays.map((h) => ({ date: String(h.date), reason: h.reason }))
-              : [],
-            ...(s.slotConfig || {
-              bays: 1,
-              windowDurationMins: 30,
-              capacityPerWindow: 1,
-              walkInReservedSlots: 0,
-              maxAdvanceBookingDays: 7,
-              allowWalkIns: true,
-            }),
-          })
-        }
+        setAvailability({
+          operatingHours: s.operatingHours || [],
+          holidays: s.holidays
+            ? s.holidays.map((h) => ({ date: String(h.date), reason: h.reason }))
+            : [],
+          bays: Math.max(1, s.slotConfig?.bays || 2),
+          windowDurationMins: Math.max(5, s.slotConfig?.windowDurationMins || 30),
+          capacityPerWindow: Math.max(1, s.slotConfig?.capacityPerWindow || 1),
+          walkInReservedSlots: s.slotConfig?.walkInReservedSlots ?? 0,
+          maxAdvanceBookingDays: Math.max(1, s.slotConfig?.maxAdvanceBookingDays || 7),
+          allowWalkIns: s.slotConfig?.allowWalkIns ?? true,
+        })
 
         if (detail.pricing && detail.pricing.length > 0) {
           setPricing(
@@ -228,19 +224,47 @@ export default function AddEditStation() {
     setAvailability(data)
 
     try {
-      await stationApi.updateStation(stationId, {
+      const res = await stationApi.updateStation(stationId, {
         step: 2,
         operatingHours: data.operatingHours,
         holidays: data.holidays || [],
         slotConfig: {
-          bays: data.bays,
-          windowDurationMins: data.windowDurationMins,
-          capacityPerWindow: data.capacityPerWindow,
-          walkInReservedSlots: data.walkInReservedSlots,
-          maxAdvanceBookingDays: data.maxAdvanceBookingDays,
-          allowWalkIns: data.allowWalkIns,
+          bays: Number(data.bays) || 1,
+          windowDurationMins: Number(data.windowDurationMins) || 30,
+          capacityPerWindow: Number(data.capacityPerWindow) || 1,
+          walkInReservedSlots: Number(data.walkInReservedSlots) || 0,
+          maxAdvanceBookingDays: Number(data.maxAdvanceBookingDays) || 7,
+          allowWalkIns: Boolean(data.allowWalkIns),
         },
       })
+      if (res?.station) {
+        const s = res.station
+        setAvailability({
+          operatingHours: s.operatingHours || data.operatingHours,
+          holidays: s.holidays
+            ? s.holidays.map((h) => ({ date: String(h.date), reason: h.reason }))
+            : data.holidays || [],
+          bays: Math.max(1, s.slotConfig?.bays || Number(data.bays) || 1),
+          windowDurationMins: Math.max(
+            5,
+            s.slotConfig?.windowDurationMins || Number(data.windowDurationMins) || 30
+          ),
+          capacityPerWindow: Math.max(
+            1,
+            s.slotConfig?.capacityPerWindow || Number(data.capacityPerWindow) || 1
+          ),
+          walkInReservedSlots:
+            s.slotConfig?.walkInReservedSlots ?? (Number(data.walkInReservedSlots) || 0),
+          maxAdvanceBookingDays: Math.max(
+            1,
+            s.slotConfig?.maxAdvanceBookingDays || Number(data.maxAdvanceBookingDays) || 7
+          ),
+          allowWalkIns:
+            s.slotConfig?.allowWalkIns !== undefined
+              ? s.slotConfig.allowWalkIns
+              : Boolean(data.allowWalkIns),
+        })
+      }
       setActiveStep(3)
     } catch (err) {
       const msg = getErrorMessage(err, "Failed to save availability settings.")

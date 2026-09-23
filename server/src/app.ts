@@ -18,6 +18,7 @@ import walletRouter from "@/modules/wallet/wallet.module"
 import { settlementRouter } from "@/modules/settlement/settlement.module"
 import { notificationRouter } from "@/modules/notification/notification.module"
 import reviewRouter from "@/modules/review/review.module"
+import analyticsRouter from "@/modules/analytics/analytics.module"
 import issueRouter from "@/modules/issue/issue.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
@@ -51,6 +52,7 @@ app.use(API_ROUTES.WALLET.ROOT, walletRouter)
 app.use(API_ROUTES.SETTLEMENTS.ROOT, settlementRouter)
 app.use(API_ROUTES.NOTIFICATIONS.ROOT, notificationRouter)
 app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
+app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
 app.use(API_ROUTES.ISSUES.ROOT, issueRouter)
 
 app.use(notFoundMiddleware)

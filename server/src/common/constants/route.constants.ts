@@ -130,6 +130,12 @@ export const API_ROUTES = {
     DISMISS_REPORTS: "/:id/reports/dismiss",
     PROVIDER_FEEDBACK: "/provider/feedback",
   },
+  ANALYTICS: {
+    ROOT: "/api/analytics",
+    ADMIN: "/admin",
+    OWNER: "/owner",
+    MANAGER: "/manager",
+  },
   ISSUES: {
     ROOT: "/api/issues",
     CREATE: "/",
