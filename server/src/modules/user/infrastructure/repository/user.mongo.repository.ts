@@ -4,7 +4,7 @@ import { UserMapper } from "../mappers/user.mapper"
 import { IUserRepository } from "../../domain/repositories/user.repository"
 import { GetUsersQuery, GetUsersResponse } from "../../application/dto/get-users.dto"
 import { buildPaginationMeta, getPagination } from "@/common/utils/pagination"
-import { RoleType, ROLE } from "@/common/constants/role.constants"
+import { ROLE, type RoleType } from "@/common/constants/role.constants"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 
 export class UserRepository extends BaseRepository<User, IUser> implements IUserRepository {

@@ -19,6 +19,8 @@ const WalletPage = lazy(() => import("@/features/wallet/pages/WalletPage"))
 const NotificationCenterPage = lazy(
   () => import("@/features/notification/pages/NotificationCenterPage")
 )
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 const ProtectedRoute = lazy(() => import("./ProtectedRoute"))
 
 const RootPathResolver = () => {
@@ -119,6 +121,22 @@ export const mainRoutes = {
       element: (
         <ProtectedRoute>
           <BookingDetails role="customer" />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "issues",
+      element: (
+        <ProtectedRoute>
+          <IssueManagement role="customer" />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "issues/:id",
+      element: (
+        <ProtectedRoute>
+          <IssueDetails role="customer" />
         </ProtectedRoute>
       ),
     },

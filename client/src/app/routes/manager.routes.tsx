@@ -14,6 +14,8 @@ const NotificationCenterPage = lazy(
   () => import("@/features/notification/pages/NotificationCenterPage")
 )
 const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/CustomerFeedbackPage"))
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -38,6 +40,14 @@ export const managerRoutes = {
     {
       path: "bookings/:id",
       element: <BookingDetails role="manager" />,
+    },
+    {
+      path: "issues",
+      element: <IssueManagement role="manager" />,
+    },
+    {
+      path: "issues/:id",
+      element: <IssueDetails role="manager" />,
     },
     {
       path: "bookings/:id/pre-inspection",

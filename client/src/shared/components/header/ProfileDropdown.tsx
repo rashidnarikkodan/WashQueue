@@ -265,7 +265,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
             </Link>
 
-            <div
+            <Link
+              to={currentRole === "customer" ? "/issues" : `/${currentRole}/issues`}
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
             >
@@ -276,12 +277,12 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 <div>
                   <span className="block text-xs font-bold text-foreground">Help & Support</span>
                   <span className="block text-[11px] text-muted-foreground">
-                    Customer support center
+                    Support tickets & issues
                   </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </div>
+            </Link>
           </div>
 
           <div className="p-3 border-t border-border/40 bg-muted/20 flex justify-end">
