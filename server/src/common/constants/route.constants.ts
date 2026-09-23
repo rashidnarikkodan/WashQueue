@@ -149,10 +149,4 @@ export const API_ROUTES = {
     RESOLVE: "/:id/resolve",
     CLOSE: "/:id/close",
   },
-  ANALYTICS: {
-    ROOT: "/api/analytics",
-    ADMIN: "/admin",
-    OWNER: "/owner",
-    MANAGER: "/manager",
-  },
 } as const
