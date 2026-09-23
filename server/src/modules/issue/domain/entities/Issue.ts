@@ -1,4 +1,6 @@
 import { IssueStatus } from "../value-objects/issue-status.vo"
+import { IssuePriority } from "../value-objects/issue-priority.vo"
+import { IssueCategory } from "../value-objects/issue-category.vo"
 import { ResolutionType } from "../value-objects/resolution-type.vo"
 import { Evidence, IssueHistoryEntry } from "../value-objects/evidence.vo"
 
@@ -7,12 +9,16 @@ export interface CustomerDetailsSnapshot {
   email?: string
   phone?: string
   avatar?: string
+  membershipTier?: string
+  totalWashes?: number
+  priorIssuesCount?: number
 }
 
 export interface StationDetailsSnapshot {
   name?: string
   city?: string
   address?: string
+  phone?: string
 }
 
 export interface BookingDetailsSnapshot {
@@ -20,6 +26,20 @@ export interface BookingDetailsSnapshot {
   serviceType?: string
   totalPrice?: number
   completedAt?: Date
+  vehiclePlate?: string
+  vehicleModel?: string
+  vehicleNickname?: string
+  preServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    capturedAt?: Date
+  } | null
+  postServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    checklist?: Array<{ label: string; passed: boolean; remark?: string }>
+    capturedAt?: Date
+  } | null
 }
 
 export interface IssueProps {
@@ -29,6 +49,8 @@ export interface IssueProps {
   stationId: string
   assignedManagerId?: string | null
   status: IssueStatus
+  priority?: IssuePriority
+  category?: string
   customerDescription: string
   customerEvidence?: Evidence[]
   managerNotes?: string | null
@@ -61,6 +83,8 @@ export class Issue {
       ...props,
       assignedManagerId: props.assignedManagerId ?? null,
       status: props.status ?? IssueStatus.OPEN,
+      priority: props.priority ?? IssuePriority.MEDIUM,
+      category: props.category ?? IssueCategory.VEHICLE_DAMAGE,
       customerEvidence: props.customerEvidence ?? [],
       managerNotes: props.managerNotes ?? null,
       managerEvidence: props.managerEvidence ?? [],
@@ -97,6 +121,14 @@ export class Issue {
 
   get status(): IssueStatus {
     return this.props.status
+  }
+
+  get priority(): IssuePriority {
+    return this.props.priority ?? IssuePriority.MEDIUM
+  }
+
+  get category(): string {
+    return this.props.category ?? IssueCategory.VEHICLE_DAMAGE
   }
 
   get customerDescription(): string {

@@ -1,4 +1,4 @@
-import { Types } from "mongoose"
+import { Query, Types } from "mongoose"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 import { Issue } from "../../domain/entities/Issue"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
@@ -22,26 +22,36 @@ export class IssueMongoRepository
     return this.save(issue)
   }
 
+  private applyPopulate<T>(query: Query<T, IIssueDocument>) {
+    return query
+      .populate("customerId", "name email phone avatar")
+      .populate("stationId", "name city address phone")
+      .populate("assignedManagerId", "name email phone avatar")
+      .populate("resolvedBy", "name email")
+      .populate("history.actionBy", "name email")
+      .populate({
+        path: "bookingId",
+        select:
+          "bookingNumber serviceType pricingSnapshot completedAt vehicleId walkInVehicle preServiceInspection postServiceInspection",
+        populate: {
+          path: "vehicleId",
+          select: "brand vehicle_model registrationNumber nickname",
+        },
+      })
+  }
+
   async findByBookingId(bookingId: string): Promise<Issue | null> {
     if (!Types.ObjectId.isValid(bookingId)) return null
-    const found = await this.model
-      .findOne({ bookingId: new Types.ObjectId(bookingId) })
-      .populate("customerId", "name email phone avatar")
-      .populate("stationId", "name city address")
-      .populate("bookingId", "bookingNumber serviceType pricingSnapshot completedAt")
-      .exec()
+    const found = await this.applyPopulate(
+      this.model.findOne({ bookingId: new Types.ObjectId(bookingId) })
+    ).exec()
 
     return found ? this.mapper.toDomain(found) : null
   }
 
   override async findById(id: string): Promise<Issue | null> {
     if (!id || !Types.ObjectId.isValid(id)) return null
-    const found = await this.model
-      .findById(id)
-      .populate("customerId", "name email phone avatar")
-      .populate("stationId", "name city address")
-      .populate("bookingId", "bookingNumber serviceType pricingSnapshot completedAt")
-      .exec()
+    const found = await this.applyPopulate(this.model.findById(id)).exec()
 
     return found ? this.mapper.toDomain(found) : null
   }
@@ -108,6 +118,27 @@ export class IssueMongoRepository
       }
     }
 
+    if (options.priority) {
+      if (Array.isArray(options.priority)) {
+        query.priority = { $in: options.priority }
+      } else {
+        query.priority = options.priority
+      }
+    }
+
+    if (options.category) {
+      query.category = options.category
+    }
+
+    if (options.search && options.search.trim().length > 0) {
+      const searchRegex = new RegExp(options.search.trim(), "i")
+      query.$or = [
+        { customerDescription: searchRegex },
+        { managerNotes: searchRegex },
+        { resolutionNotes: searchRegex },
+      ]
+    }
+
     if (options.startDate || options.endDate) {
       const dateQuery: Record<string, Date> = {}
       if (options.startDate) dateQuery.$gte = options.startDate
@@ -120,19 +151,11 @@ export class IssueMongoRepository
     const sortOptions: Record<string, 1 | -1> = { [sortField]: sortOrder }
 
     const [docs, total] = await Promise.all([
-      this.model
-        .find(query)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit)
-        .populate("customerId", "name email phone avatar")
-        .populate("stationId", "name city address")
-        .populate("bookingId", "bookingNumber serviceType pricingSnapshot completedAt")
-        .exec(),
+      this.applyPopulate(this.model.find(query).sort(sortOptions).skip(skip).limit(limit)).exec(),
       this.model.countDocuments(query).exec(),
     ])
 
-    const issues = docs.map((doc) => this.mapper.toDomain(doc))
+    const issues = (docs as unknown as IIssueDocument[]).map((doc) => this.mapper.toDomain(doc))
 
     return {
       issues,

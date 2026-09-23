@@ -61,7 +61,7 @@ export const createIssueRouter = (issueController: IssueController): Router => {
   router.patch(
     API_ROUTES.ISSUES.STATUS,
     authenticate,
-    authorize(ROLE.MANAGER, ROLE.ADMIN),
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(updateIssueStatusSchema, "body"),
     asyncHandler(issueController.updateStatus)
   )
@@ -69,7 +69,7 @@ export const createIssueRouter = (issueController: IssueController): Router => {
   router.patch(
     API_ROUTES.ISSUES.ASSIGN,
     authenticate,
-    authorize(ROLE.MANAGER, ROLE.ADMIN),
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(assignIssueSchema, "body"),
     asyncHandler(issueController.assign)
   )
@@ -85,7 +85,7 @@ export const createIssueRouter = (issueController: IssueController): Router => {
   router.post(
     API_ROUTES.ISSUES.RESOLVE,
     authenticate,
-    authorize(ROLE.MANAGER, ROLE.ADMIN),
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     validateRequest(resolveIssueSchema, "body"),
     asyncHandler(issueController.resolve)
   )

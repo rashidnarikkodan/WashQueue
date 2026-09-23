@@ -58,6 +58,8 @@ export const issueRouter = createIssueRouter(issueController)
 
 export * from "./domain/entities/Issue"
 export * from "./domain/value-objects/issue-status.vo"
+export * from "./domain/value-objects/issue-priority.vo"
+export * from "./domain/value-objects/issue-category.vo"
 export * from "./domain/value-objects/resolution-type.vo"
 export * from "./domain/value-objects/evidence.vo"
 export * from "./domain/repositories/issue.repository.interface"

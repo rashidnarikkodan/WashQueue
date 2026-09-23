@@ -75,6 +75,18 @@ export interface BookingDetailsSnapshot {
   completedAt?: string | Date
   vehiclePlate?: string
   vehicleModel?: string
+  vehicleNickname?: string
+  preServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    capturedAt?: string | Date
+  } | null
+  postServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    checklist?: Array<{ label: string; passed: boolean; remark?: string }>
+    capturedAt?: string | Date
+  } | null
 }
 
 export interface IssueDto {
@@ -113,6 +125,7 @@ export interface CreateIssuePayload {
 
 export interface UpdateIssueStatusPayload {
   status?: IssueStatus
+  priority?: IssuePriority
   managerNotes?: string
   managerEvidence?: Evidence[]
 }

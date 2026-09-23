@@ -1,4 +1,4 @@
-import { User } from "lucide-react"
+import { User, Mail, Phone } from "lucide-react"
 import type { CustomerDetailsSnapshot } from "../types/issue.types"
 import { getInitials } from "@/shared/utils/avatar"
 
@@ -8,8 +8,8 @@ interface CustomerMiniProfileProps {
 
 export default function CustomerMiniProfile({ customer }: CustomerMiniProfileProps) {
   const name = customer?.name || "Customer"
-  const membership = customer?.membershipTier || "Member Since 2023"
-  const totalWashes = customer?.totalWashes ?? 12
+  const membership = customer?.membershipTier || "Registered Client"
+  const totalWashes = customer?.totalWashes ?? 1
   const priorIssues = customer?.priorIssuesCount ?? 0
 
   return (
@@ -29,7 +29,30 @@ export default function CustomerMiniProfile({ customer }: CustomerMiniProfilePro
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 pt-2">
+      {(customer?.email || customer?.phone) && (
+        <div className="p-3 rounded-2xl bg-muted/40 border border-border space-y-1.5 text-xs">
+          {customer.email && (
+            <a
+              href={`mailto:${customer.email}`}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors truncate"
+            >
+              <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="truncate">{customer.email}</span>
+            </a>
+          )}
+          {customer.phone && (
+            <a
+              href={`tel:${customer.phone.replace(/\s+/g, "")}`}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors truncate"
+            >
+              <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>{customer.phone}</span>
+            </a>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 pt-1">
         <div className="p-3.5 rounded-2xl bg-muted/40 border border-border space-y-1">
           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground block">
             TOTAL WASHES

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react"
+import { ArrowLeft, RefreshCw, AlertTriangle, LifeBuoy } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
@@ -29,6 +29,7 @@ import {
   ResolveIssueModal,
   EscalateIssueModal,
   CloseIssueModal,
+  AssignManagerModal,
 } from "../components"
 import type { InspectionData } from "../components/InspectionComparisonTabs"
 
@@ -51,6 +52,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false)
   const [isEscalateModalOpen, setIsEscalateModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
 
   // Pre & post inspection snapshot
   const [preInspectionData, setPreInspectionData] = useState<InspectionData | null>(null)
@@ -78,8 +80,19 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
       const data = await issueApi.getById(id)
       setIssue(data)
 
-      // Fetch booking inspection data if bookingId exists
-      if (data.bookingId) {
+      // Use populated inspections if already present on issue
+      if (data.bookingDetails?.preServiceInspection) {
+        setPreInspectionData(data.bookingDetails.preServiceInspection)
+      }
+      if (data.bookingDetails?.postServiceInspection) {
+        setPostInspectionData(data.bookingDetails.postServiceInspection)
+      }
+
+      // If not populated, fetch booking inspection data directly
+      if (
+        data.bookingId &&
+        (!data.bookingDetails?.preServiceInspection || !data.bookingDetails?.postServiceInspection)
+      ) {
         try {
           const booking = await bookingApi.getBookingById(data.bookingId)
           if (booking) {
@@ -113,14 +126,13 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     if (!issue) return
     setIsActionSubmitting(true)
     try {
-      await issueApi.updateStatus(issue.id, {
+      const updated = await issueApi.updateStatus(issue.id, {
         managerNotes: notes,
       })
-      setIssue((prev) => (prev ? { ...prev, managerNotes: notes } : null))
+      setIssue(updated)
       toast.success("Internal investigation notes saved.")
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, managerNotes: notes } : null))
-      toast.success("Internal investigation notes saved.")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to save investigation notes"))
     } finally {
       setIsActionSubmitting(false)
     }
@@ -129,14 +141,13 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const handleUploadProof = async (evidence: Evidence[]) => {
     if (!issue) return
     try {
-      await issueApi.updateStatus(issue.id, {
+      const updated = await issueApi.updateStatus(issue.id, {
         managerEvidence: evidence,
       })
-      setIssue((prev) => (prev ? { ...prev, managerEvidence: evidence } : null))
+      setIssue(updated)
       toast.success("Investigation proof updated.")
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, managerEvidence: evidence } : null))
-      toast.success("Investigation proof saved.")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to update investigation proof"))
     }
   }
 
@@ -144,14 +155,28 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     if (!issue) return
     setIsActionSubmitting(true)
     try {
-      await issueApi.updateStatus(issue.id, {
+      const updated = await issueApi.updateStatus(issue.id, {
         status: IssueStatus.UNDER_REVIEW,
       })
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.UNDER_REVIEW } : null))
+      setIssue(updated)
       toast.success("Case marked as Under Review.")
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.UNDER_REVIEW } : null))
-      toast.success("Status updated to Under Review.")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to mark issue as Under Review"))
+    } finally {
+      setIsActionSubmitting(false)
+    }
+  }
+
+  const handleConfirmAssign = async (managerId: string) => {
+    if (!issue) return
+    setIsActionSubmitting(true)
+    try {
+      const updated = await issueApi.assignManager(issue.id, { managerId })
+      setIssue(updated)
+      toast.success("Manager assigned to issue successfully.")
+      setIsAssignModalOpen(false)
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to assign manager"))
     } finally {
       setIsActionSubmitting(false)
     }
@@ -161,14 +186,12 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     if (!issue) return
     setIsActionSubmitting(true)
     try {
-      await issueApi.escalateIssue(issue.id, { reason })
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.ESCALATED } : null))
+      const updated = await issueApi.escalateIssue(issue.id, { reason })
+      setIssue(updated)
       toast.success("Issue successfully escalated to Platform Admin.")
       setIsEscalateModalOpen(false)
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.ESCALATED } : null))
-      toast.success("Issue escalated to Platform Admin.")
-      setIsEscalateModalOpen(false)
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to escalate issue"))
     } finally {
       setIsActionSubmitting(false)
     }
@@ -178,14 +201,12 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     if (!issue) return
     setIsActionSubmitting(true)
     try {
-      await issueApi.resolveIssue(issue.id, payload)
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.RESOLVED } : null))
+      const updated = await issueApi.resolveIssue(issue.id, payload)
+      setIssue(updated)
       toast.success("Issue resolved cleanly.")
       setIsResolveModalOpen(false)
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.RESOLVED } : null))
-      toast.success("Issue resolved successfully.")
-      setIsResolveModalOpen(false)
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to resolve issue"))
     } finally {
       setIsActionSubmitting(false)
     }
@@ -195,14 +216,12 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     if (!issue) return
     setIsActionSubmitting(true)
     try {
-      await issueApi.closeIssue(issue.id, { notes })
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.CLOSED } : null))
+      const updated = await issueApi.closeIssue(issue.id, { notes })
+      setIssue(updated)
       toast.success("Support ticket has been closed.")
       setIsCloseModalOpen(false)
-    } catch {
-      setIssue((prev) => (prev ? { ...prev, status: IssueStatus.CLOSED } : null))
-      toast.success("Ticket closed successfully.")
-      setIsCloseModalOpen(false)
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to close issue"))
     } finally {
       setIsActionSubmitting(false)
     }
@@ -261,15 +280,12 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
         ? `${APP_ROUTES.MANAGER.ROOT}/bookings/${issue.bookingId}`
         : `/bookings/${issue.bookingId}`
 
-  const vehiclePlate = issue.bookingDetails?.vehiclePlate || "MH 91 AB 1234"
-  const vehicleModel = issue.bookingDetails?.vehicleModel || "Porsche 911 GT3 RS"
-  const customerName = issue.customerDetails?.name || "Alex Rivera"
-  const stationName = issue.stationDetails?.name || "Downtown Precision Bay"
-  const bookingNumber = issue.bookingDetails?.bookingNumber || issue.bookingId || "AWQ-8820"
+  const stationName = issue.stationDetails?.name || "WashQueue Station"
+  const bookingNumber = issue.bookingDetails?.bookingNumber || issue.bookingId
 
   return (
     <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24">
-      {/* Top Header & Breadcrumbs matching Image 2 */}
+      {/* Top Header & Breadcrumbs */}
       <div className="space-y-3 pb-3 border-b border-border/60">
         <Breadcrumbs
           items={[
@@ -280,181 +296,133 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-              {isCustomer ? "Ticket Investigation & Details" : "Issue Details"}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
+              <LifeBuoy className="w-8 h-8 text-primary" />
+              <span>
+                {isCustomer ? "Ticket Investigation & Details" : "Issue Investigation Hub"}
+              </span>
             </h1>
 
             {/* Subheader Meta */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold uppercase tracking-wider text-[10px]">REFERENCE</span>
+                <span className="font-bold uppercase tracking-wider text-[10px]">CASE REF</span>
                 <span className="font-mono font-bold text-foreground">#{issue.id}</span>
               </div>
               <span className="text-border">•</span>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold uppercase tracking-wider text-[10px]">BOOKING</span>
-                <span className="font-mono font-bold text-foreground">{bookingNumber}</span>
+                <span className="font-mono font-bold text-foreground">#{bookingNumber}</span>
               </div>
               <span className="text-border">•</span>
               <div className="flex items-center gap-1.5">
-                <span className="font-bold uppercase tracking-wider text-[10px]">
-                  {isCustomer ? "STATION" : "CUSTOMER"}
-                </span>
-                <span className="font-bold text-foreground">
-                  {isCustomer ? stationName : customerName}
-                </span>
-              </div>
-              <span className="text-border">•</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold uppercase tracking-wider text-[10px]">VEHICLE</span>
-                <span className="font-bold text-foreground">
-                  {vehicleModel} ({vehiclePlate})
-                </span>
+                <span className="font-bold uppercase tracking-wider text-[10px]">STATION</span>
+                <span className="font-semibold text-foreground">{stationName}</span>
               </div>
             </div>
           </div>
 
-          {/* Right Status Badges */}
-          <div className="flex items-center gap-2.5">
-            <IssueStatusBadge status={issue.status} size="lg" />
-            <IssuePriorityBadge priority={issue.priority} size="md" />
+          <div className="flex items-center gap-3">
+            <IssuePriorityBadge priority={issue.priority} />
+            <IssueStatusBadge status={issue.status} />
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Left Column (col-span-8) + Right Column (col-span-4) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* Left Column */}
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Main Content */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 1. Customer Complaint */}
+          {/* Customer Official Resolution Summary if resolved/closed */}
+          <CustomerResolutionCard
+            issue={issue}
+            onCloseTicket={() => setIsCloseModalOpen(true)}
+            onEscalateTicket={() => setIsEscalateModalOpen(true)}
+            isSubmitting={isActionSubmitting}
+          />
+
+          {/* Customer Complaint Statement */}
           <ComplaintCard
             description={issue.customerDescription}
             category={issue.category || "Vehicle Damage"}
             createdAt={issue.createdAt}
           />
 
-          {/* 2. Customer Evidence Gallery */}
-          <CustomerEvidenceGallery evidence={issue.customerEvidence} />
+          {/* Customer Uploaded Evidence Photos */}
+          {issue.customerEvidence && issue.customerEvidence.length > 0 && (
+            <CustomerEvidenceGallery evidence={issue.customerEvidence} />
+          )}
 
-          {/* 3. Pre / Post Inspection Tabs */}
+          {/* High-Resolution Pre & Post Optical Inspection Verification */}
           <InspectionComparisonTabs
             preInspection={preInspectionData}
             postInspection={postInspectionData}
           />
 
-          {/* Conditional Rendering for Customer vs Provider/Admin */}
-          {isCustomer ? (
-            /* Customer View: Resolution Card & Feedback */
-            <>
-              <CustomerResolutionCard
-                issue={issue}
-                onCloseTicket={() => setIsCloseModalOpen(true)}
-                onEscalateTicket={() => setIsEscalateModalOpen(true)}
-                isSubmitting={isActionSubmitting}
-              />
-            </>
-          ) : (
-            /* Manager / Owner / Admin View: Investigation Suite */
-            <>
-              {/* 4. Internal Investigation Notes */}
+          {/* Management Investigation & Notes (Visible to Manager / Owner / Admin) */}
+          {canManage && (
+            <div className="space-y-6">
               <InvestigationNotesEditor
                 initialNotes={issue.managerNotes}
                 onSave={handleSaveNotes}
                 isSaving={isActionSubmitting}
-                readOnly={false}
+                readOnly={issue.status === IssueStatus.CLOSED}
               />
 
-              {/* 5. Add Investigation Proof */}
-              <InvestigationProofUploader
-                existingProof={issue.managerEvidence}
-                onUploadProof={handleUploadProof}
-                isUploading={isActionSubmitting}
-                readOnly={false}
-              />
-            </>
-          )}
-
-          {/* 6. Activity Timeline */}
-          <IssueTimeline history={issue.history} createdAt={issue.createdAt} />
-
-          {/* 7. Bottom Action Bar */}
-          {canManage ? (
-            <IssueActionBar
-              currentStatus={issue.status}
-              onSaveProgress={() => handleSaveNotes(issue.managerNotes || "")}
-              onMarkUnderReview={handleMarkUnderReview}
-              onRequestInfo={() => toast.info("Request for information sent to customer.")}
-              onEscalate={() => setIsEscalateModalOpen(true)}
-              onResolve={() => setIsResolveModalOpen(true)}
-              isSubmitting={isActionSubmitting}
-              canManage={canManage}
-            />
-          ) : (
-            /* Customer Bottom Action Bar */
-            issue.status !== IssueStatus.CLOSED && (
-              <div className="p-4 sm:p-5 rounded-3xl bg-card border border-border shadow-xl flex flex-wrap items-center justify-between gap-3 sticky bottom-4 z-30 backdrop-blur-md">
-                <div className="text-xs text-muted-foreground">
-                  Ticket #{issue.id} • Status:{" "}
-                  <strong className="text-foreground capitalize">
-                    {issue.status.toLowerCase().replace("_", " ")}
-                  </strong>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  {issue.status !== IssueStatus.ESCALATED && (
-                    <button
-                      type="button"
-                      onClick={() => setIsEscalateModalOpen(true)}
-                      disabled={isActionSubmitting}
-                      className="px-4 py-2 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      Escalate to Admin
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => setIsCloseModalOpen(true)}
-                    disabled={isActionSubmitting}
-                    className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer disabled:opacity-50"
-                  >
-                    Close Ticket
-                  </button>
-                </div>
+              <div className="space-y-2">
+                <span className="text-[11px] font-black uppercase tracking-wider text-muted-foreground block">
+                  OFFICIAL INVESTIGATION PROOF FILES
+                </span>
+                <InvestigationProofUploader
+                  existingProof={issue.managerEvidence}
+                  onUploadProof={handleUploadProof}
+                  readOnly={issue.status === IssueStatus.CLOSED}
+                />
               </div>
-            )
+            </div>
           )}
+
+          {/* Activity Timeline */}
+          <div className="p-6 rounded-3xl bg-card border border-border shadow-xl">
+            <IssueTimeline history={issue.history} createdAt={issue.createdAt} />
+          </div>
+
+          {/* Action Bar */}
+          <IssueActionBar
+            currentStatus={issue.status}
+            onSaveProgress={() => handleSaveNotes(issue.managerNotes || "")}
+            onMarkUnderReview={handleMarkUnderReview}
+            onAssignManager={canManage ? () => setIsAssignModalOpen(true) : undefined}
+            onEscalate={() => setIsEscalateModalOpen(true)}
+            onResolve={() => setIsResolveModalOpen(true)}
+            onCloseTicket={() => setIsCloseModalOpen(true)}
+            isSubmitting={isActionSubmitting}
+            canManage={canManage}
+            isCustomer={isCustomer}
+          />
         </div>
 
-        {/* Right Column */}
+        {/* Right Sidebar Meta & Info */}
         <div className="lg:col-span-4 space-y-6">
-          {/* 1. Case Summary Card */}
           <CaseSummaryCard
             issue={issue}
             bookingUrl={bookingUrl}
             onContactCustomer={() => {
-              if (isCustomer) {
-                const phone = issue.stationDetails?.phone || "+91 98765 00000"
-                window.location.href = `tel:${phone.replace(/\s+/g, "")}`
+              if (issue.customerDetails?.phone) {
+                window.location.href = `tel:${issue.customerDetails.phone.replace(/\s+/g, "")}`
               } else {
-                toast.info(
-                  `Calling ${customerName} at ${issue.customerDetails?.phone || "+91 98765 43210"}`
-                )
+                toast.info(`Customer email: ${issue.customerDetails?.email || "N/A"}`)
               }
             }}
-            onPrintReport={() => window.print()}
           />
 
-          {/* 2. Customer Mini Profile (For Staff/Admin) OR Station Contact Card (For Customers) */}
-          {isCustomer ? (
-            <StationContactCard station={issue.stationDetails} />
-          ) : (
-            <CustomerMiniProfile customer={issue.customerDetails} />
-          )}
+          {!isCustomer && <CustomerMiniProfile customer={issue.customerDetails} />}
+
+          <StationContactCard station={issue.stationDetails} />
         </div>
       </div>
 
-      {/* Resolve Issue Modal (For Providers / Admins) */}
+      {/* Modals */}
       {isResolveModalOpen && (
         <ResolveIssueModal
           isOpen={isResolveModalOpen}
@@ -465,18 +433,15 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
         />
       )}
 
-      {/* Escalate Issue Modal */}
       {isEscalateModalOpen && (
         <EscalateIssueModal
           isOpen={isEscalateModalOpen}
           onClose={() => setIsEscalateModalOpen(false)}
           onConfirmEscalate={handleConfirmEscalate}
           isSubmitting={isActionSubmitting}
-          issueId={issue.id}
         />
       )}
 
-      {/* Close Issue Modal */}
       {isCloseModalOpen && (
         <CloseIssueModal
           isOpen={isCloseModalOpen}
@@ -484,6 +449,17 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           onConfirmClose={handleConfirmClose}
           isSubmitting={isActionSubmitting}
           issueId={issue.id}
+        />
+      )}
+
+      {isAssignModalOpen && (
+        <AssignManagerModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          onConfirmAssign={handleConfirmAssign}
+          isSubmitting={isActionSubmitting}
+          currentManagerId={issue.assignedManagerId}
+          stationId={issue.stationId}
         />
       )}
     </div>

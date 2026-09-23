@@ -7,6 +7,7 @@ import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { AppError } from "@/common/errors/app-error"
 import { Issue } from "../../domain/entities/Issue"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import {
   ICreateIssueUseCase,
   IGetIssueByIdUseCase,
@@ -24,6 +25,9 @@ interface IssueQueryParams {
   page?: number
   limit?: number
   status?: IssueStatus
+  priority?: IssuePriority
+  category?: string
+  search?: string
   startDate?: Date
   endDate?: Date
   stationId?: string
@@ -69,6 +73,9 @@ export class IssueController {
       page: query.page ? Number(query.page) : undefined,
       limit: query.limit ? Number(query.limit) : undefined,
       status: query.status,
+      priority: query.priority,
+      category: query.category,
+      search: query.search,
       startDate: query.startDate,
       endDate: query.endDate,
     })
@@ -98,6 +105,9 @@ export class IssueController {
       page: query.page ? Number(query.page) : undefined,
       limit: query.limit ? Number(query.limit) : undefined,
       status: query.status,
+      priority: query.priority,
+      category: query.category,
+      search: query.search,
       startDate: query.startDate,
       endDate: query.endDate,
     })
@@ -122,6 +132,9 @@ export class IssueController {
       page: query.page ? Number(query.page) : undefined,
       limit: query.limit ? Number(query.limit) : undefined,
       status: query.status,
+      priority: query.priority,
+      category: query.category,
+      search: query.search,
       stationId: query.stationId,
       customerId: query.customerId,
       startDate: query.startDate,

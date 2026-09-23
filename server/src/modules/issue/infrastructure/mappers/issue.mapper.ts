@@ -2,6 +2,7 @@ import { Types } from "mongoose"
 import { IMapper } from "@/core/domain/repository.interface"
 import { Issue, IssueProps } from "../../domain/entities/Issue"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import { ResolutionType } from "../../domain/value-objects/resolution-type.vo"
 import { IIssueDocument } from "../models/issue.model"
 
@@ -18,6 +19,15 @@ interface PopulatedStation {
   name?: string
   city?: string
   address?: string
+  phone?: string
+}
+
+interface PopulatedVehicle {
+  _id?: Types.ObjectId
+  brand?: string
+  vehicle_model?: string
+  registrationNumber?: string
+  nickname?: string
 }
 
 interface PopulatedBooking {
@@ -26,6 +36,19 @@ interface PopulatedBooking {
   serviceType?: string
   pricingSnapshot?: { totalPrice?: number }
   completedAt?: Date
+  vehicleId?: PopulatedVehicle | Types.ObjectId
+  walkInVehicle?: { registrationNumber?: string }
+  preServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    capturedAt?: Date
+  }
+  postServiceInspection?: {
+    photos?: Array<{ position?: string; public_id: string; secured_url: string }>
+    notes?: string
+    checklist?: Array<{ label: string; passed: boolean; remark?: string }>
+    capturedAt?: Date
+  }
 }
 
 export class IssueMapper implements IMapper<Issue, IIssueDocument> {
@@ -34,6 +57,7 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
       customerId?: PopulatedUser | Types.ObjectId
       stationId?: PopulatedStation | Types.ObjectId
       bookingId?: PopulatedBooking | Types.ObjectId
+      resolvedBy?: PopulatedUser | Types.ObjectId
     }
   ): Issue {
     const rawObj = typeof raw.toObject === "function" ? raw.toObject() : raw
@@ -60,6 +84,7 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
         name: st.name,
         city: st.city,
         address: st.address,
+        phone: st.phone,
       }
     }
 
@@ -68,12 +93,35 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
     if (rawObj.bookingId && typeof rawObj.bookingId === "object" && "_id" in rawObj.bookingId) {
       const bk = rawObj.bookingId as PopulatedBooking
       bookingIdStr = bk._id.toString()
+
+      let vehicleModel = ""
+      let vehiclePlate = bk.walkInVehicle?.registrationNumber || ""
+      let vehicleNickname = ""
+
+      if (bk.vehicleId && typeof bk.vehicleId === "object" && "brand" in bk.vehicleId) {
+        const v = bk.vehicleId as PopulatedVehicle
+        vehicleModel = `${v.brand || ""} ${v.vehicle_model || ""}`.trim()
+        if (v.registrationNumber) vehiclePlate = v.registrationNumber
+        if (v.nickname) vehicleNickname = v.nickname
+      }
+
       bookingDetails = {
         bookingNumber: bk.bookingNumber,
         serviceType: bk.serviceType,
         totalPrice: bk.pricingSnapshot?.totalPrice,
         completedAt: bk.completedAt,
+        vehicleModel: vehicleModel || undefined,
+        vehiclePlate: vehiclePlate || undefined,
+        vehicleNickname: vehicleNickname || undefined,
+        preServiceInspection: bk.preServiceInspection,
+        postServiceInspection: bk.postServiceInspection,
       }
+    }
+
+    let resolvedByStr = rawObj.resolvedBy ? rawObj.resolvedBy.toString() : null
+    if (rawObj.resolvedBy && typeof rawObj.resolvedBy === "object" && "_id" in rawObj.resolvedBy) {
+      const u = rawObj.resolvedBy as PopulatedUser
+      resolvedByStr = u.name || u._id.toString()
     }
 
     const props: IssueProps = {
@@ -82,7 +130,9 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
       customerId: customerIdStr,
       stationId: stationIdStr,
       assignedManagerId: rawObj.assignedManagerId ? rawObj.assignedManagerId.toString() : null,
-      status: rawObj.status as IssueStatus,
+      status: (rawObj.status as IssueStatus) || IssueStatus.OPEN,
+      priority: (rawObj.priority as IssuePriority) || IssuePriority.MEDIUM,
+      category: rawObj.category || "Vehicle Damage",
       customerDescription: rawObj.customerDescription,
       customerEvidence: rawObj.customerEvidence || [],
       managerNotes: rawObj.managerNotes || null,
@@ -91,21 +141,29 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
       compensationAmount: rawObj.compensationAmount || 0,
       resolutionNotes: rawObj.resolutionNotes || null,
       resolvedAt: rawObj.resolvedAt ? new Date(rawObj.resolvedAt) : null,
-      resolvedBy: rawObj.resolvedBy ? rawObj.resolvedBy.toString() : null,
+      resolvedBy: resolvedByStr,
       history: (rawObj.history || []).map(
         (h: {
           fromStatus: string
           toStatus: string
-          actionBy?: Types.ObjectId | string
+          actionBy?: { name?: string; _id?: Types.ObjectId } | Types.ObjectId | string
           reason?: string
           timestamp: Date
-        }) => ({
-          fromStatus: h.fromStatus,
-          toStatus: h.toStatus,
-          actionBy: h.actionBy?.toString() || "",
-          reason: h.reason,
-          timestamp: new Date(h.timestamp),
-        })
+        }) => {
+          let actionByStr = ""
+          if (h.actionBy && typeof h.actionBy === "object" && "name" in h.actionBy) {
+            actionByStr = h.actionBy.name || h.actionBy._id?.toString() || ""
+          } else if (h.actionBy) {
+            actionByStr = h.actionBy.toString()
+          }
+          return {
+            fromStatus: h.fromStatus,
+            toStatus: h.toStatus,
+            actionBy: actionByStr,
+            reason: h.reason,
+            timestamp: new Date(h.timestamp),
+          }
+        }
       ),
       customerDetails,
       stationDetails,
@@ -130,6 +188,8 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
         : null
     }
     if (data.status) persistence.status = data.status
+    if (data.priority) persistence.priority = data.priority
+    if (data.category !== undefined) persistence.category = data.category
     if (data.customerDescription !== undefined)
       persistence.customerDescription = data.customerDescription
     if (data.customerEvidence !== undefined) persistence.customerEvidence = data.customerEvidence
@@ -141,7 +201,10 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
     if (data.resolutionNotes !== undefined) persistence.resolutionNotes = data.resolutionNotes
     if (data.resolvedAt !== undefined) persistence.resolvedAt = data.resolvedAt
     if (data.resolvedBy !== undefined) {
-      persistence.resolvedBy = data.resolvedBy ? new Types.ObjectId(data.resolvedBy) : null
+      persistence.resolvedBy =
+        data.resolvedBy && Types.ObjectId.isValid(data.resolvedBy)
+          ? new Types.ObjectId(data.resolvedBy)
+          : null
     }
     if (data.history !== undefined) {
       persistence.history = data.history.map((h) => ({

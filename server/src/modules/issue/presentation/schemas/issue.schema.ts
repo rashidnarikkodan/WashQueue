@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import { ResolutionType } from "../../domain/value-objects/resolution-type.vo"
 
 export const EvidenceSchema = z.object({
@@ -15,10 +16,13 @@ export const createIssueSchema = z.object({
     .min(5, "Description must be at least 5 characters")
     .max(2000, "Description cannot exceed 2000 characters"),
   customerEvidence: z.array(EvidenceSchema).optional().default([]),
+  category: z.string().optional(),
+  priority: z.nativeEnum(IssuePriority).optional(),
 })
 
 export const updateIssueStatusSchema = z.object({
   status: z.nativeEnum(IssueStatus).optional(),
+  priority: z.nativeEnum(IssuePriority).optional(),
   managerNotes: z.string().max(2000).optional(),
   managerEvidence: z.array(EvidenceSchema).optional(),
 })
@@ -45,6 +49,9 @@ export const issueQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().default(1),
   limit: z.coerce.number().min(1).max(100).optional().default(10),
   status: z.nativeEnum(IssueStatus).optional(),
+  priority: z.nativeEnum(IssuePriority).optional(),
+  category: z.string().optional(),
+  search: z.string().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
 })

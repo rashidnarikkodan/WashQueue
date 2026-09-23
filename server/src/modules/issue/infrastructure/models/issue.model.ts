@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema, Types } from "mongoose"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import { ResolutionType } from "../../domain/value-objects/resolution-type.vo"
 
 export interface IEvidenceSubdocument {
@@ -23,6 +24,8 @@ export interface IIssueDocument extends Document {
   stationId: Types.ObjectId
   assignedManagerId?: Types.ObjectId | null
   status: string
+  priority: string
+  category: string
   customerDescription: string
   customerEvidence: IEvidenceSubdocument[]
   managerNotes?: string | null
@@ -89,6 +92,17 @@ const IssueSchema = new Schema<IIssueDocument>(
       default: IssueStatus.OPEN,
       index: true,
     },
+    priority: {
+      type: String,
+      enum: Object.values(IssuePriority),
+      default: IssuePriority.MEDIUM,
+      index: true,
+    },
+    category: {
+      type: String,
+      default: "Vehicle Damage",
+      index: true,
+    },
     customerDescription: {
       type: String,
       required: true,
@@ -141,6 +155,9 @@ const IssueSchema = new Schema<IIssueDocument>(
     collection: "booking_issues",
   }
 )
+
+IssueSchema.index({ stationId: 1, status: 1, createdAt: -1 })
+IssueSchema.index({ customerId: 1, status: 1, createdAt: -1 })
 
 export const IssueModel = mongoose.model<IIssueDocument>("Issue", IssueSchema)
 export default IssueModel

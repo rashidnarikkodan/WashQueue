@@ -2,6 +2,8 @@ import { CreateIssueDTO } from "../dtos/issue.dto"
 import { ICreateIssueUseCase } from "../interfaces/issue-usecases.interface"
 import { Issue } from "../../domain/entities/Issue"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
+import { IssueCategory } from "../../domain/value-objects/issue-category.vo"
 import { IIssueRepository } from "../../domain/repositories/issue.repository.interface"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { INotificationDispatcherService } from "@/modules/notification/notification.module"
@@ -44,6 +46,8 @@ export class CreateIssueUseCase implements ICreateIssueUseCase {
       customerId: dto.customerId,
       stationId: booking.stationId,
       status: IssueStatus.OPEN,
+      priority: dto.priority ?? IssuePriority.MEDIUM,
+      category: dto.category ?? IssueCategory.VEHICLE_DAMAGE,
       customerDescription: dto.customerDescription,
       customerEvidence: dto.customerEvidence ?? [],
       history: [
