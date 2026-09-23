@@ -1,5 +1,7 @@
 import { useState, useRef } from "react"
 import { CloudUpload, X, File, Loader2 } from "lucide-react"
+import { toast } from "sonner"
+import { bookingApi } from "@/shared/apis/booking.api"
 import type { Evidence } from "../types/issue.types"
 
 interface InvestigationProofUploaderProps {
@@ -16,27 +18,55 @@ export default function InvestigationProofUploader({
   readOnly = false,
 }: InvestigationProofUploaderProps) {
   const [proofList, setProofList] = useState<Evidence[]>(existingProof)
+  const [isCloudUploading, setIsCloudUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    const newEvidence: Evidence[] = []
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      // Create local object URL for preview or upload
-      const localUrl = URL.createObjectURL(file)
-      newEvidence.push({
-        public_id: `proof-${Date.now()}-${i}`,
-        url: localUrl,
-        description: file.name,
-      })
-    }
+    setIsCloudUploading(true)
 
-    const updated = [...proofList, ...newEvidence]
-    setProofList(updated)
-    onUploadProof(updated)
+    try {
+      const { signature, timestamp, folder, apiKey, cloudName } =
+        await bookingApi.getInspectionUploadSignature()
+
+      const uploadPromises = Array.from(files).map(async (file, idx) => {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("api_key", apiKey)
+        formData.append("timestamp", String(timestamp))
+        formData.append("signature", signature)
+        formData.append("folder", folder)
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`)
+        }
+
+        const result = await response.json()
+        return {
+          public_id: result.public_id || `proof-${Date.now()}-${idx}`,
+          url: result.secure_url || result.url,
+          description: file.name,
+        }
+      })
+
+      const uploadedResults = await Promise.all(uploadPromises)
+      const updated = [...proofList, ...uploadedResults]
+      setProofList(updated)
+      onUploadProof(updated)
+      toast.success(`${uploadedResults.length} investigation file(s) uploaded.`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload investigation proof files")
+    } finally {
+      setIsCloudUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
   }
 
   const handleRemove = (id: string) => {
@@ -49,7 +79,11 @@ export default function InvestigationProofUploader({
     <div className="space-y-3 text-left">
       {!readOnly && (
         <div
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => {
+            if (!isCloudUploading && !isUploading) {
+              fileInputRef.current?.click()
+            }
+          }}
           className="p-8 sm:p-10 rounded-3xl border-2 border-dashed border-border/80 bg-card hover:bg-muted/30 hover:border-primary/40 transition-all cursor-pointer text-center space-y-3 group shadow-sm"
         >
           <input
@@ -62,7 +96,7 @@ export default function InvestigationProofUploader({
           />
 
           <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary mx-auto flex items-center justify-center group-hover:scale-110 transition-transform">
-            {isUploading ? (
+            {isCloudUploading || isUploading ? (
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
             ) : (
               <CloudUpload className="w-6 h-6" />
@@ -70,9 +104,11 @@ export default function InvestigationProofUploader({
           </div>
 
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-foreground">Add Investigation Proof</h4>
+            <h4 className="text-sm font-bold text-foreground">
+              {isCloudUploading ? "Uploading to Cloud..." : "Add Investigation Proof"}
+            </h4>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Drag and drop CCTV footage, staff reports, or additional photos here
+              Upload CCTV footage captures, technician reports, or inspection close-ups
             </p>
           </div>
         </div>
@@ -87,7 +123,8 @@ export default function InvestigationProofUploader({
               className="relative p-2.5 rounded-2xl bg-muted/40 border border-border flex items-center gap-2.5 group"
             >
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-card border border-border/60 flex items-center justify-center shrink-0">
-                {item.url.match(/\.(jpg|jpeg|png|webp|gif)$/i) || item.url.startsWith("blob:") ? (
+                {item.url.match(/\.(jpg|jpeg|png|webp|gif)$/i) ||
+                item.url.includes("cloudinary.com") ? (
                   <img src={item.url} alt="Proof" className="w-full h-full object-cover" />
                 ) : (
                   <File className="w-5 h-5 text-primary" />
@@ -99,7 +136,7 @@ export default function InvestigationProofUploader({
                   {item.description || "Investigation file"}
                 </span>
                 <span className="text-[10px] text-muted-foreground block font-mono">
-                  Proof file
+                  Verified proof
                 </span>
               </div>
 

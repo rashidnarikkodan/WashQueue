@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react"
 import { X, AlertCircle, Upload, Trash2, Loader2, LifeBuoy } from "lucide-react"
 import { toast } from "sonner"
 import { issueApi } from "@/shared/apis/issue.api"
-import { IssueCategory, type Evidence, type IssueDto } from "../types/issue.types"
+import { bookingApi } from "@/shared/apis/booking.api"
+import { IssueCategory, IssuePriority, type Evidence, type IssueDto } from "../types/issue.types"
 
 interface CreateIssueModalProps {
   isOpen: boolean
@@ -28,8 +29,10 @@ export default function CreateIssueModal({
 
   const [enteredBookingId, setEnteredBookingId] = useState(bookingId)
   const [category, setCategory] = useState<string>(IssueCategory.VEHICLE_DAMAGE)
+  const [priority, setPriority] = useState<IssuePriority>(IssuePriority.MEDIUM)
   const [description, setDescription] = useState("")
   const [evidenceList, setEvidenceList] = useState<Evidence[]>([])
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -58,21 +61,59 @@ export default function CreateIssueModal({
     }
   }, [isOpen])
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    const newEvidence: Evidence[] = []
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const url = URL.createObjectURL(file)
-      newEvidence.push({
-        public_id: `evidence-${Date.now()}-${i}`,
-        url,
-        description: file.name,
-      })
+    if (evidenceList.length + files.length > 5) {
+      toast.error("You can upload a maximum of 5 evidence photos.")
+      return
     }
-    setEvidenceList((prev) => [...prev, ...newEvidence])
+
+    setIsUploadingFiles(true)
+    setError(null)
+
+    try {
+      const { signature, timestamp, folder, apiKey, cloudName } =
+        await bookingApi.getInspectionUploadSignature()
+
+      const uploadPromises = Array.from(files).map(async (file, idx) => {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("api_key", apiKey)
+        formData.append("timestamp", String(timestamp))
+        formData.append("signature", signature)
+        formData.append("folder", folder)
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`)
+        }
+
+        const result = await response.json()
+        return {
+          public_id: result.public_id || `proof-${Date.now()}-${idx}`,
+          url: result.secure_url || result.url,
+          description: file.name,
+        }
+      })
+
+      const uploadedResults = await Promise.all(uploadPromises)
+      setEvidenceList((prev) => [...prev, ...uploadedResults])
+      toast.success(`${uploadedResults.length} photo(s) uploaded successfully.`)
+    } catch (uploadErr) {
+      const msg =
+        uploadErr instanceof Error ? uploadErr.message : "Photo upload failed. Please try again."
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setIsUploadingFiles(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
   }
 
   const handleRemoveEvidence = (id: string) => {
@@ -102,6 +143,7 @@ export default function CreateIssueModal({
         customerDescription: description.trim(),
         customerEvidence: evidenceList,
         category,
+        priority,
       })
 
       toast.success("Support ticket logged successfully! Our team will review shortly.")
@@ -131,7 +173,7 @@ export default function CreateIssueModal({
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-card">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
             <LifeBuoy className="w-5 h-5" />
           </div>
           <div>
@@ -182,21 +224,39 @@ export default function CreateIssueModal({
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Issue Category <span className="text-red-400">*</span>
-          </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
-          >
-            {Object.values(IssueCategory).map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Issue Category <span className="text-red-400">*</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
+            >
+              {Object.values(IssueCategory).map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Severity / Priority
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as IssuePriority)}
+              className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
+            >
+              <option value={IssuePriority.LOW}>Low - Minor Query / Cosmetic</option>
+              <option value={IssuePriority.MEDIUM}>Medium - Standard Concern</option>
+              <option value={IssuePriority.HIGH}>High - Incomplete Wash / Delay</option>
+              <option value={IssuePriority.CRITICAL}>Critical - Damage / Severe Incident</option>
+            </select>
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -234,10 +294,20 @@ export default function CreateIssueModal({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full p-4 rounded-2xl border border-dashed border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+            disabled={isUploadingFiles || evidenceList.length >= 5}
+            className="w-full p-4 rounded-2xl border border-dashed border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer disabled:opacity-50"
           >
-            <Upload className="w-4 h-4 text-primary" />
-            <span>Click to upload photos</span>
+            {isUploadingFiles ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Uploading photos to cloud...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 text-primary" />
+                <span>Click to upload evidence photos</span>
+              </>
+            )}
           </button>
 
           {evidenceList.length > 0 && (
@@ -251,7 +321,7 @@ export default function CreateIssueModal({
                   <button
                     type="button"
                     onClick={() => handleRemoveEvidence(item.public_id)}
-                    className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/70 text-white hover:bg-red-500 transition-colors"
+                    className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/70 text-white hover:bg-red-500 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -272,7 +342,7 @@ export default function CreateIssueModal({
           <button
             type="button"
             onClick={onClose}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploadingFiles}
             className="px-5 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             Cancel
@@ -280,7 +350,7 @@ export default function CreateIssueModal({
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploadingFiles}
             className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}

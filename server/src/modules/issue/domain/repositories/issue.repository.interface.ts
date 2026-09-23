@@ -1,6 +1,7 @@
 import { IBaseRepository } from "@/core/domain/repository.interface"
 import { Issue } from "../entities/Issue"
 import { IssueStatus } from "../value-objects/issue-status.vo"
+import { IssuePriority } from "../value-objects/issue-priority.vo"
 
 export interface FindIssuesFilterOptions {
   customerId?: string
@@ -8,6 +9,9 @@ export interface FindIssuesFilterOptions {
   bookingId?: string
   assignedManagerId?: string
   status?: IssueStatus | IssueStatus[]
+  priority?: IssuePriority | IssuePriority[]
+  category?: string
+  search?: string
   startDate?: Date
   endDate?: Date
   page?: number

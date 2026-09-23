@@ -1,4 +1,5 @@
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
+import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import { ResolutionType } from "../../domain/value-objects/resolution-type.vo"
 import { Evidence, IssueHistoryEntry } from "../../domain/value-objects/evidence.vo"
 import {
@@ -12,6 +13,8 @@ export interface CreateIssueDTO {
   customerId: string
   customerDescription: string
   customerEvidence?: Evidence[]
+  category?: string
+  priority?: IssuePriority
 }
 
 export interface UpdateIssueStatusDTO {
@@ -55,6 +58,8 @@ export interface IssueResponseDTO {
   stationId: string
   assignedManagerId?: string | null
   status: IssueStatus
+  priority?: IssuePriority
+  category?: string
   customerDescription: string
   customerEvidence: Evidence[]
   managerNotes?: string | null
