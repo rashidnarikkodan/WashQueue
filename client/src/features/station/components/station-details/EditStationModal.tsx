@@ -132,14 +132,12 @@ export default function EditStationModal({
               initialValues={{
                 operatingHours: station.operatingHours || [],
                 holidays: station.holidays || [],
-                ...(station.slotConfig || {
-                  bays: 1,
-                  windowDurationMins: 30,
-                  capacityPerWindow: 1,
-                  walkInReservedSlots: 0,
-                  maxAdvanceBookingDays: 7,
-                  allowWalkIns: true,
-                }),
+                bays: Math.max(1, station.slotConfig?.bays || 2),
+                windowDurationMins: Math.max(5, station.slotConfig?.windowDurationMins || 30),
+                capacityPerWindow: Math.max(1, station.slotConfig?.capacityPerWindow || 1),
+                walkInReservedSlots: station.slotConfig?.walkInReservedSlots ?? 0,
+                maxAdvanceBookingDays: Math.max(1, station.slotConfig?.maxAdvanceBookingDays || 7),
+                allowWalkIns: station.slotConfig?.allowWalkIns ?? true,
               }}
               onBack={() => setActiveStep(1)}
               onSubmit={async (data) => {
@@ -148,7 +146,14 @@ export default function EditStationModal({
                   step: 2,
                   operatingHours: operatingHours || [],
                   holidays: holidays || [],
-                  slotConfig,
+                  slotConfig: {
+                    bays: Number(slotConfig.bays) || 1,
+                    windowDurationMins: Number(slotConfig.windowDurationMins) || 30,
+                    capacityPerWindow: Number(slotConfig.capacityPerWindow) || 1,
+                    walkInReservedSlots: Number(slotConfig.walkInReservedSlots) || 0,
+                    maxAdvanceBookingDays: Number(slotConfig.maxAdvanceBookingDays) || 7,
+                    allowWalkIns: Boolean(slotConfig.allowWalkIns),
+                  },
                 })
                 setActiveStep(3)
               }}

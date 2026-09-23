@@ -33,6 +33,7 @@ export class ConfigureSlotConfigUseCase implements IConfigureSlotConfigUseCase {
       updatedConfig = new SlotConfig({
         id: existing.id,
         stationId: input.stationId,
+        bays: existing.bays || station.getProps().slotConfig?.bays || 1,
         windowDurationMins: input.windowDurationMins,
         capacityPerWindow: input.capacityPerWindow,
         walkInReservedSlots: input.walkInReservedSlots,
@@ -45,6 +46,7 @@ export class ConfigureSlotConfigUseCase implements IConfigureSlotConfigUseCase {
       updatedConfig = new SlotConfig({
         id: randomUUID(),
         stationId: input.stationId,
+        bays: station.getProps().slotConfig?.bays || 1,
         windowDurationMins: input.windowDurationMins,
         capacityPerWindow: input.capacityPerWindow,
         walkInReservedSlots: input.walkInReservedSlots,

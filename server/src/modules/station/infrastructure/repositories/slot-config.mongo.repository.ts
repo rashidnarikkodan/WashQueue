@@ -13,6 +13,7 @@ export class SlotConfigMongoRepository implements ISlotConfigRepository {
     return new SlotConfig({
       id: stationDoc._id.toString(),
       stationId: stationDoc._id.toString(),
+      bays: stationDoc.slotConfig.bays || 1,
       windowDurationMins: stationDoc.slotConfig.windowDurationMins || 30,
       capacityPerWindow: stationDoc.slotConfig.capacityPerWindow || 2,
       walkInReservedSlots: stationDoc.slotConfig.walkInReservedSlots || 0,
@@ -24,7 +25,11 @@ export class SlotConfigMongoRepository implements ISlotConfigRepository {
   }
 
   async save(slotConfig: SlotConfig): Promise<SlotConfig> {
+    const existingStation = await StationModel.findById(slotConfig.stationId).lean()
+    const bays = slotConfig.bays || existingStation?.slotConfig?.bays || 1
+
     const raw = {
+      bays,
       windowDurationMins: slotConfig.windowDurationMins,
       capacityPerWindow: slotConfig.capacityPerWindow,
       walkInReservedSlots: slotConfig.walkInReservedSlots,
@@ -43,6 +48,7 @@ export class SlotConfigMongoRepository implements ISlotConfigRepository {
     return new SlotConfig({
       id: updated._id.toString(),
       stationId: updated._id.toString(),
+      bays: updated.slotConfig.bays || bays,
       windowDurationMins: updated.slotConfig.windowDurationMins || 30,
       capacityPerWindow: updated.slotConfig.capacityPerWindow || 2,
       walkInReservedSlots: updated.slotConfig.walkInReservedSlots || 0,

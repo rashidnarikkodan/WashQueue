@@ -14,6 +14,7 @@ const NotificationCenterPage = lazy(
   () => import("@/features/notification/pages/NotificationCenterPage")
 )
 const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/CustomerFeedbackPage"))
+const ManagerDashboard = lazy(() => import("@/features/manager/pages/ManagerDashboard"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -21,7 +22,7 @@ export const managerRoutes = {
   children: [
     {
       path: "dashboard",
-      element: <div>Manager Dashboard</div>,
+      element: <ManagerDashboard />,
     },
     {
       path: "check-in",

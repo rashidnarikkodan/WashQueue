@@ -135,12 +135,12 @@ const stationSchema = new Schema<IStation>(
     ],
 
     slotConfig: {
-      bays: { type: Number, default: 0 },
-      windowDurationMins: { type: Number, default: 0 },
-      capacityPerWindow: { type: Number, default: 0 },
+      bays: { type: Number, default: 2 },
+      windowDurationMins: { type: Number, default: 30 },
+      capacityPerWindow: { type: Number, default: 1 },
       walkInReservedSlots: { type: Number, default: 0 },
-      maxAdvanceBookingDays: { type: Number, default: 0 },
-      allowWalkIns: { type: Boolean, default: false },
+      maxAdvanceBookingDays: { type: Number, default: 7 },
+      allowWalkIns: { type: Boolean, default: true },
     },
 
     amenities: [{ type: String }],

@@ -99,4 +99,10 @@ export const API_ROUTES = {
     DISMISS_REPORTS: (id: string) => `/reviews/${id}/reports/dismiss`,
     PROVIDER_FEEDBACK: "/reviews/provider/feedback",
   },
+  ANALYTICS: {
+    ROOT: "/analytics",
+    ADMIN: "/analytics/admin",
+    OWNER: "/analytics/owner",
+    MANAGER: "/analytics/manager",
+  },
 } as const
