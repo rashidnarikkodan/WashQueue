@@ -23,6 +23,8 @@ const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"
 const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
+const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,

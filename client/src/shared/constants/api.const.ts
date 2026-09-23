@@ -117,4 +117,10 @@ export const API_ROUTES = {
     RESOLVE: (id: string) => `/issues/${id}/resolve`,
     CLOSE: (id: string) => `/issues/${id}/close`,
   },
+  ANALYTICS: {
+    ROOT: "/analytics",
+    ADMIN: "/analytics/admin",
+    OWNER: "/analytics/owner",
+    MANAGER: "/analytics/manager",
+  },
 } as const

@@ -20,6 +20,7 @@ import { notificationRouter } from "@/modules/notification/notification.module"
 import reviewRouter from "@/modules/review/review.module"
 import analyticsRouter from "@/modules/analytics/analytics.module"
 import issueRouter from "@/modules/issue/issue.module"
+import analyticsRouter from "@/modules/analytics/analytics.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
@@ -54,6 +55,7 @@ app.use(API_ROUTES.NOTIFICATIONS.ROOT, notificationRouter)
 app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
 app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
 app.use(API_ROUTES.ISSUES.ROOT, issueRouter)
+app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)
