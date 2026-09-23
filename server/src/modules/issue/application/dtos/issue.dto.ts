@@ -69,6 +69,7 @@ export interface IssueResponseDTO {
   resolutionNotes?: string | null
   resolvedAt?: string | null
   resolvedBy?: string | null
+  resolvedByName?: string | null
   history: IssueHistoryEntry[]
   customerDetails?: CustomerDetailsSnapshot
   stationDetails?: StationDetailsSnapshot

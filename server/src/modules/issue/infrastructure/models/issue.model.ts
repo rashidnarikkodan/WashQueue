@@ -12,7 +12,8 @@ export interface IEvidenceSubdocument {
 export interface IIssueHistorySubdocument {
   fromStatus: string
   toStatus: string
-  actionBy: Types.ObjectId
+  actionBy?: Types.ObjectId | null
+  actionByName?: string | null
   reason?: string
   timestamp: Date
 }
@@ -35,6 +36,7 @@ export interface IIssueDocument extends Document {
   resolutionNotes?: string | null
   resolvedAt?: Date | null
   resolvedBy?: Types.ObjectId | null
+  resolvedByName?: string | null
   history: IIssueHistorySubdocument[]
   createdAt: Date
   updatedAt: Date
@@ -53,7 +55,8 @@ const IssueHistorySchema = new Schema<IIssueHistorySubdocument>(
   {
     fromStatus: { type: String, required: true },
     toStatus: { type: String, required: true },
-    actionBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    actionBy: { type: Schema.Types.ObjectId, ref: "User", default: null, required: false },
+    actionByName: { type: String, default: null },
     reason: { type: String, default: null },
     timestamp: { type: Date, default: Date.now },
   },
@@ -143,6 +146,10 @@ const IssueSchema = new Schema<IIssueDocument>(
     resolvedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      default: null,
+    },
+    resolvedByName: {
+      type: String,
       default: null,
     },
     history: {

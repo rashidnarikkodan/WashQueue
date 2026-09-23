@@ -1,5 +1,6 @@
 import { ArrowUpRight, CheckCircle2, Eye, Save, Loader2, UserCheck } from "lucide-react"
 import { IssueStatus } from "../types/issue.types"
+import { ROLE } from "@/shared/constants/role.const"
 
 interface IssueActionBarProps {
   currentStatus: IssueStatus
@@ -12,6 +13,7 @@ interface IssueActionBarProps {
   isSubmitting?: boolean
   canManage?: boolean
   isCustomer?: boolean
+  role?: string
 }
 
 export default function IssueActionBar({
@@ -25,9 +27,14 @@ export default function IssueActionBar({
   isSubmitting = false,
   canManage = true,
   isCustomer = false,
+  role,
 }: IssueActionBarProps) {
   const isResolved = currentStatus === IssueStatus.RESOLVED
   const isClosed = currentStatus === IssueStatus.CLOSED
+
+  const isManager = role === ROLE.MANAGER
+  const isOwner = role === ROLE.OWNER
+  const isAdmin = role === ROLE.ADMIN
 
   if (isClosed) {
     return (
@@ -81,7 +88,8 @@ export default function IssueActionBar({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        {currentStatus !== IssueStatus.ESCALATED && (
+        {/* Tiered escalation button: Managers escalate to Owner, Owners escalate to Admin */}
+        {!isAdmin && !isCustomer && currentStatus !== IssueStatus.ESCALATED && (
           <button
             type="button"
             onClick={onEscalate}
@@ -89,7 +97,9 @@ export default function IssueActionBar({
             className="px-4 sm:px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-950/40 hover:bg-red-900/50 text-red-300 text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1.5"
           >
             <ArrowUpRight className="w-3.5 h-3.5 text-red-400" />
-            <span>ESCALATE TO ADMIN</span>
+            <span>
+              {isManager ? "ESCALATE TO OWNER" : isOwner ? "ESCALATE TO ADMIN" : "ESCALATE"}
+            </span>
           </button>
         )}
 

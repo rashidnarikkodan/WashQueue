@@ -139,10 +139,15 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
       }
     }
 
-    let resolvedByStr = rawObj.resolvedBy ? rawObj.resolvedBy.toString() : null
+    let resolvedByIdStr = rawObj.resolvedBy ? rawObj.resolvedBy.toString() : null
+    let resolvedByNameStr = (rawObj as { resolvedByName?: string }).resolvedByName || ""
     if (rawObj.resolvedBy && typeof rawObj.resolvedBy === "object" && "_id" in rawObj.resolvedBy) {
       const u = rawObj.resolvedBy as PopulatedUser
-      resolvedByStr = u.name || u._id.toString()
+      resolvedByIdStr = u._id.toString()
+      resolvedByNameStr = u.name || resolvedByNameStr || resolvedByIdStr
+    } else if (resolvedByIdStr && !Types.ObjectId.isValid(resolvedByIdStr)) {
+      resolvedByNameStr = resolvedByIdStr
+      resolvedByIdStr = null
     }
 
     const props: IssueProps = {
@@ -162,25 +167,39 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
       compensationAmount: rawObj.compensationAmount || 0,
       resolutionNotes: rawObj.resolutionNotes || null,
       resolvedAt: rawObj.resolvedAt ? new Date(rawObj.resolvedAt) : null,
-      resolvedBy: resolvedByStr,
+      resolvedBy: resolvedByIdStr,
+      resolvedByName: resolvedByNameStr || null,
       history: (rawObj.history || []).map(
         (h: {
           fromStatus: string
           toStatus: string
-          actionBy?: { name?: string; _id?: Types.ObjectId } | Types.ObjectId | string
+          actionBy?: { name?: string; _id?: Types.ObjectId } | Types.ObjectId | string | null
+          actionByName?: string | null
           reason?: string
           timestamp: Date
         }) => {
-          let actionByStr = ""
-          if (h.actionBy && typeof h.actionBy === "object" && "name" in h.actionBy) {
-            actionByStr = h.actionBy.name || h.actionBy._id?.toString() || ""
+          let actionByIdStr = ""
+          let actionByNameStr = h.actionByName || ""
+
+          if (h.actionBy && typeof h.actionBy === "object" && "_id" in h.actionBy) {
+            actionByIdStr = h.actionBy._id ? h.actionBy._id.toString() : ""
+            actionByNameStr =
+              (h.actionBy as { name?: string }).name || actionByNameStr || actionByIdStr
           } else if (h.actionBy) {
-            actionByStr = h.actionBy.toString()
+            const rawStr = h.actionBy.toString()
+            if (Types.ObjectId.isValid(rawStr)) {
+              actionByIdStr = rawStr
+            } else {
+              actionByNameStr = rawStr
+              actionByIdStr = rawObj.customerId ? rawObj.customerId.toString() : ""
+            }
           }
+
           return {
             fromStatus: h.fromStatus,
             toStatus: h.toStatus,
-            actionBy: actionByStr,
+            actionBy: actionByIdStr || (rawObj.customerId ? rawObj.customerId.toString() : ""),
+            actionByName: actionByNameStr || "User",
             reason: h.reason,
             timestamp: new Date(h.timestamp),
           }
@@ -227,14 +246,26 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
           ? new Types.ObjectId(data.resolvedBy)
           : null
     }
+    if (data.resolvedByName !== undefined) {
+      persistence.resolvedByName = data.resolvedByName
+    }
     if (data.history !== undefined) {
-      persistence.history = data.history.map((h) => ({
-        fromStatus: h.fromStatus,
-        toStatus: h.toStatus,
-        actionBy: Types.ObjectId.isValid(h.actionBy) ? new Types.ObjectId(h.actionBy) : h.actionBy,
-        reason: h.reason,
-        timestamp: h.timestamp,
-      }))
+      persistence.history = data.history.map((h) => {
+        let actionByOid: Types.ObjectId | null = null
+        if (h.actionBy && Types.ObjectId.isValid(h.actionBy)) {
+          actionByOid = new Types.ObjectId(h.actionBy)
+        } else if (data.customerId && Types.ObjectId.isValid(data.customerId)) {
+          actionByOid = new Types.ObjectId(data.customerId)
+        }
+        return {
+          fromStatus: h.fromStatus,
+          toStatus: h.toStatus,
+          actionBy: actionByOid,
+          actionByName: h.actionByName || null,
+          reason: h.reason,
+          timestamp: h.timestamp,
+        }
+      })
     }
 
     return persistence as Partial<IIssueDocument>

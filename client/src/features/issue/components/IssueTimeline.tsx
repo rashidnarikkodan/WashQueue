@@ -96,9 +96,10 @@ export default function IssueTimeline({ history = [], createdAt }: IssueTimeline
                 {item.reason || `Status updated from ${item.fromStatus} to ${item.toStatus}`}
               </p>
 
-              {item.actionBy && (
+              {(item.actionByName || item.actionBy) && (
                 <span className="text-[10px] text-muted-foreground/80 font-medium block mt-0.5">
-                  Action taken by: <strong className="text-foreground">{item.actionBy}</strong>
+                  Action taken by:{" "}
+                  <strong className="text-foreground">{item.actionByName || item.actionBy}</strong>
                 </span>
               )}
             </div>
