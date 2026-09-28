@@ -8,6 +8,9 @@ import { GetKnowledgeDocumentUseCase } from "./application/usecases/knowledge-do
 import { UpdateKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/update-knowledge-document.use-case"
 import { DeleteKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/delete-knowledge-document.use-case"
 
+const aiRouter = Router()
+
+// Orchestration
 const repository = new KnowledgeDocumentRepository()
 const createUseCase = new CreateKnowledgeDocumentUseCase(repository)
 const getAllUseCase = new GetKnowledgeDocumentsUseCase(repository)
@@ -15,7 +18,7 @@ const getByIdUseCase = new GetKnowledgeDocumentUseCase(repository)
 const updateUseCase = new UpdateKnowledgeDocumentUseCase(repository)
 const deleteUseCase = new DeleteKnowledgeDocumentUseCase(repository)
 
-const controller = new KnowledgeDocumentController(
+const knowledgeDocumentController = new KnowledgeDocumentController(
   createUseCase,
   getAllUseCase,
   getByIdUseCase,
@@ -23,8 +26,6 @@ const controller = new KnowledgeDocumentController(
   deleteUseCase
 )
 
-const aiRouter = Router()
-
-aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(controller))
+aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(knowledgeDocumentController))
 
 export default aiRouter
