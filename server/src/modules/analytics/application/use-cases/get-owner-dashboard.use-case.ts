@@ -49,7 +49,11 @@ export class GetOwnerDashboardUseCase {
     private readonly managerAssignmentModel?: Model<IManagerAssignment>
   ) {}
 
-  async execute(userId: string, range: DateRange = "30_DAYS"): Promise<OwnerDashboardData> {
+  async execute(
+    userId: string,
+    range: DateRange = "30_DAYS",
+    stationId?: string
+  ): Promise<OwnerDashboardData> {
     const userObjectId = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null
     const startDate = this.getStartDate(range)
 
@@ -79,29 +83,46 @@ export class GetOwnerDashboardUseCase {
     // 2. Fetch Owner's Stations
     const stationsRaw: unknown = await this.stationModel.find({ ownerId: { $in: ownerIds } }).lean()
     const stations = stationsRaw as AggregatedOwnerStation[]
-    const totalStations = stations.length
-    const activeStations = stations.filter(
+    const stationObjectIds = stations.map((s) => new Types.ObjectId(String(s._id)))
+
+    const isSpecificStation = Boolean(
+      stationId &&
+      stationId !== "ALL" &&
+      Types.ObjectId.isValid(stationId) &&
+      stationObjectIds.some((id) => id.equals(new Types.ObjectId(stationId)))
+    )
+
+    const targetStationIds = isSpecificStation
+      ? stationObjectIds.filter((id) => id.equals(new Types.ObjectId(stationId)))
+      : stationObjectIds
+
+    const targetStations = stations.filter((s) =>
+      targetStationIds.some((id) => id.equals(new Types.ObjectId(String(s._id))))
+    )
+
+    const totalStations = targetStations.length
+    const activeStations = targetStations.filter(
       (s) => s.status === "APPROVED" && s.isActive !== false
     ).length
     const avgRating =
       totalStations > 0
         ? Number(
             (
-              stations.reduce((sum: number, s) => sum + (s.rating || 5.0), 0) / totalStations
+              targetStations.reduce((sum: number, s) => sum + (s.rating || 5.0), 0) / totalStations
             ).toFixed(1)
           )
         : 5.0
 
-    const stationObjectIds = stations.map((s) => new Types.ObjectId(String(s._id)))
-
     // 3. Build Booking Match Filter
-    const ownerBookingMatch: Record<string, unknown>[] = [{ ownerId: { $in: ownerIds } }]
-    if (stationObjectIds.length > 0) {
-      ownerBookingMatch.push({ stationId: { $in: stationObjectIds } })
+    const ownerBookingMatch: Record<string, unknown>[] = []
+    if (targetStationIds.length > 0) {
+      ownerBookingMatch.push({ stationId: { $in: targetStationIds } })
+    } else if (!isSpecificStation) {
+      ownerBookingMatch.push({ ownerId: { $in: ownerIds } })
     }
 
     const dateMatch: Record<string, unknown> = {
-      $or: ownerBookingMatch,
+      $or: ownerBookingMatch.length > 0 ? ownerBookingMatch : [{ ownerId: { $in: ownerIds } }],
     }
     if (startDate) {
       dateMatch.createdAt = { $gte: startDate }
@@ -136,7 +157,9 @@ export class GetOwnerDashboardUseCase {
     if (this.managerAssignmentModel && ownerIds.length > 0) {
       const assignmentsRaw: unknown = await this.managerAssignmentModel
         .find({
-          $or: [{ ownerId: { $in: ownerIds } }, { stationId: { $in: stationObjectIds } }],
+          $or: isSpecificStation
+            ? [{ stationId: { $in: targetStationIds } }]
+            : [{ ownerId: { $in: ownerIds } }, { stationId: { $in: stationObjectIds } }],
           status: "ACTIVE",
         })
         .populate("managerUserId", "name email")
@@ -224,7 +247,10 @@ export class GetOwnerDashboardUseCase {
     const todayBookingsRaw = await this.bookingModel.aggregate([
       {
         $match: {
-          $or: ownerBookingMatch,
+          $or:
+            targetStationIds.length > 0
+              ? [{ stationId: { $in: targetStationIds } }]
+              : ownerBookingMatch,
           createdAt: { $gte: startOfToday },
         },
       },
@@ -260,8 +286,11 @@ export class GetOwnerDashboardUseCase {
     })
 
     // 9. Recent Bookings
+    const recentBookingsMatch =
+      ownerBookingMatch.length > 0 ? { $or: ownerBookingMatch } : { ownerId: { $in: ownerIds } }
+
     const recentBookingsRaw: unknown = await this.bookingModel
-      .find({ $or: ownerBookingMatch })
+      .find(recentBookingsMatch)
       .sort({ createdAt: -1 })
       .limit(8)
       .populate("stationId", "name")

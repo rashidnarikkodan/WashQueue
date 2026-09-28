@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { ArrowLeft, RefreshCw, AlertTriangle, LifeBuoy } from "lucide-react"
+import { ArrowLeft, RefreshCw, AlertTriangle, LifeBuoy, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import Loading from "@/shared/components/ui/Loading"
@@ -10,6 +10,7 @@ import { issueApi } from "@/shared/apis/issue.api"
 import { bookingApi } from "@/shared/apis/booking.api"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { getErrorMessage } from "@/shared/utils/error"
+import { getSocketClient } from "@/shared/services/socket.client"
 import type { IssueDto, Evidence, ResolveIssuePayload } from "../types/issue.types"
 import { IssueStatus } from "../types/issue.types"
 import {
@@ -44,9 +45,13 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const user = useAuthStore((state) => state.user)
 
   const [issue, setIssue] = useState<IssueDto | null>(null)
+  const [managerNotesDraft, setManagerNotesDraft] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date())
   const [error, setError] = useState<string | null>(null)
   const [isActionSubmitting, setIsActionSubmitting] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   // Modals state
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false)
@@ -72,64 +77,129 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const isCustomer = currentRole === ROLE.CUSTOMER
   const canManage = isAdmin || isManager || isOwner
 
-  const fetchIssue = useCallback(async () => {
-    if (!id) return
-    setIsLoading(true)
-    setError(null)
-    try {
-      const data = await issueApi.getById(id)
-      setIssue(data)
-
-      // Use populated inspections if already present on issue
-      if (data.bookingDetails?.preServiceInspection) {
-        setPreInspectionData(data.bookingDetails.preServiceInspection)
+  const fetchIssue = useCallback(
+    async (isBackground = false) => {
+      if (!id) return
+      if (!isBackground) {
+        setIsLoading(true)
+      } else {
+        setIsRefreshing(true)
       }
-      if (data.bookingDetails?.postServiceInspection) {
-        setPostInspectionData(data.bookingDetails.postServiceInspection)
-      }
+      setError(null)
+      try {
+        const data = await issueApi.getById(id)
+        setIssue(data)
+        setManagerNotesDraft(data.managerNotes || "")
+        setLastRefreshedAt(new Date())
 
-      // If not populated, fetch booking inspection data directly
-      if (
-        data.bookingId &&
-        (!data.bookingDetails?.preServiceInspection || !data.bookingDetails?.postServiceInspection)
-      ) {
-        try {
-          const booking = await bookingApi.getBookingById(data.bookingId)
-          if (booking) {
-            setPreInspectionData(booking.preServiceInspection ?? null)
-            setPostInspectionData(booking.postServiceInspection ?? null)
-          }
-        } catch {
-          // Silent fallback
+        // Use populated inspections if already present on issue
+        if (data.bookingDetails?.preServiceInspection) {
+          setPreInspectionData(data.bookingDetails.preServiceInspection)
         }
+        if (data.bookingDetails?.postServiceInspection) {
+          setPostInspectionData(data.bookingDetails.postServiceInspection)
+        }
+
+        // If not populated, fetch booking inspection data directly
+        if (
+          data.bookingId &&
+          (!data.bookingDetails?.preServiceInspection ||
+            !data.bookingDetails?.postServiceInspection)
+        ) {
+          try {
+            const booking = await bookingApi.getBookingById(data.bookingId)
+            if (booking) {
+              setPreInspectionData(booking.preServiceInspection ?? null)
+              setPostInspectionData(booking.postServiceInspection ?? null)
+            }
+          } catch {
+            // Non-critical fallback
+          }
+        }
+      } catch (err) {
+        if (!isBackground) {
+          setError(getErrorMessage(err, "Unable to load issue details from server"))
+          setIssue(null)
+        }
+      } finally {
+        setIsLoading(false)
+        setIsRefreshing(false)
       }
-    } catch (err) {
-      setError(getErrorMessage(err, "Unable to load issue details from server"))
-      setIssue(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [id])
+    },
+    [id]
+  )
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchIssue()
+      await fetchIssue(false)
     })
     return () => {
       ignore = true
     }
   }, [fetchIssue])
 
-  const handleSaveNotes = async (notes: string) => {
+  // Real-time Socket.IO and Window Focus subscriptions
+  useEffect(() => {
+    if (!id) return
+
+    const socket = getSocketClient()
+
+    const handleIssueUpdate = (data: { issueId?: string; id?: string }) => {
+      const targetId = data.issueId || data.id
+      if (!targetId || targetId === id) {
+        fetchIssue(true)
+      }
+    }
+
+    if (socket) {
+      socket.on("issue_updated", handleIssueUpdate)
+      socket.on("issue_resolved", handleIssueUpdate)
+      socket.on("issue_closed", handleIssueUpdate)
+      socket.on("issue_escalated", handleIssueUpdate)
+      socket.on("issue_assigned", handleIssueUpdate)
+    }
+
+    const handleWindowFocus = () => {
+      if (document.visibilityState === "visible") {
+        fetchIssue(true)
+      }
+    }
+
+    window.addEventListener("focus", handleWindowFocus)
+    document.addEventListener("visibilitychange", handleWindowFocus)
+
+    return () => {
+      if (socket) {
+        socket.off("issue_updated", handleIssueUpdate)
+        socket.off("issue_resolved", handleIssueUpdate)
+        socket.off("issue_closed", handleIssueUpdate)
+        socket.off("issue_escalated", handleIssueUpdate)
+        socket.off("issue_assigned", handleIssueUpdate)
+      }
+      window.removeEventListener("focus", handleWindowFocus)
+      document.removeEventListener("visibilitychange", handleWindowFocus)
+    }
+  }, [id, fetchIssue])
+
+  const handleCopyReference = () => {
+    if (!issue) return
+    navigator.clipboard.writeText(issue.id)
+    setIsCopied(true)
+    toast.success("Case Reference ID copied to clipboard")
+    setTimeout(() => setIsCopied(false), 2000)
+  }
+
+  const handleSaveNotes = async (notesToSave: string) => {
     if (!issue) return
     setIsActionSubmitting(true)
     try {
       const updated = await issueApi.updateStatus(issue.id, {
-        managerNotes: notes,
+        managerNotes: notesToSave,
       })
       setIssue(updated)
+      setManagerNotesDraft(updated.managerNotes || "")
       toast.success("Internal investigation notes saved.")
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to save investigation notes"))
@@ -229,8 +299,8 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 text-foreground">
-        <Loading size="lg" text="Retrieving issue details..." />
+      <div className="min-h-[70vh] flex items-center justify-center p-8 text-foreground">
+        <Loading size="lg" text="Retrieving live issue details..." />
       </div>
     )
   }
@@ -253,7 +323,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           <p className="text-xs text-muted-foreground">{error || "Issue case not found."}</p>
           <button
             type="button"
-            onClick={() => fetchIssue()}
+            onClick={() => fetchIssue(false)}
             className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-all cursor-pointer inline-flex items-center gap-2"
           >
             <RefreshCw size={14} />
@@ -284,20 +354,37 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const bookingNumber = issue.bookingDetails?.bookingNumber || issue.bookingId
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24">
+    <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
       {/* Top Header & Breadcrumbs */}
       <div className="space-y-3 pb-3 border-b border-border/60">
-        <Breadcrumbs
-          items={[
-            { label: isCustomer ? "Support & Tickets" : "Issues", path: issuesRootPath },
-            { label: `#${issue.id}` },
-          ]}
-        />
+        <div className="flex items-center justify-between">
+          <Breadcrumbs
+            items={[
+              { label: isCustomer ? "Support & Tickets" : "Issues", path: issuesRootPath },
+              { label: `#${issue.id}` },
+            ]}
+          />
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fetchIssue(true)}
+              disabled={isRefreshing}
+              className="px-3 py-1.5 rounded-xl bg-muted/40 hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground border border-border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              title={`Last updated at ${lastRefreshedAt.toLocaleTimeString()}`}
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`}
+              />
+              <span className="hidden sm:inline">{isRefreshing ? "Syncing..." : "Live Sync"}</span>
+            </button>
+          </div>
+        </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
-              <LifeBuoy className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight flex items-center gap-3">
+              <LifeBuoy className="w-7 h-7 sm:w-8 sm:h-8 text-primary shrink-0" />
               <span>
                 {isCustomer ? "Ticket Investigation & Details" : "Issue Investigation Hub"}
               </span>
@@ -308,6 +395,18 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
               <div className="flex items-center gap-1.5">
                 <span className="font-bold uppercase tracking-wider text-[10px]">CASE REF</span>
                 <span className="font-mono font-bold text-foreground">#{issue.id}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyReference}
+                  className="p-1 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                  title="Copy Reference ID"
+                >
+                  {isCopied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
               </div>
               <span className="text-border">•</span>
               <div className="flex items-center gap-1.5">
@@ -363,10 +462,12 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           {canManage && (
             <div className="space-y-6">
               <InvestigationNotesEditor
-                initialNotes={issue.managerNotes}
+                notes={managerNotesDraft}
+                onChange={setManagerNotesDraft}
                 onSave={handleSaveNotes}
                 isSaving={isActionSubmitting}
                 readOnly={issue.status === IssueStatus.CLOSED}
+                initialSavedNotes={issue.managerNotes}
               />
 
               <div className="space-y-2">
@@ -390,7 +491,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           {/* Action Bar */}
           <IssueActionBar
             currentStatus={issue.status}
-            onSaveProgress={() => handleSaveNotes(issue.managerNotes || "")}
+            onSaveProgress={() => handleSaveNotes(managerNotesDraft)}
             onMarkUnderReview={handleMarkUnderReview}
             onAssignManager={canManage ? () => setIsAssignModalOpen(true) : undefined}
             onEscalate={() => setIsEscalateModalOpen(true)}

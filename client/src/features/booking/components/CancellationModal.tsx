@@ -147,198 +147,379 @@ export default function CancellationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div
+      className="
+      fixed inset-0 z-50
+      flex items-center justify-center
+      bg-black/80 backdrop-blur-md
+      p-3 sm:p-5 lg:p-8
+      overflow-y-hidden
+      overscroll-contain
+    "
+    >
       {!isSuccess ? (
-        <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in zoom-in-95 my-8">
-          <div className="flex flex-col items-center gap-2 p-8 pb-4 relative">
-            <button
-              onClick={onClose}
-              className="absolute right-6 top-6 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              <X className="h-6 w-6" />
-            </button>
-
-            <div className="w-20 h-20 rounded-full bg-destructive/15 flex items-center justify-center border border-destructive/20">
-              <AlertTriangle className="h-10 w-10 text-destructive" />
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground text-center tracking-tight pt-2">
-              Cancel Booking?
-            </h1>
-
-            <p className="text-muted-foreground text-sm sm:text-base text-center max-w-[448px] leading-relaxed">
-              This action may affect your queue position and refund eligibility. This cannot be
-              undone.
-            </p>
-          </div>
-
-          <div className="p-6 sm:p-8 pt-0 space-y-6 max-h-[70vh] overflow-y-auto">
-            <div className="p-5 sm:p-6 rounded-2xl bg-muted/40 border border-border flex flex-col sm:flex-row items-center sm:items-start gap-5">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                <img
-                  src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=300&auto=format&fit=crop"
-                  alt="Vehicle"
-                  className="w-full h-full object-cover opacity-80"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 flex-1 text-xs sm:text-sm w-full">
-                <div>
-                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
-                    STATION
-                  </span>
-                  <span className="font-semibold text-foreground text-sm sm:text-base">
-                    {stationName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
-                    VEHICLE
-                  </span>
-                  <span className="font-semibold text-foreground text-sm sm:text-base">
-                    {vehicleName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
-                    SERVICE
-                  </span>
-                  <span className="font-semibold text-foreground text-sm sm:text-base">
-                    {serviceName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase block">
-                    TIME
-                  </span>
-                  <span className="font-semibold text-foreground text-sm sm:text-base flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span>{formattedSlotTime}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-                  REFUND BREAKDOWN
-                </span>
-                <span
-                  className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
-                    policyTier === "FULL_REFUND"
-                      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                      : policyTier === "PARTIAL_REFUND"
-                        ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                        : "bg-destructive/10 text-destructive border-destructive/20"
-                  }`}
-                >
-                  {refundPercentage}% Refund ({policyTier.replace("_", " ")})
-                </span>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-card border border-border space-y-3.5 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Service Amount</span>
-                  <span className="font-medium text-foreground text-base">₹{totalAmount}</span>
-                </div>
-
-                {nonRefundableAmount > 0 ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{deductionLabel}</span>
-                    <span className="font-medium text-destructive">- ₹{nonRefundableAmount}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{deductionLabel}</span>
-                    <span className="font-medium text-emerald-500">₹0 (Free Cancellation)</span>
-                  </div>
-                )}
-
-                <div className="pt-3 border-t border-border flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold text-foreground text-base block">
-                      Total Refund Amount
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Credited directly to your wallet
-                    </span>
-                  </div>
-                  <span className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight font-sans">
-                    ₹{refundAmount}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4.5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-left">
-              <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <div className="space-y-1 text-xs">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm">{policyTitle}</h4>
-                <p className="text-muted-foreground leading-relaxed">{policyExplanation}</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block px-1">
-                REASON FOR CANCELLATION
-              </span>
-
-              <div className="flex flex-wrap gap-2.5">
-                {CANCELLATION_REASONS.map((reason) => {
-                  const isSelected = selectedReason === reason
-                  return (
-                    <button
-                      key={reason}
-                      type="button"
-                      onClick={() => setSelectedReason(reason)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all border cursor-pointer ${
-                        isSelected
-                          ? "bg-primary/15 text-primary border-primary/40 font-semibold"
-                          : "bg-muted text-foreground border-border hover:bg-muted/80"
-                      }`}
-                    >
-                      {reason}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-xs text-destructive leading-relaxed font-medium">
-                Once cancelled, your queue position will be lost and cannot be restored. Other
-                customers may take your slot immediately.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-8 bg-muted/40 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div
+          className="
+          relative
+          flex w-full max-w-3xl
+          max-h-[calc(100dvh-1.5rem)]
+          sm:max-h-[calc(100dvh-2.5rem)]
+          lg:max-h-[calc(100dvh-4rem)]
+          flex-col
+          overflow-hidden
+          rounded-2xl sm:rounded-3xl
+          border border-border
+          bg-card text-card-foreground
+          shadow-2xl
+          animate-in zoom-in-95
+        "
+        >
+          {/* HEADER */}
+          <div
+            className="
+            relative shrink-0
+            border-b border-border
+            bg-card
+            px-5 py-5
+            sm:px-7 sm:py-6
+          "
+          >
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-card border border-border text-foreground font-semibold text-base hover:bg-muted transition-all cursor-pointer text-center"
-            >
-              Keep Booking
-            </button>
-
-            <button
-              type="button"
-              onClick={handleConfirm}
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-destructive text-destructive-foreground font-bold text-base hover:opacity-90 transition-all shadow-lg shadow-destructive/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              aria-label="Close cancellation modal"
+              className="
+              absolute right-4 top-4
+              sm:right-6 sm:top-6
+              flex h-9 w-9 items-center justify-center
+              rounded-full
+              text-muted-foreground
+              transition-colors
+              hover:bg-muted hover:text-foreground
+              disabled:pointer-events-none
+              disabled:opacity-50
+              cursor-pointer
+            "
             >
-              <Trash2 className="h-4 w-4" />
-              <span>{isSubmitting ? "Cancelling..." : "Confirm Cancellation"}</span>
+              <X className="h-5 w-5" />
             </button>
+
+            <div className="flex items-center gap-4 pr-10">
+              <div
+                className="
+                flex h-12 w-12 shrink-0
+                items-center justify-center
+                rounded-full
+                border border-destructive/20
+                bg-destructive/15
+                sm:h-14 sm:w-14
+              "
+              >
+                <AlertTriangle className="h-6 w-6 text-destructive sm:h-7 sm:w-7" />
+              </div>
+
+              <div className="min-w-0">
+                <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                  Cancel Booking?
+                </h1>
+
+                <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  Review the cancellation details and refund amount before continuing.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* SCROLLABLE CONTENT */}
+          <div
+            className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            overscroll-contain
+            px-4 py-5
+            sm:px-6 sm:py-6
+            lg:px-7
+          "
+          >
+            <div className="space-y-5">
+              {/* BOOKING SUMMARY */}
+              <section
+                className="
+                rounded-2xl
+                border border-border
+                bg-muted/40
+                p-4 sm:p-5
+              "
+              >
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <div
+                    className="
+                    h-24 w-full
+                    shrink-0
+                    overflow-hidden
+                    rounded-xl
+                    border border-border
+                    bg-muted
+                    sm:h-24 sm:w-32
+                  "
+                  >
+                    <img
+                      src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=300&auto=format&fit=crop"
+                      alt="Vehicle"
+                      className="h-full w-full object-cover opacity-80"
+                    />
+                  </div>
+
+                  <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-5 gap-y-4">
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Station
+                      </span>
+
+                      <span className="mt-1 block truncate text-sm font-semibold text-foreground sm:text-base">
+                        {stationName}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Vehicle
+                      </span>
+
+                      <span className="mt-1 block truncate text-sm font-semibold text-foreground sm:text-base">
+                        {vehicleName}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Service
+                      </span>
+
+                      <span className="mt-1 block truncate text-sm font-semibold text-foreground sm:text-base">
+                        {serviceName}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Time
+                      </span>
+
+                      <span className="mt-1 flex items-center gap-1 text-sm font-semibold text-foreground sm:text-base">
+                        <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />
+                        <span className="truncate">{formattedSlotTime}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* REFUND */}
+              <section className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Refund Breakdown
+                  </span>
+
+                  <span
+                    className={`
+                    rounded-full border px-2.5 py-1
+                    text-[10px] font-extrabold uppercase
+                    ${
+                      policyTier === "FULL_REFUND"
+                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                        : policyTier === "PARTIAL_REFUND"
+                          ? "border-amber-500/20 bg-amber-500/10 text-amber-500"
+                          : "border-destructive/20 bg-destructive/10 text-destructive"
+                    }
+                  `}
+                  >
+                    {refundPercentage}% Refund
+                  </span>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+                  <div className="space-y-3.5 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-muted-foreground">Service Amount</span>
+
+                      <span className="shrink-0 text-base font-medium text-foreground">
+                        ₹{totalAmount}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-muted-foreground">{deductionLabel}</span>
+
+                      <span
+                        className={`shrink-0 font-medium ${
+                          nonRefundableAmount > 0 ? "text-destructive" : "text-emerald-500"
+                        }`}
+                      >
+                        {nonRefundableAmount > 0 ? `- ₹${nonRefundableAmount}` : "₹0 (Free)"}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-border pt-4">
+                      <div className="flex items-end justify-between gap-4">
+                        <div>
+                          <span className="block text-base font-semibold text-foreground">
+                            Total Refund
+                          </span>
+
+                          <span className="text-[11px] text-muted-foreground">
+                            Credited to your wallet
+                          </span>
+                        </div>
+
+                        <span className="shrink-0 text-2xl font-extrabold tracking-tight text-primary sm:text-3xl">
+                          ₹{refundAmount}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* POLICY */}
+              <section
+                className="
+                flex items-start gap-3
+                rounded-2xl
+                border border-primary/20
+                bg-primary/5
+                p-4
+              "
+              >
+                <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+
+                <div className="min-w-0 space-y-1">
+                  <h4 className="text-sm font-bold text-foreground">{policyTitle}</h4>
+
+                  <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    {policyExplanation}
+                  </p>
+                </div>
+              </section>
+
+              {/* REASON */}
+              <section className="space-y-3">
+                <span className="block px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Reason for Cancellation
+                </span>
+
+                <div className="flex flex-wrap gap-2">
+                  {CANCELLATION_REASONS.map((reason) => {
+                    const isSelected = selectedReason === reason
+
+                    return (
+                      <button
+                        key={reason}
+                        type="button"
+                        onClick={() => setSelectedReason(reason)}
+                        className={`
+                        rounded-full border
+                        px-3.5 py-2
+                        text-xs font-medium
+                        transition-all
+                        sm:text-sm
+                        cursor-pointer
+                        ${
+                          isSelected
+                            ? "border-primary/40 bg-primary/15 font-semibold text-primary"
+                            : "border-border bg-muted text-foreground hover:bg-muted/80"
+                        }
+                      `}
+                      >
+                        {reason}
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+
+              {/* WARNING */}
+              <section
+                className="
+                flex items-start gap-3
+                rounded-2xl
+                border border-destructive/20
+                bg-destructive/10
+                p-4
+              "
+              >
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+
+                <p className="text-xs font-medium leading-relaxed text-destructive sm:text-sm">
+                  Once cancelled, your queue position will be lost and cannot be restored. Other
+                  customers may take your slot immediately.
+                </p>
+              </section>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div
+            className="
+            shrink-0
+            border-t border-border
+            bg-muted/40
+            p-4
+            sm:p-5 sm:px-6
+            lg:px-7
+          "
+          >
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="
+                w-full rounded-xl
+                border border-border
+                bg-card
+                px-6 py-3
+                text-sm font-semibold text-foreground
+                transition-colors
+                hover:bg-muted
+                disabled:pointer-events-none
+                disabled:opacity-50
+                sm:w-auto
+              "
+              >
+                Keep Booking
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+                className="
+                flex w-full items-center justify-center gap-2
+                rounded-xl
+                bg-destructive
+                px-6 py-3
+                text-sm font-bold text-destructive-foreground
+                shadow-lg shadow-destructive/20
+                transition-opacity
+                hover:opacity-90
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+                sm:w-auto
+              "
+              >
+                <Trash2 className="h-4 w-4" />
+
+                <span>{isSubmitting ? "Cancelling..." : "Confirm Cancellation"}</span>
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-[672px] bg-card text-card-foreground border border-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 my-8 relative p-8 sm:p-12 flex flex-col items-center text-center space-y-8">
+        <div className="w-full max-w-2xl bg-card text-card-foreground border border-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 my-8 relative p-8 sm:p-12 flex flex-col items-center text-center space-y-8">
           <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
@@ -354,7 +535,7 @@ export default function CancellationModal({
             </span>
           </div>
 
-          <div className="space-y-3 max-w-[512px]">
+          <div className="space-y-3 max-w-lg">
             <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
               Your booking has been cancelled successfully.
             </h1>

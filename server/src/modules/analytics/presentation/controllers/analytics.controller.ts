@@ -31,7 +31,8 @@ export class AnalyticsController {
         return
       }
       const range = (req.query.range as DateRange) || "30_DAYS"
-      const data = await this.getOwnerDashboardUseCase.execute(ownerId, range)
+      const stationId = req.query.stationId as string | undefined
+      const data = await this.getOwnerDashboardUseCase.execute(ownerId, range, stationId)
       res.status(200).json({ success: true, data })
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to fetch owner dashboard"

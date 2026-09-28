@@ -26,9 +26,10 @@ export default function AssignManagerModal({
   const [isLoadingManagers, setIsLoadingManagers] = useState(false)
 
   useEffect(() => {
-    queueMicrotask(() => {
-      setSelectedManagerId(currentManagerId || "")
-    })
+    if (currentManagerId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedManagerId(currentManagerId)
+    }
   }, [currentManagerId])
 
   useEffect(() => {
@@ -38,13 +39,17 @@ export default function AssignManagerModal({
     if (isOpen) {
       if (!dialog.open) {
         dialog.showModal()
-        document.body.style.overflow = "hidden"
       }
+      document.body.style.overflow = "hidden"
     } else {
       if (dialog.open) {
         dialog.close()
-        document.body.style.overflow = ""
       }
+      document.body.style.overflow = ""
+    }
+
+    return () => {
+      document.body.style.overflow = ""
     }
   }, [isOpen])
 
@@ -52,25 +57,27 @@ export default function AssignManagerModal({
     if (!isOpen) return
 
     let cancelled = false
-    void Promise.resolve().then(async () => {
-      if (cancelled) return
-      setIsLoadingManagers(true)
-      try {
-        const res = await managerApi.getOwnerManagers({
-          stationId: stationId || undefined,
-          limit: 50,
-        })
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoadingManagers(true)
+
+    managerApi
+      .getOwnerManagers({
+        stationId: stationId || undefined,
+        limit: 50,
+      })
+      .then((res) => {
         if (!cancelled && res && Array.isArray(res.managers)) {
           setStationManagers(res.managers)
         }
-      } catch {
-        // noop
-      } finally {
+      })
+      .catch((err) => {
+        console.error("Failed to load managers", err)
+      })
+      .finally(() => {
         if (!cancelled) {
           setIsLoadingManagers(false)
         }
-      }
-    })
+      })
 
     return () => {
       cancelled = true
@@ -83,6 +90,8 @@ export default function AssignManagerModal({
     await onConfirmAssign(selectedManagerId.trim())
   }
 
+  if (!isOpen) return null
+
   return (
     <dialog
       ref={dialogRef}
@@ -93,7 +102,7 @@ export default function AssignManagerModal({
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose()
       }}
-      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-md max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left"
+      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-md max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left z-50"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-card">
         <div className="flex items-center gap-3">
@@ -130,12 +139,12 @@ export default function AssignManagerModal({
             </label>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {stationManagers.map((mgr) => {
-                const isSelected =
-                  selectedManagerId === mgr.managerUserId || selectedManagerId === mgr.managerId
+                const mgrId = mgr.managerUserId || mgr.managerId
+                const isSelected = selectedManagerId === mgrId
                 return (
                   <div
                     key={mgr.assignmentId || mgr.managerUserId}
-                    onClick={() => setSelectedManagerId(mgr.managerUserId || mgr.managerId)}
+                    onClick={() => setSelectedManagerId(mgrId)}
                     className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
                         ? "bg-primary/10 border-primary shadow-xs"
