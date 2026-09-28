@@ -2,255 +2,168 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { GetAdminDashboardUseCase } from "../application/use-cases/get-admin-dashboard.use-case"
 import { GetOwnerDashboardUseCase } from "../application/use-cases/get-owner-dashboard.use-case"
 import { GetManagerDashboardUseCase } from "../application/use-cases/get-manager-dashboard.use-case"
-import { Types } from "mongoose"
+import { IAnalyticsQueryService } from "../application/interfaces/analytics-query.interface"
 
 describe("Analytics Use Cases", () => {
-  let mockBookingModel: unknown
-  let mockStationModel: unknown
-  let mockUserModel: unknown
-  let mockOwnerModel: unknown
-  let mockManagerAssignmentModel: unknown
-  let mockReviewModel: unknown
+  let mockQueryService: IAnalyticsQueryService
 
   beforeEach(() => {
-    mockBookingModel = {
-      aggregate: vi.fn(),
-      find: vi.fn().mockReturnValue({
-        sort: vi.fn().mockReturnValue({
-          limit: vi.fn().mockReturnValue({
-            populate: vi.fn().mockReturnValue({
-              populate: vi.fn().mockReturnValue({
-                lean: vi.fn().mockResolvedValue([]),
-              }),
-            }),
-          }),
-        }),
-      }),
-    }
-
-    mockStationModel = {
-      aggregate: vi
-        .fn()
-        .mockResolvedValue([{ totalStations: 5, activeStations: 4, pendingApprovals: 1 }]),
-      find: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([
-          {
-            _id: new Types.ObjectId(),
-            name: "Downtown Wash",
-            status: "APPROVED",
-            isActive: true,
-            totalBays: 3,
-            slotConfig: { bays: 3 },
-            rating: 4.8,
-            address: { city: "Ernakulam" },
-          },
-        ]),
-      }),
-      findById: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          _id: new Types.ObjectId(),
-          name: "Express Clean",
-          totalBays: 2,
-          slotConfig: { bays: 2 },
-          rating: 4.9,
-          reviewCount: 12,
-          status: "APPROVED",
-          address: { city: "Kochi", street: "MG Road" },
-        }),
-      }),
-      findOne: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          _id: new Types.ObjectId(),
-          name: "Express Clean",
-          slotConfig: { bays: 2 },
-        }),
-      }),
-    }
-
-    mockUserModel = {
-      aggregate: vi
-        .fn()
-        .mockResolvedValue([{ totalCustomers: 100, totalOwners: 10, totalManagers: 15 }]),
-    }
-
-    mockOwnerModel = {
-      findOne: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          _id: new Types.ObjectId(),
-          userId: new Types.ObjectId(),
-          businessName: "Super Wash Co",
-        }),
-      }),
-    }
-
-    mockManagerAssignmentModel = {
-      find: vi.fn().mockReturnValue({
-        populate: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue([]),
-        }),
-      }),
-      findOne: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          stationId: new Types.ObjectId(),
-          managerUserId: new Types.ObjectId(),
-          status: "ACTIVE",
-        }),
-      }),
-    }
-
-    mockReviewModel = {
-      countDocuments: vi.fn().mockResolvedValue(2),
-      find: vi.fn().mockReturnValue({
-        sort: vi.fn().mockReturnValue({
-          limit: vi.fn().mockReturnValue({
-            lean: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      }),
+    mockQueryService = {
+      getAdminDashboardData: vi.fn(),
+      getOwnerDashboardData: vi.fn(),
+      getManagerDashboardData: vi.fn(),
     }
   })
 
   describe("GetAdminDashboardUseCase", () => {
-    it("should aggregate admin platform KPIs, trends, and distributions", async () => {
-      const bModel = mockBookingModel as {
-        aggregate: ReturnType<typeof vi.fn>
-        find: ReturnType<typeof vi.fn>
-      }
-      bModel.aggregate
-        .mockResolvedValueOnce([
+    it("should fetch admin platform KPIs via query service", async () => {
+      const mockResult = {
+        kpis: {
+          totalGrossVolume: 50000,
+          totalPlatformCommission: 5000,
+          totalBookings: 100,
+          completedBookings: 90,
+          completionRate: 90,
+          totalCustomers: 100,
+          totalOwners: 10,
+          totalManagers: 15,
+          totalStations: 5,
+          activeStations: 4,
+          pendingApprovals: 1,
+          openDisputes: 2,
+        },
+        growthTrend: [{ date: "2026-09-20", revenue: 15000, bookingsCount: 30, commission: 1500 }],
+        bookingStatusDistribution: [{ status: "COMPLETED", count: 90, percentage: 90 }],
+        topStations: [
           {
-            totalGrossVolume: 50000,
-            totalPlatformCommission: 5000,
-            totalBookings: 100,
-            completedBookings: 90,
-          },
-        ]) // KPIs
-        .mockResolvedValueOnce([
-          { _id: "2026-09-20", revenue: 15000, bookingsCount: 30, commission: 1500 },
-        ]) // Growth trend
-        .mockResolvedValueOnce([
-          { _id: "COMPLETED", count: 90 },
-          { _id: "CANCELLED", count: 10 },
-        ]) // Status distribution
-        .mockResolvedValueOnce([
-          {
-            _id: new Types.ObjectId(),
+            stationId: "station-1",
+            name: "Downtown Wash",
             totalBookings: 50,
             totalRevenue: 25000,
-            station: { name: "Downtown Wash", rating: 4.8 },
+            rating: 4.8,
           },
-        ]) // Top stations
+        ],
+        recentBookings: [],
+      }
 
-      const useCase = new GetAdminDashboardUseCase(
-        mockBookingModel as never,
-        mockStationModel as never,
-        mockUserModel as never,
-        mockReviewModel as never
+      ;(mockQueryService.getAdminDashboardData as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockResult
       )
+
+      const useCase = new GetAdminDashboardUseCase(mockQueryService)
 
       const result = await useCase.execute("30_DAYS")
 
-      expect(result.kpis.totalGrossVolume).toBe(50000)
-      expect(result.kpis.totalPlatformCommission).toBe(5000)
-      expect(result.kpis.totalBookings).toBe(100)
-      expect(result.kpis.completionRate).toBe(90)
-      expect(result.kpis.totalCustomers).toBe(100)
-      expect(result.growthTrend).toHaveLength(1)
-      expect(result.bookingStatusDistribution).toHaveLength(2)
-      expect(result.topStations).toHaveLength(1)
+      expect(result).toEqual(mockResult)
+      expect(mockQueryService.getAdminDashboardData).toHaveBeenCalled()
     })
   })
 
   describe("GetOwnerDashboardUseCase", () => {
-    it("should aggregate multi-station statistics for an owner", async () => {
-      const ownerId = new Types.ObjectId().toString()
-      const bModel = mockBookingModel as {
-        aggregate: ReturnType<typeof vi.fn>
-        find: ReturnType<typeof vi.fn>
+    it("should fetch multi-station statistics for an owner via query service", async () => {
+      const ownerId = "owner-1"
+      const mockResult = {
+        kpis: {
+          totalGrossRevenue: 30000,
+          netSettlementAmount: 27000,
+          totalBookings: 60,
+          completedBookings: 55,
+          completionRate: 91,
+          totalStations: 1,
+          activeStations: 1,
+          totalManagers: 1,
+          averageRating: 4.5,
+        },
+        revenueTrend: [{ date: "2026-09-21", revenue: 10000, bookingsCount: 20, commission: 1000 }],
+        stationComparison: [
+          {
+            stationId: "station-1",
+            name: "Wash Station",
+            revenue: 30000,
+            bookingsCount: 60,
+            rating: 4.5,
+          },
+        ],
+        serviceDistribution: [{ name: "Full Wash", count: 40, revenue: 20000 }],
+        stations: [
+          {
+            stationId: "station-1",
+            name: "Wash Station",
+            totalBays: 2,
+            activeBays: 2,
+            todayBookings: 5,
+            totalRevenue: 30000,
+            rating: 4.5,
+            isActive: true,
+          },
+        ],
+        recentBookings: [],
       }
 
-      bModel.aggregate
-        .mockResolvedValueOnce([
-          {
-            totalGrossRevenue: 30000,
-            netSettlementAmount: 27000,
-            totalBookings: 60,
-            completedBookings: 55,
-          },
-        ]) // KPIs
-        .mockResolvedValueOnce([
-          { _id: "2026-09-21", revenue: 10000, bookingsCount: 20, commission: 1000 },
-        ]) // Revenue trend
-        .mockResolvedValueOnce([{ _id: new Types.ObjectId(), revenue: 30000, bookingsCount: 60 }]) // Station comparison
-        .mockResolvedValueOnce([
-          { _id: "FULL", count: 40, revenue: 20000 },
-          { _id: "HALF", count: 20, revenue: 10000 },
-        ]) // Service distribution
-        .mockResolvedValueOnce([]) // Today's bookings
-
-      const useCase = new GetOwnerDashboardUseCase(
-        mockBookingModel as never,
-        mockStationModel as never,
-        mockOwnerModel as never,
-        mockManagerAssignmentModel as never
+      ;(mockQueryService.getOwnerDashboardData as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockResult
       )
+
+      const useCase = new GetOwnerDashboardUseCase(mockQueryService)
 
       const result = await useCase.execute(ownerId, "30_DAYS")
 
-      expect(result.kpis.totalGrossRevenue).toBe(30000)
-      expect(result.kpis.netSettlementAmount).toBe(27000)
-      expect(result.kpis.totalStations).toBe(1)
-      expect(result.kpis.activeStations).toBe(1)
-      expect(result.revenueTrend).toHaveLength(1)
-      expect(result.serviceDistribution).toHaveLength(2)
-      expect(result.stations).toHaveLength(1)
+      expect(result).toEqual(mockResult)
+      expect(mockQueryService.getOwnerDashboardData).toHaveBeenCalled()
     })
   })
 
   describe("GetManagerDashboardUseCase", () => {
-    it("should aggregate single-station live operations data", async () => {
-      const managerId = new Types.ObjectId().toString()
-      const stationId = new Types.ObjectId().toString()
-      const bModel = mockBookingModel as {
-        aggregate: ReturnType<typeof vi.fn>
-        find: ReturnType<typeof vi.fn>
+    it("should fetch single-station live operations data via query service", async () => {
+      const managerId = "manager-1"
+      const stationId = "station-1"
+      const mockResult = {
+        station: {
+          id: stationId,
+          name: "Express Clean",
+          totalBays: 2,
+          rating: 4.9,
+          totalReviews: 12,
+          status: "APPROVED",
+        },
+        kpis: {
+          todayTotalScheduled: 10,
+          todayCheckedIn: 2,
+          todayInService: 1,
+          todayCompleted: 5,
+          todayNoShow: 0,
+          todayRevenue: 2500,
+          bayOccupancyRate: 50,
+          averageServiceMinutes: 25,
+        },
+        bayStates: [
+          {
+            bayNumber: 1,
+            isOccupied: true,
+            currentBookingNumber: "WQ-1001",
+            vehiclePlate: "KL-07",
+            serviceType: "Full Wash",
+            status: "IN_SERVICE",
+            timeRemainingMinutes: 10,
+          },
+          { bayNumber: 2, isOccupied: false, status: "AVAILABLE" },
+        ],
+        hourlyTrafficToday: [],
+        weeklyVolume: [],
+        upcomingQueue: [],
+        activeIssues: [],
       }
 
-      bModel.find.mockReturnValueOnce({
-        sort: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue([
-            {
-              _id: new Types.ObjectId(),
-              bookingNumber: "WQ-1001",
-              status: "IN_SERVICE",
-              serviceType: "FULL",
-              serviceStartedAt: new Date(Date.now() - 10 * 60000),
-              walkInVehicle: { registrationNumber: "KL-07-AB-1234" },
-              pricingSnapshot: { totalPrice: 499 },
-            },
-          ]),
-        }),
-      })
-
-      bModel.aggregate.mockResolvedValueOnce([
-        { _id: "2026-09-22", revenue: 2500, bookingsCount: 5 },
-      ])
-
-      const useCase = new GetManagerDashboardUseCase(
-        mockBookingModel as never,
-        mockStationModel as never,
-        mockManagerAssignmentModel as never,
-        mockReviewModel as never
+      ;(mockQueryService.getManagerDashboardData as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockResult
       )
+
+      const useCase = new GetManagerDashboardUseCase(mockQueryService)
 
       const result = await useCase.execute(managerId, stationId)
 
-      expect(result.station.name).toBe("Express Clean")
-      expect(result.kpis.todayInService).toBe(1)
-      expect(result.bayStates).toHaveLength(2)
-      expect(result.bayStates[0]?.isOccupied).toBe(true)
-      expect(result.bayStates[0]?.vehiclePlate).toBe("KL-07-AB-1234")
-      expect(result.bayStates[1]?.isOccupied).toBe(false)
+      expect(result).toEqual(mockResult)
+      expect(mockQueryService.getManagerDashboardData).toHaveBeenCalledWith(managerId, stationId)
     })
   })
 })

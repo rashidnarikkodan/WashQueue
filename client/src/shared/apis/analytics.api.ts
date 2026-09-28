@@ -1,7 +1,7 @@
 import { api } from "../config/axios"
 import { API_ROUTES } from "../constants/api.const"
 
-export type DateRangeFilter = "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL"
+export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL"
 
 export interface TimeSeriesPoint {
   date: string

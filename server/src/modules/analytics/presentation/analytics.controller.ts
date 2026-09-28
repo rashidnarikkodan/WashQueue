@@ -1,8 +1,8 @@
 import { Response } from "express"
-import { GetAdminDashboardUseCase } from "../../application/use-cases/get-admin-dashboard.use-case"
-import { GetOwnerDashboardUseCase } from "../../application/use-cases/get-owner-dashboard.use-case"
-import { GetManagerDashboardUseCase } from "../../application/use-cases/get-manager-dashboard.use-case"
-import { DateRange } from "../../domain/types/analytics.types"
+import { GetAdminDashboardUseCase } from "../application/use-cases/get-admin-dashboard.use-case"
+import { GetOwnerDashboardUseCase } from "../application/use-cases/get-owner-dashboard.use-case"
+import { GetManagerDashboardUseCase } from "../application/use-cases/get-manager-dashboard.use-case"
+import { DateRange } from "../domain/types/analytics.types"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 
 export class AnalyticsController {
