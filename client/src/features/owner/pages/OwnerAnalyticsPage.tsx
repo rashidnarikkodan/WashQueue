@@ -31,13 +31,19 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+  { label: "Today", value: "TODAY" },
+  { label: "7 Days", value: "7_DAYS" },
+  { label: "30 Days", value: "30_DAYS" },
+  { label: "90 Days", value: "90_DAYS" },
+  { label: "Year", value: "YEAR" },
+] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-]
+])
 
 export default function OwnerAnalyticsPage() {
   const navigate = useNavigate()
@@ -53,14 +59,14 @@ export default function OwnerAnalyticsPage() {
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const res = await analyticsApi.getOwnerDashboard(dateRange)
+      const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId)
       setData(res)
     } catch {
       toast.error("Failed to load owner financial analytics data")
     } finally {
       setIsLoading(false)
     }
-  }, [dateRange])
+  }, [dateRange, selectedStationId])
 
   useEffect(() => {
     let ignore = false
@@ -80,9 +86,17 @@ export default function OwnerAnalyticsPage() {
   const totalBookings = kpis?.totalBookings || 0
   const avgOrderValue = totalBookings > 0 ? Math.round(totalGross / totalBookings) : 0
 
+  const selectedStationObj = useMemo(() => {
+    if (selectedStationId === "ALL") return null
+    return (data?.stations || []).find((s) => s.stationId === selectedStationId)
+  }, [data?.stations, selectedStationId])
+
   const totalBaysAcrossStations = useMemo(() => {
+    if (selectedStationObj) {
+      return selectedStationObj.totalBays
+    }
     return (data?.stations || []).reduce((sum, s) => sum + s.totalBays, 0)
-  }, [data?.stations])
+  }, [data?.stations, selectedStationObj])
 
   const revenuePerBay =
     totalBaysAcrossStations > 0 ? Math.round(totalGross / totalBaysAcrossStations) : 0
@@ -154,7 +168,9 @@ export default function OwnerAnalyticsPage() {
       value: `₹${totalGross.toLocaleString()}`,
       variant: "primary",
       icon: TrendingUp,
-      description: "Total invoice volume before deductions",
+      description: selectedStationObj
+        ? `Total billings at ${selectedStationObj.name}`
+        : "Total invoice volume before deductions",
       onClick: () => navigate(APP_ROUTES.OWNER.FINANCIAL_RECORDS),
     },
     {
@@ -190,7 +206,9 @@ export default function OwnerAnalyticsPage() {
       value: `₹${revenuePerBay.toLocaleString()}`,
       variant: "default",
       icon: CreditCard,
-      description: `Across ${totalBaysAcrossStations} active washing bays`,
+      description: selectedStationObj
+        ? `Across ${totalBaysAcrossStations} configured bay${totalBaysAcrossStations === 1 ? "" : "s"}`
+        : `Across ${totalBaysAcrossStations} active washing bays across portfolio`,
       onClick: () => navigate(APP_ROUTES.OWNER.STATIONS),
     },
   ]

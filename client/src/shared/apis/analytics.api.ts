@@ -1,7 +1,7 @@
 import { api } from "../config/axios"
 import { API_ROUTES } from "../constants/api.const"
 
-export type DateRangeFilter = "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL"
+export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL"
 
 export interface TimeSeriesPoint {
   date: string
@@ -179,10 +179,18 @@ export const analyticsApi = {
     return res.data.data
   },
 
-  getOwnerDashboard: async (range: DateRangeFilter = "30_DAYS"): Promise<OwnerDashboardData> => {
+  getOwnerDashboard: async (
+    range: DateRangeFilter = "30_DAYS",
+    stationId?: string
+  ): Promise<OwnerDashboardData> => {
     const res = await api.get<{ success: boolean; data: OwnerDashboardData }>(
       API_ROUTES.ANALYTICS.OWNER,
-      { params: { range } }
+      {
+        params: {
+          range,
+          ...(stationId && stationId !== "ALL" ? { stationId } : {}),
+        },
+      }
     )
     return res.data.data
   },

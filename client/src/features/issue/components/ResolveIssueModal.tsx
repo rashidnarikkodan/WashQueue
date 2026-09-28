@@ -31,13 +31,17 @@ export default function ResolveIssueModal({
     if (isOpen) {
       if (!dialog.open) {
         dialog.showModal()
-        document.body.style.overflow = "hidden"
       }
+      document.body.style.overflow = "hidden"
     } else {
       if (dialog.open) {
         dialog.close()
-        document.body.style.overflow = ""
       }
+      document.body.style.overflow = ""
+    }
+
+    return () => {
+      document.body.style.overflow = ""
     }
   }, [isOpen])
 
@@ -61,6 +65,8 @@ export default function ResolveIssueModal({
     resolutionType === ResolutionType.PARTIAL_REFUND ||
     resolutionType === ResolutionType.DISCOUNT_COUPON
 
+  if (!isOpen) return null
+
   return (
     <dialog
       ref={dialogRef}
@@ -71,7 +77,7 @@ export default function ResolveIssueModal({
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose()
       }}
-      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-lg max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left"
+      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-lg max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left z-50"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-card">
         <div className="flex items-center gap-3">
@@ -108,7 +114,7 @@ export default function ResolveIssueModal({
           <select
             value={resolutionType}
             onChange={(e) => setResolutionType(e.target.value as ResolutionType)}
-            className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
+            className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all cursor-pointer"
           >
             <option value={ResolutionType.REFUND}>Full Refund</option>
             <option value={ResolutionType.PARTIAL_REFUND}>Partial Refund / Credit</option>
@@ -129,8 +135,9 @@ export default function ResolveIssueModal({
               type="number"
               min={0}
               step={1}
-              value={compensationAmount}
+              value={compensationAmount || ""}
               onChange={(e) => setCompensationAmount(Number(e.target.value))}
+              placeholder="0"
               className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
             />
           </div>

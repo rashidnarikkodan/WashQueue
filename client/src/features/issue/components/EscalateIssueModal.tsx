@@ -33,13 +33,17 @@ export default function EscalateIssueModal({
     if (isOpen) {
       if (!dialog.open) {
         dialog.showModal()
-        document.body.style.overflow = "hidden"
       }
+      document.body.style.overflow = "hidden"
     } else {
       if (dialog.open) {
         dialog.close()
-        document.body.style.overflow = ""
       }
+      document.body.style.overflow = ""
+    }
+
+    return () => {
+      document.body.style.overflow = ""
     }
   }, [isOpen])
 
@@ -53,6 +57,8 @@ export default function EscalateIssueModal({
     await onConfirmEscalate(reason.trim())
   }
 
+  if (!isOpen) return null
+
   return (
     <dialog
       ref={dialogRef}
@@ -63,7 +69,7 @@ export default function EscalateIssueModal({
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose()
       }}
-      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-lg max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left"
+      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-3xl p-0 w-full max-w-lg max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground text-left z-50"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-card">
         <div className="flex items-center gap-3">

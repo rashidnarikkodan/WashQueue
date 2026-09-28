@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { AnalyticsController } from "../controllers/analytics.controller"
+import { AnalyticsController } from "./analytics.controller"
 import asyncHandler from "@/common/utils/async-handler"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 import { authorize } from "@/infrastructure/http/middleware/authorize"

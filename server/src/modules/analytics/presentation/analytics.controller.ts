@@ -1,8 +1,8 @@
 import { Response } from "express"
-import { GetAdminDashboardUseCase } from "../../application/use-cases/get-admin-dashboard.use-case"
-import { GetOwnerDashboardUseCase } from "../../application/use-cases/get-owner-dashboard.use-case"
-import { GetManagerDashboardUseCase } from "../../application/use-cases/get-manager-dashboard.use-case"
-import { DateRange } from "../../domain/types/analytics.types"
+import { GetAdminDashboardUseCase } from "../application/use-cases/get-admin-dashboard.use-case"
+import { GetOwnerDashboardUseCase } from "../application/use-cases/get-owner-dashboard.use-case"
+import { GetManagerDashboardUseCase } from "../application/use-cases/get-manager-dashboard.use-case"
+import { DateRange } from "../domain/types/analytics.types"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 
 export class AnalyticsController {
@@ -31,7 +31,8 @@ export class AnalyticsController {
         return
       }
       const range = (req.query.range as DateRange) || "30_DAYS"
-      const data = await this.getOwnerDashboardUseCase.execute(ownerId, range)
+      const stationId = req.query.stationId as string | undefined
+      const data = await this.getOwnerDashboardUseCase.execute(ownerId, range, stationId)
       res.status(200).json({ success: true, data })
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to fetch owner dashboard"
