@@ -27,7 +27,7 @@ export class IndexKnowledgeDocument {
       id: `${document.id}-${index}`,
       documentId: document.id,
       content: chunk,
-      embedding: embeddings[index],
+      embedding: embeddings[index]!,
       metadata: {
         category: document.category,
         locale: document.locale,

@@ -24,8 +24,8 @@ export class KnowledgeDocumentRepository
       filter.status = query.status
     }
 
-    const page = query.page ? parseInt(query.page) : 1
-    const limit = query.limit ? parseInt(query.limit) : 10
+    const page = query.page ? parseInt(query.page as string) : 1
+    const limit = query.limit ? parseInt(query.limit as string) : 10
     const skip = (page - 1) * limit
 
     const [docs, total] = await Promise.all([
