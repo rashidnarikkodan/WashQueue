@@ -149,4 +149,7 @@ export const API_ROUTES = {
     RESOLVE: "/:id/resolve",
     CLOSE: "/:id/close",
   },
+  AI: {
+    ROOT: "/api/ai",
+  },
 } as const
