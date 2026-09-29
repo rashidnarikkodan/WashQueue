@@ -11,6 +11,7 @@ export interface KnowledgeDocumentProps {
   status: KnowledgeDocumentStatus
   locale: string
   version: number
+  chunkCount?: number
   publishedAt?: Date
   createdAt: Date
   updatedAt: Date
@@ -24,6 +25,7 @@ export default class KnowledgeDocument {
 
     this.props = {
       ...props,
+      chunkCount: props.chunkCount ?? 0,
       createdAt: new Date(props.createdAt),
       updatedAt: new Date(props.updatedAt),
     }
@@ -59,6 +61,10 @@ export default class KnowledgeDocument {
     return this.props.version
   }
 
+  get chunkCount(): number {
+    return this.props.chunkCount ?? 0
+  }
+
   get createdAt(): Date {
     return new Date(this.props.createdAt)
   }
@@ -68,6 +74,14 @@ export default class KnowledgeDocument {
   }
 
   // ---------- Domain behavior ----------
+
+  setChunkCount(count: number): void {
+    if (count < 0) {
+      throw new Error("Chunk count cannot be negative")
+    }
+    this.props.chunkCount = count
+    this.touch()
+  }
 
   updateContent(title: string, content: string): void {
     this.props.title = this.validateTitle(title)
@@ -130,6 +144,7 @@ export default class KnowledgeDocument {
       status: this.props.status,
       locale: this.props.locale,
       version: this.props.version,
+      chunkCount: this.props.chunkCount ?? 0,
       createdAt: new Date(this.props.createdAt),
       updatedAt: new Date(this.props.updatedAt),
     }
