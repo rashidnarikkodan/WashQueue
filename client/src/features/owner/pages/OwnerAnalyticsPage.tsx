@@ -24,6 +24,7 @@ import {
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import {
   ChartContainer,
   RevenueTrendChart,
@@ -256,24 +257,28 @@ export default function OwnerAnalyticsPage() {
   }, [data?.serviceDistribution])
 
   return (
-    <div className="space-y-8 pb-16 animate-in fade-in duration-300">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[{ label: "Owner", path: APP_ROUTES.OWNER.DASHBOARD }, { label: "Analytics" }]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Earnings &amp; Financial Analytics
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Track gross earnings, net payout disbursements, platform commission deductions, profit
-            margins, and per-station financial yield.
+            margins, and per-station financial yield
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch lg:self-auto flex-wrap">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="relative">
             <select
               value={selectedStationId}
               onChange={(e) => handleStationChange(e.target.value)}
-              className="bg-card border border-border text-foreground text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-primary transition-all cursor-pointer"
+              className="bg-card border border-border text-foreground text-xs font-semibold px-3 py-2.5 rounded-xl outline-none focus:border-primary transition-all cursor-pointer"
             >
               <option value="ALL">All Stations Portfolio</option>
               {data?.stations.map((s) => (
@@ -284,7 +289,7 @@ export default function OwnerAnalyticsPage() {
             </select>
           </div>
 
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60">
+          <div className="flex items-center bg-card p-1 rounded-xl border border-border">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -301,19 +306,25 @@ export default function OwnerAnalyticsPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => fetchAnalyticsData(dateRange, selectedStationId)}
             disabled={isRefreshing || isLoading}
             title="Refresh financial ledger"
-            className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-primary"}`}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={exportFinancialCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs transition-all cursor-pointer shadow-xs hover:opacity-95"
+            className="flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-xs sm:text-sm"
           >
-            <Download className="w-4 h-4" /> Export Financial Statement
+            <Download className="w-4 h-4" />
+            <span>Export Statement</span>
           </button>
         </div>
       </div>

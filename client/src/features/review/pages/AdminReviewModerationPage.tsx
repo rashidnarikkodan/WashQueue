@@ -26,6 +26,7 @@ import {
   type Column,
   type TabConfig,
   type SelectFilter,
+  type ToggleFilter,
   type PaginationMeta,
 } from "@/shared/components/data-table"
 import { reviewApi } from "@/shared/apis/review.api"
@@ -61,6 +62,7 @@ export default function AdminReviewModerationPage() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [ratingFilter, setRatingFilter] = useState<string>("ALL")
   const [tabFilter, setTabFilter] = useState<string>("ALL")
+  const [flaggedOnly, setFlaggedOnly] = useState<boolean>(false)
   const [sortBy, setSortBy] = useState<string>("lowest")
   const [stationTab, setStationTab] = useState<"top" | "low">("top")
 
@@ -75,6 +77,7 @@ export default function AdminReviewModerationPage() {
   const fetchReviews = useCallback(async () => {
     setIsLoading(true)
     try {
+      const isFlagged = flaggedOnly || tabFilter === "FLAGGED"
       const params: FindAdminReviewsParams = {
         page,
         limit,
@@ -85,7 +88,7 @@ export default function AdminReviewModerationPage() {
             : ratingFilter !== "ALL"
               ? Number(ratingFilter)
               : undefined,
-        flaggedOnly: tabFilter === "FLAGGED" ? true : undefined,
+        flaggedOnly: isFlagged ? true : undefined,
         sortBy: tabFilter === "LOW_RATED" ? "lowest" : sortBy,
       }
 
@@ -108,7 +111,7 @@ export default function AdminReviewModerationPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [page, limit, searchQuery, ratingFilter, tabFilter, sortBy])
+  }, [page, limit, searchQuery, ratingFilter, tabFilter, sortBy, flaggedOnly])
 
   useEffect(() => {
     let ignore = false
@@ -127,6 +130,11 @@ export default function AdminReviewModerationPage() {
 
   const handleTabChange = (tabId: string) => {
     setTabFilter(tabId)
+    if (tabId === "FLAGGED") {
+      setFlaggedOnly(true)
+    } else if (tabId === "ALL") {
+      setFlaggedOnly(false)
+    }
     setPage(1)
   }
 
@@ -264,6 +272,32 @@ export default function AdminReviewModerationPage() {
       },
     ]
   }, [ratingFilter, sortBy])
+
+  // Toggle Filters for Toolbar
+  const toggleFilters: ToggleFilter[] = useMemo(() => {
+    return [
+      {
+        id: "flaggedOnlyToggle",
+        label: "Flagged Only",
+        value: flaggedOnly || tabFilter === "FLAGGED",
+        onChange: (val: boolean) => {
+          setFlaggedOnly(val)
+          if (val) {
+            if (tabFilter !== "LOW_RATED") {
+              setTabFilter("FLAGGED")
+            }
+          } else {
+            if (tabFilter === "FLAGGED") {
+              setTabFilter("ALL")
+            }
+          }
+          setPage(1)
+        },
+        activeColor: "bg-rose-500/25 border border-rose-500/30",
+        thumbActiveColor: "bg-rose-400",
+      },
+    ]
+  }, [flaggedOnly, tabFilter])
 
   // DataTable columns
   const columns: Column<ReviewDto>[] = useMemo(() => {
@@ -614,6 +648,7 @@ export default function AdminReviewModerationPage() {
         activeTab={tabFilter}
         onTabChange={handleTabChange}
         selectFilters={selectFilters}
+        toggleFilters={toggleFilters}
       />
 
       <DataTable<ReviewDto>
