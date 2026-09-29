@@ -6,7 +6,6 @@ import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
 import ThemeToggle from "../header/ThemeToggle"
-import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation()
@@ -20,7 +19,6 @@ export default function Header({ role }: { role?: string }) {
   const isCustomer = currentRole === "customer"
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -34,7 +32,6 @@ export default function Header({ role }: { role?: string }) {
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
-      { name: "Qyn", path: APP_ROUTES.AI_ASSISTANT },
     ],
   }
 
@@ -83,19 +80,10 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={(e) => {
-                    if (link.name === "Qyn" && !isAuthenticated) {
-                      e.preventDefault()
-                      setIsAuthModalOpen(true)
-                    }
-                  }}
                   className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 flex items-center gap-1.5 ${
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
                 >
-                  {link.name === "Qyn" && (
-                    <img src="/qyn-logo.svg" alt="Qyn" className="w-3.5 h-3.5" />
-                  )}
                   {link.name}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-primary" />
@@ -152,20 +140,12 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={(e) => {
-                    if (link.name === "Qyn" && !isAuthenticated) {
-                      e.preventDefault()
-                      setIsMobileMenuOpen(false)
-                      setIsAuthModalOpen(true)
-                    }
-                  }}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary font-semibold"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
-                  {link.name === "Qyn" && <img src="/qyn-logo.svg" alt="Qyn" className="w-4 h-4" />}
                   <span>{link.name}</span>
                 </Link>
               )
@@ -173,14 +153,6 @@ export default function Header({ role }: { role?: string }) {
           </div>
         </div>
       )}
-
-      <AuthRequiredModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        title="Sign in for Qyn"
-        message="You need to be signed in to your WashQueue account to chat with Qyn."
-        actionName="access Qyn"
-      />
     </header>
   )
 }

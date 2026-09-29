@@ -33,34 +33,9 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: LayoutDashboard,
   },
   {
-    name: "User Management",
-    path: "/admin/users",
-    icon: Users,
-  },
-  {
-    name: "Owner Verification",
-    path: "/admin/owners",
-    icon: ShieldCheck,
-  },
-  {
-    name: "Station Management",
-    path: "/admin/stations",
-    icon: Fuel,
-  },
-  {
-    name: "Catelog Management",
-    path: "/admin/categories",
-    icon: Shapes,
-  },
-  {
     name: "Booking Monitoring",
     path: "/admin/bookings",
     icon: ReceiptText,
-  },
-  {
-    name: "Settlement Monitoring",
-    path: "/admin/settlements",
-    icon: CreditCard,
   },
   {
     name: "Issue Management",
@@ -68,14 +43,24 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: LifeBuoy,
   },
   {
-    name: "Knowledge Base",
-    path: "/admin/knowledge-docs",
-    icon: BookOpen,
+    name: "Station Management",
+    path: "/admin/stations",
+    icon: Fuel,
   },
   {
-    name: "Reviews & Ratings Moderation",
-    path: "/admin/reviews",
-    icon: MessageSquareMore,
+    name: "Owner Verification",
+    path: "/admin/owners",
+    icon: ShieldCheck,
+  },
+  {
+    name: "User Management",
+    path: "/admin/users",
+    icon: Users,
+  },
+  {
+    name: "Settlement Monitoring",
+    path: "/admin/settlements",
+    icon: CreditCard,
   },
   {
     name: "Fraud Monitoring",
@@ -83,14 +68,29 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: ShieldAlert,
   },
   {
-    name: "Notifications Management",
-    path: "/admin/notifications",
-    icon: Bell,
+    name: "Reviews & Ratings",
+    path: "/admin/reviews",
+    icon: MessageSquareMore,
   },
   {
     name: "Reports & Analytics",
     path: "/admin/reports",
     icon: BarChart3,
+  },
+  {
+    name: "Catalog Management",
+    path: "/admin/categories",
+    icon: Shapes,
+  },
+  {
+    name: "Notifications Management",
+    path: "/admin/notifications",
+    icon: Bell,
+  },
+  {
+    name: "Knowledge Base",
+    path: "/admin/knowledge-docs",
+    icon: BookOpen,
   },
   {
     name: "System Settings",

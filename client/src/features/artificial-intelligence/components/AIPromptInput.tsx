@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react"
-import { ArrowUp, Loader2 } from "lucide-react"
+import { ArrowUp, Loader2, Sparkles } from "lucide-react"
 
 interface AIPromptInputProps {
   value: string
@@ -25,7 +25,7 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
     const textarea = textareaRef.current
     if (!textarea) return
     textarea.style.height = "auto"
-    const min = isCentered ? 56 : 44
+    const min = isCentered ? 56 : 46
     textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, min), 200)}px`
   }, [value, isCentered])
 
@@ -46,16 +46,18 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className="rounded-2xl border bg-card transition-all duration-200"
+        className={`rounded-[24px] sm:rounded-[26px] border bg-card/90 hover:bg-card/95 backdrop-blur-xl transition-all duration-200 ${
+          isCentered ? "shadow-md hover:shadow-lg" : "shadow-xs hover:shadow-sm"
+        }`}
         style={{
-          borderColor: isFocused ? "rgb(var(--primary) / 0.6)" : "rgb(var(--border))",
+          borderColor: isFocused ? "rgb(var(--primary) / 0.55)" : "rgb(var(--border) / 0.8)",
           boxShadow: isFocused
-            ? "0 0 0 3px rgb(var(--primary) / 0.1), 0 4px 24px rgb(0 0 0 / 0.12)"
-            : "0 2px 12px rgb(0 0 0 / 0.08)",
+            ? "0 0 0 3px rgb(var(--primary) / 0.12), 0 6px 24px rgb(0 0 0 / 0.08)"
+            : undefined,
         }}
       >
         {/* Textarea */}
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-5 pt-3.5 pb-1">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -66,37 +68,42 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
-            className="w-full resize-none bg-transparent text-sm sm:text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full resize-none bg-transparent text-sm sm:text-[15px] text-foreground placeholder:text-muted-foreground/45 focus:outline-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ minHeight: isCentered ? "56px" : "44px" }}
           />
         </div>
 
         {/* Bottom toolbar */}
-        <div className="flex items-center justify-between px-3 pb-3">
-          {/* Hint */}
-          <span className="text-[11px] text-muted-foreground/40 select-none pl-1">
-            {isFocused && value ? "shift+↵ for new line" : ""}
-          </span>
+        <div className="flex items-center justify-between px-4 pb-2.5 pt-0.5">
+          {/* Helper hint / capability tag */}
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/50 select-none">
+            {isFocused && value ? (
+              <span className="text-[11px] text-muted-foreground/60 font-medium">
+                Shift + Enter for new line
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/40 font-medium">
+                <Sparkles className="w-3 h-3 text-primary/60" />
+                Live WashQueue RAG
+              </span>
+            )}
+          </div>
 
-          {/* Send button */}
+          {/* Circular Send button like ChatGPT / Gemini */}
           <button
             type="submit"
             disabled={!canSubmit}
-            aria-label="Send"
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            aria-label="Send message"
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${
               canSubmit
-                ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 cursor-pointer"
-                : "bg-muted text-muted-foreground/40 cursor-not-allowed"
+                ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 cursor-pointer shadow-sm"
+                : "bg-muted text-muted-foreground/30 cursor-not-allowed"
             }`}
-            style={canSubmit ? { boxShadow: "0 2px 12px rgb(var(--primary) / 0.35)" } : undefined}
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin text-primary-foreground" />
             ) : (
-              <>
-                <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Send</span>
-              </>
+              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
             )}
           </button>
         </div>

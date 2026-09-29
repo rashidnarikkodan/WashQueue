@@ -16,11 +16,21 @@ services:
       - washqueue
   qdrant:
     image: qdrant/qdrant:latest
-    container_name: qdrant
+    container_name: washqueue-qdrant
+    restart: unless-stopped
+
     ports:
       - "6333:6333"
+      - "6334:6334"
+
     networks:
       - washqueue
 
+    volumes:
+      - qdrant_data:/qdrant/storage
+
 networks:
   washqueue:
+
+volumes:
+  qdrant_data:

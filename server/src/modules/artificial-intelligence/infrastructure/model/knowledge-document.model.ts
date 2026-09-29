@@ -12,6 +12,7 @@ export interface IKnowledgeDocument extends Document {
   locale: string
   version: number
   chunkCount: number
+  publishedAt?: Date | null
 }
 
 const KnowledgeDocumentSchema = new Schema<IKnowledgeDocument>(
@@ -57,6 +58,11 @@ const KnowledgeDocumentSchema = new Schema<IKnowledgeDocument>(
       type: Number,
       default: 0,
       min: 0,
+    },
+
+    publishedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

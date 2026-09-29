@@ -4,7 +4,7 @@ import { AIEmptyHero } from "../components/AIEmptyHero"
 import { AIPromptInput } from "../components/AIPromptInput"
 import { AISuggestionChips } from "../components/AISuggestionChips"
 import { AIMessageList } from "../components/AIMessageList"
-import { SquarePen } from "lucide-react"
+import { PenBoxIcon } from "lucide-react"
 
 export const AIAssistantPage: React.FC = () => {
   const {
@@ -20,14 +20,55 @@ export const AIAssistantPage: React.FC = () => {
   const hasMessages = messages.length > 0
 
   return (
-    <div className="h-full flex-1 flex flex-col bg-background text-foreground overflow-hidden">
+    <div className="flex-1 min-h-0 w-full flex flex-col bg-background text-foreground overflow-hidden">
+      <div className="shrink-0 z-10 bg-background/90 backdrop-blur-md">
+        <div className="max-w-3xl sm:max-w-4xl mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          {/* Left: Branding & Status */}
+          <div className="flex items-center gap-3">
+            <img
+              src="/QynAi.png"
+              alt="Qyn"
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain shrink-0"
+              draggable={false}
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:text-base font-bold tracking-tight text-foreground">
+                  Qyn
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-muted-foreground hidden sm:block font-normal">
+                WashQueue AI Assistant & Support
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Curved, sleek New Chat button like ChatGPT / Gemini */}
+          <button
+            type="button"
+            onClick={clearMessages}
+            disabled={!hasMessages && !activePrompt}
+            className={`h-9 sm:h-10 px-4 sm:px-5 rounded-xl border text-xs sm:text-sm font-semibold tracking-wide transition-all duration-150 flex items-center gap-2 select-none shadow-xs ${
+              hasMessages || activePrompt
+                ? "border-border/80 hover:border-primary/50 bg-card hover:bg-muted text-foreground cursor-pointer active:scale-[0.98]"
+                : "border-border/40 bg-muted/30 text-muted-foreground/40 cursor-not-allowed opacity-50"
+            }`}
+            title="Start a new chat session"
+          >
+            <PenBoxIcon className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Main Content Area ──────────────────────────────────────────────── */}
       {!hasMessages ? (
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
-          <div className="w-full max-w-2xl flex flex-col items-center gap-0">
+        // Empty state view
+        <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-4 sm:px-6 py-6 overflow-y-auto">
+          <div className="w-full max-w-3xl sm:max-w-4xl flex flex-col items-center my-auto">
             <AIEmptyHero />
 
-            {/* Composer */}
-            <div className="w-full mt-8">
+            {/* Composer in empty state */}
+            <div className="w-full mt-6 sm:mt-8">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}
@@ -38,59 +79,35 @@ export const AIAssistantPage: React.FC = () => {
             </div>
 
             {/* Suggestion cards */}
-            <div className="w-full">
+            <div className="w-full mt-4">
               <AISuggestionChips onSelect={(prompt) => sendMessage(prompt)} disabled={isLoading} />
             </div>
           </div>
         </div>
       ) : (
-        // ── CONVERSATION STATE ─────────────────────────────────────────────
-        <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
-          {/* Session header */}
-          <div className="shrink-0 border-b border-border">
-            <div className="max-w-2xl mx-auto w-full px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center"
-                  style={{ boxShadow: "0 2px 8px rgb(var(--primary) / 0.12)" }}
-                >
-                  <img src="/qyn-logo.svg" alt="" aria-hidden className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-semibold text-foreground">Qyn</span>
-                <span className="hidden sm:inline text-xs text-muted-foreground/50">
-                  · WashQueue Assistant
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={clearMessages}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border transition-all duration-150 cursor-pointer"
-                title="New conversation"
-              >
-                <SquarePen className="w-3.5 h-3.5" />
-                <span>New chat</span>
-              </button>
-            </div>
-          </div>
-
+        // Conversation state view
+        <div className="flex-1 min-h-0 flex flex-col w-full overflow-hidden">
           {/* Message stream */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="max-w-2xl mx-auto w-full px-4 py-4">
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 scroll-smooth">
+            <div className="max-w-3xl sm:max-w-4xl mx-auto w-full pt-2 pb-6">
               <AIMessageList messages={messages} onRetry={retryLastMessage} />
             </div>
           </div>
 
-          {/* Docked composer */}
-          <div className="shrink-0 border-t border-border bg-background">
-            <div className="max-w-2xl mx-auto w-full px-4 py-4">
+          {/* Sticky Docked Composer at bottom without awkward gradient overlays */}
+          <div className="shrink-0 bg-background/95 backdrop-blur-md pb-4 sm:pb-5 pt-2 px-4 sm:px-6">
+            <div className="max-w-3xl sm:max-w-4xl mx-auto w-full">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}
                 onSubmit={() => sendMessage()}
                 isLoading={isLoading}
-                placeholder="Follow up with Qyn..."
+                placeholder="Ask Qyn anything about wait times, bookings, packages, or policies..."
               />
+              <p className="text-[11px] sm:text-xs text-muted-foreground/50 text-center mt-2 font-normal select-none">
+                Qyn is an AI assistant and may make mistakes. Verify critical booking and service
+                details.
+              </p>
             </div>
           </div>
         </div>

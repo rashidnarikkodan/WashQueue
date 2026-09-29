@@ -22,6 +22,13 @@ export class IndexKnowledgeDocumentUseCase implements IIndexKnowledgeDocumentUse
       throw new NotFoundError("Knowledge Document not found")
     }
 
+    if (document.status === "ARCHIVED") {
+      await this.vectorStore.deleteByDocumentId(document.id)
+      document.setChunkCount(0)
+      await this.documentsRepository.update(document.id, document)
+      return
+    }
+
     const chunks = await this.chunker.chunk(document.content)
     if (chunks.length === 0) {
       throw new Error("Document produced no chunks")

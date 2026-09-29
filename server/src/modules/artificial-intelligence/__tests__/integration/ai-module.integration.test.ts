@@ -59,7 +59,7 @@ Station managers have access to a dedicated dashboard where they can manage acti
       content,
       category: "SERVICE",
       locale: "en",
-      status: "DRAFT",
+      status: "PUBLISHED",
     }
 
     const createdDoc = await createUseCase.execute(dto)

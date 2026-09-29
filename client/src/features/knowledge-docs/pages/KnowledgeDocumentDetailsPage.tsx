@@ -15,12 +15,14 @@ import {
   X,
   Loader2,
   ChevronDown,
+  Globe,
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { knowledgeDocsApi } from "../api/knowledge-docs.api"
+import KnowledgeDocStatusBadge from "../components/KnowledgeDocStatusBadge"
 import type {
   KnowledgeDocument,
   KnowledgeDocumentCategory,
@@ -204,7 +206,7 @@ export default function KnowledgeDocumentDetailsPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
         items={[
           { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
@@ -228,9 +230,12 @@ export default function KnowledgeDocumentDetailsPage() {
               />
             </div>
           ) : (
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-              {document.title}
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                {document.title}
+              </h1>
+              <KnowledgeDocStatusBadge status={document.status} />
+            </div>
           )}
         </div>
 
@@ -316,8 +321,8 @@ export default function KnowledgeDocumentDetailsPage() {
         </div>
       </div>
 
-      {/* Metadata Overview Card */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Metadata Overview Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="p-4 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm space-y-1">
           <p className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-primary" /> Created At
@@ -328,6 +333,29 @@ export default function KnowledgeDocumentDetailsPage() {
               hour: "2-digit",
               minute: "2-digit",
             })}
+          </p>
+        </div>
+
+        <div className="p-4 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm space-y-1">
+          <p className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
+            <Globe className="w-3.5 h-3.5 text-blue-500" /> Published At
+          </p>
+          <p className="text-xs font-bold text-foreground">
+            {document.publishedAt ? (
+              <>
+                {new Date(document.publishedAt).toLocaleDateString()}{" "}
+                {new Date(document.publishedAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </>
+            ) : isEditing && editStatus === "PUBLISHED" ? (
+              <span className="text-emerald-500 font-semibold text-[11px]">
+                Will publish on save
+              </span>
+            ) : (
+              <span className="text-muted-foreground font-medium italic">Not published</span>
+            )}
           </p>
         </div>
 
@@ -380,7 +408,7 @@ export default function KnowledgeDocumentDetailsPage() {
                 className="appearance-none bg-transparent hover:bg-muted/40 cursor-pointer text-xs font-bold text-foreground border-b border-dashed border-primary/40 focus:border-primary outline-none w-full py-0.5 pr-6 transition-colors"
               >
                 <option value="PUBLISHED" className="bg-popover text-popover-foreground">
-                  Indexed in Qdrant
+                  Published (Indexed in Qdrant)
                 </option>
                 <option value="DRAFT" className="bg-popover text-popover-foreground">
                   Draft (Excluded from Qdrant)
@@ -392,11 +420,26 @@ export default function KnowledgeDocumentDetailsPage() {
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-0 pointer-events-none group-hover:text-foreground transition-colors" />
             </div>
           ) : (
-            <p className="text-xs font-bold text-foreground">
-              {document.status === "PUBLISHED"
-                ? "Indexed in Qdrant"
-                : "Draft (Not in Vector Index)"}
-            </p>
+            <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              {document.status === "PUBLISHED" && (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                  <span>Indexed in Qdrant</span>
+                </>
+              )}
+              {document.status === "DRAFT" && (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                  <span>Draft (Excluded)</span>
+                </>
+              )}
+              {document.status === "ARCHIVED" && (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                  <span>Archived (Excluded)</span>
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>

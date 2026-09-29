@@ -33,18 +33,26 @@ export class UpdateKnowledgeDocumentUseCase implements IUpdateKnowledgeDocumentU
     if (updates.locale) {
       doc.changeLocale(updates.locale)
     }
-    if (updates.status === "PUBLISHED") {
-      doc.publish()
-    } else if (updates.status === "ARCHIVED") {
-      doc.archive()
-    } else if (updates.status === "DRAFT" && doc.status === "PUBLISHED") {
-      doc.unpublish()
+    const prevStatus = doc.status
+    if (updates.status) {
+      if (updates.status === "PUBLISHED") {
+        doc.publish()
+      } else if (updates.status === "ARCHIVED") {
+        doc.archive()
+      } else if (updates.status === "DRAFT") {
+        doc.unpublish()
+      }
     }
 
     const updatedDoc = await this.repository.update(id, doc)
 
-    // Trigger background indexing if content/title/category/locale changed
-    if (updates.title || updates.content || updates.category || updates.locale) {
+    // Trigger background indexing if status changed or content/title/category/locale changed
+    const statusChanged = updates.status && updates.status !== prevStatus
+    const contentChanged = Boolean(
+      updates.title || updates.content || updates.category || updates.locale
+    )
+
+    if (statusChanged || contentChanged) {
       this.indexUseCase.execute(id).catch((err) => {
         console.error("Failed to index knowledge document on update:", err)
       })

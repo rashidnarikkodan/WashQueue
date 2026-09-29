@@ -26,6 +26,11 @@ export default class KnowledgeDocument {
     this.props = {
       ...props,
       chunkCount: props.chunkCount ?? 0,
+      publishedAt: props.publishedAt
+        ? new Date(props.publishedAt)
+        : props.status === "PUBLISHED"
+          ? new Date(props.createdAt)
+          : undefined,
       createdAt: new Date(props.createdAt),
       updatedAt: new Date(props.updatedAt),
     }
@@ -63,6 +68,10 @@ export default class KnowledgeDocument {
 
   get chunkCount(): number {
     return this.props.chunkCount ?? 0
+  }
+
+  get publishedAt(): Date | undefined {
+    return this.props.publishedAt ? new Date(this.props.publishedAt) : undefined
   }
 
   get createdAt(): Date {
@@ -105,11 +114,10 @@ export default class KnowledgeDocument {
   }
 
   publish(): void {
-    if (this.props.status === "ARCHIVED") {
-      throw new Error("Archived knowledge document cannot be published")
-    }
-
     this.props.status = "PUBLISHED"
+    if (!this.props.publishedAt) {
+      this.props.publishedAt = new Date()
+    }
     this.touch()
   }
 
@@ -119,10 +127,6 @@ export default class KnowledgeDocument {
   }
 
   unpublish(): void {
-    if (this.props.status !== "PUBLISHED") {
-      throw new Error("Only published documents can be unpublished")
-    }
-
     this.props.status = "DRAFT"
     this.touch()
   }
@@ -145,6 +149,7 @@ export default class KnowledgeDocument {
       locale: this.props.locale,
       version: this.props.version,
       chunkCount: this.props.chunkCount ?? 0,
+      publishedAt: this.props.publishedAt ? new Date(this.props.publishedAt) : undefined,
       createdAt: new Date(this.props.createdAt),
       updatedAt: new Date(this.props.updatedAt),
     }

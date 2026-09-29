@@ -354,9 +354,9 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const bookingNumber = issue.bookingDetails?.bookingNumber || issue.bookingId
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+    <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
       {/* Top Header & Breadcrumbs */}
-      <div className="space-y-3 pb-3 border-b border-border/60">
+      <div className="space-y-3 pb-1 border-b border-border/60">
         <div className="flex items-center justify-between">
           <Breadcrumbs
             items={[

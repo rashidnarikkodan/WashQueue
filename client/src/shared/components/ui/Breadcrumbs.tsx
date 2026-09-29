@@ -14,7 +14,7 @@ interface BreadcrumbsProps {
 const Breadcrumbs = ({ items, className = "" }: BreadcrumbsProps) => {
   return (
     <nav
-      className={`flex items-center space-x-1.5 text-xs font-medium text-muted-foreground/80 py-1 overflow-x-auto scrollbar-none ${className}`}
+      className={`flex items-center space-x-1.5 text-xs font-medium text-muted-foreground/80 overflow-x-auto scrollbar-none ${className}`}
     >
       <Link
         to="/"

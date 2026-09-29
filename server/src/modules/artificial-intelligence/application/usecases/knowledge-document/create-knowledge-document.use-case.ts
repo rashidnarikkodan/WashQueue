@@ -16,10 +16,12 @@ export class CreateKnowledgeDocumentUseCase implements ICreateKnowledgeDocumentU
   ) {}
 
   async execute(data: CreateKnowledgeDocumentDto): Promise<KnowledgeDocumentProps> {
+    const isPublished = data.status === "PUBLISHED"
     const doc = new KnowledgeDocument({
       ...data,
       id: new mongoose.Types.ObjectId().toString(),
       version: 1,
+      publishedAt: isPublished ? new Date() : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
