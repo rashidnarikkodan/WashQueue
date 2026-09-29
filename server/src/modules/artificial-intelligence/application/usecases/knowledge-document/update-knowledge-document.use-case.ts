@@ -1,8 +1,8 @@
 import { IKnowledgeDocumentRepository } from "../../../domain/repositories/knowledge-document.repository"
 import { KnowledgeDocumentProps } from "../../../domain/entities/KnowledgeDocument.entity"
 import { UpdateKnowledgeDocumentDto } from "../../dto/knowledge-document.dto"
-import { IUpdateKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 import { NotFoundError } from "@/common/errors/not-found-error"
+import { IUpdateKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 
 export class UpdateKnowledgeDocumentUseCase implements IUpdateKnowledgeDocumentUseCase {
   constructor(private readonly repository: IKnowledgeDocumentRepository) {}

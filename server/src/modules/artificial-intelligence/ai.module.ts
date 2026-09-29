@@ -7,25 +7,43 @@ import { GetKnowledgeDocumentsUseCase } from "./application/usecases/knowledge-d
 import { GetKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/get-knowledge-document.use-case"
 import { UpdateKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/update-knowledge-document.use-case"
 import { DeleteKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/delete-knowledge-document.use-case"
+import { IndexKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/index-knowledge-document.usecases"
+import { LangChainChunker } from "./infrastructure/services/chunker.service"
+import { LocalEmbeddingModel } from "./infrastructure/services/embedding.service"
 
 const aiRouter = Router()
 
 // Orchestration
-const repository = new KnowledgeDocumentRepository()
-const createUseCase = new CreateKnowledgeDocumentUseCase(repository)
-const getAllUseCase = new GetKnowledgeDocumentsUseCase(repository)
-const getByIdUseCase = new GetKnowledgeDocumentUseCase(repository)
-const updateUseCase = new UpdateKnowledgeDocumentUseCase(repository)
-const deleteUseCase = new DeleteKnowledgeDocumentUseCase(repository)
+const knowledgeDocumentRepository = new KnowledgeDocumentRepository()
 
-const knowledgeDocumentController = new KnowledgeDocumentController(
-  createUseCase,
-  getAllUseCase,
-  getByIdUseCase,
-  updateUseCase,
-  deleteUseCase
+const createKnowledgeDocumentUseCase = new CreateKnowledgeDocumentUseCase(
+  knowledgeDocumentRepository
 )
 
+const getKnowledgeDocumentsUseCase = new GetKnowledgeDocumentsUseCase(knowledgeDocumentRepository)
+
+const getKnowledgeDocumentUseCase = new GetKnowledgeDocumentUseCase(knowledgeDocumentRepository)
+
+const updateKnowledgeDocumentUseCase = new UpdateKnowledgeDocumentUseCase(
+  knowledgeDocumentRepository
+)
+
+const deleteKnowledgeDocumentUseCase = new DeleteKnowledgeDocumentUseCase(
+  knowledgeDocumentRepository
+)
+const indexKnowledgeDocumentUseCase = new IndexKnowledgeDocumentUseCase(
+  new LangChainChunker(),
+  new LocalEmbeddingModel(),
+  knowledgeDocumentRepository,
+  
+)
+const knowledgeDocumentController = new KnowledgeDocumentController(
+  createKnowledgeDocumentUseCase,
+  getKnowledgeDocumentsUseCase,
+  getKnowledgeDocumentUseCase,
+  updateKnowledgeDocumentUseCase,
+  deleteKnowledgeDocumentUseCase
+)
 aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(knowledgeDocumentController))
 
 export default aiRouter

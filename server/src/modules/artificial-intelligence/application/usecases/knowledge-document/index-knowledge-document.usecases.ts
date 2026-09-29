@@ -1,16 +1,16 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
-import { IKnowledgeDocumentRepository } from "../../domain/repositories/knowledge-document.repository"
-import { IEmbeddingProvider } from "../interfaces/ai-provider.interface"
-import { IIndexKnowledgeDocumentUseCase } from "../interfaces/ai-usecases.interface"
-import { IChunkerService } from "../interfaces/chunker.interface"
-import { IVectorStore } from "../interfaces/vector.interface"
+import { IKnowledgeDocumentRepository } from "../../../domain/repositories/knowledge-document.repository"
+import { IEmbeddingProvider } from "../../ports/ai-provider.interface"
+import { IChunkerService } from "../../ports/chunker.interface"
+import { IVectorStore } from "../../ports/vector.interface"
+import { IIndexKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 
 export class IndexKnowledgeDocumentUseCase implements IIndexKnowledgeDocumentUseCase {
   constructor(
     private readonly chunker: IChunkerService,
     private readonly embeddingProvider: IEmbeddingProvider,
-    private readonly vectorStore: IVectorStore,
-    private readonly documentsRepository: IKnowledgeDocumentRepository
+    private readonly documentsRepository: IKnowledgeDocumentRepository,
+    private readonly vectorStore: IVectorStore
   ) {}
   async execute(documentId: string): Promise<void> {
     const document = await this.documentsRepository.findById(documentId)

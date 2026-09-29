@@ -5,7 +5,7 @@ import {
   IGetKnowledgeDocumentUseCase,
   IUpdateKnowledgeDocumentUseCase,
   IDeleteKnowledgeDocumentUseCase,
-} from "../application/interfaces/knowledge-document-usecases.interface"
+} from "../application/interfaces/knowledge-document/knowledge-document-usecases.interface"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import {
