@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Menu, X, Heart } from "lucide-react"
+import { Menu, X, Heart, Sparkles } from "lucide-react"
 import { NotificationDropdown } from "@/features/notification"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
@@ -32,6 +32,7 @@ export default function Header({ role }: { role?: string }) {
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
+      { name: "AI Assistant", path: APP_ROUTES.AI_ASSISTANT },
     ],
   }
 
@@ -80,10 +81,13 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 flex items-center gap-1.5 ${
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
                 >
+                  {link.name === "AI Assistant" && (
+                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  )}
                   {link.name}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-primary" />
@@ -146,7 +150,8 @@ export default function Header({ role }: { role?: string }) {
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
-                  {link.name}
+                  {link.name === "AI Assistant" && <Sparkles className="w-4 h-4 text-primary" />}
+                  <span>{link.name}</span>
                 </Link>
               )
             })}

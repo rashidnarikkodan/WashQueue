@@ -79,4 +79,5 @@ export const APP_ROUTES = {
   PROFILE: "/profile",
   WALLET: "/wallet",
   NOTIFICATIONS: "/notifications",
+  AI_ASSISTANT: "/ai-assistant",
 } as const

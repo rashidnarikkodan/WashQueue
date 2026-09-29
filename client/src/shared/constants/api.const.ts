@@ -117,4 +117,7 @@ export const API_ROUTES = {
     RESOLVE: (id: string) => `/issues/${id}/resolve`,
     CLOSE: (id: string) => `/issues/${id}/close`,
   },
+  AI: {
+    ASK: "/ai/chat/ask",
+  },
 } as const
