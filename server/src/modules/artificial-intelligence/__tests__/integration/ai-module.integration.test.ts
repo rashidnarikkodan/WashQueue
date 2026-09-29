@@ -86,5 +86,38 @@ Station managers have access to a dedicated dashboard where they can manage acti
     expect(bestResult?.payload?.documentId).toBe(documentId)
     expect(bestResult?.payload?.content).toBeDefined()
     expect(bestResult?.score).toBeGreaterThan(0)
-  }, 15000) // Allow 15 seconds for embedding model load + vector DB indexing
+  }, 15000)
+
+  it("should not create duplicate points when re-indexing the same document repeatedly", async () => {
+    if (!documentId) return
+
+    // Re-index the same document twice
+    await indexUseCase.execute(documentId)
+    await indexUseCase.execute(documentId)
+
+    const count = await vectorStore.countByDocumentId(documentId)
+    const docInDb = await repository.findById(documentId)
+
+    expect(count).toBe(docInDb?.chunkCount)
+    expect(count).toBeGreaterThan(0)
+  }, 15000)
+
+  it("should remove stale chunks when re-indexed with fewer chunks", async () => {
+    if (!documentId) return
+
+    // Update document in MongoDB with shorter content that yields fewer chunks
+    const doc = await repository.findById(documentId)
+    expect(doc).toBeDefined()
+    doc!.updateContent(doc!.title, "Short single sentence content.")
+    await repository.update(documentId, doc!)
+
+    // Re-index
+    await indexUseCase.execute(documentId)
+
+    const count = await vectorStore.countByDocumentId(documentId)
+    expect(count).toBe(1)
+
+    const updatedDocInDb = await repository.findById(documentId)
+    expect(updatedDocInDb?.chunkCount).toBe(1)
+  }, 15000)
 })
