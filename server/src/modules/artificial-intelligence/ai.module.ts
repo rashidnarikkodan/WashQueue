@@ -16,8 +16,11 @@ import { SearchKnowledgeDocumentUseCase } from "./application/usecases/search/se
 import { createChatRoutes } from "./presentation/chat.routes"
 import { ChatController } from "./presentation/chat.controller"
 import { AskKnowledgeUseCase } from "./application/usecases/chat/ask-knowledge.usecase"
+import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 
 const aiRouter = Router()
+
+aiRouter.use(authenticate)
 
 // Orchestration
 const knowledgeDocumentRepository = new KnowledgeDocumentRepository()

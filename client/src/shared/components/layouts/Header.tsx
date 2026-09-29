@@ -6,6 +6,7 @@ import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
 import ThemeToggle from "../header/ThemeToggle"
+import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation()
@@ -19,6 +20,7 @@ export default function Header({ role }: { role?: string }) {
   const isCustomer = currentRole === "customer"
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -81,6 +83,12 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
+                  onClick={(e) => {
+                    if (link.name === "AI Assistant" && !isAuthenticated) {
+                      e.preventDefault()
+                      setIsAuthModalOpen(true)
+                    }
+                  }}
                   className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 flex items-center gap-1.5 ${
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
@@ -144,6 +152,13 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
+                  onClick={(e) => {
+                    if (link.name === "AI Assistant" && !isAuthenticated) {
+                      e.preventDefault()
+                      setIsMobileMenuOpen(false)
+                      setIsAuthModalOpen(true)
+                    }
+                  }}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary font-semibold"
@@ -158,6 +173,14 @@ export default function Header({ role }: { role?: string }) {
           </div>
         </div>
       )}
+
+      <AuthRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        title="Sign in for AI Assistant"
+        message="You need to be signed in to your WashQueue account to chat with the AI Assistant."
+        actionName="access AI Assistant"
+      />
     </header>
   )
 }

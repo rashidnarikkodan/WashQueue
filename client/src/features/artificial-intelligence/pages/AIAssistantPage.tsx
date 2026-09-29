@@ -20,14 +20,14 @@ export const AIAssistantPage: React.FC = () => {
   const hasMessages = messages.length > 0
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex flex-col bg-background text-foreground transition-colors duration-300">
-      <div className="relative z-10 flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="h-full flex-1 flex flex-col bg-background text-foreground transition-colors duration-300 overflow-hidden">
+      <div className="relative z-10 flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 h-full min-h-0 overflow-hidden">
         {!hasMessages ? (
-          // ================= EMPTY STATE (Initial Prompt Mode) =================
-          <div className="flex-1 flex flex-col items-center justify-center my-auto py-8">
+          // ================= EMPTY STATE (Strictly locked to viewport, zero Y-scroll) =================
+          <div className="flex-1 flex flex-col items-center justify-center my-auto py-2 overflow-hidden select-none">
             <AIEmptyHero />
 
-            <div className="w-full mt-6">
+            <div className="w-full mt-4 sm:mt-6">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}
@@ -40,10 +40,10 @@ export const AIAssistantPage: React.FC = () => {
             <AISuggestionChips onSelect={(prompt) => sendMessage(prompt)} disabled={isLoading} />
           </div>
         ) : (
-          // ================= CONVERSATION VIEW =================
-          <div className="flex-1 flex flex-col justify-between w-full h-full">
-            {/* Minimal Header */}
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-border/50">
+          // ================= CONVERSATION VIEW (Middle feed scrolls, input docked) =================
+          <div className="flex-1 flex flex-col justify-between w-full h-full min-h-0 overflow-hidden">
+            {/* Minimal Session Header */}
+            <div className="shrink-0 flex items-center justify-between pb-3 pt-2 mb-1 border-b border-border/50">
               <span className="text-sm font-semibold tracking-tight text-foreground/80">
                 WashQueue Assistant
               </span>
@@ -59,11 +59,13 @@ export const AIAssistantPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Messages Feed */}
-            <AIMessageList messages={messages} onRetry={retryLastMessage} />
+            {/* Scrollable Conversation Stream */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2 min-h-0">
+              <AIMessageList messages={messages} onRetry={retryLastMessage} />
+            </div>
 
             {/* Bottom Docked Input */}
-            <div className="sticky bottom-4 z-20 pt-3 pb-1 bg-gradient-to-t from-background via-background/95 to-transparent">
+            <div className="shrink-0 pt-2 pb-4 bg-gradient-to-t from-background via-background/95 to-transparent">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}

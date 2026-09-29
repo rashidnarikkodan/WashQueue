@@ -161,7 +161,11 @@ export const mainRoutes = {
     },
     {
       path: "ai-assistant",
-      element: <AIAssistantPage />,
+      element: (
+        <ProtectedRoute>
+          <AIAssistantPage />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "about",
