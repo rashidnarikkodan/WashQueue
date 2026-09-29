@@ -7,17 +7,23 @@ import {
   CreditCard,
   Layers,
   LifeBuoy,
+  ChevronDown,
 } from "lucide-react"
 import type { KnowledgeDocumentCategory } from "../types/knowledge-docs.types"
+import { KNOWLEDGE_DOC_CATEGORIES } from "../constants/knowledge-doc-categories.const"
 
 interface KnowledgeDocCategoryBadgeProps {
   category: KnowledgeDocumentCategory
   className?: string
+  editable?: boolean
+  onChange?: (category: KnowledgeDocumentCategory) => void
 }
 
 export const KnowledgeDocCategoryBadge: React.FC<KnowledgeDocCategoryBadgeProps> = ({
   category,
   className = "",
+  editable = false,
+  onChange,
 }) => {
   const getCategoryConfig = (cat: KnowledgeDocumentCategory) => {
     switch (cat) {
@@ -73,6 +79,32 @@ export const KnowledgeDocCategoryBadge: React.FC<KnowledgeDocCategoryBadgeProps>
   }
 
   const { icon: Icon, colorClass, label } = getCategoryConfig(category)
+
+  if (editable) {
+    return (
+      <div className={`relative inline-flex items-center group cursor-pointer ${className}`}>
+        <span
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${colorClass} group-hover:border-primary/50 group-hover:ring-2 group-hover:ring-primary/20`}
+        >
+          <Icon className="w-3.5 h-3.5" />
+          {label}
+          <ChevronDown className="w-3 h-3 ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+        </span>
+        <select
+          value={category}
+          onChange={(e) => onChange?.(e.target.value as KnowledgeDocumentCategory)}
+          aria-label="Select Category"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        >
+          {KNOWLEDGE_DOC_CATEGORIES.map((cat) => (
+            <option key={cat} value={cat} className="bg-popover text-popover-foreground">
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+    )
+  }
 
   return (
     <span

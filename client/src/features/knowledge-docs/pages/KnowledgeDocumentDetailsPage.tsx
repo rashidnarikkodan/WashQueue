@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   Save,
   X,
   Loader2,
+  ChevronDown,
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
@@ -26,18 +27,7 @@ import type {
   KnowledgeDocumentStatus,
   UpdateKnowledgeDocumentPayload,
 } from "../types/knowledge-docs.types"
-import KnowledgeDocStatusBadge from "../components/KnowledgeDocStatusBadge"
-import KnowledgeDocCategoryBadge from "../components/KnowledgeDocCategoryBadge"
-
-const CATEGORIES: KnowledgeDocumentCategory[] = [
-  "FAQ",
-  "POLICY",
-  "SERVICE",
-  "BOOKING",
-  "PAYMENT",
-  "QUEUE",
-  "SUPPORT",
-]
+import { KNOWLEDGE_DOC_CATEGORIES } from "../constants/knowledge-doc-categories.const"
 
 export default function KnowledgeDocumentDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -58,6 +48,21 @@ export default function KnowledgeDocumentDetailsPage() {
   // Delete State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false)
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
+
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  const adjustTextareaHeight = useCallback(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = `${Math.max(el.scrollHeight, 260)}px`
+  }, [])
+
+  useEffect(() => {
+    if (isEditing) {
+      adjustTextareaHeight()
+    }
+  }, [isEditing, editContent, adjustTextareaHeight])
 
   const fetchDocument = useCallback(async () => {
     if (!id) return
@@ -97,6 +102,30 @@ export default function KnowledgeDocumentDetailsPage() {
     setIsCopied(true)
     toast.success("Content copied to clipboard")
     setTimeout(() => setIsCopied(false), 2000)
+  }
+
+  const handleToggleEditMode = () => {
+    if (isEditing) {
+      handleDiscard()
+    } else {
+      if (document) {
+        setEditTitle(document.title)
+        setEditCategory(document.category)
+        setEditStatus(document.status)
+        setEditContent(document.content)
+      }
+      setIsEditing(true)
+    }
+  }
+
+  const handleDiscard = () => {
+    if (document) {
+      setEditTitle(document.title)
+      setEditCategory(document.category)
+      setEditStatus(document.status)
+      setEditContent(document.content)
+    }
+    setIsEditing(false)
   }
 
   const handleSaveEdit = async () => {
@@ -175,52 +204,73 @@ export default function KnowledgeDocumentDetailsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-16 animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
         items={[
           { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
           { label: "Knowledge Base", path: APP_ROUTES.ADMIN.KNOWLEDGE_DOCS },
-          { label: document.title },
+          { label: isEditing && editTitle.trim() ? editTitle : document.title },
         ]}
       />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => navigate(APP_ROUTES.ADMIN.KNOWLEDGE_DOCS)}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer mr-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back
-            </button>
-            <KnowledgeDocCategoryBadge category={document.category} />
-            <KnowledgeDocStatusBadge status={document.status} />
-            <span className="text-[11px] font-mono text-muted-foreground uppercase bg-muted/80 px-2 py-0.5 rounded-md border border-border">
-              {document.locale} • v{document.version}
-            </span>
-          </div>
-
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {document.title}
-          </h1>
+        <div className="w-full sm:w-auto flex-1 min-w-0">
+          {/* Title - Headings in read mode, inline editable in edit mode */}
+          {isEditing ? (
+            <div className="relative">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Document Title"
+                className="text-xl sm:text-2xl font-black tracking-tight text-foreground bg-transparent border-0 border-b border-dashed border-primary/40 hover:border-primary/60 focus:border-primary outline-none focus:ring-0 w-full py-0.5 transition-colors placeholder:text-muted-foreground/30"
+              />
+            </div>
+          ) : (
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              {document.title}
+            </h1>
+          )}
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+        {/* Action Bar */}
+        <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap shrink-0">
+          {/* Edit Mode Switch */}
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-border bg-card/65 backdrop-blur-sm">
+            <span className="text-xs font-semibold text-foreground flex items-center gap-1.5 select-none">
+              <Edit3
+                className={`w-3.5 h-3.5 transition-colors ${
+                  isEditing ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              Edit Mode
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isEditing}
+              onClick={handleToggleEditMode}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                isEditing ? "bg-primary" : "bg-muted-foreground/30 hover:bg-muted-foreground/40"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                  isEditing ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
           {isEditing ? (
             <>
               <button
-                onClick={() => {
-                  setIsEditing(false)
-                  setEditTitle(document.title)
-                  setEditContent(document.content)
-                  setEditCategory(document.category)
-                  setEditStatus(document.status)
-                }}
+                onClick={handleDiscard}
                 disabled={isSaving}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-background hover:bg-muted text-foreground text-xs font-semibold transition-colors cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" /> Cancel
+                <X className="w-3.5 h-3.5" /> Discard
               </button>
               <button
                 onClick={handleSaveEdit}
@@ -253,13 +303,6 @@ export default function KnowledgeDocumentDetailsPage() {
                     <Copy className="w-3.5 h-3.5 text-muted-foreground" /> Copy Content
                   </>
                 )}
-              </button>
-
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 text-xs font-bold transition-colors cursor-pointer"
-              >
-                <Edit3 className="w-3.5 h-3.5" /> Edit
               </button>
 
               <button
@@ -305,89 +348,96 @@ export default function KnowledgeDocumentDetailsPage() {
           <p className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-indigo-500" /> Domain Category
           </p>
-          <p className="text-xs font-bold text-foreground">{document.category}</p>
+          {isEditing ? (
+            <div className="relative inline-flex items-center w-full group">
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value as KnowledgeDocumentCategory)}
+                className="appearance-none bg-transparent hover:bg-muted/40 cursor-pointer text-xs font-bold text-foreground border-b border-dashed border-primary/40 focus:border-primary outline-none w-full py-0.5 pr-6 transition-colors"
+              >
+                {KNOWLEDGE_DOC_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat} className="bg-popover text-popover-foreground">
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-0 pointer-events-none group-hover:text-foreground transition-colors" />
+            </div>
+          ) : (
+            <p className="text-xs font-bold text-foreground">{document.category}</p>
+          )}
         </div>
 
         <div className="p-4 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm space-y-1">
           <p className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> Vector State
           </p>
-          <p className="text-xs font-bold text-foreground">
-            {document.status === "PUBLISHED" ? "Indexed in Qdrant" : "Draft (Not in Vector Index)"}
-          </p>
+          {isEditing ? (
+            <div className="relative inline-flex items-center w-full group">
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value as KnowledgeDocumentStatus)}
+                className="appearance-none bg-transparent hover:bg-muted/40 cursor-pointer text-xs font-bold text-foreground border-b border-dashed border-primary/40 focus:border-primary outline-none w-full py-0.5 pr-6 transition-colors"
+              >
+                <option value="PUBLISHED" className="bg-popover text-popover-foreground">
+                  Indexed in Qdrant
+                </option>
+                <option value="DRAFT" className="bg-popover text-popover-foreground">
+                  Draft (Excluded from Qdrant)
+                </option>
+                <option value="ARCHIVED" className="bg-popover text-popover-foreground">
+                  Archived (Excluded from Qdrant)
+                </option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-0 pointer-events-none group-hover:text-foreground transition-colors" />
+            </div>
+          ) : (
+            <p className="text-xs font-bold text-foreground">
+              {document.status === "PUBLISHED"
+                ? "Indexed in Qdrant"
+                : "Draft (Not in Vector Index)"}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-sm p-6 sm:p-8 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-border/80 pb-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Document Body
+            </h3>
+            {isEditing && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                Editing
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-muted-foreground font-mono">
+            {(isEditing ? editContent : document.content).length} characters •{" "}
+            {
+              (isEditing ? editContent : document.content).trim().split(/\s+/).filter(Boolean)
+                .length
+            }{" "}
+            words
+          </span>
+        </div>
+
         {isEditing ? (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Title</label>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border text-foreground text-sm font-bold outline-none focus:border-primary transition-colors"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  Category
-                </label>
-                <select
-                  value={editCategory}
-                  onChange={(e) => setEditCategory(e.target.value as KnowledgeDocumentCategory)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs outline-none focus:border-primary transition-colors cursor-pointer"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">Status</label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value as KnowledgeDocumentStatus)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs outline-none focus:border-primary transition-colors cursor-pointer"
-                >
-                  <option value="PUBLISHED">Published (Vectorized)</option>
-                  <option value="DRAFT">Draft</option>
-                  <option value="ARCHIVED">Archived</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Content</label>
-              <textarea
-                rows={16}
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="w-full p-4 rounded-2xl bg-background border border-border text-foreground text-xs font-mono leading-relaxed outline-none focus:border-primary transition-colors resize-y"
-              />
-            </div>
+          <div className="pt-2">
+            <textarea
+              ref={textareaRef}
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="Write document content..."
+              className="w-full bg-transparent border-0 outline-none focus:outline-none focus:ring-0 text-foreground font-sans text-xs sm:text-sm leading-relaxed p-0 resize-none placeholder:text-muted-foreground/30 transition-colors"
+              style={{ minHeight: "260px" }}
+            />
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-border/80 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Document Body
-              </h3>
-              <span className="text-[11px] text-muted-foreground font-mono">
-                {document.content.length} characters • {document.content.split(/\s+/).length} words
-              </span>
-            </div>
-
-            <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed whitespace-pre-wrap font-sans text-xs sm:text-sm bg-muted/20 p-5 sm:p-6 rounded-2xl border border-border/50">
-              {document.content}
-            </div>
+          <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed whitespace-pre-wrap font-sans text-xs sm:text-sm pt-2">
+            {document.content}
           </div>
         )}
       </div>
