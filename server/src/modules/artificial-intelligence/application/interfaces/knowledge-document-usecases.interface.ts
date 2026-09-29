@@ -3,8 +3,10 @@ import {
   UpdateKnowledgeDocumentDto,
   GetKnowledgeDocumentsQuery,
   GetKnowledgeDocumentsResponse,
+  SearchKnowledgeDocumentDto,
 } from "../dto/knowledge-document.dto"
 import { KnowledgeDocumentProps } from "../../domain/entities/KnowledgeDocument.entity"
+import { RetrievedChunk } from "../ports/vector.interface"
 
 export interface ICreateKnowledgeDocumentUseCase {
   execute(data: CreateKnowledgeDocumentDto): Promise<KnowledgeDocumentProps>
@@ -27,4 +29,7 @@ export interface IDeleteKnowledgeDocumentUseCase {
 }
 export interface IIndexKnowledgeDocumentUseCase {
   execute(documentId: string): Promise<void>
+}
+export interface ISearchKnowledgeDocumentUseCase {
+  execute(data: SearchKnowledgeDocumentDto): Promise<RetrievedChunk[]>
 }

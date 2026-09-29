@@ -31,3 +31,14 @@ export interface GetKnowledgeDocumentsResponse {
   data: KnowledgeDocumentProps[]
   total: number
 }
+
+export interface SearchKnowledgeDocumentDto {
+  query: string
+  limit?: number
+  minScore?: number
+  filter?: {
+    documentId?: string
+    category?: string
+    locale?: string
+  }
+}

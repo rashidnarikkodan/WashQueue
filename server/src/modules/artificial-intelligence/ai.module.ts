@@ -10,14 +10,28 @@ import { DeleteKnowledgeDocumentUseCase } from "./application/usecases/knowledge
 import { IndexKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/index-knowledge-document.usecases"
 import { LangChainChunker } from "./infrastructure/services/chunker.service"
 import { LocalEmbeddingModel } from "./infrastructure/services/embedding.service"
+import { QdrantVectorStore } from "./infrastructure/vector/qdrant.store"
+import { SearchKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/search-knowledge-document.usecase"
 
 const aiRouter = Router()
 
 // Orchestration
 const knowledgeDocumentRepository = new KnowledgeDocumentRepository()
 
+const chunker = new LangChainChunker()
+const embeddingModel = new LocalEmbeddingModel()
+const vectorStore = new QdrantVectorStore()
+
+const indexKnowledgeDocumentUseCase = new IndexKnowledgeDocumentUseCase(
+  chunker,
+  embeddingModel,
+  knowledgeDocumentRepository,
+  vectorStore
+)
+
 const createKnowledgeDocumentUseCase = new CreateKnowledgeDocumentUseCase(
-  knowledgeDocumentRepository
+  knowledgeDocumentRepository,
+  indexKnowledgeDocumentUseCase
 )
 
 const getKnowledgeDocumentsUseCase = new GetKnowledgeDocumentsUseCase(knowledgeDocumentRepository)
@@ -25,24 +39,26 @@ const getKnowledgeDocumentsUseCase = new GetKnowledgeDocumentsUseCase(knowledgeD
 const getKnowledgeDocumentUseCase = new GetKnowledgeDocumentUseCase(knowledgeDocumentRepository)
 
 const updateKnowledgeDocumentUseCase = new UpdateKnowledgeDocumentUseCase(
-  knowledgeDocumentRepository
+  knowledgeDocumentRepository,
+  indexKnowledgeDocumentUseCase
 )
 
 const deleteKnowledgeDocumentUseCase = new DeleteKnowledgeDocumentUseCase(
   knowledgeDocumentRepository
 )
-const indexKnowledgeDocumentUseCase = new IndexKnowledgeDocumentUseCase(
-  new LangChainChunker(),
-  new LocalEmbeddingModel(),
-  knowledgeDocumentRepository,
-  
+
+const searchKnowledgeDocumentUseCase = new SearchKnowledgeDocumentUseCase(
+  embeddingModel,
+  vectorStore
 )
+
 const knowledgeDocumentController = new KnowledgeDocumentController(
   createKnowledgeDocumentUseCase,
   getKnowledgeDocumentsUseCase,
   getKnowledgeDocumentUseCase,
   updateKnowledgeDocumentUseCase,
-  deleteKnowledgeDocumentUseCase
+  deleteKnowledgeDocumentUseCase,
+  searchKnowledgeDocumentUseCase
 )
 aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(knowledgeDocumentController))
 

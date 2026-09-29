@@ -3,11 +3,17 @@ import KnowledgeDocument, {
   KnowledgeDocumentProps,
 } from "../../../domain/entities/KnowledgeDocument.entity"
 import { CreateKnowledgeDocumentDto } from "../../dto/knowledge-document.dto"
-import { ICreateKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
+import {
+  ICreateKnowledgeDocumentUseCase,
+  IIndexKnowledgeDocumentUseCase,
+} from "../../interfaces/knowledge-document-usecases.interface"
 import mongoose from "mongoose"
 
 export class CreateKnowledgeDocumentUseCase implements ICreateKnowledgeDocumentUseCase {
-  constructor(private readonly repository: IKnowledgeDocumentRepository) {}
+  constructor(
+    private readonly repository: IKnowledgeDocumentRepository,
+    private readonly indexUseCase: IIndexKnowledgeDocumentUseCase
+  ) {}
 
   async execute(data: CreateKnowledgeDocumentDto): Promise<KnowledgeDocumentProps> {
     const doc = new KnowledgeDocument({
@@ -18,6 +24,12 @@ export class CreateKnowledgeDocumentUseCase implements ICreateKnowledgeDocumentU
       updatedAt: new Date(),
     })
     const savedDoc = await this.repository.save(doc)
+
+    // Trigger background indexing
+    this.indexUseCase.execute(savedDoc.id).catch((err) => {
+      console.error("Failed to index knowledge document:", err)
+    })
+
     return savedDoc.toJSON()
   }
 }

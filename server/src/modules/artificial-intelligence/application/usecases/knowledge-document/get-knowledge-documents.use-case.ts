@@ -3,7 +3,7 @@ import {
   GetKnowledgeDocumentsQuery,
   GetKnowledgeDocumentsResponse,
 } from "../../dto/knowledge-document.dto"
-import { IGetKnowledgeDocumentsUseCase } from "../../interfaces/knowledge-document/knowledge-document-usecases.interface"
+import { IGetKnowledgeDocumentsUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 
 export class GetKnowledgeDocumentsUseCase implements IGetKnowledgeDocumentsUseCase {
   constructor(private readonly repository: IKnowledgeDocumentRepository) {}

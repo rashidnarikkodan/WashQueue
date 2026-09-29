@@ -1,8 +1,9 @@
+import crypto from "crypto"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { IKnowledgeDocumentRepository } from "../../../domain/repositories/knowledge-document.repository"
 import { IEmbeddingProvider } from "../../ports/ai-provider.interface"
 import { IChunkerService } from "../../ports/chunker.interface"
-import { IVectorStore } from "../../ports/vector.interface"
+import { IVectorStore, VectorChunk } from "../../ports/vector.interface"
 import { IIndexKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 
 export class IndexKnowledgeDocumentUseCase implements IIndexKnowledgeDocumentUseCase {
@@ -18,7 +19,6 @@ export class IndexKnowledgeDocumentUseCase implements IIndexKnowledgeDocumentUse
       throw new NotFoundError("Documnet Not Found")
     }
     const chunks = await this.chunker.chunk(document.content)
-
     if (chunks.length === 0) {
       throw new Error("Document produced no chunks")
     }
@@ -28,11 +28,11 @@ export class IndexKnowledgeDocumentUseCase implements IIndexKnowledgeDocumentUse
         `Embedding count mismatch: expected ${chunks.length}, got ${embeddings.length}`
       )
     }
-    const vectorChunks = chunks.map((content, index) => ({
-      id: `${document.id}-${index}`,
+    const vectorChunks: VectorChunk[] = chunks.map((content, index) => ({
+      id: crypto.randomUUID(),
       documentId: document.id,
       content,
-      embedding: embeddings[index] || [],
+      vector: embeddings[index] || [],
       metadata: {
         category: document.category,
         locale: document.locale,

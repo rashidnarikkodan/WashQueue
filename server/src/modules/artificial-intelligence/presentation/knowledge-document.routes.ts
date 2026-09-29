@@ -5,6 +5,7 @@ import asyncHandler from "@/common/utils/async-handler"
 export const createKnowledgeDocumentRoutes = (controller: KnowledgeDocumentController): Router => {
   const router = Router()
 
+  router.post("/search", asyncHandler(controller.search))
   router.post("/", asyncHandler(controller.create))
   router.get("/", asyncHandler(controller.getAll))
   router.get("/:id", asyncHandler(controller.getById))

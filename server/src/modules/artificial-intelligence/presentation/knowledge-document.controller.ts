@@ -5,7 +5,8 @@ import {
   IGetKnowledgeDocumentUseCase,
   IUpdateKnowledgeDocumentUseCase,
   IDeleteKnowledgeDocumentUseCase,
-} from "../application/interfaces/knowledge-document/knowledge-document-usecases.interface"
+  ISearchKnowledgeDocumentUseCase,
+} from "../application/interfaces/knowledge-document-usecases.interface"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import {
@@ -20,7 +21,8 @@ export class KnowledgeDocumentController {
     private readonly getAllUseCase: IGetKnowledgeDocumentsUseCase,
     private readonly getByIdUseCase: IGetKnowledgeDocumentUseCase,
     private readonly updateUseCase: IUpdateKnowledgeDocumentUseCase,
-    private readonly deleteUseCase: IDeleteKnowledgeDocumentUseCase
+    private readonly deleteUseCase: IDeleteKnowledgeDocumentUseCase,
+    private readonly searchUseCase: ISearchKnowledgeDocumentUseCase
   ) {}
 
   create = async (req: Request, res: Response) => {
@@ -51,5 +53,10 @@ export class KnowledgeDocumentController {
     const id = req.params.id as string
     await this.deleteUseCase.execute(id)
     success(res, null, HTTP_STATUS.OK, "Knowledge document deleted successfully")
+  }
+
+  search = async (req: Request, res: Response) => {
+    const data = await this.searchUseCase.execute(req.body)
+    success(res, data, HTTP_STATUS.OK, "Knowledge documents searched successfully")
   }
 }

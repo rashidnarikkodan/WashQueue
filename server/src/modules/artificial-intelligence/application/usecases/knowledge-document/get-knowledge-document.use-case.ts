@@ -1,6 +1,6 @@
 import { IKnowledgeDocumentRepository } from "../../../domain/repositories/knowledge-document.repository"
 import { KnowledgeDocumentProps } from "../../../domain/entities/KnowledgeDocument.entity"
-import { IGetKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document/knowledge-document-usecases.interface"
+import { IGetKnowledgeDocumentUseCase } from "../../interfaces/knowledge-document-usecases.interface"
 import { NotFoundError } from "@/common/errors/not-found-error"
 
 export class GetKnowledgeDocumentUseCase implements IGetKnowledgeDocumentUseCase {
