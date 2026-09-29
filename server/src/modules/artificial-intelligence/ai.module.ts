@@ -7,11 +7,15 @@ import { GetKnowledgeDocumentsUseCase } from "./application/usecases/knowledge-d
 import { GetKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/get-knowledge-document.use-case"
 import { UpdateKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/update-knowledge-document.use-case"
 import { DeleteKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/delete-knowledge-document.use-case"
-import { IndexKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/index-knowledge-document.usecases"
+import { IndexKnowledgeDocumentUseCase } from "./application/usecases/indexing/index-knowledge-document.usecases"
 import { LangChainChunker } from "./infrastructure/services/chunker.service"
 import { LocalEmbeddingModel } from "./infrastructure/services/embedding.service"
 import { QdrantVectorStore } from "./infrastructure/vector/qdrant.store"
-import { SearchKnowledgeDocumentUseCase } from "./application/usecases/knowledge-document/search-knowledge-document.usecase"
+import { OllamaProvider } from "./infrastructure/llm/ollama.llm"
+import { SearchKnowledgeDocumentUseCase } from "./application/usecases/search/search-knowledge-document.usecase"
+import { createChatRoutes } from "./presentation/chat.routes"
+import { ChatController } from "./presentation/chat.controller"
+import { AskKnowledgeUseCase } from "./application/usecases/chat/ask-knowledge.usecase"
 
 const aiRouter = Router()
 
@@ -21,6 +25,7 @@ const knowledgeDocumentRepository = new KnowledgeDocumentRepository()
 const chunker = new LangChainChunker()
 const embeddingModel = new LocalEmbeddingModel()
 const vectorStore = new QdrantVectorStore()
+const llmProvider = new OllamaProvider()
 
 const indexKnowledgeDocumentUseCase = new IndexKnowledgeDocumentUseCase(
   chunker,
@@ -60,6 +65,12 @@ const knowledgeDocumentController = new KnowledgeDocumentController(
   deleteKnowledgeDocumentUseCase,
   searchKnowledgeDocumentUseCase
 )
+
+const chatController = new ChatController(
+  new AskKnowledgeUseCase(llmProvider, searchKnowledgeDocumentUseCase)
+)
+
 aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(knowledgeDocumentController))
+aiRouter.use("/chat", createChatRoutes(chatController))
 
 export default aiRouter
