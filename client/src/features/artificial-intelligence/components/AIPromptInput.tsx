@@ -56,7 +56,6 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
             : undefined,
         }}
       >
-        {/* Textarea */}
         <div className="px-5 pt-3.5 pb-1">
           <textarea
             ref={textareaRef}
@@ -73,9 +72,7 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
           />
         </div>
 
-        {/* Bottom toolbar */}
         <div className="flex items-center justify-between px-4 pb-2.5 pt-0.5">
-          {/* Helper hint / capability tag */}
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/50 select-none">
             {isFocused && value ? (
               <span className="text-[11px] text-muted-foreground/60 font-medium">
@@ -89,7 +86,6 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
             )}
           </div>
 
-          {/* Circular Send button like ChatGPT / Gemini */}
           <button
             type="submit"
             disabled={!canSubmit}

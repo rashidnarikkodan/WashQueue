@@ -74,7 +74,6 @@ export const useAIChat = () => {
   const retryLastMessage = useCallback(async () => {
     if (isLoading || messages.length === 0) return
 
-    // Find the last user message
     const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")
     if (!lastUserMessage) return
 

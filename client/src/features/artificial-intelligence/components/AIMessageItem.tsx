@@ -8,7 +8,6 @@ interface AIMessageItemProps {
   onRetry?: () => void
 }
 
-// ── inline markdown renderer ──────────────────────────────────────────────────
 const renderInline = (text: string) => {
   const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g)
   return parts.map((part, i) => {
@@ -88,7 +87,6 @@ const formatContent = (content: string) =>
     )
   })
 
-// ── component ─────────────────────────────────────────────────────────────────
 export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }) => {
   const [copied, setCopied] = useState(false)
   const isUser = message.role === "user"
@@ -107,7 +105,6 @@ export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }
     }
   }
 
-  // ── User bubble ──────────────────────────────────────────────────────────
   if (isUser) {
     return (
       <div className="flex justify-end my-3 sm:my-3.5 animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -118,10 +115,8 @@ export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }
     )
   }
 
-  // ── Assistant message ────────────────────────────────────────────────────
   return (
     <div className="group flex items-start gap-3 sm:gap-3.5 my-4 sm:my-4.5 animate-in fade-in slide-in-from-bottom-2 duration-150">
-      {/* Standalone large Qyn avatar */}
       <img
         src="/QynAi.png"
         alt="Qyn"
@@ -129,10 +124,8 @@ export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }
         draggable={false}
       />
 
-      {/* Content */}
       <div className="flex-1 min-w-0 pt-0.5">
         {isPending ? (
-          // Typing dots
           <div className="flex items-center gap-1.5 py-2 h-7">
             <span className="w-2 h-2 rounded-full bg-primary/70 animate-bounce [animation-delay:-0.3s]" />
             <span className="w-2 h-2 rounded-full bg-primary/70 animate-bounce [animation-delay:-0.15s]" />
@@ -162,7 +155,6 @@ export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }
           <div className="text-sm sm:text-[14.5px] leading-relaxed break-words text-foreground">
             <div className="space-y-0.5">{formatContent(message.content)}</div>
 
-            {/* Copy action */}
             <div className="mt-2.5 flex items-center gap-2">
               <button
                 type="button"

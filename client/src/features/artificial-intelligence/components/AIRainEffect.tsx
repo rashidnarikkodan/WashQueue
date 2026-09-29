@@ -3,12 +3,12 @@ import { createPortal } from "react-dom"
 
 interface RainDropConfig {
   id: number
-  left: number // 0 - 130%
-  headW: number // px width of head
-  headH: number // px height of head
-  tailLen: number // px small sleek tail length
-  duration: number // seconds (faster, natural rain glide)
-  delay: number // seconds (staggered waves)
+  left: number
+  headW: number
+  headH: number
+  tailLen: number
+  duration: number
+  delay: number
   opacity: number
 }
 
@@ -26,7 +26,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
 
   useEffect(() => {
     if (!active && isRendered) {
-      // Keep rendered during the 1s fade-out so drops glide and fade continuously
       const timer = setTimeout(() => {
         setIsRendered(false)
         setCycleKey((k) => k + 1)
@@ -35,10 +34,8 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
     }
   }, [active, isRendered])
 
-  // Rain drops with small sleek tails falling FASTER from top-right to bottom-left
   const drops = useMemo<RainDropConfig[]>(() => {
     return [
-      // WAVE 1: Initial Drizzle (starts immediately 0s - 0.5s)
       {
         id: 1,
         left: 22,
@@ -159,8 +156,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
         delay: 0.02,
         opacity: 0.43,
       },
-
-      // WAVE 2: Steady Rain (0.8s - 1.8s)
       {
         id: 13,
         left: 16,
@@ -301,8 +296,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
         delay: 1.45,
         opacity: 0.35,
       },
-
-      // WAVE 3: Full Shower Downpour (1.8s - 3.2s)
       {
         id: 27,
         left: 12,
@@ -539,7 +532,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
       aria-hidden="true"
     >
       <style>{`
-        /* Authentic diagonal rain falling from top-right to bottom-left */
         @keyframes rainTopRightToBottomLeft {
           0% {
             transform: translate3d(0, -90px, 0) rotate(24deg) scale(0.95);
@@ -558,10 +550,8 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
         }
       `}</style>
 
-      {/* SVG Defs for Translucent Liquid Water Refraction and Highlights */}
       <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
         <defs>
-          {/* Very Translucent Water Droplet Body Gradient with Soft Tail Fade */}
           <linearGradient id="translucentDropBodyGrad" x1="50%" y1="0%" x2="50%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
             <stop offset="35%" stopColor="#d5e8ff" stopOpacity="0.2" />
@@ -570,14 +560,12 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
             <stop offset="100%" stopColor="#081730" stopOpacity="0.38" />
           </linearGradient>
 
-          {/* Delicate Meniscus Rim Edge */}
           <linearGradient id="dropMeniscusGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
             <stop offset="50%" stopColor="#153664" stopOpacity="0.3" />
             <stop offset="100%" stopColor="#051022" stopOpacity="0.35" />
           </linearGradient>
 
-          {/* Primary Curved Specular Glint (Sky Reflection) */}
           <linearGradient id="dropSpecularGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.65" />
             <stop offset="75%" stopColor="#ffffff" stopOpacity="0.45" />
@@ -586,7 +574,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
         </defs>
       </svg>
 
-      {/* TRANSLUCENT DIAGONAL RAIN DROPS WITH SMALL SLEEK TAILS */}
       {drops.map((drop) => {
         const pad = 4
         const svgW = drop.headW + pad * 2
@@ -598,7 +585,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
         const bottomY = shoulderY + drop.headH
         const r = drop.headW / 2
 
-        // Authentic aerodynamic liquid raindrop with sleek small tail
         const dropWithTailPath = `
           M ${cx} ${topY}
           C ${cx - r * 0.28} ${topY + drop.tailLen * 0.45}, ${cx - r} ${topY + drop.tailLen * 0.8}, ${cx - r} ${shoulderY + drop.headH * 0.35}
@@ -626,7 +612,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
               fill="none"
               className="overflow-visible pointer-events-none"
             >
-              {/* Translucent Liquid Raindrop Body */}
               <path
                 d={dropWithTailPath}
                 fill="url(#translucentDropBodyGrad)"
@@ -634,7 +619,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
                 strokeWidth="0.6"
               />
 
-              {/* Delicate Specular Highlight along the Small Tail Spine */}
               <path
                 d={`
                   M ${cx - 0.3} ${topY + 3}
@@ -647,7 +631,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
                 fill="none"
               />
 
-              {/* Primary Specular Glint on Upper-Left Shoulder of the Head */}
               <ellipse
                 cx={cx - r * 0.35}
                 cy={shoulderY + drop.headH * 0.35}
@@ -657,7 +640,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
                 fill="url(#dropSpecularGrad)"
               />
 
-              {/* Secondary Specular Glint on Upper-Right Shoulder */}
               <ellipse
                 cx={cx + r * 0.38}
                 cy={shoulderY + drop.headH * 0.32}

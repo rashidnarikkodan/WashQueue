@@ -12,7 +12,6 @@ export const AIFloatingTrigger: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
-  // Do not render on the AI assistant page itself
   if (location.pathname.startsWith(APP_ROUTES.AI_ASSISTANT)) {
     return null
   }
@@ -28,7 +27,6 @@ export const AIFloatingTrigger: React.FC = () => {
 
   return (
     <>
-      {/* Site-wide generic logo rain - triggered ONLY on hover of the floating icon */}
       <AIRainEffect active={isHovered} />
 
       <div

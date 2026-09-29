@@ -23,7 +23,6 @@ export const AIAssistantPage: React.FC = () => {
     <div className="flex-1 min-h-0 w-full flex flex-col bg-background text-foreground overflow-hidden">
       <div className="shrink-0 z-10 bg-background/90 backdrop-blur-md">
         <div className="max-w-3xl sm:max-w-4xl mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          {/* Left: Branding & Status */}
           <div className="flex items-center gap-3">
             <img
               src="/QynAi.png"
@@ -43,7 +42,6 @@ export const AIAssistantPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Curved, sleek New Chat button like ChatGPT / Gemini */}
           <button
             type="button"
             onClick={clearMessages}
@@ -60,14 +58,11 @@ export const AIAssistantPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Main Content Area ──────────────────────────────────────────────── */}
       {!hasMessages ? (
-        // Empty state view
         <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-4 sm:px-6 py-6 overflow-y-auto">
           <div className="w-full max-w-3xl sm:max-w-4xl flex flex-col items-center my-auto">
             <AIEmptyHero />
 
-            {/* Composer in empty state */}
             <div className="w-full mt-6 sm:mt-8">
               <AIPromptInput
                 value={activePrompt}
@@ -78,23 +73,19 @@ export const AIAssistantPage: React.FC = () => {
               />
             </div>
 
-            {/* Suggestion cards */}
             <div className="w-full mt-4">
               <AISuggestionChips onSelect={(prompt) => sendMessage(prompt)} disabled={isLoading} />
             </div>
           </div>
         </div>
       ) : (
-        // Conversation state view
         <div className="flex-1 min-h-0 flex flex-col w-full overflow-hidden">
-          {/* Message stream */}
           <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 scroll-smooth">
             <div className="max-w-3xl sm:max-w-4xl mx-auto w-full pt-2 pb-6">
               <AIMessageList messages={messages} onRetry={retryLastMessage} />
             </div>
           </div>
 
-          {/* Sticky Docked Composer at bottom without awkward gradient overlays */}
           <div className="shrink-0 bg-background/95 backdrop-blur-md pb-4 sm:pb-5 pt-2 px-4 sm:px-6">
             <div className="max-w-3xl sm:max-w-4xl mx-auto w-full">
               <AIPromptInput
