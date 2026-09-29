@@ -152,4 +152,7 @@ export const API_ROUTES = {
   AI: {
     ROOT: "/api/ai",
   },
+  HEALTH: {
+    ROOT: "/api/health",
+  },
 } as const
