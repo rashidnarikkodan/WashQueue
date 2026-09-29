@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react"
 import {
   Star,
   Search,
-  MessageSquare,
   Building2,
   Calendar,
   X,
@@ -10,9 +9,12 @@ import {
   MessageCircle,
   Flag,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react"
 import { toast } from "sonner"
 import { reviewApi } from "@/shared/apis/review.api"
+import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import type {
   FindProviderFeedbackParams,
   ProviderStationOption,
@@ -151,23 +153,47 @@ export default function CustomerFeedbackPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          { label: "Owner", path: APP_ROUTES.OWNER.DASHBOARD },
+          { label: "Customer Feedback" },
+        ]}
+      />
+
       {/* Header */}
-      <div>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-              <MessageSquare className="w-7 h-7 text-primary" />
-              Customer Feedback
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              Monitor reviews, ratings, and customer experiences across your stations in real-time.
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+            Customer Feedback
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Monitor reviews, ratings, and customer experiences across your stations in real-time
+          </p>
         </div>
 
-        {/* Filters and Controls */}
-        <div className="mt-5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setPage(1)
+              void fetchReviews()
+            }}
+            disabled={isLoading}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            title="Refresh reviews"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary" : "text-primary"}`}
+            />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Filters and Controls */}
+      <div>
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Search bar & Dropdowns */}
           <div className="flex flex-wrap items-center gap-2.5 flex-1">
             {/* Search */}

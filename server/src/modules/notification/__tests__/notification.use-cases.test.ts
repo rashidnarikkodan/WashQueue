@@ -29,6 +29,7 @@ describe("Notification Module Unit Tests", () => {
       findById: vi.fn(),
       save: vi.fn(),
       delete: vi.fn(),
+      softDelete: vi.fn(),
       update: vi.fn(),
       findByRecipientId: vi.fn(),
       countUnreadByRecipientId: vi.fn(),

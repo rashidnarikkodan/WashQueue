@@ -14,6 +14,7 @@ import {
   MessageSquareQuote,
   Loader2,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
@@ -25,6 +26,7 @@ import {
   type Column,
   type TabConfig,
   type SelectFilter,
+  type ToggleFilter,
   type PaginationMeta,
 } from "@/shared/components/data-table"
 import { reviewApi } from "@/shared/apis/review.api"
@@ -60,6 +62,7 @@ export default function AdminReviewModerationPage() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [ratingFilter, setRatingFilter] = useState<string>("ALL")
   const [tabFilter, setTabFilter] = useState<string>("ALL")
+  const [flaggedOnly, setFlaggedOnly] = useState<boolean>(false)
   const [sortBy, setSortBy] = useState<string>("lowest")
   const [stationTab, setStationTab] = useState<"top" | "low">("top")
 
@@ -74,6 +77,7 @@ export default function AdminReviewModerationPage() {
   const fetchReviews = useCallback(async () => {
     setIsLoading(true)
     try {
+      const isFlagged = flaggedOnly || tabFilter === "FLAGGED"
       const params: FindAdminReviewsParams = {
         page,
         limit,
@@ -84,7 +88,7 @@ export default function AdminReviewModerationPage() {
             : ratingFilter !== "ALL"
               ? Number(ratingFilter)
               : undefined,
-        flaggedOnly: tabFilter === "FLAGGED" ? true : undefined,
+        flaggedOnly: isFlagged ? true : undefined,
         sortBy: tabFilter === "LOW_RATED" ? "lowest" : sortBy,
       }
 
@@ -107,7 +111,7 @@ export default function AdminReviewModerationPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [page, limit, searchQuery, ratingFilter, tabFilter, sortBy])
+  }, [page, limit, searchQuery, ratingFilter, tabFilter, sortBy, flaggedOnly])
 
   useEffect(() => {
     let ignore = false
@@ -126,6 +130,11 @@ export default function AdminReviewModerationPage() {
 
   const handleTabChange = (tabId: string) => {
     setTabFilter(tabId)
+    if (tabId === "FLAGGED") {
+      setFlaggedOnly(true)
+    } else if (tabId === "ALL") {
+      setFlaggedOnly(false)
+    }
     setPage(1)
   }
 
@@ -263,6 +272,32 @@ export default function AdminReviewModerationPage() {
       },
     ]
   }, [ratingFilter, sortBy])
+
+  // Toggle Filters for Toolbar
+  const toggleFilters: ToggleFilter[] = useMemo(() => {
+    return [
+      {
+        id: "flaggedOnlyToggle",
+        label: "Flagged Only",
+        value: flaggedOnly || tabFilter === "FLAGGED",
+        onChange: (val: boolean) => {
+          setFlaggedOnly(val)
+          if (val) {
+            if (tabFilter !== "LOW_RATED") {
+              setTabFilter("FLAGGED")
+            }
+          } else {
+            if (tabFilter === "FLAGGED") {
+              setTabFilter("ALL")
+            }
+          }
+          setPage(1)
+        },
+        activeColor: "bg-rose-500/25 border border-rose-500/30",
+        thumbActiveColor: "bg-rose-400",
+      },
+    ]
+  }, [flaggedOnly, tabFilter])
 
   // DataTable columns
   const columns: Column<ReviewDto>[] = useMemo(() => {
@@ -442,26 +477,42 @@ export default function AdminReviewModerationPage() {
   }, [actionLoadingId, handleToggleVisibility])
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       {/* Breadcrumbs & Title */}
-      <div>
-        <Breadcrumbs
-          items={[
-            { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
-            { label: "Review Moderation" },
-          ]}
-        />
-        <div className="mt-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-              <MessageSquareQuote className="w-7 h-7 text-primary" />
-              Reviews & Ratings Moderation
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              Audit customer feedback, handle inappropriate reviews, and monitor station ratings
-              across the platform.
-            </p>
-          </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
+          { label: "Review Moderation" },
+        ]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Reviews &amp; Ratings Moderation
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Audit customer feedback, handle inappropriate reviews, and monitor station ratings
+            across the platform
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              void fetchReviews()
+            }}
+            disabled={isLoading}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            title="Refresh reviews"
+          >
+            <RefreshCw
+              size={15}
+              className={isLoading ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
@@ -597,6 +648,7 @@ export default function AdminReviewModerationPage() {
         activeTab={tabFilter}
         onTabChange={handleTabChange}
         selectFilters={selectFilters}
+        toggleFilters={toggleFilters}
       />
 
       <DataTable<ReviewDto>

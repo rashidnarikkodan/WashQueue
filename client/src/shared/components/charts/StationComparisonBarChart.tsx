@@ -57,7 +57,7 @@ export const StationComparisonBarChart: React.FC<StationComparisonBarChartProps>
   if (!data || data.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-border/80 rounded-2xl bg-card/30"
+        className="flex flex-col items-center justify-center p-6 text-center w-full"
         style={{ height }}
       >
         <div className="p-3 rounded-2xl bg-primary/10 text-primary mb-2.5">

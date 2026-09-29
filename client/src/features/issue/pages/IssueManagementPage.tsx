@@ -562,63 +562,67 @@ export default function IssueManagementPage({ role: explicitRole }: IssueManagem
   }
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-300 pb-20">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       {/* Top Header & Breadcrumbs */}
-      <div className="space-y-3 pb-2 border-b border-border/60">
-        <Breadcrumbs
-          items={[
-            { label: isCustomer ? "My Account" : "Management" },
-            { label: isCustomer ? "Support & Tickets" : "Issue Management" },
-          ]}
-        />
+      <Breadcrumbs
+        items={[
+          {
+            label: isCustomer ? "Home" : "Admin",
+            path: isCustomer ? "/" : APP_ROUTES.ADMIN.DASHBOARD,
+          },
+          { label: "Issue Management" },
+        ]}
+      />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight flex items-center gap-3">
-              <LifeBuoy className="w-8 h-8 text-primary" />
-              <span>{isCustomer ? "Support Tickets & Issues" : "Issue Management Hub"}</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {isCustomer
-                ? "Track and manage reported concerns for your station wash bookings."
-                : "Investigate customer complaints, inspect optical verification scans, and issue official resolutions."}
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {isCustomer ? "Support Tickets & Issues" : "Issue Management"}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            {isCustomer
+              ? "Track and manage reported concerns for your station wash bookings"
+              : "Investigate customer complaints, inspect optical verification scans, and issue official resolutions"}
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2.5">
-            {isCustomer && (
-              <button
-                type="button"
-                onClick={() => setIsCreateModalOpen(true)}
-                className="px-5 py-2.5 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-2"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Raise Ticket</span>
-              </button>
-            )}
-
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {isCustomer && (
             <button
               type="button"
-              onClick={() => fetchIssues()}
-              disabled={isLoading}
-              className="p-2.5 rounded-2xl border border-border bg-card hover:bg-muted text-foreground transition-all cursor-pointer shadow-xs disabled:opacity-50"
-              title="Refresh Data"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-2"
             >
-              <RefreshCw size={16} className={isLoading ? "animate-spin text-primary" : ""} />
+              <PlusCircle className="w-4 h-4" />
+              <span>Raise Ticket</span>
             </button>
+          )}
 
-            {!isCustomer && (
-              <button
-                type="button"
-                onClick={handleExportData}
-                disabled={issues.length === 0}
-                className="px-4 py-2.5 rounded-2xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-50"
-              >
-                <Download size={14} className="text-primary" />
-                <span>Export CSV</span>
-              </button>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={() => fetchIssues()}
+            disabled={isLoading}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            title="Refresh Data"
+          >
+            <RefreshCw
+              size={15}
+              className={isLoading ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
+          </button>
+
+          {!isCustomer && (
+            <button
+              type="button"
+              onClick={handleExportData}
+              disabled={issues.length === 0}
+              className="px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              <Download size={14} className="text-primary" />
+              <span>Export CSV</span>
+            </button>
+          )}
         </div>
       </div>
 

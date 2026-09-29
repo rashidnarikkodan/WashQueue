@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -24,6 +24,7 @@ import {
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import {
   ChartContainer,
   RevenueTrendChart,
@@ -31,19 +32,14 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "Year", value: "YEAR" },
-] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-])
+]
 
 export default function OwnerAnalyticsPage() {
   const navigate = useNavigate()
@@ -51,33 +47,71 @@ export default function OwnerAnalyticsPage() {
   const [selectedStationId, setSelectedStationId] = useState<string>("ALL")
   const [data, setData] = useState<OwnerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "net" | "commission" | "bookings">(
     "revenue"
   )
   const [compMetric, setCompMetric] = useState<"revenue" | "bookings">("revenue")
 
-  const fetchAnalyticsData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId)
-      setData(res)
-    } catch {
-      toast.error("Failed to load owner financial analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Record<string, OwnerDashboardData>>({})
+
+  const fetchAnalyticsData = useCallback(
+    async (targetRange: DateRangeFilter = dateRange, targetStation: string = selectedStationId) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getOwnerDashboard(targetRange, targetStation)
+        const cacheKey = `${targetRange}_${targetStation}`
+        cacheRef.current[cacheKey] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load owner financial analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange, selectedStationId]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const key = `${newRange}_${selectedStationId}`
+    const cached = cacheRef.current[key]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange, selectedStationId])
+    setDateRange(newRange)
+  }
+
+  const handleStationChange = (newStationId: string) => {
+    if (newStationId === selectedStationId) return
+    const key = `${dateRange}_${newStationId}`
+    const cached = cacheRef.current[key]
+    if (cached) {
+      setData(cached)
+    }
+    setSelectedStationId(newStationId)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchAnalyticsData()
+      const cacheKey = `${dateRange}_${selectedStationId}`
+      try {
+        const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId)
+        if (ignore) return
+        cacheRef.current[cacheKey] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load owner financial analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchAnalyticsData])
+  }, [dateRange, selectedStationId])
 
   const kpis = data?.kpis
   const totalGross = kpis?.totalGrossRevenue || 0
@@ -223,33 +257,28 @@ export default function OwnerAnalyticsPage() {
   }, [data?.serviceDistribution])
 
   return (
-    <div className="space-y-8 pb-16 animate-in fade-in duration-300">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-6 rounded-3xl border border-border/80 bg-linear-to-r from-card/90 via-card/60 to-primary/10 backdrop-blur-md shadow-sm">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[{ label: "Owner", path: APP_ROUTES.OWNER.DASHBOARD }, { label: "Analytics" }]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
-              Financial Intelligence &amp; Earnings
-            </span>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live Settlement
-              Ledger
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mt-1">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Earnings &amp; Financial Analytics
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 max-w-xl">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Track gross earnings, net payout disbursements, platform commission deductions, profit
-            margins, and per-station financial yield.
+            margins, and per-station financial yield
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch lg:self-auto flex-wrap">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="relative">
             <select
               value={selectedStationId}
-              onChange={(e) => setSelectedStationId(e.target.value)}
-              className="bg-card border border-border text-foreground text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-primary transition-all cursor-pointer"
+              onChange={(e) => handleStationChange(e.target.value)}
+              className="bg-card border border-border text-foreground text-xs font-semibold px-3 py-2.5 rounded-xl outline-none focus:border-primary transition-all cursor-pointer"
             >
               <option value="ALL">All Stations Portfolio</option>
               {data?.stations.map((s) => (
@@ -260,11 +289,11 @@ export default function OwnerAnalyticsPage() {
             </select>
           </div>
 
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60">
+          <div className="flex items-center bg-card p-1 rounded-xl border border-border">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-primary text-primary-foreground shadow-xs"
@@ -277,19 +306,25 @@ export default function OwnerAnalyticsPage() {
           </div>
 
           <button
-            onClick={fetchAnalyticsData}
-            disabled={isLoading}
+            type="button"
+            onClick={() => fetchAnalyticsData(dateRange, selectedStationId)}
+            disabled={isRefreshing || isLoading}
             title="Refresh financial ledger"
-            className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-primary"}`}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={exportFinancialCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs transition-all cursor-pointer shadow-xs hover:opacity-95"
+            className="flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-xs sm:text-sm"
           >
-            <Download className="w-4 h-4" /> Export Financial Statement
+            <Download className="w-4 h-4" />
+            <span>Export Statement</span>
           </button>
         </div>
       </div>
@@ -410,7 +445,7 @@ export default function OwnerAnalyticsPage() {
               data={data?.revenueTrend || []}
               metricType={trendMetric}
               height={290}
-              onResetRange={() => setDateRange("ALL")}
+              onResetRange={() => handleDateRangeChange("ALL")}
             />
           </ChartContainer>
         </div>

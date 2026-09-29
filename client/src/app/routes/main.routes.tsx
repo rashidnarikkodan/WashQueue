@@ -21,6 +21,9 @@ const NotificationCenterPage = lazy(
 )
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const AIAssistantPage = lazy(
+  () => import("@/features/artificial-intelligence/pages/AIAssistantPage")
+)
 const ProtectedRoute = lazy(() => import("./ProtectedRoute"))
 
 const RootPathResolver = () => {
@@ -153,6 +156,14 @@ export const mainRoutes = {
       element: (
         <ProtectedRoute>
           <NotificationCenterPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "ai-assistant",
+      element: (
+        <ProtectedRoute>
+          <AIAssistantPage />
         </ProtectedRoute>
       ),
     },

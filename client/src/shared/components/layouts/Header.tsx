@@ -80,7 +80,7 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 flex items-center gap-1.5 ${
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
                 >
@@ -146,7 +146,7 @@ export default function Header({ role }: { role?: string }) {
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
-                  {link.name}
+                  <span>{link.name}</span>
                 </Link>
               )
             })}

@@ -10,26 +10,26 @@ export function NotificationCenterHeader({
   onMarkAllAsRead,
 }: NotificationCenterHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
-      <div className="flex flex-col gap-2 max-w-2xl">
-        <h1 className="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+      <div>
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
           Notifications
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
           Track operational alerts, booking updates, queue activity, and financial events across
-          your WashQueue network.
+          your network
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 shrink-0">
         <button
           type="button"
           onClick={onMarkAllAsRead}
           disabled={unreadCount === 0}
-          className="px-5 py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wider uppercase border border-primary/40 text-primary hover:bg-primary/10 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <Check className="h-4 w-4" />
-          Mark All As Read
+          <Check className="h-4 w-4 text-primary" />
+          <span>Mark All As Read</span>
         </button>
       </div>
     </div>

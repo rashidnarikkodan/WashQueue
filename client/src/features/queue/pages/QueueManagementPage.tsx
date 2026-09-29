@@ -17,6 +17,7 @@ import { StallBookingModal } from "@/features/queue/components/queue-management/
 import { ResolveStalledModal } from "@/features/queue/components/queue-management/ResolveStalledModal"
 import type { LiveQueueData, QueueFilter } from "@/features/queue/components/queue-management/types"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 
 const isActiveQueueStatus = (status: string) => {
   return (
@@ -437,7 +438,14 @@ export default function ManagerQueuePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          { label: basePath === "/owner" ? "Owner" : "Manager", path: `${basePath}/dashboard` },
+          { label: "Queue Management" },
+        ]}
+      />
+
       <QueuePageHeader
         stationName={stationInfo?.stationName || "Your Station"}
         currentDateFormatted={currentDateFormatted}

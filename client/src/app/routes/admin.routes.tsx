@@ -23,12 +23,19 @@ const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagemen
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
 const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
+const KnowledgeDocumentListPage = lazy(
+  () => import("@/features/knowledge-docs/pages/KnowledgeDocumentListPage")
+)
+const KnowledgeDocumentDetailsPage = lazy(
+  () => import("@/features/knowledge-docs/pages/KnowledgeDocumentDetailsPage")
+)
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
   element: <AdminLayout />,
   children: [
     {
+      index: true,
       path: "dashboard",
       element: <AdminDashboard />,
     },
@@ -91,6 +98,14 @@ export const adminRoutes = {
     {
       path: "reports",
       element: <AdminAnalyticsPage />,
+    },
+    {
+      path: "knowledge-docs",
+      element: <KnowledgeDocumentListPage />,
+    },
+    {
+      path: "knowledge-docs/:id",
+      element: <KnowledgeDocumentDetailsPage />,
     },
     {
       path: "analytics",

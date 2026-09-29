@@ -1,6 +1,6 @@
 import { BookingMongoRepository } from "./infrastructure/repositories/booking.mongo.repository"
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
-import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongodb/mongoose-transaction.runner"
 import { managerAssignmentRepository } from "../manager/manager.module"
 
 import { bookingNotificationService } from "@/modules/notification/notification.module"

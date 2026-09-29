@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react"
-import { FolderTree, Table, Plus } from "lucide-react"
+import { FolderTree, Table, Plus, Layers, CheckCircle2, Car } from "lucide-react"
 import type {
   VehicleCategory,
   VehicleClass,
@@ -18,6 +18,7 @@ import ClassModal from "../components/modals/ClassModal"
 
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import { DataTable, DataTableToolbar, type PaginationMeta } from "@/shared/components/data-table"
 import { getClassColumns } from "../table/columns"
 import Loading from "@/shared/components/ui/Loading"
@@ -232,8 +233,45 @@ export default function VehicleCatelog() {
     [total, page, limit, totalPages]
   )
 
-  const formattedCategoryCount = String(categories.length).padStart(2, "0")
-  const formattedClassCount = String(classes.length).padStart(2, "0")
+  const statItems: StatItem[] = useMemo(() => {
+    const activeCategoriesCount = categories.filter((c) => c.isActive).length
+    const activeClassesCount = classes.filter((c) => c.isActive).length
+
+    return [
+      {
+        id: "total-categories",
+        label: "Total Categories",
+        value: categories.length,
+        icon: FolderTree,
+        variant: "primary",
+        description: "Classification groupings",
+      },
+      {
+        id: "active-categories",
+        label: "Active Categories",
+        value: activeCategoriesCount,
+        icon: CheckCircle2,
+        variant: "emerald",
+        description: "Available in service catalogs",
+      },
+      {
+        id: "total-classes",
+        label: "Total Sub-Classes",
+        value: classes.length,
+        icon: Layers,
+        variant: "blue",
+        description: "Specific vehicle model tiers",
+      },
+      {
+        id: "active-classes",
+        label: "Active Sub-Classes",
+        value: activeClassesCount,
+        icon: Car,
+        variant: "amber",
+        description: "Active for customer booking",
+      },
+    ]
+  }, [categories, classes])
 
   const columns = getClassColumns({
     categories,
@@ -243,41 +281,42 @@ export default function VehicleCatelog() {
   })
 
   return (
-    <div className="space-y-6 text-left text-slate-100 select-none animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
-        items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Catelog Management" }]}
+        items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Vehicle Categories" }]}
       />
 
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 border-b border-slate-800 pb-6">
-        <div className="max-w-2xl text-left">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#DCE1FB] via-slate-100 to-slate-400 leading-tight tracking-tight mb-2">
-            Vehicle Classification
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Vehicle Categories
           </h1>
-          <p className="text-sm md:text-base text-slate-400 font-normal leading-relaxed">
-            Manage the structural taxonomy for all vehicles processed through the Sentinel Auto
-            pipeline. Define categories, sub-classes, and processing rules.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Manage categories, vehicle classes, and service tiers for car wash pricing
           </p>
         </div>
 
-        <div className="flex items-center gap-4 self-start md:self-end">
-          <div className="flex p-1 bg-[#191F31] rounded-xl border border-slate-800/80">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex p-1 bg-card rounded-xl border border-border">
             <button
+              type="button"
               onClick={() => setViewMode("tree")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
                 viewMode === "tree"
-                  ? "bg-[#ADC6FF] text-[#002E6A] shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <FolderTree size={14} />
               <span>Tree View</span>
             </button>
             <button
+              type="button"
               onClick={() => setViewMode("table")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
                 viewMode === "table"
-                  ? "bg-[#ADC6FF] text-[#002E6A] shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <Table size={14} />
@@ -286,95 +325,78 @@ export default function VehicleCatelog() {
           </div>
 
           <button
+            type="button"
             onClick={handleAddCategoryClick}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#ADC6FF] text-[#002E6A] hover:bg-[#b8cffd] text-xs font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg hover:shadow-xl shrink-0"
+            className="flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-xs sm:text-sm"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus className="w-4 h-4" />
             <span>Add Category</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="flex justify-between items-center p-6 rounded-3xl border border-slate-800 bg-[#151B2D] shadow-md transition-all hover:border-slate-700/50">
-          <div className="text-left space-y-1.5">
-            <span className="text-xs text-[#ADC6FF] font-bold uppercase tracking-wider">
-              Total Categories
-            </span>
-            <h2 className="text-4xl font-extrabold text-[#DCE1FB] tracking-tight">
-              {formattedCategoryCount}
-            </h2>
-          </div>
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2.5 py-1 bg-slate-900/50 rounded-lg border border-slate-800">
-            Global Standard
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center p-6 rounded-3xl border border-slate-800 bg-[#151B2D] shadow-md transition-all hover:border-slate-700/50">
-          <div className="text-left space-y-1.5">
-            <span className="text-xs text-[#ADC6FF] font-bold uppercase tracking-wider">
-              Total Classes
-            </span>
-            <h2 className="text-4xl font-extrabold text-[#DCE1FB] tracking-tight">
-              {formattedClassCount}
-            </h2>
-          </div>
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2.5 py-1 bg-slate-900/50 rounded-lg border border-slate-800">
-            Unique Types
-          </span>
-        </div>
-      </div>
+      <StatsHUD stats={statItems} columns={4} />
 
       {isLoading ? (
         <Loading
           size="lg"
           text="Loading vehicle classification data..."
-          className="py-20 gap-3 text-slate-400"
+          className="py-20 gap-3 text-muted-foreground"
         />
       ) : viewMode === "tree" ? (
-        <div className="flex flex-col gap-6">
-          {categories.map((cat) => {
-            const catClasses = classes.filter((cls) => cls.categoryId === cat.id)
-            const isExpanded = !!expandedCategories[cat.id]
+        categories.length === 0 ? (
+          <div className="p-12 text-center rounded-2xl border border-border bg-card/50 text-muted-foreground">
+            <FolderTree className="w-12 h-12 mx-auto mb-3 opacity-40 text-muted-foreground" />
+            <p className="font-semibold text-foreground">No vehicle categories found</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Get started by adding your first vehicle category above.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {categories.map((cat) => {
+              const catClasses = classes.filter((cls) => cls.categoryId === cat.id)
+              const isExpanded = !!expandedCategories[cat.id]
 
-            return (
-              <div key={cat.id} className="flex flex-col gap-2">
-                <CategoryCard
-                  category={cat}
-                  catClassesCount={catClasses.length}
-                  isExpanded={isExpanded}
-                  onToggleExpand={() => toggleCategoryExpand(cat.id)}
-                  onEdit={handleEditCategoryClick}
-                  onDelete={handleDeleteCategoryClick}
-                  onToggleStatus={handleToggleCategoryStatusClick}
-                />
+              return (
+                <div key={cat.id} className="flex flex-col gap-2">
+                  <CategoryCard
+                    category={cat}
+                    catClassesCount={catClasses.length}
+                    isExpanded={isExpanded}
+                    onToggleExpand={() => toggleCategoryExpand(cat.id)}
+                    onEdit={handleEditCategoryClick}
+                    onDelete={handleDeleteCategoryClick}
+                    onToggleStatus={handleToggleCategoryStatusClick}
+                  />
 
-                {isExpanded && (
-                  <div className="flex flex-col pl-16 relative mt-1 gap-4">
-                    <div className="flex flex-col gap-4">
-                      {catClasses.map((cls, index) => (
-                        <ClassCard
-                          key={cls.id}
-                          cls={cls}
-                          index={index}
-                          onEdit={handleEditClassClick}
-                          onDelete={handleDeleteClassClick}
-                          onToggleStatus={handleToggleClassStatusClick}
+                  {isExpanded && (
+                    <div className="flex flex-col pl-16 relative mt-1 gap-4">
+                      <div className="flex flex-col gap-4">
+                        {catClasses.map((cls, index) => (
+                          <ClassCard
+                            key={cls.id}
+                            cls={cls}
+                            index={index}
+                            onEdit={handleEditClassClick}
+                            onDelete={handleDeleteClassClick}
+                            onToggleStatus={handleToggleClassStatusClick}
+                          />
+                        ))}
+
+                        <AddClassPlaceholderCard
+                          categoryId={cat.id}
+                          classesCount={catClasses.length}
+                          onAddClass={handleAddClassClick}
                         />
-                      ))}
-
-                      <AddClassPlaceholderCard
-                        categoryId={cat.id}
-                        classesCount={catClasses.length}
-                        onAddClass={handleAddClassClick}
-                      />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )
       ) : (
         <div className="flex flex-col gap-4">
           <DataTableToolbar

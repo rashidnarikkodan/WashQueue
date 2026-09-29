@@ -41,6 +41,7 @@ describe("Review Module Unit Tests", () => {
       findByStationId: vi.fn(),
       findByUserId: vi.fn(),
       delete: vi.fn(),
+      softDelete: vi.fn(),
       getStationRatingSummary: vi.fn().mockResolvedValue({ averageRating: 4.5, reviewCount: 1 }),
       findAdminModerationReviews: vi.fn(),
       getAdminMetrics: vi.fn(),

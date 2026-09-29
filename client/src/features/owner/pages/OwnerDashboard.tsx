@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -20,6 +20,7 @@ import {
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import {
   ChartContainer,
   RevenueTrendChart,
@@ -27,49 +28,69 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "Year", value: "YEAR" },
-] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-])
+]
 
 export default function OwnerDashboard() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [data, setData] = useState<OwnerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [compMetric, setCompMetric] = useState<"revenue" | "bookings">("revenue")
 
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getOwnerDashboard(dateRange)
-      setData(res)
-    } catch {
-      toast.error("Failed to load owner dashboard data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Partial<Record<DateRangeFilter, OwnerDashboardData>>>({})
+
+  const fetchDashboardData = useCallback(
+    async (targetRange: DateRangeFilter = dateRange) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getOwnerDashboard(targetRange)
+        cacheRef.current[targetRange] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load owner dashboard data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const cached = cacheRef.current[newRange]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange])
+    setDateRange(newRange)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchDashboardData()
+      try {
+        const res = await analyticsApi.getOwnerDashboard(dateRange)
+        if (ignore) return
+        cacheRef.current[dateRange] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load owner dashboard data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchDashboardData])
+  }, [dateRange])
 
   const kpis = data?.kpis
 
@@ -122,31 +143,35 @@ export default function OwnerDashboard() {
   ]
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[{ label: "Owner", path: APP_ROUTES.OWNER.DASHBOARD }, { label: "Dashboard" }]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
               Station Owner Dashboard
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
               Provider Hub
             </span>
           </div>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Aggregated revenue analytics, station utilization, staff coordination, and booking flow.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Aggregated revenue analytics, station utilization, staff coordination, and booking flow
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
-          <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex bg-card p-1 rounded-xl border border-border">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   dateRange === opt.value
-                    ? "bg-card text-foreground shadow-xs font-bold"
+                    ? "bg-primary text-primary-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -156,19 +181,25 @@ export default function OwnerDashboard() {
           </div>
 
           <button
-            onClick={fetchDashboardData}
-            disabled={isLoading}
+            type="button"
+            onClick={() => fetchDashboardData(dateRange)}
+            disabled={isRefreshing || isLoading}
             title="Refresh analytics data"
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
+            className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-primary"}`}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={() => navigate("/owner/stations/new")}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm hover:opacity-90 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-xs sm:text-sm shrink-0"
           >
-            <Plus className="w-4 h-4" /> Add Station
+            <Plus className="w-4 h-4" />
+            <span>Add Station</span>
           </button>
         </div>
       </div>
@@ -243,7 +274,7 @@ export default function OwnerDashboard() {
           data={data?.revenueTrend || []}
           metricType="revenue"
           height={260}
-          onResetRange={() => setDateRange("ALL")}
+          onResetRange={() => handleDateRangeChange("ALL")}
         />
       </ChartContainer>
 

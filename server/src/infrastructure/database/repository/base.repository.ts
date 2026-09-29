@@ -39,6 +39,10 @@ export abstract class BaseRepository<
     await this.model.findByIdAndDelete(id).exec()
   }
 
+  async softDelete(id: string): Promise<void> {
+    await this.model.findByIdAndUpdate(id, { isDeleted: true })
+  }
+
   async update(id: string, updates: Partial<TDomain>): Promise<TDomain | null> {
     const persistenceData = this.mapper.toPersistence(updates)
     const updatedDoc = await this.model

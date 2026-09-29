@@ -20,6 +20,8 @@ import { notificationRouter } from "@/modules/notification/notification.module"
 import reviewRouter from "@/modules/review/review.module"
 import analyticsRouter from "@/modules/analytics/analytics.module"
 import issueRouter from "@/modules/issue/issue.module"
+import aiRouter from "@/modules/artificial-intelligence/ai.module"
+import healthRouter from "@/modules/health/health.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
@@ -37,6 +39,10 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }))
 app.use(cookieParser())
 app.use(loggerMiddleware)
 
+// Direct root health endpoint for infrastructure load balancers
+app.use("/health", healthRouter)
+
+app.use(API_ROUTES.HEALTH.ROOT, healthRouter)
 app.use(API_ROUTES.AUTH.ROOT, authRouter)
 app.use(API_ROUTES.USERS.ROOT, userRouter)
 app.use(API_ROUTES.OWNER.ROOT, ownerRouter)
@@ -54,6 +60,7 @@ app.use(API_ROUTES.NOTIFICATIONS.ROOT, notificationRouter)
 app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
 app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
 app.use(API_ROUTES.ISSUES.ROOT, issueRouter)
+app.use(API_ROUTES.AI.ROOT, aiRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

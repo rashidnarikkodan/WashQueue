@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -21,6 +21,7 @@ import {
   type DateRangeFilter,
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
   ChartContainer,
@@ -28,51 +29,71 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "Year", value: "YEAR" },
-] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-])
+]
 
 export default function AdminAnalyticsPage() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "net" | "commission" | "bookings">(
     "revenue"
   )
 
-  const fetchAdminAnalytics = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getAdminDashboard(dateRange)
-      setData(res)
-    } catch {
-      toast.error("Failed to load platform financial analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+
+  const fetchAdminAnalytics = useCallback(
+    async (targetRange: DateRangeFilter = dateRange) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getAdminDashboard(targetRange)
+        cacheRef.current[targetRange] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load platform financial analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const cached = cacheRef.current[newRange]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange])
+    setDateRange(newRange)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchAdminAnalytics()
+      try {
+        const res = await analyticsApi.getAdminDashboard(dateRange)
+        if (ignore) return
+        cacheRef.current[dateRange] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load platform financial analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchAdminAnalytics])
+  }, [dateRange])
 
   const kpis = data?.kpis
   const totalGMV = kpis?.totalGrossVolume || 0
@@ -189,33 +210,31 @@ export default function AdminAnalyticsPage() {
   }, [data?.bookingStatusDistribution])
 
   return (
-    <div className="space-y-8 pb-16 animate-in fade-in duration-300 text-left">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-6 rounded-3xl border border-border/80 bg-linear-to-r from-card/90 via-card/60 to-primary/10 backdrop-blur-md shadow-sm">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
+          { label: "Reports & Analytics" },
+        ]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
-              Superadmin Financial Intelligence
-            </span>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Ecosystem
-              Cashflow
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mt-1">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Platform Financial Analytics &amp; Earnings
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 max-w-xl">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Macro platform GMV tracking, 15% commission revenues, owner payout settlements, unit
-            economics, and transaction cashflow.
+            economics, and transaction cashflow
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch lg:self-auto flex-wrap">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-primary text-primary-foreground shadow-xs"
@@ -228,19 +247,26 @@ export default function AdminAnalyticsPage() {
           </div>
 
           <button
-            onClick={fetchAdminAnalytics}
-            disabled={isLoading}
+            type="button"
+            onClick={() => fetchAdminAnalytics(dateRange)}
+            disabled={isRefreshing || isLoading}
             title="Refresh financial data"
-            className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={exportFinancialAuditCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs transition-all cursor-pointer shadow-xs hover:opacity-95"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm shadow-xs hover:opacity-95 transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4" /> Export Financial Audit
+            <Download className="w-4 h-4" />
+            <span>Export Financial Audit</span>
           </button>
         </div>
       </div>
@@ -360,7 +386,7 @@ export default function AdminAnalyticsPage() {
               data={data?.growthTrend || []}
               metricType={trendMetric}
               height={300}
-              onResetRange={() => setDateRange("ALL")}
+              onResetRange={() => handleDateRangeChange("ALL")}
             />
           </ChartContainer>
         </div>

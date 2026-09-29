@@ -6,11 +6,11 @@ export const API_ROUTES = {
     VERIFY_OTP: "/auth/verify-otp",
     ME: "/auth/me",
     LOGOUT: "/auth/logout",
-    FORGOT_PASSWORD: "/forgot-password",
-    RESET_PASSWORD: "/reset-password",
-    CHANGE_PASSWORD: "/change-password",
-    REFRESH_TOKEN: "/refresh-token",
-    RESEND_OTP: "/resend-otp",
+    FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
+    CHANGE_PASSWORD: "/auth/change-password",
+    REFRESH_TOKEN: "/auth/refresh-token",
+    RESEND_OTP: "/auth/resend-otp",
   },
   USERS: {
     ROOT: "/users",
@@ -116,5 +116,10 @@ export const API_ROUTES = {
     ESCALATE: (id: string) => `/issues/${id}/escalate`,
     RESOLVE: (id: string) => `/issues/${id}/resolve`,
     CLOSE: (id: string) => `/issues/${id}/close`,
+  },
+  AI: {
+    CHAT: "/ai/chat",
+    KNOWLEDGE_DOCS: "/ai/knowledge-documents",
+    KNOWLEDGE_DOC_BY_ID: (id: string) => `/ai/knowledge-documents/${id}`,
   },
 } as const

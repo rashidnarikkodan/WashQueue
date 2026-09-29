@@ -1,4 +1,4 @@
-import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongodb/mongoose-transaction.runner"
 import { StationMongoRepository } from "./infrastructure/repositories/station.mongo.repository"
 import { StationPricingMongoRepository } from "./infrastructure/repositories/station-pricing.mongo.repository"
 import { ExtraServiceMongoRepository } from "./infrastructure/repositories/extra-service.mongo.repository"

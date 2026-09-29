@@ -235,7 +235,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
   const bookingsListLabel = isCustomer ? "My Bookings" : "Bookings"
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
         <Breadcrumbs
           items={[

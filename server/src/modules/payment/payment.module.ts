@@ -1,5 +1,5 @@
 import { BookingReservationMongoRepository } from "./infrastructure/repositories/booking-reservation.mongo.repository"
-import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongodb/mongoose-transaction.runner"
 import { sharedRazorpayService } from "@/infrastructure/payment/razorpay.service"
 import { bookingNotificationService } from "@/modules/notification/notification.module"
 import {

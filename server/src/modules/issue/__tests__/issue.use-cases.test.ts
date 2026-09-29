@@ -27,6 +27,7 @@ describe("Issue Module Unit Tests", () => {
       findByStationId: vi.fn(),
       findAll: vi.fn(),
       delete: vi.fn(),
+      softDelete: vi.fn(),
       countByStation: vi.fn(),
     }
 

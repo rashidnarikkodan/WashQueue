@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -26,49 +26,69 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "Year", value: "YEAR" },
-] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-])
+]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "bookings" | "commission">("revenue")
 
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getAdminDashboard(dateRange)
-      setData(res)
-    } catch {
-      toast.error("Failed to load platform analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+
+  const fetchDashboardData = useCallback(
+    async (targetRange: DateRangeFilter = dateRange) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getAdminDashboard(targetRange)
+        cacheRef.current[targetRange] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load platform analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const cached = cacheRef.current[newRange]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange])
+    setDateRange(newRange)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchDashboardData()
+      try {
+        const res = await analyticsApi.getAdminDashboard(dateRange)
+        if (ignore) return
+        cacheRef.current[dateRange] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load platform analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchDashboardData])
+  }, [dateRange])
 
   const kpis = data?.kpis
 
@@ -131,29 +151,23 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-4 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Platform Overview & Analytics
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-              Admin Portal
-            </span>
-          </div>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Real-time multi-station GMV, booking throughput, network capacity, and financial
-            metrics.
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Platform Overview &amp; Analytics
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Real-time multi-station GMV, booking throughput, network capacity, and financial metrics
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-card text-foreground shadow-xs font-bold"
@@ -166,12 +180,17 @@ export default function AdminDashboard() {
           </div>
 
           <button
-            onClick={fetchDashboardData}
-            disabled={isLoading}
+            type="button"
+            onClick={() => fetchDashboardData(dateRange)}
+            disabled={isRefreshing || isLoading}
             title="Refresh analytics data"
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
