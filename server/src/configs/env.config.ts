@@ -30,6 +30,7 @@ const envSchema = z.object({
   RAZORPAYX_ACCOUNT_NUMBER: z.string(),
   RAZORPAYX_WEBHOOK_SECRET: z.string(),
   AI_EMBEDDING_MODEL: z.string().default("embeddinggemma"),
+  OLLAMA_LLM_MODEL: z.string().default("qwen2.5:3b"),
   OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
   QDRANT_URL: z.string().url().default("http://localhost:6333"),
 })
