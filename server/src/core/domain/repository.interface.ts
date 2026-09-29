@@ -11,5 +11,6 @@ export interface IBaseRepository<T extends HasId> {
   findById(id: string): Promise<T | null>
   save(entity: T): Promise<T>
   delete(id: string): Promise<void>
+  softDelete(id: string): Promise<void>
   update(id: string, updates: Partial<T>): Promise<T | null>
 }
