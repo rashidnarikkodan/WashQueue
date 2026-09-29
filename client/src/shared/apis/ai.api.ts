@@ -16,7 +16,7 @@ export const aiApi = {
   ask: async (prompt: string): Promise<string> => {
     try {
       const response = await api.post<AskAIResponse>(
-        API_ROUTES.AI.ASK,
+        API_ROUTES.AI.CHAT,
         { prompt },
         {
           timeout: 90000, // 90 seconds for LLM generation

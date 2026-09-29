@@ -1,5 +1,5 @@
 import React from "react"
-import { Bot, Sparkles, Database, Zap, Cpu } from "lucide-react"
+import { Bot, Sparkles } from "lucide-react"
 
 export const AIEmptyHero: React.FC = () => {
   return (
@@ -32,22 +32,6 @@ export const AIEmptyHero: React.FC = () => {
         Ask anything about booking queues, service tiers, station bay availability, cancellations,
         or wallet payments. Powered by semantic vector search and local LLM inference.
       </p>
-
-      {/* Capability Pills */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-card/80 border border-border/80 text-xs font-medium text-muted-foreground shadow-xs">
-          <Database className="w-3.5 h-3.5 text-blue-500" />
-          <span>Vector RAG Search</span>
-        </div>
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-card/80 border border-border/80 text-xs font-medium text-muted-foreground shadow-xs">
-          <Cpu className="w-3.5 h-3.5 text-indigo-500" />
-          <span>Local Ollama LLM</span>
-        </div>
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-card/80 border border-border/80 text-xs font-medium text-muted-foreground shadow-xs">
-          <Zap className="w-3.5 h-3.5 text-amber-500" />
-          <span>Live Queue Context</span>
-        </div>
-      </div>
     </div>
   )
 }
