@@ -35,7 +35,7 @@ export const adminRoutes = {
   element: <AdminLayout />,
   children: [
     {
-      // /index: true,
+      index: true,
       path: "dashboard",
       element: <AdminDashboard />,
     },

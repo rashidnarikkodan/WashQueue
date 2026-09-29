@@ -21,6 +21,7 @@ import {
   type DateRangeFilter,
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
   ChartContainer,
@@ -209,19 +210,26 @@ export default function AdminAnalyticsPage() {
   }, [data?.bookingStatusDistribution])
 
   return (
-    <div className="space-y-8 pb-16 animate-in fade-in duration-300 text-left">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          { label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD },
+          { label: "Reports & Analytics" },
+        ]}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Platform Financial Analytics &amp; Earnings
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Macro platform GMV tracking, 15% commission revenues, owner payout settlements, unit
-            economics, and transaction cashflow.
+            economics, and transaction cashflow
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch lg:self-auto flex-wrap">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
@@ -239,19 +247,26 @@ export default function AdminAnalyticsPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => fetchAdminAnalytics(dateRange)}
             disabled={isRefreshing || isLoading}
             title="Refresh financial data"
-            className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={exportFinancialAuditCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs transition-all cursor-pointer shadow-xs hover:opacity-95"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm shadow-xs hover:opacity-95 transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4" /> Export Financial Audit
+            <Download className="w-4 h-4" />
+            <span>Export Financial Audit</span>
           </button>
         </div>
       </div>

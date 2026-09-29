@@ -151,24 +151,18 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Platform Overview & Analytics
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-              Admin Portal
-            </span>
-          </div>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Real-time multi-station GMV, booking throughput, network capacity, and financial
-            metrics.
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Platform Overview &amp; Analytics
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Real-time multi-station GMV, booking throughput, network capacity, and financial metrics
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
@@ -186,12 +180,17 @@ export default function AdminDashboard() {
           </div>
 
           <button
+            type="button"
             onClick={() => fetchDashboardData(dateRange)}
             disabled={isRefreshing || isLoading}
             title="Refresh analytics data"
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
           </button>
         </div>
       </div>

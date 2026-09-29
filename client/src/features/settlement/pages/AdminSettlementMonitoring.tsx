@@ -400,7 +400,7 @@ export default function AdminSettlementMonitoring() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       {/* Header */}
       <Breadcrumbs
         items={[
@@ -409,25 +409,31 @@ export default function AdminSettlementMonitoring() {
         ]}
       />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            Settlement & Financial Monitoring
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Settlement &amp; Financial Monitoring
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Audit platform commission revenues, provider payout transfers, and resolve held/failed
-            transactions.
+            transactions
           </p>
         </div>
 
-        <button
-          onClick={handleRefresh}
-          className="flex items-center gap-2 bg-muted hover:opacity-90 text-muted-foreground font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer border border-border"
-          title="Refresh metrics and records"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            title="Refresh metrics and records"
+          >
+            <RefreshCw
+              size={15}
+              className={isLoading ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Platform Financial KPIs via StatsHUD */}

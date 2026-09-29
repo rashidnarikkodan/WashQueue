@@ -136,16 +136,18 @@ const OwnerApproval = () => {
   const columns = getOwnerColumns((owner) => setSelectedOwner(owner))
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
         items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Owner Verification" }]}
       />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Owner Verification</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Review onboarding documents and approve station owner applications.
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Owner Verification
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Review onboarding documents and approve station owner applications
           </p>
         </div>
       </div>

@@ -17,6 +17,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
   DataTable,
+  DataTableToolbar,
   type Column,
   type TabConfig,
   type SelectFilter,
@@ -272,36 +273,42 @@ export default function KnowledgeDocumentListPage() {
   }
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
         items={[{ label: "Admin", path: APP_ROUTES.ADMIN.DASHBOARD }, { label: "Knowledge Base" }]}
       />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Knowledge Base Management
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
             Curate, index, and organize AI RAG documents, operational FAQs, service tiers, and
-            system policies that power the intelligent customer assistant.
+            system policies
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
+            type="button"
             onClick={() => fetchDocuments(true)}
             disabled={isRefreshing || isLoading}
             title="Refresh knowledge documents"
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              size={15}
+              className={isRefreshing ? "animate-spin text-primary" : "text-primary"}
+            />
+            <span>Refresh</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-xs hover:opacity-90 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm shadow-xs hover:opacity-90 transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" /> Create Document
           </button>
@@ -311,24 +318,28 @@ export default function KnowledgeDocumentListPage() {
       {/* Stats HUD */}
       <StatsHUD stats={statItems} columns={4} />
 
-      {/* Generic Data Table */}
-      <DataTable
-        columns={columns}
-        data={documents}
-        rowKey={(d) => d.id}
-        searchQuery={searchQuery}
-        onSearchChange={(q) => {
-          setSearchQuery(q)
-          setPage(1)
-        }}
-        searchPlaceholder="Search knowledge documents by title or content..."
+      {/* Toolbar */}
+      <DataTableToolbar
         tabs={STATUS_TABS}
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab)
           setPage(1)
         }}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q)
+          setPage(1)
+        }}
+        searchPlaceholder="Search knowledge documents by title or content..."
         selectFilters={selectFilters}
+      />
+
+      {/* Generic Data Table */}
+      <DataTable
+        columns={columns}
+        data={documents}
+        rowKey={(d) => d.id}
         isLoading={isLoading}
         loadingText="Loading knowledge documents..."
         emptyMessage="No knowledge documents found matching your filter criteria."

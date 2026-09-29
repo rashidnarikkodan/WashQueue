@@ -8,6 +8,8 @@ import type { TabConfig, SelectFilter } from "@/shared/components/data-table/typ
 
 import DataTableToolbar from "@/shared/components/data-table/DataTableToolbar"
 import Pagination from "@/shared/components/ui/Pagination"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
+import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { NotificationCenterHeader } from "../components/NotificationCenterHeader"
 import { NotificationCenterCard } from "../components/NotificationCenterCard"
 import { NotificationSkeletonList } from "../components/NotificationSkeletonList"
@@ -220,7 +222,31 @@ export function NotificationCenterPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-8 py-8 space-y-8 max-w-7xl">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          {
+            label:
+              user?.role === ROLE.ADMIN
+                ? "Admin"
+                : activeViewMode === VIEW_MODE.OWNER
+                  ? "Owner"
+                  : activeViewMode === VIEW_MODE.MANAGER
+                    ? "Manager"
+                    : "Home",
+            path:
+              user?.role === ROLE.ADMIN
+                ? APP_ROUTES.ADMIN.DASHBOARD
+                : activeViewMode === VIEW_MODE.OWNER
+                  ? "/owner/dashboard"
+                  : activeViewMode === VIEW_MODE.MANAGER
+                    ? "/manager/dashboard"
+                    : "/",
+          },
+          { label: "Notifications" },
+        ]}
+      />
+
       {/* Top Header */}
       <NotificationCenterHeader unreadCount={unreadCount} onMarkAllAsRead={markAllAsRead} />
 
