@@ -1,5 +1,5 @@
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters"
-import { IChunkerService } from "../../application/interfaces/chunker.interface"
+import { IChunkerService } from "../../application/ports/chunker.interface"
 
 export class LangChainChunker implements IChunkerService {
   private readonly splitter = new RecursiveCharacterTextSplitter({

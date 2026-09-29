@@ -1,8 +1,8 @@
 export interface VectorChunk {
   id: string
+  vector: number[]
   documentId: string
   content: string
-  embedding: number[]
   metadata: VectorChunkMetadata
 }
 
@@ -25,10 +25,12 @@ export interface VectorSearchOptions {
 
 export interface RetrievedChunk {
   id: string
-  documentId: string
-  content: string
   score: number
-  metadata: VectorChunkMetadata
+  payload: {
+    documentId: string
+    content: string
+    metadata: VectorChunkMetadata
+  }
 }
 
 export interface IVectorStore {
