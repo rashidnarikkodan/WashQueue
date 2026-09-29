@@ -3,12 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
+import { AIRainEffect } from "./AIRainEffect"
 
 export const AIFloatingTrigger: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuthStore()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   // Do not render on the AI assistant page itself
   if (location.pathname.startsWith(APP_ROUTES.AI_ASSISTANT)) {
@@ -16,6 +18,7 @@ export const AIFloatingTrigger: React.FC = () => {
   }
 
   const handleClick = () => {
+    setIsHovered(false)
     if (!isAuthenticated) {
       setIsAuthModalOpen(true)
       return
@@ -25,13 +28,20 @@ export const AIFloatingTrigger: React.FC = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-40 select-none">
+      {/* Site-wide generic logo rain - triggered ONLY on hover of the floating icon */}
+      <AIRainEffect active={isHovered} />
+
+      <div
+        className="fixed bottom-6 right-6 z-40 select-none"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <button
           type="button"
           onClick={handleClick}
           aria-label="Open Qyn AI Assistant"
           title="Open Qyn AI Assistant"
-          className="p-0 border-0 bg-transparent shadow-none outline-none focus:outline-none cursor-pointer transition-transform duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
+          className="p-0 border-0 bg-transparent shadow-none outline-none focus:outline-none cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
         >
           <img
             src="/QynAi.png"
