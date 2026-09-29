@@ -29,6 +29,9 @@ const envSchema = z.object({
   PLATFORM_COMMISSION_CAP: z.coerce.number().default(150),
   RAZORPAYX_ACCOUNT_NUMBER: z.string(),
   RAZORPAYX_WEBHOOK_SECRET: z.string(),
+  AI_EMBEDDING_MODEL:z.string().default("embeddinggemma"),
+  OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
+  QDRANT_URL: z.string().url().default("http://localhost:6333"),
 })
 const env = envSchema.parse(process.env)
 
