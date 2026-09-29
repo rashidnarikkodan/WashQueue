@@ -257,21 +257,12 @@ export default function OwnerAnalyticsPage() {
 
   return (
     <div className="space-y-8 pb-16 animate-in fade-in duration-300">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 p-6 rounded-3xl border border-border/80 bg-linear-to-r from-card/90 via-card/60 to-primary/10 backdrop-blur-md shadow-sm">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">
-              Financial Intelligence &amp; Earnings
-            </span>
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Live Settlement
-              Ledger
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Earnings &amp; Financial Analytics
           </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 max-w-xl">
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1 max-w-xl">
             Track gross earnings, net payout disbursements, platform commission deductions, profit
             margins, and per-station financial yield.
           </p>
