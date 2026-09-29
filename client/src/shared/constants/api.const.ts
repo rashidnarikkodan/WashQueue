@@ -119,5 +119,7 @@ export const API_ROUTES = {
   },
   AI: {
     CHAT: "/ai/chat",
+    KNOWLEDGE_DOCS: "/ai/knowledge-documents",
+    KNOWLEDGE_DOC_BY_ID: (id: string) => `/ai/knowledge-documents/${id}`,
   },
 } as const

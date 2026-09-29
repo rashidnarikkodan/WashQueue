@@ -15,6 +15,7 @@ import {
   CreditCard,
   Car,
   LifeBuoy,
+  BookOpen,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -65,6 +66,11 @@ export const adminSideBarItems: SidebarItem[] = [
     name: "Issue Management",
     path: "/admin/issues",
     icon: LifeBuoy,
+  },
+  {
+    name: "Knowledge Base",
+    path: "/admin/knowledge-docs",
+    icon: BookOpen,
   },
   {
     name: "Reviews & Ratings Moderation",

@@ -17,19 +17,23 @@ export class KnowledgeDocumentRepository
   ): Promise<{ data: KnowledgeDocument[]; total: number }> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = {}
-    if (query.category) {
+    if (query.category && query.category !== "ALL") {
       filter.category = query.category
     }
-    if (query.status) {
+    if (query.status && query.status !== "ALL") {
       filter.status = query.status
     }
+    if (query.search && typeof query.search === "string" && query.search.trim()) {
+      const searchRegex = { $regex: query.search.trim(), $options: "i" }
+      filter.$or = [{ title: searchRegex }, { content: searchRegex }]
+    }
 
-    const page = query.page ? parseInt(query.page as string) : 1
-    const limit = query.limit ? parseInt(query.limit as string) : 10
+    const page = query.page ? parseInt(query.page as string, 10) : 1
+    const limit = query.limit ? parseInt(query.limit as string, 10) : 10
     const skip = (page - 1) * limit
 
     const [docs, total] = await Promise.all([
-      this.model.find(filter).skip(skip).limit(limit).exec(),
+      this.model.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
       this.model.countDocuments(filter).exec(),
     ])
 

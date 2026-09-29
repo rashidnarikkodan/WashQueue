@@ -25,6 +25,7 @@ export interface GetKnowledgeDocumentsQuery {
   limit?: string
   category?: KnowledgeDocumentCategory
   status?: KnowledgeDocumentStatus
+  search?: string
 }
 
 export interface GetKnowledgeDocumentsResponse {

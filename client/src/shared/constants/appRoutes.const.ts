@@ -32,6 +32,8 @@ export const APP_ROUTES = {
     SETTLEMENTS: "/admin/settlements",
     ISSUES: "/admin/issues",
     ISSUE_DETAILS: (id: string | number) => `/admin/issues/${id}`,
+    KNOWLEDGE_DOCS: "/admin/knowledge-docs",
+    KNOWLEDGE_DOC_DETAILS: (id: string | number) => `/admin/knowledge-docs/${id}`,
   },
   MANAGER: {
     ROOT: "/manager",
