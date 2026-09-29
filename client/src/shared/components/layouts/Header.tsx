@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Menu, X, Heart, Sparkles } from "lucide-react"
+import { Menu, X, Heart } from "lucide-react"
 import { NotificationDropdown } from "@/features/notification"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
@@ -34,7 +34,7 @@ export default function Header({ role }: { role?: string }) {
     customer: [
       { name: "Home", path: APP_ROUTES.HOME },
       { name: "Stations", path: "/stations" },
-      { name: "AI Assistant", path: APP_ROUTES.AI_ASSISTANT },
+      { name: "Qyn", path: APP_ROUTES.AI_ASSISTANT },
     ],
   }
 
@@ -84,7 +84,7 @@ export default function Header({ role }: { role?: string }) {
                   key={link.path}
                   to={link.path}
                   onClick={(e) => {
-                    if (link.name === "AI Assistant" && !isAuthenticated) {
+                    if (link.name === "Qyn" && !isAuthenticated) {
                       e.preventDefault()
                       setIsAuthModalOpen(true)
                     }
@@ -93,8 +93,8 @@ export default function Header({ role }: { role?: string }) {
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
                 >
-                  {link.name === "AI Assistant" && (
-                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  {link.name === "Qyn" && (
+                    <img src="/qyn-logo.svg" alt="Qyn" className="w-3.5 h-3.5" />
                   )}
                   {link.name}
                   {isActive && (
@@ -153,7 +153,7 @@ export default function Header({ role }: { role?: string }) {
                   key={link.path}
                   to={link.path}
                   onClick={(e) => {
-                    if (link.name === "AI Assistant" && !isAuthenticated) {
+                    if (link.name === "Qyn" && !isAuthenticated) {
                       e.preventDefault()
                       setIsMobileMenuOpen(false)
                       setIsAuthModalOpen(true)
@@ -165,7 +165,7 @@ export default function Header({ role }: { role?: string }) {
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
-                  {link.name === "AI Assistant" && <Sparkles className="w-4 h-4 text-primary" />}
+                  {link.name === "Qyn" && <img src="/qyn-logo.svg" alt="Qyn" className="w-4 h-4" />}
                   <span>{link.name}</span>
                 </Link>
               )
@@ -177,9 +177,9 @@ export default function Header({ role }: { role?: string }) {
       <AuthRequiredModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        title="Sign in for AI Assistant"
-        message="You need to be signed in to your WashQueue account to chat with the AI Assistant."
-        actionName="access AI Assistant"
+        title="Sign in for Qyn"
+        message="You need to be signed in to your WashQueue account to chat with Qyn."
+        actionName="access Qyn"
       />
     </header>
   )
