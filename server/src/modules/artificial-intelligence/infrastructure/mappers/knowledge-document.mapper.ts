@@ -16,6 +16,7 @@ export class KnowledgeDocumentMapper implements IMapper<KnowledgeDocument, IKnow
       status: raw.status as KnowledgeDocumentStatus,
       locale: raw.locale,
       version: raw.version,
+      chunkCount: raw.chunkCount ?? 0,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     })
@@ -32,6 +33,7 @@ export class KnowledgeDocumentMapper implements IMapper<KnowledgeDocument, IKnow
       status: json.status,
       locale: json.locale,
       version: json.version,
+      chunkCount: json.chunkCount ?? 0,
     }
   }
 }
