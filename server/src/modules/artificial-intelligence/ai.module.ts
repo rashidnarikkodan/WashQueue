@@ -52,7 +52,8 @@ const updateKnowledgeDocumentUseCase = new UpdateKnowledgeDocumentUseCase(
 )
 
 const deleteKnowledgeDocumentUseCase = new DeleteKnowledgeDocumentUseCase(
-  knowledgeDocumentRepository
+  knowledgeDocumentRepository,
+  vectorStore
 )
 
 const searchKnowledgeDocumentUseCase = new SearchKnowledgeDocumentUseCase(
