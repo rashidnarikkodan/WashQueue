@@ -4,7 +4,7 @@ import { AIEmptyHero } from "../components/AIEmptyHero"
 import { AIPromptInput } from "../components/AIPromptInput"
 import { AISuggestionChips } from "../components/AISuggestionChips"
 import { AIMessageList } from "../components/AIMessageList"
-import { Plus } from "lucide-react"
+import { SquarePen } from "lucide-react"
 
 export const AIAssistantPage: React.FC = () => {
   const {
@@ -20,14 +20,14 @@ export const AIAssistantPage: React.FC = () => {
   const hasMessages = messages.length > 0
 
   return (
-    <div className="h-full flex-1 flex flex-col bg-background text-foreground transition-colors duration-300 overflow-hidden">
-      <div className="relative z-10 flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 h-full min-h-0 overflow-hidden">
-        {!hasMessages ? (
-          // ================= EMPTY STATE (Strictly locked to viewport, zero Y-scroll) =================
-          <div className="flex-1 flex flex-col items-center justify-center my-auto py-2 overflow-hidden select-none">
+    <div className="h-full flex-1 flex flex-col bg-background text-foreground overflow-hidden">
+      {!hasMessages ? (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
+          <div className="w-full max-w-2xl flex flex-col items-center gap-0">
             <AIEmptyHero />
 
-            <div className="w-full mt-4 sm:mt-6">
+            {/* Composer */}
+            <div className="w-full mt-8">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}
@@ -37,46 +37,64 @@ export const AIAssistantPage: React.FC = () => {
               />
             </div>
 
-            <AISuggestionChips onSelect={(prompt) => sendMessage(prompt)} disabled={isLoading} />
+            {/* Suggestion cards */}
+            <div className="w-full">
+              <AISuggestionChips onSelect={(prompt) => sendMessage(prompt)} disabled={isLoading} />
+            </div>
           </div>
-        ) : (
-          // ================= CONVERSATION VIEW (Middle feed scrolls, input docked) =================
-          <div className="flex-1 flex flex-col justify-between w-full h-full min-h-0 overflow-hidden">
-            {/* Minimal Session Header */}
-            <div className="shrink-0 flex items-center justify-between pb-3 pt-2 mb-1 border-b border-border/50">
-              <span className="text-sm font-semibold tracking-tight text-foreground/80">
-                WashQueue Assistant
-              </span>
+        </div>
+      ) : (
+        // ── CONVERSATION STATE ─────────────────────────────────────────────
+        <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
+          {/* Session header */}
+          <div className="shrink-0 border-b border-border">
+            <div className="max-w-2xl mx-auto w-full px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center"
+                  style={{ boxShadow: "0 2px 8px rgb(var(--primary) / 0.12)" }}
+                >
+                  <img src="/qyn-logo.svg" alt="" aria-hidden className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">Qyn</span>
+                <span className="hidden sm:inline text-xs text-muted-foreground/50">
+                  · WashQueue Assistant
+                </span>
+              </div>
 
               <button
                 type="button"
                 onClick={clearMessages}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-                title="Start a new chat"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border transition-all duration-150 cursor-pointer"
+                title="New conversation"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Chat</span>
+                <SquarePen className="w-3.5 h-3.5" />
+                <span>New chat</span>
               </button>
             </div>
+          </div>
 
-            {/* Scrollable Conversation Stream */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-2 min-h-0">
+          {/* Message stream */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="max-w-2xl mx-auto w-full px-4 py-4">
               <AIMessageList messages={messages} onRetry={retryLastMessage} />
             </div>
+          </div>
 
-            {/* Bottom Docked Input */}
-            <div className="shrink-0 pt-2 pb-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+          {/* Docked composer */}
+          <div className="shrink-0 border-t border-border bg-background">
+            <div className="max-w-2xl mx-auto w-full px-4 py-4">
               <AIPromptInput
                 value={activePrompt}
                 onChange={setActivePrompt}
                 onSubmit={() => sendMessage()}
                 isLoading={isLoading}
-                placeholder="Ask a follow-up question..."
+                placeholder="Follow up with Qyn..."
               />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

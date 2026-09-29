@@ -1,27 +1,27 @@
 import React from "react"
-import { Sparkles, Clock, ShieldAlert, CarFront } from "lucide-react"
+import { CarFront, Clock, Sparkles, ShieldAlert } from "lucide-react"
 
 const SUGGESTIONS = [
   {
     icon: CarFront,
-    label: "What packages and detailing tiers are available?",
+    label: "What packages are available?",
     prompt:
       "What car wash service packages and detailing tiers are available at WashQueue stations?",
   },
   {
     icon: Clock,
-    label: "How do live queue wait times work?",
+    label: "How do live wait times work?",
     prompt: "How does the real-time queue estimation and active bay tracking work for customers?",
   },
   {
     icon: Sparkles,
-    label: "Can I drive in without booking in advance?",
+    label: "Can I drive in without booking?",
     prompt:
       "Can station managers admit walk-in customers without a prior booking, and how does it affect the queue?",
   },
   {
     icon: ShieldAlert,
-    label: "What is the cancellation & refund policy?",
+    label: "What's the cancellation policy?",
     prompt: "What is the cancellation and refund policy for car wash reservations?",
   },
 ]
@@ -36,8 +36,8 @@ export const AISuggestionChips: React.FC<AISuggestionChipsProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className="w-full max-w-2xl mx-auto mt-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+    <div className="w-full mt-4">
+      <div className="grid grid-cols-2 gap-2">
         {SUGGESTIONS.map((item, idx) => {
           const Icon = item.icon
           return (
@@ -46,12 +46,12 @@ export const AISuggestionChips: React.FC<AISuggestionChipsProps> = ({
               type="button"
               disabled={disabled}
               onClick={() => onSelect(item.prompt)}
-              className="text-left px-3.5 py-2.5 rounded-xl bg-card/60 hover:bg-card border border-border/70 hover:border-primary/40 shadow-xs hover:shadow-sm transition-all duration-150 flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+              className="group text-left px-3.5 py-3 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-              <span className="text-xs sm:text-sm text-foreground/80 group-hover:text-foreground line-clamp-1">
+              <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary mb-2 transition-colors duration-150" />
+              <p className="text-xs sm:text-[13px] font-medium text-foreground/70 group-hover:text-foreground leading-snug transition-colors duration-150">
                 {item.label}
-              </span>
+              </p>
             </button>
           )
         })}

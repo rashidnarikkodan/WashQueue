@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, useState } from "react"
 import { ArrowUp, Loader2 } from "lucide-react"
 
 interface AIPromptInputProps {
@@ -16,73 +16,90 @@ export const AIPromptInput: React.FC<AIPromptInputProps> = ({
   onSubmit,
   isLoading,
   isCentered = false,
-  placeholder = "Ask anything about WashQueue...",
+  placeholder = "Ask Qyn anything...",
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isFocused, setIsFocused] = useState(false)
 
-  // Auto-resize textarea height as user types
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
-
     textarea.style.height = "auto"
-    const minHeight = isCentered ? 48 : 38
-    const newHeight = Math.min(Math.max(textarea.scrollHeight, minHeight), 180)
-    textarea.style.height = `${newHeight}px`
+    const min = isCentered ? 56 : 44
+    textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, min), 200)}px`
   }, [value, isCentered])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      if (value.trim() && !isLoading) {
-        onSubmit()
-      }
+      if (value.trim() && !isLoading) onSubmit()
     }
   }
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (value.trim() && !isLoading) {
-      onSubmit()
-    }
+    if (value.trim() && !isLoading) onSubmit()
   }
 
   const canSubmit = Boolean(value.trim()) && !isLoading
 
   return (
-    <form onSubmit={handleFormSubmit} className="w-full max-w-3xl mx-auto">
+    <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`relative flex items-end gap-2 rounded-2xl sm:rounded-3xl border border-border/80 bg-card/95 dark:bg-slate-900/90 backdrop-blur-xl shadow-sm hover:shadow-md transition-all duration-200 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 ${
-          isCentered ? "p-3 sm:p-3.5" : "p-2 sm:p-2.5"
-        }`}
+        className="rounded-2xl border bg-card transition-all duration-200"
+        style={{
+          borderColor: isFocused ? "rgb(var(--primary) / 0.6)" : "rgb(var(--border))",
+          boxShadow: isFocused
+            ? "0 0 0 3px rgb(var(--primary) / 0.1), 0 4px 24px rgb(0 0 0 / 0.12)"
+            : "0 2px 12px rgb(0 0 0 / 0.08)",
+        }}
       >
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={value}
-          disabled={isLoading}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="flex-1 max-h-44 min-h-[38px] resize-none bg-transparent px-3 py-1.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
-        />
+        {/* Textarea */}
+        <div className="px-4 pt-4 pb-2">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={value}
+            disabled={isLoading}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder={placeholder}
+            className="w-full resize-none bg-transparent text-sm sm:text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ minHeight: isCentered ? "56px" : "44px" }}
+          />
+        </div>
 
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          aria-label="Send prompt"
-          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${
-            canSubmit
-              ? "bg-primary text-primary-foreground shadow-sm hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
-              : "bg-muted text-muted-foreground/30 cursor-not-allowed"
-          }`}
-        >
-          {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          ) : (
-            <ArrowUp className="w-4.5 h-4.5 stroke-[2.5]" />
-          )}
-        </button>
+        {/* Bottom toolbar */}
+        <div className="flex items-center justify-between px-3 pb-3">
+          {/* Hint */}
+          <span className="text-[11px] text-muted-foreground/40 select-none pl-1">
+            {isFocused && value ? "shift+↵ for new line" : ""}
+          </span>
+
+          {/* Send button */}
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            aria-label="Send"
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              canSubmit
+                ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 cursor-pointer"
+                : "bg-muted text-muted-foreground/40 cursor-not-allowed"
+            }`}
+            style={canSubmit ? { boxShadow: "0 2px 12px rgb(var(--primary) / 0.35)" } : undefined}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Send</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   )
