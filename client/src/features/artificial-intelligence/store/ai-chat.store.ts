@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { ChatMessage } from "../types/ai.types"
+import type { ChatMessage } from "../types/ai.types"
 
 interface AIChatState {
   messages: ChatMessage[]

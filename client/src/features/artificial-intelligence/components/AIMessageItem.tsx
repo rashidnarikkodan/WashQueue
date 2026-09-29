@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Bot, User, Copy, Check, AlertCircle, RotateCcw } from "lucide-react"
-import { ChatMessage } from "../types/ai.types"
+import type { ChatMessage } from "../types/ai.types"
 import { toast } from "sonner"
 
 interface AIMessageItemProps {

@@ -1,6 +1,6 @@
 import React from "react"
 import { Sparkles, Clock, ShieldAlert, CarFront } from "lucide-react"
-import { PromptSuggestion } from "../types/ai.types"
+import type { PromptSuggestion } from "../types/ai.types"
 
 const DEFAULT_SUGGESTIONS: PromptSuggestion[] = [
   {

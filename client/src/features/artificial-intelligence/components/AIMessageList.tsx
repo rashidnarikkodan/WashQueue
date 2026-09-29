@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { Trash2, Bot, Sparkles } from "lucide-react"
-import { ChatMessage } from "../types/ai.types"
+import type { ChatMessage } from "../types/ai.types"
 import { AIMessageItem } from "./AIMessageItem"
 
 interface AIMessageListProps {

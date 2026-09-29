@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { useAIChatStore } from "../store/ai-chat.store"
 import { aiApi } from "@/shared/apis/ai.api"
-import { ChatMessage } from "../types/ai.types"
+import type { ChatMessage } from "../types/ai.types"
 
 export const useAIChat = () => {
   const {

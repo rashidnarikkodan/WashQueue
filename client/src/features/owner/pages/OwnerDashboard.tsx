@@ -27,19 +27,14 @@ import {
   DistributionDonutChart,
 } from "@/shared/components/charts"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = ([
+const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "Year", value: "YEAR" },
-] = [
   { label: "7 Days", value: "7_DAYS" },
   { label: "30 Days", value: "30_DAYS" },
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
-])
+]
 
 export default function OwnerDashboard() {
   const navigate = useNavigate()
