@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -40,30 +40,55 @@ export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "bookings" | "commission">("revenue")
 
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getAdminDashboard(dateRange)
-      setData(res)
-    } catch {
-      toast.error("Failed to load platform analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+
+  const fetchDashboardData = useCallback(
+    async (targetRange: DateRangeFilter = dateRange) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getAdminDashboard(targetRange)
+        cacheRef.current[targetRange] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load platform analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const cached = cacheRef.current[newRange]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange])
+    setDateRange(newRange)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchDashboardData()
+      try {
+        const res = await analyticsApi.getAdminDashboard(dateRange)
+        if (ignore) return
+        cacheRef.current[dateRange] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load platform analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchDashboardData])
+  }, [dateRange])
 
   const kpis = data?.kpis
 
@@ -148,7 +173,7 @@ export default function AdminDashboard() {
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-card text-foreground shadow-xs font-bold"
@@ -161,12 +186,12 @@ export default function AdminDashboard() {
           </div>
 
           <button
-            onClick={fetchDashboardData}
-            disabled={isLoading}
+            onClick={() => fetchDashboardData(dateRange)}
+            disabled={isRefreshing || isLoading}
             title="Refresh analytics data"
             className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer shrink-0"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>

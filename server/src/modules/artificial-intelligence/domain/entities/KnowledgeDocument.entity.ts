@@ -11,6 +11,7 @@ export interface KnowledgeDocumentProps {
   status: KnowledgeDocumentStatus
   locale: string
   version: number
+  publishedAt?: Date
   createdAt: Date
   updatedAt: Date
 }

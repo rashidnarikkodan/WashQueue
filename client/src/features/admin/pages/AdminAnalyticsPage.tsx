@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -42,32 +42,57 @@ export default function AdminAnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "net" | "commission" | "bookings">(
     "revenue"
   )
 
-  const fetchAdminAnalytics = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getAdminDashboard(dateRange)
-      setData(res)
-    } catch {
-      toast.error("Failed to load platform financial analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+
+  const fetchAdminAnalytics = useCallback(
+    async (targetRange: DateRangeFilter = dateRange) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getAdminDashboard(targetRange)
+        cacheRef.current[targetRange] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load platform financial analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const cached = cacheRef.current[newRange]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange])
+    setDateRange(newRange)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchAdminAnalytics()
+      try {
+        const res = await analyticsApi.getAdminDashboard(dateRange)
+        if (ignore) return
+        cacheRef.current[dateRange] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load platform financial analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchAdminAnalytics])
+  }, [dateRange])
 
   const kpis = data?.kpis
   const totalGMV = kpis?.totalGrossVolume || 0
@@ -210,7 +235,7 @@ export default function AdminAnalyticsPage() {
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-primary text-primary-foreground shadow-xs"
@@ -223,12 +248,12 @@ export default function AdminAnalyticsPage() {
           </div>
 
           <button
-            onClick={fetchAdminAnalytics}
-            disabled={isLoading}
+            onClick={() => fetchAdminAnalytics(dateRange)}
+            disabled={isRefreshing || isLoading}
             title="Refresh financial data"
             className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
 
           <button
@@ -355,7 +380,7 @@ export default function AdminAnalyticsPage() {
               data={data?.growthTrend || []}
               metricType={trendMetric}
               height={300}
-              onResetRange={() => setDateRange("ALL")}
+              onResetRange={() => handleDateRangeChange("ALL")}
             />
           </ChartContainer>
         </div>

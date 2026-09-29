@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -46,33 +46,71 @@ export default function OwnerAnalyticsPage() {
   const [selectedStationId, setSelectedStationId] = useState<string>("ALL")
   const [data, setData] = useState<OwnerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [trendMetric, setTrendMetric] = useState<"revenue" | "net" | "commission" | "bookings">(
     "revenue"
   )
   const [compMetric, setCompMetric] = useState<"revenue" | "bookings">("revenue")
 
-  const fetchAnalyticsData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId)
-      setData(res)
-    } catch {
-      toast.error("Failed to load owner financial analytics data")
-    } finally {
-      setIsLoading(false)
+  const cacheRef = useRef<Record<string, OwnerDashboardData>>({})
+
+  const fetchAnalyticsData = useCallback(
+    async (targetRange: DateRangeFilter = dateRange, targetStation: string = selectedStationId) => {
+      setIsRefreshing(true)
+      try {
+        const res = await analyticsApi.getOwnerDashboard(targetRange, targetStation)
+        const cacheKey = `${targetRange}_${targetStation}`
+        cacheRef.current[cacheKey] = res
+        setData(res)
+      } catch {
+        toast.error("Failed to load owner financial analytics data")
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [dateRange, selectedStationId]
+  )
+
+  const handleDateRangeChange = (newRange: DateRangeFilter) => {
+    if (newRange === dateRange) return
+    const key = `${newRange}_${selectedStationId}`
+    const cached = cacheRef.current[key]
+    if (cached) {
+      setData(cached)
     }
-  }, [dateRange, selectedStationId])
+    setDateRange(newRange)
+  }
+
+  const handleStationChange = (newStationId: string) => {
+    if (newStationId === selectedStationId) return
+    const key = `${dateRange}_${newStationId}`
+    const cached = cacheRef.current[key]
+    if (cached) {
+      setData(cached)
+    }
+    setSelectedStationId(newStationId)
+  }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchAnalyticsData()
+      const cacheKey = `${dateRange}_${selectedStationId}`
+      try {
+        const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId)
+        if (ignore) return
+        cacheRef.current[cacheKey] = res
+        setData(res)
+      } catch {
+        if (!ignore) toast.error("Failed to load owner financial analytics data")
+      } finally {
+        if (!ignore) setIsLoading(false)
+      }
     })
     return () => {
       ignore = true
     }
-  }, [fetchAnalyticsData])
+  }, [dateRange, selectedStationId])
 
   const kpis = data?.kpis
   const totalGross = kpis?.totalGrossRevenue || 0
@@ -243,7 +281,7 @@ export default function OwnerAnalyticsPage() {
           <div className="relative">
             <select
               value={selectedStationId}
-              onChange={(e) => setSelectedStationId(e.target.value)}
+              onChange={(e) => handleStationChange(e.target.value)}
               className="bg-card border border-border text-foreground text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-primary transition-all cursor-pointer"
             >
               <option value="ALL">All Stations Portfolio</option>
@@ -259,7 +297,7 @@ export default function OwnerAnalyticsPage() {
             {DATE_RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setDateRange(opt.value)}
+                onClick={() => handleDateRangeChange(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   dateRange === opt.value
                     ? "bg-primary text-primary-foreground shadow-xs"
@@ -272,12 +310,12 @@ export default function OwnerAnalyticsPage() {
           </div>
 
           <button
-            onClick={fetchAnalyticsData}
-            disabled={isLoading}
+            onClick={() => fetchAnalyticsData(dateRange, selectedStationId)}
+            disabled={isRefreshing || isLoading}
             title="Refresh financial ledger"
             className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
 
           <button
@@ -405,7 +443,7 @@ export default function OwnerAnalyticsPage() {
               data={data?.revenueTrend || []}
               metricType={trendMetric}
               height={290}
-              onResetRange={() => setDateRange("ALL")}
+              onResetRange={() => handleDateRangeChange("ALL")}
             />
           </ChartContainer>
         </div>
