@@ -7,8 +7,8 @@ import { LocalEmbeddingModel } from "../../infrastructure/services/embedding.ser
 import { QdrantVectorStore } from "../../infrastructure/vector/qdrant.store"
 import { KnowledgeDocumentRepository } from "../../infrastructure/repositories/knowledge-document.mongo.repository"
 import { CreateKnowledgeDocumentUseCase } from "../../application/usecases/knowledge-document/create-knowledge-document.use-case"
-import { IndexKnowledgeDocumentUseCase } from "../../application/usecases/knowledge-document/index-knowledge-document.usecases"
-import { SearchKnowledgeDocumentUseCase } from "../../application/usecases/knowledge-document/search-knowledge-document.usecase"
+import { IndexKnowledgeDocumentUseCase } from "../../application/usecases/indexing/index-knowledge-document.usecases"
+import { SearchKnowledgeDocumentUseCase } from "../../application/usecases/search/search-knowledge-document.usecase"
 import { KnowledgeDocumentModel } from "../../infrastructure/model/knowledge-document.model"
 import { CreateKnowledgeDocumentDto } from "../../application/dto/knowledge-document.dto"
 
