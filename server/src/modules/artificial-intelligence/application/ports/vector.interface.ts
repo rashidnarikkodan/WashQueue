@@ -10,6 +10,8 @@ export interface VectorChunkMetadata {
   category: string
   locale: string
   version: number
+  chunkIndex?: number
+  totalChunks?: number
 }
 
 export interface VectorSearchOptions {
@@ -39,4 +41,8 @@ export interface IVectorStore {
   search(embedding: number[], options: VectorSearchOptions): Promise<RetrievedChunk[]>
 
   deleteByDocumentId(documentId: string): Promise<void>
+
+  deleteStaleChunks(documentId: string, currentChunkIds: string[]): Promise<void>
+
+  countByDocumentId?(documentId: string): Promise<number>
 }

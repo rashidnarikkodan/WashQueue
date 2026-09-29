@@ -21,11 +21,14 @@ export class QdrantVectorStore implements IVectorStore {
         payload: {
           content: chunk.content,
           documentId: chunk.documentId,
+          chunkIndex: chunk.metadata.chunkIndex,
+          totalChunks: chunk.metadata.totalChunks,
           metadata: chunk.metadata,
         },
       })),
     })
   }
+
   async deleteByDocumentId(documentId: string): Promise<void> {
     await qdrant.delete(VECTOR_COLLECTIONS.KNOWLEDGE_DOCUMENT, {
       wait: true,
@@ -40,6 +43,66 @@ export class QdrantVectorStore implements IVectorStore {
         ],
       },
     })
+  }
+
+  async deleteStaleChunks(documentId: string, currentChunkIds: string[]): Promise<void> {
+    const currentIdSet = new Set(currentChunkIds)
+    const stalePointIds: (string | number)[] = []
+    let offset: string | number | null | undefined = undefined
+
+    // Scroll through existing points for this documentId
+    do {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const scrollResult: any = await qdrant.scroll(VECTOR_COLLECTIONS.KNOWLEDGE_DOCUMENT, {
+        filter: {
+          must: [
+            {
+              key: "documentId",
+              match: {
+                value: documentId,
+              },
+            },
+          ],
+        },
+        limit: 100,
+        offset: offset ?? undefined,
+        with_payload: false,
+        with_vector: false,
+      })
+
+      const points = scrollResult.points || []
+      for (const point of points) {
+        if (!currentIdSet.has(String(point.id))) {
+          stalePointIds.push(point.id)
+        }
+      }
+
+      offset = scrollResult.next_page_offset
+    } while (offset)
+
+    if (stalePointIds.length > 0) {
+      await qdrant.delete(VECTOR_COLLECTIONS.KNOWLEDGE_DOCUMENT, {
+        wait: true,
+        points: stalePointIds,
+      })
+    }
+  }
+
+  async countByDocumentId(documentId: string): Promise<number> {
+    const result = await qdrant.count(VECTOR_COLLECTIONS.KNOWLEDGE_DOCUMENT, {
+      filter: {
+        must: [
+          {
+            key: "documentId",
+            match: {
+              value: documentId,
+            },
+          },
+        ],
+      },
+      exact: true,
+    })
+    return result.count
   }
   async search(embedding: number[], options: VectorSearchOptions): Promise<RetrievedChunk[]> {
     const filterConditions: Record<string, unknown>[] = []
