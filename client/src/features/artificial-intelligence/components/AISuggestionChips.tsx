@@ -1,46 +1,30 @@
 import React from "react"
 import { Sparkles, Clock, ShieldAlert, CarFront } from "lucide-react"
-import type { PromptSuggestion } from "../types/ai.types"
 
-const DEFAULT_SUGGESTIONS: PromptSuggestion[] = [
+const SUGGESTIONS = [
   {
-    id: "services",
-    title: "Car Wash Packages",
-    description: "Explore Express Wash, Deluxe Interior Detailing & Ceramic Coating",
+    icon: CarFront,
+    label: "What packages and detailing tiers are available?",
     prompt:
       "What car wash service packages and detailing tiers are available at WashQueue stations?",
-    category: "service",
   },
   {
-    id: "queue",
-    title: "Live Queue & Wait Times",
-    description: "Learn how real-time queue tracking & bay management works",
+    icon: Clock,
+    label: "How do live queue wait times work?",
     prompt: "How does the real-time queue estimation and active bay tracking work for customers?",
-    category: "queue",
   },
   {
-    id: "walkins",
-    title: "Walk-in Customers",
-    description: "Can I get a service without booking in advance?",
+    icon: Sparkles,
+    label: "Can I drive in without booking in advance?",
     prompt:
       "Can station managers admit walk-in customers without a prior booking, and how does it affect the queue?",
-    category: "walkin",
   },
   {
-    id: "policy",
-    title: "Cancellations & Refunds",
-    description: "Review appointment cancellation rules and wallet refunds",
+    icon: ShieldAlert,
+    label: "What is the cancellation & refund policy?",
     prompt: "What is the cancellation and refund policy for car wash reservations?",
-    category: "policy",
   },
 ]
-
-const CATEGORY_ICONS = {
-  service: CarFront,
-  queue: Clock,
-  walkin: Sparkles,
-  policy: ShieldAlert,
-}
 
 interface AISuggestionChipsProps {
   onSelect: (prompt: string) => void
@@ -52,36 +36,22 @@ export const AISuggestionChips: React.FC<AISuggestionChipsProps> = ({
   disabled = false,
 }) => {
   return (
-    <div className="w-full max-w-4xl mx-auto mt-8">
-      <div className="flex items-center justify-between mb-3 px-1">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-          Suggested Inquiries
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {DEFAULT_SUGGESTIONS.map((item) => {
-          const Icon = CATEGORY_ICONS[item.category]
+    <div className="w-full max-w-2xl mx-auto mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {SUGGESTIONS.map((item, idx) => {
+          const Icon = item.icon
           return (
             <button
-              key={item.id}
+              key={idx}
               type="button"
               disabled={disabled}
               onClick={() => onSelect(item.prompt)}
-              className="group text-left p-4 rounded-2xl bg-card/70 hover:bg-card border border-border/80 hover:border-primary/40 shadow-sm hover:shadow-md transition-all duration-200 flex items-start gap-3.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-left px-3.5 py-2.5 rounded-xl bg-card/60 hover:bg-card border border-border/70 hover:border-primary/40 shadow-xs hover:shadow-sm transition-all duration-150 flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-200 shrink-0 mt-0.5">
-                <Icon className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {item.title}
-                </h4>
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
+              <Icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+              <span className="text-xs sm:text-sm text-foreground/80 group-hover:text-foreground line-clamp-1">
+                {item.label}
+              </span>
             </button>
           )
         })}

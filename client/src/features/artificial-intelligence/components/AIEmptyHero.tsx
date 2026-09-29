@@ -1,36 +1,19 @@
 import React from "react"
-import { Bot, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 
 export const AIEmptyHero: React.FC = () => {
   return (
-    <div className="flex flex-col items-center text-center max-w-3xl mx-auto pt-6 sm:pt-10 pb-6 px-4">
-      {/* Icon Badge */}
-      <div className="relative mb-6">
-        <div className="absolute -inset-2 bg-gradient-to-r from-blue-600/30 via-indigo-600/30 to-purple-600/30 rounded-3xl blur-xl opacity-75 animate-pulse" />
-        <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-indigo-500/20 border border-primary/30 flex items-center justify-center text-primary shadow-xl">
-          <Bot className="w-10 h-10 sm:w-11 sm:h-11" />
-          <div className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-primary text-white shadow-md">
-            <Sparkles className="w-3.5 h-3.5" />
-          </div>
-        </div>
+    <div className="flex flex-col items-center text-center max-w-2xl mx-auto pt-8 pb-4 px-4">
+      <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5 border border-primary/20 shadow-xs">
+        <Sparkles className="w-6 h-6 sm:w-7 sm:h-7" />
       </div>
 
-      {/* Title */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-3">
-        <Sparkles className="w-3 h-3" />
-        RAG Powered Station Intelligence
-      </div>
-
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight">
-        How can I help you with{" "}
-        <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-primary bg-clip-text text-transparent">
-          WashQueue today?
-        </span>
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
+        How can we help you today?
       </h1>
 
-      <p className="mt-3.5 text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
-        Ask anything about booking queues, service tiers, station bay availability, cancellations,
-        or wallet payments. Powered by semantic vector search and local LLM inference.
+      <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
+        Ask about service packages, live queue wait times, station locations, or booking policies.
       </p>
     </div>
   )
