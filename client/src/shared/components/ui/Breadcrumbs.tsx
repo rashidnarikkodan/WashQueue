@@ -8,11 +8,14 @@ export interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[]
+  className?: string
 }
 
-const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
+const Breadcrumbs = ({ items, className = "" }: BreadcrumbsProps) => {
   return (
-    <nav className="flex items-center space-x-1.5 text-xs font-medium text-muted-foreground/80 py-1.5 overflow-x-auto scrollbar-none">
+    <nav
+      className={`flex items-center space-x-1.5 text-xs font-medium text-muted-foreground/80 py-1 overflow-x-auto scrollbar-none ${className}`}
+    >
       <Link
         to="/"
         className="flex items-center gap-1 hover:text-foreground transition-colors duration-200"
