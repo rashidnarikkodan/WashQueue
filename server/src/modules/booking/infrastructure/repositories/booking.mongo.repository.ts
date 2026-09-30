@@ -3,7 +3,6 @@ import { Booking, BookingStatus, PaymentStatus } from "../../domain/entities/Boo
 import {
   FindBookingsFilter,
   FindBookingsResult,
-  FindUserBookingsFilter,
   IBookingRepository,
   RefundDetailsSnapshot,
 } from "../../domain/repositories/booking.repository"
@@ -39,68 +38,6 @@ export class BookingMongoRepository implements IBookingRepository {
     return BookingMapper.toDomain(doc)
   }
 
-  async findByUserId(filter: FindUserBookingsFilter): Promise<Booking[]> {
-    if (!Types.ObjectId.isValid(filter.userId)) return []
-
-    const query: Record<string, unknown> = {
-      userId: new Types.ObjectId(filter.userId),
-    }
-
-    if (filter.status) {
-      if (Array.isArray(filter.status)) {
-        query.status = { $in: filter.status }
-      } else {
-        query.status = filter.status
-      }
-    } else if (filter.noShowOnly) {
-      query.status = BookingStatus.NO_SHOW
-    } else if (filter.upcomingOnly) {
-      query.status = {
-        $in: [
-          BookingStatus.PENDING,
-          BookingStatus.CONFIRMED,
-          BookingStatus.CHECKED_IN,
-          BookingStatus.IN_SERVICE,
-        ],
-      }
-    } else if (filter.historyOnly) {
-      query.status = {
-        $in: [
-          BookingStatus.SERVICE_COMPLETED,
-          BookingStatus.AWAITING_HANDOVER,
-          BookingStatus.COMPLETED,
-          BookingStatus.CANCELLED,
-          BookingStatus.NO_SHOW,
-        ],
-      }
-    }
-
-    const docs = await BookingModel.find(query)
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
-      .sort({ "scheduling.windowStart": -1, createdAt: -1 })
-    return docs.map(BookingMapper.toDomain)
-  }
-
-  async findByStationId(stationId: string, status?: BookingStatus): Promise<Booking[]> {
-    if (!Types.ObjectId.isValid(stationId)) return []
-
-    const query: Record<string, unknown> = {
-      stationId: new Types.ObjectId(stationId),
-    }
-
-    if (status) {
-      query.status = status
-    }
-
-    const docs = await BookingModel.find(query)
-      .populate("stationId")
-      .populate("vehicleId")
-      .populate("userId")
-      .sort({ "scheduling.windowStart": 1 })
-    return docs.map(BookingMapper.toDomain)
-  }
 
   async findBookings(filter: FindBookingsFilter): Promise<FindBookingsResult> {
     const query: Record<string, unknown> = {}

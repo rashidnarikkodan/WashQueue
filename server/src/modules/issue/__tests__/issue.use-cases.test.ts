@@ -35,8 +35,6 @@ describe("Issue Module Unit Tests", () => {
       findById: vi.fn(),
       findByBookingNumber: vi.fn(),
       findByQrTokenHash: vi.fn(),
-      findByUserId: vi.fn(),
-      findByStationId: vi.fn(),
       findBookings: vi.fn(),
       save: vi.fn(),
       update: vi.fn(),
