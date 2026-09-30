@@ -93,3 +93,35 @@ export interface SettlementPaginationDTO<T> {
     totalPages: number
   }
 }
+
+export interface OwnerEarningsItemDTO {
+  bookingId: string
+  bookingNumber: string
+  stationName: string
+  serviceType: string
+  vehicleRegNumber: string
+  customerName: string
+  completedAt: string
+  grossAmount: number
+  platformCommission: number
+  netEarnings: number
+  paymentMethod: string
+  settlementStatus: string
+  payoutId?: string
+}
+
+export interface RazorpayXPayoutWebhookPayload {
+  id?: string
+  event: string
+  created_at?: number
+  payload?: {
+    payout?: {
+      entity?: {
+        id?: string
+        status?: string
+        utr?: string
+        failure_reason?: string
+      }
+    }
+  }
+}

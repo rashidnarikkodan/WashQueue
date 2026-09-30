@@ -2,17 +2,9 @@ import {
   IWalletTransactionRepository,
   LedgerFilterOptions,
 } from "../../domain/repositories/wallet-transaction.repository.interface"
-import { WalletTransactionDTO } from "../dtos/wallet.dto"
+import { PaginatedLedgerDTO } from "../dtos/wallet.dto"
 import { WalletMapper } from "../mappers/wallet.mapper"
 import { IGetTransactionLedgerUseCase } from "../interfaces/wallet.use-cases"
-
-export interface PaginatedLedgerDTO {
-  transactions: WalletTransactionDTO[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
 
 export class GetTransactionLedgerUseCase implements IGetTransactionLedgerUseCase {
   constructor(private readonly transactionRepository: IWalletTransactionRepository) {}

@@ -8,9 +8,9 @@ import {
   ToggleReviewVisibilityDTO,
   UpdateReviewDTO,
   UserReviewsResponseDTO,
+  GetProviderFeedbackInput,
 } from "../dtos/review.dto"
 import { FindAdminReviewsOptions } from "../../domain/repositories/review.repository.interface"
-import { GetProviderFeedbackInput } from "../use-cases/get-provider-feedback.use-case"
 
 export interface ICreateReviewUseCase {
   execute(userId: string, input: CreateReviewDTO): Promise<ReviewResponseDTO>

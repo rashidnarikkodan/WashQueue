@@ -3,24 +3,8 @@ import { BookingStatus } from "@/common/constants/booking.constants"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
-import { SettlementPaginationDTO } from "../dtos/settlement.dto"
+import { SettlementPaginationDTO, OwnerEarningsItemDTO } from "../dtos/settlement.dto"
 import { IGetOwnerEarningsHistoryUseCase } from "../interfaces/settlement-usecases.interface"
-
-export interface OwnerEarningsItemDTO {
-  bookingId: string
-  bookingNumber: string
-  stationName: string
-  serviceType: string
-  vehicleRegNumber: string
-  customerName: string
-  completedAt: string
-  grossAmount: number
-  platformCommission: number
-  netEarnings: number
-  paymentMethod: string
-  settlementStatus: string
-  payoutId?: string
-}
 
 export class GetOwnerEarningsHistoryUseCase implements IGetOwnerEarningsHistoryUseCase {
   constructor(

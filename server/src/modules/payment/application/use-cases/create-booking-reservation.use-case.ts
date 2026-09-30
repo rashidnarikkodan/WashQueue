@@ -15,24 +15,10 @@ import { ICreateBookingReservationUseCase } from "../interfaces/payment-usecases
 import { BookingPricingResolutionService } from "@/modules/booking/application/services/booking-pricing-resolution.service"
 import { IPaymentGatewayService } from "@/core/application/interfaces/payment-gateway.interface"
 
-export interface CreateBookingReservationInput {
-  stationId: string
-  vehicleId: string
-  timeWindowId: string
-  serviceType: "HALF" | "FULL"
-  extraServiceIds?: string[]
-  paymentMethod: "ONLINE" | "PAY_AT_STATION"
-  useWallet?: boolean
-}
-
-export interface BookingReservationResponseDTO {
-  reservationId: string
-  paymentOrderId: string
-  amount: number
-  walletAmount?: number
-  currency: string
-  expiresAt: string
-}
+import {
+  CreateBookingReservationInput,
+  BookingReservationResponseDTO,
+} from "../dtos/payment.dto"
 
 export class CreateBookingReservationUseCase implements ICreateBookingReservationUseCase {
   private readonly pricingResolutionService: BookingPricingResolutionService

@@ -6,6 +6,7 @@ import {
   SettlementFilterOptions,
   SettlementPaginationDTO,
   SettlementResponseDTO,
+  OwnerEarningsItemDTO,
 } from "../dtos/settlement.dto"
 
 export interface ICreateSettlementUseCase {
@@ -33,7 +34,7 @@ export interface IGetOwnerEarningsHistoryUseCase {
     page?: number,
     limit?: number,
     search?: string
-  ): Promise<SettlementPaginationDTO<unknown>>
+  ): Promise<SettlementPaginationDTO<OwnerEarningsItemDTO>>
 }
 
 export interface IGetAdminSettlementsUseCase {

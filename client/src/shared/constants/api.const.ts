@@ -122,4 +122,15 @@ export const API_ROUTES = {
     KNOWLEDGE_DOCS: "/ai/knowledge-documents",
     KNOWLEDGE_DOC_BY_ID: (id: string) => `/ai/knowledge-documents/${id}`,
   },
+  FRAUD: {
+    ROOT: "/fraud",
+    EVENTS: "/fraud/events",
+    EVENT_BY_ID: (id: string) => `/fraud/events/${id}`,
+    UPDATE_STATUS: (id: string) => `/fraud/events/${id}/status`,
+    USER_PROFILE: (userId: string) => `/fraud/users/${userId}`,
+    METRICS: "/fraud/metrics",
+    WATCHLIST: "/fraud/watchlist",
+    SECURITY_LOGS: "/fraud/security-logs",
+    EVALUATE: "/fraud/evaluate",
+  },
 } as const

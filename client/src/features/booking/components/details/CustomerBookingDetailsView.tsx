@@ -758,7 +758,7 @@ export default function CustomerBookingDetailsView({
                 >
                   <div className="flex items-center gap-3">
                     <LifeBuoy size={16} className="text-amber-500" />
-                    <span>View Ticket #{activeIssue.id}</span>
+                    <span>View Ticket {`#${activeIssue.id}`}</span>
                   </div>
                   <ChevronRight size={14} className="text-amber-500" />
                 </Link>

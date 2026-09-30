@@ -21,6 +21,7 @@ import reviewRouter from "@/modules/review/review.module"
 import analyticsRouter from "@/modules/analytics/analytics.module"
 import issueRouter from "@/modules/issue/issue.module"
 import aiRouter from "@/modules/artificial-intelligence/ai.module"
+import fraudRouter from "@/modules/fraud/fraud.module"
 import healthRouter from "@/modules/health/health.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
@@ -61,6 +62,7 @@ app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
 app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
 app.use(API_ROUTES.ISSUES.ROOT, issueRouter)
 app.use(API_ROUTES.AI.ROOT, aiRouter)
+app.use(API_ROUTES.FRAUD.ROOT, fraudRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

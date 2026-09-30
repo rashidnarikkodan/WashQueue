@@ -20,6 +20,7 @@ export interface IIssueHistorySubdocument {
 
 export interface IIssueDocument extends Document {
   _id: Types.ObjectId
+  caseReference?: string
   bookingId: Types.ObjectId
   customerId: Types.ObjectId
   stationId: Types.ObjectId
@@ -65,6 +66,12 @@ const IssueHistorySchema = new Schema<IIssueHistorySubdocument>(
 
 const IssueSchema = new Schema<IIssueDocument>(
   {
+    caseReference: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
     bookingId: {
       type: Schema.Types.ObjectId,
       ref: "Booking",

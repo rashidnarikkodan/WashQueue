@@ -185,7 +185,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
 
   const handleCopyReference = () => {
     if (!issue) return
-    navigator.clipboard.writeText(issue.id)
+    navigator.clipboard.writeText(issue.caseReference || issue.id)
     setIsCopied(true)
     toast.success("Case Reference ID copied to clipboard")
     setTimeout(() => setIsCopied(false), 2000)
@@ -361,7 +361,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
           <Breadcrumbs
             items={[
               { label: isCustomer ? "Support & Tickets" : "Issues", path: issuesRootPath },
-              { label: `#${issue.id}` },
+              { label: issue.caseReference || `#${issue.id}` },
             ]}
           />
 
@@ -394,7 +394,9 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold uppercase tracking-wider text-[10px]">CASE REF</span>
-                <span className="font-mono font-bold text-foreground">#{issue.id}</span>
+                <span className="font-mono font-bold text-foreground">
+                  {issue.caseReference || `#${issue.id}`}
+                </span>
                 <button
                   type="button"
                   onClick={handleCopyReference}

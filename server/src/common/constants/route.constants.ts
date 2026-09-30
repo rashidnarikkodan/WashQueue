@@ -152,6 +152,9 @@ export const API_ROUTES = {
   AI: {
     ROOT: "/api/ai",
   },
+  FRAUD: {
+    ROOT: "/api/fraud",
+  },
   HEALTH: {
     ROOT: "/api/health",
   },

@@ -7,15 +7,10 @@ import { IBookingNotificationService } from "@/modules/notification/notification
 import {
   RefundPolicyEngine,
   RefundPolicyResult,
-  Responsibility,
 } from "../../domain/services/RefundPolicyEngine"
 import logger from "@/configs/logger.config"
 
-export interface ProcessRefundInput {
-  bookingId: string
-  responsibility?: Responsibility
-  reason?: string
-}
+import { ProcessRefundInput } from "../dtos/payment.dto"
 
 import { RefundWalletUseCase } from "@/modules/wallet/application/use-cases/refund-wallet.use-case"
 import { IEvaluateAndProcessRefundUseCase } from "../interfaces/payment-usecases.interface"

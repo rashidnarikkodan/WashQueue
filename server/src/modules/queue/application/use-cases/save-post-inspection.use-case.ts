@@ -1,11 +1,7 @@
 import { ISavePostInspectionUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import {
-  BookingStatus,
-  InspectionChecklistItem,
-  InspectionPhoto,
-} from "@/modules/booking/domain/entities/Booking"
+import { BookingStatus } from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -19,12 +15,7 @@ import { IStationRepository } from "@/modules/station/domain/repositories/statio
 import { ICreateSettlementUseCase } from "@/modules/settlement/settlement.module"
 import logger from "@/configs/logger.config"
 
-export interface SavePostInspectionInput {
-  bookingId: string
-  photos?: InspectionPhoto[]
-  notes?: string
-  checklist?: InspectionChecklistItem[]
-}
+import { SavePostInspectionInput } from "../dtos/queue.dto"
 
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 

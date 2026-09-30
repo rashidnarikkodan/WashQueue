@@ -146,7 +146,8 @@ export default function CreateIssueModal({
         priority,
       })
 
-      toast.success("Support ticket logged successfully! Our team will review shortly.")
+      const refMsg = created.caseReference ? ` (${created.caseReference})` : ""
+      toast.success(`Support ticket${refMsg} logged successfully! Our team will review shortly.`)
       onSuccess?.(created)
       onClose()
       setDescription("")

@@ -10,6 +10,7 @@ import { INotificationDispatcherService } from "@/modules/notification/notificat
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ConflictError } from "@/common/errors/conflict-error"
+import { CaseReferenceService } from "../../domain/services/case-reference.service"
 
 export class CreateIssueUseCase implements ICreateIssueUseCase {
   constructor(
@@ -37,11 +38,14 @@ export class CreateIssueUseCase implements ICreateIssueUseCase {
       existingIssue.status !== IssueStatus.RESOLVED
     ) {
       throw new ConflictError(
-        `An active issue (#${existingIssue.id}) is already ${existingIssue.status} for this booking`
+        `An active issue (#${existingIssue.caseReference || existingIssue.id}) is already ${existingIssue.status} for this booking`
       )
     }
 
+    const caseReference = CaseReferenceService.generate()
+
     const issue = new Issue({
+      caseReference,
       bookingId: dto.bookingId,
       customerId: dto.customerId,
       stationId: booking.stationId,
@@ -72,9 +76,13 @@ export class CreateIssueUseCase implements ICreateIssueUseCase {
           notifyOwner: true,
           defaultPayload: {
             type: "SYSTEM",
-            title: "New Issue Reported",
-            message: `Customer reported an issue for booking #${booking.bookingNumber ?? booking.id}`,
-            data: { issueId: createdIssue.id, bookingId: booking.id },
+            title: `New Issue Reported (${createdIssue.caseReference || createdIssue.id})`,
+            message: `Customer reported issue ${createdIssue.caseReference || ""} for booking #${booking.bookingNumber ?? booking.id}`,
+            data: {
+              issueId: createdIssue.id,
+              caseReference: createdIssue.caseReference,
+              bookingId: booking.id,
+            },
           },
         })
         .catch(() => {})

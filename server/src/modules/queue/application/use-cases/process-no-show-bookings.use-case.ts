@@ -6,10 +6,7 @@ import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositori
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "@/modules/notification/notification.module"
-export interface ProcessNoShowResult {
-  processedCount: number
-  noShowBookingIds: string[]
-}
+import { ProcessNoShowResult } from "../dtos/queue.dto"
 
 export class ProcessNoShowBookingsUseCase implements IProcessNoShowBookingsUseCase {
   constructor(

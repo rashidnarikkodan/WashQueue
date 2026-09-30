@@ -1,20 +1,8 @@
 import { IReviewRepository } from "../../domain/repositories/review.repository.interface"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
-import { ProviderFeedbackResponseDTO } from "../dtos/review.dto"
+import { ProviderFeedbackResponseDTO, GetProviderFeedbackInput } from "../dtos/review.dto"
 import { ROLE } from "@/common/constants/role.constants"
 import { ReviewDTOMapper } from "../mappers/review-dto.mapper"
-
-export interface GetProviderFeedbackInput {
-  userId: string
-  userRole: string
-  stationId?: string
-  rating?: number
-  pillFilter?: "ALL" | "LOW_RATED" | string
-  search?: string
-  sortBy?: "lowest" | "highest" | "recent" | string
-  page?: number
-  limit?: number
-}
 
 export class GetProviderFeedbackUseCase {
   constructor(

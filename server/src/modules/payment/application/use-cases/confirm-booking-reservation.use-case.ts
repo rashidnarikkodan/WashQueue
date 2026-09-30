@@ -27,13 +27,7 @@ import { DebitWalletUseCase } from "@/modules/wallet/application/use-cases/debit
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
 import logger from "@/configs/logger.config"
 
-export interface ConfirmBookingReservationInput {
-  razorpay_order_id: string
-  razorpay_payment_id: string
-  razorpay_signature: string
-  paymentMethod?: PaymentMethod
-  skipSignatureVerification?: boolean
-}
+import { ConfirmBookingReservationInput } from "../dtos/payment.dto"
 
 import { IConfirmBookingReservationUseCase } from "../interfaces/payment-usecases.interface"
 import { BookingPricingResolutionService } from "@/modules/booking/application/services/booking-pricing-resolution.service"

@@ -415,7 +415,9 @@ export default function IssueManagementPage({ role: explicitRole }: IssueManagem
         cell: (issue) => (
           <div className="space-y-1 text-left">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-foreground">#{issue.id}</span>
+              <span className="font-mono text-xs font-bold text-foreground">
+                {issue.caseReference || `#${issue.id}`}
+              </span>
               {issue.customerEvidence && issue.customerEvidence.length > 0 && (
                 <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-bold">
                   {issue.customerEvidence.length} photo

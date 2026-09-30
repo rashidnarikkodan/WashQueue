@@ -105,6 +105,13 @@ export default function CaseSummaryCard({
 
       <div className="space-y-4 text-xs">
         <div className="flex items-center justify-between">
+          <span className="text-muted-foreground font-medium">Case Reference</span>
+          <span className="font-mono font-bold text-foreground">
+            {issue.caseReference || `#${issue.id}`}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
           <span className="text-muted-foreground font-medium">Current Status</span>
           <span className="font-bold text-foreground capitalize">{normStatus}</span>
         </div>

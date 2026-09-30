@@ -11,21 +11,7 @@ import {
 
 const PROVIDER = "RAZORPAY_X"
 
-interface RazorpayXPayoutWebhookPayload {
-  id?: string
-  event: string
-  created_at?: number
-  payload?: {
-    payout?: {
-      entity?: {
-        id?: string
-        status?: string
-        utr?: string
-        failure_reason?: string
-      }
-    }
-  }
-}
+import { RazorpayXPayoutWebhookPayload } from "../dtos/settlement.dto"
 
 export class HandlePayoutWebhookUseCase implements IHandlePayoutWebhookUseCase {
   constructor(

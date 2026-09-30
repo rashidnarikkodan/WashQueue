@@ -100,6 +100,7 @@ export interface BookingDetailsSnapshot {
 
 export interface IssueDto {
   id: string
+  caseReference?: string
   bookingId: string
   customerId: string
   stationId: string

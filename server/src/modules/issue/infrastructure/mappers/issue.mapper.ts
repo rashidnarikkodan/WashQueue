@@ -152,6 +152,9 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
 
     const props: IssueProps = {
       id: rawObj._id ? rawObj._id.toString() : rawObj.id?.toString(),
+      caseReference:
+        rawObj.caseReference ||
+        (rawObj._id ? `CASE-${rawObj._id.toString().slice(-6).toUpperCase()}` : undefined),
       bookingId: bookingIdStr,
       customerId: customerIdStr,
       stationId: stationIdStr,
@@ -220,6 +223,7 @@ export class IssueMapper implements IMapper<Issue, IIssueDocument> {
     const persistence: Record<string, unknown> = {}
 
     if (data.bookingId) persistence.bookingId = new Types.ObjectId(data.bookingId)
+    if (data.caseReference) persistence.caseReference = data.caseReference
     if (data.customerId) persistence.customerId = new Types.ObjectId(data.customerId)
     if (data.stationId) persistence.stationId = new Types.ObjectId(data.stationId)
     if (data.assignedManagerId !== undefined) {

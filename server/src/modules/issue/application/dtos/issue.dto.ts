@@ -53,6 +53,7 @@ export interface CloseIssueDTO {
 
 export interface IssueResponseDTO {
   id: string
+  caseReference?: string
   bookingId: string
   customerId: string
   stationId: string

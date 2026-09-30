@@ -4,33 +4,7 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { IBookingQueueService } from "../interfaces/booking-queue.interface"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
-export interface PublicQueueItemDTO {
-  id: string
-  bookingNumber: string
-  position?: number
-  bayNumber?: number
-  vehicle: string
-  package: string
-  serviceType: string
-  status: string
-  serviceStartedAt?: string
-  estimatedWaitMinutes?: number
-  estimatedServiceStart?: string
-  isBayActive: boolean
-}
-
-export interface PublicStationQueueDTO {
-  stationId: string
-  stationName: string
-  totalBays: number
-  activeServicesCount: number
-  availableBays: number
-  queueDepth: number
-  totalActiveAndWaiting: number
-  averageWashDurationMinutes: number
-  activeServices: PublicQueueItemDTO[]
-  waitingQueue: PublicQueueItemDTO[]
-}
+import { PublicQueueItemDTO, PublicStationQueueDTO } from "../dtos/queue.dto"
 
 export class GetPublicStationQueueUseCase implements IGetPublicStationQueueUseCase {
   constructor(

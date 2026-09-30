@@ -133,6 +133,7 @@ export class IssueMongoRepository
     if (options.search && options.search.trim().length > 0) {
       const searchRegex = new RegExp(options.search.trim(), "i")
       query.$or = [
+        { caseReference: searchRegex },
         { customerDescription: searchRegex },
         { managerNotes: searchRegex },
         { resolutionNotes: searchRegex },

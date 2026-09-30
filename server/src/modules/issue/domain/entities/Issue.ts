@@ -52,6 +52,7 @@ export interface BookingDetailsSnapshot {
 
 export interface IssueProps {
   id?: string
+  caseReference?: string
   bookingId: string
   customerId: string
   stationId: string
@@ -110,6 +111,10 @@ export class Issue {
 
   get id(): string | undefined {
     return this.props.id
+  }
+
+  get caseReference(): string | undefined {
+    return this.props.caseReference
   }
 
   get bookingId(): string {

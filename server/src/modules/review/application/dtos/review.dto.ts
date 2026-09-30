@@ -124,3 +124,15 @@ export interface ReportReviewDTO {
 export interface ToggleReviewVisibilityDTO {
   isVisible: boolean
 }
+
+export interface GetProviderFeedbackInput {
+  userId: string
+  userRole: string
+  stationId?: string
+  rating?: number
+  pillFilter?: "ALL" | "LOW_RATED" | string
+  search?: string
+  sortBy?: "lowest" | "highest" | "recent" | string
+  page?: number
+  limit?: number
+}
