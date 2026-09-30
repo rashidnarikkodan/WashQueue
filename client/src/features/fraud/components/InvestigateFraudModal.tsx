@@ -1,13 +1,17 @@
-import React, { useState } from "react";
-import { X, ShieldAlert } from "lucide-react";
-import { RiskLevelBadge, FraudStatusBadge, ActorRoleBadge } from "./FraudBadges";
-import type { FraudEventDto } from "../types/fraud.types";
+import React, { useState } from "react"
+import { X, ShieldAlert } from "lucide-react"
+import { RiskLevelBadge, FraudStatusBadge, ActorRoleBadge } from "./FraudBadges"
+import type { FraudEventDto } from "../types/fraud.types"
 
 interface InvestigateFraudModalProps {
-  event: FraudEventDto | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdateStatus: (id: string, action: "REVIEW" | "RESOLVE" | "DISMISS", notes?: string) => Promise<void>;
+  event: FraudEventDto | null
+  isOpen: boolean
+  onClose: () => void
+  onUpdateStatus: (
+    id: string,
+    action: "REVIEW" | "RESOLVE" | "DISMISS",
+    notes?: string
+  ) => Promise<void>
 }
 
 export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
@@ -16,23 +20,23 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
   onClose,
   onUpdateStatus,
 }) => {
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notes, setNotes] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  if (!isOpen || !event) return null;
+  if (!isOpen || !event) return null
 
-  const eventId = event.id || event._id || "";
+  const eventId = event.id || event._id || ""
 
   const handleAction = async (action: "REVIEW" | "RESOLVE" | "DISMISS") => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      await onUpdateStatus(eventId, action, notes);
-      setNotes("");
-      onClose();
+      await onUpdateStatus(eventId, action, notes)
+      setNotes("")
+      onClose()
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -58,23 +62,31 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl border border-border/50 bg-background/50">
             <div>
-              <span className="text-[11px] text-muted-foreground uppercase font-medium">Risk Score</span>
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">
+                Risk Score
+              </span>
               <p className="text-xl font-bold text-rose-400 mt-0.5">{event.riskScore} / 100</p>
             </div>
             <div>
-              <span className="text-[11px] text-muted-foreground uppercase font-medium">Severity</span>
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">
+                Severity
+              </span>
               <div className="mt-1">
                 <RiskLevelBadge level={event.riskLevel} />
               </div>
             </div>
             <div>
-              <span className="text-[11px] text-muted-foreground uppercase font-medium">Status</span>
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">
+                Status
+              </span>
               <div className="mt-1">
                 <FraudStatusBadge status={event.status} />
               </div>
             </div>
             <div>
-              <span className="text-[11px] text-muted-foreground uppercase font-medium">Actor Role</span>
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">
+                Actor Role
+              </span>
               <div className="mt-1">
                 <ActorRoleBadge role={event.actorType} />
               </div>
@@ -82,7 +94,9 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-semibold text-foreground uppercase tracking-wider">Target Context</span>
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Target Context
+            </span>
             <div className="p-3.5 rounded-xl border border-border/50 bg-background/40 grid grid-cols-2 gap-3 text-xs">
               <div>
                 <span className="text-muted-foreground">User ID:</span>
@@ -90,7 +104,9 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
               </div>
               <div>
                 <span className="text-muted-foreground">Entity:</span>
-                <p className="font-medium text-foreground">{event.entityType} #{event.entityId}</p>
+                <p className="font-medium text-foreground">
+                  {event.entityType} #{event.entityId}
+                </p>
               </div>
               <div>
                 <span className="text-muted-foreground">Event Type:</span>
@@ -98,18 +114,27 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
               </div>
               <div>
                 <span className="text-muted-foreground">Detected At:</span>
-                <p className="font-medium text-foreground">{new Date(event.createdAt).toLocaleString()}</p>
+                <p className="font-medium text-foreground">
+                  {new Date(event.createdAt).toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-semibold text-foreground uppercase tracking-wider">Triggered Signals ({event.signals.length})</span>
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Triggered Signals ({event.signals.length})
+            </span>
             <div className="space-y-2">
               {event.signals.map((sig, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl border border-border/60 bg-muted/20 space-y-1.5">
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl border border-border/60 bg-muted/20 space-y-1.5"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-foreground tracking-wide">{sig.code}</span>
+                    <span className="font-bold text-xs text-foreground tracking-wide">
+                      {sig.code}
+                    </span>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
                       +{sig.score} pts
                     </span>
@@ -126,7 +151,9 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-foreground uppercase tracking-wider">Resolution Notes</label>
+            <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Resolution Notes
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -165,5 +192,5 @@ export const InvestigateFraudModal: React.FC<InvestigateFraudModalProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

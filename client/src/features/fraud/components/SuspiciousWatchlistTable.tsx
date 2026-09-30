@@ -1,10 +1,10 @@
-import React from "react";
-import type { WatchlistUser } from "../types/fraud.types";
+import React from "react"
+import type { WatchlistUser } from "../types/fraud.types"
 
 interface SuspiciousWatchlistTableProps {
-  users: WatchlistUser[];
-  onReview: (user: WatchlistUser) => void;
-  isLoading?: boolean;
+  users: WatchlistUser[]
+  onReview: (user: WatchlistUser) => void
+  isLoading?: boolean
 }
 
 export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> = ({
@@ -45,18 +45,18 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
               </tr>
             ) : (
               users.map((user) => {
-                const isHighRate = user.cancellationRate >= 50;
-                const isMediumRate = user.cancellationRate >= 25 && user.cancellationRate < 50;
+                const isHighRate = user.cancellationRate >= 50
+                const isMediumRate = user.cancellationRate >= 25 && user.cancellationRate < 50
                 const barColor = isHighRate
                   ? "bg-rose-500"
                   : isMediumRate
-                  ? "bg-amber-500"
-                  : "bg-emerald-500";
+                    ? "bg-amber-500"
+                    : "bg-emerald-500"
                 const textColor = isHighRate
                   ? "text-rose-400"
                   : isMediumRate
-                  ? "text-amber-400"
-                  : "text-emerald-400";
+                    ? "text-amber-400"
+                    : "text-emerald-400"
 
                 return (
                   <tr key={user.id} className="hover:bg-muted/30 transition-colors">
@@ -64,7 +64,11 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center font-semibold text-primary shrink-0 border border-primary/30">
                           {user.avatar ? (
-                            <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                            <img
+                              src={user.avatar}
+                              alt={user.name}
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             user.name.charAt(0)
                           )}
@@ -76,14 +80,14 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-3 text-muted-foreground font-medium">
-                      {user.role}
-                    </td>
+                    <td className="py-3.5 px-3 text-muted-foreground font-medium">{user.role}</td>
 
                     <td className="py-3.5 px-3">
                       <div className="w-28 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className={`font-semibold ${textColor}`}>{user.cancellationRate}%</span>
+                          <span className={`font-semibold ${textColor}`}>
+                            {user.cancellationRate}%
+                          </span>
                         </div>
                         <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                           <div
@@ -96,13 +100,9 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
 
                     <td className="py-3.5 px-3">
                       {user.duplicateSignalStatus === "YES (HIGH)" ? (
-                        <span className="font-bold text-rose-400 text-[11px]">
-                          YES (HIGH)
-                        </span>
+                        <span className="font-bold text-rose-400 text-[11px]">YES (HIGH)</span>
                       ) : user.duplicateSignalStatus === "SUSPICIOUS" ? (
-                        <span className="font-semibold text-amber-400 text-[11px]">
-                          SUSPICIOUS
-                        </span>
+                        <span className="font-semibold text-amber-400 text-[11px]">SUSPICIOUS</span>
                       ) : (
                         <span className="text-muted-foreground text-[11px]">No Match</span>
                       )}
@@ -115,8 +115,8 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
                             user.status === "ACTIVE"
                               ? "bg-emerald-500"
                               : user.status === "FLAGGED"
-                              ? "bg-rose-500"
-                              : "bg-amber-500"
+                                ? "bg-rose-500"
+                                : "bg-amber-500"
                           }`}
                         />
                         <span className="font-semibold text-[11px] tracking-wider text-muted-foreground uppercase">
@@ -134,12 +134,12 @@ export const SuspiciousWatchlistTable: React.FC<SuspiciousWatchlistTableProps> =
                       </button>
                     </td>
                   </tr>
-                );
+                )
               })
             )}
           </tbody>
         </table>
       </div>
     </div>
-  );
-};
+  )
+}

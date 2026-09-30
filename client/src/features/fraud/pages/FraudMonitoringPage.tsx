@@ -1,20 +1,20 @@
-import { useState, useCallback, useMemo, useRef } from "react";
-import { Download, RefreshCw, Shield, AlertTriangle, ScrollText } from "lucide-react";
-import { toast } from "sonner";
-import Breadcrumbs from "@/shared/components/ui/Breadcrumbs";
-import { APP_ROUTES } from "@/shared/constants/appRoutes.const";
-import { fraudApi } from "@/shared/apis/fraud.api";
-import { FraudStatsGrid } from "../components/FraudStatsGrid";
-import { InvestigateFraudModal } from "../components/InvestigateFraudModal";
-import { RiskLevelBadge, FraudStatusBadge, ActorRoleBadge } from "../components/FraudBadges";
+import { useState, useCallback, useMemo, useEffect } from "react"
+import { Download, RefreshCw, Shield, AlertTriangle, ScrollText } from "lucide-react"
+import { toast } from "sonner"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
+import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
+import { fraudApi } from "@/shared/apis/fraud.api"
+import { FraudStatsGrid } from "../components/FraudStatsGrid"
+import { InvestigateFraudModal } from "../components/InvestigateFraudModal"
+import { RiskLevelBadge, FraudStatusBadge, ActorRoleBadge } from "../components/FraudBadges"
 import {
   DataTable,
   DataTableToolbar,
   type Column,
   type TabConfig,
   type SelectFilter,
-} from "@/shared/components/data-table";
-import type { PaginationMeta } from "@/shared/components/ui/Pagination";
+} from "@/shared/components/data-table"
+import type { PaginationMeta } from "@/shared/components/ui/Pagination"
 import type {
   FraudEventDto,
   FraudMetricsDto,
@@ -23,7 +23,7 @@ import type {
   ActorType,
   WatchlistUser,
   SecurityAuditLog,
-} from "../types/fraud.types";
+} from "../types/fraud.types"
 
 const STATUS_TABS: TabConfig[] = [
   { id: "ALL", label: "All Alerts" },
@@ -31,118 +31,109 @@ const STATUS_TABS: TabConfig[] = [
   { id: "REVIEWING", label: "In Review" },
   { id: "RESOLVED", label: "Resolved" },
   { id: "DISMISSED", label: "Dismissed" },
-];
+]
 
 export default function FraudMonitoringPage() {
-  const [activeView, setActiveView] = useState<"alerts" | "watchlist" | "logs">("alerts");
-  const [timeRange, setTimeRange] = useState<"Today" | "7 days" | "30 days">("7 days");
+  const [activeView, setActiveView] = useState<"alerts" | "watchlist" | "logs">("alerts")
+  const [timeRange, setTimeRange] = useState<"Today" | "7 days" | "30 days">("7 days")
 
-  const [metrics, setMetrics] = useState<FraudMetricsDto | null>(null);
-  const [alerts, setAlerts] = useState<FraudEventDto[]>([]);
-  const [totalAlerts, setTotalAlerts] = useState(0);
-  const [watchlist, setWatchlist] = useState<WatchlistUser[]>([]);
-  const [securityLogs, setSecurityLogs] = useState<SecurityAuditLog[]>([]);
+  const [metrics, setMetrics] = useState<FraudMetricsDto | null>(null)
+  const [alerts, setAlerts] = useState<FraudEventDto[]>([])
+  const [totalAlerts, setTotalAlerts] = useState(0)
+  const [watchlist, setWatchlist] = useState<WatchlistUser[]>([])
+  const [securityLogs, setSecurityLogs] = useState<SecurityAuditLog[]>([])
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [riskLevelFilter, setRiskLevelFilter] = useState("ALL");
-  const [actorTypeFilter, setActorTypeFilter] = useState("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
+  const [statusFilter, setStatusFilter] = useState("ALL")
+  const [riskLevelFilter, setRiskLevelFilter] = useState("ALL")
+  const [actorTypeFilter, setActorTypeFilter] = useState("ALL")
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const [watchlistSearch, setWatchlistSearch] = useState("");
-  const [watchlistRoleFilter, setWatchlistRoleFilter] = useState("ALL");
-  const [watchlistPage, setWatchlistPage] = useState(1);
+  const [watchlistSearch, setWatchlistSearch] = useState("")
+  const [watchlistRoleFilter, setWatchlistRoleFilter] = useState("ALL")
+  const [watchlistPage, setWatchlistPage] = useState(1)
 
-  const [logsSearch, setLogsSearch] = useState("");
-  const [logsSeverityFilter, setLogsSeverityFilter] = useState("ALL");
-  const [logsPage, setLogsPage] = useState(1);
+  const [logsSearch, setLogsSearch] = useState("")
+  const [logsSeverityFilter, setLogsSeverityFilter] = useState("ALL")
+  const [logsPage, setLogsPage] = useState(1)
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [investigatingEvent, setInvestigatingEvent] = useState<FraudEventDto | null>(null);
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [investigatingEvent, setInvestigatingEvent] = useState<FraudEventDto | null>(null)
 
-  const loadData = useCallback(async (signal?: { cancelled: boolean }) => {
-    setIsLoading(true);
-    setLoadError(null);
-    try {
-      const now = new Date();
-      let startDate: Date | undefined;
-      if (timeRange === "Today") {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (timeRange === "7 days") {
-        startDate = new Date(now.getTime() - 7 * 86400 * 1000);
-      } else if (timeRange === "30 days") {
-        startDate = new Date(now.getTime() - 30 * 86400 * 1000);
+  const loadData = useCallback(
+    async (signal?: { cancelled: boolean }) => {
+      setIsLoading(true)
+      setLoadError(null)
+      try {
+        const now = new Date()
+        let startDate: Date | undefined
+        if (timeRange === "Today") {
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        } else if (timeRange === "7 days") {
+          startDate = new Date(now.getTime() - 7 * 86400 * 1000)
+        } else if (timeRange === "30 days") {
+          startDate = new Date(now.getTime() - 30 * 86400 * 1000)
+        }
+
+        const [metricsRes, eventsRes, watchlistRes, logsRes] = await Promise.all([
+          fraudApi
+            .getMetrics(startDate ? { startDate: startDate.toISOString() } : undefined)
+            .catch(() => null),
+          fraudApi
+            .listEvents({
+              page: currentPage,
+              limit: pageSize,
+              status: statusFilter !== "ALL" ? (statusFilter as FraudEventStatus) : undefined,
+              riskLevel: riskLevelFilter !== "ALL" ? (riskLevelFilter as RiskLevel) : undefined,
+              actorType: actorTypeFilter !== "ALL" ? actorTypeFilter : undefined,
+              search: searchQuery.trim() || undefined,
+              startDate: startDate ? startDate.toISOString() : undefined,
+            })
+            .catch(() => null),
+          fraudApi.getWatchlist().catch(() => []),
+          fraudApi.getSecurityLogs().catch(() => []),
+        ])
+
+        if (signal?.cancelled) return
+
+        if (metricsRes) {
+          setMetrics(metricsRes)
+        }
+
+        if (eventsRes) {
+          setAlerts(eventsRes.items || [])
+          setTotalAlerts(eventsRes.total || 0)
+        } else {
+          setAlerts([])
+          setTotalAlerts(0)
+        }
+
+        setWatchlist(watchlistRes || [])
+        setSecurityLogs(logsRes || [])
+      } catch {
+        if (!signal?.cancelled) {
+          setLoadError("Failed to synchronize fraud records from server")
+        }
+      } finally {
+        if (!signal?.cancelled) {
+          setIsLoading(false)
+        }
       }
+    },
+    [timeRange, currentPage, pageSize, statusFilter, riskLevelFilter, actorTypeFilter, searchQuery]
+  )
 
-      const [metricsRes, eventsRes, watchlistRes, logsRes] = await Promise.all([
-        fraudApi
-          .getMetrics(startDate ? { startDate: startDate.toISOString() } : undefined)
-          .catch(() => null),
-        fraudApi
-          .listEvents({
-            page: currentPage,
-            limit: pageSize,
-            status: statusFilter !== "ALL" ? (statusFilter as FraudEventStatus) : undefined,
-            riskLevel: riskLevelFilter !== "ALL" ? (riskLevelFilter as RiskLevel) : undefined,
-            actorType: actorTypeFilter !== "ALL" ? actorTypeFilter : undefined,
-            search: searchQuery.trim() || undefined,
-            startDate: startDate ? startDate.toISOString() : undefined,
-          })
-          .catch(() => null),
-        fraudApi.getWatchlist().catch(() => []),
-        fraudApi.getSecurityLogs().catch(() => []),
-      ]);
-
-      if (signal?.cancelled) return;
-
-      if (metricsRes) {
-        setMetrics(metricsRes);
-      }
-
-      if (eventsRes) {
-        setAlerts(eventsRes.items || []);
-        setTotalAlerts(eventsRes.total || 0);
-      } else {
-        setAlerts([]);
-        setTotalAlerts(0);
-      }
-
-      setWatchlist(watchlistRes || []);
-      setSecurityLogs(logsRes || []);
-    } catch {
-      if (!signal?.cancelled) {
-        setLoadError("Failed to synchronize fraud records from server");
-      }
-    } finally {
-      if (!signal?.cancelled) {
-        setIsLoading(false);
-      }
+  useEffect(() => {
+    const signal = { cancelled: false }
+    void (async () => {
+      await loadData(signal)
+    })()
+    return () => {
+      signal.cancelled = true
     }
-  }, [
-    timeRange,
-    currentPage,
-    pageSize,
-    statusFilter,
-    riskLevelFilter,
-    actorTypeFilter,
-    searchQuery,
-  ]);
-
-  useRef<boolean>(false);
-  {
-    const loadDataRef = useRef(loadData);
-    loadDataRef.current = loadData;
-
-    const depsKey = `${timeRange}-${currentPage}-${statusFilter}-${riskLevelFilter}-${actorTypeFilter}-${searchQuery}`;
-    const prevDepsKey = useRef(depsKey);
-
-    if (prevDepsKey.current !== depsKey) {
-      prevDepsKey.current = depsKey;
-      loadDataRef.current();
-    }
-  }
+  }, [loadData])
 
   const handleUpdateStatus = async (
     id: string,
@@ -150,13 +141,13 @@ export default function FraudMonitoringPage() {
     notes?: string
   ) => {
     try {
-      await fraudApi.updateEventStatus(id, action, notes);
-      toast.success(`Event status updated to ${action}`);
-      await loadData();
+      await fraudApi.updateEventStatus(id, action, notes)
+      toast.success(`Event status updated to ${action}`)
+      await loadData()
     } catch {
-      toast.error("Failed to update status on server");
+      toast.error("Failed to update status on server")
     }
-  };
+  }
 
   const handleExportLogs = () => {
     const dataToExport = alerts.map((a) => ({
@@ -170,25 +161,25 @@ export default function FraudMonitoringPage() {
       Status: a.status,
       Reason: a.reason,
       CreatedAt: a.createdAt,
-    }));
+    }))
 
     const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
       JSON.stringify(dataToExport, null, 2)
-    )}`;
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", jsonString);
+    )}`
+    const downloadAnchor = document.createElement("a")
+    downloadAnchor.setAttribute("href", jsonString)
     downloadAnchor.setAttribute(
       "download",
       `fraud_security_logs_${new Date().toISOString().slice(0, 10)}.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    toast.success("Security logs exported successfully");
-  };
+    )
+    document.body.appendChild(downloadAnchor)
+    downloadAnchor.click()
+    downloadAnchor.remove()
+    toast.success("Security logs exported successfully")
+  }
 
   const paginationMeta: PaginationMeta = useMemo(() => {
-    const totalPages = Math.ceil(totalAlerts / pageSize) || 1;
+    const totalPages = Math.ceil(totalAlerts / pageSize) || 1
     return {
       total: totalAlerts,
       page: currentPage,
@@ -196,8 +187,8 @@ export default function FraudMonitoringPage() {
       totalPages,
       hasNextPage: currentPage < totalPages,
       hasPrevPage: currentPage > 1,
-    };
-  }, [totalAlerts, currentPage, pageSize]);
+    }
+  }, [totalAlerts, currentPage, pageSize])
 
   const alertColumns: Column<FraudEventDto>[] = useMemo(
     () => [
@@ -207,7 +198,7 @@ export default function FraudMonitoringPage() {
         cell: (row) => {
           const ruleCode = row.signals[0]?.code
             ? row.signals[0].code.replace(/^(CUST_|BOOKING_|OPS_|ACCT_)/, "").replace(/_/g, " ")
-            : row.eventType.replace(/_/g, " ");
+            : row.eventType.replace(/_/g, " ")
           return (
             <div className="space-y-1 py-1">
               <div className="flex items-center gap-2">
@@ -220,16 +211,16 @@ export default function FraudMonitoringPage() {
                 {row.entityType}: {row.entityId}
               </p>
             </div>
-          );
+          )
         },
       },
       {
         id: "actor",
         header: "Actor",
         cell: (row) => {
-          const name = row.metadata?.userName || `User ${row.userId.slice(-6)}`;
-          const email = row.metadata?.userEmail || `${row.userId.slice(-6)}@washqueue.com`;
-          const avatar = row.metadata?.userAvatar as string | undefined;
+          const name = row.metadata?.userName || `User ${row.userId.slice(-6)}`
+          const email = row.metadata?.userEmail || `${row.userId.slice(-6)}@washqueue.com`
+          const avatar = row.metadata?.userAvatar as string | undefined
           return (
             <div className="flex items-center gap-2.5 py-1">
               <div className="h-8 w-8 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center font-semibold text-primary shrink-0 border border-primary/30 text-xs">
@@ -247,7 +238,7 @@ export default function FraudMonitoringPage() {
                 </div>
               </div>
             </div>
-          );
+          )
         },
       },
       {
@@ -283,8 +274,8 @@ export default function FraudMonitoringPage() {
             row.riskLevel === "HIGH"
               ? "text-rose-400 bg-rose-500/10 border-rose-500/20"
               : row.riskLevel === "MEDIUM"
-              ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
-              : "text-blue-400 bg-blue-500/10 border-blue-500/20";
+                ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
+                : "text-blue-400 bg-blue-500/10 border-blue-500/20"
           return (
             <div className="flex flex-col items-center gap-1 py-1">
               <span className={`px-2 py-0.5 rounded text-xs font-bold border ${color}`}>
@@ -296,14 +287,14 @@ export default function FraudMonitoringPage() {
                     row.riskLevel === "HIGH"
                       ? "bg-rose-500"
                       : row.riskLevel === "MEDIUM"
-                      ? "bg-amber-500"
-                      : "bg-blue-500"
+                        ? "bg-amber-500"
+                        : "bg-blue-500"
                   }`}
                   style={{ width: `${Math.min(100, row.riskScore)}%` }}
                 />
               </div>
             </div>
-          );
+          )
         },
       },
       {
@@ -344,7 +335,7 @@ export default function FraudMonitoringPage() {
       },
     ],
     []
-  );
+  )
 
   const selectFilters: SelectFilter[] = useMemo(
     () => [
@@ -353,8 +344,8 @@ export default function FraudMonitoringPage() {
         label: "Risk Level",
         value: riskLevelFilter,
         onChange: (val) => {
-          setRiskLevelFilter(val);
-          setCurrentPage(1);
+          setRiskLevelFilter(val)
+          setCurrentPage(1)
         },
         options: [
           { label: "All Severities", value: "ALL" },
@@ -368,8 +359,8 @@ export default function FraudMonitoringPage() {
         label: "Actor Role",
         value: actorTypeFilter,
         onChange: (val) => {
-          setActorTypeFilter(val);
-          setCurrentPage(1);
+          setActorTypeFilter(val)
+          setCurrentPage(1)
         },
         options: [
           { label: "All Roles", value: "ALL" },
@@ -380,25 +371,25 @@ export default function FraudMonitoringPage() {
       },
     ],
     [riskLevelFilter, actorTypeFilter]
-  );
+  )
 
   const filteredWatchlist = useMemo(() => {
     return watchlist.filter((user) => {
       const matchRole =
         watchlistRoleFilter === "ALL" ||
-        user.role.toUpperCase() === watchlistRoleFilter.toUpperCase();
+        user.role.toUpperCase() === watchlistRoleFilter.toUpperCase()
       const matchSearch =
         !watchlistSearch ||
         user.name.toLowerCase().includes(watchlistSearch.toLowerCase()) ||
         user.email.toLowerCase().includes(watchlistSearch.toLowerCase()) ||
-        user.id.toLowerCase().includes(watchlistSearch.toLowerCase());
-      return matchRole && matchSearch;
-    });
-  }, [watchlist, watchlistRoleFilter, watchlistSearch]);
+        user.id.toLowerCase().includes(watchlistSearch.toLowerCase())
+      return matchRole && matchSearch
+    })
+  }, [watchlist, watchlistRoleFilter, watchlistSearch])
 
   const watchlistPaginationMeta: PaginationMeta = useMemo(() => {
-    const total = filteredWatchlist.length;
-    const totalPages = Math.ceil(total / 10) || 1;
+    const total = filteredWatchlist.length
+    const totalPages = Math.ceil(total / 10) || 1
     return {
       total,
       page: watchlistPage,
@@ -406,13 +397,13 @@ export default function FraudMonitoringPage() {
       totalPages,
       hasNextPage: watchlistPage < totalPages,
       hasPrevPage: watchlistPage > 1,
-    };
-  }, [filteredWatchlist.length, watchlistPage]);
+    }
+  }, [filteredWatchlist.length, watchlistPage])
 
   const paginatedWatchlist = useMemo(() => {
-    const start = (watchlistPage - 1) * 10;
-    return filteredWatchlist.slice(start, start + 10);
-  }, [filteredWatchlist, watchlistPage]);
+    const start = (watchlistPage - 1) * 10
+    return filteredWatchlist.slice(start, start + 10)
+  }, [filteredWatchlist, watchlistPage])
 
   const watchlistColumns: Column<WatchlistUser>[] = useMemo(
     () => [
@@ -450,8 +441,8 @@ export default function FraudMonitoringPage() {
               row.riskScore >= 70
                 ? "text-rose-400 bg-rose-500/10 border-rose-500/20"
                 : row.riskScore >= 40
-                ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
-                : "text-blue-400 bg-blue-500/10 border-blue-500/20"
+                  ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
+                  : "text-blue-400 bg-blue-500/10 border-blue-500/20"
             }`}
           >
             {row.riskScore}
@@ -462,8 +453,8 @@ export default function FraudMonitoringPage() {
         id: "cancellationRate",
         header: "Cancellation Rate",
         cell: (row) => {
-          const isHigh = row.cancellationRate >= 50;
-          const isMed = row.cancellationRate >= 25 && row.cancellationRate < 50;
+          const isHigh = row.cancellationRate >= 50
+          const isMed = row.cancellationRate >= 25 && row.cancellationRate < 50
           return (
             <div className="w-28 space-y-1 py-1">
               <span
@@ -482,7 +473,7 @@ export default function FraudMonitoringPage() {
                 />
               </div>
             </div>
-          );
+          )
         },
       },
       {
@@ -494,8 +485,8 @@ export default function FraudMonitoringPage() {
               row.duplicateSignalStatus === "YES (HIGH)"
                 ? "text-rose-400"
                 : row.duplicateSignalStatus === "SUSPICIOUS"
-                ? "text-amber-400"
-                : "text-muted-foreground"
+                  ? "text-amber-400"
+                  : "text-muted-foreground"
             }`}
           >
             {row.duplicateSignalStatus}
@@ -513,8 +504,8 @@ export default function FraudMonitoringPage() {
                 row.status === "ACTIVE"
                   ? "bg-emerald-500"
                   : row.status === "FLAGGED"
-                  ? "bg-rose-500"
-                  : "bg-amber-500"
+                    ? "bg-rose-500"
+                    : "bg-amber-500"
               }`}
             />
             <span className="font-semibold text-[11px] tracking-wider text-muted-foreground uppercase">
@@ -555,8 +546,8 @@ export default function FraudMonitoringPage() {
                 },
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-              };
-              setInvestigatingEvent(matchedAlert);
+              }
+              setInvestigatingEvent(matchedAlert)
             }}
             className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-150 shadow-xs cursor-pointer"
           >
@@ -566,24 +557,23 @@ export default function FraudMonitoringPage() {
       },
     ],
     [alerts]
-  );
+  )
 
   const filteredLogs = useMemo(() => {
     return securityLogs.filter((log) => {
-      const matchSeverity =
-        logsSeverityFilter === "ALL" || log.severity === logsSeverityFilter;
+      const matchSeverity = logsSeverityFilter === "ALL" || log.severity === logsSeverityFilter
       const matchSearch =
         !logsSearch ||
         log.title.toLowerCase().includes(logsSearch.toLowerCase()) ||
         log.description.toLowerCase().includes(logsSearch.toLowerCase()) ||
-        log.meta.toLowerCase().includes(logsSearch.toLowerCase());
-      return matchSeverity && matchSearch;
-    });
-  }, [securityLogs, logsSeverityFilter, logsSearch]);
+        log.meta.toLowerCase().includes(logsSearch.toLowerCase())
+      return matchSeverity && matchSearch
+    })
+  }, [securityLogs, logsSeverityFilter, logsSearch])
 
   const logsPaginationMeta: PaginationMeta = useMemo(() => {
-    const total = filteredLogs.length;
-    const totalPages = Math.ceil(total / 10) || 1;
+    const total = filteredLogs.length
+    const totalPages = Math.ceil(total / 10) || 1
     return {
       total,
       page: logsPage,
@@ -591,13 +581,13 @@ export default function FraudMonitoringPage() {
       totalPages,
       hasNextPage: logsPage < totalPages,
       hasPrevPage: logsPage > 1,
-    };
-  }, [filteredLogs.length, logsPage]);
+    }
+  }, [filteredLogs.length, logsPage])
 
   const paginatedLogs = useMemo(() => {
-    const start = (logsPage - 1) * 10;
-    return filteredLogs.slice(start, start + 10);
-  }, [filteredLogs, logsPage]);
+    const start = (logsPage - 1) * 10
+    return filteredLogs.slice(start, start + 10)
+  }, [filteredLogs, logsPage])
 
   const logsColumns: Column<SecurityAuditLog>[] = useMemo(
     () => [
@@ -641,7 +631,7 @@ export default function FraudMonitoringPage() {
       },
     ],
     []
-  );
+  )
 
   return (
     <div className="space-y-6 pb-12">
@@ -667,8 +657,8 @@ export default function FraudMonitoringPage() {
               <button
                 key={tab}
                 onClick={() => {
-                  setTimeRange(tab);
-                  setCurrentPage(1);
+                  setTimeRange(tab)
+                  setCurrentPage(1)
                 }}
                 className={`px-3 py-1 rounded-md font-medium transition-all ${
                   timeRange === tab
@@ -771,16 +761,16 @@ export default function FraudMonitoringPage() {
           <DataTableToolbar
             searchQuery={searchQuery}
             onSearchChange={(q) => {
-              setSearchQuery(q);
-              setCurrentPage(1);
+              setSearchQuery(q)
+              setCurrentPage(1)
             }}
             searchLabel="Search Incidents"
             searchPlaceholder="Search by actor, email, reason, rule code..."
             tabs={STATUS_TABS}
             activeTab={statusFilter}
             onTabChange={(tab) => {
-              setStatusFilter(tab);
-              setCurrentPage(1);
+              setStatusFilter(tab)
+              setCurrentPage(1)
             }}
             selectFilters={selectFilters}
           />
@@ -804,8 +794,8 @@ export default function FraudMonitoringPage() {
           <DataTableToolbar
             searchQuery={watchlistSearch}
             onSearchChange={(q) => {
-              setWatchlistSearch(q);
-              setWatchlistPage(1);
+              setWatchlistSearch(q)
+              setWatchlistPage(1)
             }}
             searchLabel="Search Watchlist"
             searchPlaceholder="Search user by name, email, ID..."
@@ -817,8 +807,8 @@ export default function FraudMonitoringPage() {
             ]}
             activeTab={watchlistRoleFilter}
             onTabChange={(tab) => {
-              setWatchlistRoleFilter(tab);
-              setWatchlistPage(1);
+              setWatchlistRoleFilter(tab)
+              setWatchlistPage(1)
             }}
           />
 
@@ -841,8 +831,8 @@ export default function FraudMonitoringPage() {
           <DataTableToolbar
             searchQuery={logsSearch}
             onSearchChange={(q) => {
-              setLogsSearch(q);
-              setLogsPage(1);
+              setLogsSearch(q)
+              setLogsPage(1)
             }}
             searchLabel="Search Logs"
             searchPlaceholder="Search audit events by action, IP, description..."
@@ -854,8 +844,8 @@ export default function FraudMonitoringPage() {
             ]}
             activeTab={logsSeverityFilter}
             onTabChange={(tab) => {
-              setLogsSeverityFilter(tab);
-              setLogsPage(1);
+              setLogsSeverityFilter(tab)
+              setLogsPage(1)
             }}
           />
 
@@ -880,5 +870,5 @@ export default function FraudMonitoringPage() {
         onUpdateStatus={handleUpdateStatus}
       />
     </div>
-  );
+  )
 }

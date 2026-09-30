@@ -1,33 +1,33 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document } from "mongoose"
 import {
   RiskLevel,
   ActorType,
   EntityType,
   FraudEventStatus,
-} from "../../domain/value-objects/fraud-types.vo";
+} from "../../domain/value-objects/fraud-types.vo"
 
 export interface IFraudEventDoc extends Document {
-  userId: string;
-  actorType: ActorType;
-  entityType: EntityType;
-  entityId: string;
-  eventType: string;
-  riskScore: number;
-  riskLevel: RiskLevel;
+  userId: string
+  actorType: ActorType
+  entityType: EntityType
+  entityId: string
+  eventType: string
+  riskScore: number
+  riskLevel: RiskLevel
   signals: Array<{
-    code: string;
-    description: string;
-    score: number;
-    metadata?: Record<string, unknown>;
-  }>;
-  reason: string;
-  status: FraudEventStatus;
-  metadata?: Record<string, unknown>;
-  resolvedAt?: Date | null;
-  resolvedBy?: string | null;
-  resolutionNotes?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+    code: string
+    description: string
+    score: number
+    metadata?: Record<string, unknown>
+  }>
+  reason: string
+  status: FraudEventStatus
+  metadata?: Record<string, unknown>
+  resolvedAt?: Date | null
+  resolvedBy?: string | null
+  resolutionNotes?: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 const FraudSignalSchema = new Schema(
@@ -38,7 +38,7 @@ const FraudSignalSchema = new Schema(
     metadata: { type: Schema.Types.Mixed },
   },
   { _id: false }
-);
+)
 
 export const FraudEventSchema = new Schema<IFraudEventDoc>(
   {
@@ -81,10 +81,10 @@ export const FraudEventSchema = new Schema<IFraudEventDoc>(
     timestamps: true,
     collection: "fraud_events",
   }
-);
+)
 
-FraudEventSchema.index({ status: 1, riskLevel: 1, createdAt: -1 });
-FraudEventSchema.index({ userId: 1, createdAt: -1 });
-FraudEventSchema.index({ "metadata.stationId": 1, createdAt: -1 });
+FraudEventSchema.index({ status: 1, riskLevel: 1, createdAt: -1 })
+FraudEventSchema.index({ userId: 1, createdAt: -1 })
+FraudEventSchema.index({ "metadata.stationId": 1, createdAt: -1 })
 
-export const FraudEventModel = model<IFraudEventDoc>("FraudEvent", FraudEventSchema);
+export const FraudEventModel = model<IFraudEventDoc>("FraudEvent", FraudEventSchema)

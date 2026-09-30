@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class SuspiciousReviewRule implements IFraudRule {
-  readonly code = "CUST_SUSPICIOUS_REVIEW";
-  readonly description = "Customer has submitted rapid or repeated review ratings";
-  readonly baseScore = 25;
+  readonly code = "CUST_SUSPICIOUS_REVIEW"
+  readonly description = "Customer has submitted rapid or repeated review ratings"
+  readonly baseScore = 25
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -17,12 +17,12 @@ export class SuspiciousReviewRule implements IFraudRule {
       context.actorType === ActorType.CUSTOMER &&
       context.entityType === EntityType.REVIEW &&
       context.eventType === "REVIEW_SUBMITTED"
-    );
+    )
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const key = `fraud:counter:reviews:user:${context.userId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 86400);
+    const key = `fraud:counter:reviews:user:${context.userId}`
+    const count = await this.cacheService.incrementWithTtl(key, 86400)
 
     if (count > this.threshold) {
       return {
@@ -33,9 +33,9 @@ export class SuspiciousReviewRule implements IFraudRule {
           reviewCount: count,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

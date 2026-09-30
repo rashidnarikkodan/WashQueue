@@ -29,9 +29,7 @@ const KnowledgeDocumentListPage = lazy(
 const KnowledgeDocumentDetailsPage = lazy(
   () => import("@/features/knowledge-docs/pages/KnowledgeDocumentDetailsPage")
 )
-const FraudMonitoringPage = lazy(
-  () => import("@/features/fraud/pages/FraudMonitoringPage")
-)
+const FraudMonitoringPage = lazy(() => import("@/features/fraud/pages/FraudMonitoringPage"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,

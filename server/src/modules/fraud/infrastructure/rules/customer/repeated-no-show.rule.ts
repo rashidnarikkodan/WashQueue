@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class RepeatedNoShowRule implements IFraudRule {
-  readonly code = "CUST_REPEATED_NO_SHOW";
-  readonly description = "Customer has accumulated repeated no-show records";
-  readonly baseScore = 40;
+  readonly code = "CUST_REPEATED_NO_SHOW"
+  readonly description = "Customer has accumulated repeated no-show records"
+  readonly baseScore = 40
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -17,12 +17,12 @@ export class RepeatedNoShowRule implements IFraudRule {
       context.actorType === ActorType.CUSTOMER &&
       context.entityType === EntityType.BOOKING &&
       context.eventType === "BOOKING_NO_SHOW"
-    );
+    )
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const key = `fraud:counter:noshows:user:${context.userId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 1209600);
+    const key = `fraud:counter:noshows:user:${context.userId}`
+    const count = await this.cacheService.incrementWithTtl(key, 1209600)
 
     if (count >= this.threshold) {
       return {
@@ -34,9 +34,9 @@ export class RepeatedNoShowRule implements IFraudRule {
           periodDays: 14,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

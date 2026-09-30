@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class LoginVelocityAbuseRule implements IFraudRule {
-  readonly code = "ACCT_LOGIN_VELOCITY";
-  readonly description = "Excessive failed login attempts from user identifier or IP address";
-  readonly baseScore = 30;
+  readonly code = "ACCT_LOGIN_VELOCITY"
+  readonly description = "Excessive failed login attempts from user identifier or IP address"
+  readonly baseScore = 30
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -13,15 +13,12 @@ export class LoginVelocityAbuseRule implements IFraudRule {
   ) {}
 
   isApplicable(context: FraudEvaluationContext): boolean {
-    return (
-      context.entityType === EntityType.USER &&
-      context.eventType === "USER_LOGIN_FAILED"
-    );
+    return context.entityType === EntityType.USER && context.eventType === "USER_LOGIN_FAILED"
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const key = `fraud:counter:failed_logins:user:${context.userId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 900);
+    const key = `fraud:counter:failed_logins:user:${context.userId}`
+    const count = await this.cacheService.incrementWithTtl(key, 900)
 
     if (count >= this.threshold) {
       return {
@@ -33,9 +30,9 @@ export class LoginVelocityAbuseRule implements IFraudRule {
           periodMinutes: 15,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

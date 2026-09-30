@@ -1,13 +1,13 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal } from "../../../domain/value-objects/fraud-types.vo";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal } from "../../../domain/value-objects/fraud-types.vo"
 
 export class SuspendedAccountActivityRule implements IFraudRule {
-  readonly code = "ACCT_SUSPENDED_ACTIVITY";
-  readonly description = "Attempted actions from a blocked or suspended account";
-  readonly baseScore = 60;
+  readonly code = "ACCT_SUSPENDED_ACTIVITY"
+  readonly description = "Attempted actions from a blocked or suspended account"
+  readonly baseScore = 60
 
   isApplicable(context: FraudEvaluationContext): boolean {
-    return Boolean(context.payload?.isBlocked || context.payload?.isSuspended);
+    return Boolean(context.payload?.isBlocked || context.payload?.isSuspended)
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
@@ -20,9 +20,9 @@ export class SuspendedAccountActivityRule implements IFraudRule {
           userId: context.userId,
           eventType: context.eventType,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

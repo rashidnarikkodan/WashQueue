@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class ExcessivePaymentFailuresRule implements IFraudRule {
-  readonly code = "CUST_EXCESSIVE_PAYMENT_FAILURES";
-  readonly description = "Customer has multiple failed payment attempts within a short interval";
-  readonly baseScore = 35;
+  readonly code = "CUST_EXCESSIVE_PAYMENT_FAILURES"
+  readonly description = "Customer has multiple failed payment attempts within a short interval"
+  readonly baseScore = 35
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -17,12 +17,12 @@ export class ExcessivePaymentFailuresRule implements IFraudRule {
       context.actorType === ActorType.CUSTOMER &&
       context.entityType === EntityType.PAYMENT &&
       context.eventType === "PAYMENT_FAILED"
-    );
+    )
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const key = `fraud:counter:payment_failures:user:${context.userId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 900);
+    const key = `fraud:counter:payment_failures:user:${context.userId}`
+    const count = await this.cacheService.incrementWithTtl(key, 900)
 
     if (count >= this.threshold) {
       return {
@@ -34,9 +34,9 @@ export class ExcessivePaymentFailuresRule implements IFraudRule {
           periodMinutes: 15,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

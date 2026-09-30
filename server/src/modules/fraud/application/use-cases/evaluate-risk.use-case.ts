@@ -1,14 +1,14 @@
-import { IFraudDetectorService } from "../../domain/services/fraud-detector.interface";
-import { IFraudEventRepository } from "../../domain/repositories/fraud-event.repository.interface";
-import { FraudEvaluationContext } from "../../domain/services/fraud-rule.interface";
-import { FraudEvent } from "../../domain/entities/fraud-event.entity";
+import { IFraudDetectorService } from "../../domain/services/fraud-detector.interface"
+import { IFraudEventRepository } from "../../domain/repositories/fraud-event.repository.interface"
+import { FraudEvaluationContext } from "../../domain/services/fraud-rule.interface"
+import { FraudEvent } from "../../domain/entities/fraud-event.entity"
 import {
   RiskAssessment,
   RiskLevel,
   FraudEventStatus,
-} from "../../domain/value-objects/fraud-types.vo";
-import { EvaluateRiskInputDTO } from "../dtos/fraud.dto";
-import { IEvaluateRiskUseCase } from "../interfaces/fraud-usecases.interface";
+} from "../../domain/value-objects/fraud-types.vo"
+import { EvaluateRiskInputDTO } from "../dtos/fraud.dto"
+import { IEvaluateRiskUseCase } from "../interfaces/fraud-usecases.interface"
 
 export class EvaluateRiskUseCase implements IEvaluateRiskUseCase {
   constructor(
@@ -28,9 +28,9 @@ export class EvaluateRiskUseCase implements IEvaluateRiskUseCase {
       deviceId: dto.deviceId,
       payload: dto.payload,
       timestamp: new Date(),
-    };
+    }
 
-    const assessment = await this.detector.assess(context);
+    const assessment = await this.detector.assess(context)
 
     if (assessment.level === RiskLevel.MEDIUM || assessment.level === RiskLevel.HIGH) {
       const fraudEvent = new FraudEvent({
@@ -50,11 +50,11 @@ export class EvaluateRiskUseCase implements IEvaluateRiskUseCase {
           deviceId: dto.deviceId,
           ...dto.payload,
         },
-      });
+      })
 
-      await this.repository.save(fraudEvent);
+      await this.repository.save(fraudEvent)
     }
 
-    return assessment;
+    return assessment
   }
 }

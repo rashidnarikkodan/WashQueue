@@ -15,10 +15,7 @@ import { ICreateBookingReservationUseCase } from "../interfaces/payment-usecases
 import { BookingPricingResolutionService } from "@/modules/booking/application/services/booking-pricing-resolution.service"
 import { IPaymentGatewayService } from "@/core/application/interfaces/payment-gateway.interface"
 
-import {
-  CreateBookingReservationInput,
-  BookingReservationResponseDTO,
-} from "../dtos/payment.dto"
+import { CreateBookingReservationInput, BookingReservationResponseDTO } from "../dtos/payment.dto"
 
 export class CreateBookingReservationUseCase implements ICreateBookingReservationUseCase {
   private readonly pricingResolutionService: BookingPricingResolutionService

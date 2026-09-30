@@ -1,13 +1,13 @@
-import React from "react";
-import { Shield, MoreVertical, XCircle, Star, Copy, ExternalLink } from "lucide-react";
-import { RiskLevelBadge } from "./FraudBadges";
-import type { FraudEventDto } from "../types/fraud.types";
+import React from "react"
+import { Shield, MoreVertical, XCircle, Star, Copy, ExternalLink } from "lucide-react"
+import { RiskLevelBadge } from "./FraudBadges"
+import type { FraudEventDto } from "../types/fraud.types"
 
 interface ActiveFraudAlertsCardProps {
-  alerts: FraudEventDto[];
-  onInvestigate: (alert: FraudEventDto) => void;
-  onViewAll?: () => void;
-  isLoading?: boolean;
+  alerts: FraudEventDto[]
+  onInvestigate: (alert: FraudEventDto) => void
+  onViewAll?: () => void
+  isLoading?: boolean
 }
 
 export const ActiveFraudAlertsCard: React.FC<ActiveFraudAlertsCardProps> = ({
@@ -22,27 +22,28 @@ export const ActiveFraudAlertsCard: React.FC<ActiveFraudAlertsCardProps> = ({
         <div className="h-9 w-9 rounded-full flex items-center justify-center bg-rose-500/15 text-rose-400 shrink-0">
           <XCircle size={18} />
         </div>
-      );
+      )
     }
     if (alert.riskLevel === "MEDIUM") {
       return (
         <div className="h-9 w-9 rounded-full flex items-center justify-center bg-amber-500/15 text-amber-400 shrink-0">
           <Star size={18} />
         </div>
-      );
+      )
     }
     return (
       <div className="h-9 w-9 rounded-full flex items-center justify-center bg-blue-500/15 text-blue-400 shrink-0">
         <Copy size={18} />
       </div>
-    );
-  };
+    )
+  }
 
   const formatActorDisplay = (alert: FraudEventDto) => {
-    const role = alert.actorType === "OWNER" ? "Owner" : alert.actorType === "MANAGER" ? "Manager" : "Customer";
-    const name = alert.metadata?.userName || alert.userId.slice(-6);
-    return `${name} (${role})`;
-  };
+    const role =
+      alert.actorType === "OWNER" ? "Owner" : alert.actorType === "MANAGER" ? "Manager" : "Customer"
+    const name = alert.metadata?.userName || alert.userId.slice(-6)
+    return `${name} (${role})`
+  }
 
   return (
     <div className="rounded-xl border border-border/80 bg-card/70 backdrop-blur-md p-5 flex flex-col justify-between">
@@ -64,14 +65,18 @@ export const ActiveFraudAlertsCard: React.FC<ActiveFraudAlertsCardProps> = ({
 
       <div className="mt-4 space-y-3">
         {isLoading ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">Loading active alerts...</div>
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            Loading active alerts...
+          </div>
         ) : alerts.length === 0 ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">No active fraud alerts detected</div>
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            No active fraud alerts detected
+          </div>
         ) : (
           alerts.slice(0, 4).map((alert, idx) => {
             const ruleCodeFormatted = alert.signals[0]?.code
               ? alert.signals[0].code.replace(/^(CUST_|BOOKING_|OPS_|ACCT_)/, "").replace(/_/g, " ")
-              : alert.eventType.replace(/_/g, " ");
+              : alert.eventType.replace(/_/g, " ")
 
             return (
               <div
@@ -109,10 +114,10 @@ export const ActiveFraudAlertsCard: React.FC<ActiveFraudAlertsCardProps> = ({
                   </button>
                 </div>
               </div>
-            );
+            )
           })
         )}
       </div>
     </div>
-  );
-};
+  )
+}

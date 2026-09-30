@@ -5,6 +5,8 @@ interface OllamaEmbedResponse {
   embeddings: number[][]
 }
 
+// make wrapper here for api calls --marked
+
 export class LocalEmbeddingModel implements IEmbeddingProvider {
   async embed(text: string): Promise<number[]> {
     const response = await fetch(`${env.OLLAMA_BASE_URL}/api/embed`, {

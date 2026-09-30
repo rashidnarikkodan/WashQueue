@@ -1,8 +1,8 @@
-import { IFraudEventRepository } from "../../domain/repositories/fraud-event.repository.interface";
+import { IFraudEventRepository } from "../../domain/repositories/fraud-event.repository.interface"
 import {
   IGetUserFraudProfileUseCase,
   UserFraudProfileResult,
-} from "../interfaces/fraud-usecases.interface";
+} from "../interfaces/fraud-usecases.interface"
 
 export class GetUserFraudProfileUseCase implements IGetUserFraudProfileUseCase {
   constructor(private readonly repository: IFraudEventRepository) {}
@@ -11,11 +11,11 @@ export class GetUserFraudProfileUseCase implements IGetUserFraudProfileUseCase {
     const [summary, recentEvents] = await Promise.all([
       this.repository.getUserFraudSummary(userId),
       this.repository.findByUserId(userId, 10),
-    ]);
+    ])
 
     return {
       summary,
       recentEvents,
-    };
+    }
   }
 }

@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class UnusualBookingFrequencyRule implements IFraudRule {
-  readonly code = "BOOKING_UNUSUAL_FREQUENCY";
-  readonly description = "Unusual overall booking frequency over a 24-hour cycle";
-  readonly baseScore = 30;
+  readonly code = "BOOKING_UNUSUAL_FREQUENCY"
+  readonly description = "Unusual overall booking frequency over a 24-hour cycle"
+  readonly baseScore = 30
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -13,15 +13,12 @@ export class UnusualBookingFrequencyRule implements IFraudRule {
   ) {}
 
   isApplicable(context: FraudEvaluationContext): boolean {
-    return (
-      context.entityType === EntityType.BOOKING &&
-      context.eventType === "BOOKING_CREATED"
-    );
+    return context.entityType === EntityType.BOOKING && context.eventType === "BOOKING_CREATED"
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const key = `fraud:counter:daily_bookings:user:${context.userId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 86400);
+    const key = `fraud:counter:daily_bookings:user:${context.userId}`
+    const count = await this.cacheService.incrementWithTtl(key, 86400)
 
     if (count > this.threshold) {
       return {
@@ -32,9 +29,9 @@ export class UnusualBookingFrequencyRule implements IFraudRule {
           dailyBookings: count,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

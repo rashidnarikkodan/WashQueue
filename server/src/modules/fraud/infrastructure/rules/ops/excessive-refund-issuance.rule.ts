@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class ExcessiveRefundIssuanceRule implements IFraudRule {
-  readonly code = "OPS_EXCESSIVE_REFUNDS";
-  readonly description = "Abnormally high volume of refunds issued for a station";
-  readonly baseScore = 45;
+  readonly code = "OPS_EXCESSIVE_REFUNDS"
+  readonly description = "Abnormally high volume of refunds issued for a station"
+  readonly baseScore = 45
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -17,15 +17,15 @@ export class ExcessiveRefundIssuanceRule implements IFraudRule {
       (context.actorType === ActorType.MANAGER || context.actorType === ActorType.OWNER) &&
       context.entityType === EntityType.PAYMENT &&
       context.eventType === "PAYMENT_REFUNDED"
-    );
+    )
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const stationId = context.stationId ?? context.payload?.stationId;
-    if (!stationId) return null;
+    const stationId = context.stationId ?? context.payload?.stationId
+    if (!stationId) return null
 
-    const key = `fraud:counter:station_refunds:${stationId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 86400);
+    const key = `fraud:counter:station_refunds:${stationId}`
+    const count = await this.cacheService.incrementWithTtl(key, 86400)
 
     if (count > this.threshold) {
       return {
@@ -37,9 +37,9 @@ export class ExcessiveRefundIssuanceRule implements IFraudRule {
           refundCount: count,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

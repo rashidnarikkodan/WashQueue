@@ -29,15 +29,15 @@ export enum FraudEventStatus {
 }
 
 export interface FraudSignal {
-  code: string;
-  description: string;
-  score: number;
-  metadata?: Record<string, unknown>;
+  code: string
+  description: string
+  score: number
+  metadata?: Record<string, unknown>
 }
 
 export interface RiskAssessment {
-  score: number;
-  level: RiskLevel;
-  signals: FraudSignal[];
-  reason: string;
+  score: number
+  level: RiskLevel
+  signals: FraudSignal[]
+  reason: string
 }

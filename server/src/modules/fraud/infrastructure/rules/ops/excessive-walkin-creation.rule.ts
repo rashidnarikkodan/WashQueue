@@ -1,11 +1,11 @@
-import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface";
-import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo";
-import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface";
+import { IFraudRule, FraudEvaluationContext } from "../../../domain/services/fraud-rule.interface"
+import { FraudSignal, ActorType, EntityType } from "../../../domain/value-objects/fraud-types.vo"
+import { IFraudCacheService } from "../../../domain/services/fraud-cache.interface"
 
 export class ExcessiveWalkinCreationRule implements IFraudRule {
-  readonly code = "OPS_EXCESSIVE_WALKINS";
-  readonly description = "Abnormally high walk-in bookings logged within a short time window";
-  readonly baseScore = 35;
+  readonly code = "OPS_EXCESSIVE_WALKINS"
+  readonly description = "Abnormally high walk-in bookings logged within a short time window"
+  readonly baseScore = 35
 
   constructor(
     private readonly cacheService: IFraudCacheService,
@@ -17,15 +17,15 @@ export class ExcessiveWalkinCreationRule implements IFraudRule {
       (context.actorType === ActorType.MANAGER || context.actorType === ActorType.OWNER) &&
       context.entityType === EntityType.BOOKING &&
       context.eventType === "WALKIN_BOOKING_CREATED"
-    );
+    )
   }
 
   async evaluate(context: FraudEvaluationContext): Promise<FraudSignal | null> {
-    const stationId = context.stationId ?? context.payload?.stationId;
-    if (!stationId) return null;
+    const stationId = context.stationId ?? context.payload?.stationId
+    if (!stationId) return null
 
-    const key = `fraud:counter:walkins:station:${stationId}`;
-    const count = await this.cacheService.incrementWithTtl(key, 3600);
+    const key = `fraud:counter:walkins:station:${stationId}`
+    const count = await this.cacheService.incrementWithTtl(key, 3600)
 
     if (count > this.threshold) {
       return {
@@ -38,9 +38,9 @@ export class ExcessiveWalkinCreationRule implements IFraudRule {
           periodMinutes: 60,
           threshold: this.threshold,
         },
-      };
+      }
     }
 
-    return null;
+    return null
   }
 }

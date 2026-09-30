@@ -1,10 +1,10 @@
-import React from "react";
-import { AlertCircle, UserCheck, Ban, Lock, ShieldCheck } from "lucide-react";
-import type { FraudMetricsDto } from "../types/fraud.types";
+import React from "react"
+import { AlertCircle, UserCheck, Ban, Lock, ShieldCheck } from "lucide-react"
+import type { FraudMetricsDto } from "../types/fraud.types"
 
 interface FraudStatsGridProps {
-  metrics: FraudMetricsDto | null;
-  isLoading?: boolean;
+  metrics: FraudMetricsDto | null
+  isLoading?: boolean
 }
 
 export const FraudStatsGrid: React.FC<FraudStatsGridProps> = ({ metrics, isLoading }) => {
@@ -59,12 +59,12 @@ export const FraudStatsGrid: React.FC<FraudStatsGridProps> = ({ metrics, isLoadi
       iconColor: "text-emerald-400 bg-emerald-500/10",
       indicatorColor: "bg-emerald-500",
     },
-  ];
+  ]
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
       {cards.map((card) => {
-        const Icon = card.icon;
+        const Icon = card.icon
         return (
           <div
             key={card.id}
@@ -97,8 +97,8 @@ export const FraudStatsGrid: React.FC<FraudStatsGridProps> = ({ metrics, isLoadi
               )}
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
