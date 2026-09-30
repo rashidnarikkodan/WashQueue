@@ -39,6 +39,7 @@ export const analyticsRouter = createAnalyticsRouter(analyticsController)
 
 export * from "./domain/types/analytics.types"
 export * from "./application/interfaces/analytics-query.interface"
+export * from "./application/interfaces/analytics-usecases.interface"
 export * from "./application/use-cases/get-admin-dashboard.use-case"
 export * from "./application/use-cases/get-owner-dashboard.use-case"
 export * from "./application/use-cases/get-manager-dashboard.use-case"

@@ -1,7 +1,8 @@
 import { AdminDashboardData, DateRange } from "../../domain/types/analytics.types"
 import { IAnalyticsQueryService } from "../interfaces/analytics-query.interface"
+import { IGetAdminDashboardUseCase } from "../interfaces/analytics-usecases.interface"
 
-export class GetAdminDashboardUseCase {
+export class GetAdminDashboardUseCase implements IGetAdminDashboardUseCase {
   constructor(private readonly queryService: IAnalyticsQueryService) {}
 
   async execute(range: DateRange = "30_DAYS"): Promise<AdminDashboardData> {

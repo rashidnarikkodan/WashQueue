@@ -1,7 +1,8 @@
 import { OwnerDashboardData, DateRange } from "../../domain/types/analytics.types"
 import { IAnalyticsQueryService } from "../interfaces/analytics-query.interface"
+import { IGetOwnerDashboardUseCase } from "../interfaces/analytics-usecases.interface"
 
-export class GetOwnerDashboardUseCase {
+export class GetOwnerDashboardUseCase implements IGetOwnerDashboardUseCase {
   constructor(private readonly queryService: IAnalyticsQueryService) {}
 
   async execute(
