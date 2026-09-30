@@ -10,7 +10,12 @@ export class SearchKnowledgeDocumentUseCase implements ISearchKnowledgeDocumentU
   ) {}
 
   async execute(data: SearchKnowledgeDocumentDto): Promise<RetrievedChunk[]> {
-    const embedding = await this.embeddingProvider.embed(data.query)
+    const trimmedQuery = data.query?.trim()
+    if (!trimmedQuery) {
+      return []
+    }
+
+    const embedding = await this.embeddingProvider.embed(trimmedQuery)
 
     const results = await this.vectorStore.search(embedding, {
       limit: data.limit || 5,
