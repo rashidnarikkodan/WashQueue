@@ -70,3 +70,11 @@ export interface DebitWalletInputDTO {
   referenceId?: string
   metadata?: Record<string, unknown>
 }
+
+export interface PaginatedLedgerDTO {
+  transactions: WalletTransactionDTO[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}

@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { HealthService } from "./health.service"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import { AppError } from "@/common/errors/app-error"
 
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
@@ -30,12 +31,10 @@ export class HealthController {
   getReady = async (_req: Request, res: Response): Promise<void> => {
     const isReady = await this.healthService.isReady()
     if (!isReady) {
-      res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
-        success: false,
-        message: "Server is not ready (critical dependencies unavailable)",
-        timestamp: new Date().toISOString(),
-      })
-      return
+      throw new AppError(
+        "Server is not ready (critical dependencies unavailable)",
+        HTTP_STATUS.SERVICE_UNAVAILABLE
+      )
     }
 
     success(

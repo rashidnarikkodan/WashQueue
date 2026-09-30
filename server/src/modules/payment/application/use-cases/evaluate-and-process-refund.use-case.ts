@@ -4,18 +4,12 @@ import { PaymentStatus } from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { IBookingNotificationService } from "@/modules/notification/notification.module"
-import {
-  RefundPolicyEngine,
-  RefundPolicyResult,
-  Responsibility,
-} from "../../domain/services/RefundPolicyEngine"
+import { RefundPolicyEngine, RefundPolicyResult } from "../../domain/services/RefundPolicyEngine"
 import logger from "@/configs/logger.config"
 
-export interface ProcessRefundInput {
-  bookingId: string
-  responsibility?: Responsibility
-  reason?: string
-}
+import { ProcessRefundInput } from "../dtos/payment.dto"
+
+export type { ProcessRefundInput }
 
 import { RefundWalletUseCase } from "@/modules/wallet/application/use-cases/refund-wallet.use-case"
 import { IEvaluateAndProcessRefundUseCase } from "../interfaces/payment-usecases.interface"

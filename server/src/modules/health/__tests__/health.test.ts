@@ -145,15 +145,11 @@ describe("Health Module", () => {
     it("should return 503 on getReady when services are not ready", async () => {
       vi.spyOn(mockHealthService, "isReady").mockResolvedValueOnce(false)
       const req = {} as Request
-      await controller.getReady(req, res as Response)
 
-      expect(res.status).toHaveBeenCalledWith(503)
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: false,
-          message: expect.stringContaining("not ready"),
-        })
-      )
+      await expect(controller.getReady(req, res as Response)).rejects.toMatchObject({
+        statusCode: 503,
+        message: expect.stringContaining("not ready"),
+      })
     })
 
     it("should return compact metrics on getMetrics", async () => {
