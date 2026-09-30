@@ -1,0 +1,17 @@
+export enum AIIntent {
+  FAQ = "FAQ",
+  SERVICE_INFO = "SERVICE_INFO",
+  POLICY = "POLICY",
+  BOOKING_INFO = "BOOKING_INFO",
+  PAYMENT_INFO = "PAYMENT_INFO",
+  QUEUE_INFO = "QUEUE_INFO",
+  SUPPORT_INFO = "SUPPORT_INFO",
+  STATION_DISCOVERY = "STATION_DISCOVERY",
+  RECOMMENDATION = "RECOMMENDATION",
+  OUT_OF_SCOPE = "OUT_OF_SCOPE",
+}
+
+export interface IntentResult {
+  intent: AIIntent
+  confidence: number
+}

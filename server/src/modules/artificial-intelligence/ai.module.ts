@@ -16,6 +16,13 @@ import { SearchKnowledgeDocumentUseCase } from "./application/usecases/search/se
 import { createChatRoutes } from "./presentation/chat.routes"
 import { ChatController } from "./presentation/chat.controller"
 import { AskKnowledgeUseCase } from "./application/usecases/chat/ask-knowledge.usecase"
+import { ChatUseCase } from "./application/usecases/chat/chat.usecase"
+import { OllamaIntentClassifier } from "./infrastructure/intent/ollama.intent-classifier"
+import { StationQueryAdapter } from "./infrastructure/adapters/station-query.adapter"
+import { QueueQueryAdapter } from "./infrastructure/adapters/queue-query.adapter"
+import { BookingQueryAdapter } from "./infrastructure/adapters/booking-query.adapter"
+import { stationRepository } from "@/modules/station/station.module"
+import { bookingRepository } from "@/modules/booking/booking.module"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 
 const aiRouter = Router()
@@ -70,9 +77,23 @@ const knowledgeDocumentController = new KnowledgeDocumentController(
   searchKnowledgeDocumentUseCase
 )
 
-const chatController = new ChatController(
-  new AskKnowledgeUseCase(llmProvider, searchKnowledgeDocumentUseCase)
+// Intent Classification & Routing Wiring
+const intentClassifier = new OllamaIntentClassifier(llmProvider)
+const stationQueryPort = new StationQueryAdapter(stationRepository)
+const queueQueryPort = new QueueQueryAdapter(stationRepository)
+const bookingQueryPort = new BookingQueryAdapter(bookingRepository)
+const askKnowledgeUseCase = new AskKnowledgeUseCase(llmProvider, searchKnowledgeDocumentUseCase)
+
+export const chatUseCase = new ChatUseCase(
+  intentClassifier,
+  searchKnowledgeDocumentUseCase,
+  llmProvider,
+  stationQueryPort,
+  queueQueryPort,
+  bookingQueryPort
 )
+
+const chatController = new ChatController(chatUseCase, askKnowledgeUseCase)
 
 aiRouter.use("/knowledge-documents", createKnowledgeDocumentRoutes(knowledgeDocumentController))
 aiRouter.use("/chat", createChatRoutes(chatController))

@@ -3,6 +3,7 @@ export interface LLMRequest {
   systemPrompt?: string
   temperature?: number
   maxTokens?: number
+  format?: "json" | Record<string, unknown>
 }
 
 export interface LLMResponse {
@@ -13,6 +14,8 @@ export interface IEmbeddingProvider {
   embed(text: string): Promise<number[]>
   embedBatch(texts: string[]): Promise<number[][]>
 }
+
 export interface ILLMProvider {
   generate(request: LLMRequest): Promise<LLMResponse>
+  generateStructured<T = unknown>(request: LLMRequest): Promise<T>
 }

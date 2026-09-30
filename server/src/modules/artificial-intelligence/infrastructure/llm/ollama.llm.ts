@@ -62,4 +62,57 @@ export class OllamaProvider implements ILLMProvider {
       content: data.response ?? "",
     }
   }
+
+  async generateStructured<T = unknown>(request: LLMRequest): Promise<T> {
+    const options: Record<string, unknown> = {}
+    if (request.temperature !== undefined) {
+      options.temperature = request.temperature
+    }
+    if (request.maxTokens !== undefined) {
+      options.num_predict = request.maxTokens
+    }
+
+    const response = await fetch(`${env.OLLAMA_BASE_URL}/api/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: env.OLLAMA_LLM_MODEL,
+        prompt: request.prompt,
+        system: request.systemPrompt,
+        stream: false,
+        format: request.format ?? "json",
+        options: Object.keys(options).length > 0 ? options : undefined,
+      }),
+    })
+
+    if (!response.ok) {
+      let errorMessage = `${response.status} ${response.statusText}`
+      try {
+        const errorBody = (await response.json()) as { error?: string }
+        if (errorBody?.error) {
+          errorMessage = errorBody.error
+        }
+      } catch {
+        // Fallback
+      }
+      throw new Error(`Ollama structured request failed: ${errorMessage}`)
+    }
+
+    const data = (await response.json()) as OllamaGenerateResponse
+    const rawContent = data.response?.trim() ?? ""
+
+    // Strip optional markdown JSON formatting if present
+    const cleaned = rawContent
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim()
+
+    try {
+      return JSON.parse(cleaned) as T
+    } catch {
+      throw new Error(`Failed to parse LLM structured response as JSON: ${rawContent}`)
+    }
+  }
 }

@@ -6,7 +6,8 @@ import { authenticate } from "@/infrastructure/http/middleware/authenticate"
 export const createChatRoutes = (controller: ChatController): Router => {
   const router = Router()
 
-  router.post("/", authenticate, asyncHandler(controller.ask))
+  router.post("/", authenticate, asyncHandler(controller.chat))
+  router.post("/ask", authenticate, asyncHandler(controller.ask))
 
   return router
 }

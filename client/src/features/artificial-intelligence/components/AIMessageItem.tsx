@@ -30,8 +30,15 @@ const renderInline = (text: string) => {
   })
 }
 
-const formatContent = (content: string) =>
-  content.split("\n\n").map((block, i) => {
+const formatContent = (content: unknown) => {
+  const text =
+    typeof content === "string"
+      ? content
+      : typeof content === "object" && content !== null && "message" in content
+        ? String((content as { message: unknown }).message ?? "")
+        : String(content ?? "")
+
+  return text.split("\n\n").map((block, i) => {
     const lines = block.split("\n")
     if (block.startsWith("### "))
       return (
@@ -86,6 +93,7 @@ const formatContent = (content: string) =>
       </p>
     )
   })
+}
 
 export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }) => {
   const [copied, setCopied] = useState(false)
@@ -95,8 +103,12 @@ export const AIMessageItem: React.FC<AIMessageItemProps> = ({ message, onRetry }
 
   const handleCopy = async () => {
     if (!message.content) return
+    const textToCopy =
+      typeof message.content === "string"
+        ? message.content
+        : ((message.content as { message?: string })?.message ?? String(message.content ?? ""))
     try {
-      await navigator.clipboard.writeText(message.content)
+      await navigator.clipboard.writeText(textToCopy)
       setCopied(true)
       toast.success("Copied to clipboard")
       setTimeout(() => setCopied(false), 2000)
