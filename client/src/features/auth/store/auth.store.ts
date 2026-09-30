@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { toast } from "sonner"
 import { authApi } from "../../../shared/apis/auth.api"
+import { registerAuthFailureHandler } from "../../../shared/config/axios"
 import type { ViewModeType } from "../../../shared/constants/role.const"
 import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
 import { getErrorMessage } from "../../../shared/utils/error"
@@ -258,3 +259,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 }))
+
+registerAuthFailureHandler((msg) => {
+  useAuthStore.setState({
+    user: null,
+    isAuthenticated: false,
+  })
+  if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
+    toast.error(msg, { id: "suspension-toast" })
+  }
+})
