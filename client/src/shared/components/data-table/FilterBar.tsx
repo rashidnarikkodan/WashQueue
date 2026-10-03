@@ -8,7 +8,7 @@ interface FilterBarProps {
 const FilterBar = ({ selectFilters = [], toggleFilters = [] }: FilterBarProps) => (
   <>
     {selectFilters.map((filter) => (
-      <div key={filter.id} className="space-y-2">
+      <div key={filter.id} className={`space-y-2 ${filter.colSpan || ""}`}>
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
           {filter.label}
         </span>

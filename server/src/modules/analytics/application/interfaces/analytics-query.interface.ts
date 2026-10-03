@@ -5,15 +5,18 @@ import {
 } from "../../domain/types/analytics.types"
 
 export interface IAnalyticsQueryService {
-  getAdminDashboardData(startDate: Date | null): Promise<AdminDashboardData>
+  getAdminDashboardData(startDate: Date | null, endDate?: Date | null): Promise<AdminDashboardData>
   getOwnerDashboardData(
     userId: string,
     startDate: Date | null,
-    stationId?: string
+    stationId?: string,
+    endDate?: Date | null
   ): Promise<OwnerDashboardData>
   getManagerDashboardData(
     userId: string,
-    requestedStationId?: string
+    requestedStationId?: string,
+    startDate?: Date | null,
+    endDate?: Date | null
   ): Promise<ManagerDashboardData>
 }
 

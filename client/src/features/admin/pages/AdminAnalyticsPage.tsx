@@ -22,13 +22,13 @@ import {
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
+import DatePicker from "@/shared/components/form/DatePicker"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
-  ChartContainer,
-  RevenueTrendChart,
-  DistributionDonutChart,
-} from "@/shared/components/charts"
-import { DataTable } from "@/shared/components/data-table"
+  DataTable,
+  DataTableToolbar,
+  type TabConfig,
+} from "@/shared/components/data-table"
 
 type TopStation = NonNullable<AdminDashboardData["topStations"]>[number] & { rank: number }
 
@@ -39,26 +39,35 @@ const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "90 Days", value: "90_DAYS" },
   { label: "1 Year", value: "YEAR" },
   { label: "All Time", value: "ALL" },
+  { label: "Custom", value: "CUSTOM" },
 ]
 
 export default function AdminAnalyticsPage() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
+  const [customStartDate, setCustomStartDate] = useState<string>("")
+  const [customEndDate, setCustomEndDate] = useState<string>("")
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [trendMetric, setTrendMetric] = useState<"revenue" | "net" | "commission" | "bookings">(
-    "revenue"
-  )
 
   const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
 
   const fetchAdminAnalytics = useCallback(
-    async (targetRange: DateRangeFilter = dateRange) => {
+    async (
+      targetRange: DateRangeFilter = dateRange,
+      start?: string,
+      end?: string
+    ) => {
       setIsRefreshing(true)
       try {
-        const res = await analyticsApi.getAdminDashboard(targetRange)
-        cacheRef.current[targetRange] = res
+        const res = await analyticsApi.getAdminDashboard(
+          targetRange,
+          start || customStartDate,
+          end || customEndDate
+        )
+        const cacheKey = `${targetRange}_${start || customStartDate}_${end || customEndDate}` as any
+        cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
         toast.error("Failed to load platform financial analytics data")
@@ -66,26 +75,37 @@ export default function AdminAnalyticsPage() {
         setIsRefreshing(false)
       }
     },
-    [dateRange]
+    [dateRange, customStartDate, customEndDate]
   )
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const cached = cacheRef.current[newRange]
-    if (cached) {
+    const key = `${newRange}_${customStartDate}_${customEndDate}` as any
+    const cached = cacheRef.current[key]
+    if (cached && newRange !== "CUSTOM") {
       setData(cached)
     }
     setDateRange(newRange)
+    if (newRange !== "CUSTOM") {
+      setCustomStartDate("")
+      setCustomEndDate("")
+    }
   }
 
   useEffect(() => {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
+      if (dateRange === "CUSTOM" && (!customStartDate || !customEndDate)) {
+        setIsLoading(false)
+        return
+      }
+
       try {
-        const res = await analyticsApi.getAdminDashboard(dateRange)
+        const res = await analyticsApi.getAdminDashboard(dateRange, customStartDate, customEndDate)
         if (ignore) return
-        cacheRef.current[dateRange] = res
+        const cacheKey = `${dateRange}_${customStartDate}_${customEndDate}` as any
+        cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
         if (!ignore) toast.error("Failed to load platform financial analytics data")
@@ -96,7 +116,7 @@ export default function AdminAnalyticsPage() {
     return () => {
       ignore = true
     }
-  }, [dateRange])
+  }, [dateRange, customStartDate, customEndDate])
 
   const kpis = data?.kpis
   const totalGMV = kpis?.totalGrossVolume || 0
@@ -203,15 +223,6 @@ export default function AdminAnalyticsPage() {
     },
   ]
 
-  const statusDonutData = useMemo(() => {
-    const list = data?.bookingStatusDistribution || []
-    return list.map((st) => ({
-      name: st.status.replace(/_/g, " "),
-      count: st.count,
-      percentage: st.percentage,
-    }))
-  }, [data?.bookingStatusDistribution])
-
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
@@ -232,22 +243,7 @@ export default function AdminAnalyticsPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60">
-            {DATE_RANGE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleDateRangeChange(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  dateRange === opt.value
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
 
           <button
             type="button"
@@ -276,147 +272,53 @@ export default function AdminAnalyticsPage() {
 
       <StatsHUD stats={statItems} columns={5} />
 
-      <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-xs">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-border/70 pb-5 mb-5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-foreground text-base">
-                Ecosystem Cashflow &amp; Payout Waterfall
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Platform GMV allocation, commission withholdings, and partner disbursements
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> T+2 Bank Reconciliation
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-1">
-            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-              <span>1. Total Platform GMV</span>
-              <span className="text-primary font-bold">100% Volume</span>
-            </div>
-            <p className="text-xl font-black text-foreground">₹{totalGMV.toLocaleString()}</p>
-            <p className="text-[11px] text-muted-foreground">Total customer invoices processed</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
-            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-              <span>2. WashQueue Net Take</span>
-              <span className="text-emerald-500 font-bold">15% Take</span>
-            </div>
-            <p className="text-xl font-black text-emerald-500">
-              ₹{platformCommission.toLocaleString()}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Direct platform commission revenue</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 space-y-1">
-            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-              <span>3. Station Owner Settlements</span>
-              <span className="text-blue-500 font-bold">85% Disbursed</span>
-            </div>
-            <p className="text-xl font-black text-blue-500">
-              ₹{partnerDisbursements.toLocaleString()}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Transferred to station partners</p>
-          </div>
-        </div>
+      <div className="mb-2 relative z-50">
+        <DataTableToolbar
+          tabs={DATE_RANGE_OPTIONS.map((opt) => ({
+            id: opt.value,
+            label: opt.label,
+          }))}
+          activeTab={dateRange}
+          onTabChange={(tabId) => handleDateRangeChange(tabId as DateRangeFilter)}
+          extraFilters={
+            dateRange === "CUSTOM" ? (
+              (() => {
+                const today = new Date().toISOString().split("T")[0]
+                return (
+                  <>
+                    <div className="col-span-1 min-w-[150px]">
+                      <DatePicker
+                        label="Start Date"
+                        value={customStartDate}
+                        maxDate={customEndDate || today}
+                        onChange={(date) => setCustomStartDate(date)}
+                      />
+                    </div>
+                    <div className="col-span-1 min-w-[150px]">
+                      <DatePicker
+                        label="End Date"
+                        value={customEndDate}
+                        minDate={customStartDate || undefined}
+                        maxDate={today}
+                        onChange={(date) => setCustomEndDate(date)}
+                      />
+                    </div>
+                  </>
+                )
+              })()
+            ) : null
+          }
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ChartContainer
-            title="Platform Monetization &amp; Growth Trajectory"
-            subtitle="Historical timeline of gross GMV, commission take, and partner payouts"
-            icon={TrendingUp}
-            isLoading={isLoading}
-            action={
-              <div className="flex items-center bg-muted/70 p-1 rounded-lg border border-border text-xs">
-                <button
-                  onClick={() => setTrendMetric("revenue")}
-                  className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
-                    trendMetric === "revenue"
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Gross GMV (₹)
-                </button>
-                <button
-                  onClick={() => setTrendMetric("commission")}
-                  className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
-                    trendMetric === "commission"
-                      ? "bg-amber-500 text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Commission (₹)
-                </button>
-                <button
-                  onClick={() => setTrendMetric("net")}
-                  className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
-                    trendMetric === "net"
-                      ? "bg-emerald-500 text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Disbursements (₹)
-                </button>
-                <button
-                  onClick={() => setTrendMetric("bookings")}
-                  className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
-                    trendMetric === "bookings"
-                      ? "bg-sky-500 text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Volume
-                </button>
-              </div>
-            }
-          >
-            <RevenueTrendChart
-              data={data?.growthTrend || []}
-              metricType={trendMetric}
-              height={300}
-              onResetRange={() => handleDateRangeChange("ALL")}
-            />
-          </ChartContainer>
-        </div>
 
-        <div>
-          <ChartContainer
-            title="Booking Lifecycle Breakdown"
-            subtitle="Volume and value distribution by order state"
-            icon={Layers}
-            isLoading={isLoading}
-          >
-            <DistributionDonutChart
-              data={statusDonutData}
-              height={300}
-              centerLabel="Total Washes"
-              centerValue={totalBookings ? String(totalBookings) : undefined}
-            />
-          </ChartContainer>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="font-bold text-lg text-foreground tracking-tight">
-                Top Grossing Wash Facilities (Station Financial Rankings)
+                Top 3 Grossing Wash Facilities (Station Financial Rankings)
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Highest grossing facilities by transaction volume and commission contribution
@@ -519,7 +421,7 @@ export default function AdminAnalyticsPage() {
                 ),
               },
             ]}
-            data={(data?.topStations || []).map((st, idx) => ({ ...st, rank: idx }))}
+            data={(data?.topStations || []).slice(0, 3).map((st, idx) => ({ ...st, rank: idx }))}
             rowKey={(st) => st.stationId}
             emptyMessage="No station transaction records found for this period."
           />

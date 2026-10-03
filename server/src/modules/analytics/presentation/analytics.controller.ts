@@ -6,6 +6,7 @@ import {
   IGetManagerDashboardUseCase,
   IGetOwnerDashboardUseCase,
 } from "../application/interfaces/analytics-usecases.interface"
+import { IExportOwnerAnalyticsUseCase } from "../application/use-cases/export-owner-analytics.use-case"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
@@ -14,12 +15,15 @@ export class AnalyticsController {
   constructor(
     private readonly getAdminDashboardUseCase: IGetAdminDashboardUseCase,
     private readonly getOwnerDashboardUseCase: IGetOwnerDashboardUseCase,
-    private readonly getManagerDashboardUseCase: IGetManagerDashboardUseCase
+    private readonly getManagerDashboardUseCase: IGetManagerDashboardUseCase,
+    private readonly exportOwnerAnalyticsUseCase: IExportOwnerAnalyticsUseCase
   ) {}
 
   getAdminDashboard = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const range = (req.query.range as DateRange) || "30_DAYS"
-    const data = await this.getAdminDashboardUseCase.execute(range)
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
+    const data = await this.getAdminDashboardUseCase.execute(range, startDate, endDate)
     success(res, data, HTTP_STATUS.OK, "Admin dashboard fetched successfully")
   }
 
@@ -30,7 +34,9 @@ export class AnalyticsController {
     }
     const range = (req.query.range as DateRange) || "30_DAYS"
     const stationId = req.query.stationId as string | undefined
-    const data = await this.getOwnerDashboardUseCase.execute(ownerId, range, stationId)
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
+    const data = await this.getOwnerDashboardUseCase.execute(ownerId, range, stationId, startDate, endDate)
     success(res, data, HTTP_STATUS.OK, "Owner dashboard fetched successfully")
   }
 
@@ -42,5 +48,22 @@ export class AnalyticsController {
     const stationId = req.query.stationId as string | undefined
     const data = await this.getManagerDashboardUseCase.execute(userId, stationId)
     success(res, data, HTTP_STATUS.OK, "Manager dashboard fetched successfully")
+  }
+
+  exportOwnerAnalytics = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const ownerId = req.user?.userId
+    if (!ownerId) {
+      throw new UnauthorizedError()
+    }
+    const range = (req.query.range as DateRange) || "30_DAYS"
+    const stationId = req.query.stationId as string | undefined
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
+    
+    const { buffer, contentType, filename } = await this.exportOwnerAnalyticsUseCase.execute(ownerId, range, stationId, startDate, endDate)
+    
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    res.send(buffer)
   }
 }

@@ -1,7 +1,7 @@
 import { api } from "../config/axios"
 import { API_ROUTES } from "../constants/api.const"
 
-export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL"
+export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL" | "CUSTOM"
 
 export interface TimeSeriesPoint {
   date: string
@@ -171,17 +171,23 @@ export interface ManagerDashboardData {
 }
 
 export const analyticsApi = {
-  getAdminDashboard: async (range: DateRangeFilter = "30_DAYS"): Promise<AdminDashboardData> => {
+  getAdminDashboard: async (
+    range: DateRangeFilter = "30_DAYS",
+    startDate?: string,
+    endDate?: string
+  ): Promise<AdminDashboardData> => {
     const res = await api.get<{ success: boolean; data: AdminDashboardData }>(
       API_ROUTES.ANALYTICS.ADMIN,
-      { params: { range } }
+      { params: { range, ...(startDate ? { startDate } : {}), ...(endDate ? { endDate } : {}) } }
     )
     return res.data.data
   },
 
   getOwnerDashboard: async (
     range: DateRangeFilter = "30_DAYS",
-    stationId?: string
+    stationId?: string,
+    startDate?: string,
+    endDate?: string
   ): Promise<OwnerDashboardData> => {
     const res = await api.get<{ success: boolean; data: OwnerDashboardData }>(
       API_ROUTES.ANALYTICS.OWNER,
@@ -189,17 +195,44 @@ export const analyticsApi = {
         params: {
           range,
           ...(stationId && stationId !== "ALL" ? { stationId } : {}),
+          ...(startDate ? { startDate } : {}),
+          ...(endDate ? { endDate } : {}),
         },
       }
     )
     return res.data.data
   },
 
-  getManagerDashboard: async (stationId?: string): Promise<ManagerDashboardData> => {
+  getManagerDashboard: async (
+    stationId?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<ManagerDashboardData> => {
     const res = await api.get<{ success: boolean; data: ManagerDashboardData }>(
       API_ROUTES.ANALYTICS.MANAGER,
-      { params: { stationId } }
+      { params: { stationId, ...(startDate ? { startDate } : {}), ...(endDate ? { endDate } : {}) } }
     )
     return res.data.data
+  },
+
+  exportOwnerAnalytics: async (
+    range: DateRangeFilter = "30_DAYS",
+    stationId?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<Blob> => {
+    const res = await api.get(
+      API_ROUTES.ANALYTICS.OWNER + "/export",
+      {
+        params: {
+          range,
+          ...(stationId && stationId !== "ALL" ? { stationId } : {}),
+          ...(startDate ? { startDate } : {}),
+          ...(endDate ? { endDate } : {}),
+        },
+        responseType: "blob",
+      }
+    )
+    return res.data
   },
 }

@@ -9,6 +9,8 @@ import { AnalyticsMongoQueryService } from "./infrastructure/services/analytics.
 import { GetAdminDashboardUseCase } from "./application/use-cases/get-admin-dashboard.use-case"
 import { GetOwnerDashboardUseCase } from "./application/use-cases/get-owner-dashboard.use-case"
 import { GetManagerDashboardUseCase } from "./application/use-cases/get-manager-dashboard.use-case"
+import { ExportOwnerAnalyticsUseCase } from "./application/use-cases/export-owner-analytics.use-case"
+import { CsvExportService } from "@/infrastructure/export/csv-export.service"
 import { AnalyticsController } from "./presentation/analytics.controller"
 import { createAnalyticsRouter } from "./presentation/analytics.routes"
 
@@ -27,11 +29,15 @@ export const getAdminDashboardUseCase = new GetAdminDashboardUseCase(analyticsQu
 export const getOwnerDashboardUseCase = new GetOwnerDashboardUseCase(analyticsQueryService)
 export const getManagerDashboardUseCase = new GetManagerDashboardUseCase(analyticsQueryService)
 
+const csvExportService = new CsvExportService()
+export const exportOwnerAnalyticsUseCase = new ExportOwnerAnalyticsUseCase(analyticsQueryService, csvExportService)
+
 // Controller
 export const analyticsController = new AnalyticsController(
   getAdminDashboardUseCase,
   getOwnerDashboardUseCase,
-  getManagerDashboardUseCase
+  getManagerDashboardUseCase,
+  exportOwnerAnalyticsUseCase
 )
 
 // Router

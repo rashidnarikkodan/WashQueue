@@ -19,6 +19,12 @@ export const createAnalyticsRouter = (analyticsController: AnalyticsController):
   )
 
   router.get(
+    "/owner/export",
+    authorize(ROLE.OWNER, ROLE.ADMIN),
+    asyncHandler(analyticsController.exportOwnerAnalytics)
+  )
+
+  router.get(
     "/manager",
     authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
     asyncHandler(analyticsController.getManagerDashboard)

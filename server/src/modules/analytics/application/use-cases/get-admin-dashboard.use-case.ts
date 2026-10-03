@@ -5,9 +5,20 @@ import { IGetAdminDashboardUseCase } from "../interfaces/analytics-usecases.inte
 export class GetAdminDashboardUseCase implements IGetAdminDashboardUseCase {
   constructor(private readonly queryService: IAnalyticsQueryService) {}
 
-  async execute(range: DateRange = "30_DAYS"): Promise<AdminDashboardData> {
-    const startDate = this.getStartDate(range)
-    return this.queryService.getAdminDashboardData(startDate)
+  async execute(
+    range: DateRange = "30_DAYS",
+    customStartDate?: Date,
+    customEndDate?: Date
+  ): Promise<AdminDashboardData> {
+    let startDate = this.getStartDate(range)
+    let endDate = null
+    
+    if (range === "CUSTOM") {
+      startDate = customStartDate || null
+      endDate = customEndDate || null
+    }
+
+    return this.queryService.getAdminDashboardData(startDate, endDate)
   }
 
   private getStartDate(range: DateRange): Date | null {

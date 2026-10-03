@@ -8,10 +8,19 @@ export class GetOwnerDashboardUseCase implements IGetOwnerDashboardUseCase {
   async execute(
     userId: string,
     range: DateRange = "30_DAYS",
-    stationId?: string
+    stationId?: string,
+    customStartDate?: Date,
+    customEndDate?: Date
   ): Promise<OwnerDashboardData> {
-    const startDate = this.getStartDate(range)
-    return this.queryService.getOwnerDashboardData(userId, startDate, stationId)
+    let startDate = this.getStartDate(range)
+    let endDate = null
+
+    if (range === "CUSTOM") {
+      startDate = customStartDate || null
+      endDate = customEndDate || null
+    }
+
+    return this.queryService.getOwnerDashboardData(userId, startDate, stationId, endDate)
   }
 
   private getStartDate(range: DateRange): Date | null {

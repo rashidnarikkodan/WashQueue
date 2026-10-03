@@ -107,12 +107,15 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     private readonly reviewModel?: Model<IReview>
   ) {}
 
-  async getAdminDashboardData(startDate: Date | null): Promise<AdminDashboardData> {
-    const dateQuery = startDate ? { createdAt: { $gte: startDate } } : {}
+  async getAdminDashboardData(startDate: Date | null, endDate?: Date | null): Promise<AdminDashboardData> {
+    const dateQuery: Record<string, unknown> = {}
+    if (startDate) dateQuery.$gte = startDate
+    if (endDate) dateQuery.$lte = endDate
+    const matchQuery = Object.keys(dateQuery).length > 0 ? { createdAt: dateQuery } : {}
 
     // 1. KPIs
     const [bookingStats] = await this.bookingModel.aggregate([
-      { $match: dateQuery },
+      { $match: matchQuery },
       {
         $group: {
           _id: null,
@@ -177,7 +180,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
 
     // 2. Growth Trend (daily or monthly buckets)
     const growthTrendRaw = await this.bookingModel.aggregate([
-      { $match: dateQuery },
+      { $match: matchQuery },
       {
         $group: {
           _id: {
@@ -200,7 +203,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
 
     // 3. Status Distribution
     const statusRaw = await this.bookingModel.aggregate([
-      { $match: dateQuery },
+      { $match: matchQuery },
       {
         $group: {
           _id: "$status",
@@ -217,7 +220,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
 
     // 4. Top Stations by Revenue
     const topStationsRaw = await this.bookingModel.aggregate([
-      { $match: dateQuery },
+      { $match: matchQuery },
       {
         $group: {
           _id: "$stationId",
@@ -295,7 +298,8 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
   async getOwnerDashboardData(
     userId: string,
     startDate: Date | null,
-    stationId?: string
+    stationId?: string,
+    endDate?: Date | null
   ): Promise<OwnerDashboardData> {
     const userObjectId = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null
 
@@ -366,8 +370,11 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     const dateMatch: Record<string, unknown> = {
       $or: ownerBookingMatch.length > 0 ? ownerBookingMatch : [{ ownerId: { $in: ownerIds } }],
     }
-    if (startDate) {
-      dateMatch.createdAt = { $gte: startDate }
+    const createdAtMatch: Record<string, unknown> = {}
+    if (startDate) createdAtMatch.$gte = startDate
+    if (endDate) createdAtMatch.$lte = endDate
+    if (Object.keys(createdAtMatch).length > 0) {
+      dateMatch.createdAt = createdAtMatch
     }
 
     // 4. Booking KPIs

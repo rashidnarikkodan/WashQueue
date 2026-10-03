@@ -181,7 +181,7 @@ export default function DatePicker({
       : ""
 
   return (
-    <div className={`flex flex-col gap-1.5 w-full relative ${className}`} ref={containerRef}>
+    <div className={`flex flex-col gap-1.5 w-full relative z-1000 ${className}`} ref={containerRef}>
       {label && (
         <label
           htmlFor={id}
