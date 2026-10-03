@@ -25,6 +25,9 @@ import {
   StationComparisonBarChart,
   DistributionDonutChart,
 } from "@/shared/components/charts"
+import { DataTable } from "@/shared/components/data-table"
+
+type RecentBooking = NonNullable<AdminDashboardData["recentBookings"]>[number]
 
 const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
@@ -398,70 +401,76 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                <th className="py-3 px-3">Booking #</th>
-                <th className="py-3 px-3">Station</th>
-                <th className="py-3 px-3">Customer</th>
-                <th className="py-3 px-3">Type</th>
-                <th className="py-3 px-3">Amount</th>
-                <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-right">Time</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {data?.recentBookings && data.recentBookings.length > 0 ? (
-                data.recentBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-muted/40 transition-colors">
-                    <td className="py-3 px-3 font-mono font-bold text-foreground">
-                      {b.bookingNumber}
-                    </td>
-                    <td className="py-3 px-3 font-medium text-foreground">{b.stationName}</td>
-                    <td className="py-3 px-3 text-muted-foreground">{b.customerName}</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted text-foreground border border-border">
-                        {b.serviceType}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-foreground">
-                      ₹{b.amount.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          b.status === "COMPLETED"
-                            ? "bg-emerald-500/15 text-emerald-500"
-                            : b.status === "IN_SERVICE"
-                              ? "bg-primary/15 text-primary"
-                              : b.status === "CANCELLED"
-                                ? "bg-rose-500/15 text-rose-500"
-                                : "bg-amber-500/15 text-amber-500"
-                        }`}
-                      >
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right text-muted-foreground whitespace-nowrap">
-                      {new Date(b.createdAt).toLocaleDateString()}{" "}
-                      {new Date(b.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                    No recent booking transactions recorded.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          variant="widget"
+          columns={[
+            {
+              id: "bookingNumber",
+              header: "Booking #",
+              cell: (b: RecentBooking) => <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>,
+            },
+            {
+              id: "stationName",
+              header: "Station",
+              cell: (b: RecentBooking) => <span className="font-medium text-foreground">{b.stationName}</span>,
+            },
+            {
+              id: "customerName",
+              header: "Customer",
+              cell: (b: RecentBooking) => <span className="text-muted-foreground">{b.customerName}</span>,
+            },
+            {
+              id: "serviceType",
+              header: "Type",
+              cell: (b: RecentBooking) => (
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted text-foreground border border-border">
+                  {b.serviceType}
+                </span>
+              ),
+            },
+            {
+              id: "amount",
+              header: "Amount",
+              cell: (b: RecentBooking) => <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>,
+            },
+            {
+              id: "status",
+              header: "Status",
+              cell: (b: RecentBooking) => (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                    b.status === "COMPLETED"
+                      ? "bg-emerald-500/15 text-emerald-500"
+                      : b.status === "IN_SERVICE"
+                        ? "bg-primary/15 text-primary"
+                        : b.status === "CANCELLED"
+                          ? "bg-rose-500/15 text-rose-500"
+                          : "bg-amber-500/15 text-amber-500"
+                  }`}
+                >
+                  {b.status}
+                </span>
+              ),
+            },
+            {
+              id: "time",
+              header: "Time",
+              align: "right",
+              cell: (b: RecentBooking) => (
+                <span className="text-muted-foreground whitespace-nowrap">
+                  {new Date(b.createdAt).toLocaleDateString()}{" "}
+                  {new Date(b.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              ),
+            },
+          ]}
+          data={data?.recentBookings || []}
+          rowKey={(b) => b.id}
+          emptyMessage="No recent booking transactions recorded."
+        />
       </div>
     </div>
   )

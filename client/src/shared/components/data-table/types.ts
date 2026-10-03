@@ -45,6 +45,7 @@ export interface DataTableProps<T> {
   columns: Column<T>[]
   data: T[]
   rowKey: (row: T) => string
+  variant?: "default" | "widget"
 
   toolbar?: React.ReactNode
 

@@ -60,7 +60,7 @@ export default function StationMetadataCard({
           </div>
 
           <p className="text-xs text-[#c2c6d6] leading-relaxed pt-1">
-            {fullAddress || "1200 Bayside Drive, Suite 400, San Francisco, CA 94105"}
+            {fullAddress || "NA"}
           </p>
 
           {(station.location?.latitude || station.location?.longitude) && (

@@ -9,6 +9,7 @@ function DataTable<T>({
   columns,
   data,
   rowKey,
+  variant = "default",
   toolbar,
   searchQuery,
   onSearchChange,
@@ -56,7 +57,11 @@ function DataTable<T>({
       ) : (
         <div
           key={activeTab ?? "__default__"}
-          className="border border-border/80 bg-card/60 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className={
+            variant === "widget"
+              ? "overflow-hidden w-full"
+              : "border border-border/80 bg-card/60 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
+          }
         >
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">

@@ -28,6 +28,9 @@ import {
   RevenueTrendChart,
   DistributionDonutChart,
 } from "@/shared/components/charts"
+import { DataTable } from "@/shared/components/data-table"
+
+type TopStation = NonNullable<AdminDashboardData["topStations"]>[number] & { rank: number }
 
 const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
@@ -428,78 +431,78 @@ export default function AdminAnalyticsPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-border/80 text-muted-foreground uppercase text-[11px] font-bold tracking-wider">
-                  <th className="pb-3 px-3">Rank</th>
-                  <th className="pb-3 px-3">Station Name</th>
-                  <th className="pb-3 px-3">Location</th>
-                  <th className="pb-3 px-3">Washes</th>
-                  <th className="pb-3 px-3">Gross GMV (₹)</th>
-                  <th className="pb-3 px-3">Commission 15% (₹)</th>
-                  <th className="pb-3 px-3 font-bold text-emerald-500">Partner Share (₹)</th>
-                  <th className="pb-3 px-3">Rating</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {!data?.topStations || data.topStations.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                      No station transaction records found for this period.
-                    </td>
-                  </tr>
-                ) : (
-                  data.topStations.map((st, idx) => {
-                    const gmv = st.totalRevenue || 0
-                    const comm = Math.round(gmv * 0.15)
-                    const partnerShare = gmv - comm
-                    return (
-                      <tr key={st.stationId} className="hover:bg-muted/40 transition-colors">
-                        <td className="py-3.5 px-3">
-                          <span
-                            className={`font-mono font-bold w-6 h-6 rounded-full inline-flex items-center justify-center text-xs ${
-                              idx === 0
-                                ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                                : idx === 1
-                                  ? "bg-slate-400/20 text-slate-300 border border-slate-400/40"
-                                  : idx === 2
-                                    ? "bg-orange-500/20 text-orange-400 border border-orange-500/40"
-                                    : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {idx + 1}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-foreground">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-primary" />
-                            <span>{st.name}</span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-3 text-muted-foreground">{st.city || "Kerala"}</td>
-                        <td className="py-3.5 px-3 font-semibold text-foreground">
-                          {st.totalBookings.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-primary">
-                          ₹{gmv.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-amber-500">
-                          ₹{comm.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-3 font-black text-emerald-500">
-                          ₹{partnerShare.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-amber-500">
-                          ★ {st.rating.toFixed(1)}
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            variant="widget"
+            columns={[
+              {
+                id: "rank",
+                header: "Rank",
+                cell: (st: TopStation) => (
+                  <span
+                    className={`font-mono font-bold w-6 h-6 rounded-full inline-flex items-center justify-center text-xs ${
+                      st.rank === 0
+                        ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                        : st.rank === 1
+                          ? "bg-slate-400/20 text-slate-300 border border-slate-400/40"
+                          : st.rank === 2
+                            ? "bg-orange-500/20 text-orange-400 border border-orange-500/40"
+                            : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {st.rank + 1}
+                  </span>
+                ),
+              },
+              {
+                id: "name",
+                header: "Station Name",
+                cell: (st: TopStation) => (
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    <span className="font-bold text-foreground">{st.name}</span>
+                  </div>
+                ),
+              },
+              {
+                id: "city",
+                header: "Location",
+                cell: (st: TopStation) => <span className="text-muted-foreground">{st.city || "Kerala"}</span>,
+              },
+              {
+                id: "washes",
+                header: "Washes",
+                cell: (st: TopStation) => <span className="font-semibold text-foreground">{st.totalBookings.toLocaleString()}</span>,
+              },
+              {
+                id: "gross",
+                header: "Gross GMV (₹)",
+                cell: (st: TopStation) => <span className="font-bold text-primary">₹{(st.totalRevenue || 0).toLocaleString()}</span>,
+              },
+              {
+                id: "commission",
+                header: "Commission 15% (₹)",
+                cell: (st: TopStation) => <span className="font-bold text-amber-500">₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}</span>,
+              },
+              {
+                id: "partner",
+                header: "Partner Share (₹)",
+                cell: (st: TopStation) => {
+                  const gmv = st.totalRevenue || 0
+                  const comm = Math.round(gmv * 0.15)
+                  const partnerShare = gmv - comm
+                  return <span className="font-black text-emerald-500">₹{partnerShare.toLocaleString()}</span>
+                },
+              },
+              {
+                id: "rating",
+                header: "Rating",
+                cell: (st: TopStation) => <span className="font-bold text-amber-500">★ {st.rating.toFixed(1)}</span>,
+              },
+            ]}
+            data={(data?.topStations || []).map((st, idx) => ({ ...st, rank: idx }))}
+            rowKey={(st) => st.stationId}
+            emptyMessage="No station transaction records found for this period."
+          />
         </div>
 
         <div className="space-y-6">

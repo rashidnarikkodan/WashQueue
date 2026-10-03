@@ -20,6 +20,7 @@ import { toast } from "sonner"
 import {
   analyticsApi,
   type OwnerDashboardData,
+  type OwnerStationSummary,
   type DateRangeFilter,
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
@@ -31,6 +32,7 @@ import {
   StationComparisonBarChart,
   DistributionDonutChart,
 } from "@/shared/components/charts"
+import { DataTable } from "@/shared/components/data-table"
 
 const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
@@ -568,91 +570,99 @@ export default function OwnerAnalyticsPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-border/80 text-muted-foreground uppercase text-[11px] font-bold tracking-wider">
-                <th className="pb-3 px-3">Station Name</th>
-                <th className="pb-3 px-3">Location</th>
-                <th className="pb-3 px-3">Service Bays</th>
-                <th className="pb-3 px-3">Washes</th>
-                <th className="pb-3 px-3">Gross Billings (₹)</th>
-                <th className="pb-3 px-3">Platform Fee (15%)</th>
-                <th className="pb-3 px-3 font-bold text-emerald-500">Net Take (85%)</th>
-                <th className="pb-3 px-3">Yield / Bay</th>
-                <th className="pb-3 px-3">Status</th>
-                <th className="pb-3 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {filteredStations.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="py-8 text-center text-muted-foreground">
-                    No station financial records found for the active filter.
-                  </td>
-                </tr>
-              ) : (
-                filteredStations.map((st) => {
-                  const gross = st.totalRevenue || 0
-                  const fee = Math.round(gross * 0.15)
-                  const net = gross - fee
-                  const bayYield = st.totalBays > 0 ? Math.round(gross / st.totalBays) : 0
-                  return (
-                    <tr key={st.stationId} className="hover:bg-muted/40 transition-colors group">
-                      <td className="py-4 px-3 font-bold text-foreground">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-primary" />
-                          <span>{st.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-3 text-muted-foreground">{st.city || "Kerala"}</td>
-                      <td className="py-4 px-3">
-                        <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-muted text-foreground border border-border/70">
-                          {st.totalBays} Bays
-                        </span>
-                      </td>
-                      <td className="py-4 px-3 font-semibold text-foreground">
-                        {st.todayBookings}
-                      </td>
-                      <td className="py-4 px-3 font-bold text-foreground">
-                        ₹{gross.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-3 font-medium text-amber-500">
-                        - ₹{fee.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-3 font-black text-emerald-500">
-                        ₹{net.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-3 font-bold text-primary">
-                        ₹{bayYield.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            st.isActive
-                              ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
-                              : "bg-muted text-muted-foreground border border-border"
-                          }`}
-                        >
-                          {st.isActive ? "Settled" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-3 text-right">
-                        <button
-                          onClick={() => navigate(APP_ROUTES.OWNER.FINANCIAL_RECORDS)}
-                          className="px-3 py-1.5 rounded-lg bg-card hover:bg-primary hover:text-primary-foreground text-foreground border border-border font-bold text-xs transition-all cursor-pointer flex items-center gap-1 ml-auto"
-                        >
-                          <span>Ledger</span>
-                          <ArrowUpRight className="w-3 h-3" />
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          variant="widget"
+          columns={[
+            {
+              id: "name",
+              header: "Station Name",
+              cell: (st: OwnerStationSummary) => (
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-primary" />
+                  <span className="font-bold text-foreground">{st.name}</span>
+                </div>
+              ),
+            },
+            {
+              id: "location",
+              header: "Location",
+              cell: (st: OwnerStationSummary) => <span className="text-muted-foreground">{st.city || "Kerala"}</span>,
+            },
+            {
+              id: "bays",
+              header: "Service Bays",
+              cell: (st: OwnerStationSummary) => (
+                <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-muted text-foreground border border-border/70">
+                  {st.totalBays} Bays
+                </span>
+              ),
+            },
+            {
+              id: "washes",
+              header: "Washes",
+              cell: (st: OwnerStationSummary) => <span className="font-semibold text-foreground">{st.todayBookings}</span>,
+            },
+            {
+              id: "gross",
+              header: "Gross Billings (₹)",
+              cell: (st: OwnerStationSummary) => <span className="font-bold text-foreground">₹{(st.totalRevenue || 0).toLocaleString()}</span>,
+            },
+            {
+              id: "fee",
+              header: "Platform Fee (15%)",
+              cell: (st: OwnerStationSummary) => <span className="font-medium text-amber-500">- ₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}</span>,
+            },
+            {
+              id: "net",
+              header: "Net Take (85%)",
+              cell: (st: OwnerStationSummary) => {
+                const gross = st.totalRevenue || 0
+                const fee = Math.round(gross * 0.15)
+                return <span className="font-black text-emerald-500">₹{(gross - fee).toLocaleString()}</span>
+              },
+            },
+            {
+              id: "yield",
+              header: "Yield / Bay",
+              cell: (st: OwnerStationSummary) => {
+                const yieldBay = st.totalBays > 0 ? Math.round((st.totalRevenue || 0) / st.totalBays) : 0
+                return <span className="font-bold text-primary">₹{yieldBay.toLocaleString()}</span>
+              },
+            },
+            {
+              id: "status",
+              header: "Status",
+              cell: (st: OwnerStationSummary) => (
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    st.isActive
+                      ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                      : "bg-muted text-muted-foreground border border-border"
+                  }`}
+                >
+                  {st.isActive ? "Settled" : "Inactive"}
+                </span>
+              ),
+            },
+            {
+              id: "actions",
+              header: "Actions",
+              align: "right",
+              cell: () => (
+                <button
+                  onClick={() => navigate(APP_ROUTES.OWNER.FINANCIAL_RECORDS)}
+                  className="px-3 py-1.5 rounded-lg bg-card hover:bg-primary hover:text-primary-foreground text-foreground border border-border font-bold text-xs transition-all cursor-pointer flex items-center gap-1 ml-auto"
+                >
+                  <span>Ledger</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </button>
+              ),
+            },
+          ]}
+          data={filteredStations}
+          rowKey={(st) => st.stationId}
+          emptyMessage="No station financial records found for the active filter."
+        />
       </div>
     </div>
   )

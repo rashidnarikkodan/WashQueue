@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import {
   analyticsApi,
   type OwnerDashboardData,
+  type OwnerStationSummary,
   type DateRangeFilter,
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
@@ -27,6 +28,9 @@ import {
   StationComparisonBarChart,
   DistributionDonutChart,
 } from "@/shared/components/charts"
+import { DataTable } from "@/shared/components/data-table"
+
+type RecentBooking = NonNullable<OwnerDashboardData["recentBookings"]>[number]
 
 const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
@@ -296,75 +300,81 @@ export default function OwnerDashboard() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                <th className="py-3 px-3">Station Name</th>
-                <th className="py-3 px-3">Location</th>
-                <th className="py-3 px-3">Bays</th>
-                <th className="py-3 px-3">Today's Queue</th>
-                <th className="py-3 px-3">Gross Revenue</th>
-                <th className="py-3 px-3">Rating</th>
-                <th className="py-3 px-3">Manager</th>
-                <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {data?.stations && data.stations.length > 0 ? (
-                data.stations.map((s) => (
-                  <tr key={s.stationId} className="hover:bg-muted/40 transition-colors">
-                    <td className="py-3 px-3 font-bold text-foreground">{s.name}</td>
-                    <td className="py-3 px-3 text-muted-foreground">{s.city || "—"}</td>
-                    <td className="py-3 px-3 font-mono font-medium text-foreground">
-                      {s.totalBays} Bays
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="font-bold text-primary">{s.todayBookings} washes</span>
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-foreground">
-                      ₹{s.totalRevenue.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-3 text-amber-500 font-semibold">
-                      ★ {s.rating.toFixed(1)}
-                    </td>
-                    <td className="py-3 px-3 text-muted-foreground">
-                      {s.assignedManagerName || (
-                        <span className="text-amber-500/80 italic">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          s.isActive
-                            ? "bg-emerald-500/15 text-emerald-500"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {s.isActive ? "Active" : "Paused"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button
-                        onClick={() => navigate(`/owner/stations/${s.stationId}`)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-semibold text-[11px] transition-all cursor-pointer border border-border"
-                      >
-                        Details <ExternalLink className="w-3 h-3" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
-                    No wash stations found. Click "Add Station" to register your first location.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          variant="widget"
+          columns={[
+            {
+              id: "name",
+              header: "Station Name",
+              cell: (s: OwnerStationSummary) => <span className="font-bold text-foreground">{s.name}</span>,
+            },
+            {
+              id: "location",
+              header: "Location",
+              cell: (s: OwnerStationSummary) => <span className="text-muted-foreground">{s.city || "—"}</span>,
+            },
+            {
+              id: "bays",
+              header: "Bays",
+              cell: (s: OwnerStationSummary) => <span className="font-mono font-medium text-foreground">{s.totalBays} Bays</span>,
+            },
+            {
+              id: "queue",
+              header: "Today's Queue",
+              cell: (s: OwnerStationSummary) => <span className="font-bold text-primary">{s.todayBookings} washes</span>,
+            },
+            {
+              id: "revenue",
+              header: "Gross Revenue",
+              cell: (s: OwnerStationSummary) => <span className="font-semibold text-foreground">₹{s.totalRevenue.toLocaleString()}</span>,
+            },
+            {
+              id: "rating",
+              header: "Rating",
+              cell: (s: OwnerStationSummary) => <span className="text-amber-500 font-semibold">★ {s.rating.toFixed(1)}</span>,
+            },
+            {
+              id: "manager",
+              header: "Manager",
+              cell: (s: OwnerStationSummary) => (
+                <span className="text-muted-foreground">
+                  {s.assignedManagerName || <span className="text-amber-500/80 italic">Unassigned</span>}
+                </span>
+              ),
+            },
+            {
+              id: "status",
+              header: "Status",
+              cell: (s: OwnerStationSummary) => (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                    s.isActive
+                      ? "bg-emerald-500/15 text-emerald-500"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {s.isActive ? "Active" : "Paused"}
+                </span>
+              ),
+            },
+            {
+              id: "actions",
+              header: "Actions",
+              align: "right",
+              cell: (s: OwnerStationSummary) => (
+                <button
+                  onClick={() => navigate(`/owner/stations/${s.stationId}`)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-semibold text-[11px] transition-all cursor-pointer border border-border ml-auto"
+                >
+                  Details <ExternalLink className="w-3 h-3" />
+                </button>
+              ),
+            },
+          ]}
+          data={data?.stations || []}
+          rowKey={(s) => s.stationId}
+          emptyMessage="No wash stations found. Click 'Add Station' to register your first location."
+        />
       </div>
 
       <div className="rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm p-5 sm:p-6 shadow-sm">
@@ -385,68 +395,72 @@ export default function OwnerDashboard() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                <th className="py-3 px-3">Booking #</th>
-                <th className="py-3 px-3">Station</th>
-                <th className="py-3 px-3">Customer</th>
-                <th className="py-3 px-3">Vehicle</th>
-                <th className="py-3 px-3">Gross Amount</th>
-                <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-right">Time</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {data?.recentBookings && data.recentBookings.length > 0 ? (
-                data.recentBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-muted/40 transition-colors">
-                    <td className="py-3 px-3 font-mono font-bold text-foreground">
-                      {b.bookingNumber}
-                    </td>
-                    <td className="py-3 px-3 font-medium text-foreground">{b.stationName}</td>
-                    <td className="py-3 px-3 text-muted-foreground">{b.customerName}</td>
-                    <td className="py-3 px-3 font-mono text-muted-foreground uppercase">
-                      {b.vehiclePlate}
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-foreground">
-                      ₹{b.amount.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          b.status === "COMPLETED"
-                            ? "bg-emerald-500/15 text-emerald-500"
-                            : b.status === "IN_SERVICE"
-                              ? "bg-primary/15 text-primary"
-                              : b.status === "CANCELLED"
-                                ? "bg-rose-500/15 text-rose-500"
-                                : "bg-amber-500/15 text-amber-500"
-                        }`}
-                      >
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right text-muted-foreground whitespace-nowrap">
-                      {new Date(b.createdAt).toLocaleDateString()}{" "}
-                      {new Date(b.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                    No bookings logged yet for your stations.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          variant="widget"
+          columns={[
+            {
+              id: "bookingNumber",
+              header: "Booking #",
+              cell: (b: RecentBooking) => <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>,
+            },
+            {
+              id: "stationName",
+              header: "Station",
+              cell: (b: RecentBooking) => <span className="font-medium text-foreground">{b.stationName}</span>,
+            },
+            {
+              id: "customerName",
+              header: "Customer",
+              cell: (b: RecentBooking) => <span className="text-muted-foreground">{b.customerName}</span>,
+            },
+            {
+              id: "vehiclePlate",
+              header: "Vehicle",
+              cell: (b: RecentBooking) => <span className="font-mono text-muted-foreground uppercase">{b.vehiclePlate}</span>,
+            },
+            {
+              id: "amount",
+              header: "Gross Amount",
+              cell: (b: RecentBooking) => <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>,
+            },
+            {
+              id: "status",
+              header: "Status",
+              cell: (b: RecentBooking) => (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                    b.status === "COMPLETED"
+                      ? "bg-emerald-500/15 text-emerald-500"
+                      : b.status === "IN_SERVICE"
+                        ? "bg-primary/15 text-primary"
+                        : b.status === "CANCELLED"
+                          ? "bg-rose-500/15 text-rose-500"
+                          : "bg-amber-500/15 text-amber-500"
+                  }`}
+                >
+                  {b.status}
+                </span>
+              ),
+            },
+            {
+              id: "time",
+              header: "Time",
+              align: "right",
+              cell: (b: RecentBooking) => (
+                <span className="text-muted-foreground whitespace-nowrap">
+                  {new Date(b.createdAt).toLocaleDateString()}{" "}
+                  {new Date(b.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              ),
+            },
+          ]}
+          data={data?.recentBookings || []}
+          rowKey={(b) => b.id}
+          emptyMessage="No bookings logged yet for your stations."
+        />
       </div>
     </div>
   )

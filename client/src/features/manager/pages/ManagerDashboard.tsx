@@ -21,6 +21,9 @@ import {
   HourlyTrafficBarChart,
   LiveBayMonitor,
 } from "@/shared/components/charts"
+import { DataTable } from "@/shared/components/data-table"
+
+type QueueItem = NonNullable<ManagerDashboardData["upcomingQueue"]>[number]
 
 export default function ManagerDashboard() {
   const navigate = useNavigate()
@@ -205,70 +208,75 @@ export default function ManagerDashboard() {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-border/80 text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                  <th className="py-2.5 px-3">Slot Time</th>
-                  <th className="py-2.5 px-3">Vehicle #</th>
-                  <th className="py-2.5 px-3">Customer</th>
-                  <th className="py-2.5 px-3">Wash Type</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {data?.upcomingQueue && data.upcomingQueue.length > 0 ? (
-                  data.upcomingQueue.map((q) => (
-                    <tr key={q.id} className="hover:bg-muted/40 transition-colors">
-                      <td className="py-2.5 px-3 font-medium text-foreground whitespace-nowrap">
-                        {new Date(q.windowStart).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-foreground uppercase">
-                        {q.vehiclePlate}
-                      </td>
-                      <td className="py-2.5 px-3 text-muted-foreground">{q.customerName}</td>
-                      <td className="py-2.5 px-3">
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted text-foreground border border-border">
-                          {q.serviceType}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                            q.status === "CHECKED_IN"
-                              ? "bg-primary/15 text-primary"
-                              : q.status === "IN_SERVICE"
-                                ? "bg-amber-500/15 text-amber-500"
-                                : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {q.status}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right">
-                        <button
-                          onClick={() => navigate(APP_ROUTES.MANAGER.QUEUES)}
-                          className="px-2.5 py-1 rounded-lg bg-primary hover:opacity-90 text-primary-foreground font-semibold text-[11px] transition-all cursor-pointer"
-                        >
-                          Process
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-6 text-center text-muted-foreground">
-                      No vehicles in the upcoming queue.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            variant="widget"
+            columns={[
+              {
+                id: "slotTime",
+                header: "Slot Time",
+                cell: (q: QueueItem) => (
+                  <span className="font-medium text-foreground whitespace-nowrap">
+                    {new Date(q.windowStart).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                ),
+              },
+              {
+                id: "vehicle",
+                header: "Vehicle #",
+                cell: (q: QueueItem) => <span className="font-mono font-bold text-foreground uppercase">{q.vehiclePlate}</span>,
+              },
+              {
+                id: "customer",
+                header: "Customer",
+                cell: (q: QueueItem) => <span className="text-muted-foreground">{q.customerName}</span>,
+              },
+              {
+                id: "washType",
+                header: "Wash Type",
+                cell: (q: QueueItem) => (
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted text-foreground border border-border">
+                    {q.serviceType}
+                  </span>
+                ),
+              },
+              {
+                id: "status",
+                header: "Status",
+                cell: (q: QueueItem) => (
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                      q.status === "CHECKED_IN"
+                        ? "bg-primary/15 text-primary"
+                        : q.status === "IN_SERVICE"
+                          ? "bg-amber-500/15 text-amber-500"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {q.status}
+                  </span>
+                ),
+              },
+              {
+                id: "action",
+                header: "Action",
+                align: "right",
+                cell: () => (
+                  <button
+                    onClick={() => navigate(APP_ROUTES.MANAGER.QUEUES)}
+                    className="px-2.5 py-1 rounded-lg bg-primary hover:opacity-90 text-primary-foreground font-semibold text-[11px] transition-all cursor-pointer"
+                  >
+                    Process
+                  </button>
+                ),
+              },
+            ]}
+            data={data?.upcomingQueue || []}
+            rowKey={(q) => q.id}
+            emptyMessage="No vehicles in the upcoming queue."
+          />
         </div>
 
         <div className="rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm p-5 sm:p-6 shadow-sm flex flex-col justify-between">
