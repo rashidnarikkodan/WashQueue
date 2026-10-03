@@ -1,6 +1,7 @@
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { IOwnerOnboardingDetails } from "../interfaces/owner-usecases.interfaces"
-import { MediaUploadService, MulterFileMap } from "@/core/application/services/media-upload.service"
+import { MediaUploadService } from "@/core/application/services/media-upload.service"
+import { MulterFileMap } from "@/core/application/types/media-upload.types"
 
 export interface ParsedOnboardingStepRequest {
   step: number

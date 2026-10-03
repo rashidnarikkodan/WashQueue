@@ -11,10 +11,8 @@ import { PipelineStage, Types } from "mongoose"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
 import { StationPricingModel } from "../models/station-pricing.model"
 import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
-import {
-  StationRankingService,
-  HydratedStationItem,
-} from "../../domain/services/station-ranking.service"
+import { StationRankingService } from "../../domain/services/station-ranking.service"
+import { HydratedStationItem } from "../../domain/types/station.types"
 import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
 import { StationStatusCounts } from "../../application/dtos/get-stations.dto"
 

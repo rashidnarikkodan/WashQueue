@@ -7,10 +7,7 @@ import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationStepParserFactory, safeJsonParse } from "./station-step.parser"
 import { StationImage } from "../../domain/entities/Station"
 
-export interface ReviewStationRequestInput {
-  action: "APPROVE" | "REJECT" | "SUSPEND"
-  rejectionReason?: string
-}
+import { ReviewStationRequestInput } from "../interfaces/station-request.interface"
 
 export class StationRequestMapper {
   constructor(private readonly stepParserFactory: StationStepParserFactory) {}

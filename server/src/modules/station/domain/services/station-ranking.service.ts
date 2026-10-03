@@ -1,15 +1,4 @@
-import { Station } from "../entities/Station"
-
-export interface HydratedStationItem {
-  station: Station
-  distanceKm?: number
-  startingPrice?: number
-  queueDepth: number
-  estimatedWaitMins: number
-  isVerified: boolean
-  rating: number
-  score?: number
-}
+import { HydratedStationItem } from "../types/station.types"
 
 export class StationRankingService {
   static computeScore(item: HydratedStationItem): number {

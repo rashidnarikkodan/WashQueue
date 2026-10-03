@@ -1,11 +1,7 @@
 import redis from "@/infrastructure/cache/redis.client"
 import { Station } from "../../domain/entities/Station"
 
-export interface StationLiveState {
-  queueDepth: number
-  estimatedWaitMins: number
-  isOpen: boolean
-}
+import { StationLiveState } from "../../domain/types/station.types"
 
 export class StationRedisHydrationService {
   static async hydrateLiveStates(stations: Station[]): Promise<Map<string, StationLiveState>> {

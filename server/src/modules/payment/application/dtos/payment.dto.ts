@@ -1,5 +1,5 @@
 import { PaymentMethod } from "@/modules/booking/domain/entities/Booking"
-import { Responsibility } from "../../domain/services/RefundPolicyEngine"
+import { Responsibility } from "../../domain/types/refund-policy.types"
 
 export interface CreateBookingReservationInput {
   stationId: string

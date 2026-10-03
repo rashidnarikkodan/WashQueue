@@ -1,7 +1,25 @@
-import { BookingStatus, ServiceType } from "@/common/constants/booking.constants"
-import { PaymentStatus, PaymentMethod } from "@/common/constants/payment.constants"
-
-export { BookingStatus, ServiceType, PaymentStatus, PaymentMethod }
+import {
+  BookingStatus,
+  ServiceType,
+  PaymentStatus,
+  PaymentMethod,
+  VehicleSnapshot,
+  PricingSnapshot,
+  ExtraServiceSnapshot,
+  SchedulingDetails,
+  WalkInCustomer,
+  WalkInVehicle,
+  InspectionRecord,
+  SettlementSnapshot,
+  QRDetails,
+  CancellationDetails,
+  StationDetails,
+  VehicleDetails,
+  CustomerDetails,
+  StalledDetails,
+  BookingProps,
+} from "../types/booking.types"
+export * from "../types/booking.types"
 
 export function deriveOnlinePaymentMethod(
   opts: { isWalletPayment?: boolean; walletAmount?: number } = {}
@@ -16,152 +34,6 @@ export function derivePaymentStatus(paymentMethod: PaymentMethod): PaymentStatus
     return PaymentStatus.PENDING
   }
   return PaymentStatus.PAID
-}
-
-export interface VehicleSnapshot {
-  vehicleCategoryId: string
-  vehicleClassId: string
-}
-
-export interface PricingSnapshot {
-  basePrice: number
-  extraPrice: number
-  totalPrice: number
-  currency: string
-}
-
-export interface ExtraServiceSnapshot {
-  serviceId: string
-  name: string
-  price: number
-}
-
-export interface SchedulingDetails {
-  timeWindowId: string
-  windowStart: Date
-  windowEnd: Date
-}
-
-export interface WalkInCustomer {
-  userId?: string
-  name: string
-  phone: string
-}
-
-export interface WalkInVehicle {
-  vehicleId?: string
-  registrationNumber: string
-  categoryId: string
-  classId: string
-}
-
-export interface InspectionChecklistItem {
-  key: string
-  label: string
-  passed: boolean
-  remark?: string
-}
-
-export interface InspectionPhoto {
-  position: string
-  public_id: string
-  secured_url: string
-}
-
-export interface InspectionRecord {
-  photos: InspectionPhoto[]
-  notes?: string
-  capturedBy: string
-  capturedAt: Date
-  checklist?: InspectionChecklistItem[]
-}
-
-export interface SettlementSnapshot {
-  platformCommission: number
-  stationSettlement: number
-}
-
-export interface QRDetails {
-  qrTokenHash: string
-  qrExpiresAt: Date
-}
-
-export interface CancellationDetails {
-  cancellationReason: string
-  cancelledBy: string
-  cancelledAt: Date
-}
-
-export interface StationDetails {
-  name?: string
-  city?: string
-  phone?: string
-}
-
-export interface VehicleDetails {
-  nickname?: string
-  brand?: string
-  model?: string
-  registrationNumber?: string
-}
-
-export interface CustomerDetails {
-  name?: string
-  email?: string
-  phone?: string
-}
-
-export interface StalledDetails {
-  stalledReason: string
-  stalledBy: string
-  stalledAt: Date
-  previousStatus: "CHECKED_IN" | "IN_SERVICE"
-  resolution?: string
-  resolvedBy?: string
-  resolvedAt?: Date
-}
-
-export interface BookingProps {
-  id: string
-  bookingNumber: string
-  userId?: string | null
-  ownerId: string
-  stationId: string
-  vehicleId?: string | null
-  vehicleSnapshot: VehicleSnapshot
-  serviceType: ServiceType
-  pricingSnapshot: PricingSnapshot
-  extraServices: ExtraServiceSnapshot[]
-  scheduling: SchedulingDetails
-  isWalkIn: boolean
-  walkInCustomer?: WalkInCustomer | null
-  walkInVehicle?: WalkInVehicle | null
-  createdByUserId: string
-  qr: QRDetails
-  paymentStatus: PaymentStatus
-  paymentMethod: PaymentMethod
-  depositAmount: number
-  cashAmount: number
-  refundAmount: number
-  settlement: SettlementSnapshot
-  preServiceInspection?: InspectionRecord | null
-  postServiceInspection?: InspectionRecord | null
-  status: BookingStatus
-  stalledInfo?: StalledDetails | null
-  checkedInAt?: Date | null
-  checkedInBy?: string | null
-  serviceStartedAt?: Date | null
-  serviceCompletedAt?: Date | null
-  handoverInitiatedAt?: Date | null
-  completedAt?: Date | null
-  noShowAt?: Date | null
-  cancellation?: CancellationDetails | null
-  stationDetails?: StationDetails
-  vehicleDetails?: VehicleDetails
-  customerDetails?: CustomerDetails
-  rescheduleCount?: number
-  createdAt: Date
-  updatedAt: Date
 }
 
 export class Booking {

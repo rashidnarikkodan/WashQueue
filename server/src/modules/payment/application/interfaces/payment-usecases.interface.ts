@@ -5,7 +5,7 @@ import {
   ConfirmBookingReservationInput,
   ProcessRefundInput,
 } from "../dtos/payment.dto"
-import { RefundPolicyResult } from "../../domain/services/RefundPolicyEngine"
+import { RefundPolicyResult } from "../../domain/types/refund-policy.types"
 
 export interface ICreateBookingReservationUseCase {
   execute(
