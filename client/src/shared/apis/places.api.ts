@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { PlaceSuggestion, ResolvedPlace } from "../types/places.types"
 export * from "../types/places.types"
 const PLACES_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY as string | undefined

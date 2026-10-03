@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { OnboardingStatus } from "../types/owner.types"
 export * from "../types/owner.types"
 import { api } from "../config/axios"

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { AskAIResponse } from "../types/ai.types"
 export * from "../types/ai.types"
 import { api } from "@/shared/config/axios"
