@@ -36,7 +36,13 @@ export class AnalyticsController {
     const stationId = req.query.stationId as string | undefined
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
-    const data = await this.getOwnerDashboardUseCase.execute(ownerId, range, stationId, startDate, endDate)
+    const data = await this.getOwnerDashboardUseCase.execute(
+      ownerId,
+      range,
+      stationId,
+      startDate,
+      endDate
+    )
     success(res, data, HTTP_STATUS.OK, "Owner dashboard fetched successfully")
   }
 
@@ -59,11 +65,17 @@ export class AnalyticsController {
     const stationId = req.query.stationId as string | undefined
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
-    
-    const { buffer, contentType, filename } = await this.exportOwnerAnalyticsUseCase.execute(ownerId, range, stationId, startDate, endDate)
-    
-    res.setHeader('Content-Type', contentType)
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+
+    const { buffer, contentType, filename } = await this.exportOwnerAnalyticsUseCase.execute(
+      ownerId,
+      range,
+      stationId,
+      startDate,
+      endDate
+    )
+
+    res.setHeader("Content-Type", contentType)
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`)
     res.send(buffer)
   }
 }

@@ -16,7 +16,7 @@ import {
   PayoutProviderError,
   PayoutProviderResult,
 } from "@/core/application/interfaces/payout-provider.interface"
-import { PaymentMethod } from "@/common/constants/payment.constants"
+import { PaymentMethod } from "@/modules/booking/domain/entities/Booking"
 import { applyPayoutOutcome } from "../services/apply-payout-outcome"
 import { ensureOwnerPayoutAccount } from "@/modules/owner/application/services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"

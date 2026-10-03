@@ -10,9 +10,20 @@ export interface IGetAdminDashboardUseCase {
 }
 
 export interface IGetManagerDashboardUseCase {
-  execute(userId: string, requestedStationId?: string, startDate?: Date, endDate?: Date): Promise<ManagerDashboardData>
+  execute(
+    userId: string,
+    requestedStationId?: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<ManagerDashboardData>
 }
 
 export interface IGetOwnerDashboardUseCase {
-  execute(userId: string, range?: DateRange, stationId?: string, startDate?: Date, endDate?: Date): Promise<OwnerDashboardData>
+  execute(
+    userId: string,
+    range?: DateRange,
+    stationId?: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<OwnerDashboardData>
 }

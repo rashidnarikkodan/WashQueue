@@ -107,7 +107,10 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     private readonly reviewModel?: Model<IReview>
   ) {}
 
-  async getAdminDashboardData(startDate: Date | null, endDate?: Date | null): Promise<AdminDashboardData> {
+  async getAdminDashboardData(
+    startDate: Date | null,
+    endDate?: Date | null
+  ): Promise<AdminDashboardData> {
     const dateQuery: Record<string, unknown> = {}
     if (startDate) dateQuery.$gte = startDate
     if (endDate) dateQuery.$lte = endDate

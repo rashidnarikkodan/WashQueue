@@ -40,9 +40,7 @@ describe("ProcessSettlementUseCase", () => {
 
     const payoutRepository = {
       findBySettlementId: vi.fn().mockResolvedValue(null),
-      save: vi.fn(async (payout: Payout) =>
-        new Payout({ ...payout.getProps(), id: "payout-1" })
-      ),
+      save: vi.fn(async (payout: Payout) => new Payout({ ...payout.getProps(), id: "payout-1" })),
     } as unknown as IPayoutRepository
 
     const ownerRepository = {

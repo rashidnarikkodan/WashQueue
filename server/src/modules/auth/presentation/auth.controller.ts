@@ -16,7 +16,7 @@ import success from "@/common/utils/success"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { setAuthCookies, clearAuthCookies } from "@/common/utils/cookies"
-import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import { SUCCESS_MESSAGES } from "@/common/constants/success.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 

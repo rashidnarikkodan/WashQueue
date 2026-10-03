@@ -12,7 +12,7 @@ export class GetAdminDashboardUseCase implements IGetAdminDashboardUseCase {
   ): Promise<AdminDashboardData> {
     let startDate = this.getStartDate(range)
     let endDate = null
-    
+
     if (range === "CUSTOM") {
       startDate = customStartDate || null
       endDate = customEndDate || null

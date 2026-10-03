@@ -30,7 +30,10 @@ export const getOwnerDashboardUseCase = new GetOwnerDashboardUseCase(analyticsQu
 export const getManagerDashboardUseCase = new GetManagerDashboardUseCase(analyticsQueryService)
 
 const csvExportService = new CsvExportService()
-export const exportOwnerAnalyticsUseCase = new ExportOwnerAnalyticsUseCase(analyticsQueryService, csvExportService)
+export const exportOwnerAnalyticsUseCase = new ExportOwnerAnalyticsUseCase(
+  analyticsQueryService,
+  csvExportService
+)
 
 // Controller
 export const analyticsController = new AnalyticsController(

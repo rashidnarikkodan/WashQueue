@@ -1,5 +1,5 @@
 import { NotFoundError } from "@/common/errors/not-found-error"
-import { BookingStatus } from "@/common/constants/booking.constants"
+import { BookingStatus } from "@/modules/booking/domain/entities/Booking"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { ISettlementRepository } from "../../domain/repositories/settlement.repository.interface"
