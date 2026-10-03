@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
   TrendingUp,
   Wallet,
@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   RefreshCw,
   Download,
-  Layers,
   ExternalLink,
   ReceiptText,
   BadgeIndianRupee,
@@ -24,11 +23,7 @@ import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import DatePicker from "@/shared/components/form/DatePicker"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
-import {
-  DataTable,
-  DataTableToolbar,
-  type TabConfig,
-} from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 
 type TopStation = NonNullable<AdminDashboardData["topStations"]>[number] & { rank: number }
 
@@ -51,14 +46,10 @@ export default function AdminAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+  const cacheRef = useRef<Record<string, AdminDashboardData>>({})
 
   const fetchAdminAnalytics = useCallback(
-    async (
-      targetRange: DateRangeFilter = dateRange,
-      start?: string,
-      end?: string
-    ) => {
+    async (targetRange: DateRangeFilter = dateRange, start?: string, end?: string) => {
       setIsRefreshing(true)
       try {
         const res = await analyticsApi.getAdminDashboard(
@@ -66,7 +57,7 @@ export default function AdminAnalyticsPage() {
           start || customStartDate,
           end || customEndDate
         )
-        const cacheKey = `${targetRange}_${start || customStartDate}_${end || customEndDate}` as any
+        const cacheKey = `${targetRange}_${start || customStartDate}_${end || customEndDate}`
         cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
@@ -80,7 +71,7 @@ export default function AdminAnalyticsPage() {
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const key = `${newRange}_${customStartDate}_${customEndDate}` as any
+    const key = `${newRange}_${customStartDate}_${customEndDate}`
     const cached = cacheRef.current[key]
     if (cached && newRange !== "CUSTOM") {
       setData(cached)
@@ -104,7 +95,7 @@ export default function AdminAnalyticsPage() {
       try {
         const res = await analyticsApi.getAdminDashboard(dateRange, customStartDate, customEndDate)
         if (ignore) return
-        const cacheKey = `${dateRange}_${customStartDate}_${customEndDate}` as any
+        const cacheKey = `${dateRange}_${customStartDate}_${customEndDate}`
         cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
@@ -243,8 +234,7 @@ export default function AdminAnalyticsPage() {
           </p>
         </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => fetchAdminAnalytics(dateRange)}
@@ -281,37 +271,35 @@ export default function AdminAnalyticsPage() {
           activeTab={dateRange}
           onTabChange={(tabId) => handleDateRangeChange(tabId as DateRangeFilter)}
           extraFilters={
-            dateRange === "CUSTOM" ? (
-              (() => {
-                const today = new Date().toISOString().split("T")[0]
-                return (
-                  <>
-                    <div className="col-span-1 min-w-[150px]">
-                      <DatePicker
-                        label="Start Date"
-                        value={customStartDate}
-                        maxDate={customEndDate || today}
-                        onChange={(date) => setCustomStartDate(date)}
-                      />
-                    </div>
-                    <div className="col-span-1 min-w-[150px]">
-                      <DatePicker
-                        label="End Date"
-                        value={customEndDate}
-                        minDate={customStartDate || undefined}
-                        maxDate={today}
-                        onChange={(date) => setCustomEndDate(date)}
-                      />
-                    </div>
-                  </>
-                )
-              })()
-            ) : null
+            dateRange === "CUSTOM"
+              ? (() => {
+                  const today = new Date().toISOString().split("T")[0]
+                  return (
+                    <>
+                      <div className="col-span-1 min-w-[150px]">
+                        <DatePicker
+                          label="Start Date"
+                          value={customStartDate}
+                          maxDate={customEndDate || today}
+                          onChange={(date) => setCustomStartDate(date)}
+                        />
+                      </div>
+                      <div className="col-span-1 min-w-[150px]">
+                        <DatePicker
+                          label="End Date"
+                          value={customEndDate}
+                          minDate={customStartDate || undefined}
+                          maxDate={today}
+                          onChange={(date) => setCustomEndDate(date)}
+                        />
+                      </div>
+                    </>
+                  )
+                })()
+              : null
           }
         />
       </div>
-
-
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">

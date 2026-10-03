@@ -5,15 +5,10 @@ import {
   Building2,
   RefreshCw,
   Download,
-  BarChart3,
-  Layers,
-  Sparkles,
-  ExternalLink,
   CreditCard,
   ReceiptText,
   BadgeIndianRupee,
   ArrowUpRight,
-  ShieldCheck,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -28,10 +23,7 @@ import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import DatePicker from "@/shared/components/form/DatePicker"
 
-import {
-  DataTable,
-  DataTableToolbar,
-} from "@/shared/components/data-table"
+import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 
 const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
@@ -118,7 +110,12 @@ export default function OwnerAnalyticsPage() {
 
       const cacheKey = `${dateRange}_${selectedStationId}_${customStartDate}_${customEndDate}`
       try {
-        const res = await analyticsApi.getOwnerDashboard(dateRange, selectedStationId, customStartDate, customEndDate)
+        const res = await analyticsApi.getOwnerDashboard(
+          dateRange,
+          selectedStationId,
+          customStartDate,
+          customEndDate
+        )
         if (ignore) return
         cacheRef.current[cacheKey] = res
         setData(res)
@@ -168,17 +165,25 @@ export default function OwnerAnalyticsPage() {
         toast.error("Please select start and end dates to export custom range")
         return
       }
-      const blob = await analyticsApi.exportOwnerAnalytics(dateRange, selectedStationId, customStartDate, customEndDate)
+      const blob = await analyticsApi.exportOwnerAnalytics(
+        dateRange,
+        selectedStationId,
+        customStartDate,
+        customEndDate
+      )
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
-      link.setAttribute("download", `owner-financial-statement-${dateRange.toLowerCase()}-${Date.now()}.csv`)
+      link.setAttribute(
+        "download",
+        `owner-financial-statement-${dateRange.toLowerCase()}-${Date.now()}.csv`
+      )
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       toast.success("Financial statement exported successfully!")
-    } catch (error) {
+    } catch {
       toast.error("Failed to export financial statement")
     } finally {
       setIsRefreshing(false)
@@ -237,15 +242,6 @@ export default function OwnerAnalyticsPage() {
     },
   ]
 
-  const servicePieData = useMemo(() => {
-    const list = data?.serviceDistribution || []
-    return list.map((sd) => ({
-      name: sd.name,
-      count: sd.count,
-      revenue: sd.revenue,
-    }))
-  }, [data?.serviceDistribution])
-
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs
@@ -263,8 +259,7 @@ export default function OwnerAnalyticsPage() {
           </p>
         </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => fetchAnalyticsData(dateRange, selectedStationId)}
@@ -316,39 +311,35 @@ export default function OwnerAnalyticsPage() {
             },
           ]}
           extraFilters={
-            dateRange === "CUSTOM" ? (
-              (() => {
-                const today = new Date().toISOString().split("T")[0]
-                return (
-                  <>
-                    <div className="col-span-1 min-w-[150px]">
-                      <DatePicker
-                        label="Start Date"
-                        value={customStartDate}
-                        maxDate={customEndDate || today}
-                        onChange={(date) => setCustomStartDate(date)}
-                      />
-                    </div>
-                    <div className="col-span-1 min-w-[150px]">
-                      <DatePicker
-                        label="End Date"
-                        value={customEndDate}
-                        minDate={customStartDate || undefined}
-                        maxDate={today}
-                        onChange={(date) => setCustomEndDate(date)}
-                      />
-                    </div>
-                  </>
-                )
-              })()
-            ) : null
+            dateRange === "CUSTOM"
+              ? (() => {
+                  const today = new Date().toISOString().split("T")[0]
+                  return (
+                    <>
+                      <div className="col-span-1 min-w-[150px]">
+                        <DatePicker
+                          label="Start Date"
+                          value={customStartDate}
+                          maxDate={customEndDate || today}
+                          onChange={(date) => setCustomStartDate(date)}
+                        />
+                      </div>
+                      <div className="col-span-1 min-w-[150px]">
+                        <DatePicker
+                          label="End Date"
+                          value={customEndDate}
+                          minDate={customStartDate || undefined}
+                          maxDate={today}
+                          onChange={(date) => setCustomEndDate(date)}
+                        />
+                      </div>
+                    </>
+                  )
+                })()
+              : null
           }
         />
       </div>
-
-
-
-
 
       <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">

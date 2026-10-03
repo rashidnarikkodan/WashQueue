@@ -56,7 +56,7 @@ export default function Header({ role }: { role?: string }) {
   const activeBadge = roleBadges[currentRole as keyof typeof roleBadges]
 
   return (
-    <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
+    <header className="fixed top-1 z-[100] w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
         <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
