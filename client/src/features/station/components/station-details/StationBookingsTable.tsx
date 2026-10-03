@@ -47,7 +47,7 @@ export default function StationBookingsTable() {
           {
             id: "vehicle",
             header: "Vehicle",
-            cell: (b: typeof mockBookings[0]) => (
+            cell: (b: (typeof mockBookings)[0]) => (
               <div className="flex items-center gap-3 py-1">
                 <div className="w-10 h-10 bg-[#2e3447] rounded-xl flex items-center justify-center text-[#adc6ff]">
                   <Car size={20} />

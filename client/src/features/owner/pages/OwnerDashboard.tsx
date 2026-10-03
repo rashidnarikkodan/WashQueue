@@ -306,39 +306,55 @@ export default function OwnerDashboard() {
             {
               id: "name",
               header: "Station Name",
-              cell: (s: OwnerStationSummary) => <span className="font-bold text-foreground">{s.name}</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="font-bold text-foreground">{s.name}</span>
+              ),
             },
             {
               id: "location",
               header: "Location",
-              cell: (s: OwnerStationSummary) => <span className="text-muted-foreground">{s.city || "—"}</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="text-muted-foreground">{s.city || "—"}</span>
+              ),
             },
             {
               id: "bays",
               header: "Bays",
-              cell: (s: OwnerStationSummary) => <span className="font-mono font-medium text-foreground">{s.totalBays} Bays</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="font-mono font-medium text-foreground">{s.totalBays} Bays</span>
+              ),
             },
             {
               id: "queue",
               header: "Today's Queue",
-              cell: (s: OwnerStationSummary) => <span className="font-bold text-primary">{s.todayBookings} washes</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="font-bold text-primary">{s.todayBookings} washes</span>
+              ),
             },
             {
               id: "revenue",
               header: "Gross Revenue",
-              cell: (s: OwnerStationSummary) => <span className="font-semibold text-foreground">₹{s.totalRevenue.toLocaleString()}</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="font-semibold text-foreground">
+                  ₹{s.totalRevenue.toLocaleString()}
+                </span>
+              ),
             },
             {
               id: "rating",
               header: "Rating",
-              cell: (s: OwnerStationSummary) => <span className="text-amber-500 font-semibold">★ {s.rating.toFixed(1)}</span>,
+              cell: (s: OwnerStationSummary) => (
+                <span className="text-amber-500 font-semibold">★ {s.rating.toFixed(1)}</span>
+              ),
             },
             {
               id: "manager",
               header: "Manager",
               cell: (s: OwnerStationSummary) => (
                 <span className="text-muted-foreground">
-                  {s.assignedManagerName || <span className="text-amber-500/80 italic">Unassigned</span>}
+                  {s.assignedManagerName || (
+                    <span className="text-amber-500/80 italic">Unassigned</span>
+                  )}
                 </span>
               ),
             },
@@ -401,27 +417,37 @@ export default function OwnerDashboard() {
             {
               id: "bookingNumber",
               header: "Booking #",
-              cell: (b: RecentBooking) => <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>
+              ),
             },
             {
               id: "stationName",
               header: "Station",
-              cell: (b: RecentBooking) => <span className="font-medium text-foreground">{b.stationName}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-medium text-foreground">{b.stationName}</span>
+              ),
             },
             {
               id: "customerName",
               header: "Customer",
-              cell: (b: RecentBooking) => <span className="text-muted-foreground">{b.customerName}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="text-muted-foreground">{b.customerName}</span>
+              ),
             },
             {
               id: "vehiclePlate",
               header: "Vehicle",
-              cell: (b: RecentBooking) => <span className="font-mono text-muted-foreground uppercase">{b.vehiclePlate}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-mono text-muted-foreground uppercase">{b.vehiclePlate}</span>
+              ),
             },
             {
               id: "amount",
               header: "Gross Amount",
-              cell: (b: RecentBooking) => <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>
+              ),
             },
             {
               id: "status",

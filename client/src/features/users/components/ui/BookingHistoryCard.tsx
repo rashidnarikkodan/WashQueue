@@ -95,7 +95,9 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
               {
                 id: "station",
                 header: "Station",
-                cell: (b: Booking) => <span className="font-semibold text-foreground">{b.stationName}</span>,
+                cell: (b: Booking) => (
+                  <span className="font-semibold text-foreground">{b.stationName}</span>
+                ),
               },
               {
                 id: "vehicle",
@@ -110,7 +112,9 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
               {
                 id: "amount",
                 header: "Amount",
-                cell: (b: Booking) => <span className="font-black text-foreground">${b.amount.toFixed(2)}</span>,
+                cell: (b: Booking) => (
+                  <span className="font-black text-foreground">${b.amount.toFixed(2)}</span>
+                ),
               },
               {
                 id: "status",

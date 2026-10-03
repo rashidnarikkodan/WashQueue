@@ -407,17 +407,23 @@ export default function AdminDashboard() {
             {
               id: "bookingNumber",
               header: "Booking #",
-              cell: (b: RecentBooking) => <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-mono font-bold text-foreground">{b.bookingNumber}</span>
+              ),
             },
             {
               id: "stationName",
               header: "Station",
-              cell: (b: RecentBooking) => <span className="font-medium text-foreground">{b.stationName}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-medium text-foreground">{b.stationName}</span>
+              ),
             },
             {
               id: "customerName",
               header: "Customer",
-              cell: (b: RecentBooking) => <span className="text-muted-foreground">{b.customerName}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="text-muted-foreground">{b.customerName}</span>
+              ),
             },
             {
               id: "serviceType",
@@ -431,7 +437,9 @@ export default function AdminDashboard() {
             {
               id: "amount",
               header: "Amount",
-              cell: (b: RecentBooking) => <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>,
+              cell: (b: RecentBooking) => (
+                <span className="font-semibold text-foreground">₹{b.amount.toFixed(2)}</span>
+              ),
             },
             {
               id: "status",

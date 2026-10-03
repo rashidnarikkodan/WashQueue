@@ -59,9 +59,7 @@ export default function StationMetadataCard({
             </div>
           </div>
 
-          <p className="text-xs text-[#c2c6d6] leading-relaxed pt-1">
-            {fullAddress || "NA"}
-          </p>
+          <p className="text-xs text-[#c2c6d6] leading-relaxed pt-1">{fullAddress || "NA"}</p>
 
           {(station.location?.latitude || station.location?.longitude) && (
             <div className="text-[11px] font-mono text-[#8c909f] pt-1">

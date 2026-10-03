@@ -586,7 +586,9 @@ export default function OwnerAnalyticsPage() {
             {
               id: "location",
               header: "Location",
-              cell: (st: OwnerStationSummary) => <span className="text-muted-foreground">{st.city || "Kerala"}</span>,
+              cell: (st: OwnerStationSummary) => (
+                <span className="text-muted-foreground">{st.city || "Kerala"}</span>
+              ),
             },
             {
               id: "bays",
@@ -600,17 +602,27 @@ export default function OwnerAnalyticsPage() {
             {
               id: "washes",
               header: "Washes",
-              cell: (st: OwnerStationSummary) => <span className="font-semibold text-foreground">{st.todayBookings}</span>,
+              cell: (st: OwnerStationSummary) => (
+                <span className="font-semibold text-foreground">{st.todayBookings}</span>
+              ),
             },
             {
               id: "gross",
               header: "Gross Billings (₹)",
-              cell: (st: OwnerStationSummary) => <span className="font-bold text-foreground">₹{(st.totalRevenue || 0).toLocaleString()}</span>,
+              cell: (st: OwnerStationSummary) => (
+                <span className="font-bold text-foreground">
+                  ₹{(st.totalRevenue || 0).toLocaleString()}
+                </span>
+              ),
             },
             {
               id: "fee",
               header: "Platform Fee (15%)",
-              cell: (st: OwnerStationSummary) => <span className="font-medium text-amber-500">- ₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}</span>,
+              cell: (st: OwnerStationSummary) => (
+                <span className="font-medium text-amber-500">
+                  - ₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}
+                </span>
+              ),
             },
             {
               id: "net",
@@ -618,14 +630,19 @@ export default function OwnerAnalyticsPage() {
               cell: (st: OwnerStationSummary) => {
                 const gross = st.totalRevenue || 0
                 const fee = Math.round(gross * 0.15)
-                return <span className="font-black text-emerald-500">₹{(gross - fee).toLocaleString()}</span>
+                return (
+                  <span className="font-black text-emerald-500">
+                    ₹{(gross - fee).toLocaleString()}
+                  </span>
+                )
               },
             },
             {
               id: "yield",
               header: "Yield / Bay",
               cell: (st: OwnerStationSummary) => {
-                const yieldBay = st.totalBays > 0 ? Math.round((st.totalRevenue || 0) / st.totalBays) : 0
+                const yieldBay =
+                  st.totalBays > 0 ? Math.round((st.totalRevenue || 0) / st.totalBays) : 0
                 return <span className="font-bold text-primary">₹{yieldBay.toLocaleString()}</span>
               },
             },

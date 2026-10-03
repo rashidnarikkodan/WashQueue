@@ -466,22 +466,36 @@ export default function AdminAnalyticsPage() {
               {
                 id: "city",
                 header: "Location",
-                cell: (st: TopStation) => <span className="text-muted-foreground">{st.city || "Kerala"}</span>,
+                cell: (st: TopStation) => (
+                  <span className="text-muted-foreground">{st.city || "Kerala"}</span>
+                ),
               },
               {
                 id: "washes",
                 header: "Washes",
-                cell: (st: TopStation) => <span className="font-semibold text-foreground">{st.totalBookings.toLocaleString()}</span>,
+                cell: (st: TopStation) => (
+                  <span className="font-semibold text-foreground">
+                    {st.totalBookings.toLocaleString()}
+                  </span>
+                ),
               },
               {
                 id: "gross",
                 header: "Gross GMV (₹)",
-                cell: (st: TopStation) => <span className="font-bold text-primary">₹{(st.totalRevenue || 0).toLocaleString()}</span>,
+                cell: (st: TopStation) => (
+                  <span className="font-bold text-primary">
+                    ₹{(st.totalRevenue || 0).toLocaleString()}
+                  </span>
+                ),
               },
               {
                 id: "commission",
                 header: "Commission 15% (₹)",
-                cell: (st: TopStation) => <span className="font-bold text-amber-500">₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}</span>,
+                cell: (st: TopStation) => (
+                  <span className="font-bold text-amber-500">
+                    ₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}
+                  </span>
+                ),
               },
               {
                 id: "partner",
@@ -490,13 +504,19 @@ export default function AdminAnalyticsPage() {
                   const gmv = st.totalRevenue || 0
                   const comm = Math.round(gmv * 0.15)
                   const partnerShare = gmv - comm
-                  return <span className="font-black text-emerald-500">₹{partnerShare.toLocaleString()}</span>
+                  return (
+                    <span className="font-black text-emerald-500">
+                      ₹{partnerShare.toLocaleString()}
+                    </span>
+                  )
                 },
               },
               {
                 id: "rating",
                 header: "Rating",
-                cell: (st: TopStation) => <span className="font-bold text-amber-500">★ {st.rating.toFixed(1)}</span>,
+                cell: (st: TopStation) => (
+                  <span className="font-bold text-amber-500">★ {st.rating.toFixed(1)}</span>
+                ),
               },
             ]}
             data={(data?.topStations || []).map((st, idx) => ({ ...st, rank: idx }))}

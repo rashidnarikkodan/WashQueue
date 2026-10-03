@@ -226,12 +226,18 @@ export default function ManagerDashboard() {
               {
                 id: "vehicle",
                 header: "Vehicle #",
-                cell: (q: QueueItem) => <span className="font-mono font-bold text-foreground uppercase">{q.vehiclePlate}</span>,
+                cell: (q: QueueItem) => (
+                  <span className="font-mono font-bold text-foreground uppercase">
+                    {q.vehiclePlate}
+                  </span>
+                ),
               },
               {
                 id: "customer",
                 header: "Customer",
-                cell: (q: QueueItem) => <span className="text-muted-foreground">{q.customerName}</span>,
+                cell: (q: QueueItem) => (
+                  <span className="text-muted-foreground">{q.customerName}</span>
+                ),
               },
               {
                 id: "washType",

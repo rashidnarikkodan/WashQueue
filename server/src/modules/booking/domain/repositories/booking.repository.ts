@@ -1,6 +1,5 @@
 import { Booking, BookingStatus, PaymentStatus } from "../entities/Booking"
 
-
 export interface FindBookingsFilter {
   userId?: string
   stationId?: string

@@ -38,7 +38,6 @@ export class BookingMongoRepository implements IBookingRepository {
     return BookingMapper.toDomain(doc)
   }
 
-
   async findBookings(filter: FindBookingsFilter): Promise<FindBookingsResult> {
     const query: Record<string, unknown> = {}
 
