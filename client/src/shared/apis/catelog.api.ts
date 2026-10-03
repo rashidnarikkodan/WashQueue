@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { api } from "@/shared/config/axios"
 import { handleApiError } from "@/shared/utils/handleApiError"
 import type {

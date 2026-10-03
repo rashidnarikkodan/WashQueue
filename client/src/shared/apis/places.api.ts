@@ -1,16 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { PlaceSuggestion, ResolvedPlace } from "../types/places.types"
+export * from "../types/places.types"
 const PLACES_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY as string | undefined
-
-export interface PlaceSuggestion {
-  placeId: string
-  mainText: string
-  secondaryText: string
-}
-
-export interface ResolvedPlace {
-  latitude: number
-  longitude: number
-  description: string
-}
 
 export const placesApi = {
   async autocomplete(input: string, sessionToken: string): Promise<PlaceSuggestion[]> {

@@ -2,37 +2,10 @@ import { useState, useEffect, useCallback } from "react"
 import { Sparkles, Car, AlertCircle, RefreshCw, Zap, CheckCircle2, Clock } from "lucide-react"
 import { stationApi } from "@/shared/apis/station.api"
 import { getSocketClient } from "@/shared/services/socket.client"
+import type { PublicQueueData } from "@/features/station/types"
 
 interface StationLiveQueueSectionProps {
   stationId?: string
-}
-
-interface PublicQueueItem {
-  id: string
-  bookingNumber: string
-  position?: number
-  bayNumber?: number
-  vehicle: string
-  package: string
-  serviceType: string
-  status: string
-  serviceStartedAt?: string
-  estimatedWaitMinutes?: number
-  estimatedServiceStart?: string
-  isBayActive: boolean
-}
-
-interface PublicQueueData {
-  stationId: string
-  stationName: string
-  totalBays: number
-  activeServicesCount: number
-  availableBays: number
-  queueDepth: number
-  totalActiveAndWaiting: number
-  averageWashDurationMinutes: number
-  activeServices: PublicQueueItem[]
-  waitingQueue: PublicQueueItem[]
 }
 
 export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionProps) {

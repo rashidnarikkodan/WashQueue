@@ -1,16 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { AskAIResponse } from "../types/ai.types"
+export * from "../types/ai.types"
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
-
-export interface AskAIPayload {
-  prompt: string
-}
-
-export interface AskAIResponse {
-  success: boolean
-  data: string
-  message: string
-}
 
 export const aiApi = {
   ask: async (prompt: string): Promise<string> => {

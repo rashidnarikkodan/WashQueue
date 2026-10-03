@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
@@ -10,10 +11,12 @@ import type {
   Station,
   StationDetail,
   UpdateStationInput,
+  BookingCalendarResponse,
+  BookingTimeWindowsResponse,
+  PublicQueueData,
 } from "@/features/station/types"
 
 import type { ApiResponse } from "../types/ApiResponse"
-import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
 
 export const stationApi = {
   getFilterOptions: async (): Promise<FilterMetadata> => {
@@ -146,13 +149,7 @@ export const stationApi = {
     }
   },
 
-  getBookingCalendar: async (
-    stationId: string
-  ): Promise<{
-    minDate: string
-    maxDate: string
-    dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
-  }> => {
+  getBookingCalendar: async (stationId: string): Promise<BookingCalendarResponse> => {
     try {
       const response = await api.get(`/stations/${stationId}/booking-calendar`)
       return response.data.data
@@ -164,11 +161,7 @@ export const stationApi = {
   getAvailableTimeWindows: async (
     stationId: string,
     date: string
-  ): Promise<{
-    stationId: string
-    date: string
-    windows: TimeWindowSlot[]
-  }> => {
+  ): Promise<BookingTimeWindowsResponse> => {
     try {
       const response = await api.get(`/stations/${stationId}/time-windows`, {
         params: { date },
@@ -179,41 +172,7 @@ export const stationApi = {
     }
   },
 
-  getPublicLiveQueue: async (
-    stationId: string
-  ): Promise<{
-    stationId: string
-    stationName: string
-    totalBays: number
-    activeServicesCount: number
-    availableBays: number
-    queueDepth: number
-    totalActiveAndWaiting: number
-    averageWashDurationMinutes: number
-    activeServices: Array<{
-      id: string
-      bookingNumber: string
-      bayNumber: number
-      vehicle: string
-      package: string
-      serviceType: string
-      status: string
-      serviceStartedAt?: string
-      isBayActive: boolean
-    }>
-    waitingQueue: Array<{
-      id: string
-      bookingNumber: string
-      position: number
-      vehicle: string
-      package: string
-      serviceType: string
-      status: string
-      estimatedWaitMinutes?: number
-      estimatedServiceStart?: string
-      isBayActive: boolean
-    }>
-  }> => {
+  getPublicLiveQueue: async (stationId: string): Promise<PublicQueueData> => {
     try {
       const response = await api.get(`/bookings/stations/${stationId}/public-queue`)
       return response.data.data

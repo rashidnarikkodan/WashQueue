@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
@@ -41,12 +42,12 @@ export const reviewApi = {
     }
   },
 
-  getByBooking: async (bookingId: string): Promise<ReviewDto | null> => {
+  getByBooking: async (bookingId: string): Promise<ReviewDto> => {
     try {
       const response = await api.get(API_ROUTES.REVIEWS.BY_BOOKING(bookingId), { skipToast: true })
-      return response.data?.data || null
-    } catch {
-      return null
+      return response.data?.data
+    } catch (error) {
+      handleApiError(error, "Failed to load review by booking")
     }
   },
 
