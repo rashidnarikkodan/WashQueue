@@ -58,10 +58,10 @@ const OwnerApproval = () => {
       const totalCount = allOwnersResponse.users.length
       const approvedCount = allOwnersResponse.users.filter((u: User) => u.isVerified).length
       const pendingCount = allOwnersResponse.users.filter(
-        (u: User) => !u.isVerified && u.onboardingStep === 4
+        (u: User) => !u.isVerified && (u.onboardingStep ?? 1) >= 3
       ).length
       const draftCount = allOwnersResponse.users.filter(
-        (u: User) => !u.isVerified && u.onboardingStep !== 4
+        (u: User) => !u.isVerified && (u.onboardingStep ?? 1) < 3
       ).length
 
       setStats({

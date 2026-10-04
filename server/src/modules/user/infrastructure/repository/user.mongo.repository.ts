@@ -95,25 +95,35 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
 
     const filter: Record<string, unknown> = {}
 
-    if (approvalStatus || typeof isVerified === "boolean") {
+    if (approvalStatus) {
       const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
-
-      if (approvalStatus === "approved" || isVerified === true) {
-        const ownersList = await OwnerModel.find({ isVerified: true })
-          .select("userId")
+      if (approvalStatus === "approved") {
+        const approvedOwners = await OwnerModel.find({ isVerified: true }, { userId: 1 })
           .lean()
           .exec()
-        const ownerUserIds = ownersList.map((o) => o.userId).filter(Boolean)
-        filter.$or = [{ isVerified: true }, { _id: { $in: ownerUserIds } }]
+        const approvedUserIds = approvedOwners.map((o) => o.userId)
+        filter._id = { $in: approvedUserIds }
       } else if (approvalStatus === "pending") {
-        filter.isVerified = false
-        filter.onboardingStep = 4
+        const pendingOwners = await OwnerModel.find(
+          { isVerified: { $ne: true }, onboardingStep: { $gte: 3 } },
+          { userId: 1 }
+        )
+          .lean()
+          .exec()
+        const pendingUserIds = pendingOwners.map((o) => o.userId)
+        filter._id = { $in: pendingUserIds }
       } else if (approvalStatus === "draft") {
-        filter.isVerified = false
-        filter.onboardingStep = { $ne: 4 }
-      } else if (isVerified === false) {
-        filter.isVerified = false
+        const nonDraftOwners = await OwnerModel.find(
+          { $or: [{ isVerified: true }, { onboardingStep: { $gte: 3 } }] },
+          { userId: 1 }
+        )
+          .lean()
+          .exec()
+        const nonDraftUserIds = nonDraftOwners.map((o) => o.userId)
+        filter._id = { $nin: nonDraftUserIds }
       }
+    } else if (typeof isVerified === "boolean") {
+      filter.isVerified = isVerified
     }
 
     if (search) {

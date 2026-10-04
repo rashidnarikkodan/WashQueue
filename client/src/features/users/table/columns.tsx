@@ -161,7 +161,7 @@ export function getOwnerColumns(onViewApplication: (owner: User) => void): Colum
       header: "Onboarding Step",
       cell: (user) => (
         <span className="bg- text-slate-400 border border-border/40 px-3 py-1.5 rounded-lg text-[11px] font-bold">
-          Step {user.onboardingStep == 4 ? 3 : (user.onboardingStep ?? 1)} of 3
+          Step {Math.min(user.onboardingStep ?? 1, 3)} of 3
         </span>
       ),
     },
@@ -176,7 +176,7 @@ export function getOwnerColumns(onViewApplication: (owner: User) => void): Colum
             </span>
           )
         }
-        if (user.onboardingStep === 4) {
+        if ((user.onboardingStep ?? 1) >= 3) {
           return (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border bg-blue-500/10 text-blue-500 border-blue-500/20">
               In Review
