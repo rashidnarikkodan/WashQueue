@@ -264,7 +264,14 @@ registerAuthFailureHandler((msg) => {
   useAuthStore.setState({
     user: null,
     isAuthenticated: false,
+    activeViewMode: VIEW_MODE.CUSTOMER,
   })
+  localStorage.removeItem("wq_user")
+  localStorage.removeItem("wq_auth")
+  localStorage.removeItem("wq_view_mode")
+  localStorage.removeItem("wq_token")
+  localStorage.removeItem("wq_temp_email")
+  localStorage.removeItem("wq_reset_email")
   if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
     toast.error(msg, { id: "suspension-toast" })
   }

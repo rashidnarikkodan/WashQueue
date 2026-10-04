@@ -23,9 +23,9 @@ export interface DateRangeTabsProps {
 
 const DASHBOARD_RANGES: { label: string; value: DateRangeFilter }[] = [
   { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "12 Months", value: "12_MONTHS" },
+  { label: "Last 7 Days", value: "7_DAYS" },
+  { label: "This Month", value: "30_DAYS" },
+  { label: "This Year", value: "12_MONTHS" },
   { label: "All Years", value: "ALL_YEARS" },
 ]
 

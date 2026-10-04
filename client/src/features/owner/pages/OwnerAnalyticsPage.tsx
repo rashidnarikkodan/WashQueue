@@ -276,36 +276,34 @@ export default function OwnerAnalyticsPage() {
 
       <StatsHUD stats={statItems} columns={5} />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm shadow-xs mb-2 relative z-50">
-        <DateRangeTabs
-          activeRange={dateRange}
-          onRangeChange={handleDateRangeChange}
-          selectedYear={selectedYear}
-          onYearChange={setSelectedYear}
-          selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
-          startDate={customStartDate}
-          onStartDateChange={setCustomStartDate}
-          endDate={customEndDate}
-          onEndDateChange={setCustomEndDate}
-          allowCustom={true}
-        />
+      <DateRangeTabs
+        activeRange={dateRange}
+        onRangeChange={handleDateRangeChange}
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
+        startDate={customStartDate}
+        onStartDateChange={setCustomStartDate}
+        endDate={customEndDate}
+        onEndDateChange={setCustomEndDate}
+        allowCustom={true}
+      />
 
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold text-muted-foreground">Filter Station:</span>
-          <select
-            value={selectedStationId}
-            onChange={(e) => handleStationChange(e.target.value)}
-            className="bg-card text-xs font-bold text-foreground px-3 py-2 rounded-xl border border-border focus:outline-none cursor-pointer"
-          >
-            <option value="ALL">All Stations Portfolio</option>
-            {(data?.stations || []).map((s) => (
-              <option key={s.stationId} value={s.stationId}>
-                {s.name} ({s.totalBays} Bays)
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-xs font-semibold text-muted-foreground">Filter Station:</span>
+        <select
+          value={selectedStationId}
+          onChange={(e) => handleStationChange(e.target.value)}
+          className="bg-card text-xs font-bold text-foreground px-3 py-2 rounded-xl border border-border focus:outline-none cursor-pointer"
+        >
+          <option value="ALL">All Stations Portfolio</option>
+          {(data?.stations || []).map((s) => (
+            <option key={s.stationId} value={s.stationId}>
+              {s.name} ({s.totalBays} Bays)
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">

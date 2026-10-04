@@ -45,25 +45,20 @@ interface UsersApiResponse {
 
 const toUser = (u?: UserApiPayload): User => {
   if (!u) throw new Error("User payload is missing")
-  if (!u.id && !u._id) throw new Error("User payload missing ID")
-  if (!u.email) throw new Error("User payload missing email")
-  if (!u.role) throw new Error("User payload missing role")
-  if (typeof u.isBlocked !== "boolean") throw new Error("User payload missing isBlocked status")
-  if (typeof u.isVerified !== "boolean") throw new Error("User payload missing isVerified status")
-  if (!u.createdAt) throw new Error("User payload missing createdAt")
-  if (!u.updatedAt) throw new Error("User payload missing updatedAt")
+  const id = u.id || u._id
+  if (!id) throw new Error("User payload missing ID")
 
   return {
-    id: u.id ?? u._id!,
+    id,
     name: u.name ?? "",
-    email: u.email,
-    role: u.role,
+    email: u.email ?? "",
+    role: u.role ?? "customer",
     phone: u.phone,
-    isBlocked: u.isBlocked,
-    isVerified: u.isVerified,
-    bookmarks: u.bookmarks ?? [],
-    createdAt: u.createdAt,
-    updatedAt: u.updatedAt,
+    isBlocked: typeof u.isBlocked === "boolean" ? u.isBlocked : false,
+    isVerified: typeof u.isVerified === "boolean" ? u.isVerified : false,
+    bookmarks: Array.isArray(u.bookmarks) ? u.bookmarks : [],
+    createdAt: u.createdAt ?? new Date().toISOString(),
+    updatedAt: u.updatedAt ?? new Date().toISOString(),
     authProvider: u.authProvider,
     lastLoginAt: u.lastLoginAt,
     onboardingStep: u.onboardingStep,

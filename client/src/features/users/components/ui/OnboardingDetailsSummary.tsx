@@ -33,7 +33,7 @@ const getApiUrl = (path?: string) => {
 }
 
 const OnboardingDetailsSummary = ({
-  details,
+  details = {},
   email,
   idProofFile = null,
   bankProofFile = null,

@@ -18,6 +18,7 @@ export function NotificationItemCard({
   const formatTimeAgo = (dateInput: string | Date | undefined) => {
     if (!dateInput) return "JUST NOW"
     const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput
+    if (isNaN(date.getTime())) return "JUST NOW"
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
     const diffMins = Math.floor(diffMs / (1000 * 60))

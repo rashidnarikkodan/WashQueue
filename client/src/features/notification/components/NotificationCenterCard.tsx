@@ -23,6 +23,7 @@ interface NotificationCenterCardProps {
 function formatRelativeTime(dateInput: string | Date): string {
   try {
     const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput
+    if (isNaN(date.getTime())) return String(dateInput)
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
     const diffSec = Math.floor(diffMs / 1000)
@@ -70,7 +71,7 @@ export function NotificationCenterCard({
     (parsedData.transactionId
       ? `#TRX-${String(parsedData.transactionId).slice(-4).toUpperCase()}`
       : null) ||
-    (notification.id ? `#NOTIF-${notification.id.slice(-4).toUpperCase()}` : null)
+    (notification.id ? `#NOTIF-${String(notification.id).slice(-4).toUpperCase()}` : null)
 
   const locationTag =
     (parsedData.stationName as string) ||
