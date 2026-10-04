@@ -18,6 +18,7 @@ import { IUser } from "@/modules/user/infrastructure/model/user.model"
 import { IOwner } from "@/modules/owner/infrastructure/model/owner.model"
 import { IManagerAssignment } from "@/modules/manager/infrastructure/models/manager-assignment.model"
 import { IReview } from "@/modules/review/infrastructure/models/review.model"
+import { ROLE } from "@/common/constants/role.constants"
 
 interface AggregatedBookingRecord {
   _id: unknown
@@ -97,6 +98,179 @@ interface AggregatedFlaggedReview {
   createdAt?: Date
 }
 
+import { DateRange } from "../../domain/types/analytics.types"
+
+function resolveDateRangeAndBuckets(
+  range: DateRange = "30_DAYS",
+  year?: number,
+  month?: number,
+  customStartDate?: Date | null,
+  customEndDate?: Date | null
+): {
+  matchStartDate: Date | null
+  matchEndDate: Date | null
+  dateFormat: string
+  buckets: Array<{ dateKey: string; label: string }>
+} {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  let matchStartDate: Date | null = null
+  let matchEndDate: Date | null = null
+  let dateFormat = "%Y-%m-%d"
+  const buckets: Array<{ dateKey: string; label: string }> = []
+
+  if (range === "TODAY") {
+    const start = new Date(now)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%H:00"
+
+    for (let h = 0; h < 24; h++) {
+      const hourStr = `${String(h).padStart(2, "0")}:00`
+      buckets.push({ dateKey: hourStr, label: hourStr })
+    }
+  } else if (range === "7_DAYS") {
+    const start = new Date(now)
+    start.setDate(start.getDate() - 6)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m-%d"
+
+    const curr = new Date(start)
+    while (curr <= end) {
+      const yearStr = curr.getFullYear()
+      const monthStr = String(curr.getMonth() + 1).padStart(2, "0")
+      const dayStr = String(curr.getDate()).padStart(2, "0")
+      const key = `${yearStr}-${monthStr}-${dayStr}`
+      const monthName = curr.toLocaleString("en-US", { month: "short" })
+      buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+      curr.setDate(curr.getDate() + 1)
+    }
+  } else if (range === "30_DAYS") {
+    const targetYear = year || currentYear
+    const targetMonth = month || currentMonth
+
+    const start = new Date(targetYear, targetMonth - 1, 1, 0, 0, 0, 0)
+    const end = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m-%d"
+
+    const daysInMonth = end.getDate()
+    const monthName = start.toLocaleString("en-US", { month: "short" })
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = String(d).padStart(2, "0")
+      const monthStr = String(targetMonth).padStart(2, "0")
+      const key = `${targetYear}-${monthStr}-${dayStr}`
+      buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+    }
+  } else if (range === "12_MONTHS") {
+    const targetYear = year || currentYear
+    const start = new Date(targetYear, 0, 1, 0, 0, 0, 0)
+    const end = new Date(targetYear, 11, 31, 23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m"
+
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]
+    for (let m = 1; m <= 12; m++) {
+      const monthStr = String(m).padStart(2, "0")
+      const key = `${targetYear}-${monthStr}`
+      buckets.push({ dateKey: key, label: monthNames[m - 1] || monthStr })
+    }
+  } else if (range === "ALL_YEARS") {
+    dateFormat = "%Y"
+    const startYear = 2024
+    for (let y = startYear; y <= currentYear; y++) {
+      const key = String(y)
+      buckets.push({ dateKey: key, label: key })
+    }
+    matchStartDate = new Date(startYear, 0, 1, 0, 0, 0, 0)
+    matchEndDate = new Date(currentYear, 11, 31, 23, 59, 59, 999)
+  } else if (range === "CUSTOM") {
+    matchStartDate = customStartDate || null
+    matchEndDate = customEndDate || null
+    dateFormat = "%Y-%m-%d"
+
+    if (matchStartDate && matchEndDate) {
+      const curr = new Date(matchStartDate)
+      curr.setHours(0, 0, 0, 0)
+      const end = new Date(matchEndDate)
+      end.setHours(23, 59, 59, 999)
+
+      while (curr <= end) {
+        const yearStr = curr.getFullYear()
+        const monthStr = String(curr.getMonth() + 1).padStart(2, "0")
+        const dayStr = String(curr.getDate()).padStart(2, "0")
+        const key = `${yearStr}-${monthStr}-${dayStr}`
+        const monthName = curr.toLocaleString("en-US", { month: "short" })
+        buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+        curr.setDate(curr.getDate() + 1)
+      }
+    }
+  }
+
+  return { matchStartDate, matchEndDate, dateFormat, buckets }
+}
+
+function fillTimeSeriesBuckets(
+  rawPoints: Array<{ _id: string; revenue?: number; bookingsCount?: number; commission?: number }>,
+  buckets: Array<{ dateKey: string; label: string }>
+): TimeSeriesPoint[] {
+  const rawMap = new Map<string, { revenue: number; bookingsCount: number; commission: number }>()
+  rawPoints.forEach((p) => {
+    rawMap.set(p._id, {
+      revenue: p.revenue || 0,
+      bookingsCount: p.bookingsCount || 0,
+      commission: p.commission || 0,
+    })
+  })
+
+  if (buckets.length === 0) {
+    return rawPoints.map((p) => ({
+      date: p._id,
+      revenue: p.revenue || 0,
+      bookingsCount: p.bookingsCount || 0,
+      commission: p.commission || 0,
+    }))
+  }
+
+  return buckets.map((b) => {
+    const data = rawMap.get(b.dateKey) || { revenue: 0, bookingsCount: 0, commission: 0 }
+    return {
+      date: b.label,
+      revenue: data.revenue,
+      bookingsCount: data.bookingsCount,
+      commission: data.commission,
+    }
+  })
+}
+
 export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
   constructor(
     private readonly bookingModel: Model<IBookingDocument>,
@@ -108,12 +282,23 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
   ) {}
 
   async getAdminDashboardData(
-    startDate: Date | null,
+    range: DateRange = "30_DAYS",
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
     endDate?: Date | null
   ): Promise<AdminDashboardData> {
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
+
     const dateQuery: Record<string, unknown> = {}
-    if (startDate) dateQuery.$gte = startDate
-    if (endDate) dateQuery.$lte = endDate
+    if (matchStartDate) dateQuery.$gte = matchStartDate
+    if (matchEndDate) dateQuery.$lte = matchEndDate
     const matchQuery = Object.keys(dateQuery).length > 0 ? { createdAt: dateQuery } : {}
 
     // 1. KPIs
@@ -145,13 +330,43 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
         $group: {
           _id: null,
           totalCustomers: {
-            $sum: { $cond: [{ $eq: ["$role", "CUSTOMER"] }, 1, 0] },
+            $sum: {
+              $cond: [
+                {
+                  $in: [
+                    { $toLower: { $ifNull: ["$role", ""] } },
+                    [ROLE.CUSTOMER, "customer", "CUSTOMER"],
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
           },
           totalOwners: {
-            $sum: { $cond: [{ $eq: ["$role", "OWNER"] }, 1, 0] },
+            $sum: {
+              $cond: [
+                {
+                  $in: [{ $toLower: { $ifNull: ["$role", ""] } }, [ROLE.OWNER, "owner", "OWNER"]],
+                },
+                1,
+                0,
+              ],
+            },
           },
           totalManagers: {
-            $sum: { $cond: [{ $eq: ["$role", "MANAGER"] }, 1, 0] },
+            $sum: {
+              $cond: [
+                {
+                  $in: [
+                    { $toLower: { $ifNull: ["$role", ""] } },
+                    [ROLE.MANAGER, "manager", "MANAGER"],
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
           },
         },
       },
@@ -181,13 +396,13 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       })
     }
 
-    // 2. Growth Trend (daily or monthly buckets)
+    // 2. Growth Trend
     const growthTrendRaw = await this.bookingModel.aggregate([
       { $match: matchQuery },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: { format: dateFormat, date: "$createdAt" },
           },
           revenue: { $sum: "$pricingSnapshot.totalPrice" },
           bookingsCount: { $sum: 1 },
@@ -197,12 +412,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       { $sort: { _id: 1 } },
     ])
 
-    const growthTrend: TimeSeriesPoint[] = growthTrendRaw.map((item) => ({
-      date: item._id,
-      revenue: item.revenue || 0,
-      bookingsCount: item.bookingsCount || 0,
-      commission: item.commission || 0,
-    }))
+    const growthTrend: TimeSeriesPoint[] = fillTimeSeriesBuckets(growthTrendRaw, buckets)
 
     // 3. Status Distribution
     const statusRaw = await this.bookingModel.aggregate([
@@ -300,8 +510,11 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
 
   async getOwnerDashboardData(
     userId: string,
-    startDate: Date | null,
+    range: DateRange = "30_DAYS",
     stationId?: string,
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
     endDate?: Date | null
   ): Promise<OwnerDashboardData> {
     const userObjectId = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null
@@ -370,12 +583,20 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       ownerBookingMatch.push({ ownerId: { $in: ownerIds } })
     }
 
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
+
     const dateMatch: Record<string, unknown> = {
       $or: ownerBookingMatch.length > 0 ? ownerBookingMatch : [{ ownerId: { $in: ownerIds } }],
     }
     const createdAtMatch: Record<string, unknown> = {}
-    if (startDate) createdAtMatch.$gte = startDate
-    if (endDate) createdAtMatch.$lte = endDate
+    if (matchStartDate) createdAtMatch.$gte = matchStartDate
+    if (matchEndDate) createdAtMatch.$lte = matchEndDate
     if (Object.keys(createdAtMatch).length > 0) {
       dateMatch.createdAt = createdAtMatch
     }
@@ -426,7 +647,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: { format: dateFormat, date: "$createdAt" },
           },
           revenue: { $sum: "$pricingSnapshot.totalPrice" },
           bookingsCount: { $sum: 1 },
@@ -436,12 +657,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       { $sort: { _id: 1 } },
     ])
 
-    const revenueTrend: TimeSeriesPoint[] = revenueTrendRaw.map((item) => ({
-      date: item._id,
-      revenue: item.revenue || 0,
-      bookingsCount: item.bookingsCount || 0,
-      commission: item.commission || 0,
-    }))
+    const revenueTrend: TimeSeriesPoint[] = fillTimeSeriesBuckets(revenueTrendRaw, buckets)
 
     // 6. Station Comparison
     const stationCompRaw = await this.bookingModel.aggregate([
@@ -487,7 +703,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     ])
 
     const serviceDistribution: ServiceDistributionItem[] = serviceRaw.map((sr) => ({
-      name: sr._id === "FULL" ? "Full Wash & Detail" : "Quick Wash",
+      name: sr._id ? String(sr._id) : "General Wash",
       count: sr.count,
       revenue: sr.revenue,
     }))
@@ -586,7 +802,12 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
 
   async getManagerDashboardData(
     userId: string,
-    requestedStationId?: string
+    requestedStationId?: string,
+    range: DateRange = "TODAY",
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
+    endDate?: Date | null
   ): Promise<ManagerDashboardData> {
     let resolvedStationId = requestedStationId
 
@@ -623,7 +844,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     const station = stationRaw as AggregatedStationData
     const totalBays = Math.max(1, station.slotConfig?.bays || 1)
 
-    // Today's range
+    // Today's range for live status & upcoming queue
     const startOfToday = new Date()
     startOfToday.setHours(0, 0, 0, 0)
     const endOfToday = new Date()
@@ -668,7 +889,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     })
 
     const averageServiceMinutes =
-      durationCount > 0 ? Math.round(totalServiceDurationMinutes / durationCount) : 25
+      durationCount > 0 ? Math.round(totalServiceDurationMinutes / durationCount) : 0
     const bayOccupancyRate =
       totalBays > 0 ? Math.min(100, Math.round((todayInService / totalBays) * 100)) : 0
 
@@ -678,8 +899,11 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
     for (let i = 1; i <= totalBays; i++) {
       const activeBooking = activeInService[i - 1]
       if (activeBooking) {
-        let remaining = 20
-        if (activeBooking.serviceStartedAt) {
+        let remaining = 0
+        if (activeBooking.serviceStartedAt && activeBooking.scheduling?.windowEnd) {
+          const endMs = new Date(activeBooking.scheduling.windowEnd).getTime()
+          remaining = Math.max(0, Math.round((endMs - Date.now()) / 60000))
+        } else if (activeBooking.serviceStartedAt) {
           const elapsed = Math.round(
             (Date.now() - new Date(activeBooking.serviceStartedAt).getTime()) / 60000
           )
@@ -693,8 +917,8 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
           vehiclePlate:
             activeBooking.walkInVehicle?.registrationNumber ||
             activeBooking.vehicleDetails?.registrationNumber ||
-            "VEHICLE",
-          serviceType: activeBooking.serviceType === "FULL" ? "Full Wash" : "Quick Wash",
+            "—",
+          serviceType: activeBooking.serviceType || "Wash",
           status: "IN_SERVICE",
           timeRemainingMinutes: remaining,
         })
@@ -731,22 +955,29 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       })
     )
 
-    // 4. Weekly Volume (past 7 days)
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    sevenDaysAgo.setHours(0, 0, 0, 0)
+    // 4. Time series volume for selected range
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
 
-    const weeklyRaw = await this.bookingModel.aggregate([
-      {
-        $match: {
-          stationId: stationObjectId,
-          createdAt: { $gte: sevenDaysAgo },
-        },
-      },
+    const managerRangeMatch: Record<string, unknown> = { stationId: stationObjectId }
+    const createdAtMatch: Record<string, unknown> = {}
+    if (matchStartDate) createdAtMatch.$gte = matchStartDate
+    if (matchEndDate) createdAtMatch.$lte = matchEndDate
+    if (Object.keys(createdAtMatch).length > 0) {
+      managerRangeMatch.createdAt = createdAtMatch
+    }
+
+    const volumeRaw = await this.bookingModel.aggregate([
+      { $match: managerRangeMatch },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: { format: dateFormat, date: "$createdAt" },
           },
           revenue: { $sum: "$pricingSnapshot.totalPrice" },
           bookingsCount: { $sum: 1 },
@@ -755,11 +986,7 @@ export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
       { $sort: { _id: 1 } },
     ])
 
-    const weeklyVolume: TimeSeriesPoint[] = weeklyRaw.map((w) => ({
-      date: w._id,
-      revenue: w.revenue || 0,
-      bookingsCount: w.bookingsCount || 0,
-    }))
+    const weeklyVolume: TimeSeriesPoint[] = fillTimeSeriesBuckets(volumeRaw, buckets)
 
     // 5. Upcoming / Today's Queue (Active / In progress / Pending check-in)
     const upcomingQueue = todayBookings

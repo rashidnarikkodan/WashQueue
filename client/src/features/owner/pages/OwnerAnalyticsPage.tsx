@@ -21,24 +21,16 @@ import {
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import DatePicker from "@/shared/components/form/DatePicker"
+import { DataTable } from "@/shared/components/data-table"
 
-import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
-
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
-  { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "1 Year", value: "YEAR" },
-  { label: "All Time", value: "ALL" },
-  { label: "Custom", value: "CUSTOM" },
-]
+import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 
 export default function OwnerAnalyticsPage() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
   const [selectedStationId, setSelectedStationId] = useState<string>("ALL")
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [customStartDate, setCustomStartDate] = useState<string>("")
   const [customEndDate, setCustomEndDate] = useState<string>("")
   const [data, setData] = useState<OwnerDashboardData | null>(null)
@@ -51,6 +43,8 @@ export default function OwnerAnalyticsPage() {
     async (
       targetRange: DateRangeFilter = dateRange,
       targetStation: string = selectedStationId,
+      year: number = selectedYear,
+      month: number = selectedMonth,
       start?: string,
       end?: string
     ) => {
@@ -59,10 +53,12 @@ export default function OwnerAnalyticsPage() {
         const res = await analyticsApi.getOwnerDashboard(
           targetRange,
           targetStation,
+          year,
+          month,
           start || customStartDate,
           end || customEndDate
         )
-        const cacheKey = `${targetRange}_${targetStation}_${start || customStartDate}_${end || customEndDate}`
+        const cacheKey = `${targetRange}_${targetStation}_${year}_${month}_${start || customStartDate}_${end || customEndDate}`
         cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
@@ -71,16 +67,11 @@ export default function OwnerAnalyticsPage() {
         setIsRefreshing(false)
       }
     },
-    [dateRange, selectedStationId, customStartDate, customEndDate]
+    [dateRange, selectedStationId, selectedYear, selectedMonth, customStartDate, customEndDate]
   )
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const key = `${newRange}_${selectedStationId}_${customStartDate}_${customEndDate}`
-    const cached = cacheRef.current[key]
-    if (cached && newRange !== "CUSTOM") {
-      setData(cached)
-    }
     setDateRange(newRange)
     if (newRange !== "CUSTOM") {
       setCustomStartDate("")
@@ -90,11 +81,6 @@ export default function OwnerAnalyticsPage() {
 
   const handleStationChange = (newStationId: string) => {
     if (newStationId === selectedStationId) return
-    const key = `${dateRange}_${newStationId}_${customStartDate}_${customEndDate}`
-    const cached = cacheRef.current[key]
-    if (cached && dateRange !== "CUSTOM") {
-      setData(cached)
-    }
     setSelectedStationId(newStationId)
   }
 
@@ -102,17 +88,18 @@ export default function OwnerAnalyticsPage() {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      // If CUSTOM is selected but dates aren't set, wait for user
       if (dateRange === "CUSTOM" && (!customStartDate || !customEndDate)) {
         setIsLoading(false)
         return
       }
 
-      const cacheKey = `${dateRange}_${selectedStationId}_${customStartDate}_${customEndDate}`
+      const cacheKey = `${dateRange}_${selectedStationId}_${selectedYear}_${selectedMonth}_${customStartDate}_${customEndDate}`
       try {
         const res = await analyticsApi.getOwnerDashboard(
           dateRange,
           selectedStationId,
+          selectedYear,
+          selectedMonth,
           customStartDate,
           customEndDate
         )
@@ -128,7 +115,7 @@ export default function OwnerAnalyticsPage() {
     return () => {
       ignore = true
     }
-  }, [dateRange, selectedStationId, customStartDate, customEndDate])
+  }, [dateRange, selectedStationId, selectedYear, selectedMonth, customStartDate, customEndDate])
 
   const kpis = data?.kpis
   const totalGross = kpis?.totalGrossRevenue || 0
@@ -168,9 +155,12 @@ export default function OwnerAnalyticsPage() {
       const blob = await analyticsApi.exportOwnerAnalytics(
         dateRange,
         selectedStationId,
+        selectedYear,
+        selectedMonth,
         customStartDate,
         customEndDate
       )
+
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
@@ -286,59 +276,36 @@ export default function OwnerAnalyticsPage() {
 
       <StatsHUD stats={statItems} columns={5} />
 
-      <div className="mb-2 relative z-50">
-        <DataTableToolbar
-          tabs={DATE_RANGE_OPTIONS.map((opt) => ({
-            id: opt.value,
-            label: opt.label,
-          }))}
-          activeTab={dateRange}
-          onTabChange={(tabId) => handleDateRangeChange(tabId as DateRangeFilter)}
-          selectFilters={[
-            {
-              id: "station",
-              label: "Station",
-              value: selectedStationId,
-              onChange: handleStationChange,
-              colSpan: "md:col-span-2 lg:col-span-3",
-              options: [
-                { label: "All Stations Portfolio", value: "ALL" },
-                ...(data?.stations || []).map((s) => ({
-                  label: `${s.name} (${s.totalBays} Bays)`,
-                  value: s.stationId,
-                })),
-              ],
-            },
-          ]}
-          extraFilters={
-            dateRange === "CUSTOM"
-              ? (() => {
-                  const today = new Date().toISOString().split("T")[0]
-                  return (
-                    <>
-                      <div className="col-span-1 min-w-[150px]">
-                        <DatePicker
-                          label="Start Date"
-                          value={customStartDate}
-                          maxDate={customEndDate || today}
-                          onChange={(date) => setCustomStartDate(date)}
-                        />
-                      </div>
-                      <div className="col-span-1 min-w-[150px]">
-                        <DatePicker
-                          label="End Date"
-                          value={customEndDate}
-                          minDate={customStartDate || undefined}
-                          maxDate={today}
-                          onChange={(date) => setCustomEndDate(date)}
-                        />
-                      </div>
-                    </>
-                  )
-                })()
-              : null
-          }
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm shadow-xs mb-2 relative z-50">
+        <DateRangeTabs
+          activeRange={dateRange}
+          onRangeChange={handleDateRangeChange}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+          startDate={customStartDate}
+          onStartDateChange={setCustomStartDate}
+          endDate={customEndDate}
+          onEndDateChange={setCustomEndDate}
+          allowCustom={true}
         />
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-muted-foreground">Filter Station:</span>
+          <select
+            value={selectedStationId}
+            onChange={(e) => handleStationChange(e.target.value)}
+            className="bg-card text-xs font-bold text-foreground px-3 py-2 rounded-xl border border-border focus:outline-none cursor-pointer"
+          >
+            <option value="ALL">All Stations Portfolio</option>
+            {(data?.stations || []).map((s) => (
+              <option key={s.stationId} value={s.stationId}>
+                {s.name} ({s.totalBays} Bays)
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">

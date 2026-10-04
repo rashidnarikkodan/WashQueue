@@ -2,19 +2,34 @@ import {
   AdminDashboardData,
   OwnerDashboardData,
   ManagerDashboardData,
+  DateRange,
 } from "../../domain/types/analytics.types"
 
 export interface IAnalyticsQueryService {
-  getAdminDashboardData(startDate: Date | null, endDate?: Date | null): Promise<AdminDashboardData>
+  getAdminDashboardData(
+    range?: DateRange,
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
+    endDate?: Date | null
+  ): Promise<AdminDashboardData>
+
   getOwnerDashboardData(
     userId: string,
-    startDate: Date | null,
+    range?: DateRange,
     stationId?: string,
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
     endDate?: Date | null
   ): Promise<OwnerDashboardData>
+
   getManagerDashboardData(
     userId: string,
     requestedStationId?: string,
+    range?: DateRange,
+    year?: number,
+    month?: number,
     startDate?: Date | null,
     endDate?: Date | null
   ): Promise<ManagerDashboardData>

@@ -25,7 +25,7 @@ const OwnerApproval = () => {
     hasNextPage: false,
     hasPrevPage: false,
   })
-  const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0 })
+  const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0, draft: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -33,7 +33,7 @@ const OwnerApproval = () => {
   const [rejectionReasonInput, setRejectionReasonInput] = useState("")
 
   const searchQuery = searchParams.get("q") || ""
-  const activeTab = (searchParams.get("tab") as "all" | "customer" | "owner") || "customer"
+  const activeTab = (searchParams.get("tab") as "all" | "pending" | "approved" | "draft") || "all"
   const currentPage = Number(searchParams.get("page")) || 1
   const limit = 10
 
@@ -45,6 +45,7 @@ const OwnerApproval = () => {
         page: currentPage,
         limit,
         role: "owner",
+        approvalStatus: activeTab,
         search: searchQuery || undefined,
       })
 
@@ -57,19 +58,20 @@ const OwnerApproval = () => {
       const totalCount = allOwnersResponse.users.length
       const approvedCount = allOwnersResponse.users.filter((u: User) => u.isVerified).length
       const pendingCount = allOwnersResponse.users.filter(
-        (u: User) => u.onboardingStep === 4 && !u.isVerified
+        (u: User) => !u.isVerified && u.onboardingStep === 4
+      ).length
+      const draftCount = allOwnersResponse.users.filter(
+        (u: User) => !u.isVerified && u.onboardingStep !== 4
       ).length
 
-      setStats({ total: totalCount, approved: approvedCount, pending: pendingCount })
+      setStats({
+        total: totalCount,
+        approved: approvedCount,
+        pending: pendingCount,
+        draft: draftCount,
+      })
 
-      let processed = response.users
-      if (activeTab === "customer") {
-        processed = processed.filter((u: User) => u.onboardingStep === 4 && !u.isVerified)
-      } else if (activeTab === "owner") {
-        processed = processed.filter((u: User) => u.isVerified)
-      }
-
-      setOwners(processed)
+      setOwners(response.users)
       setPaginationMeta(response.pagination)
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to retrieve owner applications")
@@ -156,7 +158,7 @@ const OwnerApproval = () => {
         totalUsers={stats.total}
         activeUsers={stats.approved}
         blockedUsers={stats.pending}
-        ownersCount={0}
+        ownersCount={stats.draft}
         isOwnerApproval={true}
       />
 

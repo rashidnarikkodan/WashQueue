@@ -27,33 +27,35 @@ import {
 } from "@/shared/components/charts"
 import { DataTable } from "@/shared/components/data-table"
 
-type RecentBooking = NonNullable<AdminDashboardData["recentBookings"]>[number]
+import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
-  { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "1 Year", value: "YEAR" },
-  { label: "All Time", value: "ALL" },
-]
+type RecentBooking = NonNullable<AdminDashboardData["recentBookings"]>[number]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
+  const [dateRange, setDateRange] = useState<DateRangeFilter>("TODAY")
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [data, setData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [trendMetric, setTrendMetric] = useState<"revenue" | "bookings" | "commission">("revenue")
+  const [trendMetric, setTrendMetric] = useState<"all" | "revenue" | "bookings" | "commission">(
+    "all"
+  )
 
-  const cacheRef = useRef<Partial<Record<DateRangeFilter, AdminDashboardData>>>({})
+  const cacheRef = useRef<Record<string, AdminDashboardData>>({})
 
   const fetchDashboardData = useCallback(
-    async (targetRange: DateRangeFilter = dateRange) => {
+    async (
+      targetRange: DateRangeFilter = dateRange,
+      year: number = selectedYear,
+      month: number = selectedMonth
+    ) => {
       setIsRefreshing(true)
       try {
-        const res = await analyticsApi.getAdminDashboard(targetRange)
-        cacheRef.current[targetRange] = res
+        const res = await analyticsApi.getAdminDashboard(targetRange, year, month)
+        const key = `${targetRange}_${year}_${month}`
+        cacheRef.current[key] = res
         setData(res)
       } catch {
         toast.error("Failed to load platform analytics data")
@@ -61,15 +63,11 @@ export default function AdminDashboard() {
         setIsRefreshing(false)
       }
     },
-    [dateRange]
+    [dateRange, selectedYear, selectedMonth]
   )
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const cached = cacheRef.current[newRange]
-    if (cached) {
-      setData(cached)
-    }
     setDateRange(newRange)
   }
 
@@ -77,10 +75,11 @@ export default function AdminDashboard() {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
+      const key = `${dateRange}_${selectedYear}_${selectedMonth}`
       try {
-        const res = await analyticsApi.getAdminDashboard(dateRange)
+        const res = await analyticsApi.getAdminDashboard(dateRange, selectedYear, selectedMonth)
         if (ignore) return
-        cacheRef.current[dateRange] = res
+        cacheRef.current[key] = res
         setData(res)
       } catch {
         if (!ignore) toast.error("Failed to load platform analytics data")
@@ -91,7 +90,7 @@ export default function AdminDashboard() {
     return () => {
       ignore = true
     }
-  }, [dateRange])
+  }, [dateRange, selectedYear, selectedMonth])
 
   const kpis = data?.kpis
 
@@ -166,21 +165,15 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
-            {DATE_RANGE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleDateRangeChange(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  dateRange === opt.value
-                    ? "bg-card text-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <DateRangeTabs
+            activeRange={dateRange}
+            onRangeChange={handleDateRangeChange}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+            selectedMonth={selectedMonth}
+            onMonthChange={setSelectedMonth}
+            allowCustom={false}
+          />
 
           <button
             type="button"
@@ -210,6 +203,16 @@ export default function AdminDashboard() {
             action={
               <div className="flex items-center gap-1 bg-muted/70 p-0.5 rounded-lg border border-border text-xs">
                 <button
+                  onClick={() => setTrendMetric("all")}
+                  className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                    trendMetric === "all"
+                      ? "bg-purple-600 text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  All
+                </button>
+                <button
                   onClick={() => setTrendMetric("revenue")}
                   className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     trendMetric === "revenue"
@@ -223,7 +226,7 @@ export default function AdminDashboard() {
                   onClick={() => setTrendMetric("bookings")}
                   className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
                     trendMetric === "bookings"
-                      ? "bg-emerald-500 text-white shadow-xs"
+                      ? "bg-violet-500 text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >

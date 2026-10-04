@@ -80,9 +80,13 @@ export const DistributionDonutChart: React.FC<DistributionDonutChartProps> = ({
     )
   }
 
+  const totalCount = data.reduce((acc, curr) => acc + (curr.count || 0), 0)
+  const isZeroTotal = totalCount === 0
+
   const chartData = data.map((d) => ({
     ...d,
     displayName: d.name || d.status || "Unknown",
+    sliceValue: isZeroTotal ? 1 : d.count || 0,
   }))
 
   return (
@@ -96,7 +100,7 @@ export const DistributionDonutChart: React.FC<DistributionDonutChartProps> = ({
             <Tooltip content={<CustomTooltip />} />
             <Pie
               data={chartData}
-              dataKey="count"
+              dataKey="sliceValue"
               nameKey="displayName"
               cx="50%"
               cy="50%"
@@ -106,13 +110,17 @@ export const DistributionDonutChart: React.FC<DistributionDonutChartProps> = ({
               stroke="none"
             >
               {chartData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                  fillOpacity={isZeroTotal ? 0.35 : 1}
+                />
               ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
 
-        {centerValue && (
+        {centerValue !== undefined && centerValue !== null && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
             <span className="text-xl font-extrabold text-foreground leading-none">
               {centerValue}

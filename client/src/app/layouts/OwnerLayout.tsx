@@ -59,7 +59,7 @@ const OwnerLayout = () => {
   if (isOnboarding) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <header className="absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-3 pl-6">
+        <header className="absolute z-40 left-0 right-0 top-0 flex items-center justify-between p-3 pl-6">
           <Link
             to="/"
             onClick={() => setActiveViewMode(VIEW_MODE.CUSTOMER)}

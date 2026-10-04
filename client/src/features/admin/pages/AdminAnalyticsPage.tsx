@@ -21,25 +21,21 @@ import {
 } from "@/shared/apis/analytics.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import DatePicker from "@/shared/components/form/DatePicker"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
-import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
+import { DataTable } from "@/shared/components/data-table"
+
+import ChartContainer from "@/shared/components/charts/ChartContainer"
+import DistributionDonutChart from "@/shared/components/charts/DistributionDonutChart"
+import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
+import { Users, CalendarCheck } from "lucide-react"
 
 type TopStation = NonNullable<AdminDashboardData["topStations"]>[number] & { rank: number }
-
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
-  { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "1 Year", value: "YEAR" },
-  { label: "All Time", value: "ALL" },
-  { label: "Custom", value: "CUSTOM" },
-]
 
 export default function AdminAnalyticsPage() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [customStartDate, setCustomStartDate] = useState<string>("")
   const [customEndDate, setCustomEndDate] = useState<string>("")
   const [data, setData] = useState<AdminDashboardData | null>(null)
@@ -49,15 +45,23 @@ export default function AdminAnalyticsPage() {
   const cacheRef = useRef<Record<string, AdminDashboardData>>({})
 
   const fetchAdminAnalytics = useCallback(
-    async (targetRange: DateRangeFilter = dateRange, start?: string, end?: string) => {
+    async (
+      targetRange: DateRangeFilter = dateRange,
+      year: number = selectedYear,
+      month: number = selectedMonth,
+      start?: string,
+      end?: string
+    ) => {
       setIsRefreshing(true)
       try {
         const res = await analyticsApi.getAdminDashboard(
           targetRange,
+          year,
+          month,
           start || customStartDate,
           end || customEndDate
         )
-        const cacheKey = `${targetRange}_${start || customStartDate}_${end || customEndDate}`
+        const cacheKey = `${targetRange}_${year}_${month}_${start || customStartDate}_${end || customEndDate}`
         cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
@@ -66,16 +70,11 @@ export default function AdminAnalyticsPage() {
         setIsRefreshing(false)
       }
     },
-    [dateRange, customStartDate, customEndDate]
+    [dateRange, selectedYear, selectedMonth, customStartDate, customEndDate]
   )
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const key = `${newRange}_${customStartDate}_${customEndDate}`
-    const cached = cacheRef.current[key]
-    if (cached && newRange !== "CUSTOM") {
-      setData(cached)
-    }
     setDateRange(newRange)
     if (newRange !== "CUSTOM") {
       setCustomStartDate("")
@@ -93,9 +92,15 @@ export default function AdminAnalyticsPage() {
       }
 
       try {
-        const res = await analyticsApi.getAdminDashboard(dateRange, customStartDate, customEndDate)
+        const res = await analyticsApi.getAdminDashboard(
+          dateRange,
+          selectedYear,
+          selectedMonth,
+          customStartDate,
+          customEndDate
+        )
         if (ignore) return
-        const cacheKey = `${dateRange}_${customStartDate}_${customEndDate}`
+        const cacheKey = `${dateRange}_${selectedYear}_${selectedMonth}_${customStartDate}_${customEndDate}`
         cacheRef.current[cacheKey] = res
         setData(res)
       } catch {
@@ -107,7 +112,7 @@ export default function AdminAnalyticsPage() {
     return () => {
       ignore = true
     }
-  }, [dateRange, customStartDate, customEndDate])
+  }, [dateRange, selectedYear, selectedMonth, customStartDate, customEndDate])
 
   const kpis = data?.kpis
   const totalGMV = kpis?.totalGrossVolume || 0
@@ -115,6 +120,12 @@ export default function AdminAnalyticsPage() {
   const partnerDisbursements = Math.max(0, totalGMV - platformCommission)
   const totalBookings = kpis?.totalBookings || 0
   const aov = totalBookings > 0 ? Math.round(totalGMV / totalBookings) : 0
+
+  const userRoleDistribution = [
+    { name: "Customers", count: kpis?.totalCustomers || 0 },
+    { name: "Station Owners", count: kpis?.totalOwners || 0 },
+    { name: "Managers & Staff", count: kpis?.totalManagers || 0 },
+  ]
 
   const exportFinancialAuditCSV = () => {
     if (!data?.topStations || data.topStations.length === 0) {
@@ -262,43 +273,50 @@ export default function AdminAnalyticsPage() {
 
       <StatsHUD stats={statItems} columns={5} />
 
-      <div className="mb-2 relative z-50">
-        <DataTableToolbar
-          tabs={DATE_RANGE_OPTIONS.map((opt) => ({
-            id: opt.value,
-            label: opt.label,
-          }))}
-          activeTab={dateRange}
-          onTabChange={(tabId) => handleDateRangeChange(tabId as DateRangeFilter)}
-          extraFilters={
-            dateRange === "CUSTOM"
-              ? (() => {
-                  const today = new Date().toISOString().split("T")[0]
-                  return (
-                    <>
-                      <div className="col-span-1 min-w-[150px]">
-                        <DatePicker
-                          label="Start Date"
-                          value={customStartDate}
-                          maxDate={customEndDate || today}
-                          onChange={(date) => setCustomStartDate(date)}
-                        />
-                      </div>
-                      <div className="col-span-1 min-w-[150px]">
-                        <DatePicker
-                          label="End Date"
-                          value={customEndDate}
-                          minDate={customStartDate || undefined}
-                          maxDate={today}
-                          onChange={(date) => setCustomEndDate(date)}
-                        />
-                      </div>
-                    </>
-                  )
-                })()
-              : null
-          }
-        />
+      <DateRangeTabs
+        activeRange={dateRange}
+        onRangeChange={handleDateRangeChange}
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        selectedMonth={selectedMonth}
+        onMonthChange={setSelectedMonth}
+        startDate={customStartDate}
+        onStartDateChange={setCustomStartDate}
+        endDate={customEndDate}
+        onEndDateChange={setCustomEndDate}
+        allowCustom={true}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ChartContainer
+          title="Booking Status Distribution"
+          subtitle="Proportion of completed, in-progress, and cancelled washes"
+          icon={CalendarCheck}
+          isLoading={isLoading}
+        >
+          <DistributionDonutChart
+            data={data?.bookingStatusDistribution || []}
+            centerLabel="Bookings"
+            centerValue={kpis?.totalBookings || 0}
+            height={260}
+          />
+        </ChartContainer>
+
+        <ChartContainer
+          title="User Network Breakdown"
+          subtitle="Active customers vs station providers and station managers"
+          icon={Users}
+          isLoading={isLoading}
+        >
+          <DistributionDonutChart
+            data={userRoleDistribution}
+            centerLabel="Accounts"
+            centerValue={
+              (kpis?.totalCustomers || 0) + (kpis?.totalOwners || 0) + (kpis?.totalManagers || 0)
+            }
+            height={260}
+          />
+        </ChartContainer>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

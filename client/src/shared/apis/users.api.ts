@@ -105,6 +105,12 @@ export const usersApi = {
       if (typeof filters.isBlocked === "boolean") {
         params.isBlocked = filters.isBlocked ? "true" : "false"
       }
+      if (typeof filters.isVerified === "boolean") {
+        params.isVerified = filters.isVerified ? "true" : "false"
+      }
+      if (filters.approvalStatus && filters.approvalStatus !== "all") {
+        params.approvalStatus = filters.approvalStatus
+      }
 
       if (filters.sortBy) params.sortBy = filters.sortBy
       if (filters.sortOrder) params.sortOrder = filters.sortOrder

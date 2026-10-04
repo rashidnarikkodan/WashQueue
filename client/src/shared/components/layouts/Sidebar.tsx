@@ -97,7 +97,7 @@ const Sidebar = ({ items }: Props) => {
           left-0
           top-[96px]
           [@media(max-height:800px)]:top-[80px]
-          z-100
+          z-40
           flex
           h-auto
           max-h-[calc(100vh-120px)]

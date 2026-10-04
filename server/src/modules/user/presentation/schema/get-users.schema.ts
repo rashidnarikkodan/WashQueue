@@ -21,6 +21,8 @@ export const usersQuerySchema: z.ZodType<GetUsersQuery> = z.object({
     .transform((value) => value === "true")
     .optional(),
 
+  approvalStatus: z.enum(["all", "pending", "approved", "draft"]).optional(),
+
   sortBy: z.enum(["createdAt", "name", "email"]).default("createdAt"),
 
   sortOrder: z.enum(["asc", "desc"]).default("desc"),

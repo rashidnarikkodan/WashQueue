@@ -30,7 +30,7 @@ export default function LoginForm() {
         } else {
           const role = user?.role
           if (role === ROLE.ADMIN) {
-            navigate("/admin")
+            navigate("/admin/dashboard")
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
           } else if (role === ROLE.OWNER) {
@@ -70,7 +70,7 @@ export default function LoginForm() {
 
       const role = state.user.role
       if (role === ROLE.ADMIN) {
-        navigate("/admin")
+        navigate("/admin/dashboard")
       } else if (role === ROLE.MANAGER) {
         navigate("/manager")
       } else if (role === ROLE.OWNER) {

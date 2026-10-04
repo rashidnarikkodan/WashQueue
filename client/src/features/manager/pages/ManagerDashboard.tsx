@@ -25,25 +25,38 @@ import {
 } from "@/shared/components/charts"
 import { DataTable } from "@/shared/components/data-table"
 
+import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
+import type { DateRangeFilter } from "@/shared/types/analytics.types"
+
 type QueueItem = NonNullable<ManagerDashboardData["upcomingQueue"]>[number]
 
 export default function ManagerDashboard() {
   const navigate = useNavigate()
+  const [dateRange, setDateRange] = useState<DateRangeFilter>("TODAY")
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [data, setData] = useState<ManagerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isToggling, setIsToggling] = useState(false)
 
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await analyticsApi.getManagerDashboard()
-      setData(res)
-    } catch {
-      toast.error("Failed to load station operations data")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+  const fetchDashboardData = useCallback(
+    async (
+      targetRange: DateRangeFilter = dateRange,
+      year: number = selectedYear,
+      month: number = selectedMonth
+    ) => {
+      setIsLoading(true)
+      try {
+        const res = await analyticsApi.getManagerDashboard(targetRange, undefined, year, month)
+        setData(res)
+      } catch {
+        toast.error("Failed to load station operations data")
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [dateRange, selectedYear, selectedMonth]
+  )
 
   const handleToggleActive = async () => {
     if (!data?.station?.id) return
@@ -69,12 +82,12 @@ export default function ManagerDashboard() {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
-      await fetchDashboardData()
+      await fetchDashboardData(dateRange, selectedYear, selectedMonth)
     })
     return () => {
       ignore = true
     }
-  }, [fetchDashboardData])
+  }, [fetchDashboardData, dateRange, selectedYear, selectedMonth])
 
   const kpis = data?.kpis
   const station = data?.station
@@ -172,8 +185,9 @@ export default function ManagerDashboard() {
           )}
 
           <button
-            onClick={fetchDashboardData}
+            onClick={() => fetchDashboardData(dateRange, selectedYear, selectedMonth)}
             disabled={isLoading}
+
             title="Refresh live status"
             className="p-2.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
           >
@@ -220,6 +234,18 @@ export default function ManagerDashboard() {
         />
       </div>
 
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm shadow-xs">
+        <DateRangeTabs
+          activeRange={dateRange}
+          onRangeChange={(range) => setDateRange(range)}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+          allowCustom={false}
+        />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartContainer
           title="Today's Hourly Traffic & Peak Hours"
@@ -231,8 +257,8 @@ export default function ManagerDashboard() {
         </ChartContainer>
 
         <ChartContainer
-          title="Weekly Wash Volume"
-          subtitle="Past 7 days throughput comparison"
+          title="Wash Volume Trend"
+          subtitle="Throughput comparison across selected timeframe"
           icon={TrendingUp}
           isLoading={isLoading}
         >

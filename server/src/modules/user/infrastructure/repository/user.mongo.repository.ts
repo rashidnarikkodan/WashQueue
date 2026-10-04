@@ -90,15 +90,30 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
   }
 
   async getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse> {
-    const { page, limit, search, role, isBlocked, isVerified, sortBy, sortOrder } = query
+    const { page, limit, search, role, isBlocked, isVerified, approvalStatus, sortBy, sortOrder } =
+      query
 
     const filter: Record<string, unknown> = {}
 
-    if (typeof isVerified === "boolean") {
+    if (approvalStatus || typeof isVerified === "boolean") {
       const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
-      const ownersList = await OwnerModel.find({ isVerified }).select("userId").lean().exec()
-      const ownerUserIds = ownersList.map((o) => o.userId)
-      filter._id = { $in: ownerUserIds }
+
+      if (approvalStatus === "approved" || isVerified === true) {
+        const ownersList = await OwnerModel.find({ isVerified: true })
+          .select("userId")
+          .lean()
+          .exec()
+        const ownerUserIds = ownersList.map((o) => o.userId).filter(Boolean)
+        filter.$or = [{ isVerified: true }, { _id: { $in: ownerUserIds } }]
+      } else if (approvalStatus === "pending") {
+        filter.isVerified = false
+        filter.onboardingStep = 4
+      } else if (approvalStatus === "draft") {
+        filter.isVerified = false
+        filter.onboardingStep = { $ne: 4 }
+      } else if (isVerified === false) {
+        filter.isVerified = false
+      }
     }
 
     if (search) {

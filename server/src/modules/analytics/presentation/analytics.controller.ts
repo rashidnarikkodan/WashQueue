@@ -21,9 +21,11 @@ export class AnalyticsController {
 
   getAdminDashboard = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const range = (req.query.range as DateRange) || "30_DAYS"
+    const year = req.query.year ? Number(req.query.year) : undefined
+    const month = req.query.month ? Number(req.query.month) : undefined
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
-    const data = await this.getAdminDashboardUseCase.execute(range, startDate, endDate)
+    const data = await this.getAdminDashboardUseCase.execute(range, year, month, startDate, endDate)
     success(res, data, HTTP_STATUS.OK, "Admin dashboard fetched successfully")
   }
 
@@ -34,12 +36,16 @@ export class AnalyticsController {
     }
     const range = (req.query.range as DateRange) || "30_DAYS"
     const stationId = req.query.stationId as string | undefined
+    const year = req.query.year ? Number(req.query.year) : undefined
+    const month = req.query.month ? Number(req.query.month) : undefined
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
     const data = await this.getOwnerDashboardUseCase.execute(
       ownerId,
       range,
       stationId,
+      year,
+      month,
       startDate,
       endDate
     )
@@ -52,7 +58,20 @@ export class AnalyticsController {
       throw new UnauthorizedError()
     }
     const stationId = req.query.stationId as string | undefined
-    const data = await this.getManagerDashboardUseCase.execute(userId, stationId)
+    const range = (req.query.range as DateRange) || "TODAY"
+    const year = req.query.year ? Number(req.query.year) : undefined
+    const month = req.query.month ? Number(req.query.month) : undefined
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
+    const data = await this.getManagerDashboardUseCase.execute(
+      userId,
+      stationId,
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
     success(res, data, HTTP_STATUS.OK, "Manager dashboard fetched successfully")
   }
 
@@ -63,6 +82,8 @@ export class AnalyticsController {
     }
     const range = (req.query.range as DateRange) || "30_DAYS"
     const stationId = req.query.stationId as string | undefined
+    const year = req.query.year ? Number(req.query.year) : undefined
+    const month = req.query.month ? Number(req.query.month) : undefined
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
 
@@ -70,6 +91,8 @@ export class AnalyticsController {
       ownerId,
       range,
       stationId,
+      year,
+      month,
       startDate,
       endDate
     )

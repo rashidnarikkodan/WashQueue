@@ -32,7 +32,7 @@ export default function SignupForm() {
         } else {
           const role = user?.role
           if (role === ROLE.ADMIN) {
-            navigate("/admin")
+            navigate("/admin/dashboard")
           } else if (role === ROLE.MANAGER) {
             navigate("/manager")
           } else if (role === ROLE.OWNER) {

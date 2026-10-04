@@ -26,6 +26,8 @@ export interface GetUsersFilters {
   search?: string
   role?: string
   isBlocked?: boolean
+  isVerified?: boolean
+  approvalStatus?: "all" | "pending" | "approved" | "draft"
   sortBy?: "createdAt" | "name" | "email"
   sortOrder?: "asc" | "desc"
 }

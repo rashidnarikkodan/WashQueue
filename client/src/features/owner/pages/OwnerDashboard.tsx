@@ -30,33 +30,36 @@ import {
 } from "@/shared/components/charts"
 import { DataTable } from "@/shared/components/data-table"
 
-type RecentBooking = NonNullable<OwnerDashboardData["recentBookings"]>[number]
+import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 
-const DATE_RANGE_OPTIONS: { label: string; value: DateRangeFilter }[] = [
-  { label: "Today", value: "TODAY" },
-  { label: "7 Days", value: "7_DAYS" },
-  { label: "30 Days", value: "30_DAYS" },
-  { label: "90 Days", value: "90_DAYS" },
-  { label: "1 Year", value: "YEAR" },
-  { label: "All Time", value: "ALL" },
-]
+type RecentBooking = NonNullable<OwnerDashboardData["recentBookings"]>[number]
 
 export default function OwnerDashboard() {
   const navigate = useNavigate()
-  const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")
+  const [dateRange, setDateRange] = useState<DateRangeFilter>("TODAY")
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1)
   const [data, setData] = useState<OwnerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [compMetric, setCompMetric] = useState<"revenue" | "bookings">("revenue")
+  const [trendMetric, setTrendMetric] = useState<"all" | "revenue" | "bookings" | "commission">(
+    "all"
+  )
 
-  const cacheRef = useRef<Partial<Record<DateRangeFilter, OwnerDashboardData>>>({})
+  const cacheRef = useRef<Record<string, OwnerDashboardData>>({})
 
   const fetchDashboardData = useCallback(
-    async (targetRange: DateRangeFilter = dateRange) => {
+    async (
+      targetRange: DateRangeFilter = dateRange,
+      year: number = selectedYear,
+      month: number = selectedMonth
+    ) => {
       setIsRefreshing(true)
       try {
-        const res = await analyticsApi.getOwnerDashboard(targetRange)
-        cacheRef.current[targetRange] = res
+        const res = await analyticsApi.getOwnerDashboard(targetRange, undefined, year, month)
+        const key = `${targetRange}_${year}_${month}`
+        cacheRef.current[key] = res
         setData(res)
       } catch {
         toast.error("Failed to load owner dashboard data")
@@ -64,15 +67,11 @@ export default function OwnerDashboard() {
         setIsRefreshing(false)
       }
     },
-    [dateRange]
+    [dateRange, selectedYear, selectedMonth]
   )
 
   const handleDateRangeChange = (newRange: DateRangeFilter) => {
     if (newRange === dateRange) return
-    const cached = cacheRef.current[newRange]
-    if (cached) {
-      setData(cached)
-    }
     setDateRange(newRange)
   }
 
@@ -80,10 +79,16 @@ export default function OwnerDashboard() {
     let ignore = false
     void Promise.resolve().then(async () => {
       if (ignore) return
+      const key = `${dateRange}_${selectedYear}_${selectedMonth}`
       try {
-        const res = await analyticsApi.getOwnerDashboard(dateRange)
+        const res = await analyticsApi.getOwnerDashboard(
+          dateRange,
+          undefined,
+          selectedYear,
+          selectedMonth
+        )
         if (ignore) return
-        cacheRef.current[dateRange] = res
+        cacheRef.current[key] = res
         setData(res)
       } catch {
         if (!ignore) toast.error("Failed to load owner dashboard data")
@@ -94,7 +99,7 @@ export default function OwnerDashboard() {
     return () => {
       ignore = true
     }
-  }, [dateRange])
+  }, [dateRange, selectedYear, selectedMonth])
 
   const kpis = data?.kpis
 
@@ -168,21 +173,15 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex bg-card p-1 rounded-xl border border-border">
-            {DATE_RANGE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleDateRangeChange(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  dateRange === opt.value
-                    ? "bg-primary text-primary-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <DateRangeTabs
+            activeRange={dateRange}
+            onRangeChange={handleDateRangeChange}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+            selectedMonth={selectedMonth}
+            onMonthChange={setSelectedMonth}
+            allowCustom={false}
+          />
 
           <button
             type="button"
@@ -273,12 +272,56 @@ export default function OwnerDashboard() {
         subtitle="Historical financial inflow across all managed stations"
         icon={TrendingUp}
         isLoading={isLoading}
+        action={
+          <div className="flex items-center gap-1 bg-muted/70 p-0.5 rounded-lg border border-border text-xs">
+            <button
+              onClick={() => setTrendMetric("all")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                trendMetric === "all"
+                  ? "bg-purple-600 text-white shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setTrendMetric("revenue")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                trendMetric === "revenue"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Revenue
+            </button>
+            <button
+              onClick={() => setTrendMetric("bookings")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                trendMetric === "bookings"
+                  ? "bg-violet-500 text-white shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Bookings
+            </button>
+            <button
+              onClick={() => setTrendMetric("commission")}
+              className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                trendMetric === "commission"
+                  ? "bg-amber-500 text-white shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Commission
+            </button>
+          </div>
+        }
       >
         <RevenueTrendChart
           data={data?.revenueTrend || []}
-          metricType="revenue"
+          metricType={trendMetric}
           height={260}
-          onResetRange={() => handleDateRangeChange("ALL")}
+          onResetRange={() => handleDateRangeChange("ALL_YEARS")}
         />
       </ChartContainer>
 

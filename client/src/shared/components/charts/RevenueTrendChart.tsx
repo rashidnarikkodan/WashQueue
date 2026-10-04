@@ -13,7 +13,7 @@ import type { TimeSeriesPoint } from "@/shared/apis/analytics.api"
 
 interface RevenueTrendChartProps {
   data: TimeSeriesPoint[]
-  metricType?: "revenue" | "net" | "bookings" | "commission"
+  metricType?: "revenue" | "net" | "bookings" | "commission" | "all"
   height?: number
   onResetRange?: () => void
 }
@@ -38,8 +38,8 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
     return (
       <div className="bg-card/95 backdrop-blur-md border border-border p-3.5 rounded-xl shadow-xl text-xs space-y-1.5 z-50 min-w-[170px]">
         <p className="font-bold text-foreground border-b border-border/70 pb-1">{label}</p>
-        <div className="flex items-center justify-between gap-3 text-primary font-semibold">
-          <span>Gross Volume:</span>
+        <div className="flex items-center justify-between gap-3 text-blue-500 font-semibold">
+          <span>Gross Revenue:</span>
           <span>₹{gross.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between gap-3 text-emerald-500 font-bold">
@@ -47,11 +47,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
           <span>₹{net.toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between gap-3 text-amber-500 font-medium">
-          <span>Commission (15%):</span>
+          <span>Commission:</span>
           <span>₹{comm.toLocaleString()}</span>
         </div>
-        <div className="flex items-center justify-between gap-3 text-muted-foreground pt-1 border-t border-border/50">
-          <span>Completed Orders:</span>
+        <div className="flex items-center justify-between gap-3 text-violet-400 font-semibold pt-1 border-t border-border/50">
+          <span>Bookings Count:</span>
           <span>{current.bookingsCount || 0}</span>
         </div>
       </div>
@@ -101,6 +101,8 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({
     }
   })
 
+  const isAllMode = metricType === "all"
+
   const dataKey =
     metricType === "bookings"
       ? "bookingsCount"
@@ -112,7 +114,7 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({
 
   const strokeColor =
     metricType === "bookings"
-      ? "#38BDF8"
+      ? "#8B5CF6"
       : metricType === "commission"
         ? "#F59E0B"
         : metricType === "net"
@@ -124,8 +126,23 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({
   return (
     <div style={{ width: "100%", height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart
+          data={chartData}
+          margin={{ top: 10, right: isAllMode ? 20 : 10, left: -20, bottom: 0 }}
+        >
           <defs>
+            <linearGradient id="gradient_revenue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
+            </linearGradient>
+            <linearGradient id="gradient_commission" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.0} />
+            </linearGradient>
+            <linearGradient id="gradient_bookings" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
+            </linearGradient>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={strokeColor} stopOpacity={0.4} />
               <stop offset="95%" stopColor={strokeColor} stopOpacity={0.0} />
@@ -144,25 +161,75 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({
             dy={8}
           />
           <YAxis
+            yAxisId="left"
             tickLine={false}
             axisLine={false}
             tick={{ fill: "currentColor", fontSize: 11, opacity: 0.6 }}
             tickFormatter={(val) =>
-              metricType === "bookings"
+              !isAllMode && metricType === "bookings"
                 ? String(val)
                 : `₹${Number(val) >= 1000 ? `${(Number(val) / 1000).toFixed(0)}k` : val}`
             }
           />
+          {isAllMode && (
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "#8B5CF6", fontSize: 11, opacity: 0.8 }}
+              tickFormatter={(val) => String(val)}
+            />
+          )}
           <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey={dataKey}
-            stroke={strokeColor}
-            strokeWidth={2.5}
-            fillOpacity={1}
-            fill={`url(#${gradientId})`}
-            activeDot={{ r: 6, fill: strokeColor, stroke: "#ffffff", strokeWidth: 2 }}
-          />
+          {isAllMode ? (
+            <>
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="revenue"
+                name="Gross Revenue"
+                stroke="#3B82F6"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#gradient_revenue)"
+                activeDot={{ r: 5, fill: "#3B82F6" }}
+              />
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="commission"
+                name="Commission"
+                stroke="#F59E0B"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#gradient_commission)"
+                activeDot={{ r: 5, fill: "#F59E0B" }}
+              />
+              <Area
+                yAxisId="right"
+                type="monotone"
+                dataKey="bookingsCount"
+                name="Bookings Count"
+                stroke="#8B5CF6"
+                strokeWidth={2.5}
+                fillOpacity={1}
+                fill="url(#gradient_bookings)"
+                activeDot={{ r: 5, fill: "#8B5CF6" }}
+              />
+            </>
+          ) : (
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey={dataKey}
+              stroke={strokeColor}
+              strokeWidth={2.5}
+              fillOpacity={1}
+              fill={`url(#${gradientId})`}
+              activeDot={{ r: 6, fill: strokeColor, stroke: "#ffffff", strokeWidth: 2 }}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

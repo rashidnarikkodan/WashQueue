@@ -39,12 +39,14 @@ export function DataTableToolbar({
   const hasContent = Boolean(onSearchChange || tabs.length > 0 || hasFilters || extraFilters)
   if (!hasContent) return null
 
+  const showFilterRow = Boolean(onSearchChange || hasFilters || extraFilters)
+
   return (
     <div
-      className={`rounded-2xl border border-border/40 bg-card/50 backdrop-blur-md flex flex-col gap-4 p-1 shadow-md ${className}`}
+      className={`relative z-30 rounded-2xl border border-border/40 bg-card/50 backdrop-blur-md flex flex-col p-1 shadow-md ${className}`}
     >
       {tabs.length > 0 && (
-        <div className="px-3 pt-3 border-b border-border/30">
+        <div className={`px-3 pt-3 ${showFilterRow ? "pb-2" : "pb-3"}`}>
           <ScrollableTabs
             tabs={tabs}
             activeTab={activeTab}
@@ -53,19 +55,21 @@ export function DataTableToolbar({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 px-5 pb-5 pt-2 items-end">
-        {onSearchChange && (
-          <Search
-            value={searchQuery}
-            onChange={onSearchChange}
-            placeholder={searchPlaceholder}
-            label={searchLabel}
-            className={computedSearchColSpan}
-          />
-        )}
-        <FilterBar selectFilters={selectFilters} toggleFilters={toggleFilters} />
-        {extraFilters}
-      </div>
+      {showFilterRow && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 px-5 pb-5 pt-2 items-end">
+          {onSearchChange && (
+            <Search
+              value={searchQuery}
+              onChange={onSearchChange}
+              placeholder={searchPlaceholder}
+              label={searchLabel}
+              className={computedSearchColSpan}
+            />
+          )}
+          <FilterBar selectFilters={selectFilters} toggleFilters={toggleFilters} />
+          {extraFilters}
+        </div>
+      )}
     </div>
   )
 }

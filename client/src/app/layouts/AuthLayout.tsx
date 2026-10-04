@@ -27,7 +27,7 @@ export default function AuthLayout() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="absolute z-100 left-0 right-0 top-0 flex items-center justify-between p-6">
+      <header className="absolute z-40 left-0 right-0 top-0 flex items-center justify-between p-6">
         <Link to="/" className="flex items-center gap-2 group">
           <span
             className={`text-xl font-bold italic tracking-tight transition-colors duration-300 ${getLogoColor()}`}

@@ -1,4 +1,4 @@
-export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "90_DAYS" | "YEAR" | "ALL" | "CUSTOM"
+export type DateRangeFilter = "TODAY" | "7_DAYS" | "30_DAYS" | "12_MONTHS" | "ALL_YEARS" | "CUSTOM"
 
 export interface TimeSeriesPoint {
   date: string

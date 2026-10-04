@@ -7,6 +7,8 @@ export interface IExportOwnerAnalyticsUseCase {
     userId: string,
     range?: DateRange,
     stationId?: string,
+    year?: number,
+    month?: number,
     startDate?: Date,
     endDate?: Date
   ): Promise<{ buffer: Buffer; contentType: string; extension: string; filename: string }>
@@ -22,21 +24,21 @@ export class ExportOwnerAnalyticsUseCase implements IExportOwnerAnalyticsUseCase
     userId: string,
     range: DateRange = "30_DAYS",
     stationId?: string,
+    year?: number,
+    month?: number,
     customStartDate?: Date,
     customEndDate?: Date
   ) {
-    let startDate = this.getStartDate(range)
-    let endDate = null
-
-    if (range === "CUSTOM") {
-      startDate = customStartDate || null
-      endDate = customEndDate || null
-    }
+    const startDate = range === "CUSTOM" ? customStartDate || null : null
+    const endDate = range === "CUSTOM" ? customEndDate || null : null
 
     const dashboardData = await this.queryService.getOwnerDashboardData(
       userId,
-      startDate,
+      range,
       stationId,
+      year,
+      month,
+      startDate,
       endDate
     )
 
@@ -94,30 +96,5 @@ export class ExportOwnerAnalyticsUseCase implements IExportOwnerAnalyticsUseCase
       extension: this.exportService.getFileExtension(),
       filename: `owner-financial-statement-${range.toLowerCase()}-${Date.now()}`,
     }
-  }
-
-  private getStartDate(range: DateRange): Date | null {
-    const now = new Date()
-    if (range === "TODAY") {
-      now.setHours(0, 0, 0, 0)
-      return now
-    }
-    if (range === "7_DAYS") {
-      now.setDate(now.getDate() - 7)
-      return now
-    }
-    if (range === "30_DAYS") {
-      now.setDate(now.getDate() - 30)
-      return now
-    }
-    if (range === "90_DAYS") {
-      now.setDate(now.getDate() - 90)
-      return now
-    }
-    if (range === "YEAR") {
-      now.setFullYear(now.getFullYear() - 1)
-      return now
-    }
-    return null
   }
 }

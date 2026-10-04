@@ -25,6 +25,7 @@ export interface GetUsersQuery {
   role?: RoleType
   isBlocked?: boolean
   isVerified?: boolean
+  approvalStatus?: "all" | "pending" | "approved" | "draft"
   sortBy: "createdAt" | "name" | "email"
   sortOrder: "asc" | "desc"
 }

@@ -163,7 +163,15 @@ describe("Analytics Use Cases", () => {
       const result = await useCase.execute(managerId, stationId)
 
       expect(result).toEqual(mockResult)
-      expect(mockQueryService.getManagerDashboardData).toHaveBeenCalledWith(managerId, stationId)
+      expect(mockQueryService.getManagerDashboardData).toHaveBeenCalledWith(
+        managerId,
+        stationId,
+        "TODAY",
+        undefined,
+        undefined,
+        null,
+        null
+      )
     })
   })
 })
