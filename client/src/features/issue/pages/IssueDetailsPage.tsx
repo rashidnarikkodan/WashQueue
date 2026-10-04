@@ -11,6 +11,7 @@ import { bookingApi } from "@/shared/apis/booking.api"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { getErrorMessage } from "@/shared/utils/error"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 import type { IssueDto, Evidence, ResolveIssuePayload } from "../types/issue.types"
 import { IssueStatus } from "../types/issue.types"
 import {
@@ -154,11 +155,11 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
     }
 
     if (socket) {
-      socket.on("issue_updated", handleIssueUpdate)
-      socket.on("issue_resolved", handleIssueUpdate)
-      socket.on("issue_closed", handleIssueUpdate)
-      socket.on("issue_escalated", handleIssueUpdate)
-      socket.on("issue_assigned", handleIssueUpdate)
+      socket.on(SOCKET_EVENTS.ISSUE_UPDATED, handleIssueUpdate)
+      socket.on(SOCKET_EVENTS.ISSUE_RESOLVED, handleIssueUpdate)
+      socket.on(SOCKET_EVENTS.ISSUE_CLOSED, handleIssueUpdate)
+      socket.on(SOCKET_EVENTS.ISSUE_ESCALATED, handleIssueUpdate)
+      socket.on(SOCKET_EVENTS.ISSUE_ASSIGNED, handleIssueUpdate)
     }
 
     const handleWindowFocus = () => {

@@ -12,6 +12,8 @@ import { IMailService } from "@/core/application/interfaces/mail.interface"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
+import { SOCKET_EVENTS } from "@/common/constants/socket-events.constants"
+
 export type { NotificationEventType }
 
 export class BookingNotificationService implements IBookingNotificationService {
@@ -57,7 +59,7 @@ export class BookingNotificationService implements IBookingNotificationService {
       if (this.realtimePublisher) {
         if (booking.stationId) {
           this.realtimePublisher.emitToStation(booking.stationId, eventType, payload)
-          this.realtimePublisher.emitToStation(booking.stationId, "QUEUE_UPDATED", {
+          this.realtimePublisher.emitToStation(booking.stationId, SOCKET_EVENTS.QUEUE_UPDATED, {
             stationId: booking.stationId,
             lastUpdated: new Date().toISOString(),
           })
@@ -65,14 +67,32 @@ export class BookingNotificationService implements IBookingNotificationService {
 
         if (booking.userId) {
           this.realtimePublisher.emitToUser(booking.userId, eventType, payload)
-          this.realtimePublisher.emitToUser(booking.userId, "QUEUE_POSITION_CHANGED", payload)
+          this.realtimePublisher.emitToUser(
+            booking.userId,
+            SOCKET_EVENTS.QUEUE_POSITION_CHANGED,
+            payload
+          )
 
-          if (eventType === "PAYMENT_SUCCESS" || eventType === "PAYMENT_UPDATED") {
-            this.realtimePublisher.emitToUser(booking.userId, "PAYMENT_UPDATED", payload)
+          if (
+            eventType === SOCKET_EVENTS.PAYMENT_SUCCESS ||
+            eventType === SOCKET_EVENTS.PAYMENT_UPDATED
+          ) {
+            this.realtimePublisher.emitToUser(
+              booking.userId,
+              SOCKET_EVENTS.PAYMENT_UPDATED,
+              payload
+            )
           }
-          if (eventType === "REFUND_COMPLETED" || eventType === "REFUND_PROCESSED") {
-            this.realtimePublisher.emitToUser(booking.userId, "REFUND_PROCESSED", payload)
-            this.realtimePublisher.emitToUser(booking.userId, "WALLET_UPDATED", payload)
+          if (
+            eventType === SOCKET_EVENTS.REFUND_COMPLETED ||
+            eventType === SOCKET_EVENTS.REFUND_PROCESSED
+          ) {
+            this.realtimePublisher.emitToUser(
+              booking.userId,
+              SOCKET_EVENTS.REFUND_PROCESSED,
+              payload
+            )
+            this.realtimePublisher.emitToUser(booking.userId, SOCKET_EVENTS.WALLET_UPDATED, payload)
           }
         }
 

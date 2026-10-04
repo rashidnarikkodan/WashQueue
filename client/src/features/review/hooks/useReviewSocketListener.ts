@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { useReviewModalStore } from "../store/review-modal.store"
 import { reviewApi } from "@/shared/apis/review.api"
@@ -35,7 +36,7 @@ export function useReviewSocketListener() {
     const socket = getSocketClient()
 
     // Join user room explicitly
-    socket.emit("join_user", { userId: user.id })
+    socket.emit(SOCKET_EVENTS.JOIN_USER, { userId: user.id })
 
     const handleHandoverEvent = async (payload: HandoverSocketPayload) => {
       if (!payload || !payload.bookingId) return
@@ -69,12 +70,12 @@ export function useReviewSocketListener() {
       }
     }
 
-    socket.on("HANDOVER_COMPLETED", handleHandoverEvent)
-    socket.on("BOOKING_COMPLETED", handleHandoverEvent)
+    socket.on(SOCKET_EVENTS.HANDOVER_COMPLETED, handleHandoverEvent)
+    socket.on(SOCKET_EVENTS.BOOKING_COMPLETED, handleHandoverEvent)
 
     return () => {
-      socket.off("HANDOVER_COMPLETED", handleHandoverEvent)
-      socket.off("BOOKING_COMPLETED", handleHandoverEvent)
+      socket.off(SOCKET_EVENTS.HANDOVER_COMPLETED, handleHandoverEvent)
+      socket.off(SOCKET_EVENTS.BOOKING_COMPLETED, handleHandoverEvent)
     }
   }, [isAuthenticated, user?.id, user?.role, openReviewModal])
 }

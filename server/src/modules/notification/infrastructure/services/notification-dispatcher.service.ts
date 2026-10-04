@@ -16,6 +16,8 @@ import {
 
 export type { DispatchNotificationOptions, DispatchStationStakeholdersOptions }
 
+import { SOCKET_EVENTS } from "@/common/constants/socket-events.constants"
+
 export class NotificationDispatcherService implements INotificationDispatcherService {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
@@ -57,7 +59,11 @@ export class NotificationDispatcherService implements INotificationDispatcherSer
       // Emit real-time WebSocket event to the recipient
       try {
         const socketService = SocketServerService.getInstance()
-        socketService.emitToUser(options.recipientId, "NOTIFICATION_RECEIVED", saved.data)
+        socketService.emitToUser(
+          options.recipientId,
+          SOCKET_EVENTS.NOTIFICATION_RECEIVED,
+          saved.data
+        )
       } catch (socketErr) {
         logger.warn(
           { socketErr, recipientId: options.recipientId },

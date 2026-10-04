@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Sparkles, Car, AlertCircle, RefreshCw, Zap, CheckCircle2, Clock } from "lucide-react"
 import { stationApi } from "@/shared/apis/station.api"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 import type { PublicQueueData } from "@/features/station/types"
 
 interface StationLiveQueueSectionProps {
@@ -38,30 +39,30 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
     })
 
     const socket = getSocketClient()
-    socket.emit("join_station", { stationId })
+    socket.emit(SOCKET_EVENTS.JOIN_STATION, { stationId })
 
     const handleRealtimeQueueUpdate = () => {
       fetchLiveQueue()
     }
 
-    socket.on("QUEUE_UPDATED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
-    socket.on("SERVICE_STARTED", handleRealtimeQueueUpdate)
-    socket.on("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.QUEUE_UPDATED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_CHECKED_IN, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.SERVICE_STARTED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.SERVICE_COMPLETED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_COMPLETED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_CANCELLED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_NO_SHOW, handleRealtimeQueueUpdate)
 
     return () => {
       ignore = true
-      socket.emit("leave_station", { stationId })
-      socket.off("QUEUE_UPDATED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
-      socket.off("SERVICE_STARTED", handleRealtimeQueueUpdate)
-      socket.off("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+      socket.emit(SOCKET_EVENTS.LEAVE_STATION, { stationId })
+      socket.off(SOCKET_EVENTS.QUEUE_UPDATED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_CHECKED_IN, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.SERVICE_STARTED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.SERVICE_COMPLETED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_COMPLETED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_CANCELLED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_NO_SHOW, handleRealtimeQueueUpdate)
     }
   }, [stationId, fetchLiveQueue])
 

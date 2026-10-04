@@ -11,6 +11,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import ProviderBookingDetailsView from "../components/details/OwnerBookingDetailsView"
 import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 
 interface BookingDetailsProps {
   role?: RoleType
@@ -100,22 +101,22 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     }
 
     const realTimeEvents = [
-      "CHECKIN_SUCCESS",
-      "BOOKING_CHECKED_IN",
-      "WASH_STARTED",
-      "SERVICE_STARTED",
-      "WASH_COMPLETED",
-      "SERVICE_COMPLETED",
-      "POST_INSPECTION_COMPLETED",
-      "HANDOVER_READY",
-      "BOOKING_COMPLETED",
-      "BOOKING_CANCELLED",
-      "BOOKING_RESCHEDULED",
-      "BOOKING_NO_SHOW",
-      "BOOKING_STALLED",
-      "QUEUE_POSITION_CHANGED",
-      "PAYMENT_UPDATED",
-      "REFUND_PROCESSED",
+      SOCKET_EVENTS.CHECKIN_SUCCESS,
+      SOCKET_EVENTS.BOOKING_CHECKED_IN,
+      SOCKET_EVENTS.WASH_STARTED,
+      SOCKET_EVENTS.SERVICE_STARTED,
+      SOCKET_EVENTS.WASH_COMPLETED,
+      SOCKET_EVENTS.SERVICE_COMPLETED,
+      SOCKET_EVENTS.POST_INSPECTION_COMPLETED,
+      SOCKET_EVENTS.HANDOVER_READY,
+      SOCKET_EVENTS.BOOKING_COMPLETED,
+      SOCKET_EVENTS.BOOKING_CANCELLED,
+      SOCKET_EVENTS.BOOKING_RESCHEDULED,
+      SOCKET_EVENTS.BOOKING_NO_SHOW,
+      SOCKET_EVENTS.BOOKING_STALLED,
+      SOCKET_EVENTS.QUEUE_POSITION_CHANGED,
+      SOCKET_EVENTS.PAYMENT_UPDATED,
+      SOCKET_EVENTS.REFUND_PROCESSED,
     ]
 
     realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))

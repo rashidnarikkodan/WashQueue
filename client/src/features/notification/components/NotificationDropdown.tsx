@@ -14,6 +14,7 @@ import { NotificationItemCard } from "./NotificationItemCard"
 import { NotificationSkeletonList } from "./NotificationSkeletonList"
 import { NotificationEmptyState } from "./NotificationEmptyState"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 
 export function NotificationDropdown() {
   const navigate = useNavigate()
@@ -38,8 +39,6 @@ export function NotificationDropdown() {
 
   useEffect(() => {
     fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
   }, [fetchUnreadCount])
 
   const loadData = useCallback(() => {
@@ -152,10 +151,11 @@ export function NotificationDropdown() {
       addNotification(notification)
     }
 
-    socket.on("NOTIFICATION_RECEIVED", handleNewNotification)
+    socket.on(SOCKET_EVENTS.NOTIFICATION_RECEIVED, handleNewNotification)
+    socket.on(SOCKET_EVENTS.NOTIFICATION_RECEIVED, fetchUnreadCount)
 
     return () => {
-      socket.off("NOTIFICATION_RECEIVED", handleNewNotification)
+      socket.off(SOCKET_EVENTS.NOTIFICATION_RECEIVED, handleNewNotification)
     }
   }, [addNotification])
 

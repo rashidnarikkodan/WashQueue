@@ -9,6 +9,8 @@ export interface SocketUserPayload {
   role?: string
 }
 
+import { SOCKET_EVENTS } from "@/common/constants/socket-events.constants"
+
 function readCookie(cookieHeader: string | undefined, name: string): string {
   if (!cookieHeader) return ""
   for (const pair of cookieHeader.split(";")) {
@@ -87,7 +89,7 @@ export class SocketServerService {
         logger.info({ socketId: socket.id, userRoom }, "[SocketIO] Socket joined user room")
       }
 
-      socket.on("join_user", (data: { userId: string }) => {
+      socket.on(SOCKET_EVENTS.JOIN_USER, (data: { userId: string }) => {
         if (data?.userId) {
           const userRoom = `user:${data.userId}`
           socket.join(userRoom)
@@ -98,13 +100,13 @@ export class SocketServerService {
         }
       })
 
-      socket.on("leave_user", (data: { userId: string }) => {
+      socket.on(SOCKET_EVENTS.LEAVE_USER, (data: { userId: string }) => {
         if (data?.userId) {
           socket.leave(`user:${data.userId}`)
         }
       })
 
-      socket.on("join_station", (data: { stationId: string }) => {
+      socket.on(SOCKET_EVENTS.JOIN_STATION, (data: { stationId: string }) => {
         if (data?.stationId) {
           const stationRoom = `station:${data.stationId}`
           socket.join(stationRoom)
@@ -112,13 +114,13 @@ export class SocketServerService {
         }
       })
 
-      socket.on("leave_station", (data: { stationId: string }) => {
+      socket.on(SOCKET_EVENTS.LEAVE_STATION, (data: { stationId: string }) => {
         if (data?.stationId) {
           socket.leave(`station:${data.stationId}`)
         }
       })
 
-      socket.on("join_booking", (data: { bookingId: string }) => {
+      socket.on(SOCKET_EVENTS.JOIN_BOOKING, (data: { bookingId: string }) => {
         if (data?.bookingId) {
           socket.join(`booking:${data.bookingId}`)
         }
