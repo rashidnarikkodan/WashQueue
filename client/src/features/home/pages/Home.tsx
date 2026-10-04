@@ -6,19 +6,17 @@ import WalletLoyaltySection from "../components/homeSections/WalletLoyaltySectio
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pt-10 pb-16">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <WelcomeSection />
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-4 pb-16 space-y-8 min-h-screen text-left animate-in fade-in duration-300">
+      <WelcomeSection />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
-          <ActiveBookingSection />
-          <SidebarWidgetsSection />
-        </div>
-
-        <GarageSection />
-
-        <WalletLoyaltySection />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-4">
+        <ActiveBookingSection />
+        <SidebarWidgetsSection />
       </div>
+
+      <GarageSection />
+
+      <WalletLoyaltySection />
     </div>
   )
 }

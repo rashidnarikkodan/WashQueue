@@ -1,27 +1,10 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  Check,
-  Clock,
-  Droplets,
-  Wind,
-  CheckCircle2,
-  ArrowRight,
-  Sparkles,
-  Calendar,
-  MapPin,
-  Car,
-  Loader2,
-} from "lucide-react"
+import { ArrowRight, Sparkles, Calendar, MapPin, Car, Loader2, Clock } from "lucide-react"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import { stationApi } from "@/shared/apis/station.api"
 import { useAuthStore } from "@/features/auth/store/auth.store"
-
-interface StepItem {
-  label: string
-  status: "completed" | "current" | "upcoming"
-  icon: typeof Check
-}
+import { BookingStatusTracker } from "@/features/booking/components"
 
 export default function ActiveBookingSection() {
   const navigate = useNavigate()
@@ -170,65 +153,7 @@ export default function ActiveBookingSection() {
 
   // Calculate dynamic steps for active booking
   const status = activeBooking.status
-  const isConfirmed = [
-    "CONFIRMED",
-    "CHECKED_IN",
-    "IN_SERVICE",
-    "SERVICE_COMPLETED",
-    "AWAITING_HANDOVER",
-    "COMPLETED",
-  ].includes(status)
-  const isQueued = [
-    "CHECKED_IN",
-    "IN_SERVICE",
-    "SERVICE_COMPLETED",
-    "AWAITING_HANDOVER",
-    "COMPLETED",
-  ].includes(status)
-  const isInService = [
-    "IN_SERVICE",
-    "SERVICE_COMPLETED",
-    "AWAITING_HANDOVER",
-    "COMPLETED",
-  ].includes(status)
-  const isFinishing = ["SERVICE_COMPLETED", "AWAITING_HANDOVER", "COMPLETED"].includes(status)
   const isReady = ["AWAITING_HANDOVER", "COMPLETED"].includes(status)
-
-  const steps: StepItem[] = [
-    {
-      label: "Confirmed",
-      status: isQueued ? "completed" : isConfirmed ? "current" : "upcoming",
-      icon: Check,
-    },
-    {
-      label: "Queued",
-      status: isInService ? "completed" : status === "CHECKED_IN" ? "current" : "upcoming",
-      icon: Clock,
-    },
-    {
-      label: "Washing",
-      status: isFinishing ? "completed" : status === "IN_SERVICE" ? "current" : "upcoming",
-      icon: Droplets,
-    },
-    {
-      label: "Finishing",
-      status: isReady ? "completed" : status === "SERVICE_COMPLETED" ? "current" : "upcoming",
-      icon: Wind,
-    },
-    {
-      label: "Ready",
-      status: isReady ? "completed" : "upcoming",
-      icon: CheckCircle2,
-    },
-  ]
-
-  // Compute progress line width
-  let progressWidth = "0%"
-  if (status === "CONFIRMED") progressWidth = "10%"
-  else if (status === "CHECKED_IN") progressWidth = "25%"
-  else if (status === "IN_SERVICE") progressWidth = "50%"
-  else if (status === "SERVICE_COMPLETED") progressWidth = "75%"
-  else if (isReady) progressWidth = "100%"
 
   const vehicleName = activeBooking.vehicleDetails
     ? `${activeBooking.vehicleDetails.brand || ""} ${activeBooking.vehicleDetails.model || ""}`.trim() ||
@@ -358,44 +283,8 @@ export default function ActiveBookingSection() {
         </button>
       </div>
 
-      <div className="relative pt-6">
-        <div className="absolute top-[36px] left-[32px] right-[32px] h-[3px] bg-muted -z-10 rounded-full" />
-        <div
-          className="absolute top-[36px] left-[32px] h-[3px] bg-primary shadow-[0_0_12px_rgba(59,130,246,0.6)] -z-10 rounded-full transition-all duration-700"
-          style={{ width: `calc(${progressWidth} * 0.85)` }}
-        />
-
-        <div className="flex justify-between items-start">
-          {steps.map((step, idx) => {
-            const isCompleted = step.status === "completed"
-            const isCurrent = step.status === "current"
-            const Icon = step.icon
-
-            return (
-              <div key={idx} className="flex flex-col items-center gap-3 text-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-card shadow-md transition-all duration-300 ${
-                    isCompleted
-                      ? "bg-primary text-primary-foreground"
-                      : isCurrent
-                        ? "bg-primary/20 text-primary scale-110 ring-4 ring-primary/30"
-                        : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <Icon className="h-4.5 w-4.5 stroke-[2.5]" />
-                </div>
-
-                <span
-                  className={`text-xs md:text-sm font-bold tracking-tight transition-colors ${
-                    isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+      <div className="pt-6">
+        <BookingStatusTracker booking={activeBooking} />
       </div>
     </div>
   )
