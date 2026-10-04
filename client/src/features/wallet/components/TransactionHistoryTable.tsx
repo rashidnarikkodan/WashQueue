@@ -1,15 +1,7 @@
 import React from "react"
-import {
-  FileText,
-  Download,
-  Sparkles,
-  ArrowDownLeft,
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react"
+import { FileText, Download, Sparkles, ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react"
 import type { WalletTransactionItem } from "@/shared/apis/wallet.api"
+import { Pagination, type PaginationMeta } from "@/shared/components/ui/Pagination"
 
 interface TransactionHistoryTableProps {
   transactions: WalletTransactionItem[]
@@ -38,12 +30,23 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
   totalRecords,
   onPageChange,
 }) => {
+  const safeTransactions = Array.isArray(transactions) ? transactions : []
+
   const filterTabs = [
     { id: "ALL", label: "All" },
     { id: "DEBIT", label: "Payments" },
     { id: "REFUND", label: "Refunds" },
     { id: "CREDIT", label: "Credits / Top-ups" },
   ]
+
+  const paginationMeta: PaginationMeta = {
+    total: totalRecords,
+    page: currentPage,
+    limit: pageSize,
+    totalPages: Math.max(1, totalPages),
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1,
+  }
 
   const renderTransactionRow = (tx: WalletTransactionItem) => {
     const isCredit =
@@ -159,48 +162,19 @@ export const TransactionHistoryTable: React.FC<TransactionHistoryTableProps> = (
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span>Loading transactions...</span>
           </div>
-        ) : transactions.length === 0 ? (
+        ) : safeTransactions.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground text-sm space-y-2">
             <Sparkles className="h-8 w-8 text-muted-foreground/60 mx-auto" />
             <p>No transactions found for this filter.</p>
           </div>
         ) : (
-          transactions.map(renderTransactionRow)
+          safeTransactions.map(renderTransactionRow)
         )}
       </div>
 
       {totalRecords > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/60 text-xs text-muted-foreground">
-          <span>
-            Showing {Math.min((currentPage - 1) * pageSize + 1, totalRecords)} to{" "}
-            {Math.min(currentPage * pageSize, totalRecords)} of {totalRecords} transactions
-          </span>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage <= 1 || isLoading}
-              className="px-3 py-1.5 rounded-lg bg-muted border border-border text-foreground hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 font-semibold transition-colors"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              <span>Previous</span>
-            </button>
-
-            <span className="px-3 py-1.5 rounded-lg bg-muted/50 border border-border font-bold text-foreground">
-              {currentPage} / {totalPages}
-            </span>
-
-            <button
-              type="button"
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage >= totalPages || isLoading}
-              className="px-3 py-1.5 rounded-lg bg-muted border border-border text-foreground hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1 font-semibold transition-colors"
-            >
-              <span>Next</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
+        <div className="pt-4 border-t border-border/60">
+          <Pagination meta={paginationMeta} onPageChange={onPageChange} />
         </div>
       )}
     </div>
