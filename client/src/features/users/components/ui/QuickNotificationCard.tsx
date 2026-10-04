@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Send } from "lucide-react"
 import { toast } from "sonner"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface QuickNotificationCardProps {
   userEmail: string
@@ -37,29 +38,17 @@ export default function QuickNotificationCard({ userEmail, userName }: QuickNoti
       </div>
 
       <form onSubmit={handleSendNotification} className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-            Notification Type
-          </label>
-          <select
-            value={notification.type}
-            onChange={(e) => setNotification((prev) => ({ ...prev, type: e.target.value }))}
-            className="w-full bg-muted/40 border border-border rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground"
-          >
-            <option value="Account Alert" className="bg-card text-foreground">
-              Account Alert
-            </option>
-            <option value="Promotional" className="bg-card text-foreground">
-              Promotional Offer
-            </option>
-            <option value="Maintenance" className="bg-card text-foreground">
-              System Maintenance
-            </option>
-            <option value="Warning" className="bg-card text-foreground">
-              Policy Warning
-            </option>
-          </select>
-        </div>
+        <SelectInput
+          label="Notification Type"
+          value={notification.type}
+          onChange={(val) => setNotification((prev) => ({ ...prev, type: val }))}
+          options={[
+            { label: "Account Alert", value: "Account Alert" },
+            { label: "Promotional Offer", value: "Promotional" },
+            { label: "System Maintenance", value: "Maintenance" },
+            { label: "Policy Warning", value: "Warning" },
+          ]}
+        />
 
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">

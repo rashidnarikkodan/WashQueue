@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { issueApi } from "@/shared/apis/issue.api"
 import { bookingApi } from "@/shared/apis/booking.api"
 import { IssueCategory, IssuePriority, type Evidence, type IssueDto } from "../types/issue.types"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface CreateIssueModalProps {
   isOpen: boolean
@@ -225,38 +226,25 @@ export default function CreateIssueModal({
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Issue Category <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
-            >
-              {Object.values(IssueCategory).map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectInput
+            label="Issue Category"
+            required
+            value={category}
+            onChange={(val) => setCategory(val)}
+            options={Object.values(IssueCategory).map((cat) => ({ label: cat, value: cat }))}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Severity / Priority
-            </label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as IssuePriority)}
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all"
-            >
-              <option value={IssuePriority.LOW}>Low - Minor Query / Cosmetic</option>
-              <option value={IssuePriority.MEDIUM}>Medium - Standard Concern</option>
-              <option value={IssuePriority.HIGH}>High - Incomplete Wash / Delay</option>
-              <option value={IssuePriority.CRITICAL}>Critical - Damage / Severe Incident</option>
-            </select>
-          </div>
+          <SelectInput
+            label="Severity / Priority"
+            value={priority}
+            onChange={(val) => setPriority(val as IssuePriority)}
+            options={[
+              { label: "Low - Minor Query / Cosmetic", value: IssuePriority.LOW },
+              { label: "Medium - Standard Concern", value: IssuePriority.MEDIUM },
+              { label: "High - Incomplete Wash / Delay", value: IssuePriority.HIGH },
+              { label: "Critical - Damage / Severe Incident", value: IssuePriority.CRITICAL },
+            ]}
+          />
         </div>
 
         <div className="space-y-1.5">

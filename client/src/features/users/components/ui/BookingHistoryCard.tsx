@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Clock } from "lucide-react"
 import type { Booking } from "../../types"
 import { DataTable } from "@/shared/components/data-table"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface BookingHistoryCardProps {
   bookings: Booking[]
@@ -66,21 +67,20 @@ export default function BookingHistoryCard({ bookings }: BookingHistoryCardProps
             </h2>
           </div>
 
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value)
-                setCurrentPage(1)
-              }}
-              className="bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-xs font-semibold text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="ALL">All Status</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-              <option value="PENDING">Pending</option>
-            </select>
-          </div>
+          <SelectInput
+            value={statusFilter}
+            onChange={(val) => {
+              setStatusFilter(val)
+              setCurrentPage(1)
+            }}
+            options={[
+              { label: "All Status", value: "ALL" },
+              { label: "Completed", value: "COMPLETED" },
+              { label: "Cancelled", value: "CANCELLED" },
+              { label: "Pending", value: "PENDING" },
+            ]}
+            className="w-32"
+          />
         </div>
 
         <div className="mt-4">

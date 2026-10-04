@@ -21,6 +21,7 @@ import type {
   ReviewDto,
 } from "@/shared/types/review.types"
 import { Pagination, type PaginationMeta } from "@/shared/components/ui/Pagination"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 const REPORT_REASONS = [
   { id: "DEFAMATION", label: "Defamatory or false claim" },
@@ -212,39 +213,37 @@ export default function CustomerFeedbackPage() {
             </div>
 
             {/* Ratings dropdown */}
-            <select
+            <SelectInput
               value={ratingFilter}
-              onChange={(e) => {
-                const val = e.target.value === "ALL" ? "ALL" : Number(e.target.value)
-                setRatingFilter(val)
+              onChange={(val) => {
+                const parsed = val === "ALL" ? "ALL" : Number(val)
+                setRatingFilter(parsed)
                 setPage(1)
               }}
-              className="bg-card/80 border border-border text-foreground text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-primary transition-colors cursor-pointer"
-            >
-              <option value="ALL">All Ratings</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
-            </select>
+              options={[
+                { label: "All Ratings", value: "ALL" },
+                { label: "5 Stars", value: 5 },
+                { label: "4 Stars", value: 4 },
+                { label: "3 Stars", value: 3 },
+                { label: "2 Stars", value: 2 },
+                { label: "1 Star", value: 1 },
+              ]}
+              className="w-32"
+            />
 
             {/* Stations dropdown */}
-            <select
+            <SelectInput
               value={stationFilter}
-              onChange={(e) => {
-                setStationFilter(e.target.value)
+              onChange={(val) => {
+                setStationFilter(String(val))
                 setPage(1)
               }}
-              className="bg-card/80 border border-border text-foreground text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-primary transition-colors cursor-pointer max-w-[180px] truncate"
-            >
-              <option value="ALL">All Stations</option>
-              {stations.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { label: "All Stations", value: "ALL" },
+                ...stations.map((st) => ({ label: st.name, value: st.id })),
+              ]}
+              className="w-44"
+            />
           </div>
 
           {/* Pill Switcher */}

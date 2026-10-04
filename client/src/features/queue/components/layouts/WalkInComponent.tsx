@@ -10,6 +10,7 @@ import type { VehicleCategory, VehicleClass } from "@/features/vehicle-catelog/t
 import type { StationDetail } from "@/features/station/types"
 import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 export default function WalkInComponent() {
   const navigate = useNavigate()
@@ -302,29 +303,23 @@ export default function WalkInComponent() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  CATEGORY
-                </label>
-                <select
-                  value={effectiveCategory}
-                  onChange={(e) => setCategory(e.target.value)}
-                  disabled={isLoadingCatelog}
-                  className="w-full px-5 py-3.5 rounded-2xl bg-muted border border-border text-foreground font-medium text-base focus:outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {isLoadingCatelog ? (
-                    <option value="">Loading categories...</option>
-                  ) : availableCategories.length === 0 ? (
-                    <option value="">No categories available for this station</option>
-                  ) : (
-                    availableCategories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
+              <SelectInput
+                label="CATEGORY"
+                value={effectiveCategory}
+                onChange={(val) => setCategory(val)}
+                disabled={isLoadingCatelog}
+                placeholder={
+                  isLoadingCatelog
+                    ? "Loading categories..."
+                    : availableCategories.length === 0
+                      ? "No categories available"
+                      : "Select category..."
+                }
+                options={availableCategories.map((cat) => ({
+                  label: cat.name,
+                  value: cat.id,
+                }))}
+              />
             </div>
 
             <div className="space-y-2">

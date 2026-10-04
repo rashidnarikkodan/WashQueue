@@ -14,15 +14,15 @@ import {
   Save,
   X,
   Loader2,
-  ChevronDown,
   Globe,
 } from "lucide-react"
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { knowledgeDocsApi } from "../api/knowledge-docs.api"
 import KnowledgeDocStatusBadge from "../components/KnowledgeDocStatusBadge"
+import SelectInput from "@/shared/components/form/SelectInput"
 import type {
   KnowledgeDocument,
   KnowledgeDocumentCategory,
@@ -377,20 +377,12 @@ export default function KnowledgeDocumentDetailsPage() {
             <Layers className="w-3.5 h-3.5 text-indigo-500" /> Domain Category
           </p>
           {isEditing ? (
-            <div className="relative inline-flex items-center w-full group">
-              <select
-                value={editCategory}
-                onChange={(e) => setEditCategory(e.target.value as KnowledgeDocumentCategory)}
-                className="appearance-none bg-transparent hover:bg-muted/40 cursor-pointer text-xs font-bold text-foreground border-b border-dashed border-primary/40 focus:border-primary outline-none w-full py-0.5 pr-6 transition-colors"
-              >
-                {KNOWLEDGE_DOC_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat} className="bg-popover text-popover-foreground">
-                    {cat}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-0 pointer-events-none group-hover:text-foreground transition-colors" />
-            </div>
+            <SelectInput
+              value={editCategory}
+              onChange={(val) => setEditCategory(val as KnowledgeDocumentCategory)}
+              options={KNOWLEDGE_DOC_CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
+              className="w-full"
+            />
           ) : (
             <p className="text-xs font-bold text-foreground">{document.category}</p>
           )}
@@ -401,24 +393,16 @@ export default function KnowledgeDocumentDetailsPage() {
             <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> Vector State
           </p>
           {isEditing ? (
-            <div className="relative inline-flex items-center w-full group">
-              <select
-                value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value as KnowledgeDocumentStatus)}
-                className="appearance-none bg-transparent hover:bg-muted/40 cursor-pointer text-xs font-bold text-foreground border-b border-dashed border-primary/40 focus:border-primary outline-none w-full py-0.5 pr-6 transition-colors"
-              >
-                <option value="PUBLISHED" className="bg-popover text-popover-foreground">
-                  Published (Indexed in Qdrant)
-                </option>
-                <option value="DRAFT" className="bg-popover text-popover-foreground">
-                  Draft (Excluded from Qdrant)
-                </option>
-                <option value="ARCHIVED" className="bg-popover text-popover-foreground">
-                  Archived (Excluded from Qdrant)
-                </option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-0 pointer-events-none group-hover:text-foreground transition-colors" />
-            </div>
+            <SelectInput
+              value={editStatus}
+              onChange={(val) => setEditStatus(val as KnowledgeDocumentStatus)}
+              options={[
+                { label: "Published (Indexed in Qdrant)", value: "PUBLISHED" },
+                { label: "Draft (Excluded from Qdrant)", value: "DRAFT" },
+                { label: "Archived (Excluded from Qdrant)", value: "ARCHIVED" },
+              ]}
+              className="w-full"
+            />
           ) : (
             <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
               {document.status === "PUBLISHED" && (

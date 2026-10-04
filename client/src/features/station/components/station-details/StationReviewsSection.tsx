@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner"
 import { reviewApi } from "@/shared/apis/review.api"
 import type { ReviewDto } from "@/shared/types/review.types"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface StationReviewsSectionProps {
   stationId?: string
@@ -234,16 +235,16 @@ export function StationReviewsSection({
           {reviewCount > 1 && (
             <div className="flex items-center gap-2">
               <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
-              <select
+              <SelectInput
                 value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value as SortOption)}
-                aria-label="Sort customer reviews"
-                className="bg-card border border-border text-foreground text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-xs"
-              >
-                <option value="LATEST">Latest First</option>
-                <option value="HIGHEST">Highest Rating</option>
-                <option value="LOWEST">Lowest Rating</option>
-              </select>
+                onChange={(val) => handleSortChange(val as SortOption)}
+                options={[
+                  { label: "Latest First", value: "LATEST" },
+                  { label: "Highest Rating", value: "HIGHEST" },
+                  { label: "Lowest Rating", value: "LOWEST" },
+                ]}
+                className="w-36"
+              />
             </div>
           )}
         </div>

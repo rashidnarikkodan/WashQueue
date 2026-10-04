@@ -1,6 +1,7 @@
 import React from "react"
-import { CheckCircle2, Clock, Archive, ChevronDown } from "lucide-react"
+import { CheckCircle2, Clock, Archive } from "lucide-react"
 import type { KnowledgeDocumentStatus } from "../types/knowledge-docs.types"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface KnowledgeDocStatusBadgeProps {
   status: KnowledgeDocumentStatus
@@ -47,32 +48,22 @@ export const KnowledgeDocStatusBadge: React.FC<KnowledgeDocStatusBadgeProps> = (
   const { icon: Icon, colorClass, label } = getStatusConfig(status)
 
   if (editable) {
+    const statuses: KnowledgeDocumentStatus[] = ["PUBLISHED", "DRAFT", "ARCHIVED"]
     return (
-      <div className={`relative inline-flex items-center group cursor-pointer ${className}`}>
-        <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${colorClass} group-hover:border-primary/50 group-hover:ring-2 group-hover:ring-primary/20`}
-        >
-          <Icon className="w-3.5 h-3.5" />
-          {label}
-          <ChevronDown className="w-3 h-3 ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-        </span>
-        <select
-          value={status}
-          onChange={(e) => onChange?.(e.target.value as KnowledgeDocumentStatus)}
-          aria-label="Select Status"
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        >
-          <option value="PUBLISHED" className="bg-popover text-popover-foreground">
-            Published
-          </option>
-          <option value="DRAFT" className="bg-popover text-popover-foreground">
-            Draft
-          </option>
-          <option value="ARCHIVED" className="bg-popover text-popover-foreground">
-            Archived
-          </option>
-        </select>
-      </div>
+      <SelectInput
+        value={status}
+        onChange={(val) => onChange?.(val as KnowledgeDocumentStatus)}
+        options={statuses.map((st) => {
+          const cfg = getStatusConfig(st)
+          const StIcon = cfg.icon
+          return {
+            label: cfg.label,
+            value: st,
+            icon: <StIcon className="w-3.5 h-3.5" />,
+          }
+        })}
+        className={`w-36 ${className}`}
+      />
     )
   }
 

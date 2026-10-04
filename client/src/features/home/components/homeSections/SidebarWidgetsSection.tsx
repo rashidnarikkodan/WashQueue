@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { stationApi } from "@/shared/apis/station.api"
 import type { Station } from "@/features/station/types"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface WeatherState {
   temp: number
@@ -222,17 +223,12 @@ export default function SidebarWidgetsSection() {
           </h3>
 
           {stations.length > 1 && (
-            <select
+            <SelectInput
               value={selectedStationId}
-              onChange={(e) => handleStationChange(e.target.value)}
-              className="bg-muted text-foreground text-xs font-semibold px-2 py-1 rounded-lg border border-border focus:outline-none cursor-pointer max-w-[130px] truncate"
-            >
-              {stations.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => handleStationChange(val)}
+              options={stations.map((st) => ({ label: st.name, value: st.id }))}
+              className="max-w-[160px]"
+            />
           )}
         </div>
 

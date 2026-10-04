@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { ResolutionType, type ResolveIssuePayload } from "../types/issue.types"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface ResolveIssueModalProps {
   isOpen: boolean
@@ -107,24 +108,21 @@ export default function ResolveIssueModal({
         onSubmit={handleSubmit}
         className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]"
       >
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Resolution Type <span className="text-red-400">*</span>
-          </label>
-          <select
-            value={resolutionType}
-            onChange={(e) => setResolutionType(e.target.value as ResolutionType)}
-            className="w-full px-4 py-2.5 rounded-xl bg-muted/40 text-foreground text-sm border border-border focus:border-primary focus:outline-none transition-all cursor-pointer"
-          >
-            <option value={ResolutionType.REFUND}>Full Refund</option>
-            <option value={ResolutionType.PARTIAL_REFUND}>Partial Refund / Credit</option>
-            <option value={ResolutionType.SERVICE_REDO}>Complimentary Wash / Redo</option>
-            <option value={ResolutionType.DISCOUNT_COUPON}>Discount Voucher</option>
-            <option value={ResolutionType.APOLOGY}>Apology / Clarification</option>
-            <option value={ResolutionType.DISMISSED}>Dismissed / Invalid Claim</option>
-            <option value={ResolutionType.OTHER}>Other Settlement</option>
-          </select>
-        </div>
+        <SelectInput
+          label="Resolution Type"
+          required
+          value={resolutionType}
+          onChange={(val) => setResolutionType(val as ResolutionType)}
+          options={[
+            { label: "Full Refund", value: ResolutionType.REFUND },
+            { label: "Partial Refund / Credit", value: ResolutionType.PARTIAL_REFUND },
+            { label: "Complimentary Wash / Redo", value: ResolutionType.SERVICE_REDO },
+            { label: "Discount Voucher", value: ResolutionType.DISCOUNT_COUPON },
+            { label: "Apology / Clarification", value: ResolutionType.APOLOGY },
+            { label: "Dismissed / Invalid Claim", value: ResolutionType.DISMISSED },
+            { label: "Other Settlement", value: ResolutionType.OTHER },
+          ]}
+        />
 
         {showCompensation && (
           <div className="space-y-1.5">

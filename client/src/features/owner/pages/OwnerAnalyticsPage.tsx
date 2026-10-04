@@ -24,6 +24,7 @@ import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import { DataTable } from "@/shared/components/data-table"
 
 import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 export default function OwnerAnalyticsPage() {
   const navigate = useNavigate()
@@ -290,20 +291,19 @@ export default function OwnerAnalyticsPage() {
         allowCustom={true}
       />
 
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs font-semibold text-muted-foreground">Filter Station:</span>
-        <select
+      <div className="flex items-center gap-2 shrink-0 min-w-[220px]">
+        <SelectInput
+          label="Filter Station"
           value={selectedStationId}
-          onChange={(e) => handleStationChange(e.target.value)}
-          className="bg-card text-xs font-bold text-foreground px-3 py-2 rounded-xl border border-border focus:outline-none cursor-pointer"
-        >
-          <option value="ALL">All Stations Portfolio</option>
-          {(data?.stations || []).map((s) => (
-            <option key={s.stationId} value={s.stationId}>
-              {s.name} ({s.totalBays} Bays)
-            </option>
-          ))}
-        </select>
+          onChange={(val) => handleStationChange(val)}
+          options={[
+            { label: "All Stations Portfolio", value: "ALL" },
+            ...(data?.stations || []).map((s) => ({
+              label: `${s.name} (${s.totalBays} Bays)`,
+              value: s.stationId,
+            })),
+          ]}
+        />
       </div>
 
       <div className="rounded-3xl border border-border/80 bg-card/65 backdrop-blur-md p-6 shadow-sm">

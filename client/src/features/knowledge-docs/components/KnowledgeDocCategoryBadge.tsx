@@ -7,10 +7,10 @@ import {
   CreditCard,
   Layers,
   LifeBuoy,
-  ChevronDown,
 } from "lucide-react"
 import type { KnowledgeDocumentCategory } from "../types/knowledge-docs.types"
 import { KNOWLEDGE_DOC_CATEGORIES } from "../constants/knowledge-doc-categories.const"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface KnowledgeDocCategoryBadgeProps {
   category: KnowledgeDocumentCategory
@@ -82,27 +82,20 @@ export const KnowledgeDocCategoryBadge: React.FC<KnowledgeDocCategoryBadgeProps>
 
   if (editable) {
     return (
-      <div className={`relative inline-flex items-center group cursor-pointer ${className}`}>
-        <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${colorClass} group-hover:border-primary/50 group-hover:ring-2 group-hover:ring-primary/20`}
-        >
-          <Icon className="w-3.5 h-3.5" />
-          {label}
-          <ChevronDown className="w-3 h-3 ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity" />
-        </span>
-        <select
-          value={category}
-          onChange={(e) => onChange?.(e.target.value as KnowledgeDocumentCategory)}
-          aria-label="Select Category"
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        >
-          {KNOWLEDGE_DOC_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat} className="bg-popover text-popover-foreground">
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SelectInput
+        value={category}
+        onChange={(val) => onChange?.(val as KnowledgeDocumentCategory)}
+        options={KNOWLEDGE_DOC_CATEGORIES.map((cat) => {
+          const cfg = getCategoryConfig(cat)
+          const CatIcon = cfg.icon
+          return {
+            label: cfg.label,
+            value: cat,
+            icon: <CatIcon className="w-3.5 h-3.5" />,
+          }
+        })}
+        className={`w-36 ${className}`}
+      />
     )
   }
 

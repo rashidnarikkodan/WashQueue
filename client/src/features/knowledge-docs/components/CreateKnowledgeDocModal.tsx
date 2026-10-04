@@ -7,6 +7,7 @@ import type {
   KnowledgeDocumentStatus,
 } from "../types/knowledge-docs.types"
 import { knowledgeDocsApi } from "../api/knowledge-docs.api"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 interface CreateKnowledgeDocModalProps {
   isOpen: boolean
@@ -116,32 +117,22 @@ export const CreateKnowledgeDocModal: React.FC<CreateKnowledgeDocModalProps> = (
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as KnowledgeDocumentCategory)}
-                className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs outline-none focus:border-primary transition-colors cursor-pointer"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectInput
+              label="Category"
+              value={category}
+              onChange={(val) => setCategory(val as KnowledgeDocumentCategory)}
+              options={CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
+            />
 
-            <div>
-              <label className="block text-xs font-semibold text-foreground mb-1.5">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as KnowledgeDocumentStatus)}
-                className="w-full px-3 py-2.5 rounded-xl bg-background border border-border text-foreground text-xs outline-none focus:border-primary transition-colors cursor-pointer"
-              >
-                <option value="PUBLISHED">Published (Vectorized)</option>
-                <option value="DRAFT">Draft</option>
-              </select>
-            </div>
+            <SelectInput
+              label="Status"
+              value={status}
+              onChange={(val) => setStatus(val as KnowledgeDocumentStatus)}
+              options={[
+                { label: "Published (Vectorized)", value: "PUBLISHED" },
+                { label: "Draft", value: "DRAFT" },
+              ]}
+            />
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">Locale</label>
