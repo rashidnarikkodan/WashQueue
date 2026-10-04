@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
-import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
+import AuthRequiredModal from "@/shared/components/modals/AuthRequiredModal"
 import { AIRainEffect } from "./AIRainEffect"
 
 export const AIFloatingTrigger: React.FC = () => {

@@ -5,7 +5,7 @@ import { managerApi } from "@/shared/apis/manager.api"
 import type { ManagerListItem, ManagerInvitationItem } from "@/shared/apis/manager.api"
 import { InviteManagerModal } from "@/features/owner/components/InviteManagerModal"
 import { UpdatePermissionsModal } from "@/features/owner/components/UpdatePermissionsModal"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import { toast } from "sonner"
 import {
   UserCheck,

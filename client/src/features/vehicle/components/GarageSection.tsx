@@ -5,8 +5,8 @@ import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import AddVehicleModal from "./AddVehicleModal"
 import VehicleCard from "./VehicleCard"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
+import AuthRequiredModal from "@/shared/components/modals/AuthRequiredModal"
 import type { Vehicle } from "../types"
 
 export default function GarageSection() {

@@ -12,7 +12,7 @@ import { DataTable, DataTableToolbar } from "@/shared/components/data-table"
 import { getUserColumns } from "../table/columns"
 import { userTabs } from "../table/tabs"
 import { buildUserFilters } from "../table/filters"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([])

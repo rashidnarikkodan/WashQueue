@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 import PromptModal from "@/shared/components/ui/PromptModal"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import { SettlementStatusBadge } from "@/shared/components/badges"
 import {
   settlementApi,

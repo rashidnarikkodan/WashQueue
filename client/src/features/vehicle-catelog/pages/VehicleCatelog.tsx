@@ -17,7 +17,7 @@ import CategoryModal from "../components/modals/CategoryModal"
 import ClassModal from "../components/modals/ClassModal"
 
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import { DataTable, DataTableToolbar, type PaginationMeta } from "@/shared/components/data-table"
 import { getClassColumns } from "../table/columns"
