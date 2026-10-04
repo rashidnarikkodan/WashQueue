@@ -61,20 +61,21 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     try {
       const updated = await profileApi.updateProfile(current.id, input)
 
-      set({
-        profile: {
-          ...current,
-          ...updated,
-          ...input,
-        },
-      })
+      const mergedProfile: UserProfile = {
+        ...current,
+        ...updated,
+        ...input,
+      }
+
+      set({ profile: mergedProfile })
 
       const authUser = useAuthStore.getState().user
       if (authUser) {
         const newAuthUser = {
           ...authUser,
-          name: updated.name || input.name || authUser.name,
-          phone: updated.phone || input.phone || authUser.phone,
+          name: mergedProfile.name,
+          phone: mergedProfile.phone,
+          avatar: mergedProfile.avatar,
         }
         useAuthStore.setState({ user: newAuthUser })
         localStorage.setItem("wq_user", JSON.stringify(newAuthUser))

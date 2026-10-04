@@ -1,5 +1,15 @@
 import { useState } from "react"
-import { Mail, Phone, Calendar, Pencil, CheckCircle2 } from "lucide-react"
+import {
+  Mail,
+  Phone,
+  Calendar,
+  Pencil,
+  CheckCircle2,
+  Shield,
+  Briefcase,
+  Wrench,
+  User,
+} from "lucide-react"
 import type { UserProfile } from "../types"
 import { getInitials } from "@/shared/utils/avatar"
 
@@ -12,14 +22,41 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
   const [imgError, setImgError] = useState(false)
   const initials = getInitials(profile.name)
 
-  const roleLabel =
-    profile.role === "owner"
-      ? "Verified Owner"
-      : profile.role === "admin"
-        ? "System Admin"
-        : profile.role === "manager"
-          ? "Station Manager"
-          : "Verified Customer"
+  const getRoleConfig = () => {
+    switch (profile.role) {
+      case "admin":
+        return {
+          label: "System Administrator",
+          subLabel: profile.department || "Platform Operations",
+          badgeColor: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+          icon: Shield,
+        }
+      case "owner":
+        return {
+          label: "Verified Station Owner",
+          subLabel: profile.businessName || "Service Provider Partner",
+          badgeColor: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+          icon: Briefcase,
+        }
+      case "manager":
+        return {
+          label: "Station Manager",
+          subLabel: profile.assignedStationName || "Desk Operations Lead",
+          badgeColor: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+          icon: Wrench,
+        }
+      default:
+        return {
+          label: "Verified Customer",
+          subLabel: "WashQueue Member",
+          badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+          icon: User,
+        }
+    }
+  }
+
+  const roleConfig = getRoleConfig()
+  const RoleIcon = roleConfig.icon
 
   const formattedMemberSince = profile.createdAt
     ? new Date(profile.createdAt).getFullYear()
@@ -51,17 +88,22 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
                 {profile.name}
               </h1>
 
-              <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                {roleLabel}
+              <span
+                className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${roleConfig.badgeColor}`}
+              >
+                <RoleIcon className="w-3.5 h-3.5" />
+                {roleConfig.label}
               </span>
 
               {profile.isVerified && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Verified
+                  Verified Account
                 </span>
               )}
             </div>
+
+            <p className="text-sm font-semibold text-primary">{roleConfig.subLabel}</p>
 
             <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground font-normal pt-1">
               <div className="flex items-center gap-2">
@@ -84,6 +126,7 @@ export default function ProfileHeader({ profile, onEditClick }: ProfileHeaderPro
 
         <div className="shrink-0">
           <button
+            type="button"
             onClick={onEditClick}
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold text-sm transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2.5 cursor-pointer"
           >

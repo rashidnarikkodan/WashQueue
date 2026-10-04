@@ -14,6 +14,7 @@ export interface AuthUser {
   authProvider?: string
   ownerId?: string
   isManager?: boolean
+  createdAt?: string
 }
 
 export interface LoginState {
