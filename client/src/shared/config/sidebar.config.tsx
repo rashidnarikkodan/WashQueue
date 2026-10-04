@@ -16,6 +16,7 @@ import {
   Car,
   LifeBuoy,
   BookOpen,
+  User,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -97,6 +98,11 @@ export const adminSideBarItems: SidebarItem[] = [
     path: "/admin/settings",
     icon: Settings,
   },
+  {
+    name: "My Profile",
+    path: "/admin/profile",
+    icon: User,
+  },
 ]
 
 export const ownerSideBarItems: SidebarItem[] = [
@@ -145,6 +151,11 @@ export const ownerSideBarItems: SidebarItem[] = [
     path: "/owner/notifications",
     icon: Bell,
   },
+  {
+    name: "My Profile",
+    path: "/owner/profile",
+    icon: User,
+  },
 ]
 
 export const managerSideBarItems: SidebarItem[] = [
@@ -182,5 +193,10 @@ export const managerSideBarItems: SidebarItem[] = [
     name: "Station",
     path: "/manager/station",
     icon: Car,
+  },
+  {
+    name: "My Profile",
+    path: "/manager/profile",
+    icon: User,
   },
 ]

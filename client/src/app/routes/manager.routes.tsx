@@ -17,6 +17,7 @@ const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/Customer
 const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
 const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 const ManagerDashboard = lazy(() => import("@/features/manager/pages/ManagerDashboard"))
+const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -93,6 +94,10 @@ export const managerRoutes = {
     {
       path: "notifications",
       element: <NotificationCenterPage />,
+    },
+    {
+      path: "profile",
+      element: <ProfilePage />,
     },
   ],
 }

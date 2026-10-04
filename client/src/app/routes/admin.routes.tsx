@@ -29,6 +29,7 @@ const KnowledgeDocumentListPage = lazy(
 const KnowledgeDocumentDetailsPage = lazy(
   () => import("@/features/knowledge-docs/pages/KnowledgeDocumentDetailsPage")
 )
+const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"))
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
@@ -118,6 +119,10 @@ export const adminRoutes = {
     {
       path: "settings",
       element: <>System Settings</>,
+    },
+    {
+      path: "profile",
+      element: <ProfilePage />,
     },
   ],
 }
