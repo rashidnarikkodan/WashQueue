@@ -13,6 +13,8 @@ import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
 import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 
+import { BOOKING_STAGES, getBookingStageIndex } from "../utils/booking-status-stage.utils"
+
 interface BookingDetailsProps {
   role?: RoleType
 }
@@ -159,24 +161,11 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     return { dateStr, timeStr }
   }, [booking])
 
-  const stages = [
-    { id: "CONFIRMED", label: "Confirmed" },
-    { id: "CHECKED_IN", label: "Arrived" },
-    { id: "IN_QUEUE", label: "In Queue" },
-    { id: "IN_SERVICE", label: "Washing" },
-    { id: "COMPLETED", label: "Ready" },
-  ]
+  const stages = BOOKING_STAGES
 
   const currentStageIndex = useMemo(() => {
-    if (!booking) return 0
-    const s = booking.status
-    if (s === "PENDING" || s === "CONFIRMED") return 0
-    if (s === "CHECKED_IN") return 1
-    if (s === "IN_SERVICE") return 3
-    if (s === "SERVICE_COMPLETED" || s === "AWAITING_HANDOVER" || s === "COMPLETED") return 4
-    if (s === "CANCELLED" || s === "NO_SHOW") return -1
-    return 2
-  }, [booking])
+    return getBookingStageIndex(booking?.status)
+  }, [booking?.status])
 
   if (isLoading) {
     return (
@@ -283,6 +272,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
           onOpenCancelModal={() => setIsCancelModalOpen(true)}
           onAdvanceStatus={handleAdvanceStatus}
           isAdvancingStatus={isAdvancingStatus}
+          basePath={bookingsListPath}
         />
       )}
 
@@ -305,7 +295,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
             setBooking(updated)
             toast.success(`Booking #${booking.bookingNumber} has been cancelled cleanly.`)
           }}
-          onBookAgain={() => navigate("/book")}
+          onBookAgain={() => navigate("/bookings/new")}
           onBackToHome={() => navigate("/")}
         />
       )}

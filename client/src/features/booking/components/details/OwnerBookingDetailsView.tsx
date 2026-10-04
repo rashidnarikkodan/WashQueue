@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   Printer,
   Sparkles,
-  Lock,
   FileText,
   History,
   Activity,
@@ -81,6 +80,8 @@ function getStatusLogConfig(status?: string) {
   }
 }
 
+import InspectionReportCard from "./InspectionReportCard"
+
 interface ProviderBookingDetailsViewProps {
   booking: BookingResponse
   formattedDates: { dateStr: string; timeStr: string }
@@ -88,6 +89,7 @@ interface ProviderBookingDetailsViewProps {
   onOpenCancelModal: () => void
   onAdvanceStatus: (targetStatus: string) => Promise<void>
   isAdvancingStatus: boolean
+  basePath?: string
 }
 
 export default function ProviderBookingDetailsView({
@@ -96,8 +98,10 @@ export default function ProviderBookingDetailsView({
   onOpenCancelModal,
   onAdvanceStatus,
   isAdvancingStatus,
+  basePath,
 }: ProviderBookingDetailsViewProps) {
   const navigate = useNavigate()
+  const navBasePath = basePath || "/manager/bookings"
 
   const customerName =
     booking.customerDetails?.name ||
@@ -450,220 +454,107 @@ export default function ProviderBookingDetailsView({
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-6 text-left">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <h3 className="text-base font-bold text-foreground">Pre-Service Inspection</h3>
-              <span
-                className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
-                  booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "bg-muted text-muted-foreground border border-border"
-                    : booking.status === "IN_SERVICE" ||
-                        booking.status === "SERVICE_COMPLETED" ||
-                        booking.status === "COMPLETED"
-                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                }`}
-              >
-                {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                  ? "NOT APPLICABLE"
-                  : booking.status === "IN_SERVICE" ||
-                      booking.status === "SERVICE_COMPLETED" ||
-                      booking.status === "COMPLETED"
-                    ? "CONDUCTED"
-                    : "PENDING"}
-              </span>
-            </div>
-
-            {booking.preServiceInspection ? (
-              <div className="space-y-4">
-                {booking.preServiceInspection.photos.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {booking.preServiceInspection.photos.map((photo, idx) => (
-                      <a
-                        key={idx}
-                        href={photo.secured_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
-                      >
-                        <img
-                          src={photo.secured_url}
-                          alt={`Pre-inspection angle ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                )}
-                <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                    INSPECTION FINDINGS &amp; NOTES
-                  </span>
-                  <p className="text-xs italic text-foreground leading-relaxed">
-                    "{booking.preServiceInspection.notes || "No additional notes recorded"}"
-                  </p>
-                  <span className="text-[10px] text-muted-foreground block pt-1">
-                    Captured {new Date(booking.preServiceInspection.capturedAt).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            ) : inspectionLog?.notes ? (
-              <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                  INSPECTION FINDINGS &amp; NOTES
-                </span>
-                <p className="text-xs italic text-foreground leading-relaxed">
-                  "{inspectionLog.notes}"
-                </p>
-              </div>
-            ) : booking.status === "CANCELLED" || booking.status === "NO_SHOW" ? (
-              <div className="p-4 rounded-xl border border-border bg-muted/40">
-                <p className="text-xs text-muted-foreground">
-                  Wash booking was cancelled before service was initiated. Pre-inspection was not
-                  required.
-                </p>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl border border-border bg-muted/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-xs text-muted-foreground">
-                  {booking.status === "IN_SERVICE" || booking.status === "COMPLETED"
-                    ? "Vehicle received and checked in at station."
-                    : "Pre-service inspection can be logged prior to starting the wash service."}
-                </p>
+          <InspectionReportCard
+            title="Pre-Service Inspection"
+            type="PRE"
+            inspection={
+              booking.preServiceInspection
+                ? {
+                    inspectorName: "Station Inspector",
+                    inspectedAt: booking.preServiceInspection.capturedAt,
+                    notes: booking.preServiceInspection.notes,
+                    photos: booking.preServiceInspection.photos,
+                  }
+                : inspectionLog?.notes
+                  ? { notes: inspectionLog.notes }
+                  : null
+            }
+            statusBadgeText={
+              booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                ? "NOT APPLICABLE"
+                : booking.status === "IN_SERVICE" ||
+                    booking.status === "SERVICE_COMPLETED" ||
+                    booking.status === "COMPLETED"
+                  ? "CONDUCTED"
+                  : "PENDING"
+            }
+            statusBadgeClass={
+              booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                ? "bg-muted text-muted-foreground border border-border"
+                : booking.status === "IN_SERVICE" ||
+                    booking.status === "SERVICE_COMPLETED" ||
+                    booking.status === "COMPLETED"
+                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                  : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+            }
+            actionButton={
+              booking.status !== "CANCELLED" && booking.status !== "NO_SHOW" ? (
                 <button
                   type="button"
-                  onClick={() => navigate(`/manager/bookings/${booking.id}/pre-inspection`)}
-                  className="px-3.5 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
+                  onClick={() => navigate(`${navBasePath}/${booking.id}/pre-inspection`)}
+                  className="px-3 py-1.5 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
                 >
                   <FileText size={14} />
-                  <span>Log Pre-Inspection</span>
+                  <span>
+                    {booking.preServiceInspection ? "View / Edit Inspection" : "Log Pre-Inspection"}
+                  </span>
                 </button>
-              </div>
-            )}
-          </div>
+              ) : undefined
+            }
+          />
 
-          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-4 text-left">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <h3 className="text-base font-bold text-foreground">
-                Post-Service Quality Inspection
-              </h3>
-              <span
-                className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase ${
-                  booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "bg-muted text-muted-foreground border border-border"
-                    : booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED"
-                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                      : "bg-muted text-muted-foreground border border-border"
-                }`}
-              >
-                {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                  ? "NOT APPLICABLE"
-                  : booking.status === "COMPLETED"
-                    ? "COMPLETED"
-                    : booking.status === "SERVICE_COMPLETED"
-                      ? "READY FOR HANDOVER"
-                      : "LOCKED"}
-              </span>
-            </div>
-
-            {booking.postServiceInspection ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-xs font-bold ${
-                      booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
-                        ? "text-emerald-500"
-                        : "text-amber-500"
-                    }`}
-                  >
-                    {booking.postServiceInspection.checklist?.every((c) => c.passed) !== false
-                      ? "✓ Quality Assurance Passed"
-                      : "⚠ Quality Assurance — Issues Flagged"}
+          <InspectionReportCard
+            title="Post-Service Quality Inspection"
+            type="POST"
+            inspection={
+              booking.postServiceInspection
+                ? {
+                    inspectorName: "Quality Inspector",
+                    inspectedAt: booking.postServiceInspection.capturedAt,
+                    notes: booking.postServiceInspection.notes,
+                    photos: booking.postServiceInspection.photos,
+                    checklist: booking.postServiceInspection.checklist?.map((c) => ({
+                      itemId: c.key,
+                      label: c.label,
+                      passed: c.passed,
+                      notes: c.remark,
+                    })),
+                  }
+                : null
+            }
+            statusBadgeText={
+              booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                ? "NOT APPLICABLE"
+                : booking.status === "COMPLETED"
+                  ? "COMPLETED"
+                  : booking.status === "SERVICE_COMPLETED"
+                    ? "READY FOR HANDOVER"
+                    : "LOCKED"
+            }
+            statusBadgeClass={
+              booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                ? "bg-muted text-muted-foreground border border-border"
+                : booking.status === "COMPLETED" || booking.status === "SERVICE_COMPLETED"
+                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                  : "bg-muted text-muted-foreground border border-border"
+            }
+            actionButton={
+              booking.status === "SERVICE_COMPLETED" ||
+              booking.status === "COMPLETED" ||
+              booking.status === "IN_SERVICE" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`${navBasePath}/${booking.id}/post-inspection`)}
+                  className="px-3 py-1.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted cursor-pointer shrink-0 flex items-center gap-1.5"
+                >
+                  <FileText size={14} />
+                  <span>
+                    {booking.postServiceInspection ? "View Post-Inspection" : "Log Post-Inspection"}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/manager/bookings/${booking.id}/post-inspection`)}
-                    className="px-3 py-1.5 rounded-lg bg-card border border-border text-foreground text-xs font-bold hover:bg-muted cursor-pointer"
-                  >
-                    View Post-Inspection
-                  </button>
-                </div>
-
-                {booking.postServiceInspection.photos.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {booking.postServiceInspection.photos.map((photo, idx) => (
-                      <a
-                        key={idx}
-                        href={photo.secured_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block aspect-square rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-colors"
-                      >
-                        <img
-                          src={photo.secured_url}
-                          alt={`Post-inspection angle ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                )}
-
-                {booking.postServiceInspection.checklist &&
-                  booking.postServiceInspection.checklist.length > 0 && (
-                    <div className="space-y-1.5">
-                      {booking.postServiceInspection.checklist.map((item) => (
-                        <div
-                          key={item.key}
-                          className="p-3 rounded-lg border border-border bg-muted/40 space-y-1"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs font-semibold text-foreground truncate">
-                              {item.label}
-                            </span>
-                            <span
-                              className={`shrink-0 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
-                                item.passed
-                                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                                  : "bg-destructive/10 text-destructive border border-destructive/20"
-                              }`}
-                            >
-                              {item.passed ? "Passed" : "Issue Flagged"}
-                            </span>
-                          </div>
-                          {item.remark && (
-                            <p className="text-[11px] text-muted-foreground italic">
-                              "{item.remark}"
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                    HANDOVER NOTES
-                  </span>
-                  <p className="text-xs italic text-foreground leading-relaxed">
-                    "{booking.postServiceInspection.notes || "No additional notes recorded"}"
-                  </p>
-                  <span className="text-[10px] text-muted-foreground block pt-1">
-                    Captured {new Date(booking.postServiceInspection.capturedAt).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl border border-dashed border-border bg-muted/40 text-xs text-muted-foreground flex items-center gap-3">
-                <Lock size={16} className="shrink-0 text-muted-foreground/60" />
-                <span>
-                  {booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                    ? "Service cancelled; post-wash quality inspection is not applicable."
-                    : "Post-service quality check unlocks once washing is completed by the manager or technician."}
-                </span>
-              </div>
-            )}
-          </div>
+                </button>
+              ) : undefined
+            }
+          />
 
           {(booking.status === "CANCELLED" ||
             booking.cancellation ||
@@ -975,7 +866,7 @@ export default function ProviderBookingDetailsView({
             {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
               <button
                 type="button"
-                onClick={() => navigate("/manager/check-in")}
+                onClick={() => navigate("/owner/check-in")}
                 className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
               >
                 CHECK-IN VEHICLE
