@@ -23,6 +23,7 @@ import {
   getVehicleDisplayName,
   getVehiclePlateNumber,
 } from "../../utils/booking-display.utils"
+import type { RoleType } from "@/shared/constants/role.const"
 
 export interface UnifiedBookingDetailsViewProps {
   booking: BookingResponse
@@ -34,7 +35,7 @@ export interface UnifiedBookingDetailsViewProps {
   onAdvanceStatus?: (targetStatus: string) => Promise<void>
   isAdvancingStatus?: boolean
   basePath?: string
-  userRole?: "CUSTOMER" | "MANAGER" | "OWNER" | "ADMIN"
+  userRole?: RoleType | "CUSTOMER" | "MANAGER" | "OWNER" | "ADMIN"
 }
 
 export default function UnifiedBookingDetailsView({
@@ -47,10 +48,11 @@ export default function UnifiedBookingDetailsView({
   onAdvanceStatus,
   isAdvancingStatus = false,
   basePath,
-  userRole = "CUSTOMER",
+  userRole = "customer",
 }: UnifiedBookingDetailsViewProps) {
   const navigate = useNavigate()
-  const isCustomer = userRole === "CUSTOMER"
+  const normalizedRole = userRole.toLowerCase()
+  const isCustomer = normalizedRole === "customer"
   const navBasePath = basePath || (isCustomer ? "" : "/manager/bookings")
 
   const vehicleName = getVehicleDisplayName(booking)

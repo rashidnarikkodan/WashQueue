@@ -264,7 +264,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         onAdvanceStatus={handleAdvanceStatus}
         isAdvancingStatus={isAdvancingStatus}
         basePath={bookingsListPath}
-        userRole={}
+        userRole={currentRole}
       />
 
       {isRescheduleModalOpen && booking && (
