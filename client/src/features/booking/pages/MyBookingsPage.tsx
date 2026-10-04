@@ -8,7 +8,7 @@ import type { Booking } from "../types/booking.types"
 import { CUSTOMER_BOOKING_TABS } from "../config/booking-tabs.config"
 import { getCustomerColumns } from "../config/booking-columns.config"
 import { useBookingList } from "../hooks/useBookingList"
-import CancellationModal from "../components/CancellationModal"
+import { CancellationModal } from "../components"
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()

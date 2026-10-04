@@ -12,7 +12,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
-import { useBookingSlots } from "../hooks/useBookingSlots"
+import { useBookingSlots } from "../../hooks/useBookingSlots"
+import type { TimeSlotOption } from "../creation/TimeSlotSelectionStep"
 import DatePicker from "@/shared/components/form/DatePicker"
 
 interface RescheduleModalProps {
@@ -221,7 +222,7 @@ export default function RescheduleModal({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {timeSlotOptions.map((slot) => {
+                {timeSlotOptions.map((slot: TimeSlotOption) => {
                   const isSelected = selectedSlotId === slot.id
                   const isCurrent = booking.scheduling?.timeWindowId === slot.id
                   const isFull = slot.status === "FULL"

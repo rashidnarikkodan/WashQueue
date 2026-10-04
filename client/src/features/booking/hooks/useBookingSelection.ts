@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { vehicleApi } from "@/shared/apis/vehicle.api"
 import type { Vehicle, CreateVehicleInput } from "@/features/vehicle/types"
 import type { StationDetails, StationPricing, ExtraService } from "@/features/station/types"
-import type { ServicePlanOption, ExtraServiceOption } from "../components/ServiceSelectionStep"
+import type {
+  ServicePlanOption,
+  ExtraServiceOption,
+} from "../components/creation/ServiceSelectionStep"
 
 interface UseBookingSelectionParams {
   station: StationDetails | null

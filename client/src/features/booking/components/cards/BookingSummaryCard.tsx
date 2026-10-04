@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import type { Station } from "@/features/station/types"
 import type { Vehicle } from "@/features/vehicle/types"
-import type { ServicePlanOption, ExtraServiceOption } from "./ServiceSelectionStep"
+import type { ServicePlanOption, ExtraServiceOption } from "../creation/ServiceSelectionStep"
 
 interface BookingSummaryCardProps {
   station: Station | null

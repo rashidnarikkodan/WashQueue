@@ -10,7 +10,6 @@ import ServiceDurationTimerCard from "./ServiceDurationTimerCard"
 import BookingPaymentSummaryCard from "./BookingPaymentSummaryCard"
 import BookingSpecificationsCard from "./BookingSpecificationsCard"
 import BookingActivityHistoryCard from "./BookingActivityHistoryCard"
-import CustomerVehicleProfileCard from "./CustomerVehicleProfileCard"
 import InspectionReportCard from "./InspectionReportCard"
 import {
   CustomerActionHeaderButtons,
@@ -24,6 +23,7 @@ import {
   getVehiclePlateNumber,
 } from "../../utils/booking-display.utils"
 import type { RoleType } from "@/shared/constants/role.const"
+import { BOOKING_STATUS } from "@/shared/constants/booking.constants"
 
 export interface UnifiedBookingDetailsViewProps {
   booking: BookingResponse
@@ -183,8 +183,8 @@ export default function UnifiedBookingDetailsView({
               {/* Status Stepper */}
               <BookingStatusTracker
                 booking={booking}
-                variant="stepper"
                 currentStageIndex={currentStageIndex}
+                title="Service Progress"
                 stages={stages}
               />
 
@@ -271,8 +271,9 @@ export default function UnifiedBookingDetailsView({
               {/* Staff Timeline */}
               <BookingStatusTracker
                 booking={booking}
-                variant="timeline"
                 currentStageIndex={currentStageIndex}
+                title="Live Execution Timeline"
+                stages={stages}
               />
             </>
           )}
@@ -435,12 +436,12 @@ export default function UnifiedBookingDetailsView({
                 totalPrice={totalPrice}
                 paymentStatus={paymentStatusStr}
               />
-              <CustomerVehicleProfileCard booking={booking} showCustomerDetails={false} />
-              <CustomerSupportSidebarWidget booking={booking} />
+              {booking.status == BOOKING_STATUS.COMPLETED &&
+                
+              }              <CustomerSupportSidebarWidget booking={booking} />
             </>
           ) : (
             <>
-              <CustomerVehicleProfileCard booking={booking} showCustomerDetails={true} />
               <ServiceDurationTimerCard
                 booking={booking}
                 mode="elapsed"
