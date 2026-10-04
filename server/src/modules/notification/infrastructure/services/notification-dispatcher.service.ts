@@ -148,14 +148,36 @@ export class NotificationDispatcherService implements INotificationDispatcherSer
 
       const promises: Promise<unknown>[] = []
 
-      // 1. Notify Station Owner
+      let ownerUserId: string | null = null
+
+      // 1. Determine Station Owner User ID
       if (notifyOwner && stationDoc.ownerId) {
-        let ownerUserId = stationDoc.ownerId.toString()
+        ownerUserId = stationDoc.ownerId.toString()
         const ownerDoc = await OwnerModel.findById(stationDoc.ownerId).lean().exec()
         if (ownerDoc && ownerDoc.userId) {
           ownerUserId = ownerDoc.userId.toString()
         }
+      }
 
+      // 2. Fetch Active Station Manager User IDs (excluding Owner User ID if present)
+      let managerUserIds: string[] = []
+      if (notifyManagers) {
+        const managerAssignments = await ManagerAssignmentModel.find({
+          stationId: stationDoc._id,
+          status: "ACTIVE",
+        })
+          .select("managerUserId")
+          .lean()
+          .exec()
+
+        managerUserIds = managerAssignments.map((a) => a.managerUserId.toString())
+        if (ownerUserId) {
+          managerUserIds = managerUserIds.filter((id) => id !== ownerUserId)
+        }
+      }
+
+      // 3. Dispatch to Station Owner
+      if (ownerUserId) {
         const payload: DispatchNotificationOptions = {
           ...defaultPayload,
           ...ownerPayload,
@@ -170,30 +192,19 @@ export class NotificationDispatcherService implements INotificationDispatcherSer
         promises.push(this.dispatch(payload))
       }
 
-      // 2. Notify Active Station Managers
-      if (notifyManagers) {
-        const managerAssignments = await ManagerAssignmentModel.find({
-          stationId: stationDoc._id,
-          status: "ACTIVE",
-        })
-          .select("managerUserId")
-          .lean()
-          .exec()
-
-        const managerUserIds = managerAssignments.map((a) => a.managerUserId.toString())
-        if (managerUserIds.length > 0) {
-          const payloadOptions: Omit<DispatchNotificationOptions, "recipientId"> = {
-            ...defaultPayload,
-            ...managerPayload,
-            data: {
-              stationId: stationDoc._id.toString(),
-              stationName: stationDoc.name,
-              ...(typeof defaultPayload.data === "object" ? defaultPayload.data : {}),
-              ...(typeof managerPayload?.data === "object" ? managerPayload.data : {}),
-            },
-          }
-          promises.push(this.dispatchToUsers(managerUserIds, payloadOptions))
+      // 4. Dispatch to Station Managers
+      if (managerUserIds.length > 0) {
+        const payloadOptions: Omit<DispatchNotificationOptions, "recipientId"> = {
+          ...defaultPayload,
+          ...managerPayload,
+          data: {
+            stationId: stationDoc._id.toString(),
+            stationName: stationDoc.name,
+            ...(typeof defaultPayload.data === "object" ? defaultPayload.data : {}),
+            ...(typeof managerPayload?.data === "object" ? managerPayload.data : {}),
+          },
         }
+        promises.push(this.dispatchToUsers(managerUserIds, payloadOptions))
       }
 
       await Promise.all(promises)
