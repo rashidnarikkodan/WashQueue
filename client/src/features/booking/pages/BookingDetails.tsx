@@ -6,9 +6,8 @@ import { ROLE, type RoleType } from "@/shared/constants/role.const"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
 import CancellationModal from "../components/CancellationModal"
 import RescheduleModal from "../components/RescheduleModal"
-import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import ProviderBookingDetailsView from "../components/details/OwnerBookingDetailsView"
+import UnifiedBookingDetailsView from "../components/details/UnifiedBookingDetailsView"
 import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
 import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
@@ -226,7 +225,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
+      <div className="flex items-center justify-between gap-4 pb-2">
         <Breadcrumbs
           items={[
             {
@@ -255,26 +254,18 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         </button>
       </div>
 
-      {isCustomer ? (
-        <CustomerBookingDetailsView
-          booking={booking}
-          formattedDates={formattedDates}
-          currentStageIndex={currentStageIndex}
-          stages={stages}
-          onOpenCancelModal={() => setIsCancelModalOpen(true)}
-          onOpenRescheduleModal={() => setIsRescheduleModalOpen(true)}
-        />
-      ) : (
-        <ProviderBookingDetailsView
-          booking={booking}
-          formattedDates={formattedDates}
-          currentStageIndex={currentStageIndex}
-          onOpenCancelModal={() => setIsCancelModalOpen(true)}
-          onAdvanceStatus={handleAdvanceStatus}
-          isAdvancingStatus={isAdvancingStatus}
-          basePath={bookingsListPath}
-        />
-      )}
+      <UnifiedBookingDetailsView
+        booking={booking}
+        formattedDates={formattedDates}
+        currentStageIndex={currentStageIndex}
+        stages={stages}
+        onOpenCancelModal={() => setIsCancelModalOpen(true)}
+        onOpenRescheduleModal={() => setIsRescheduleModalOpen(true)}
+        onAdvanceStatus={handleAdvanceStatus}
+        isAdvancingStatus={isAdvancingStatus}
+        basePath={bookingsListPath}
+        userRole={}
+      />
 
       {isRescheduleModalOpen && booking && (
         <RescheduleModal
