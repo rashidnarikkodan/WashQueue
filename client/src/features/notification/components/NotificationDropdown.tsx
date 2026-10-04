@@ -156,8 +156,9 @@ export function NotificationDropdown() {
 
     return () => {
       socket.off(SOCKET_EVENTS.NOTIFICATION_RECEIVED, handleNewNotification)
+      socket.off(SOCKET_EVENTS.NOTIFICATION_RECEIVED, fetchUnreadCount)
     }
-  }, [addNotification])
+  }, [addNotification, fetchUnreadCount])
 
   return (
     <div className="relative" ref={containerRef}>
