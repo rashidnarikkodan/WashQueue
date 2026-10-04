@@ -1,7 +1,7 @@
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
-import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
+import AuthRequiredModal from "@/shared/components/modals/AuthRequiredModal"
 import {
   VehicleSelectionStep,
   ServiceSelectionStep,

@@ -1,9 +1,8 @@
 import { useMemo } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Clock, FileText } from "lucide-react"
+import { FileText } from "lucide-react"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import QRCodePass from "@/shared/components/ui/QRCodePass"
-import { BookingReviewCard } from "@/features/review/components/BookingReviewCard"
 
 import BookingStatusTracker from "./BookingStatusTracker"
 import ServiceDurationTimerCard from "./ServiceDurationTimerCard"
@@ -132,153 +131,73 @@ export default function UnifiedBookingDetailsView({
         {/* Left Column */}
         <div className="lg:col-span-8 space-y-6">
           {/* Main Card */}
-          {isCustomer ? (
-            <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-8 relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                        booking.status === "COMPLETED"
-                          ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
-                          : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                            ? "bg-blue-500/15 text-blue-500 border border-blue-500/30 animate-pulse"
-                            : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                              ? "bg-destructive/15 text-destructive border border-destructive/30"
-                              : "bg-amber-500/15 text-amber-500 border border-amber-500/30"
-                      }`}
-                    >
-                      <span className="w-2 h-2 rounded-full bg-current" />
-                      <span>{bookingStatusStr}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {formattedDates.dateStr}
-                    </span>
-                  </div>
-
-                  <Link to={`/stations/${booking.stationId}`}>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight hover:text-primary">
-                      {stationName}
-                    </h2>
-                  </Link>
-                  <p className="text-xs text-primary font-medium flex items-center gap-1.5">
-                    <Clock size={13} />
-                    <span>Slot Window: {formattedDates.timeStr}</span>
-                  </p>
+          <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl space-y-8 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                      booking.status === "COMPLETED"
+                        ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                        : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
+                          ? "bg-blue-500/15 text-blue-500 border border-blue-500/30 animate-pulse"
+                          : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
+                            ? "bg-destructive/15 text-destructive border border-destructive/30"
+                            : "bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-current" />
+                    <span>{bookingStatusStr}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {formattedDates.dateStr}
+                  </span>
                 </div>
 
-                <div className="text-left sm:text-right space-y-1 bg-muted/40 p-4 rounded-2xl border border-border sm:border-0 sm:p-0 sm:bg-transparent">
-                  <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
-                    Total Amount
-                  </span>
-                  <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
-                    ₹{totalPrice.toLocaleString("en-IN")}
-                  </span>
-                  <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">
-                    ✓ {paymentStatusStr} via {paymentMethodStr}
-                  </div>
-                </div>
+                <Link to={`/stations/${booking.stationId}`}>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight hover:text-primary">
+                    {stationName}
+                  </h2>
+                </Link>
+                <p className="text-xs text-primary font-medium flex items-center gap-1.5">
+                  <span className="text font-bold text-lg"> #{booking.bookingNumber} </span>
+                </p>
               </div>
 
-              {/* Status Stepper */}
-              <BookingStatusTracker
-                booking={booking}
-                currentStageIndex={currentStageIndex}
-                title="Service Progress"
-                stages={stages}
-              />
+              <div className="text-left sm:text-right space-y-1 bg-muted/40 p-4 rounded-2xl border border-border sm:border-0 sm:p-0 sm:bg-transparent">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest block">
+                  Total Amount
+                </span>
+                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans">
+                  ₹{totalPrice.toLocaleString("en-IN")}
+                </span>
+                <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">
+                  ✓ {paymentStatusStr} via {paymentMethodStr}
+                </div>
+              </div>
+            </div>
 
-              {/* Customer Actions */}
+            {/* Status Stepper */}
+            <BookingStatusTracker
+              booking={booking}
+              currentStageIndex={currentStageIndex}
+              title="Live Service Progress"
+              stages={stages}
+            />
+
+            {/* Customer Actions */}
+            {isCustomer && (
               <CustomerActionHeaderButtons
                 booking={booking}
                 formattedDates={formattedDates}
                 onOpenCancelModal={onOpenCancelModal}
                 onOpenRescheduleModal={onOpenRescheduleModal}
               />
-            </div>
-          ) : (
-            <>
-              {/* Staff Overview Grid */}
-              <div className="p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-xl grid grid-cols-1 sm:grid-cols-4 gap-6 text-left">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
-                    Booking ID
-                  </span>
-                  <span className="text-lg font-mono font-bold text-primary">
-                    #{booking.bookingNumber}
-                  </span>
-                </div>
+            )}
+          </div>
 
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
-                    Current Status
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        booking.status === "COMPLETED"
-                          ? "bg-emerald-500 shadow-xs shadow-emerald-500"
-                          : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                            ? "bg-blue-500 animate-pulse shadow-xs shadow-blue-500"
-                            : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                              ? "bg-destructive shadow-xs shadow-destructive"
-                              : "bg-amber-500 shadow-xs shadow-amber-500"
-                      }`}
-                    />
-                    <span
-                      className={`text-base font-bold uppercase ${
-                        booking.status === "COMPLETED"
-                          ? "text-emerald-500"
-                          : booking.status === "IN_SERVICE" || booking.status === "CHECKED_IN"
-                            ? "text-blue-500"
-                            : booking.status === "CANCELLED" || booking.status === "NO_SHOW"
-                              ? "text-destructive"
-                              : "text-amber-500"
-                      }`}
-                    >
-                      {booking.status.replace("_", " ")}
-                    </span>
-                  </div>
-                </div>
+          <BookingSpecificationsCard booking={booking} formattedDates={formattedDates} />
 
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
-                    Scheduled Slot
-                  </span>
-                  <span className="text-xs font-bold text-foreground block truncate">
-                    {formattedDates.timeStr}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground block truncate">
-                    {formattedDates.dateStr}
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block">
-                    Service Type
-                  </span>
-                  <span className="text-sm font-bold text-foreground block">{serviceName}</span>
-                  <span className="text-[10px] text-muted-foreground truncate block">
-                    {booking.vehicleDetails?.brand
-                      ? `${booking.vehicleDetails.brand} ${booking.vehicleDetails.model || ""}`.trim()
-                      : plateNumber !== "N/A"
-                        ? `Plate: ${plateNumber}`
-                        : "Standard Wash"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Staff Timeline */}
-              <BookingStatusTracker
-                booking={booking}
-                currentStageIndex={currentStageIndex}
-                title="Live Execution Timeline"
-                stages={stages}
-              />
-            </>
-          )}
-
-          {/* Service Duration Timer (Customer View) */}
           {isCustomer && <ServiceDurationTimerCard booking={booking} mode="countdown" />}
 
           {/* Pre-Service Inspection Card */}
@@ -394,29 +313,7 @@ export default function UnifiedBookingDetailsView({
             />
           )}
 
-          {/* Review Card (Customer View) */}
-          {isCustomer && (
-            <BookingReviewCard
-              bookingId={booking.id}
-              stationId={booking.stationId}
-              stationName={stationName}
-              stationImage={booking.stationDetails?.images?.[0]?.url}
-              serviceType={serviceName}
-              dateTime={`${formattedDates.dateStr} • ${formattedDates.timeStr}`}
-              bookingNumber={booking.bookingNumber}
-              bookingStatus={booking.status}
-            />
-          )}
-
-          {/* Specifications & Financial Breakdowns */}
-          {isCustomer ? (
-            <>
-              <BookingSpecificationsCard booking={booking} formattedDates={formattedDates} />
-              <BookingPaymentSummaryCard booking={booking} variant="full" />
-            </>
-          ) : (
-            <BookingActivityHistoryCard booking={booking} />
-          )}
+          <BookingActivityHistoryCard booking={booking} />
         </div>
 
         {/* Right Column (Sidebar) */}
@@ -436,9 +333,15 @@ export default function UnifiedBookingDetailsView({
                 totalPrice={totalPrice}
                 paymentStatus={paymentStatusStr}
               />
-              {booking.status == BOOKING_STATUS.COMPLETED &&
-                
-              }              <CustomerSupportSidebarWidget booking={booking} />
+              <BookingPaymentSummaryCard booking={booking} variant="sidebar" />
+              {booking.status == BOOKING_STATUS.COMPLETED && (
+                <ServiceDurationTimerCard
+                  booking={booking}
+                  mode="elapsed"
+                  formattedTimeStr={formattedDates.timeStr}
+                />
+              )}
+              <CustomerSupportSidebarWidget booking={booking} />
             </>
           ) : (
             <>

@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom"
 import { XCircle, Sparkles, CheckCircle2, Phone, Printer } from "lucide-react"
 import { toast } from "sonner"
-import type { BookingResponse } from "@/shared/apis/booking.api"
+import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
+import { useState } from "react"
 
 interface StaffBookingActionsProps {
   booking: BookingResponse
@@ -17,6 +18,19 @@ export function StaffHeaderActions({
   isAdvancingStatus = false,
 }: StaffBookingActionsProps) {
   const customerPhone = booking.customerDetails?.phone || booking.walkInCustomer?.phone || "N/A"
+  const [isDownloading, setIsDownloading] = useState<boolean>(false)
+  const handleDownloadInvoice = async () => {
+    try {
+      setIsDownloading(true)
+      toast.info("Generating invoice PDF...")
+      await bookingApi.downloadInvoice(booking.id, booking.bookingNumber)
+      toast.success("Invoice downloaded successfully")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to download invoice")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -68,9 +82,10 @@ export function StaffHeaderActions({
 
       <button
         type="button"
-        onClick={() => window.print()}
+        onClick={() => handleDownloadInvoice()}
         className="p-2.5 rounded-full bg-card border border-border text-foreground hover:bg-muted transition-all cursor-pointer"
         title="Print Summary"
+        disabled={isDownloading}
       >
         <Printer size={15} />
       </button>
@@ -127,7 +142,9 @@ export function StaffSidebarWorkflowPanel({
       {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
         <button
           type="button"
-          onClick={() => navigate("/owner/check-in")}
+          onClick={() =>
+            navigate("/owner/check-in", { state: { bookingNumber: booking.bookingNumber } })
+          }
           className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
         >
           CHECK-IN VEHICLE
