@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 
 const SOCKET_URL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace("/api/v1", "").replace("/api", "")
@@ -31,13 +32,27 @@ export function getSocketClient(): Socket {
 export function subscribeToStation(stationId: string): void {
   const socket = getSocketClient()
   if (socket && stationId) {
-    socket.emit("join_station", { stationId })
+    socket.emit(SOCKET_EVENTS.JOIN_STATION, { stationId })
   }
 }
 
 export function unsubscribeFromStation(stationId: string): void {
   const socket = getSocketClient()
   if (socket && stationId) {
-    socket.emit("leave_station", { stationId })
+    socket.emit(SOCKET_EVENTS.LEAVE_STATION, { stationId })
+  }
+}
+
+export function subscribeToUser(userId: string): void {
+  const socket = getSocketClient()
+  if (socket && userId) {
+    socket.emit(SOCKET_EVENTS.JOIN_USER, { userId })
+  }
+}
+
+export function unsubscribeFromUser(userId: string): void {
+  const socket = getSocketClient()
+  if (socket && userId) {
+    socket.emit(SOCKET_EVENTS.LEAVE_USER, { userId })
   }
 }

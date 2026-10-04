@@ -42,15 +42,22 @@ const UserStats: React.FC<UserStatsProps> = ({
         icon: CheckCircle2,
       },
       {
+        id: "draft",
+        label: "Draft Applications",
+        value: ownersCount,
+        variant: "slate",
+        icon: FileText,
+      },
+      {
         id: "total",
         label: "Total Owners",
         value: totalUsers,
         variant: "primary",
-        icon: FileText,
+        icon: Users,
       },
     ]
 
-    return <StatsHUD stats={ownerStats} columns={3} />
+    return <StatsHUD stats={ownerStats} columns={4} />
   }
 
   const userStats: StatItem[] = [

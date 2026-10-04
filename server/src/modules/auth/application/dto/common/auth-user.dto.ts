@@ -1,4 +1,4 @@
-import { RoleType } from "@/common/constants/role.constants"
+import type { RoleType } from "@/common/constants/role.constants"
 
 export interface AuthUser {
   id: string
@@ -13,6 +13,7 @@ export interface AuthUser {
   onboardingStep?: number
   authProvider?: string
   ownerId?: string
+  isManager?: boolean
 }
 
 export interface AuthTokens {

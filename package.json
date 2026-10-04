@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev": "pnpm -r --parallel dev",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "start": "pnpm -r start",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "pnpm -r format",
+    "format:check": "pnpm -r format:check"
   },
   "keywords": [],
   "author": "",

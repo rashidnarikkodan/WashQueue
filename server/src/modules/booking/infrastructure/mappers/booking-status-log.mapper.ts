@@ -1,6 +1,7 @@
 import { Types } from "mongoose"
 import { BookingStatus } from "../../domain/entities/Booking"
-import { BookingStatusLog, BookingStatusLogProps } from "../../domain/entities/BookingStatusLog"
+import { BookingStatusLog } from "../../domain/entities/BookingStatusLog"
+import { BookingStatusLogProps } from "../../domain/types/booking.types"
 import { IBookingStatusLogDocument } from "../models/booking-status-log.model"
 
 function toObjectId(val: unknown): Types.ObjectId | null {

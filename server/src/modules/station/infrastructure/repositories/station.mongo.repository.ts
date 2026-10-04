@@ -11,10 +11,8 @@ import { PipelineStage, Types } from "mongoose"
 import { VehicleClassModel } from "@/modules/vehicle-catelog/infrastructure/models/class.model"
 import { StationPricingModel } from "../models/station-pricing.model"
 import { Owner as OwnerModel } from "@/modules/owner/infrastructure/model/owner.model"
-import {
-  StationRankingService,
-  HydratedStationItem,
-} from "../../domain/services/station-ranking.service"
+import { StationRankingService } from "../../domain/services/station-ranking.service"
+import { HydratedStationItem } from "../../domain/types/station.types"
 import { StationRedisHydrationService } from "../services/station-redis-hydration.service"
 import { StationStatusCounts } from "../../application/dtos/get-stations.dto"
 
@@ -367,7 +365,10 @@ export class StationMongoRepository
         const ownerDoc = await OwnerModel.findOne({
           $or: [
             ...(Types.ObjectId.isValid(ownerIdStr)
-              ? [{ _id: new Types.ObjectId(ownerIdStr) }]
+              ? [
+                  { _id: new Types.ObjectId(ownerIdStr) },
+                  { userId: new Types.ObjectId(ownerIdStr) },
+                ]
               : []),
           ],
         }).exec()
@@ -393,15 +394,6 @@ export class StationMongoRepository
       match.status = "ACTIVE"
     }
 
-    // if (filter.city) {
-    //   match["address.city"] = { $regex: filter.city, $options: "i" }
-    // }
-    // if (filter.state) {
-    //   match["address.state"] = { $regex: filter.state, $options: "i" }
-    // }
-    // if (filter.country) {
-    //   match["address.country"] = { $regex: filter.country, $options: "i" }
-    // }
     if (filter.isActive !== undefined) {
       match.isActive = filter.isActive
     }
@@ -409,13 +401,11 @@ export class StationMongoRepository
       match.verifiedAt = { $exists: true, $ne: null }
     }
 
-    //rating filter
     const minRating = filter.minRating
     if (minRating !== undefined && minRating > 0) {
       match.rating = { $gte: minRating }
     }
 
-    //search result filter
     const q = filter.search
     if (q && q.trim().length > 0) {
       const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")

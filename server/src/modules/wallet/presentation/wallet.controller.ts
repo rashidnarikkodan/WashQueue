@@ -6,8 +6,9 @@ import { GetTransactionLedgerUseCase } from "../application/use-cases/get-transa
 import { CreateTopUpOrderUseCase } from "../application/use-cases/create-topup-order.use-case"
 import { VerifyTopUpPaymentUseCase } from "../application/use-cases/verify-topup-payment.use-case"
 import { PayWithWalletUseCase } from "../application/use-cases/pay-with-wallet.use-case"
-import { AppError } from "@/common/errors/app-error"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
+import success from "@/common/utils/success"
 import { TransactionCategory, TransactionType } from "../domain/entities/wallet-transaction.entity"
 
 interface AuthenticatedRequest extends Request {
@@ -34,15 +35,12 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const wallet = await this.getWalletBalanceUseCase.execute(userId)
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: wallet,
-    })
+    success(res, wallet, HTTP_STATUS.OK, "Wallet balance retrieved successfully")
   }
 
   public getLedger = async (req: Request, res: Response): Promise<void> => {
@@ -50,7 +48,7 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const { page, limit, type, category, startDate, endDate } = req.query
@@ -64,16 +62,20 @@ export class WalletController {
       endDate: endDate ? new Date(endDate as string) : undefined,
     })
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: result.transactions,
-      pagination: {
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: result.totalPages,
+    success(
+      res,
+      {
+        transactions: result.transactions,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
       },
-    })
+      HTTP_STATUS.OK,
+      "Transaction ledger retrieved successfully"
+    )
   }
 
   public createTopUpOrder = async (req: Request, res: Response): Promise<void> => {
@@ -81,17 +83,14 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const { amount, currency } = req.body
 
     const order = await this.createTopUpOrderUseCase.execute(userId, amount, currency)
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      data: order,
-    })
+    success(res, order, HTTP_STATUS.OK, "Top-up order created successfully")
   }
 
   public verifyTopUpPayment = async (req: Request, res: Response): Promise<void> => {
@@ -99,7 +98,7 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const { amount, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body
@@ -110,11 +109,7 @@ export class WalletController {
       razorpaySignature: razorpay_signature,
     })
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Wallet topped up successfully",
-      data: transaction,
-    })
+    success(res, transaction, HTTP_STATUS.OK, "Wallet topped up successfully")
   }
 
   public payWithWallet = async (req: Request, res: Response): Promise<void> => {
@@ -122,7 +117,7 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const { amount, referenceId, description, metadata } = req.body
@@ -135,11 +130,7 @@ export class WalletController {
       metadata,
     })
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Payment processed using wallet balance",
-      data: transaction,
-    })
+    success(res, transaction, HTTP_STATUS.OK, "Payment processed using wallet balance")
   }
 
   public creditWallet = async (req: Request, res: Response): Promise<void> => {
@@ -154,11 +145,7 @@ export class WalletController {
       metadata,
     })
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Wallet credited successfully",
-      data: transaction,
-    })
+    success(res, transaction, HTTP_STATUS.OK, "Wallet credited successfully")
   }
 
   public debitWallet = async (req: Request, res: Response): Promise<void> => {
@@ -173,11 +160,7 @@ export class WalletController {
       metadata,
     })
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Wallet debited successfully",
-      data: transaction,
-    })
+    success(res, transaction, HTTP_STATUS.OK, "Wallet debited successfully")
   }
 
   public exportTransactions = async (req: Request, res: Response): Promise<void> => {
@@ -185,7 +168,7 @@ export class WalletController {
     const userId = authReq.user?.userId || authReq.user?.id
 
     if (!userId) {
-      throw new AppError("Authentication required", HTTP_STATUS.UNAUTHORIZED)
+      throw new UnauthorizedError()
     }
 
     const { type, category, startDate, endDate } = req.query

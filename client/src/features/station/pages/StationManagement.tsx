@@ -82,7 +82,7 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   const searchQuery = searchParams.get("q") || ""
   const activeTab = searchParams.get("tab") || "all"
   const currentPage = Number(searchParams.get("page")) || 1
-  const limit = 10
+  const limit = 12
 
   const loadStations = useCallback(async () => {
     if (isAdmin) {
@@ -251,18 +251,18 @@ export default function StationManagement({ role: explicitRole }: StationManagem
 
   if (isAdmin) {
     return (
-      <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
         <Breadcrumbs
           items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Station Management" }]}
         />
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-              Stations Approval
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              Station Management
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Review layout, pricing models, amenities, and verify station registration details.
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+              Review layout, pricing models, amenities, and verify station registration details
             </p>
           </div>
         </div>
@@ -293,41 +293,44 @@ export default function StationManagement({ role: explicitRole }: StationManagem
   }
 
   return (
-    <div className="space-y-6 min-h-screen animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs items={[{ label: "Owner", path: "/owner/dashboard" }, { label: "Stations" }]} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             Stations Management
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Maintain and Manage all your stations.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Maintain and manage all your wash stations
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            if (!isAdmin && user && !user.isVerified) {
-              return
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAdmin && user && !user.isVerified) {
+                return
+              }
+              navigate("/owner/stations/new")
+            }}
+            disabled={!isAdmin && user ? !user.isVerified : false}
+            title={
+              !isAdmin && user && !user.isVerified
+                ? "Account pending admin approval"
+                : "Create Station"
             }
-            navigate("/owner/stations/new")
-          }}
-          disabled={!isAdmin && user ? !user.isVerified : false}
-          title={
-            !isAdmin && user && !user.isVerified
-              ? "Account pending admin approval"
-              : "Create Station"
-          }
-          className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
-            !isAdmin && user && !user.isVerified
-              ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-              : "bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          }`}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create Station</span>
-        </button>
+            className={`flex items-center gap-2 font-semibold px-4.5 py-2.5 rounded-xl transition-all shadow-md select-none ${
+              !isAdmin && user && !user.isVerified
+                ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                : "bg-primary hover:opacity-90 text-primary-foreground hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            }`}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Station</span>
+          </button>
+        </div>
       </div>
       <DataTableToolbar
         searchQuery={searchQuery}

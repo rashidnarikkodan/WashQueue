@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Menu, X, Heart } from "lucide-react"
-import ThemeToggle from "../header/ThemeToggle"
-import NotificationDropdown from "../header/NotificationDropdown"
+import { NotificationDropdown } from "@/features/notification"
 import ProfileDropdown from "../header/ProfileDropdown"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { APP_ROUTES } from "../../constants/appRoutes.const"
+import ThemeToggle from "../header/ThemeToggle"
 
 export default function Header({ role }: { role?: string }) {
   const location = useLocation()
@@ -56,7 +56,7 @@ export default function Header({ role }: { role?: string }) {
   const activeBadge = roleBadges[currentRole as keyof typeof roleBadges]
 
   return (
-    <header className="fixed top-1 z-40 w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
+    <header className="fixed top-1 z-[100] w-full rounded-[3rem] border-b border-x border-border bg-card/90 backdrop-blur-md transition-all duration-300 shadow-md">
       <div className="mx-auto w-full px-6 py-3.5 grid grid-cols-3 items-center">
         <div className="col-span-1 flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
@@ -80,7 +80,7 @@ export default function Header({ role }: { role?: string }) {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 ${
+                  className={`text-sm font-medium transition-colors hover:text-foreground relative py-1.5 flex items-center gap-1.5 ${
                     isActive ? "text-foreground font-semibold" : "text-muted-foreground"
                   }`}
                 >
@@ -95,6 +95,7 @@ export default function Header({ role }: { role?: string }) {
         </div>
 
         <div className="col-span-1 flex justify-end items-center gap-3">
+          {!isAuthenticated && <ThemeToggle />}
           {isAuthenticated && isCustomer && (
             <Link
               to={APP_ROUTES.BOOKMARKS}
@@ -104,7 +105,6 @@ export default function Header({ role }: { role?: string }) {
               <Heart className="h-4.5 w-4.5" />
             </Link>
           )}
-          <ThemeToggle />
 
           {isAuthenticated && <NotificationDropdown />}
 
@@ -146,7 +146,7 @@ export default function Header({ role }: { role?: string }) {
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
-                  {link.name}
+                  <span>{link.name}</span>
                 </Link>
               )
             })}

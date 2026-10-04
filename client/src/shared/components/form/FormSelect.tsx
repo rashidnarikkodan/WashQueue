@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import SelectInput from "./SelectInput"
 
 interface Option {
   value: string
@@ -18,6 +19,7 @@ interface FormSelectProps {
   leftIcon?: ReactNode
   disabled?: boolean
   required?: boolean
+  className?: string
 }
 
 export default function FormSelect({
@@ -33,60 +35,30 @@ export default function FormSelect({
   leftIcon,
   disabled,
   required,
+  className = "",
 }: FormSelectProps) {
   return (
-    <div className="flex flex-col gap-1.5 w-full relative">
-      {(label || labelRight) && (
-        <div className="flex items-center gap-1.5">
-          {label && (
-            <label
-              htmlFor={id}
-              className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 text-left flex items-center gap-1"
-            >
-              <span>{label}</span>
-              {required && <span className="text-destructive">*</span>}
-            </label>
-          )}
-          {labelRight}
-        </div>
-      )}
-      <div className="relative flex items-center">
-        {leftIcon && (
-          <div className="absolute left-3.5 text-muted-foreground z-10 flex items-center pointer-events-none">
-            {leftIcon}
-          </div>
-        )}
-        <select
-          id={id}
-          name={name}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          className={`w-full bg-muted border rounded-xl pr-10 py-3 text-sm text-foreground outline-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/85 font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-            leftIcon ? "pl-11" : "pl-3.5"
-          } ${
-            error
-              ? "border-destructive/80 focus:ring-destructive/20"
-              : "border-border/80 hover:border-border"
-          }`}
-        >
-          {placeholder && (
-            <option value="" className="bg-card text-muted-foreground">
-              {placeholder}
-            </option>
-          )}
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-card text-foreground">
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      {error && (
-        <span className="text-[11px] text-destructive font-medium pl-1 animate-in fade-in slide-in-from-top-1 duration-200 text-left">
-          {error}
-        </span>
-      )}
-    </div>
+    <SelectInput
+      id={id}
+      name={name}
+      label={label}
+      labelRight={labelRight}
+      value={value}
+      onChange={(val) => {
+        if (onChange) {
+          const syntheticEvent = {
+            target: { value: val, name },
+          } as React.ChangeEvent<HTMLSelectElement>
+          onChange(syntheticEvent)
+        }
+      }}
+      options={options}
+      placeholder={placeholder}
+      error={error}
+      leftIcon={leftIcon}
+      disabled={disabled}
+      required={required}
+      className={className}
+    />
   )
 }

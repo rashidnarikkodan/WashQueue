@@ -150,7 +150,7 @@ export function SettlementDetailModal({
               <div className="text-sm">
                 <p className="text-xs text-muted-foreground">Payout Reference</p>
                 <p className="font-mono font-medium text-foreground truncate">
-                  {settlement.payoutId || "Not generated yet"}
+                  {settlement.razorpayPayoutId || settlement.payoutId || "Not generated yet"}
                 </p>
               </div>
               <div className="text-sm">

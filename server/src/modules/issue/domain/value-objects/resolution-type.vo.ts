@@ -1,0 +1,11 @@
+export enum ResolutionType {
+  REFUND = "REFUND",
+  PARTIAL_REFUND = "PARTIAL_REFUND",
+  SERVICE_REDO = "SERVICE_REDO",
+  DISCOUNT_COUPON = "DISCOUNT_COUPON",
+  APOLOGY = "APOLOGY",
+  DISMISSED = "DISMISSED",
+  OTHER = "OTHER",
+}
+
+export const VALID_RESOLUTION_TYPES = Object.values(ResolutionType)

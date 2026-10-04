@@ -1,3 +1,4 @@
+import type { Window as TimeWindowSlot } from "@/features/booking/types/booking.types"
 export const StationStatus = {
   DRAFT: "DRAFT",
   PENDING_REVIEW: "PENDING_REVIEW",
@@ -330,4 +331,78 @@ export const DEFAULT_FILTERS: FilterOptions = {
   openNow: false,
   verifiedOnly: false,
   amenities: [],
+}
+
+export interface StationQueueItem {
+  bookingId: string
+  bookingNumber: string
+  stationId: string
+  status: string
+  serviceType: string
+  isWalkIn: boolean
+  customerName: string
+  customerPhone: string
+  registrationNumber: string
+  vehicleModel?: string
+  windowStart?: string
+  windowEnd?: string
+  checkedInAt?: string
+  serviceStartedAt?: string
+  queuePosition: number
+  isBayActive: boolean
+  assignedBayNumber?: number
+  estimatedWaitMinutes: number
+}
+
+export interface StationQueueResponse {
+  stationId: string
+  stationName: string
+  totalBays: number
+  activeServicesCount: number
+  availableBays: number
+  queueDepth: number
+  totalActiveAndWaiting: number
+  averageWashDurationMinutes: number
+  waitingQueue: StationQueueItem[]
+  activeServices: StationQueueItem[]
+}
+
+export interface BookingCalendarResponse {
+  minDate: string
+  maxDate: string
+  dates: { date: string; status: "AVAILABLE" | "FULL" | "HOLIDAY" | "CLOSED" }[]
+}
+
+export interface BookingTimeWindowsResponse {
+  stationId: string
+  date: string
+  windows: TimeWindowSlot[] // Will replace any with TimeWindowSlot if imported, but in api we can use TimeWindowSlot
+}
+
+export interface PublicQueueItem {
+  id: string
+  bookingNumber: string
+  position?: number
+  bayNumber?: number
+  vehicle: string
+  package: string
+  serviceType: string
+  status: string
+  serviceStartedAt?: string
+  estimatedWaitMinutes?: number
+  estimatedServiceStart?: string
+  isBayActive: boolean
+}
+
+export interface PublicQueueData {
+  stationId: string
+  stationName: string
+  totalBays: number
+  activeServicesCount: number
+  availableBays: number
+  queueDepth: number
+  totalActiveAndWaiting: number
+  averageWashDurationMinutes: number
+  activeServices: PublicQueueItem[]
+  waitingQueue: PublicQueueItem[]
 }

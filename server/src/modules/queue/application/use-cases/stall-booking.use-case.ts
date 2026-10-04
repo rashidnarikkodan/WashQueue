@@ -10,10 +10,9 @@ import { IBookingNotificationService } from "@/modules/notification/notification
 import { BookingDTOMapper } from "@/modules/booking/application/mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
 
-export interface StallBookingInput {
-  bookingId: string
-  reason: string
-}
+import { StallBookingInput } from "../dtos/queue-operations.dto"
+
+export type { StallBookingInput }
 
 export class StallBookingUseCase implements IStallBookingUseCase {
   constructor(

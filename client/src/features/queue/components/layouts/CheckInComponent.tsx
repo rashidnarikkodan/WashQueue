@@ -1,6 +1,6 @@
 import { toast } from "sonner"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { QrCode, Keyboard, CheckCircle2, HelpCircle, ArrowRight, Sparkles } from "lucide-react"
 import { bookingApi } from "@/shared/apis/booking.api"
 import { QrCameraScanner } from "../ui/QrCameraScanner"
@@ -8,9 +8,11 @@ import type { BookingResponse } from "@/shared/apis/booking.api"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
 export default function CheckInComponent() {
+  const state = useLocation().state
+  console.log(state)
   const navigate = useNavigate()
   const basePath = useQueueBasePath()
-  const [bookingIdInput, setBookingIdInput] = useState("")
+  const [bookingIdInput, setBookingIdInput] = useState(state.bookingNumber || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
 

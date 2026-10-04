@@ -4,4 +4,6 @@ export const ROLE = {
   OWNER: "owner",
   MANAGER: "manager",
 } as const
+
+export const RoleType = ROLE
 export type RoleType = (typeof ROLE)[keyof typeof ROLE]

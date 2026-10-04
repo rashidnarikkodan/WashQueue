@@ -4,13 +4,13 @@ import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { RefreshCw, AlertTriangle, ArrowLeft } from "lucide-react"
 import { ROLE, type RoleType } from "@/shared/constants/role.const"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
-import CancellationModal from "../components/CancellationModal"
-import RescheduleModal from "../components/RescheduleModal"
-import CustomerBookingDetailsView from "../components/details/CustomerBookingDetailsView"
+import { CancellationModal, RescheduleModal, UnifiedBookingDetailsView } from "../components"
 import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
-import ProviderBookingDetailsView from "../components/details/ProviderBookingDetailsView"
 import Loading from "@/shared/components/ui/Loading"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
+
+import { BOOKING_STAGES, getBookingStageIndex } from "../utils/booking-status-stage.utils"
 
 interface BookingDetailsProps {
   role?: RoleType
@@ -100,22 +100,22 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     }
 
     const realTimeEvents = [
-      "CHECKIN_SUCCESS",
-      "BOOKING_CHECKED_IN",
-      "WASH_STARTED",
-      "SERVICE_STARTED",
-      "WASH_COMPLETED",
-      "SERVICE_COMPLETED",
-      "POST_INSPECTION_COMPLETED",
-      "HANDOVER_READY",
-      "BOOKING_COMPLETED",
-      "BOOKING_CANCELLED",
-      "BOOKING_RESCHEDULED",
-      "BOOKING_NO_SHOW",
-      "BOOKING_STALLED",
-      "QUEUE_POSITION_CHANGED",
-      "PAYMENT_UPDATED",
-      "REFUND_PROCESSED",
+      SOCKET_EVENTS.CHECKIN_SUCCESS,
+      SOCKET_EVENTS.BOOKING_CHECKED_IN,
+      SOCKET_EVENTS.WASH_STARTED,
+      SOCKET_EVENTS.SERVICE_STARTED,
+      SOCKET_EVENTS.WASH_COMPLETED,
+      SOCKET_EVENTS.SERVICE_COMPLETED,
+      SOCKET_EVENTS.POST_INSPECTION_COMPLETED,
+      SOCKET_EVENTS.HANDOVER_READY,
+      SOCKET_EVENTS.BOOKING_COMPLETED,
+      SOCKET_EVENTS.BOOKING_CANCELLED,
+      SOCKET_EVENTS.BOOKING_RESCHEDULED,
+      SOCKET_EVENTS.BOOKING_NO_SHOW,
+      SOCKET_EVENTS.BOOKING_STALLED,
+      SOCKET_EVENTS.QUEUE_POSITION_CHANGED,
+      SOCKET_EVENTS.PAYMENT_UPDATED,
+      SOCKET_EVENTS.REFUND_PROCESSED,
     ]
 
     realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
@@ -158,24 +158,11 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
     return { dateStr, timeStr }
   }, [booking])
 
-  const stages = [
-    { id: "CONFIRMED", label: "Confirmed" },
-    { id: "CHECKED_IN", label: "Arrived" },
-    { id: "IN_QUEUE", label: "In Queue" },
-    { id: "IN_SERVICE", label: "Washing" },
-    { id: "COMPLETED", label: "Ready" },
-  ]
+  const stages = BOOKING_STAGES
 
   const currentStageIndex = useMemo(() => {
-    if (!booking) return 0
-    const s = booking.status
-    if (s === "PENDING" || s === "CONFIRMED") return 0
-    if (s === "CHECKED_IN") return 1
-    if (s === "IN_SERVICE") return 3
-    if (s === "SERVICE_COMPLETED" || s === "AWAITING_HANDOVER" || s === "COMPLETED") return 4
-    if (s === "CANCELLED" || s === "NO_SHOW") return -1
-    return 2
-  }, [booking])
+    return getBookingStageIndex(booking?.status)
+  }, [booking?.status])
 
   if (isLoading) {
     return (
@@ -235,8 +222,8 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
   const bookingsListLabel = isCustomer ? "My Bookings" : "Bookings"
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-20 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <div className="flex items-center justify-between gap-4 pb-2">
         <Breadcrumbs
           items={[
             {
@@ -265,25 +252,18 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
         </button>
       </div>
 
-      {isCustomer ? (
-        <CustomerBookingDetailsView
-          booking={booking}
-          formattedDates={formattedDates}
-          currentStageIndex={currentStageIndex}
-          stages={stages}
-          onOpenCancelModal={() => setIsCancelModalOpen(true)}
-          onOpenRescheduleModal={() => setIsRescheduleModalOpen(true)}
-        />
-      ) : (
-        <ProviderBookingDetailsView
-          booking={booking}
-          formattedDates={formattedDates}
-          currentStageIndex={currentStageIndex}
-          onOpenCancelModal={() => setIsCancelModalOpen(true)}
-          onAdvanceStatus={handleAdvanceStatus}
-          isAdvancingStatus={isAdvancingStatus}
-        />
-      )}
+      <UnifiedBookingDetailsView
+        booking={booking}
+        formattedDates={formattedDates}
+        currentStageIndex={currentStageIndex}
+        stages={stages}
+        onOpenCancelModal={() => setIsCancelModalOpen(true)}
+        onOpenRescheduleModal={() => setIsRescheduleModalOpen(true)}
+        onAdvanceStatus={handleAdvanceStatus}
+        isAdvancingStatus={isAdvancingStatus}
+        basePath={bookingsListPath}
+        userRole={currentRole}
+      />
 
       {isRescheduleModalOpen && booking && (
         <RescheduleModal
@@ -304,7 +284,7 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
             setBooking(updated)
             toast.success(`Booking #${booking.bookingNumber} has been cancelled cleanly.`)
           }}
-          onBookAgain={() => navigate("/book")}
+          onBookAgain={() => navigate("/bookings/new")}
           onBackToHome={() => navigate("/")}
         />
       )}

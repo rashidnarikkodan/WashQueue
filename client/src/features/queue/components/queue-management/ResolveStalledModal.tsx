@@ -1,4 +1,5 @@
 import { X } from "lucide-react"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 type ResolveTargetStatus = "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
 
@@ -39,20 +40,16 @@ export function ResolveStalledModal({
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              RECOVERY TARGET ACTION
-            </label>
-            <select
-              value={targetStatusInput}
-              onChange={(e) => onTargetStatusChange(e.target.value as ResolveTargetStatus)}
-              className="w-full px-4 py-3 rounded-2xl bg-muted border border-border text-foreground font-bold text-sm focus:outline-none focus:border-amber-500"
-            >
-              <option value="CHECKED_IN">Re-enter Waiting Queue (CHECKED_IN)</option>
-              <option value="IN_SERVICE">Resume Wash Service (IN_SERVICE)</option>
-              <option value="CANCELLED">Cancel Booking &amp; Process Refund</option>
-            </select>
-          </div>
+          <SelectInput
+            label="RECOVERY TARGET ACTION"
+            value={targetStatusInput}
+            onChange={(val) => onTargetStatusChange(val as ResolveTargetStatus)}
+            options={[
+              { label: "Re-enter Waiting Queue (CHECKED_IN)", value: "CHECKED_IN" },
+              { label: "Resume Wash Service (IN_SERVICE)", value: "IN_SERVICE" },
+              { label: "Cancel Booking & Process Refund", value: "CANCELLED" },
+            ]}
+          />
 
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">

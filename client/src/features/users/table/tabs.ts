@@ -16,10 +16,11 @@ export const userTabs: TabConfig[] = [
 
 export const ownerApprovalTabs: TabConfig[] = [
   { id: "all", label: "All Owners" },
-  { id: "customer", label: "Pending Verification" },
+  { id: "pending", label: "Pending Verification" },
   {
-    id: "owner",
+    id: "approved",
     label: "Approved Owners",
     activeColor: "border-[#ADC6FF] text-[#ADC6FF]",
   },
+  { id: "draft", label: "Draft Applications" },
 ]

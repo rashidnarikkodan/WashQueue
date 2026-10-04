@@ -10,6 +10,13 @@ const CheckInPage = lazy(() => import("@/features/queue/pages/CheckInPage"))
 const ManagerPreInspectionPage = lazy(() => import("@/features/queue/pages/PreInspectionPage"))
 const ManagerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostInspectionPage"))
 const AddEditStation = lazy(() => import("@/features/station/pages/AddEditStation"))
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
+const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/CustomerFeedbackPage"))
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const ManagerDashboard = lazy(() => import("@/features/manager/pages/ManagerDashboard"))
 
 export const managerRoutes = {
   path: APP_ROUTES.MANAGER.ROOT,
@@ -17,7 +24,7 @@ export const managerRoutes = {
   children: [
     {
       path: "dashboard",
-      element: <div>Manager Dashboard</div>,
+      element: <ManagerDashboard />,
     },
     {
       path: "check-in",
@@ -34,6 +41,14 @@ export const managerRoutes = {
     {
       path: "bookings/:id",
       element: <BookingDetails role="manager" />,
+    },
+    {
+      path: "issues",
+      element: <IssueManagement role="manager" />,
+    },
+    {
+      path: "issues/:id",
+      element: <IssueDetails role="manager" />,
     },
     {
       path: "bookings/:id/pre-inspection",
@@ -60,6 +75,10 @@ export const managerRoutes = {
       element: <ManagerQueuePage />,
     },
     {
+      path: "feedback",
+      element: <CustomerFeedbackPage />,
+    },
+    {
       path: "station",
       element: <StationDetail role="manager" />,
     },
@@ -70,6 +89,10 @@ export const managerRoutes = {
     {
       path: "station/:stationId/edit",
       element: <AddEditStation />,
+    },
+    {
+      path: "notifications",
+      element: <NotificationCenterPage />,
     },
   ],
 }

@@ -4,7 +4,7 @@ import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { PayoutStatus } from "@/modules/booking/domain/entities/Payout"
+import { PayoutStatus } from "@/modules/settlement/domain/entities/Payout"
 import {
   CreatePayoutParams,
   EnsurePayoutDestinationResult,
@@ -14,10 +14,6 @@ import {
   PayoutProviderResult,
 } from "@/core/application/interfaces/payout-provider.interface"
 
-// RazorpayX field limits enforced here (the API boundary) so no caller has to know them:
-// narration <=30 chars, letters/digits/space only; reference_id <=40 chars; the
-// X-Payout-Idempotency header <=36 chars; both restricted to letters/digits/hyphen/underscore/space;
-// contact/bank_account names 3-50 / 3-120 chars, can't end in a character other than a letter/digit/".".
 function sanitizeNarration(narration: string): string {
   const cleaned = narration.replace(/[^a-zA-Z0-9 ]/g, "").trim()
   return (cleaned || "Settlement payout").slice(0, 30)

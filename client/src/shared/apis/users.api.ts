@@ -43,43 +43,49 @@ interface UsersApiResponse {
   }
 }
 
-const toUser = (u?: UserApiPayload): User => ({
-  id: u?.id ?? u?._id ?? "",
-  name: u?.name ?? "",
-  email: u?.email ?? "",
-  role: u?.role ?? "customer",
-  phone: u?.phone,
-  isBlocked: u?.isBlocked ?? false,
-  isVerified: u?.isVerified ?? false,
-  bookmarks: u?.bookmarks ?? [],
-  createdAt: u?.createdAt ?? "",
-  updatedAt: u?.updatedAt ?? "",
-  authProvider: u?.authProvider,
-  lastLoginAt: u?.lastLoginAt,
-  onboardingStep: u?.onboardingStep,
-  rejectionReason: u?.rejectionReason,
-  onboardingDetails:
-    u?.onboardingDetails ??
-    (u?.legalFullName || u?.businessName || u?.idProofUrl
-      ? {
-          fullName: u?.legalFullName,
-          businessName: u?.businessName,
-          gstNumber: u?.gstNumber,
-          phone: u?.phone,
-          whatsapp: u?.whatsapp,
-          idProofType: u?.idProofType,
-          idProofUrl: u?.idProofUrl,
-          businessLicenseUrl: u?.businessLicenseUrl,
-          gstCertificateUrl: u?.gstCertificateUrl,
-          accountHolderName: u?.accountHolderName,
-          accountNumber: u?.accountNumber,
-          bankName: u?.bankName,
-          bankProofUrl: u?.bankProofUrl,
-          ifscCode: u?.ifscCode,
-          rejectionReason: u?.rejectionReason,
-        }
-      : undefined),
-})
+const toUser = (u?: UserApiPayload): User => {
+  if (!u) throw new Error("User payload is missing")
+  const id = u.id || u._id
+  if (!id) throw new Error("User payload missing ID")
+
+  return {
+    id,
+    name: u.name ?? "",
+    email: u.email ?? "",
+    role: u.role ?? "customer",
+    phone: u.phone,
+    isBlocked: typeof u.isBlocked === "boolean" ? u.isBlocked : false,
+    isVerified: typeof u.isVerified === "boolean" ? u.isVerified : false,
+    bookmarks: Array.isArray(u.bookmarks) ? u.bookmarks : [],
+    createdAt: u.createdAt ?? new Date().toISOString(),
+    updatedAt: u.updatedAt ?? new Date().toISOString(),
+    authProvider: u.authProvider,
+    lastLoginAt: u.lastLoginAt,
+    onboardingStep: u.onboardingStep,
+    rejectionReason: u.rejectionReason,
+    onboardingDetails:
+      u.onboardingDetails ??
+      (u.legalFullName || u.businessName || u.idProofUrl
+        ? {
+            fullName: u.legalFullName,
+            businessName: u.businessName,
+            gstNumber: u.gstNumber,
+            phone: u.phone,
+            whatsapp: u.whatsapp,
+            idProofType: u.idProofType,
+            idProofUrl: u.idProofUrl,
+            businessLicenseUrl: u.businessLicenseUrl,
+            gstCertificateUrl: u.gstCertificateUrl,
+            accountHolderName: u.accountHolderName,
+            accountNumber: u.accountNumber,
+            bankName: u.bankName,
+            bankProofUrl: u.bankProofUrl,
+            ifscCode: u.ifscCode,
+            rejectionReason: u.rejectionReason,
+          }
+        : undefined),
+  }
+}
 
 export const usersApi = {
   getUsers: async (filters: GetUsersFilters): Promise<GetUsersResponse> => {
@@ -93,6 +99,12 @@ export const usersApi = {
 
       if (typeof filters.isBlocked === "boolean") {
         params.isBlocked = filters.isBlocked ? "true" : "false"
+      }
+      if (typeof filters.isVerified === "boolean") {
+        params.isVerified = filters.isVerified ? "true" : "false"
+      }
+      if (filters.approvalStatus && filters.approvalStatus !== "all") {
+        params.approvalStatus = filters.approvalStatus
       }
 
       if (filters.sortBy) params.sortBy = filters.sortBy

@@ -1,4 +1,4 @@
-import { RoleType } from "@/common/constants/role.constants"
+import type { RoleType } from "@/common/constants/role.constants"
 import { AuthProvider, AUTH_PROVIDER } from "@/common/constants/authProvider"
 
 export interface UserProps {

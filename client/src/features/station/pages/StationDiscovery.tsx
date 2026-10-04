@@ -13,7 +13,6 @@ import {
   Car,
   Sparkles,
   ArrowUpDown,
-  ChevronDown,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/station.store"
@@ -22,6 +21,7 @@ import { StationFilterModal } from "../components/station-discovery/StationFilte
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
 import LocationAutocomplete from "../components/station-discovery/LocationAutocomplete"
 import { DEFAULT_FILTERS, type FilterOptions, type Station } from "@/features/station/types"
+import SelectInput from "@/shared/components/form/SelectInput"
 import { useDebounce } from "@/shared/hooks/useDebounce"
 import Pagination from "@/shared/components/ui/Pagination"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -208,26 +208,25 @@ const StationDiscovery = () => {
             )}
           </button>
 
-          <div className="relative flex items-center shrink-0">
-            <ArrowUpDown className="w-4 h-4 text-primary absolute left-3.5 pointer-events-none" />
-            <select
+          <div className="w-52 shrink-0">
+            <SelectInput
               value={filters.sortBy}
-              onChange={(e) =>
+              leftIcon={<ArrowUpDown className="w-4 h-4 text-primary" />}
+              onChange={(val) =>
                 setFilters((prev) => ({
                   ...prev,
-                  sortBy: e.target.value as FilterOptions["sortBy"],
+                  sortBy: val as FilterOptions["sortBy"],
                 }))
               }
-              className="pl-9 pr-8 py-2.5 rounded-full bg-card border border-border text-foreground text-xs sm:text-sm font-semibold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer transition-all shadow-sm"
-            >
-              <option value="RECOMMENDED">Sort: Recommended</option>
-              <option value="DISTANCE">Sort: Nearest First</option>
-              <option value="RATING">Sort: Highest Rated</option>
-              <option value="WAIT_TIME">Sort: Fastest Service</option>
-              <option value="PRICE_LOW_TO_HIGH">Sort: Price Low to High</option>
-              <option value="PRICE_HIGH_TO_LOW">Sort: Price High to Low</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-3 pointer-events-none" />
+              options={[
+                { label: "Sort: Recommended", value: "RECOMMENDED" },
+                { label: "Sort: Nearest First", value: "DISTANCE" },
+                { label: "Sort: Highest Rated", value: "RATING" },
+                { label: "Sort: Fastest Service", value: "WAIT_TIME" },
+                { label: "Sort: Price Low to High", value: "PRICE_LOW_TO_HIGH" },
+                { label: "Sort: Price High to Low", value: "PRICE_HIGH_TO_LOW" },
+              ]}
+            />
           </div>
 
           <button

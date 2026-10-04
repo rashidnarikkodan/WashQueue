@@ -1,15 +1,6 @@
 import { BookingStatus } from "./Booking"
 
-export interface BookingStatusLogProps {
-  id: string
-  bookingId: string
-  fromStatus: BookingStatus | null
-  toStatus: BookingStatus
-  changedBy: string
-  reason?: string
-  notes?: string
-  createdAt: Date
-}
+import { BookingStatusLogProps } from "../types/booking.types"
 
 export class BookingStatusLog {
   constructor(private readonly props: BookingStatusLogProps) {}

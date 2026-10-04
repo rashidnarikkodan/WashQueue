@@ -52,12 +52,12 @@ export class StationMapper implements IMapper<Station, IStation> {
       })),
 
       slotConfig: {
-        bays: raw.slotConfig?.bays ?? 0,
-        windowDurationMins: raw.slotConfig?.windowDurationMins ?? 0,
-        capacityPerWindow: raw.slotConfig?.capacityPerWindow ?? 0,
+        bays: Math.max(1, raw.slotConfig?.bays || 2),
+        windowDurationMins: Math.max(5, raw.slotConfig?.windowDurationMins || 30),
+        capacityPerWindow: Math.max(1, raw.slotConfig?.capacityPerWindow || 1),
         walkInReservedSlots: raw.slotConfig?.walkInReservedSlots ?? 0,
-        maxAdvanceBookingDays: raw.slotConfig?.maxAdvanceBookingDays ?? 0,
-        allowWalkIns: raw.slotConfig?.allowWalkIns ?? false,
+        maxAdvanceBookingDays: Math.max(1, raw.slotConfig?.maxAdvanceBookingDays || 7),
+        allowWalkIns: raw.slotConfig?.allowWalkIns ?? true,
       },
 
       amenities: raw.amenities ?? [],

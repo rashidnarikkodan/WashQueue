@@ -6,8 +6,21 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { useAuthStore } from "./features/auth/store/auth.store"
 import { useEffect } from "react"
 import { authApi } from "./shared/apis/auth.api"
+import { RateExperienceModal } from "./features/review/components/RateExperienceModal"
+import { useReviewSocketListener } from "./features/review/hooks/useReviewSocketListener"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
+function AppContent() {
+  useReviewSocketListener()
+
+  return (
+    <>
+      <RouterProvider router={router} />
+      <RateExperienceModal />
+    </>
+  )
+}
 
 function App() {
   useEffect(() => {
@@ -24,7 +37,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <AppContent />
         <Toaster
           position="top-right"
           theme="system"

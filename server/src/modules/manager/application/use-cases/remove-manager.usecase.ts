@@ -43,6 +43,7 @@ export class RemoveManagerUseCase implements IRemoveManagerUseCase {
       if (user && user.role === ROLE.MANAGER) {
         await this.userRepository.updateRole(managerUserId, ROLE.CUSTOMER)
       }
+      await this.ownerRepository.updateIsManager(managerUserId, false)
     }
   }
 }

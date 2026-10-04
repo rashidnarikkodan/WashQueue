@@ -15,6 +15,8 @@ export interface LoadBookingsParams {
   limit?: number
   userName?: string
   userPhone?: string
+  startDate?: string
+  endDate?: string
   /** Forces the result to be scoped strictly to the caller's own userId, regardless of role. */
   mine?: boolean
 }
@@ -98,6 +100,13 @@ export const useBookingStore = create<BookingStore>((set) => ({
         apiParams.mine = true
       }
 
+      if (opts.startDate) {
+        apiParams.startDate = opts.startDate
+      }
+
+      if (opts.endDate) {
+        apiParams.endDate = opts.endDate
+      }
       if (q && q.trim()) {
         apiParams.q = q.trim()
       }

@@ -9,6 +9,7 @@ import {
   subscribeToStation,
   unsubscribeFromStation,
 } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
 import { QueuePageHeader } from "@/features/queue/components/queue-management/QueuePageHeader"
 import { KpiCardsGrid } from "@/features/queue/components/queue-management/KpiCardsGrid"
 import { BookingQueuePanel } from "@/features/queue/components/queue-management/BookingQueuePanel"
@@ -17,6 +18,7 @@ import { StallBookingModal } from "@/features/queue/components/queue-management/
 import { ResolveStalledModal } from "@/features/queue/components/queue-management/ResolveStalledModal"
 import type { LiveQueueData, QueueFilter } from "@/features/queue/components/queue-management/types"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
+import Breadcrumbs from "@/shared/components/ui/Breadcrumbs"
 
 const isActiveQueueStatus = (status: string) => {
   return (
@@ -180,22 +182,22 @@ export default function ManagerQueuePage() {
     }
 
     const realTimeEvents = [
-      "QUEUE_UPDATED",
-      "QUEUE_POSITION_CHANGED",
-      "CHECKIN_SUCCESS",
-      "BOOKING_CHECKED_IN",
-      "WASH_STARTED",
-      "SERVICE_STARTED",
-      "WASH_COMPLETED",
-      "SERVICE_COMPLETED",
-      "POST_INSPECTION_COMPLETED",
-      "HANDOVER_READY",
-      "BOOKING_COMPLETED",
-      "BOOKING_CREATED",
-      "BOOKING_CANCELLED",
-      "BOOKING_NO_SHOW",
-      "BOOKING_STALLED",
-      "REFUND_COMPLETED",
+      SOCKET_EVENTS.QUEUE_UPDATED,
+      SOCKET_EVENTS.QUEUE_POSITION_CHANGED,
+      SOCKET_EVENTS.CHECKIN_SUCCESS,
+      SOCKET_EVENTS.BOOKING_CHECKED_IN,
+      SOCKET_EVENTS.WASH_STARTED,
+      SOCKET_EVENTS.SERVICE_STARTED,
+      SOCKET_EVENTS.WASH_COMPLETED,
+      SOCKET_EVENTS.SERVICE_COMPLETED,
+      SOCKET_EVENTS.POST_INSPECTION_COMPLETED,
+      SOCKET_EVENTS.HANDOVER_READY,
+      SOCKET_EVENTS.BOOKING_COMPLETED,
+      SOCKET_EVENTS.BOOKING_CREATED,
+      SOCKET_EVENTS.BOOKING_CANCELLED,
+      SOCKET_EVENTS.BOOKING_NO_SHOW,
+      SOCKET_EVENTS.BOOKING_STALLED,
+      SOCKET_EVENTS.REFUND_COMPLETED,
     ]
 
     realTimeEvents.forEach((evt) => socket.on(evt, handleRealTimeUpdate))
@@ -437,7 +439,14 @@ export default function ManagerQueuePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+      <Breadcrumbs
+        items={[
+          { label: basePath === "/owner" ? "Owner" : "Manager", path: `${basePath}/dashboard` },
+          { label: "Queue Management" },
+        ]}
+      />
+
       <QueuePageHeader
         stationName={stationInfo?.stationName || "Your Station"}
         currentDateFormatted={currentDateFormatted}

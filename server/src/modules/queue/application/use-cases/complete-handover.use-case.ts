@@ -15,7 +15,7 @@ import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositor
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { ICompleteHandoverUseCase } from "../interfaces/queue-usecases.interface"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
-import { ICreateSettlementUseCase } from "@/modules/booking/application/interfaces/settlement.usecases"
+import { ICreateSettlementUseCase } from "@/modules/settlement/settlement.module"
 import logger from "@/configs/logger.config"
 
 export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
@@ -123,7 +123,19 @@ export class CompleteHandoverUseCase implements ICompleteHandoverUseCase {
 
     await this.redisQueueService.updateQueueStatus(domainBooking)
 
-    await this.notificationService.notify("WASH_COMPLETED", domainBooking)
+    await this.notificationService.notify("HANDOVER_COMPLETED", domainBooking, {
+      stationName: station.getProps().name,
+      stationImage: station.getProps().images?.[0]?.url,
+      slotDate: domainBooking.scheduling?.windowStart
+        ? new Date(domainBooking.scheduling.windowStart).toLocaleDateString()
+        : undefined,
+      slotStartTime: domainBooking.scheduling?.windowStart
+        ? new Date(domainBooking.scheduling.windowStart).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : undefined,
+    })
 
     const bookingDTO = BookingDTOMapper.toDTO(domainBooking)
 

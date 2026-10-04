@@ -1,4 +1,4 @@
-import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongodb/mongoose-transaction.runner"
 import { StationMongoRepository } from "./infrastructure/repositories/station.mongo.repository"
 import { StationPricingMongoRepository } from "./infrastructure/repositories/station-pricing.mongo.repository"
 import { ExtraServiceMongoRepository } from "./infrastructure/repositories/extra-service.mongo.repository"
@@ -31,8 +31,8 @@ import { GetStationFilterOptionsUseCase } from "./application/use-cases/get-stat
 import { VehicleCategoryMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-category.mongo.repository"
 import { VehicleClassMongoRepository } from "../vehicle-catelog/infrastructure/repositories/vehicle-class.mongo.repository"
 import { RedisCacheService } from "@/infrastructure/cache/redis-cache.service"
-
 import { UserRepository } from "../user/infrastructure/repository/user.mongo.repository"
+import { notificationDispatcherService } from "../notification/notification.module"
 
 export const stationRepository = new StationMongoRepository()
 export const ownerRepository = new OwnerMongoRepository()
@@ -110,12 +110,17 @@ const getStationUseCase = new GetStationUseCase(
   extraServiceRepository
 )
 const getStationsUseCase = new GetStationsUseCase(stationRepository, userRepository)
+
 const submitStationUseCase = new SubmitStationUseCase(
   stationRepository,
   ownerRepository,
-  stationPricingRepository
+  stationPricingRepository,
+  notificationDispatcherService
 )
-const reviewStationUseCase = new ReviewStationUseCase(stationRepository)
+const reviewStationUseCase = new ReviewStationUseCase(
+  stationRepository,
+  notificationDispatcherService
+)
 const deleteStationUseCase = new DeleteStationUseCase(
   stationRepository,
   stationPricingRepository,
@@ -124,7 +129,8 @@ const deleteStationUseCase = new DeleteStationUseCase(
 )
 const toggleActiveStationUseCase = new ToggleActiveStationUseCase(
   stationRepository,
-  ownerRepository
+  ownerRepository,
+  notificationDispatcherService
 )
 
 const vehicleCategoryRepository = new VehicleCategoryMongoRepository()

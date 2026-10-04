@@ -2,7 +2,7 @@ import { IMediaStorage, UploadedFile } from "@/core/application/interfaces/media
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 
-export type MulterFileMap = Record<string, Express.Multer.File[]>
+import { MulterFileMap } from "../types/media-upload.types"
 
 export class MediaUploadService {
   constructor(private readonly mediaStorage: IMediaStorage) {}

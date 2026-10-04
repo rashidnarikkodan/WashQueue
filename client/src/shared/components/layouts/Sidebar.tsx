@@ -97,7 +97,7 @@ const Sidebar = ({ items }: Props) => {
           left-0
           top-[96px]
           [@media(max-height:800px)]:top-[80px]
-          z-50
+          z-40
           flex
           h-auto
           max-h-[calc(100vh-120px)]
@@ -163,12 +163,12 @@ const Sidebar = ({ items }: Props) => {
                   px-4
                   md:px-3
                   md:group-hover:px-4
+                  md:group-focus:text-black
                   transition-all
                   duration-200
                   border
                   focus:outline-none
-                  focus-visible:ring-2
-                  focus-visible:ring-primary
+                  focus-visible:border-primary
 
                   ${
                     isActive
@@ -184,19 +184,20 @@ const Sidebar = ({ items }: Props) => {
 
                 <span
                   className="
-                    whitespace-nowrap
-                    text-sm
-                    font-semibold
-                    ml-3
-                    md:ml-0
-                    md:max-w-0
-                    md:opacity-0
-                    overflow-hidden
-                    transition-all
-                    duration-200
-                    md:group-hover:max-w-xs
-                    md:group-hover:opacity-100
-                    md:group-hover:ml-4
+                      whitespace-nowrap
+                      text-sm
+                      font-semibold
+                      ml-3
+                      md:ml-0
+                      md:max-w-0
+                      md:opacity-0
+                      overflow-hidden
+                      transition-all
+                      duration-200
+
+                      md:group-hover:max-w-xs
+                      md:group-hover:opacity-100
+                      md:group-hover:ml-4
                   "
                 >
                   {item.name}

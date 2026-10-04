@@ -1,29 +1,7 @@
+import type { OnboardingStatus } from "../types/owner.types"
+export * from "../types/owner.types"
 import { api } from "../config/axios"
 import { API_ROUTES } from "../constants/api.const"
-
-export interface OnboardingDetails {
-  fullName?: string
-  phone?: string
-  whatsapp?: string
-  businessName?: string
-  gstNumber?: string
-  idProofType?: string
-  idProofUrl?: string
-  businessLicenseUrl?: string
-  gstCertificateUrl?: string
-  accountHolderName?: string
-  bankName?: string
-  accountNumber?: string
-  ifscCode?: string
-  bankProofUrl?: string
-  rejectionReason?: string
-}
-
-export interface OnboardingStatus {
-  step: number
-  details: OnboardingDetails
-  isSubmitted: boolean
-}
 
 export const ownerApi = {
   getOnboardingStatus: async (): Promise<OnboardingStatus> => {

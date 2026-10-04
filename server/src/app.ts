@@ -15,7 +15,13 @@ import bookingRouter from "@/bootstrap/module-composition"
 import queueRouter from "@/modules/queue/queue.module"
 import paymentRouter, { invoiceRouter } from "@/modules/payment/payment.module"
 import walletRouter from "@/modules/wallet/wallet.module"
-import { settlementRouter } from "@/modules/booking/booking.module"
+import { settlementRouter } from "@/modules/settlement/settlement.module"
+import { notificationRouter } from "@/modules/notification/notification.module"
+import reviewRouter from "@/modules/review/review.module"
+import analyticsRouter from "@/modules/analytics/analytics.module"
+import issueRouter from "@/modules/issue/issue.module"
+import aiRouter from "@/modules/artificial-intelligence/ai.module"
+import healthRouter from "@/modules/health/health.module"
 import { API_ROUTES } from "@/common/constants/route.constants"
 
 const app = express()
@@ -33,6 +39,10 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }))
 app.use(cookieParser())
 app.use(loggerMiddleware)
 
+// Direct root health endpoint for infrastructure load balancers
+app.use("/health", healthRouter)
+
+app.use(API_ROUTES.HEALTH.ROOT, healthRouter)
 app.use(API_ROUTES.AUTH.ROOT, authRouter)
 app.use(API_ROUTES.USERS.ROOT, userRouter)
 app.use(API_ROUTES.OWNER.ROOT, ownerRouter)
@@ -40,12 +50,17 @@ app.use(API_ROUTES.VEHICLE_CATALOG.ROOT, vehicleCatelogRouter)
 app.use(API_ROUTES.STATIONS.ROOT, stationRouter)
 app.use(API_ROUTES.VEHICLES.ROOT, vehicleRouter)
 app.use(API_ROUTES.MANAGERS.ROOT, managerRouter)
+app.use(API_ROUTES.BOOKINGS.ROOT, queueRouter)
 app.use(API_ROUTES.BOOKINGS.ROOT, bookingRouter)
 app.use(API_ROUTES.BOOKINGS.ROOT, invoiceRouter)
-app.use(API_ROUTES.BOOKINGS.ROOT, queueRouter)
 app.use(API_ROUTES.PAYMENT.ROOT, paymentRouter)
 app.use(API_ROUTES.WALLET.ROOT, walletRouter)
 app.use(API_ROUTES.SETTLEMENTS.ROOT, settlementRouter)
+app.use(API_ROUTES.NOTIFICATIONS.ROOT, notificationRouter)
+app.use(API_ROUTES.REVIEWS.ROOT, reviewRouter)
+app.use(API_ROUTES.ANALYTICS.ROOT, analyticsRouter)
+app.use(API_ROUTES.ISSUES.ROOT, issueRouter)
+app.use(API_ROUTES.AI.ROOT, aiRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorMiddleware)

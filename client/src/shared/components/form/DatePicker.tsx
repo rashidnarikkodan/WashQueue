@@ -181,7 +181,7 @@ export default function DatePicker({
       : ""
 
   return (
-    <div className={`flex flex-col gap-1.5 w-full relative ${className}`} ref={containerRef}>
+    <div className={`flex flex-col gap-1.5 w-full relative z-40 ${className}`} ref={containerRef}>
       {label && (
         <label
           htmlFor={id}
@@ -226,7 +226,7 @@ export default function DatePicker({
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 z-50 w-72 sm:w-80 p-4 rounded-2xl bg-card border border-border shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 text-card-foreground">
+          <div className="absolute top-full left-0 mt-2 z-[100] w-72 sm:w-80 p-4 rounded-2xl bg-card border border-border shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 text-card-foreground">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <button
                 type="button"

@@ -230,6 +230,7 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
           const configToSave = new SlotConfig({
             id: existingConfig?.id || randomUUID(),
             stationId,
+            bays: updates.slotConfig.bays,
             windowDurationMins: updates.slotConfig.windowDurationMins,
             capacityPerWindow: updates.slotConfig.capacityPerWindow,
             walkInReservedSlots: updates.slotConfig.walkInReservedSlots,

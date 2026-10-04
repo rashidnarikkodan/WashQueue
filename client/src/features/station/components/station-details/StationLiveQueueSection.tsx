@@ -1,38 +1,12 @@
 import { useState, useEffect, useCallback } from "react"
-import { Sparkles, Car, AlertCircle, RefreshCw } from "lucide-react"
+import { Sparkles, Car, AlertCircle, RefreshCw, Zap, CheckCircle2, Clock } from "lucide-react"
 import { stationApi } from "@/shared/apis/station.api"
 import { getSocketClient } from "@/shared/services/socket.client"
+import { SOCKET_EVENTS } from "@/shared/constants/socket.const"
+import type { PublicQueueData } from "@/features/station/types"
 
 interface StationLiveQueueSectionProps {
   stationId?: string
-}
-
-interface PublicQueueItem {
-  id: string
-  bookingNumber: string
-  position?: number
-  bayNumber?: number
-  vehicle: string
-  package: string
-  serviceType: string
-  status: string
-  serviceStartedAt?: string
-  estimatedWaitMinutes?: number
-  estimatedServiceStart?: string
-  isBayActive: boolean
-}
-
-interface PublicQueueData {
-  stationId: string
-  stationName: string
-  totalBays: number
-  activeServicesCount: number
-  availableBays: number
-  queueDepth: number
-  totalActiveAndWaiting: number
-  averageWashDurationMinutes: number
-  activeServices: PublicQueueItem[]
-  waitingQueue: PublicQueueItem[]
 }
 
 export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionProps) {
@@ -65,30 +39,30 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
     })
 
     const socket = getSocketClient()
-    socket.emit("join_station", { stationId })
+    socket.emit(SOCKET_EVENTS.JOIN_STATION, { stationId })
 
     const handleRealtimeQueueUpdate = () => {
       fetchLiveQueue()
     }
 
-    socket.on("QUEUE_UPDATED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
-    socket.on("SERVICE_STARTED", handleRealtimeQueueUpdate)
-    socket.on("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
-    socket.on("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.QUEUE_UPDATED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_CHECKED_IN, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.SERVICE_STARTED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.SERVICE_COMPLETED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_COMPLETED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_CANCELLED, handleRealtimeQueueUpdate)
+    socket.on(SOCKET_EVENTS.BOOKING_NO_SHOW, handleRealtimeQueueUpdate)
 
     return () => {
       ignore = true
-      socket.emit("leave_station", { stationId })
-      socket.off("QUEUE_UPDATED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_CHECKED_IN", handleRealtimeQueueUpdate)
-      socket.off("SERVICE_STARTED", handleRealtimeQueueUpdate)
-      socket.off("SERVICE_COMPLETED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_COMPLETED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_CANCELLED", handleRealtimeQueueUpdate)
-      socket.off("BOOKING_NO_SHOW", handleRealtimeQueueUpdate)
+      socket.emit(SOCKET_EVENTS.LEAVE_STATION, { stationId })
+      socket.off(SOCKET_EVENTS.QUEUE_UPDATED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_CHECKED_IN, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.SERVICE_STARTED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.SERVICE_COMPLETED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_COMPLETED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_CANCELLED, handleRealtimeQueueUpdate)
+      socket.off(SOCKET_EVENTS.BOOKING_NO_SHOW, handleRealtimeQueueUpdate)
     }
   }, [stationId, fetchLiveQueue])
 
@@ -151,21 +125,42 @@ export function StationLiveQueueSection({ stationId }: StationLiveQueueSectionPr
           <p className="text-xs text-destructive">{error}</p>
         </div>
       ) : totalLiveVehicles === 0 ? (
-        <div className="p-8 rounded-2xl border border-border bg-card/80 text-center space-y-3 backdrop-blur-md shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-success/10 border border-success/20 text-success flex items-center justify-center mx-auto">
-            <Sparkles size={22} />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-base font-bold text-foreground">All Washing Bays Available</h4>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              There are currently 0 vehicles waiting in queue. Drive in or book now for immediate
-              service across {totalBays} service bay{totalBays > 1 ? "s" : ""}.
-            </p>
-          </div>
-          <div className="pt-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success border border-success/20 text-xs font-bold">
-              ✓ 0 Min Estimated Wait Time
-            </span>
+        <div className="p-8 sm:p-10 rounded-3xl border border-border/80 bg-card/80 backdrop-blur-md shadow-lg text-center space-y-5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-success/5 via-transparent to-transparent pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-success/10 border border-success/20 text-success flex items-center justify-center shadow-inner relative">
+              <Sparkles className="w-8 h-8 animate-pulse text-success" />
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-success" />
+              </span>
+            </div>
+
+            <div className="space-y-1.5 max-w-md mx-auto">
+              <h4 className="text-lg font-bold text-foreground tracking-tight">
+                All Washing Bays Available
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                There are currently no vehicles waiting in queue. Drive in or book now for immediate
+                service across {totalBays} service bay{totalBays > 1 ? "s" : ""}.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-success/10 text-success border border-success/20 text-xs font-bold shadow-xs">
+                <Zap className="w-3.5 h-3.5" /> 0 Min Estimated Wait Time
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-card text-muted-foreground border border-border text-xs font-semibold shadow-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                {queueData?.availableBays ?? totalBays} / {totalBays} Bay{totalBays > 1 ? "s" : ""}{" "}
+                Open
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-card text-muted-foreground border border-border text-xs font-semibold shadow-xs">
+                <Clock className="w-3.5 h-3.5 text-primary" />~
+                {queueData?.averageWashDurationMinutes || 15}m Avg Duration
+              </span>
+            </div>
           </div>
         </div>
       ) : (

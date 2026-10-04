@@ -11,11 +11,9 @@ import { BookingDTOMapper } from "@/modules/booking/application/mappers/booking-
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 
-export interface ResolveStalledBookingInput {
-  bookingId: string
-  resolution: string
-  targetStatus?: "CHECKED_IN" | "IN_SERVICE" | "CANCELLED"
-}
+import { ResolveStalledBookingInput } from "../dtos/queue-operations.dto"
+
+export type { ResolveStalledBookingInput }
 
 export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCase {
   constructor(

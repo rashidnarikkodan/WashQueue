@@ -17,6 +17,13 @@ const OwnerPostInspectionPage = lazy(() => import("@/features/queue/pages/PostIn
 const OwnerFinancialRecords = lazy(
   () => import("@/features/settlement/pages/OwnerFinancialRecords")
 )
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
+const CustomerFeedbackPage = lazy(() => import("@/features/review/pages/CustomerFeedbackPage"))
+const OwnerAnalyticsPage = lazy(() => import("@/features/owner/pages/OwnerAnalyticsPage"))
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
 
 export const ownerRoutes = {
   path: APP_ROUTES.OWNER.ROOT,
@@ -67,6 +74,14 @@ export const ownerRoutes = {
       element: <BookingDetails role="owner" />,
     },
     {
+      path: "issues",
+      element: <IssueManagement role="owner" />,
+    },
+    {
+      path: "issues/:id",
+      element: <IssueDetails role="owner" />,
+    },
+    {
       path: "bookings/:id/pre-inspection",
       element: <OwnerPreInspectionPage />,
     },
@@ -96,15 +111,15 @@ export const ownerRoutes = {
     },
     {
       path: "analytics",
-      element: <>Analytics</>,
+      element: <OwnerAnalyticsPage />,
     },
     {
       path: "feedback",
-      element: <>Customer Feedback</>,
+      element: <CustomerFeedbackPage />,
     },
     {
       path: "notifications",
-      element: <>Notifications</>,
+      element: <NotificationCenterPage />,
     },
   ],
 }

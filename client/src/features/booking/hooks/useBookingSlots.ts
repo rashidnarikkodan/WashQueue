@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { stationApi } from "@/shared/apis/station.api"
 import type { Calender, Window } from "../types/booking.types"
-import type { TimeSlotOption } from "../components/TimeSlotSelectionStep"
+import type { TimeSlotOption } from "../components/creation/TimeSlotSelectionStep"
 
 interface UseBookingSlotsParams {
   stationId: string | null

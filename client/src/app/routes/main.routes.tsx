@@ -16,6 +16,14 @@ const Booking = lazy(() => import("@/features/booking/pages/Booking"))
 const BookingManagement = lazy(() => import("@/features/booking/pages/BookingList"))
 const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetails"))
 const WalletPage = lazy(() => import("@/features/wallet/pages/WalletPage"))
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const AIAssistantPage = lazy(
+  () => import("@/features/artificial-intelligence/pages/AIAssistantPage")
+)
 const ProtectedRoute = lazy(() => import("./ProtectedRoute"))
 
 const RootPathResolver = () => {
@@ -120,10 +128,42 @@ export const mainRoutes = {
       ),
     },
     {
+      path: "issues",
+      element: (
+        <ProtectedRoute>
+          <IssueManagement role="customer" />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "issues/:id",
+      element: (
+        <ProtectedRoute>
+          <IssueDetails role="customer" />
+        </ProtectedRoute>
+      ),
+    },
+    {
       path: "wallet",
       element: (
         <ProtectedRoute>
           <WalletPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "notifications",
+      element: (
+        <ProtectedRoute>
+          <NotificationCenterPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "ai-assistant",
+      element: (
+        <ProtectedRoute>
+          <AIAssistantPage />
         </ProtectedRoute>
       ),
     },

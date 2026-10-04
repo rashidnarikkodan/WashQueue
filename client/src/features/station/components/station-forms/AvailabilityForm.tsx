@@ -27,19 +27,32 @@ export default function AvailabilityForm({
 }: AvailabilityFormProps) {
   const [formData, setFormData] = useState<AvailabilityFormData>({
     operatingHours:
-      initialValues?.operatingHours ||
-      DEFAULT_DAYS.map((day) => ({
-        day,
-        open: "09:00",
-        close: "18:00",
-        isClosed: false,
-        breaks: [],
-      })),
-    bays: initialValues?.bays ?? 2,
-    windowDurationMins: initialValues?.windowDurationMins ?? 30,
-    capacityPerWindow: initialValues?.capacityPerWindow ?? 1,
-    walkInReservedSlots: initialValues?.walkInReservedSlots ?? 0,
-    maxAdvanceBookingDays: initialValues?.maxAdvanceBookingDays ?? 7,
+      initialValues?.operatingHours && initialValues.operatingHours.length > 0
+        ? initialValues.operatingHours
+        : DEFAULT_DAYS.map((day) => ({
+            day,
+            open: "09:00",
+            close: "18:00",
+            isClosed: false,
+            breaks: [],
+          })),
+    bays: initialValues?.bays && initialValues.bays > 0 ? Number(initialValues.bays) : 2,
+    windowDurationMins:
+      initialValues?.windowDurationMins && initialValues.windowDurationMins > 0
+        ? Number(initialValues.windowDurationMins)
+        : 30,
+    capacityPerWindow:
+      initialValues?.capacityPerWindow && initialValues.capacityPerWindow > 0
+        ? Number(initialValues.capacityPerWindow)
+        : 1,
+    walkInReservedSlots:
+      initialValues?.walkInReservedSlots !== undefined
+        ? Number(initialValues.walkInReservedSlots)
+        : 0,
+    maxAdvanceBookingDays:
+      initialValues?.maxAdvanceBookingDays && initialValues.maxAdvanceBookingDays > 0
+        ? Number(initialValues.maxAdvanceBookingDays)
+        : 7,
     allowWalkIns: initialValues?.allowWalkIns ?? true,
   })
 
@@ -51,6 +64,45 @@ export default function AvailabilityForm({
   const [newHolidayReason, setNewHolidayReason] = useState("")
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (initialValues) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        operatingHours:
+          initialValues.operatingHours && initialValues.operatingHours.length > 0
+            ? initialValues.operatingHours
+            : DEFAULT_DAYS.map((day) => ({
+                day,
+                open: "09:00",
+                close: "18:00",
+                isClosed: false,
+                breaks: [],
+              })),
+        bays: initialValues.bays && initialValues.bays > 0 ? Number(initialValues.bays) : 2,
+        windowDurationMins:
+          initialValues.windowDurationMins && initialValues.windowDurationMins > 0
+            ? Number(initialValues.windowDurationMins)
+            : 30,
+        capacityPerWindow:
+          initialValues.capacityPerWindow && initialValues.capacityPerWindow > 0
+            ? Number(initialValues.capacityPerWindow)
+            : 1,
+        walkInReservedSlots:
+          initialValues.walkInReservedSlots !== undefined
+            ? Number(initialValues.walkInReservedSlots)
+            : 0,
+        maxAdvanceBookingDays:
+          initialValues.maxAdvanceBookingDays && initialValues.maxAdvanceBookingDays > 0
+            ? Number(initialValues.maxAdvanceBookingDays)
+            : 7,
+        allowWalkIns: initialValues.allowWalkIns ?? true,
+      })
+      if (initialValues.holidays) {
+        setHolidays(initialValues.holidays)
+      }
+    }
+  }, [initialValues])
 
   useEffect(() => {
     if (applySameSchedule && formData.operatingHours.length > 0) {
@@ -386,11 +438,18 @@ export default function AvailabilityForm({
             label="NUMBER OF BAYS"
             type="number"
             placeholder="2"
-            value={formData.bays === 0 || (formData.bays as unknown) === "" ? "" : formData.bays}
+            value={
+              formData.bays === undefined ||
+              formData.bays === null ||
+              isNaN(formData.bays) ||
+              (formData.bays as unknown) === ""
+                ? ""
+                : formData.bays
+            }
             onChange={(e) =>
               handleFieldChange(
                 "bays",
-                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+                e.target.value === "" ? ("" as unknown as number) : Number(e.target.value)
               )
             }
             error={errors.bays}
@@ -400,14 +459,17 @@ export default function AvailabilityForm({
             type="number"
             placeholder="30"
             value={
-              formData.windowDurationMins === 0 || (formData.windowDurationMins as unknown) === ""
+              formData.windowDurationMins === undefined ||
+              formData.windowDurationMins === null ||
+              isNaN(formData.windowDurationMins) ||
+              (formData.windowDurationMins as unknown) === ""
                 ? ""
                 : formData.windowDurationMins
             }
             onChange={(e) =>
               handleFieldChange(
                 "windowDurationMins",
-                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+                e.target.value === "" ? ("" as unknown as number) : Number(e.target.value)
               )
             }
             error={errors.windowDurationMins}
@@ -415,16 +477,19 @@ export default function AvailabilityForm({
           <FormInput
             label="WALK-IN RESERVED SLOTS"
             type="number"
-            placeholder="1"
+            placeholder="0"
             value={
-              formData.walkInReservedSlots === 0 || (formData.walkInReservedSlots as unknown) === ""
+              formData.walkInReservedSlots === undefined ||
+              formData.walkInReservedSlots === null ||
+              isNaN(formData.walkInReservedSlots) ||
+              (formData.walkInReservedSlots as unknown) === ""
                 ? ""
                 : formData.walkInReservedSlots
             }
             onChange={(e) =>
               handleFieldChange(
                 "walkInReservedSlots",
-                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+                e.target.value === "" ? ("" as unknown as number) : Number(e.target.value)
               )
             }
             error={errors.walkInReservedSlots}
@@ -435,16 +500,19 @@ export default function AvailabilityForm({
           <FormInput
             label="CAPACITY PER WINDOW"
             type="number"
-            placeholder="2"
+            placeholder="1"
             value={
-              formData.capacityPerWindow === 0 || (formData.capacityPerWindow as unknown) === ""
+              formData.capacityPerWindow === undefined ||
+              formData.capacityPerWindow === null ||
+              isNaN(formData.capacityPerWindow) ||
+              (formData.capacityPerWindow as unknown) === ""
                 ? ""
                 : formData.capacityPerWindow
             }
             onChange={(e) =>
               handleFieldChange(
                 "capacityPerWindow",
-                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+                e.target.value === "" ? ("" as unknown as number) : Number(e.target.value)
               )
             }
             error={errors.capacityPerWindow}
@@ -454,7 +522,9 @@ export default function AvailabilityForm({
             type="number"
             placeholder="7"
             value={
-              formData.maxAdvanceBookingDays === 0 ||
+              formData.maxAdvanceBookingDays === undefined ||
+              formData.maxAdvanceBookingDays === null ||
+              isNaN(formData.maxAdvanceBookingDays) ||
               (formData.maxAdvanceBookingDays as unknown) === ""
                 ? ""
                 : formData.maxAdvanceBookingDays
@@ -462,7 +532,7 @@ export default function AvailabilityForm({
             onChange={(e) =>
               handleFieldChange(
                 "maxAdvanceBookingDays",
-                e.target.value === "" ? ("" as unknown as number) : parseInt(e.target.value)
+                e.target.value === "" ? ("" as unknown as number) : Number(e.target.value)
               )
             }
             error={errors.maxAdvanceBookingDays}

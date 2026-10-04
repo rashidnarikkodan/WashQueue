@@ -1,4 +1,4 @@
-import { PayoutStatus } from "@/modules/booking/domain/entities/Payout"
+import { PayoutStatus } from "@/modules/settlement/domain/entities/Payout"
 
 export class PayoutProviderError extends Error {
   constructor(

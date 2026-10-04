@@ -272,7 +272,7 @@ export default function OwnerFinancialRecords() {
       header: "Payout Ref",
       cell: (s) => (
         <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-30 block">
-          {s.payoutId || "—"}
+          {s.razorpayPayoutId || s.payoutId || "—"}
         </span>
       ),
     },
@@ -295,33 +295,38 @@ export default function OwnerFinancialRecords() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       {/* Breadcrumb & Header */}
       <Breadcrumbs
         items={[
-          { label: "Dashboard", path: APP_ROUTES.OWNER.DASHBOARD },
-          { label: "Financial Records & Settlements" },
+          { label: "Owner", path: APP_ROUTES.OWNER.DASHBOARD },
+          { label: "Financial Records" },
         ]}
       />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            Financial Records & Payouts
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Financial Records &amp; Payouts
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Monitor gross booking revenues, platform commission deductions, and bank settlements.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+            Monitor gross booking revenues, platform commission deductions, and bank settlements
           </p>
         </div>
 
-        <button
-          onClick={handleRefresh}
-          className="flex items-center gap-2 bg-muted hover:opacity-90 text-muted-foreground font-semibold px-4.5 py-2.5 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-md select-none cursor-pointer border border-border"
-          title="Refresh Data"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            title="Refresh Data"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary" : "text-primary"}`}
+            />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats HUD Cards */}

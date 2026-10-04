@@ -10,12 +10,15 @@ import { startProcessPendingSettlementsJob } from "./infrastructure/jobs/process
 
 import { createServer } from "http"
 import { SocketServerService } from "./infrastructure/websocket/socket-server.service"
+import { initializeQdrant } from "./infrastructure/database/qdrant/connect"
 
 async function startServer() {
   try {
     await connectDB()
 
     await redis.ping()
+
+    await initializeQdrant()
 
     startReservationCleanupJob()
     startNoShowCleanupJob()

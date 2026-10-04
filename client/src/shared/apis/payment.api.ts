@@ -1,51 +1,14 @@
+import type {
+  CreateOrderInput,
+  CreateOrderResponse,
+  VerifyPaymentInput,
+  VerifyPaymentResponse,
+} from "../types/payment.types"
+export * from "../types/payment.types"
 import { api } from "@/shared/config/axios"
 import { API_ROUTES } from "@/shared/constants/api.const"
 import { handleApiError } from "@/shared/utils/handleApiError"
 import type { BookingResponse } from "@/shared/apis/booking.api"
-import type { PaymentMethod } from "@/shared/constants/payment.constants"
-
-export interface CreateOrderInput {
-  amount: number
-  currency?: string
-  receipt?: string
-  stationId?: string
-  vehicleId?: string
-  timeWindowId?: string
-  serviceType?: "HALF" | "FULL"
-  extraServiceIds?: string[]
-  paymentMethod?: Extract<PaymentMethod, "ONLINE" | "PAY_AT_STATION">
-  useWallet?: boolean
-}
-
-export interface CreateOrderResponse {
-  success?: boolean
-  order_id: string
-  id: string
-  amount: number
-  currency: string
-  receipt?: string
-  reservation_id?: string
-  wallet_amount?: number
-  expires_at?: string
-  code?: string
-  message?: string
-}
-
-export interface VerifyPaymentInput {
-  razorpay_order_id: string
-  razorpay_payment_id: string
-  razorpay_signature: string
-  paymentMethod?: PaymentMethod
-}
-
-export interface VerifyPaymentResponse {
-  success: boolean
-  message: string
-  order_id?: string
-  payment_id?: string
-  booking?: BookingResponse
-  code?: string
-}
 
 export const paymentApi = {
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResponse> {
@@ -91,7 +54,7 @@ export const paymentApi = {
     try {
       await api.post(`/payment/reservations/${reservationId}/cancel`)
     } catch (error) {
-      console.warn("Failed to cancel reservation on server:", error)
+      handleApiError(error, "Failed to cancel reservation on server")
     }
   },
 }

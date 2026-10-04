@@ -1,6 +1,7 @@
 export interface SlotConfigProps {
   id: string
   stationId: string
+  bays?: number
   windowDurationMins: number
   capacityPerWindow: number
   walkInReservedSlots: number
@@ -19,6 +20,10 @@ export class SlotConfig {
 
   get stationId() {
     return this.props.stationId
+  }
+
+  get bays() {
+    return this.props.bays
   }
 
   get windowDurationMins() {

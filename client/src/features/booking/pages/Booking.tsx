@@ -1,13 +1,15 @@
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import AddVehicleModal from "@/features/vehicle/components/AddVehicleModal"
-import AuthRequiredModal from "@/shared/components/ui/AuthRequiredModal"
-import VehicleSelectionStep from "../components/VehicleSelectionStep"
-import ServiceSelectionStep from "../components/ServiceSelectionStep"
-import TimeSlotSelectionStep from "../components/TimeSlotSelectionStep"
-import BookingSummaryCard from "../components/BookingSummaryCard"
-import BookingResultModal from "../components/BookingResultModal"
-import PaymentModal from "../components/PaymentModal"
+import AuthRequiredModal from "@/shared/components/modals/AuthRequiredModal"
+import {
+  VehicleSelectionStep,
+  ServiceSelectionStep,
+  TimeSlotSelectionStep,
+  BookingSummaryCard,
+  BookingResultModal,
+  PaymentModal,
+} from "../components"
 import { useBookingFlow } from "../hooks/useBookingFlow"
 
 export default function Booking() {

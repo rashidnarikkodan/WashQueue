@@ -1,7 +1,7 @@
 import { ISavePreInspectionAndCheckInUseCase } from "../interfaces/queue-usecases.interface"
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { BookingStatus, InspectionPhoto } from "@/modules/booking/domain/entities/Booking"
+import { BookingStatus } from "@/modules/booking/domain/entities/Booking"
 import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
@@ -12,11 +12,9 @@ import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-r
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 
-export interface SavePreInspectionInput {
-  bookingId: string
-  photos?: InspectionPhoto[]
-  notes?: string
-}
+import { SavePreInspectionInput } from "../dtos/queue-operations.dto"
+
+export type { SavePreInspectionInput }
 
 const REQUIRED_INSPECTION_PHOTO_COUNT = 4
 

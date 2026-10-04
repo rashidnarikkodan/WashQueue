@@ -1,6 +1,5 @@
 import { PaymentMethod, PricingSnapshot, SettlementSnapshot } from "../entities/Booking"
-
-import { calculatePlatformCommission } from "@/configs/commission.config"
+import { calculatePlatformCommission } from "./CommissionCalculationService"
 
 export interface CalculatePricingInput {
   basePrice: number

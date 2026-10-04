@@ -10,10 +10,7 @@ import {
 } from "../dtos/update-station.dto"
 import { StationImage } from "../../domain/entities/Station"
 
-export interface IStationStepParser<T> {
-  supports(step: number): boolean
-  parse(req: AuthenticatedRequest): Promise<T> | T
-}
+import { IStationStepParser } from "../interfaces/station-step-parser.interface"
 
 export function safeJsonParse<T>(val: unknown, fallback: T): T {
   if (val === undefined || val === null || val === "") {

@@ -7,7 +7,7 @@ import { useOwnerStore } from "../store/owner.store"
 import Loading from "../../../shared/components/ui/Loading"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { ROLE, VIEW_MODE } from "../../../shared/constants/role.const"
-import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "../../../shared/components/modals/ConfirmationModal"
 import { ONBOARDING_STEPS } from "../config/stepper.config"
 import { Stepper } from "@/shared/components/stepper"
 
@@ -35,6 +35,14 @@ export default function OwnerOnboarding() {
     }
     return () => {
       useOwnerStore.setState({ isFetchingStatus: true })
+      const state = useAuthStore.getState()
+      if (
+        state.user?.role !== ROLE.OWNER ||
+        !state.user?.onboardingStep ||
+        state.user.onboardingStep < 4
+      ) {
+        state.setActiveViewMode(VIEW_MODE.CUSTOMER)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -1,0 +1,1080 @@
+import { Model, Types } from "mongoose"
+import { IAnalyticsQueryService } from "../../application/interfaces/analytics-query.interface"
+import {
+  AdminDashboardData,
+  OwnerDashboardData,
+  ManagerDashboardData,
+  TimeSeriesPoint,
+  StatusDistributionItem,
+  StationLeaderboardItem,
+  ServiceDistributionItem,
+  OwnerStationSummary,
+  LiveBayState,
+  HourlyTrafficPoint,
+} from "../../domain/types/analytics.types"
+import { IBookingDocument } from "@/modules/booking/infrastructure/models/booking.model"
+import { IStation } from "@/modules/station/infrastructure/models/station.model"
+import { IUser } from "@/modules/user/infrastructure/model/user.model"
+import { IOwner } from "@/modules/owner/infrastructure/model/owner.model"
+import { IManagerAssignment } from "@/modules/manager/infrastructure/models/manager-assignment.model"
+import { IReview } from "@/modules/review/infrastructure/models/review.model"
+import { ROLE } from "@/common/constants/role.constants"
+
+interface AggregatedBookingRecord {
+  _id: unknown
+  bookingNumber?: string
+  stationDetails?: { name?: string }
+  stationId?: { name?: string }
+  walkInCustomer?: { name?: string }
+  customerDetails?: { name?: string }
+  userId?: { name?: string }
+  pricingSnapshot?: { totalPrice?: number }
+  status: string
+  serviceType?: string
+  createdAt?: Date
+}
+
+interface AggregatedOwnerStation {
+  _id: unknown
+  name?: string
+  status?: string
+  isActive?: boolean
+  rating?: number
+  address?: { city?: string }
+  slotConfig?: { bays?: number }
+}
+
+interface AggregatedManagerAssignment {
+  stationId: unknown
+  managerUserId?: { name?: string; email?: string }
+}
+
+interface AggregatedOwnerBooking {
+  _id: unknown
+  bookingNumber?: string
+  stationDetails?: { name?: string }
+  stationId?: { name?: string }
+  walkInCustomer?: { name?: string }
+  customerDetails?: { name?: string }
+  userId?: { name?: string }
+  walkInVehicle?: { registrationNumber?: string }
+  vehicleDetails?: { registrationNumber?: string }
+  pricingSnapshot?: { totalPrice?: number }
+  status: string
+  createdAt?: Date
+}
+
+interface AggregatedStationData {
+  _id: unknown
+  name?: string
+  rating?: number
+  reviewCount?: number
+  status?: string
+  address?: { street?: string; city?: string }
+  slotConfig?: { bays?: number }
+}
+
+interface AggregatedManagerBooking {
+  _id: unknown
+  bookingNumber?: string
+  status: string
+  serviceType?: string
+  serviceStartedAt?: Date
+  completedAt?: Date
+  createdAt: Date
+  pricingSnapshot?: { totalPrice?: number }
+  scheduling?: { windowStart?: Date; windowEnd?: Date }
+  walkInCustomer?: { name?: string; phone?: string }
+  customerDetails?: { name?: string; phone?: string }
+  walkInVehicle?: { registrationNumber?: string }
+  vehicleDetails?: { registrationNumber?: string }
+  isWalkIn?: boolean
+}
+
+interface AggregatedFlaggedReview {
+  _id: unknown
+  comment?: string
+  report_count?: number
+  createdAt?: Date
+}
+
+import { DateRange } from "../../domain/types/analytics.types"
+
+function resolveDateRangeAndBuckets(
+  range: DateRange = "30_DAYS",
+  year?: number,
+  month?: number,
+  customStartDate?: Date | null,
+  customEndDate?: Date | null
+): {
+  matchStartDate: Date | null
+  matchEndDate: Date | null
+  dateFormat: string
+  buckets: Array<{ dateKey: string; label: string }>
+} {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  let matchStartDate: Date | null = null
+  let matchEndDate: Date | null = null
+  let dateFormat = "%Y-%m-%d"
+  const buckets: Array<{ dateKey: string; label: string }> = []
+
+  if (range === "TODAY") {
+    const start = new Date(now)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%H:00"
+
+    for (let h = 0; h < 24; h++) {
+      const hourStr = `${String(h).padStart(2, "0")}:00`
+      buckets.push({ dateKey: hourStr, label: hourStr })
+    }
+  } else if (range === "7_DAYS") {
+    const start = new Date(now)
+    start.setDate(start.getDate() - 6)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m-%d"
+
+    const curr = new Date(start)
+    while (curr <= end) {
+      const yearStr = curr.getFullYear()
+      const monthStr = String(curr.getMonth() + 1).padStart(2, "0")
+      const dayStr = String(curr.getDate()).padStart(2, "0")
+      const key = `${yearStr}-${monthStr}-${dayStr}`
+      const monthName = curr.toLocaleString("en-US", { month: "short" })
+      buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+      curr.setDate(curr.getDate() + 1)
+    }
+  } else if (range === "30_DAYS") {
+    const targetYear = year || currentYear
+    const targetMonth = month || currentMonth
+
+    const start = new Date(targetYear, targetMonth - 1, 1, 0, 0, 0, 0)
+    const end = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m-%d"
+
+    const daysInMonth = end.getDate()
+    const monthName = start.toLocaleString("en-US", { month: "short" })
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = String(d).padStart(2, "0")
+      const monthStr = String(targetMonth).padStart(2, "0")
+      const key = `${targetYear}-${monthStr}-${dayStr}`
+      buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+    }
+  } else if (range === "12_MONTHS") {
+    const targetYear = year || currentYear
+    const start = new Date(targetYear, 0, 1, 0, 0, 0, 0)
+    const end = new Date(targetYear, 11, 31, 23, 59, 59, 999)
+
+    matchStartDate = start
+    matchEndDate = end
+    dateFormat = "%Y-%m"
+
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]
+    for (let m = 1; m <= 12; m++) {
+      const monthStr = String(m).padStart(2, "0")
+      const key = `${targetYear}-${monthStr}`
+      buckets.push({ dateKey: key, label: monthNames[m - 1] || monthStr })
+    }
+  } else if (range === "ALL_YEARS") {
+    dateFormat = "%Y"
+    const startYear = 2024
+    for (let y = startYear; y <= currentYear; y++) {
+      const key = String(y)
+      buckets.push({ dateKey: key, label: key })
+    }
+    matchStartDate = new Date(startYear, 0, 1, 0, 0, 0, 0)
+    matchEndDate = new Date(currentYear, 11, 31, 23, 59, 59, 999)
+  } else if (range === "CUSTOM") {
+    matchStartDate = customStartDate || null
+    matchEndDate = customEndDate || null
+    dateFormat = "%Y-%m-%d"
+
+    if (matchStartDate && matchEndDate) {
+      const curr = new Date(matchStartDate)
+      curr.setHours(0, 0, 0, 0)
+      const end = new Date(matchEndDate)
+      end.setHours(23, 59, 59, 999)
+
+      while (curr <= end) {
+        const yearStr = curr.getFullYear()
+        const monthStr = String(curr.getMonth() + 1).padStart(2, "0")
+        const dayStr = String(curr.getDate()).padStart(2, "0")
+        const key = `${yearStr}-${monthStr}-${dayStr}`
+        const monthName = curr.toLocaleString("en-US", { month: "short" })
+        buckets.push({ dateKey: key, label: `${monthName} ${dayStr}` })
+        curr.setDate(curr.getDate() + 1)
+      }
+    }
+  }
+
+  return { matchStartDate, matchEndDate, dateFormat, buckets }
+}
+
+function fillTimeSeriesBuckets(
+  rawPoints: Array<{ _id: string; revenue?: number; bookingsCount?: number; commission?: number }>,
+  buckets: Array<{ dateKey: string; label: string }>
+): TimeSeriesPoint[] {
+  const rawMap = new Map<string, { revenue: number; bookingsCount: number; commission: number }>()
+  rawPoints.forEach((p) => {
+    rawMap.set(p._id, {
+      revenue: p.revenue || 0,
+      bookingsCount: p.bookingsCount || 0,
+      commission: p.commission || 0,
+    })
+  })
+
+  if (buckets.length === 0) {
+    return rawPoints.map((p) => ({
+      date: p._id,
+      revenue: p.revenue || 0,
+      bookingsCount: p.bookingsCount || 0,
+      commission: p.commission || 0,
+    }))
+  }
+
+  return buckets.map((b) => {
+    const data = rawMap.get(b.dateKey) || { revenue: 0, bookingsCount: 0, commission: 0 }
+    return {
+      date: b.label,
+      revenue: data.revenue,
+      bookingsCount: data.bookingsCount,
+      commission: data.commission,
+    }
+  })
+}
+
+export class AnalyticsMongoQueryService implements IAnalyticsQueryService {
+  constructor(
+    private readonly bookingModel: Model<IBookingDocument>,
+    private readonly stationModel: Model<IStation>,
+    private readonly userModel: Model<IUser>,
+    private readonly ownerModel?: Model<IOwner>,
+    private readonly managerAssignmentModel?: Model<IManagerAssignment>,
+    private readonly reviewModel?: Model<IReview>
+  ) {}
+
+  async getAdminDashboardData(
+    range: DateRange = "30_DAYS",
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
+    endDate?: Date | null
+  ): Promise<AdminDashboardData> {
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
+
+    const dateQuery: Record<string, unknown> = {}
+    if (matchStartDate) dateQuery.$gte = matchStartDate
+    if (matchEndDate) dateQuery.$lte = matchEndDate
+    const matchQuery = Object.keys(dateQuery).length > 0 ? { createdAt: dateQuery } : {}
+
+    // 1. KPIs
+    const [bookingStats] = await this.bookingModel.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: null,
+          totalGrossVolume: { $sum: "$pricingSnapshot.totalPrice" },
+          totalPlatformCommission: { $sum: "$settlement.platformCommission" },
+          totalBookings: { $sum: 1 },
+          completedBookings: {
+            $sum: { $cond: [{ $eq: ["$status", "COMPLETED"] }, 1, 0] },
+          },
+        },
+      },
+    ])
+
+    const totalGrossVolume = bookingStats?.totalGrossVolume || 0
+    const totalPlatformCommission = bookingStats?.totalPlatformCommission || 0
+    const totalBookings = bookingStats?.totalBookings || 0
+    const completedBookings = bookingStats?.completedBookings || 0
+    const completionRate =
+      totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0
+
+    // User counts
+    const [userCounts] = await this.userModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCustomers: {
+            $sum: {
+              $cond: [
+                {
+                  $in: [
+                    { $toLower: { $ifNull: ["$role", ""] } },
+                    [ROLE.CUSTOMER, "customer", "CUSTOMER"],
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          totalOwners: {
+            $sum: {
+              $cond: [
+                {
+                  $in: [{ $toLower: { $ifNull: ["$role", ""] } }, [ROLE.OWNER, "owner", "OWNER"]],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          totalManagers: {
+            $sum: {
+              $cond: [
+                {
+                  $in: [
+                    { $toLower: { $ifNull: ["$role", ""] } },
+                    [ROLE.MANAGER, "manager", "MANAGER"],
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ])
+
+    // Station counts
+    const [stationCounts] = await this.stationModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalStations: { $sum: 1 },
+          activeStations: {
+            $sum: { $cond: [{ $eq: ["$status", "APPROVED"] }, 1, 0] },
+          },
+          pendingApprovals: {
+            $sum: { $cond: [{ $eq: ["$status", "PENDING_APPROVAL"] }, 1, 0] },
+          },
+        },
+      },
+    ])
+
+    // Flagged reviews / disputes count
+    let openDisputes = 0
+    if (this.reviewModel) {
+      openDisputes = await this.reviewModel.countDocuments({
+        report_count: { $gt: 0 },
+      })
+    }
+
+    // 2. Growth Trend
+    const growthTrendRaw = await this.bookingModel.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: dateFormat, date: "$createdAt" },
+          },
+          revenue: { $sum: "$pricingSnapshot.totalPrice" },
+          bookingsCount: { $sum: 1 },
+          commission: { $sum: "$settlement.platformCommission" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+
+    const growthTrend: TimeSeriesPoint[] = fillTimeSeriesBuckets(growthTrendRaw, buckets)
+
+    // 3. Status Distribution
+    const statusRaw = await this.bookingModel.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ])
+
+    const bookingStatusDistribution: StatusDistributionItem[] = statusRaw.map((s) => ({
+      status: s._id || "UNKNOWN",
+      count: s.count,
+      percentage: totalBookings > 0 ? Math.round((s.count / totalBookings) * 100) : 0,
+    }))
+
+    // 4. Top Stations by Revenue
+    const topStationsRaw = await this.bookingModel.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: "$stationId",
+          totalBookings: { $sum: 1 },
+          totalRevenue: { $sum: "$pricingSnapshot.totalPrice" },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "stations",
+          localField: "_id",
+          foreignField: "_id",
+          as: "station",
+        },
+      },
+      { $unwind: { path: "$station", preserveNullAndEmptyArrays: true } },
+    ])
+
+    const topStations: StationLeaderboardItem[] = topStationsRaw.map((t) => ({
+      stationId: String(t._id),
+      name: t.station?.name || "Station",
+      city: t.station?.address?.city || undefined,
+      totalBookings: t.totalBookings || 0,
+      totalRevenue: t.totalRevenue || 0,
+      rating: t.station?.rating || 5.0,
+    }))
+
+    // 5. Recent Bookings
+    const recentBookingsRaw: unknown = await this.bookingModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate("stationId", "name")
+      .populate("userId", "name")
+      .lean()
+
+    const recentBookingsTyped = recentBookingsRaw as AggregatedBookingRecord[]
+
+    const recentBookings = recentBookingsTyped.map((b) => ({
+      id: String(b._id),
+      bookingNumber: b.bookingNumber || String(b._id).slice(0, 8),
+      stationName: b.stationDetails?.name || b.stationId?.name || "Station",
+      customerName:
+        b.walkInCustomer?.name || b.customerDetails?.name || b.userId?.name || "Guest Customer",
+      amount: b.pricingSnapshot?.totalPrice || 0,
+      status: b.status,
+      serviceType: b.serviceType || "FULL",
+      createdAt: b.createdAt ? new Date(b.createdAt).toISOString() : new Date().toISOString(),
+    }))
+
+    return {
+      kpis: {
+        totalGrossVolume,
+        totalPlatformCommission,
+        totalBookings,
+        completedBookings,
+        completionRate,
+        totalCustomers: userCounts?.totalCustomers || 0,
+        totalOwners: userCounts?.totalOwners || 0,
+        totalManagers: userCounts?.totalManagers || 0,
+        totalStations: stationCounts?.totalStations || 0,
+        activeStations: stationCounts?.activeStations || 0,
+        pendingApprovals: stationCounts?.pendingApprovals || 0,
+        openDisputes,
+      },
+      growthTrend,
+      bookingStatusDistribution,
+      topStations,
+      recentBookings,
+    }
+  }
+
+  async getOwnerDashboardData(
+    userId: string,
+    range: DateRange = "30_DAYS",
+    stationId?: string,
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
+    endDate?: Date | null
+  ): Promise<OwnerDashboardData> {
+    const userObjectId = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : null
+
+    // 1. Resolve all possible owner IDs (both User._id and Owner._id)
+    const ownerIds: Types.ObjectId[] = []
+    if (userObjectId) {
+      ownerIds.push(userObjectId)
+    }
+
+    if (this.ownerModel && userObjectId) {
+      const ownerDoc = await this.ownerModel
+        .findOne({ $or: [{ userId: userObjectId }, { _id: userObjectId }] })
+        .lean()
+      if (ownerDoc) {
+        if (ownerDoc._id && !ownerIds.some((id) => id.equals(ownerDoc._id as Types.ObjectId))) {
+          ownerIds.push(ownerDoc._id as Types.ObjectId)
+        }
+        if (
+          ownerDoc.userId &&
+          !ownerIds.some((id) => id.equals(ownerDoc.userId as Types.ObjectId))
+        ) {
+          ownerIds.push(ownerDoc.userId as Types.ObjectId)
+        }
+      }
+    }
+
+    // 2. Fetch Owner's Stations
+    const stationsRaw: unknown = await this.stationModel.find({ ownerId: { $in: ownerIds } }).lean()
+    const stations = stationsRaw as AggregatedOwnerStation[]
+    const stationObjectIds = stations.map((s) => new Types.ObjectId(String(s._id)))
+
+    const isSpecificStation = Boolean(
+      stationId &&
+      stationId !== "ALL" &&
+      Types.ObjectId.isValid(stationId) &&
+      stationObjectIds.some((id) => id.equals(new Types.ObjectId(stationId)))
+    )
+
+    const targetStationIds = isSpecificStation
+      ? stationObjectIds.filter((id) => id.equals(new Types.ObjectId(stationId!)))
+      : stationObjectIds
+
+    const targetStations = stations.filter((s) =>
+      targetStationIds.some((id) => id.equals(new Types.ObjectId(String(s._id))))
+    )
+
+    const totalStations = targetStations.length
+    const activeStations = targetStations.filter(
+      (s) => s.status === "APPROVED" && s.isActive !== false
+    ).length
+    const avgRating =
+      totalStations > 0
+        ? Number(
+            (
+              targetStations.reduce((sum: number, s) => sum + (s.rating || 5.0), 0) / totalStations
+            ).toFixed(1)
+          )
+        : 5.0
+
+    // 3. Build Booking Match Filter
+    const ownerBookingMatch: Record<string, unknown>[] = []
+    if (targetStationIds.length > 0) {
+      ownerBookingMatch.push({ stationId: { $in: targetStationIds } })
+    } else if (!isSpecificStation) {
+      ownerBookingMatch.push({ ownerId: { $in: ownerIds } })
+    }
+
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
+
+    const dateMatch: Record<string, unknown> = {
+      $or: ownerBookingMatch.length > 0 ? ownerBookingMatch : [{ ownerId: { $in: ownerIds } }],
+    }
+    const createdAtMatch: Record<string, unknown> = {}
+    if (matchStartDate) createdAtMatch.$gte = matchStartDate
+    if (matchEndDate) createdAtMatch.$lte = matchEndDate
+    if (Object.keys(createdAtMatch).length > 0) {
+      dateMatch.createdAt = createdAtMatch
+    }
+
+    // 4. Booking KPIs
+    const [bookingStats] = await this.bookingModel.aggregate([
+      { $match: dateMatch },
+      {
+        $group: {
+          _id: null,
+          totalGrossRevenue: { $sum: "$pricingSnapshot.totalPrice" },
+          netSettlementAmount: { $sum: "$settlement.stationSettlement" },
+          totalBookings: { $sum: 1 },
+          completedBookings: {
+            $sum: { $cond: [{ $eq: ["$status", "COMPLETED"] }, 1, 0] },
+          },
+        },
+      },
+    ])
+
+    const totalGrossRevenue = bookingStats?.totalGrossRevenue || 0
+    const netSettlementAmount = bookingStats?.netSettlementAmount || 0
+    const totalBookings = bookingStats?.totalBookings || 0
+    const completedBookings = bookingStats?.completedBookings || 0
+    const completionRate =
+      totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0
+
+    // Managers count
+    let totalManagers = 0
+    let managerAssignments: AggregatedManagerAssignment[] = []
+    if (this.managerAssignmentModel && ownerIds.length > 0) {
+      const assignmentsRaw: unknown = await this.managerAssignmentModel
+        .find({
+          $or: isSpecificStation
+            ? [{ stationId: { $in: targetStationIds } }]
+            : [{ ownerId: { $in: ownerIds } }, { stationId: { $in: stationObjectIds } }],
+          status: "ACTIVE",
+        })
+        .populate("managerUserId", "name email")
+        .lean()
+      managerAssignments = assignmentsRaw as AggregatedManagerAssignment[]
+      totalManagers = managerAssignments.length
+    }
+
+    // 5. Revenue Trend
+    const revenueTrendRaw = await this.bookingModel.aggregate([
+      { $match: dateMatch },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: dateFormat, date: "$createdAt" },
+          },
+          revenue: { $sum: "$pricingSnapshot.totalPrice" },
+          bookingsCount: { $sum: 1 },
+          commission: { $sum: "$settlement.platformCommission" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+
+    const revenueTrend: TimeSeriesPoint[] = fillTimeSeriesBuckets(revenueTrendRaw, buckets)
+
+    // 6. Station Comparison
+    const stationCompRaw = await this.bookingModel.aggregate([
+      { $match: dateMatch },
+      {
+        $group: {
+          _id: "$stationId",
+          revenue: { $sum: "$pricingSnapshot.totalPrice" },
+          bookingsCount: { $sum: 1 },
+        },
+      },
+    ])
+
+    const compMap = new Map<string, { revenue: number; bookingsCount: number }>()
+    stationCompRaw.forEach((sc) => {
+      compMap.set(String(sc._id), {
+        revenue: sc.revenue || 0,
+        bookingsCount: sc.bookingsCount || 0,
+      })
+    })
+
+    const stationComparison = stations.map((s) => {
+      const stats = compMap.get(String(s._id)) || { revenue: 0, bookingsCount: 0 }
+      return {
+        stationId: String(s._id),
+        name: s.name || "Station",
+        revenue: stats.revenue,
+        bookingsCount: stats.bookingsCount,
+        rating: s.rating || 5.0,
+      }
+    })
+
+    // 7. Service Distribution Breakdown
+    const serviceRaw = await this.bookingModel.aggregate([
+      { $match: dateMatch },
+      {
+        $group: {
+          _id: "$serviceType",
+          count: { $sum: 1 },
+          revenue: { $sum: "$pricingSnapshot.totalPrice" },
+        },
+      },
+    ])
+
+    const serviceDistribution: ServiceDistributionItem[] = serviceRaw.map((sr) => ({
+      name: sr._id ? String(sr._id) : "General Wash",
+      count: sr.count,
+      revenue: sr.revenue,
+    }))
+
+    // 8. Station Summaries for Owner
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
+    const todayBookingsRaw = await this.bookingModel.aggregate([
+      {
+        $match: {
+          $or:
+            targetStationIds.length > 0
+              ? [{ stationId: { $in: targetStationIds } }]
+              : ownerBookingMatch,
+          createdAt: { $gte: startOfToday },
+        },
+      },
+      {
+        $group: {
+          _id: "$stationId",
+          count: { $sum: 1 },
+        },
+      },
+    ])
+
+    const todayMap = new Map<string, number>()
+    todayBookingsRaw.forEach((tb) => {
+      todayMap.set(String(tb._id), tb.count)
+    })
+
+    const stationSummaries: OwnerStationSummary[] = stations.map((s) => {
+      const sId = String(s._id)
+      const comp = compMap.get(sId)
+      const assignedAssignment = managerAssignments.find((ma) => String(ma.stationId) === sId)
+      return {
+        stationId: sId,
+        name: s.name || "Wash Station",
+        city: s.address?.city || undefined,
+        totalBays: Math.max(1, s.slotConfig?.bays || 1),
+        activeBays: Math.max(1, s.slotConfig?.bays || 1),
+        todayBookings: todayMap.get(sId) || 0,
+        totalRevenue: comp?.revenue || 0,
+        rating: s.rating || 5.0,
+        isActive: s.status === "APPROVED" && s.isActive !== false,
+        assignedManagerName: assignedAssignment?.managerUserId?.name || undefined,
+      }
+    })
+
+    // 9. Recent Bookings
+    const recentBookingsMatch =
+      ownerBookingMatch.length > 0 ? { $or: ownerBookingMatch } : { ownerId: { $in: ownerIds } }
+
+    const recentBookingsRaw: unknown = await this.bookingModel
+      .find(recentBookingsMatch)
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate("stationId", "name")
+      .populate("userId", "name")
+      .lean()
+
+    const recentBookingsTyped = recentBookingsRaw as AggregatedOwnerBooking[]
+
+    const recentBookings = recentBookingsTyped.map((b) => ({
+      id: String(b._id),
+      bookingNumber: b.bookingNumber || String(b._id).slice(0, 8),
+      stationName: b.stationDetails?.name || b.stationId?.name || "Station",
+      customerName:
+        b.walkInCustomer?.name || b.customerDetails?.name || b.userId?.name || "Customer",
+      vehiclePlate:
+        b.walkInVehicle?.registrationNumber || b.vehicleDetails?.registrationNumber || "VEHICLE",
+      amount: b.pricingSnapshot?.totalPrice || 0,
+      status: b.status,
+      createdAt: b.createdAt ? new Date(b.createdAt).toISOString() : new Date().toISOString(),
+    }))
+
+    return {
+      kpis: {
+        totalGrossRevenue,
+        netSettlementAmount,
+        totalBookings,
+        completedBookings,
+        completionRate,
+        totalStations,
+        activeStations,
+        totalManagers,
+        averageRating: avgRating,
+      },
+      revenueTrend,
+      stationComparison,
+      serviceDistribution,
+      stations: stationSummaries,
+      recentBookings,
+    }
+  }
+
+  async getManagerDashboardData(
+    userId: string,
+    requestedStationId?: string,
+    range: DateRange = "TODAY",
+    year?: number,
+    month?: number,
+    startDate?: Date | null,
+    endDate?: Date | null
+  ): Promise<ManagerDashboardData> {
+    let resolvedStationId = requestedStationId
+
+    // If no explicit stationId provided, resolve through manager assignment
+    if (!resolvedStationId && this.managerAssignmentModel) {
+      const assignment = await this.managerAssignmentModel
+        .findOne({ managerUserId: new Types.ObjectId(userId), status: "ACTIVE" })
+        .lean()
+      if (assignment) {
+        resolvedStationId = String(assignment.stationId)
+      }
+    }
+
+    if (!resolvedStationId) {
+      // Fallback: Check if user owns a station
+      const station = await this.stationModel
+        .findOne({ ownerId: new Types.ObjectId(userId) })
+        .lean()
+      if (station) {
+        resolvedStationId = String(station._id)
+      }
+    }
+
+    if (!resolvedStationId) {
+      throw new Error("No station assigned or found for this user")
+    }
+
+    const stationObjectId = new Types.ObjectId(resolvedStationId)
+    const stationRaw: unknown = await this.stationModel.findById(stationObjectId).lean()
+    if (!stationRaw) {
+      throw new Error("Station not found")
+    }
+
+    const station = stationRaw as AggregatedStationData
+    const totalBays = Math.max(1, station.slotConfig?.bays || 1)
+
+    // Today's range for live status & upcoming queue
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+    const endOfToday = new Date()
+    endOfToday.setHours(23, 59, 59, 999)
+
+    // 1. Today's Bookings
+    const todayBookingsRaw: unknown = await this.bookingModel
+      .find({
+        stationId: stationObjectId,
+        $or: [
+          { "scheduling.windowStart": { $gte: startOfToday, $lte: endOfToday } },
+          { createdAt: { $gte: startOfToday, $lte: endOfToday } },
+        ],
+      })
+      .sort({ "scheduling.windowStart": 1, createdAt: 1 })
+      .lean()
+
+    const todayBookings = todayBookingsRaw as AggregatedManagerBooking[]
+
+    let todayCheckedIn = 0
+    let todayInService = 0
+    let todayCompleted = 0
+    let todayNoShow = 0
+    let todayRevenue = 0
+    let totalServiceDurationMinutes = 0
+    let durationCount = 0
+
+    todayBookings.forEach((b) => {
+      if (b.status === "CHECKED_IN") todayCheckedIn++
+      else if (b.status === "IN_SERVICE") todayInService++
+      else if (b.status === "COMPLETED") {
+        todayCompleted++
+        todayRevenue += b.pricingSnapshot?.totalPrice || 0
+        if (b.serviceStartedAt && b.completedAt) {
+          const start = new Date(b.serviceStartedAt).getTime()
+          const end = new Date(b.completedAt).getTime()
+          const mins = Math.max(1, Math.round((end - start) / 60000))
+          totalServiceDurationMinutes += mins
+          durationCount++
+        }
+      } else if (b.status === "NO_SHOW") todayNoShow++
+    })
+
+    const averageServiceMinutes =
+      durationCount > 0 ? Math.round(totalServiceDurationMinutes / durationCount) : 0
+    const bayOccupancyRate =
+      totalBays > 0 ? Math.min(100, Math.round((todayInService / totalBays) * 100)) : 0
+
+    // 2. Live Bay States
+    const activeInService = todayBookings.filter((b) => b.status === "IN_SERVICE")
+    const bayStates: LiveBayState[] = []
+    for (let i = 1; i <= totalBays; i++) {
+      const activeBooking = activeInService[i - 1]
+      if (activeBooking) {
+        let remaining = 0
+        if (activeBooking.serviceStartedAt && activeBooking.scheduling?.windowEnd) {
+          const endMs = new Date(activeBooking.scheduling.windowEnd).getTime()
+          remaining = Math.max(0, Math.round((endMs - Date.now()) / 60000))
+        } else if (activeBooking.serviceStartedAt) {
+          const elapsed = Math.round(
+            (Date.now() - new Date(activeBooking.serviceStartedAt).getTime()) / 60000
+          )
+          remaining = Math.max(0, 30 - elapsed)
+        }
+        bayStates.push({
+          bayNumber: i,
+          isOccupied: true,
+          currentBookingNumber:
+            activeBooking.bookingNumber || String(activeBooking._id).slice(0, 8),
+          vehiclePlate:
+            activeBooking.walkInVehicle?.registrationNumber ||
+            activeBooking.vehicleDetails?.registrationNumber ||
+            "—",
+          serviceType: activeBooking.serviceType || "Wash",
+          status: "IN_SERVICE",
+          timeRemainingMinutes: remaining,
+        })
+      } else {
+        bayStates.push({
+          bayNumber: i,
+          isOccupied: false,
+          status: "AVAILABLE",
+        })
+      }
+    }
+
+    // 3. Hourly traffic today
+    const hourlyMap = new Map<string, number>()
+    for (let h = 8; h <= 20; h++) {
+      const hourKey = `${String(h).padStart(2, "0")}:00`
+      hourlyMap.set(hourKey, 0)
+    }
+
+    todayBookings.forEach((b) => {
+      const targetTime = b.scheduling?.windowStart
+        ? new Date(b.scheduling.windowStart)
+        : new Date(b.createdAt)
+      const hourStr = `${String(targetTime.getHours()).padStart(2, "0")}:00`
+      if (hourlyMap.has(hourStr)) {
+        hourlyMap.set(hourStr, (hourlyMap.get(hourStr) || 0) + 1)
+      }
+    })
+
+    const hourlyTrafficToday: HourlyTrafficPoint[] = Array.from(hourlyMap.entries()).map(
+      ([hour, count]) => ({
+        hour,
+        bookingsCount: count,
+      })
+    )
+
+    // 4. Time series volume for selected range
+    const { matchStartDate, matchEndDate, dateFormat, buckets } = resolveDateRangeAndBuckets(
+      range,
+      year,
+      month,
+      startDate,
+      endDate
+    )
+
+    const managerRangeMatch: Record<string, unknown> = { stationId: stationObjectId }
+    const createdAtMatch: Record<string, unknown> = {}
+    if (matchStartDate) createdAtMatch.$gte = matchStartDate
+    if (matchEndDate) createdAtMatch.$lte = matchEndDate
+    if (Object.keys(createdAtMatch).length > 0) {
+      managerRangeMatch.createdAt = createdAtMatch
+    }
+
+    const volumeRaw = await this.bookingModel.aggregate([
+      { $match: managerRangeMatch },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: dateFormat, date: "$createdAt" },
+          },
+          revenue: { $sum: "$pricingSnapshot.totalPrice" },
+          bookingsCount: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+
+    const weeklyVolume: TimeSeriesPoint[] = fillTimeSeriesBuckets(volumeRaw, buckets)
+
+    // 5. Upcoming / Today's Queue (Active / In progress / Pending check-in)
+    const upcomingQueue = todayBookings
+      .filter((b) =>
+        ["CONFIRMED", "CHECKED_IN", "IN_SERVICE", "PAYMENT_PENDING"].includes(b.status)
+      )
+      .slice(0, 8)
+      .map((b) => ({
+        id: String(b._id),
+        bookingNumber: b.bookingNumber || String(b._id).slice(0, 8),
+        customerName: b.walkInCustomer?.name || b.customerDetails?.name || "Customer",
+        customerPhone: b.walkInCustomer?.phone || b.customerDetails?.phone || undefined,
+        vehiclePlate:
+          b.walkInVehicle?.registrationNumber || b.vehicleDetails?.registrationNumber || "VEHICLE",
+        serviceType: b.serviceType || "FULL",
+        windowStart: b.scheduling?.windowStart
+          ? new Date(b.scheduling.windowStart).toISOString()
+          : new Date().toISOString(),
+        windowEnd: b.scheduling?.windowEnd
+          ? new Date(b.scheduling.windowEnd).toISOString()
+          : new Date().toISOString(),
+        status: b.status,
+        amount: b.pricingSnapshot?.totalPrice || 0,
+        isWalkIn: Boolean(b.isWalkIn),
+      }))
+
+    // 6. Recent reviews / flags for this station
+    let activeIssues: Array<{
+      id: string
+      issueNumber: string
+      title: string
+      priority: string
+      status: string
+      reportedAt: string
+    }> = []
+
+    if (this.reviewModel) {
+      const flaggedReviewsRaw: unknown = await this.reviewModel
+        .find({
+          stationId: stationObjectId,
+          report_count: { $gt: 0 },
+        })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean()
+
+      const flaggedReviews = flaggedReviewsRaw as AggregatedFlaggedReview[]
+
+      activeIssues = flaggedReviews.map((rev) => ({
+        id: String(rev._id),
+        issueNumber: `REV-${String(rev._id).slice(-4).toUpperCase()}`,
+        title: rev.comment
+          ? `Reported Review: "${rev.comment.slice(0, 30)}..."`
+          : "Flagged customer review",
+        priority: (rev.report_count ?? 0) > 2 ? "HIGH" : "MEDIUM",
+        status: "OPEN",
+        reportedAt: rev.createdAt
+          ? new Date(rev.createdAt).toISOString()
+          : new Date().toISOString(),
+      }))
+    }
+
+    return {
+      station: {
+        id: String(station._id),
+        name: station.name || "Station",
+        address: station.address?.street || undefined,
+        city: station.address?.city || undefined,
+        totalBays,
+        rating: station.rating || 5.0,
+        totalReviews: station.reviewCount || 0,
+        status: station.status || "APPROVED",
+      },
+      kpis: {
+        todayTotalScheduled: todayBookings.length,
+        todayCheckedIn,
+        todayInService,
+        todayCompleted,
+        todayNoShow,
+        todayRevenue,
+        bayOccupancyRate,
+        averageServiceMinutes,
+      },
+      bayStates,
+      hourlyTrafficToday,
+      weeklyVolume,
+      upcomingQueue,
+      activeIssues,
+    }
+  }
+}

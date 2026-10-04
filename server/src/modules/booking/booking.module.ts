@@ -1,6 +1,6 @@
 import { BookingMongoRepository } from "./infrastructure/repositories/booking.mongo.repository"
 import { BookingStatusLogMongoRepository } from "./infrastructure/repositories/booking-status-log.mongo.repository"
-import { MongooseTransactionRunner } from "@/infrastructure/database/mongoose-transaction.runner"
+import { MongooseTransactionRunner } from "@/infrastructure/database/mongodb/mongoose-transaction.runner"
 import { managerAssignmentRepository } from "../manager/manager.module"
 
 import { bookingNotificationService } from "@/modules/notification/notification.module"
@@ -22,28 +22,6 @@ import { RescheduleBookingUseCase } from "./application/use-cases/reschedule-boo
 
 import { BookingController } from "./presentation/controllers/booking.controller"
 import { createBookingRouter } from "./presentation/routers/booking.routes"
-import { SettlementRepository } from "./infrastructure/repositories/settlement.repository"
-import { PayoutRepository } from "./infrastructure/repositories/payout.repository"
-import { CreateSettlementUseCase } from "./application/use-cases/create-settlement.use-case"
-import { ProcessSettlementUseCase } from "./application/use-cases/process-settlement.use-case"
-import { GetOwnerSettlementSummaryUseCase } from "./application/use-cases/get-owner-settlement-summary.use-case"
-import { GetOwnerSettlementsUseCase } from "./application/use-cases/get-owner-settlements.use-case"
-import { GetOwnerEarningsHistoryUseCase } from "./application/use-cases/get-owner-earnings-history.use-case"
-import { GetAdminSettlementsUseCase } from "./application/use-cases/get-admin-settlements.use-case"
-import { GetAdminSettlementMetricsUseCase } from "./application/use-cases/get-admin-settlement-metrics.use-case"
-import { GetSettlementByIdUseCase } from "./application/use-cases/get-settlement-by-id.use-case"
-import { RetrySettlementUseCase } from "./application/use-cases/retry-settlement.use-case"
-import { ManageSettlementHoldUseCase } from "./application/use-cases/manage-settlement-hold.use-case"
-import { HandlePayoutWebhookUseCase } from "./application/use-cases/handle-payout-webhook.use-case"
-import { ProcessPendingSettlementsUseCase } from "./application/use-cases/process-pending-settlements.use-case"
-import { SettlementController } from "./presentation/controllers/settlement.controller"
-import { PayoutWebhookController } from "./presentation/controllers/payout-webhook.controller"
-import { createSettlementRouter } from "./presentation/routers/settlement.routes"
-import { ownerRepository } from "../owner/owner.module"
-import {
-  razorpayXPayoutProvider,
-  verifyRazorpayXWebhookSignature,
-} from "@/infrastructure/payment/razorpayx-payout.service"
 
 import type { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
@@ -80,92 +58,6 @@ export const rescheduleBookingUseCase = new RescheduleBookingUseCase(
   bookingNotificationService,
   transactionRunner
 )
-
-export const settlementRepository = new SettlementRepository()
-export const payoutRepository = new PayoutRepository()
-export const createSettlementUseCase = new CreateSettlementUseCase(settlementRepository)
-export const processSettlementUseCase = new ProcessSettlementUseCase(
-  settlementRepository,
-  payoutRepository,
-  ownerRepository,
-  razorpayXPayoutProvider,
-  bookingRepository
-)
-
-export const getOwnerSettlementSummaryUseCase = new GetOwnerSettlementSummaryUseCase(
-  settlementRepository,
-  ownerRepository
-)
-
-export const getOwnerSettlementsUseCase = new GetOwnerSettlementsUseCase(
-  settlementRepository,
-  ownerRepository,
-  bookingRepository
-)
-
-export const getOwnerEarningsHistoryUseCase = new GetOwnerEarningsHistoryUseCase(
-  ownerRepository,
-  bookingRepository,
-  settlementRepository
-)
-
-export const getAdminSettlementsUseCase = new GetAdminSettlementsUseCase(
-  settlementRepository,
-  bookingRepository
-)
-
-export const getAdminSettlementMetricsUseCase = new GetAdminSettlementMetricsUseCase(
-  settlementRepository
-)
-
-export const getSettlementByIdUseCase = new GetSettlementByIdUseCase(
-  settlementRepository,
-  ownerRepository,
-  bookingRepository
-)
-
-export const retrySettlementUseCase = new RetrySettlementUseCase(
-  settlementRepository,
-  processSettlementUseCase
-)
-
-export const manageSettlementHoldUseCase = new ManageSettlementHoldUseCase(settlementRepository)
-
-export const processPendingSettlementsUseCase = new ProcessPendingSettlementsUseCase(
-  settlementRepository,
-  processSettlementUseCase
-)
-
-export const handlePayoutWebhookUseCase = new HandlePayoutWebhookUseCase(
-  payoutRepository,
-  settlementRepository,
-  razorpayXPayoutProvider,
-  verifyRazorpayXWebhookSignature
-)
-
-export const payoutWebhookController = new PayoutWebhookController(handlePayoutWebhookUseCase)
-
-export const settlementController = new SettlementController(
-  getOwnerSettlementSummaryUseCase,
-  getOwnerSettlementsUseCase,
-  getOwnerEarningsHistoryUseCase,
-  getAdminSettlementsUseCase,
-  getAdminSettlementMetricsUseCase,
-  getSettlementByIdUseCase,
-  retrySettlementUseCase,
-  manageSettlementHoldUseCase
-)
-
-export const settlementRouter = createSettlementRouter(
-  settlementController,
-  payoutWebhookController
-)
-
-// CreateWalkInBookingUseCase and CancelBookingUseCase depend on the queue module's Redis queue
-// service (and CancelBookingUseCase optionally on the payment module's refund use-case).
-// Both of those modules depend back on this module's repos, so building these two eagerly here
-// would create a require() cycle between booking.module.ts and queue.module.ts/payment.module.ts.
-// They're built lazily instead — see @/bootstrap/module-composition.
 
 export function createCreateWalkInBookingUseCase(
   queueService: IBookingQueueService

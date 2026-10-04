@@ -5,7 +5,7 @@ import { ROLE } from "../../../shared/constants/role.const"
 import Breadcrumbs from "../../../shared/components/ui/Breadcrumbs"
 import { usersApi } from "@/shared/apis/users.api"
 import type { User, Booking, Vehicle, OwnerStation } from "../types"
-import ConfirmationModal from "../../../shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "../../../shared/components/modals/ConfirmationModal"
 import { toast } from "sonner"
 import { getErrorMessage } from "../../../shared/utils/error"
 import Loading from "../../../shared/components/ui/Loading"
@@ -18,75 +18,7 @@ import LoyaltyTierCard from "../components/ui/LoyaltyTierCard"
 import QuickNotificationCard from "../components/ui/QuickNotificationCard"
 import OwnerProfileOverviewCard from "../components/ui/OwnerProfileOverviewCard"
 import FeatureLock from "@/shared/components/ui/FeatureLock"
-
-const getMockBookings = (userId: string): Booking[] => {
-  return [
-    {
-      id: `BK-${userId.slice(-4).toUpperCase()}-01`,
-      stationName: "Express Shine Auto Wash",
-      vehicle: "Tesla Model 3 (KA-03-MM-1234)",
-      date: "2026-07-14",
-      amount: 25.0,
-      status: "COMPLETED",
-    },
-    {
-      id: `BK-${userId.slice(-4).toUpperCase()}-02`,
-      stationName: "Elite Detailers Club",
-      vehicle: "Tesla Model 3 (KA-03-MM-1234)",
-      date: "2026-07-15",
-      amount: 60.0,
-      status: "PENDING",
-    },
-    {
-      id: `BK-${userId.slice(-4).toUpperCase()}-03`,
-      stationName: "Eco Clean Waterless",
-      vehicle: "BMW 5 Series (KA-01-AB-9999)",
-      date: "2026-07-10",
-      amount: 40.0,
-      status: "CANCELLED",
-    },
-  ]
-}
-
-const getMockVehicles = (userId: string): Vehicle[] => {
-  return [
-    {
-      id: `VH-${userId.slice(-4).toUpperCase()}-1`,
-      name: "Tesla Model 3 (Deep Blue Metallic)",
-      plate: "KA-03-MM-1234",
-      addedDate: "2026-07-01",
-    },
-    {
-      id: `VH-${userId.slice(-4).toUpperCase()}-2`,
-      name: "BMW 5 Series (Alpine White)",
-      plate: "KA-01-AB-9999",
-      addedDate: "2026-07-05",
-    },
-  ]
-}
-
-const getMockStations = (): OwnerStation[] => {
-  return [
-    {
-      name: "Express Shine Auto Wash",
-      location: "Indiranagar, Bangalore",
-      status: "ONLINE",
-      sessions: 142,
-    },
-    {
-      name: "Elite Detailers Club",
-      location: "Koramangala, Bangalore",
-      status: "ONLINE",
-      sessions: 98,
-    },
-    {
-      name: "Eco Clean Waterless",
-      location: "HSR Layout, Bangalore",
-      status: "MAINTENANCE",
-      sessions: 35,
-    },
-  ]
-}
+import { bookingApi, vehicleApi } from "@/shared/apis"
 
 const UserDetails = () => {
   const { id } = useParams<{ id: string }>()
@@ -110,11 +42,31 @@ const UserDetails = () => {
       setErrorMsg(null)
       try {
         const fetched = await usersApi.getUser(id)
-        setUser(fetched)
+        const userBookings = await bookingApi.getUserBookings()
+        const userVehicles = await vehicleApi.getVehicles()
 
-        setVehicles(getMockVehicles(fetched.id))
-        setBookings(getMockBookings(fetched.id))
-        setOwnerStations(getMockStations())
+        setUser(fetched)
+        setVehicles(
+          userVehicles.map((vehicle) => ({
+            id: vehicle.id,
+            name: vehicle.nickname,
+            plate: vehicle.registrationNumber || "N/A",
+            addedDate: vehicle.createdAt,
+          }))
+        )
+
+        setBookings(
+          userBookings.bookings.map((booking) => ({
+            id: booking.id,
+            stationName: booking.stationDetails?.name || "N/A",
+            status: booking.status as "COMPLETED" | "CANCELLED" | "PENDING",
+            vehicle: booking.vehicleDetails?.nickname || "N/A",
+            date: booking.createdAt,
+            amount: booking.pricingSnapshot.totalPrice || 0,
+          }))
+        )
+
+        setOwnerStations([])
       } catch (err: unknown) {
         setErrorMsg(getErrorMessage(err, "Failed to load user details"))
       } finally {

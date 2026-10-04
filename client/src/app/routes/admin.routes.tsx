@@ -13,14 +13,31 @@ const BookingDetails = lazy(() => import("@/features/booking/pages/BookingDetail
 const AdminSettlementMonitoring = lazy(
   () => import("@/features/settlement/pages/AdminSettlementMonitoring")
 )
+const NotificationCenterPage = lazy(
+  () => import("@/features/notification/pages/NotificationCenterPage")
+)
+const AdminReviewModerationPage = lazy(
+  () => import("@/features/review/pages/AdminReviewModerationPage")
+)
+const IssueManagement = lazy(() => import("@/features/issue/pages/IssueManagementPage"))
+const IssueDetails = lazy(() => import("@/features/issue/pages/IssueDetailsPage"))
+const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"))
+const AdminAnalyticsPage = lazy(() => import("@/features/admin/pages/AdminAnalyticsPage"))
+const KnowledgeDocumentListPage = lazy(
+  () => import("@/features/knowledge-docs/pages/KnowledgeDocumentListPage")
+)
+const KnowledgeDocumentDetailsPage = lazy(
+  () => import("@/features/knowledge-docs/pages/KnowledgeDocumentDetailsPage")
+)
 
 export const adminRoutes = {
   path: APP_ROUTES.ADMIN.ROOT,
   element: <AdminLayout />,
   children: [
     {
+      index: true,
       path: "dashboard",
-      element: <>Dashboard</>,
+      element: <AdminDashboard />,
     },
     {
       path: "users",
@@ -55,12 +72,20 @@ export const adminRoutes = {
       element: <BookingDetails role="admin" />,
     },
     {
+      path: "issues",
+      element: <IssueManagement role="admin" />,
+    },
+    {
+      path: "issues/:id",
+      element: <IssueDetails role="admin" />,
+    },
+    {
       path: "queues",
       element: <>Queue Monitoring</>,
     },
     {
       path: "reviews",
-      element: <>Reviews &amp; Ratings Moderation</>,
+      element: <AdminReviewModerationPage />,
     },
     {
       path: "fraud",
@@ -68,11 +93,23 @@ export const adminRoutes = {
     },
     {
       path: "notifications",
-      element: <>Notifications Management</>,
+      element: <NotificationCenterPage />,
     },
     {
       path: "reports",
-      element: <>Reports &amp; Analytics</>,
+      element: <AdminAnalyticsPage />,
+    },
+    {
+      path: "knowledge-docs",
+      element: <KnowledgeDocumentListPage />,
+    },
+    {
+      path: "knowledge-docs/:id",
+      element: <KnowledgeDocumentDetailsPage />,
+    },
+    {
+      path: "analytics",
+      element: <AdminAnalyticsPage />,
     },
     {
       path: "settlements",

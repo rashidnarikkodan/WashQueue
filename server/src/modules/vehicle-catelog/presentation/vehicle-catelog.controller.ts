@@ -16,7 +16,7 @@ import {
 import { getClassesQuerySchema } from "./schema/class.schema"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
-import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import { SUCCESS_MESSAGES } from "@/common/constants/success.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
 
 export class VehicleCatelogController {

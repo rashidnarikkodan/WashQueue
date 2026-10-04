@@ -4,7 +4,7 @@ import { UserMapper } from "../mappers/user.mapper"
 import { IUserRepository } from "../../domain/repositories/user.repository"
 import { GetUsersQuery, GetUsersResponse } from "../../application/dto/get-users.dto"
 import { buildPaginationMeta, getPagination } from "@/common/utils/pagination"
-import { RoleType, ROLE } from "@/common/constants/role.constants"
+import { ROLE, type RoleType } from "@/common/constants/role.constants"
 import { BaseRepository } from "@/infrastructure/database/repository/base.repository"
 
 export class UserRepository extends BaseRepository<User, IUser> implements IUserRepository {
@@ -90,15 +90,40 @@ export class UserRepository extends BaseRepository<User, IUser> implements IUser
   }
 
   async getAllUsers(query: GetUsersQuery): Promise<GetUsersResponse> {
-    const { page, limit, search, role, isBlocked, isVerified, sortBy, sortOrder } = query
+    const { page, limit, search, role, isBlocked, isVerified, approvalStatus, sortBy, sortOrder } =
+      query
 
     const filter: Record<string, unknown> = {}
 
-    if (typeof isVerified === "boolean") {
+    if (approvalStatus) {
       const { Owner: OwnerModel } = await import("@/modules/owner/infrastructure/model/owner.model")
-      const ownersList = await OwnerModel.find({ isVerified }).select("userId").lean().exec()
-      const ownerUserIds = ownersList.map((o) => o.userId)
-      filter._id = { $in: ownerUserIds }
+      if (approvalStatus === "approved") {
+        const approvedOwners = await OwnerModel.find({ isVerified: true }, { userId: 1 })
+          .lean()
+          .exec()
+        const approvedUserIds = approvedOwners.map((o) => o.userId)
+        filter._id = { $in: approvedUserIds }
+      } else if (approvalStatus === "pending") {
+        const pendingOwners = await OwnerModel.find(
+          { isVerified: { $ne: true }, onboardingStep: { $gte: 3 } },
+          { userId: 1 }
+        )
+          .lean()
+          .exec()
+        const pendingUserIds = pendingOwners.map((o) => o.userId)
+        filter._id = { $in: pendingUserIds }
+      } else if (approvalStatus === "draft") {
+        const nonDraftOwners = await OwnerModel.find(
+          { $or: [{ isVerified: true }, { onboardingStep: { $gte: 3 } }] },
+          { userId: 1 }
+        )
+          .lean()
+          .exec()
+        const nonDraftUserIds = nonDraftOwners.map((o) => o.userId)
+        filter._id = { $nin: nonDraftUserIds }
+      }
+    } else if (typeof isVerified === "boolean") {
+      filter.isVerified = isVerified
     }
 
     if (search) {

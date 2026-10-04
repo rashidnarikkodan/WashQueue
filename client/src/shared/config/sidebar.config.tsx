@@ -14,6 +14,8 @@ import {
   Calendar,
   CreditCard,
   Car,
+  LifeBuoy,
+  BookOpen,
 } from "lucide-react"
 
 import type { LucideIcon } from "lucide-react"
@@ -31,14 +33,14 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: LayoutDashboard,
   },
   {
-    name: "User Management",
-    path: "/admin/users",
-    icon: Users,
+    name: "Booking Monitoring",
+    path: "/admin/bookings",
+    icon: ReceiptText,
   },
   {
-    name: "Owner Verification",
-    path: "/admin/owners",
-    icon: ShieldCheck,
+    name: "Issue Management",
+    path: "/admin/issues",
+    icon: LifeBuoy,
   },
   {
     name: "Station Management",
@@ -46,24 +48,19 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: Fuel,
   },
   {
-    name: "Catelog Management",
-    path: "/admin/categories",
-    icon: Shapes,
+    name: "Owner Verification",
+    path: "/admin/owners",
+    icon: ShieldCheck,
   },
   {
-    name: "Booking Monitoring",
-    path: "/admin/bookings",
-    icon: ReceiptText,
+    name: "User Management",
+    path: "/admin/users",
+    icon: Users,
   },
   {
-    name: "Queue Monitoring",
-    path: "/admin/queues",
-    icon: Hourglass,
-  },
-  {
-    name: "Reviews & Ratings Moderation",
-    path: "/admin/reviews",
-    icon: MessageSquareMore,
+    name: "Settlement Monitoring",
+    path: "/admin/settlements",
+    icon: CreditCard,
   },
   {
     name: "Fraud Monitoring",
@@ -71,9 +68,9 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: ShieldAlert,
   },
   {
-    name: "Notifications Management",
-    path: "/admin/notifications",
-    icon: Bell,
+    name: "Reviews & Ratings",
+    path: "/admin/reviews",
+    icon: MessageSquareMore,
   },
   {
     name: "Reports & Analytics",
@@ -81,9 +78,19 @@ export const adminSideBarItems: SidebarItem[] = [
     icon: BarChart3,
   },
   {
-    name: "Settlement Monitoring",
-    path: "/admin/settlements",
-    icon: CreditCard,
+    name: "Catalog Management",
+    path: "/admin/categories",
+    icon: Shapes,
+  },
+  {
+    name: "Notifications Management",
+    path: "/admin/notifications",
+    icon: Bell,
+  },
+  {
+    name: "Knowledge Base",
+    path: "/admin/knowledge-docs",
+    icon: BookOpen,
   },
   {
     name: "System Settings",
@@ -107,6 +114,11 @@ export const ownerSideBarItems: SidebarItem[] = [
     name: "Bookings",
     path: "/owner/bookings",
     icon: Calendar,
+  },
+  {
+    name: "Issue Management",
+    path: "/owner/issues",
+    icon: LifeBuoy,
   },
   {
     name: "My Stations",
@@ -150,6 +162,11 @@ export const managerSideBarItems: SidebarItem[] = [
     name: "Bookings",
     path: "/manager/bookings",
     icon: Calendar,
+  },
+  {
+    name: "Issue Management",
+    path: "/manager/issues",
+    icon: LifeBuoy,
   },
   {
     name: "Customer Feedback",

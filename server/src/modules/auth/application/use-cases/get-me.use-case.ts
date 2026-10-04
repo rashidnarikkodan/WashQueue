@@ -27,6 +27,7 @@ export class GetMeUseCase implements IGetMeUseCase {
     let isVerified = user.isVerified
     let onboardingStep = 1
     let ownerId: string | undefined = undefined
+    let isManager: boolean | undefined = undefined
 
     if (user.role === ROLE.OWNER) {
       const owner = await this.ownerRepository.findByUserId(userId)
@@ -34,6 +35,7 @@ export class GetMeUseCase implements IGetMeUseCase {
         isVerified = owner.isVerified ?? false
         onboardingStep = owner.onboardingStep ?? 1
         ownerId = owner.id
+        isManager = owner.isManager ?? false
       }
     }
 
@@ -49,6 +51,7 @@ export class GetMeUseCase implements IGetMeUseCase {
       onboardingStep,
       authProvider: user.authProvider,
       ownerId,
+      isManager,
     }
   }
 }

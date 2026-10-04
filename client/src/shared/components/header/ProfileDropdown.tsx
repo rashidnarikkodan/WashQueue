@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import {
-  User,
-  Car,
   Calendar,
   CreditCard,
   Wrench,
   Headphones,
   LogOut,
   ChevronRight,
+  Sun,
+  Moon,
 } from "lucide-react"
+import { useTheme } from "next-themes"
 import { useAuthStore } from "../../../features/auth/store/auth.store"
 import { ROLE, VIEW_MODE } from "../../constants/role.const"
 
@@ -22,6 +23,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const { user, logout, setActiveViewMode } = useAuthStore()
+  const { setTheme, resolvedTheme } = useTheme()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,8 +52,11 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
     }
   }
 
+  const isOwnerOnboarded =
+    user.role === ROLE.OWNER && user.onboardingStep !== undefined && user.onboardingStep >= 4
+
   const getCtaContent = () => {
-    if (user.role === ROLE.OWNER) {
+    if (isOwnerOnboarded) {
       if (currentRole === VIEW_MODE.CUSTOMER) {
         return {
           title: "Switch to Owner Mode",
@@ -83,10 +88,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
     switch (currentRole) {
       case ROLE.ADMIN:
-        return {
-          title: "System Analytics",
-          desc: "Monitor platform performance",
-        }
+        return null
       case ROLE.MANAGER:
         return {
           title: "Walk-in Queue",
@@ -94,7 +96,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
         }
       default:
         return {
-          title: "Become an Owner",
+          title: user.onboardingStep ? "Continue Onboarding" : "Become an Owner",
           desc: "List your service and earn",
         }
     }
@@ -113,7 +115,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
   const handleRoleSwitch = () => {
     setIsOpen(false)
-    if (user.role === ROLE.OWNER) {
+    if (isOwnerOnboarded) {
       if (currentRole === VIEW_MODE.CUSTOMER) {
         setActiveViewMode(VIEW_MODE.OWNER)
         navigate("/owner")
@@ -148,15 +150,21 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
 
       {isOpen && (
         <div className="absolute right-0 top-12 z-50 w-96 rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-card-foreground">
-          <div className="p-5 border-b border-border/50 bg-muted/30">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-base font-extrabold shadow-md shadow-primary/20">
+          <Link
+            to="/profile"
+            onClick={() => setIsOpen(false)}
+            className="p-5 border-b border-border/50 bg-muted/30 flex items-center justify-between hover:bg-muted/50 transition-colors group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-base font-extrabold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
                 {initials}
               </div>
 
               <div className="flex flex-col overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-extrabold text-foreground text-sm truncate">{user.name}</h3>
+                  <h3 className="font-extrabold text-foreground text-sm truncate group-hover:text-primary transition-colors">
+                    {user.name}
+                  </h3>
                   <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                     {getRoleLabel()}
                   </span>
@@ -164,65 +172,60 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
               </div>
             </div>
-          </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+          </Link>
 
-          <div className="p-3 border-b border-border/40 bg-primary/5">
-            <button
-              type="button"
-              onClick={handleRoleSwitch}
-              className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                  <Wrench className="h-4.5 w-4.5" />
+          {cta && (
+            <div className="p-3 ">
+              <button
+                type="button"
+                onClick={handleRoleSwitch}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                    <Wrench className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="text-left">
+                    <>
+                      <span className="block text-xs font-extrabold text-foreground">
+                        {cta.title}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
+                    </>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <span className="block text-xs font-extrabold text-foreground">{cta.title}</span>
-                  <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
+                <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          )}
 
           <div className="p-2 space-y-1">
-            <Link
-              to="/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
+            <button
+              type="button"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <User className="h-4.5 w-4.5" />
+                  {resolvedTheme === "dark" ? (
+                    <Moon className="h-4.5 w-4.5" />
+                  ) : (
+                    <Sun className="h-4.5 w-4.5" />
+                  )}
                 </div>
-                <div>
-                  <span className="block text-xs font-bold text-foreground">My Profile</span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Account details & settings
+                <div className="text-left">
+                  <span className="block text-xs font-bold text-foreground">Theme</span>
+                  <span className="block text-[11px] text-muted-foreground capitalize">
+                    {resolvedTheme === "dark" ? "Dark Mode" : "Light Mode"}
                   </span>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </Link>
-
-            <Link
-              to="/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <Car className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-foreground">My Garage</span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Manage saved vehicles
-                  </span>
-                </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted border border-border/50 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground">
+                {resolvedTheme === "dark" ? <Moon size={12} /> : <Sun size={12} />}
+                <span className="capitalize">{resolvedTheme}</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </Link>
+            </button>
 
             <Link
               to={currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`}
@@ -262,7 +265,8 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
             </Link>
 
-            <div
+            <Link
+              to={currentRole === "customer" ? "/issues" : `/${currentRole}/issues`}
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
             >
@@ -273,12 +277,12 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
                 <div>
                   <span className="block text-xs font-bold text-foreground">Help & Support</span>
                   <span className="block text-[11px] text-muted-foreground">
-                    Customer support center
+                    Support tickets & issues
                   </span>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </div>
+            </Link>
           </div>
 
           <div className="p-3 border-t border-border/40 bg-muted/20 flex justify-end">

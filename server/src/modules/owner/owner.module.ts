@@ -28,17 +28,21 @@ const getOwnerUseCase = new GetOwnerUseCase(ownerRepository)
 const updateOwnerUseCase = new UpdateOwnerUseCase(ownerRepository)
 const saveOnboardingStepUseCase = new SaveOnboardingStepUseCase(ownerRepository, userRepository)
 const getOnboardingStatusUseCase = new GetOnboardingStatusUseCase(ownerRepository)
+import { notificationDispatcherService } from "../notification/notification.module"
+
 const submitOnboardingUseCase = new SubmitOnboardingUseCase(
   ownerRepository,
   tokenService,
   userRepository,
-  razorpayXPayoutProvider
+  razorpayXPayoutProvider,
+  notificationDispatcherService
 )
 const approveOwnerUseCase = new ApproveOwnerUseCase(
   ownerRepository,
   userRepository,
   mailService,
-  razorpayXPayoutProvider
+  razorpayXPayoutProvider,
+  notificationDispatcherService
 )
 
 const ownerController = new OwnerController(

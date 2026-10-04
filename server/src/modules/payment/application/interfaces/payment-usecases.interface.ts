@@ -2,10 +2,10 @@ import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-r
 import {
   CreateBookingReservationInput,
   BookingReservationResponseDTO,
-} from "../use-cases/create-booking-reservation.use-case"
-import { ConfirmBookingReservationInput } from "../use-cases/confirm-booking-reservation.use-case"
-import { RefundPolicyResult } from "../../domain/services/RefundPolicyEngine"
-import { ProcessRefundInput } from "../use-cases/evaluate-and-process-refund.use-case"
+  ConfirmBookingReservationInput,
+  ProcessRefundInput,
+} from "../dtos/payment.dto"
+import { RefundPolicyResult } from "../../domain/types/refund-policy.types"
 
 export interface ICreateBookingReservationUseCase {
   execute(

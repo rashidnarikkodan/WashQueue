@@ -7,6 +7,8 @@ import { ISubmitOnboardingUseCase } from "../interfaces/owner-usecases.interface
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { Owner } from "../../domain/entities/Owner"
 import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
+import { ROLE } from "@/common/constants/role.constants"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 import logger from "@/configs/logger.config"
@@ -16,7 +18,8 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
-    private readonly payoutProvider: IPayoutProvider
+    private readonly payoutProvider: IPayoutProvider,
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute(userId: string): Promise<{
@@ -62,10 +65,22 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
       })
     }
 
-    // Attempt to create the owner's RazorpayX payout destination now, while they're present to
-    // fix a bad IFSC/account number immediately — rather than waiting until admin approval days
-    // later. Not fatal here: ApproveOwnerUseCase still hard-requires it before final approval,
-    // and ProcessSettlementUseCase has its own lazy fallback — this is just the earliest attempt.
+    try {
+      await ensureOwnerPayoutAccount(
+        owner,
+        this.payoutProvider,
+        userDoc.name,
+        userDoc.email,
+        userDoc.phone
+      )
+    } catch (err: unknown) {
+      logger.warn(
+        { err, ownerId: owner.id },
+        "Failed to create RazorpayX payout destination during onboarding submission; will retry at approval time"
+      )
+    }
+
+    const savedOwner = await this.ownerRepository.save(owner)
     try {
       await ensureOwnerPayoutAccount(
         owner,
@@ -83,16 +98,51 @@ export class SubmitOnboardingUseCase implements ISubmitOnboardingUseCase {
 
     await this.ownerRepository.save(owner)
 
+    const targetRole = ROLE.OWNER
+
     const tokenPayload = {
       userId: userDoc.id || userId,
-      role: userDoc.role,
+      role: targetRole,
       email: userDoc.email,
     }
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload)
     const refreshToken = this.tokenService.generateRefreshToken(tokenPayload)
 
-    await this.userRepository.update(userId, { refreshToken })
+    await this.userRepository.update(userId, { role: targetRole, refreshToken })
+
+    if (this.notificationDispatcher) {
+      try {
+        // 1. Notify Owner User
+        await this.notificationDispatcher.dispatch({
+          recipientId: userId,
+          type: "SYSTEM",
+          title: "Partner Application Submitted",
+          message:
+            "Your onboarding application has been submitted and is currently in review by an administrator.",
+          data: {
+            ownerId: savedOwner.id,
+            url: "/owner/onboarding",
+          },
+          actionType: "NAVIGATE",
+        })
+
+        // 2. Notify Platform Admins
+        await this.notificationDispatcher.dispatchToAdmins({
+          type: "SYSTEM",
+          title: "New Partner Application",
+          message: `${savedOwner.legalFullName || userDoc.name || "A partner"} submitted an onboarding application for review.`,
+          data: {
+            ownerId: savedOwner.id,
+            applicantName: savedOwner.legalFullName || userDoc.name,
+            url: "/admin/owners",
+          },
+          actionType: "NAVIGATE",
+        })
+      } catch {
+        // Non-blocking
+      }
+    }
 
     return {
       success: true,

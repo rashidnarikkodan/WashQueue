@@ -1,7 +1,14 @@
 import axios from "axios"
 import { toast } from "sonner"
-import { useAuthStore } from "../../features/auth/store/auth.store"
 import { API_ROUTES } from "../constants/api.const"
+
+export type AuthFailureCallback = (message?: string) => void
+
+let authFailureHandler: AuthFailureCallback | null = null
+
+export const registerAuthFailureHandler = (handler: AuthFailureCallback) => {
+  authFailureHandler = handler
+}
 
 declare module "axios" {
   export interface AxiosRequestConfig {
@@ -71,13 +78,10 @@ api.interceptors.response.use(
         localStorage.removeItem("wq_auth")
         localStorage.removeItem("wq_temp_email")
 
-        useAuthStore.setState({
-          user: null,
-          isAuthenticated: false,
-        })
-
         const msg = error.response?.data?.message
-        if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
+        if (authFailureHandler) {
+          authFailureHandler(msg)
+        } else if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
           toast.error(msg, { id: "suspension-toast" })
         }
 
@@ -114,13 +118,10 @@ api.interceptors.response.use(
             localStorage.removeItem("wq_auth")
             localStorage.removeItem("wq_temp_email")
 
-            useAuthStore.setState({
-              user: null,
-              isAuthenticated: false,
-            })
-
             const msg = err.response?.data?.message
-            if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
+            if (authFailureHandler) {
+              authFailureHandler(msg)
+            } else if (msg && (msg.includes("suspended") || msg.includes("blocked"))) {
               toast.error(msg, { id: "suspension-toast" })
             }
 

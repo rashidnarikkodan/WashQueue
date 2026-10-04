@@ -6,9 +6,9 @@ import {
   VerifyTopUpPaymentDTO,
   WalletDTO,
   WalletTransactionDTO,
+  PaginatedLedgerDTO,
 } from "../dtos/wallet.dto"
 import { LedgerFilterOptions } from "../../domain/repositories/wallet-transaction.repository.interface"
-import { PaginatedLedgerDTO } from "../use-cases/get-transaction-ledger.use-case"
 
 export interface ICreateTopUpOrderUseCase {
   execute(userId: string, amount: number, currency?: string): Promise<TopUpOrderDTO>

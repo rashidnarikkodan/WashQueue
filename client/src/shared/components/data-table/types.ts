@@ -30,6 +30,7 @@ export interface SelectFilter {
   value: string
   onChange: (value: string) => void
   options: SelectFilterOption[]
+  colSpan?: string
 }
 
 export interface ToggleFilter {
@@ -45,6 +46,7 @@ export interface DataTableProps<T> {
   columns: Column<T>[]
   data: T[]
   rowKey: (row: T) => string
+  variant?: "default" | "widget"
 
   toolbar?: React.ReactNode
 

@@ -8,7 +8,7 @@ import type { Booking } from "../types/booking.types"
 import { CUSTOMER_BOOKING_TABS } from "../config/booking-tabs.config"
 import { getCustomerColumns } from "../config/booking-columns.config"
 import { useBookingList } from "../hooks/useBookingList"
-import CancellationModal from "../components/CancellationModal"
+import { CancellationModal } from "../components"
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()
@@ -81,7 +81,7 @@ export default function MyBookingsPage() {
   }, [pagination, filteredBookings.length, page])
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs items={[{ label: "Home", path: "/" }, { label: "My Bookings" }]} />
 
       <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">

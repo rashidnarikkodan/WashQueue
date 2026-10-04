@@ -1,5 +1,5 @@
 import { PaginationMeta } from "@/common/types/pagination"
-import { RoleType } from "@/common/constants/role.constants"
+import type { RoleType } from "@/common/constants/role.constants"
 
 export interface UserSummaryDto {
   id: string
@@ -25,6 +25,7 @@ export interface GetUsersQuery {
   role?: RoleType
   isBlocked?: boolean
   isVerified?: boolean
+  approvalStatus?: "all" | "pending" | "approved" | "draft"
   sortBy: "createdAt" | "name" | "email"
   sortOrder: "asc" | "desc"
 }

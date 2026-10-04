@@ -1,11 +1,12 @@
 import { IOwnerRepository } from "../../domain/repositories/owner.repository"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
 import { IMailService } from "@/core/application/interfaces/mail.interface"
-import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { Owner } from "../../domain/entities/Owner"
+import { ONBOARDING_STEP } from "../../domain/constants/onboarding-step.constants"
 import { IApproveOwnerUseCase } from "../interfaces/owner-usecases.interfaces"
 import { ApproveOwnerInput } from "../dto/approve-owner.dto"
+import { INotificationDispatcherService } from "@/modules/notification/notification.module"
 import { IPayoutProvider } from "@/core/application/interfaces/payout-provider.interface"
 import { ensureOwnerPayoutAccount } from "../services/ensure-owner-payout-account.service"
 
@@ -14,7 +15,8 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     private readonly ownerRepository: IOwnerRepository,
     private readonly userRepository: IUserRepository,
     private readonly mailService: IMailService,
-    private readonly payoutProvider: IPayoutProvider
+    private readonly payoutProvider?: IPayoutProvider,
+    private readonly notificationDispatcher?: INotificationDispatcherService
   ) {}
 
   async execute({
@@ -41,10 +43,37 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
     if (isApproved) {
       owner.verify()
 
-      await ensureOwnerPayoutAccount(owner, this.payoutProvider, user.name, user.email, user.phone)
+      if (this.payoutProvider) {
+        await ensureOwnerPayoutAccount(
+          owner,
+          this.payoutProvider,
+          user.name,
+          user.email,
+          user.phone
+        )
+      }
 
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: true })
+
+      if (this.notificationDispatcher) {
+        try {
+          await this.notificationDispatcher.dispatch({
+            recipientId: owner.userId,
+            type: "SYSTEM",
+            title: "Partner Application Approved! 🚀",
+            message:
+              "Welcome to the WashQueue Partner network! Your onboarding application has been verified and approved. You can now configure and submit your stations.",
+            data: {
+              ownerId: owner.id,
+              url: "/owner/stations",
+            },
+            actionType: "NAVIGATE",
+          })
+        } catch {
+          // Non-blocking
+        }
+      }
 
       try {
         await this.mailService.sendOwnerApprovalEmail(user.email, displayName)
@@ -60,6 +89,25 @@ export class ApproveOwnerUseCase implements IApproveOwnerUseCase {
       owner.setOnboardingStep(ONBOARDING_STEP.FIRST_STEP)
       await this.ownerRepository.save(owner)
       await this.userRepository.update(owner.userId, { isVerified: false })
+
+      if (this.notificationDispatcher) {
+        try {
+          await this.notificationDispatcher.dispatch({
+            recipientId: owner.userId,
+            type: "SYSTEM",
+            title: "Partner Application Update",
+            message: `Your partner application requires changes: ${reason}`,
+            data: {
+              ownerId: owner.id,
+              rejectionReason: reason,
+              url: "/owner/onboarding",
+            },
+            actionType: "NAVIGATE",
+          })
+        } catch {
+          // Non-blocking
+        }
+      }
 
       try {
         await this.mailService.sendOwnerRejectionEmail(user.email, displayName, reason)

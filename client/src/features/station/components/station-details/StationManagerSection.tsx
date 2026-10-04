@@ -5,7 +5,7 @@ import { managerApi } from "@/shared/apis/manager.api"
 import type { ManagerListItem, ManagerInvitationItem } from "@/shared/apis/manager.api"
 import { InviteManagerModal } from "@/features/owner/components/InviteManagerModal"
 import { UpdatePermissionsModal } from "@/features/owner/components/UpdatePermissionsModal"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import { toast } from "sonner"
 import {
   UserCheck,
@@ -77,7 +77,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       setManagerAssignment(assigned)
       setPendingInvitation(pending)
     } catch {
-      // Failed to load manager assignment or pending invitations
+      setManagerAssignment(null)
+      setPendingInvitation(null)
     } finally {
       setLoading(false)
     }
@@ -104,7 +105,8 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         setManagerAssignment(assigned)
         setPendingInvitation(pending)
       } catch {
-        // Failed to fetch manager assignments on load
+        setManagerAssignment(null)
+        setPendingInvitation(null)
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -132,6 +134,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
       await managerApi.selfAssignManager(station.id)
       await loadManagerData()
       await onRefresh()
+      await useAuthStore.getState().refreshUser()
       toast.success("Assigned yourself as manager for this station!")
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
@@ -157,6 +160,7 @@ export const StationManagerSection: React.FC<StationManagerSectionProps> = ({
         try {
           setManagerAssignment(null)
           await managerApi.removeManager(targetAssignment.assignmentId)
+          await useAuthStore.getState().refreshUser()
           toast.success("Station manager removed successfully")
         } catch (err: unknown) {
           const errorObj = err as { response?: { data?: { message?: string } } }

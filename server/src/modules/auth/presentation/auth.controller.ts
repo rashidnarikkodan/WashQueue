@@ -16,8 +16,9 @@ import success from "@/common/utils/success"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { setAuthCookies, clearAuthCookies } from "@/common/utils/cookies"
-import { SUCCESS_MESSAGES } from "@/common/constants/app.constants"
+import { SUCCESS_MESSAGES } from "@/common/constants/success.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
+import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 
 export class AuthController {
   constructor(
@@ -66,12 +67,7 @@ export class AuthController {
     }
 
     if (!token) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGES.REFRESH_TOKEN_REQUIRED,
-        data: null,
-      })
-      return
+      throw new UnauthorizedError(ERROR_MESSAGES.REFRESH_TOKEN_REQUIRED)
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
@@ -83,12 +79,7 @@ export class AuthController {
   me = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGES.UNAUTHORIZED,
-        data: null,
-      })
-      return
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
     const result = await this.getMeUseCase.execute(userId)
     success(res, result, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_RETRIEVED_SUCCESS)
@@ -116,12 +107,7 @@ export class AuthController {
   changePassword = async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user?.userId
     if (!userId) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGES.UNAUTHORIZED,
-        data: null,
-      })
-      return
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
     await this.changePasswordUseCase.execute(userId, req.body)

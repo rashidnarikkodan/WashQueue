@@ -9,6 +9,8 @@ export interface SocketUserPayload {
   role?: string
 }
 
+import { SOCKET_EVENTS } from "@/common/constants/socket-events.constants"
+
 function readCookie(cookieHeader: string | undefined, name: string): string {
   if (!cookieHeader) return ""
   for (const pair of cookieHeader.split(";")) {
@@ -46,6 +48,7 @@ export class SocketServerService {
       pingInterval: 10000,
     })
 
+    // middleware for socket, for auth user
     this.io.use((socket: Socket, next) => {
       try {
         const token =
@@ -86,7 +89,24 @@ export class SocketServerService {
         logger.info({ socketId: socket.id, userRoom }, "[SocketIO] Socket joined user room")
       }
 
-      socket.on("join_station", (data: { stationId: string }) => {
+      socket.on(SOCKET_EVENTS.JOIN_USER, (data: { userId: string }) => {
+        if (data?.userId) {
+          const userRoom = `user:${data.userId}`
+          socket.join(userRoom)
+          logger.info(
+            { socketId: socket.id, userRoom },
+            "[SocketIO] Socket joined user room via join_user"
+          )
+        }
+      })
+
+      socket.on(SOCKET_EVENTS.LEAVE_USER, (data: { userId: string }) => {
+        if (data?.userId) {
+          socket.leave(`user:${data.userId}`)
+        }
+      })
+
+      socket.on(SOCKET_EVENTS.JOIN_STATION, (data: { stationId: string }) => {
         if (data?.stationId) {
           const stationRoom = `station:${data.stationId}`
           socket.join(stationRoom)
@@ -94,13 +114,13 @@ export class SocketServerService {
         }
       })
 
-      socket.on("leave_station", (data: { stationId: string }) => {
+      socket.on(SOCKET_EVENTS.LEAVE_STATION, (data: { stationId: string }) => {
         if (data?.stationId) {
           socket.leave(`station:${data.stationId}`)
         }
       })
 
-      socket.on("join_booking", (data: { bookingId: string }) => {
+      socket.on(SOCKET_EVENTS.JOIN_BOOKING, (data: { bookingId: string }) => {
         if (data?.bookingId) {
           socket.join(`booking:${data.bookingId}`)
         }
