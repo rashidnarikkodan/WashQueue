@@ -1,5 +1,6 @@
 import React from "react"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 export interface PaginationMeta {
   total: number
@@ -70,19 +71,17 @@ export const Pagination: React.FC<PaginationProps> = ({
           </span>
 
           {onLimitChange && (
-            <div className="hidden md:flex items-center gap-1.5 ml-2 pl-3 border-l border-border/40">
-              <span className="text-muted-foreground/70">Per page:</span>
-              <select
+            <div className="hidden md:flex items-center gap-1.5 ml-2 pl-3 border-l border-border/40 min-w-[100px]">
+              <span className="text-muted-foreground/70 text-xs">Per page:</span>
+              <SelectInput
                 value={limit}
-                onChange={(e) => onLimitChange(Number(e.target.value))}
-                className="bg-transparent border border-border/40 hover:border-border text-foreground text-xs rounded-full px-2.5 py-0.5 font-medium focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors cursor-pointer"
-              >
-                {pageSizeOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-card text-foreground">
-                    {opt}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => onLimitChange(Number(val))}
+                options={pageSizeOptions.map((opt) => ({
+                  label: String(opt),
+                  value: opt,
+                }))}
+                className="w-20"
+              />
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import type { SelectFilter, ToggleFilter } from "./types"
+import SelectInput from "../form/SelectInput"
 
 interface FilterBarProps {
   selectFilters?: SelectFilter[]
@@ -8,21 +9,13 @@ interface FilterBarProps {
 const FilterBar = ({ selectFilters = [], toggleFilters = [] }: FilterBarProps) => (
   <>
     {selectFilters.map((filter) => (
-      <div key={filter.id} className={`space-y-2 ${filter.colSpan || ""}`}>
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">
-          {filter.label}
-        </span>
-        <select
+      <div key={filter.id} className={filter.colSpan || ""}>
+        <SelectInput
+          label={filter.label}
           value={filter.value}
-          onChange={(e) => filter.onChange(e.target.value)}
-          className="w-full bg-muted border border-transparent rounded-xl px-3 py-2.5 text-sm text-[#DCE1FB] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold cursor-pointer"
-        >
-          {filter.options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => filter.onChange(val)}
+          options={filter.options}
+        />
       </div>
     ))}
 

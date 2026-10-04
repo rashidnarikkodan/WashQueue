@@ -4,6 +4,7 @@ import DatePicker from "@/shared/components/form/DatePicker"
 import DataTableToolbar from "@/shared/components/data-table/DataTableToolbar"
 import type { SelectFilter, TabConfig } from "@/shared/components/data-table/types"
 import { Calendar } from "lucide-react"
+import SelectInput from "@/shared/components/form/SelectInput"
 
 export interface DateRangeTabsProps {
   activeRange: DateRangeFilter
@@ -175,61 +176,39 @@ export default function DateRangeTabs({
         </div>
 
         {activeRange === "12_MONTHS" && onYearChange && (
-          <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-xl border border-border shrink-0 animate-in fade-in duration-200">
-            <Calendar className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">Select Year:</span>
-            <select
+          <div className="flex items-center gap-2 shrink-0 animate-in fade-in duration-200 w-36">
+            <SelectInput
               value={selectedYear}
-              onChange={(e) => onYearChange(Number(e.target.value))}
-              className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer"
-            >
-              {availableYears.map((y) => (
-                <option key={y} value={y} className="bg-card text-foreground">
-                  {y}
-                </option>
-              ))}
-            </select>
+              leftIcon={<Calendar className="w-3.5 h-3.5 text-primary" />}
+              onChange={(val) => onYearChange(Number(val))}
+              options={availableYears.map((y) => ({ label: String(y), value: y }))}
+            />
           </div>
         )}
 
         {activeRange === "30_DAYS" && (
-          <div className="flex items-center gap-3 bg-card px-3 py-1.5 rounded-xl border border-border shrink-0 animate-in fade-in duration-200">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 animate-in fade-in duration-200">
             {onMonthChange && (
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-medium text-muted-foreground">Month:</span>
-                <select
+              <div className="w-36">
+                <SelectInput
                   value={selectedMonth}
-                  onChange={(e) => onMonthChange(Number(e.target.value))}
-                  className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer"
-                >
-                  {MONTH_OPTIONS.map((m) => (
-                    <option
-                      key={m.value}
-                      value={Number(m.value)}
-                      className="bg-card text-foreground"
-                    >
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
+                  leftIcon={<Calendar className="w-3.5 h-3.5 text-primary" />}
+                  onChange={(val) => onMonthChange(Number(val))}
+                  options={MONTH_OPTIONS.map((m) => ({
+                    label: m.label,
+                    value: Number(m.value),
+                  }))}
+                />
               </div>
             )}
 
             {onYearChange && (
-              <div className="flex items-center gap-1.5 border-l border-border pl-3">
-                <span className="text-xs font-medium text-muted-foreground">Year:</span>
-                <select
+              <div className="w-28">
+                <SelectInput
                   value={selectedYear}
-                  onChange={(e) => onYearChange(Number(e.target.value))}
-                  className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer"
-                >
-                  {availableYears.map((y) => (
-                    <option key={y} value={y} className="bg-card text-foreground">
-                      {y}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => onYearChange(Number(val))}
+                  options={availableYears.map((y) => ({ label: String(y), value: y }))}
+                />
               </div>
             )}
           </div>
