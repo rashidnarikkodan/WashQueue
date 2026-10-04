@@ -16,7 +16,16 @@ export class SettlementMapper implements IMapper<Settlement, ISettlementDocument
       stationSettlementAmount: doc.stationSettlementAmount,
       currency: doc.currency || "INR",
       status: doc.status,
-      payoutId: doc.payoutId?.toString(),
+      payoutId:
+        typeof doc.payoutId === "object" && doc.payoutId !== null && "_id" in doc.payoutId
+          ? (doc.payoutId as unknown as { _id: { toString(): string } })._id.toString()
+          : doc.payoutId?.toString(),
+      razorpayPayoutId:
+        typeof doc.payoutId === "object" &&
+        doc.payoutId !== null &&
+        "razorpayPayoutId" in doc.payoutId
+          ? (doc.payoutId as unknown as { razorpayPayoutId: string }).razorpayPayoutId
+          : undefined,
       holdReason: doc.holdReason,
       failureReason: doc.failureReason,
       retryCount: doc.retryCount || 0,

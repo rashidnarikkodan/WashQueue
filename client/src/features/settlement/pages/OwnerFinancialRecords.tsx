@@ -272,7 +272,7 @@ export default function OwnerFinancialRecords() {
       header: "Payout Ref",
       cell: (s) => (
         <span className="font-mono text-xs text-muted-foreground whitespace-nowrap truncate max-w-30 block">
-          {s.payoutId || "—"}
+          {s.razorpayPayoutId || s.payoutId || "—"}
         </span>
       ),
     },

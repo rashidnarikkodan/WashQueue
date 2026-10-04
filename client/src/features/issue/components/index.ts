@@ -1,8 +1,6 @@
 export { default as IssueStatusBadge } from "./IssueStatusBadge"
 export { default as IssuePriorityBadge } from "./IssuePriorityBadge"
 export { default as IssueCategoryBadge } from "./IssueCategoryBadge"
-export { default as IssueStatsHUD } from "./IssueStatsHUD"
-export { default as IssueRecentActivity } from "./IssueRecentActivity"
 export { default as CaseSummaryCard } from "./CaseSummaryCard"
 export { default as CustomerMiniProfile } from "./CustomerMiniProfile"
 export { default as ComplaintCard } from "./ComplaintCard"

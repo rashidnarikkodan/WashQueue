@@ -34,6 +34,7 @@ export interface SettlementResponseDTO {
   currency: string
   status: SettlementStatus
   payoutId?: string
+  razorpayPayoutId?: string
   holdReason?: string
   failureReason?: string
   retryCount: number

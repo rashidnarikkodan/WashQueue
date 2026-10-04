@@ -64,23 +64,14 @@ export default function SidebarWidgetsSection() {
 
             setQueueStats({
               stationName: queueData.stationName || firstStation.name,
-              averageDuration: queueData.averageWashDurationMinutes || 15,
-              activeCount: queueData.activeServicesCount || 0,
-              totalBays: queueData.totalBays || 1,
-              queueDepth: queueData.queueDepth || 0,
-              availableBays: queueData.availableBays || 0,
+              averageDuration: queueData.averageWashDurationMinutes ?? 0,
+              activeCount: queueData.activeServicesCount ?? 0,
+              totalBays: queueData.totalBays ?? 0,
+              queueDepth: queueData.queueDepth ?? 0,
+              availableBays: queueData.availableBays ?? 0,
             })
           } catch {
-            // Fallback from station props
-            const bays = firstStation.slotConfig?.bays || 2
-            setQueueStats({
-              stationName: firstStation.name,
-              averageDuration: 15,
-              activeCount: 1,
-              totalBays: bays,
-              queueDepth: 0,
-              availableBays: bays - 1,
-            })
+            setQueueStats(null)
           }
         }
       } catch (err) {
@@ -107,22 +98,14 @@ export default function SidebarWidgetsSection() {
       const queueData = await stationApi.getPublicLiveQueue(stationId)
       setQueueStats({
         stationName: queueData.stationName || st.name,
-        averageDuration: queueData.averageWashDurationMinutes || 15,
-        activeCount: queueData.activeServicesCount || 0,
-        totalBays: queueData.totalBays || 1,
-        queueDepth: queueData.queueDepth || 0,
-        availableBays: queueData.availableBays || 0,
+        averageDuration: queueData.averageWashDurationMinutes ?? 0,
+        activeCount: queueData.activeServicesCount ?? 0,
+        totalBays: queueData.totalBays ?? 0,
+        queueDepth: queueData.queueDepth ?? 0,
+        availableBays: queueData.availableBays ?? 0,
       })
     } catch {
-      const bays = st.slotConfig?.bays || 2
-      setQueueStats({
-        stationName: st.name,
-        averageDuration: 15,
-        activeCount: 0,
-        totalBays: bays,
-        queueDepth: 0,
-        availableBays: bays,
-      })
+      setQueueStats(null)
     } finally {
       setIsQueueLoading(false)
     }
@@ -191,15 +174,7 @@ export default function SidebarWidgetsSection() {
         })
       } catch (err) {
         console.error("Failed to load real weather", err)
-        // Fallback realistic weather
-        setWeather({
-          temp: 26,
-          code: 0,
-          description: "Clear Sky",
-          alertTitle: "Optimal Wash Day",
-          alertDetails: "Pleasant conditions across stations. Moderate queue times expected today.",
-          isRain: false,
-        })
+        setWeather(null)
       } finally {
         if (!ignore) setIsWeatherLoading(false)
       }
@@ -211,13 +186,12 @@ export default function SidebarWidgetsSection() {
           fetchWeather(pos.coords.latitude, pos.coords.longitude)
         },
         () => {
-          // Default to Bangalore / Central coordinates
-          fetchWeather(12.9716, 77.5946)
+          setIsWeatherLoading(false)
         },
         { timeout: 5000 }
       )
     } else {
-      fetchWeather(12.9716, 77.5946)
+      setTimeout(() => setIsWeatherLoading(false), 0)
     }
 
     return () => {
@@ -275,7 +249,7 @@ export default function SidebarWidgetsSection() {
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-muted-foreground font-semibold">Average Wash Time</p>
                 <p className="text-base font-black text-foreground truncate">
-                  {queueStats?.averageDuration || 15} mins / car
+                  {queueStats ? `${queueStats.averageDuration} mins / car` : "Unavailable"}
                 </p>
               </div>
             </div>
@@ -289,7 +263,7 @@ export default function SidebarWidgetsSection() {
                 <p className="text-base font-black text-foreground truncate">
                   {queueStats
                     ? `${queueStats.activeCount} / ${queueStats.totalBays} Bays Active`
-                    : "Live Tracking"}
+                    : "Unavailable"}
                 </p>
               </div>
             </div>
@@ -320,22 +294,22 @@ export default function SidebarWidgetsSection() {
             <div>
               <h4 className="text-sm font-bold text-foreground">Weather Insights</h4>
               <p className="text-xs text-muted-foreground font-medium">
-                {weather?.description || "Live Conditions"}
+                {weather?.description || "Weather Unavailable"}
               </p>
             </div>
           </div>
           <span className="text-2xl font-black text-foreground">
-            {isWeatherLoading ? "--" : `${weather?.temp || 26}°C`}
+            {isWeatherLoading ? "--" : weather ? `${weather.temp}°C` : "--"}
           </span>
         </div>
 
         <div className="space-y-1.5 pt-1">
           <p className="text-xs font-black text-primary uppercase tracking-wider">
-            {weather?.alertTitle || "Optimal Wash Conditions"}
+            {weather?.alertTitle || "Location Needed"}
           </p>
           <p className="text-xs md:text-sm text-muted-foreground leading-relaxed font-medium">
             {weather?.alertDetails ||
-              "Great weather conditions. Check station live queues for fast wash bay entry."}
+              "Allow location access to get localized weather insights and recommendations for your detailing."}
           </p>
         </div>
       </div>

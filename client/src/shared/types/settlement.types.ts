@@ -13,6 +13,7 @@ export interface Settlement {
   currency: string
   status: SettlementStatus
   payoutId?: string
+  razorpayPayoutId?: string
   holdReason?: string
   failureReason?: string
   retryCount: number

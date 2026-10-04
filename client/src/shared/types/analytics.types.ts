@@ -130,6 +130,7 @@ export interface ManagerDashboardData {
     rating: number
     totalReviews: number
     status: string
+    isActive: boolean
   }
   kpis: {
     todayTotalScheduled: number

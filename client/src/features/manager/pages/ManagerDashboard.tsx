@@ -9,10 +9,12 @@ import {
   ShieldAlert,
   MapPin,
   Star,
+  Power,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { analyticsApi, type ManagerDashboardData } from "@/shared/apis/analytics.api"
+import { stationApi } from "@/shared/apis/station.api"
 import { APP_ROUTES } from "@/shared/constants/appRoutes.const"
 import { StatsHUD, type StatItem } from "@/shared/components/stats"
 import {
@@ -29,6 +31,7 @@ export default function ManagerDashboard() {
   const navigate = useNavigate()
   const [data, setData] = useState<ManagerDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isToggling, setIsToggling] = useState(false)
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true)
@@ -41,6 +44,26 @@ export default function ManagerDashboard() {
       setIsLoading(false)
     }
   }, [])
+
+  const handleToggleActive = async () => {
+    if (!data?.station?.id) return
+    setIsToggling(true)
+    try {
+      const updatedStation = await stationApi.toggleActiveStation(data.station.id)
+      setData((prev) =>
+        prev ? { ...prev, station: { ...prev.station, isActive: updatedStation.isActive } } : prev
+      )
+      toast.success(
+        updatedStation.isActive
+          ? "Station is now online and accepting washes"
+          : "Station is now offline and stopped"
+      )
+    } catch {
+      toast.error("Failed to change station operational status")
+    } finally {
+      setIsToggling(false)
+    }
+  }
 
   useEffect(() => {
     let ignore = false
@@ -85,7 +108,7 @@ export default function ManagerDashboard() {
     {
       id: "turnaround",
       label: "Avg Service Duration",
-      value: `${kpis?.averageServiceMinutes || 35} mins`,
+      value: kpis?.averageServiceMinutes ? `${kpis.averageServiceMinutes} mins` : "--",
       variant: "slate",
       icon: Clock,
       description: "Per completed vehicle wash",
@@ -98,28 +121,56 @@ export default function ManagerDashboard() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-              {station?.name || "Assigned Wash Station"}
+              {station?.name || "Station Dashboard"}
             </h1>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/15 text-primary border border-primary/30">
               Manager Floor
             </span>
+            {station && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
+                  station.isActive
+                    ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                    : "bg-red-500/15 text-red-500 border-red-500/30"
+                }`}
+              >
+                {station.isActive ? "ONLINE" : "OFFLINE"}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
             <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-primary" /> {station?.city || "Kerala Hub"}
+              <MapPin className="w-3.5 h-3.5 text-primary" />{" "}
+              {station?.city || "Location Unavailable"}
             </span>
             <span>•</span>
             <span className="font-mono font-bold text-foreground">
-              {station?.totalBays || 1} Bays Available
+              {station?.totalBays ?? 0} Bays Available
             </span>
             <span>•</span>
             <span className="flex items-center gap-1 text-amber-500 font-bold">
-              <Star className="w-3 h-3 fill-amber-500" /> {(station?.rating || 5.0).toFixed(1)}
+              <Star className="w-3 h-3 fill-amber-500" />{" "}
+              {station?.rating ? station.rating.toFixed(1) : "--"}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+          {station && (
+            <button
+              onClick={handleToggleActive}
+              disabled={isToggling}
+              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer ${
+                station.isActive
+                  ? "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20"
+                  : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20"
+              }`}
+            >
+              <Power className={`w-4 h-4 ${isToggling ? "animate-pulse" : ""}`} />
+              {station.isActive ? "Stop Operations" : "Start Operations"}
+            </button>
+          )}
+
           <button
             onClick={fetchDashboardData}
             disabled={isLoading}

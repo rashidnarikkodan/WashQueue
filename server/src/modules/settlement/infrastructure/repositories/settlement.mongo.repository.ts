@@ -18,7 +18,7 @@ export class SettlementRepository
   }
 
   async findByBookingId(bookingId: string): Promise<Settlement | null> {
-    const doc = await this.model.findOne({ bookingId }).exec()
+    const doc = await this.model.findOne({ bookingId }).populate("payoutId").exec()
     return doc ? this.mapper.toDomain(doc) : null
   }
 
@@ -61,7 +61,13 @@ export class SettlementRepository
 
     const [total, docs] = await Promise.all([
       this.model.countDocuments(query).exec(),
-      this.model.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+      this.model
+        .find(query)
+        .populate("payoutId")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
     ])
 
     return {

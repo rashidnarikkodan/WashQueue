@@ -38,15 +38,15 @@ export default function WalletLoyaltySection() {
     fetchWallet()
   }, [fetchWallet])
 
-  const balanceNumber = wallet?.balance ?? user?.walletBalance ?? 0
+  const balanceNumber = wallet?.balance ?? 0
   const currencySymbol = wallet?.currency === "USD" ? "$" : "₹"
   const formattedBalance = `${currencySymbol}${balanceNumber.toFixed(2)}`
 
-  // Dynamic loyalty points calculation based on balance & engagement
-  const loyaltyPoints = Math.max(120, Math.round(balanceNumber * 2.5) + 350)
+  // Loyalty Program is not yet implemented
+  const loyaltyPoints = 0
   const tierTarget = 2500
-  const tierProgress = Math.min(100, Math.round((loyaltyPoints / tierTarget) * 100))
-  const pointsToNextTier = Math.max(0, tierTarget - loyaltyPoints)
+  const tierProgress = 0
+  const pointsToNextTier = tierTarget
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {

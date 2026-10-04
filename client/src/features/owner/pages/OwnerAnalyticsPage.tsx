@@ -132,7 +132,7 @@ export default function OwnerAnalyticsPage() {
 
   const kpis = data?.kpis
   const totalGross = kpis?.totalGrossRevenue || 0
-  const netEarnings = kpis?.netSettlementAmount || Math.round(totalGross * 0.85)
+  const netEarnings = kpis?.netSettlementAmount ?? 0
   const platformFee = Math.max(0, totalGross - netEarnings)
   const totalBookings = kpis?.totalBookings || 0
   const avgOrderValue = totalBookings > 0 ? Math.round(totalGross / totalBookings) : 0
@@ -208,16 +208,16 @@ export default function OwnerAnalyticsPage() {
       value: `₹${netEarnings.toLocaleString()}`,
       variant: "emerald",
       icon: Wallet,
-      description: "85% net payable after platform fee",
+      description: "Actual take-home earnings",
       onClick: () => navigate(APP_ROUTES.OWNER.FINANCIAL_RECORDS),
     },
     {
       id: "owner-platform-fee",
-      label: "Platform Fees (15%)",
+      label: "Platform Fees",
       value: `₹${platformFee.toLocaleString()}`,
       variant: "amber",
       icon: ReceiptText,
-      description: "Payment gateway & tech infra fee",
+      description: "Actual fees deducted",
       onClick: () => navigate(APP_ROUTES.OWNER.FINANCIAL_RECORDS),
     },
     {
@@ -405,25 +405,17 @@ export default function OwnerAnalyticsPage() {
             },
             {
               id: "fee",
-              header: "Platform Fee (15%)",
-              cell: (st: OwnerStationSummary) => (
-                <span className="font-medium text-amber-500">
-                  - ₹{Math.round((st.totalRevenue || 0) * 0.15).toLocaleString()}
-                </span>
+              header: "Platform Fee",
+              cell: () => (
+                <span className="text-muted-foreground text-xs italic">See account total</span>
               ),
             },
             {
               id: "net",
-              header: "Net Take (85%)",
-              cell: (st: OwnerStationSummary) => {
-                const gross = st.totalRevenue || 0
-                const fee = Math.round(gross * 0.15)
-                return (
-                  <span className="font-black text-emerald-500">
-                    ₹{(gross - fee).toLocaleString()}
-                  </span>
-                )
-              },
+              header: "Net Take",
+              cell: () => (
+                <span className="text-muted-foreground text-xs italic">Pending settlement</span>
+              ),
             },
             {
               id: "yield",

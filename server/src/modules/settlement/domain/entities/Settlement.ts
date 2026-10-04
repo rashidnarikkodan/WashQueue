@@ -29,6 +29,7 @@ export interface SettlementProps {
 
   status: SettlementStatus
   payoutId?: string
+  razorpayPayoutId?: string
 
   holdReason?: string
   failureReason?: string
@@ -122,6 +123,10 @@ export class Settlement {
 
   get payoutId(): string | undefined {
     return this.props.payoutId
+  }
+
+  get razorpayPayoutId(): string | undefined {
+    return this.props.razorpayPayoutId
   }
 
   get holdReason(): string | undefined {

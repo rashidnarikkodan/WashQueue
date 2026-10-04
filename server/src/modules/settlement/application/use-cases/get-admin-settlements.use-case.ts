@@ -63,6 +63,7 @@ export class GetAdminSettlementsUseCase implements IGetAdminSettlementsUseCase {
           currency: s.currency,
           status: s.status,
           payoutId: s.payoutId,
+          razorpayPayoutId: s.razorpayPayoutId,
           holdReason: s.holdReason,
           failureReason: s.failureReason,
           retryCount: s.retryCount,

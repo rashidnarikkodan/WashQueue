@@ -24,25 +24,14 @@ export default function InspectionComparisonTabs({
   const currentData = activeTab === "pre" ? preInspection : postInspection
   const currentPhotos = currentData?.photos || []
 
-  const fallbackPhoto =
-    activeTab === "pre"
-      ? "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80"
-      : "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=1200&q=80"
-
   const activePhotoUrl =
     currentPhotos[selectedPhotoIdx]?.secured_url ||
     currentPhotos[selectedPhotoIdx]?.url ||
     currentPhotos[0]?.secured_url ||
     currentPhotos[0]?.url ||
-    fallbackPhoto
+    ""
 
   const activePosition = currentPhotos[selectedPhotoIdx]?.position || "Main Inspection Angle"
-
-  const defaultInspectorNotes = [
-    { label: "Bodywork condition", status: "Clean, no deep abrasions", passed: true },
-    { label: "Wheel bays", status: "Brake dust removed & coated", passed: true },
-    { label: "Glass & Windshield", status: "Clear, optical verification 98%", passed: true },
-  ]
 
   return (
     <div className="rounded-3xl bg-card border border-border shadow-xl overflow-hidden text-left">
@@ -85,30 +74,44 @@ export default function InspectionComparisonTabs({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Inspection Image Gallery */}
           <div className="lg:col-span-7 space-y-3">
-            <div
-              onClick={() => setLightboxPhoto(activePhotoUrl)}
-              className="group relative aspect-4/3 rounded-2xl overflow-hidden border border-border bg-black/40 cursor-pointer"
-            >
-              <img
-                src={activePhotoUrl}
-                alt={`${activeTab} inspection bay view`}
-                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
-              />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
-                <Camera className="w-3.5 h-3.5 text-primary" />
-                <span>{activePosition}</span>
-              </div>
+            {currentPhotos.length > 0 && activePhotoUrl ? (
+              <div
+                onClick={() => setLightboxPhoto(activePhotoUrl)}
+                className="group relative aspect-4/3 rounded-2xl overflow-hidden border border-border bg-black/40 cursor-pointer"
+              >
+                <img
+                  src={activePhotoUrl}
+                  alt={`${activeTab} inspection bay view`}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
+                  <Camera className="w-3.5 h-3.5 text-primary" />
+                  <span>{activePosition}</span>
+                </div>
 
-              <div className="absolute top-3 right-3 p-2 rounded-xl bg-black/60 backdrop-blur-sm text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <ZoomIn className="w-4 h-4" />
+                <div className="absolute top-3 right-3 p-2 rounded-xl bg-black/60 backdrop-blur-sm text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ZoomIn className="w-4 h-4" />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="aspect-4/3 rounded-2xl border border-border border-dashed bg-muted/20 flex flex-col items-center justify-center text-muted-foreground p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
+                  <Camera className="w-6 h-6 opacity-50" />
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  No inspection photos available
+                </p>
+                <p className="text-xs opacity-70">
+                  No imagery was captured for this stage of the service.
+                </p>
+              </div>
+            )}
 
             {/* Photo Angle Switcher if multiple photos exist */}
             {currentPhotos.length > 1 && (
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
                 {currentPhotos.map((photo, idx) => {
-                  const pUrl = photo.secured_url || photo.url || fallbackPhoto
+                  const pUrl = photo.secured_url || photo.url || ""
                   const isSelected = idx === selectedPhotoIdx
                   return (
                     <button
@@ -138,17 +141,19 @@ export default function InspectionComparisonTabs({
             )}
 
             {/* Automated Scan Logs */}
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Scan className="w-3.5 h-3.5 text-primary" />
-                AUTOMATED OPTICAL VERIFICATION LOGS
-              </span>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {activeTab === "pre"
-                  ? "Pre-wash scan captured on bay entry. Timestamped baseline condition recorded to ensure accountability."
-                  : "Final post-dry optical verification complete. Verified against baseline pre-wash scan."}
-              </p>
-            </div>
+            {currentPhotos.length > 0 && (
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Scan className="w-3.5 h-3.5 text-primary" />
+                  AUTOMATED OPTICAL VERIFICATION LOGS
+                </span>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {activeTab === "pre"
+                    ? "Pre-wash scan captured on bay entry. Timestamped baseline condition recorded to ensure accountability."
+                    : "Final post-dry optical verification complete. Verified against baseline pre-wash scan."}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Inspector Notes Checklist */}
@@ -181,21 +186,12 @@ export default function InspectionComparisonTabs({
                 ))}
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {defaultInspectorNotes.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3.5 rounded-2xl bg-muted/40 border border-border flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                      <span className="text-xs font-semibold text-foreground">{item.label}:</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground font-medium truncate">
-                      {item.status}
-                    </span>
-                  </div>
-                ))}
+              <div className="p-6 rounded-2xl border border-border border-dashed flex flex-col items-center justify-center text-center space-y-2 bg-muted/20">
+                <ShieldCheck className="w-8 h-8 text-muted-foreground opacity-30 mb-1" />
+                <p className="text-sm font-semibold text-foreground">No Checklist Found</p>
+                <p className="text-xs text-muted-foreground max-w-48">
+                  The inspection checklist was not recorded for this stage.
+                </p>
               </div>
             )}
 
