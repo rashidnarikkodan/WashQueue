@@ -30,7 +30,6 @@ import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 import { Users, CalendarCheck } from "lucide-react"
 import type { TopStation } from "../types/admin.types"
 
-
 export default function AdminAnalyticsPage() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("30_DAYS")

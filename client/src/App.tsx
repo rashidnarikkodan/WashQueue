@@ -6,31 +6,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { useAuthStore } from "./features/auth/store/auth.store"
 import { useEffect } from "react"
 import { authApi } from "./shared/apis/auth.api"
-import { RateExperienceModal } from "./features/review/components/RateExperienceModal"
-import { useReviewSocketListener } from "./features/review/hooks/useReviewSocketListener"
 import { TOASTER } from "./shared/constants/toaster.const"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
-
-function AppContent() {
-  useReviewSocketListener()
-
-  return (
-    <>
-      <RouterProvider router={router} />
-      <RateExperienceModal />
-      <Toaster
-          position={TOASTER.POSITION}
-          theme={TOASTER.THEME}
-          duration={TOASTER.DURATION}
-          closeButton
-          toastOptions={{
-            classNames: TOASTER.CLASS_NAMES,
-          }}
-        />
-    </>
-  )
-}
 
 function App() {
   useEffect(() => {
@@ -47,8 +25,16 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
-        <AppContent />
-        
+        <RouterProvider router={router} />
+        <Toaster
+          position={TOASTER.POSITION}
+          theme={TOASTER.THEME}
+          duration={TOASTER.DURATION}
+          closeButton
+          toastOptions={{
+            classNames: TOASTER.CLASS_NAMES,
+          }}
+        />{" "}
       </ThemeProvider>
     </GoogleOAuthProvider>
   )

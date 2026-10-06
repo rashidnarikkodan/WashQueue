@@ -1,5 +1,4 @@
-
-export function AIEmptyHero(){
+export function AIEmptyHero() {
   return (
     <div className="flex flex-col items-center text-center px-4 pb-2 animate-in fade-in duration-200">
       {/* Standalone large Qyn logo */}

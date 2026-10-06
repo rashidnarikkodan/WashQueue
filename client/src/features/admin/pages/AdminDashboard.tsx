@@ -30,7 +30,6 @@ import { DataTable } from "@/shared/components/data-table"
 import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 import type { RecentBooking } from "../types/admin.types"
 
-
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [dateRange, setDateRange] = useState<DateRangeFilter>("TODAY")
