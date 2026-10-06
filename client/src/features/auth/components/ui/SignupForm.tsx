@@ -7,10 +7,11 @@ import { AlertCircle } from "lucide-react"
 import FormInput from "../../../../shared/components/form/FormInput"
 import SocialButton from "./SocialButton"
 import Submit from "./Submit"
-import { signupAction, type SignupState } from "../../actions/signup.action"
+import { signupAction } from "../../actions/signup.action"
 import { useAuthStore } from "../../store/auth.store"
 import { ROLE, VIEW_MODE } from "../../../../shared/constants/role.const"
 import PasswordStrength from "@/shared/components/ui/PasswordStrength"
+import type { SignupState } from "../../types"
 
 const initialState: SignupState = {
   success: false,

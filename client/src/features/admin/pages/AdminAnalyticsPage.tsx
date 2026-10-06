@@ -28,8 +28,8 @@ import ChartContainer from "@/shared/components/charts/ChartContainer"
 import DistributionDonutChart from "@/shared/components/charts/DistributionDonutChart"
 import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
 import { Users, CalendarCheck } from "lucide-react"
+import type { TopStation } from "../types/admin.types"
 
-type TopStation = NonNullable<AdminDashboardData["topStations"]>[number] & { rank: number }
 
 export default function AdminAnalyticsPage() {
   const navigate = useNavigate()

@@ -10,14 +10,14 @@ interface AIPromptInputProps {
   placeholder?: string
 }
 
-export const AIPromptInput: React.FC<AIPromptInputProps> = ({
+export function AIPromptInput({
   value,
   onChange,
   onSubmit,
   isLoading,
   isCentered = false,
   placeholder = "Ask Qyn anything...",
-}) => {
+}: AIPromptInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
 

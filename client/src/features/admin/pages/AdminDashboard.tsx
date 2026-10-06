@@ -28,8 +28,8 @@ import {
 import { DataTable } from "@/shared/components/data-table"
 
 import DateRangeTabs from "@/shared/components/analytics/DateRangeTabs"
+import type { RecentBooking } from "../types/admin.types"
 
-type RecentBooking = NonNullable<AdminDashboardData["recentBookings"]>[number]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()

@@ -2,8 +2,6 @@ import { authApi } from "@/shared/apis/auth.api"
 import { getErrorMessage } from "@/shared/utils/error"
 import type { SignupState } from "../types"
 
-export type { SignupState } from "../types"
-
 export async function signupAction(
   _prevState: SignupState,
   formData: FormData
