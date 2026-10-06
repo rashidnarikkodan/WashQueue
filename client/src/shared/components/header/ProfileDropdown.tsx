@@ -151,7 +151,7 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       {isOpen && (
         <div className="absolute right-0 top-12 z-50 w-96 rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-card-foreground">
           <Link
-            to="/profile"
+            to={currentRole === "customer" ? "/profile" : `/${currentRole}/profile`}
             onClick={() => setIsOpen(false)}
             className="p-5 border-b border-border/50 bg-muted/30 flex items-center justify-between hover:bg-muted/50 transition-colors group cursor-pointer"
           >

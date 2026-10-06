@@ -1,4 +1,3 @@
-import React from "react"
 import { useAIChat } from "../hooks/useAIChat"
 import { AIEmptyHero } from "../components/AIEmptyHero"
 import { AIPromptInput } from "../components/AIPromptInput"
@@ -6,7 +5,7 @@ import { AISuggestionChips } from "../components/AISuggestionChips"
 import { AIMessageList } from "../components/AIMessageList"
 import { PenBoxIcon } from "lucide-react"
 
-export const AIAssistantPage: React.FC = () => {
+export function AIAssistantPage() {
   const {
     messages,
     isLoading,

@@ -2,8 +2,6 @@ import { getErrorMessage } from "@/shared/utils/error"
 import { authApi } from "@/shared/apis/auth.api"
 import type { LoginState } from "../types"
 
-export type { LoginState } from "../types"
-
 export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   let email = ""
   try {

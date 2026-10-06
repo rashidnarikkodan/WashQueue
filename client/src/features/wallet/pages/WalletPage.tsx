@@ -55,10 +55,23 @@ export default function WalletPage() {
         if (filterType === "TOP_UP") queryParams.category = "TOP_UP"
 
         const res = await walletApi.getTransactions(queryParams)
-        setTransactions(res.data || [])
+        const rawRes = res as unknown as Record<string, unknown>
+        const txArray: WalletTransactionItem[] = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(rawRes.transactions)
+            ? (rawRes.transactions as WalletTransactionItem[])
+            : Array.isArray((rawRes.data as Record<string, unknown>)?.transactions)
+              ? ((rawRes.data as Record<string, unknown>).transactions as WalletTransactionItem[])
+              : []
+        setTransactions(txArray)
+
         if (res.pagination) {
           setTotalPages(res.pagination.totalPages || 1)
-          setTotalRecords(res.pagination.total || (res.data ? res.data.length : 0))
+          setTotalRecords(res.pagination.total || txArray.length)
+        } else if (rawRes.total) {
+          setTotalRecords(Number(rawRes.total))
+        } else {
+          setTotalRecords(txArray.length)
         }
       } catch (err) {
         console.error("Failed to load transaction history", err)
@@ -210,7 +223,15 @@ export default function WalletPage() {
     setIsStatementLoading(true)
     try {
       const res = await walletApi.getTransactions({ limit: 100 })
-      setStatementTransactions(res.data || [])
+      const rawRes = res as unknown as Record<string, unknown>
+      const txArray: WalletTransactionItem[] = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(rawRes.transactions)
+          ? (rawRes.transactions as WalletTransactionItem[])
+          : Array.isArray((rawRes.data as Record<string, unknown>)?.transactions)
+            ? ((rawRes.data as Record<string, unknown>).transactions as WalletTransactionItem[])
+            : []
+      setStatementTransactions(txArray)
     } catch (err) {
       console.error("Failed to load wallet statement", err)
       toast.error("Failed to load wallet statement")
@@ -219,20 +240,28 @@ export default function WalletPage() {
     }
   }
 
-  const totalTransactionsCount = totalRecords || transactions.length
-  const totalSpentAmount = useMemo(() => {
-    return transactions
-      .filter((tx) => tx.type === "DEBIT" && tx.category !== "REFUND" && tx.status === "COMPLETED")
-      .reduce((acc, tx) => acc + tx.amount, 0)
+  const safeTransactions = useMemo(() => {
+    return Array.isArray(transactions) ? transactions : []
   }, [transactions])
 
-  const totalRefundAmount = useMemo(() => {
-    return transactions
+  const totalTransactionsCount = totalRecords || safeTransactions.length
+
+  const totalSpentAmount = useMemo(() => {
+    return safeTransactions
       .filter(
-        (tx) => (tx.category === "REFUND" || tx.type === "REFUND") && tx.status === "COMPLETED"
+        (tx) => tx && tx.type === "DEBIT" && tx.category !== "REFUND" && tx.status === "COMPLETED"
       )
-      .reduce((acc, tx) => acc + tx.amount, 0)
-  }, [transactions])
+      .reduce((acc, tx) => acc + (tx.amount || 0), 0)
+  }, [safeTransactions])
+
+  const totalRefundAmount = useMemo(() => {
+    return safeTransactions
+      .filter(
+        (tx) =>
+          tx && (tx.category === "REFUND" || tx.type === "REFUND") && tx.status === "COMPLETED"
+      )
+      .reduce((acc, tx) => acc + (tx.amount || 0), 0)
+  }, [safeTransactions])
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-4 pb-12 px-4 sm:px-6 lg:px-8">

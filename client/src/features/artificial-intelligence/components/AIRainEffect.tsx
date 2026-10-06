@@ -1,14 +1,14 @@
-import React, { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 
 interface RainDropConfig {
   id: number
-  left: number // 0 - 130%
-  headW: number // px width of head
-  headH: number // px height of head
-  tailLen: number // px small sleek tail length
-  duration: number // seconds (faster, natural rain glide)
-  delay: number // seconds (staggered waves)
+  left: number
+  headW: number
+  headH: number
+  tailLen: number
+  duration: number
+  delay: number
   opacity: number
 }
 
@@ -16,7 +16,7 @@ interface AIRainEffectProps {
   active: boolean
 }
 
-export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
+export function AIRainEffect({ active }: AIRainEffectProps) {
   const [cycleKey, setCycleKey] = useState(0)
   const [isRendered, setIsRendered] = useState(active)
 
@@ -35,7 +35,6 @@ export const AIRainEffect: React.FC<AIRainEffectProps> = ({ active }) => {
     }
   }, [active, isRendered])
 
-  // Rain drops with small sleek tails falling FASTER from top-right to bottom-left
   const drops = useMemo<RainDropConfig[]>(() => {
     return [
       // WAVE 1: Initial Drizzle (starts immediately 0s - 0.5s)

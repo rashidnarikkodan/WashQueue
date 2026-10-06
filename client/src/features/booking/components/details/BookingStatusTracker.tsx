@@ -140,7 +140,7 @@ export default function BookingStatusTracker({
               }}
             >
               {/* Background track segment between nodes */}
-              <div className="w-full h-full bg-muted-foreground/25 dark:bg-slate-700/80 rounded-full" />
+              <div className="w-full h-full bg-muted-foreground/25 dark:bg-forground/20 rounded-full" />
 
               {/* Animated fill line for segment (stops at active stage node) */}
               <div

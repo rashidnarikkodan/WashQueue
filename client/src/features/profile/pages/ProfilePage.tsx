@@ -7,6 +7,8 @@ import ProfileHeader from "../components/ProfileHeader"
 import ProfileActivityStats from "../components/ProfileActivityStats"
 import PersonalDetailsCard from "../components/PersonalDetailsCard"
 import BusinessDetailsCard from "../components/BusinessDetailsCard"
+import ManagerStationDetailsCard from "../components/ManagerStationDetailsCard"
+import AdminGovernanceCard from "../components/AdminGovernanceCard"
 import AccountDetailsCard from "../components/AccountDetailsCard"
 import ProfileFooterActions from "../components/ProfileFooterActions"
 import EditProfileModal from "../components/EditProfileModal"
@@ -54,35 +56,42 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pt-10 pb-16 transition-colors duration-300">
-      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="min-h-screen bg-background text-foreground font-sans pt-6 pb-16 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <ProfileHeader profile={profile} onEditClick={() => setEditModalOpen(true)} />
 
-        <ProfileActivityStats stats={stats} />
+        <ProfileActivityStats stats={stats} role={profile.role} />
 
-        {profile.role === "owner" || profile.role === "admin" || profile.role === "manager" ? (
-          <div className="space-y-8">
-            <div className="w-full">
-              <BusinessDetailsCard profile={profile} />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-              <PersonalDetailsCard profile={profile} />
-              <AccountDetailsCard profile={profile} />
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            <PersonalDetailsCard profile={profile} />
-
-            <AccountDetailsCard profile={profile} />
+        {/* Role Specific Section */}
+        {profile.role === "owner" && (
+          <div className="w-full">
+            <BusinessDetailsCard profile={profile} />
           </div>
         )}
+
+        {profile.role === "manager" && (
+          <div className="w-full">
+            <ManagerStationDetailsCard profile={profile} />
+          </div>
+        )}
+
+        {profile.role === "admin" && (
+          <div className="w-full">
+            <AdminGovernanceCard profile={profile} />
+          </div>
+        )}
+
+        {/* Common Details Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+          <PersonalDetailsCard profile={profile} />
+          <AccountDetailsCard profile={profile} />
+        </div>
 
         <ProfileFooterActions
           onChangePasswordClick={() => setChangePasswordModalOpen(true)}
           onSignOutClick={handleSignOut}
           isLocal={profile.authProvider === "local"}
+          role={profile.role}
         />
       </div>
 

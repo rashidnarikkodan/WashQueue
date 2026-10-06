@@ -1,19 +1,5 @@
 import { create } from "zustand"
-import type { ChatMessage } from "../types/ai.types"
-
-interface AIChatState {
-  messages: ChatMessage[]
-  isLoading: boolean
-  error: string | null
-  activePrompt: string
-
-  setActivePrompt: (prompt: string) => void
-  addMessage: (message: ChatMessage) => void
-  updateMessage: (id: string, updates: Partial<ChatMessage>) => void
-  clearMessages: () => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
-}
+import type { AIChatState } from "../types/ai.types"
 
 export const useAIChatStore = create<AIChatState>((set) => ({
   messages: [],

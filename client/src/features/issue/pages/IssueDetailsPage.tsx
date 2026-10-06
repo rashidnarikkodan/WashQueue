@@ -308,7 +308,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
 
   if (error || !issue) {
     return (
-      <div className="min-h-screen max-w-4xl mx-auto px-4 pt-16 pb-20 text-left space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-16 pb-20 text-left space-y-6 min-h-screen">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -355,7 +355,7 @@ export default function IssueDetailsPage({ role: explicitRole }: IssueDetailsPag
   const bookingNumber = issue.bookingDetails?.bookingNumber || issue.bookingId
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-300 min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
+    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-24 space-y-6 text-left animate-in fade-in duration-300 min-h-screen">
       {/* Top Header & Breadcrumbs */}
       <div className="space-y-3 pb-1 border-b border-border/60">
         <div className="flex items-center justify-between">

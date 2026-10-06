@@ -1,6 +1,4 @@
-import React from "react"
-
-export const AIEmptyHero: React.FC = () => {
+export function AIEmptyHero() {
   return (
     <div className="flex flex-col items-center text-center px-4 pb-2 animate-in fade-in duration-200">
       {/* Standalone large Qyn logo */}
@@ -15,7 +13,7 @@ export const AIEmptyHero: React.FC = () => {
 
       {/* Title with Gemini/ChatGPT style gradient accent */}
       <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">
-        <span className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-800 bg-clip-text text-transparent font-bold">
+        <span className="bg-linear-to-r from-blue-500 via-blue-600 to-blue-800 bg-clip-text text-transparent font-bold">
           Hello!
         </span>
         <br />

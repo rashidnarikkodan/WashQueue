@@ -1,4 +1,3 @@
-import React from "react"
 import { CarFront, Clock, Sparkles, ShieldAlert } from "lucide-react"
 
 const SUGGESTIONS = [
@@ -31,10 +30,7 @@ interface AISuggestionChipsProps {
   disabled?: boolean
 }
 
-export const AISuggestionChips: React.FC<AISuggestionChipsProps> = ({
-  onSelect,
-  disabled = false,
-}) => {
+export function AISuggestionChips({ onSelect, disabled = false }: AISuggestionChipsProps) {
   return (
     <div className="w-full mt-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
