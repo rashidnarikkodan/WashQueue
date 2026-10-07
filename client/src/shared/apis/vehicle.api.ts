@@ -53,7 +53,9 @@ export const vehicleApi = {
 
   updateVehicle: async (id: string, input: Partial<CreateVehicleInput>): Promise<Vehicle> => {
     try {
-      const response = await api.patch<{ data: Vehicle }>(API_ROUTES.VEHICLES.BY_ID(id), input)
+      const payload = { ...input }
+      delete payload.imageFile
+      const response = await api.patch<{ data: Vehicle }>(API_ROUTES.VEHICLES.BY_ID(id), payload)
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to update vehicle")
