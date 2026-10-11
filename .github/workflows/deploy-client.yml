@@ -1,5 +1,4 @@
-
-name: Deploy Frontend
+name: Deploy Client Image
 
 on:
   push:
@@ -15,41 +14,38 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: rashidnarikkodan/washqueue-client
+
 jobs:
-  deploy:
-    name: Build and Deploy Frontend
+  build-and-push:
+    name: Build and Push Client Image
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.25.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.20.0
-          cache: pnpm
-          cache-dependency-path: client/pnpm-lock.yaml
-
-      - name: Install frontend dependencies
-        working-directory: client
-        run: pnpm install --frozen-lockfile
-
-      - name: Build frontend
-        working-directory: client
-        run: pnpm run build
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::900160667047:role/WashQueueFrontendDeployRole
-          aws-region: ap-south-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to S3
-        run: |
-          aws s3 sync client/dist/ s3://washqueue-client-app/ --delete
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
