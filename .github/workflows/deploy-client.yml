@@ -30,7 +30,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::900160667047:role/WashQueueFrontendDeployRole
+          role-to-assume: arn:aws:iam::900160667047:role/WashQueueServerDeployRole
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
