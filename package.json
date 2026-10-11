@@ -17,13 +17,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.15.1",
-      "onFail": "download"
-    }
-  },
+  "packageManager": "pnpm@11.25.0",
   "type": "module",
   "devDependencies": {
     "husky": "^9.1.7"
