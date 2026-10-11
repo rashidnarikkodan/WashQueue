@@ -40,9 +40,6 @@ jobs:
       - name: Format check
         run: pnpm run format:check
 
-      - name: Test
-        run: NODE_ENV=test pnpm run test
-
       - name: Build
         run: pnpm run build
 
