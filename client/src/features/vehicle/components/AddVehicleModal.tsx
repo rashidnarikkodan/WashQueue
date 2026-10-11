@@ -112,36 +112,40 @@ export default function AddVehicleModal({
   }
 
   useEffect(() => {
-    if (isOpen && initialVehicle) {
-      queueMicrotask(() => {
-        setNickname(initialVehicle.nickname || "")
-        setBrand(initialVehicle.brand || "")
-        setModel(initialVehicle.model || "")
-        setYear(initialVehicle.year || new Date().getFullYear())
-        setRegistrationNumber(initialVehicle.registrationNumber || "")
-        setCategoryId(initialVehicle.categoryId || "")
-        setClassId(initialVehicle.classId || "")
-        setIsPrimary(initialVehicle.isPrimary || false)
-        if (initialVehicle.image?.url) {
-          setImagePreview(initialVehicle.image.url)
-        }
-      })
+    if (!isOpen || !initialVehicle) return
+    let active = true
+    Promise.resolve().then(() => {
+      if (!active) return
+      setNickname(initialVehicle.nickname || "")
+      setBrand(initialVehicle.brand || "")
+      setModel(initialVehicle.model || "")
+      setYear(initialVehicle.year || new Date().getFullYear())
+      setRegistrationNumber(initialVehicle.registrationNumber || "")
+      setCategoryId(initialVehicle.categoryId || "")
+      setClassId(initialVehicle.classId || "")
+      setIsPrimary(initialVehicle.isPrimary || false)
+      setImagePreview(initialVehicle.image?.url || null)
+      setImageFile(null)
 
       if (initialVehicle.categoryId) {
-        queueMicrotask(() => setIsLoadingClasses(true))
+        setIsLoadingClasses(true)
         vehicleCatelogApi
           .getClasses({ categoryId: initialVehicle.categoryId })
           .then((data) => {
-            setCategoryClasses(data ?? [])
+            if (active) setCategoryClasses(data ?? [])
           })
           .catch((err) => {
             console.error("Failed to load classes", err)
-            setCategoryClasses([])
+            if (active) setCategoryClasses([])
           })
           .finally(() => {
-            setIsLoadingClasses(false)
+            if (active) setIsLoadingClasses(false)
           })
       }
+    })
+
+    return () => {
+      active = false
     }
   }, [isOpen, initialVehicle])
 
