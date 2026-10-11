@@ -32,6 +32,9 @@ const envSchema = z.object({
   AI_EMBEDDING_MODEL: z.string().default("embeddinggemma"),
   OLLAMA_LLM_MODEL: z.string().default("qwen2.5:3b"),
   OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  GEMINI_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com"),
   QDRANT_URL: z.string().url().default("http://localhost:6333"),
   QDRANT_API_KEY: z.string().optional(),
 })

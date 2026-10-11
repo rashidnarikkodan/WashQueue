@@ -11,12 +11,12 @@ import { IndexKnowledgeDocumentUseCase } from "./application/usecases/indexing/i
 import { LangChainChunker } from "./infrastructure/services/chunker.service"
 import { LocalEmbeddingModel } from "./infrastructure/services/embedding.service"
 import { QdrantVectorStore } from "./infrastructure/vector/qdrant.store"
-import { OllamaProvider } from "./infrastructure/llm/ollama.llm"
 import { SearchKnowledgeDocumentUseCase } from "./application/usecases/search/search-knowledge-document.usecase"
 import { createChatRoutes } from "./presentation/chat.routes"
 import { ChatController } from "./presentation/chat.controller"
 import { AskKnowledgeUseCase } from "./application/usecases/chat/ask-knowledge.usecase"
 import { authenticate } from "@/infrastructure/http/middleware/authenticate"
+import { GeminiProvider } from "./infrastructure/llm/gemini.llm"
 
 const aiRouter = Router()
 
@@ -28,7 +28,7 @@ const knowledgeDocumentRepository = new KnowledgeDocumentRepository()
 const chunker = new LangChainChunker()
 const embeddingModel = new LocalEmbeddingModel()
 const vectorStore = new QdrantVectorStore()
-const llmProvider = new OllamaProvider()
+const llmProvider = new GeminiProvider()
 
 const indexKnowledgeDocumentUseCase = new IndexKnowledgeDocumentUseCase(
   chunker,

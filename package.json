@@ -12,7 +12,8 @@
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "format": "pnpm -r format",
-    "format:check": "pnpm -r format:check"
+    "format:check": "pnpm -r format:check",
+    "dev:server": "doppler run -- pnpm --dir server dev"
   },
   "keywords": [],
   "author": "",
