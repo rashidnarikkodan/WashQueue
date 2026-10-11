@@ -11,7 +11,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_EXPIRES_IN: z.coerce.number(),
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.coerce.number(),
-  REDIS_HOST: z.string().default("120.0.0.1"),
+  REDIS_HOST: z.string().default("127.0.0.1"),
   REDIS_PORT: z.coerce.number().default(6379),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),
@@ -32,7 +32,11 @@ const envSchema = z.object({
   AI_EMBEDDING_MODEL: z.string().default("embeddinggemma"),
   OLLAMA_LLM_MODEL: z.string().default("qwen2.5:3b"),
   OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  GEMINI_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com"),
   QDRANT_URL: z.string().url().default("http://localhost:6333"),
+  QDRANT_API_KEY: z.string().optional(),
 })
 const env = envSchema.parse(process.env)
 

@@ -289,13 +289,26 @@ pnpm format
 
 ## Docker Setup
 
-The repository includes a Docker Compose setup for infrastructure services and backend execution.
+The repository includes a Docker Compose setup for the backend, Valkey, and Qdrant. The backend
+expects MongoDB to be available separately; set `MONGODB_URI` to an address reachable from the
+container (for example, a MongoDB Atlas connection string).
+
+Create the server environment file and fill in the required credentials and connection values:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Then start the services:
 
 ```bash
 docker compose up --build
 ```
 
-The Docker configuration exposes core services such as:
+Compose configures the backend to reach Valkey and Qdrant over the internal Docker network. By
+default, Ollama is expected to be running on the Docker host at port `11434`; set
+`OLLAMA_BASE_URL` in the shell or the root Compose `.env` file to use another address. The
+container exposes the following host ports:
 
 - backend on port 3000
 - Valkey on port 6379

@@ -12,18 +12,13 @@
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "format": "pnpm -r format",
-    "format:check": "pnpm -r format:check"
+    "format:check": "pnpm -r format:check",
+    "dev:server": "doppler run -- pnpm --dir server dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.15.1",
-      "onFail": "download"
-    }
-  },
+  "packageManager": "pnpm@11.25.0",
   "type": "module",
   "devDependencies": {
     "husky": "^9.1.7"

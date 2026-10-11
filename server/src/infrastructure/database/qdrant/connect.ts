@@ -2,7 +2,7 @@ import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { QdrantClient } from "@qdrant/js-client-rest"
 
-export const qdrant = new QdrantClient({ url: env.QDRANT_URL })
+export const qdrant = new QdrantClient({ url: env.QDRANT_URL, apiKey: env.QDRANT_API_KEY })
 
 import { VECTOR_COLLECTIONS } from "@/common/constants/vector-collections.constants"
 
