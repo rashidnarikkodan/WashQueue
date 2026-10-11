@@ -33,6 +33,7 @@ const envSchema = z.object({
   OLLAMA_LLM_MODEL: z.string().default("qwen2.5:3b"),
   OLLAMA_BASE_URL: z.string().url().default("http://localhost:11434"),
   QDRANT_URL: z.string().url().default("http://localhost:6333"),
+  QDRANT_API_KEY: z.string().optional(),
 })
 const env = envSchema.parse(process.env)
 
