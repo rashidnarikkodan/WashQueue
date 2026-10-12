@@ -1,0 +1,14 @@
+  - name: Validate frontend build configuration
+      env:
+        VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+      run: |
+        if [ -z "$VITE_GOOGLE_CLIENT_ID" ]; then
+          echo "::error::VITE_GOOGLE_CLIENT_ID is empty"
+          exit 1
+        fi
+    
+        case "$VITE_GOOGLE_CLIENT_ID" in
+          *.apps.googleusercontent.com) echo "Google client ID format looks correct." ;;
+          *) echo "::error::Google client ID format is unexpected"; exit 1 ;;
+        esac
+  build-and-push:
