@@ -17,7 +17,7 @@ permissions:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REPOSITORY: rashidnarikkodan/wasqueue-server
+  ECR_REPOSITORY: rashidnarikkodan/washqueue-server
   AWS_ACCOUNT_ID: "900160667047"
 
 jobs:
