@@ -1,3 +1,4 @@
+
 name: Deploy Client Image
 
 on:
@@ -27,6 +28,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate frontend build configuration
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+        run: |
+          if [ -z "$VITE_GOOGLE_CLIENT_ID" ]; then
+            echo "::error::VITE_GOOGLE_CLIENT_ID is missing or empty"
+            exit 1
+          fi
+
+          case "$VITE_GOOGLE_CLIENT_ID" in
+            *.apps.googleusercontent.com)
+              echo "Google client ID format looks correct."
+              ;;
+            *)
+              echo "::error::Google client ID format is unexpected"
+              exit 1
+              ;;
+          esac
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -51,7 +71,6 @@ jobs:
             VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
             VITE_RAZORPAY_KEY_ID=${{ vars.VITE_RAZORPAY_KEY_ID }}
             VITE_GOOGLE_PLACES_API_KEY=${{ vars.VITE_GOOGLE_PLACES_API_KEY }}
-
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
