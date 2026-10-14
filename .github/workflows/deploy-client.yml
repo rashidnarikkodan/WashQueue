@@ -1,47 +1,49 @@
-name: Deploy Client Image
+name: Deploy Client
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Client CI"]
+    types:
+      - completed
     branches:
-      - main
-    paths:
-      - "client/**"
-      - ".github/workflows/deploy-client.yml"
-
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  id-token: write
+        - main
 
 jobs:
-  build-and-push:
-    name: Build and Push Client Image
+  deploy:
+    name: Deploy Client to AWS S3
+    if: ${{github.event.workflow_run.conclusion == 'success'}}
     runs-on: ubuntu-latest
 
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Download client build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: washqueue-client
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: client/dist
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::900160667047:role/WashQueueFrontendDeployRole
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+        
+      - name: Deploy files to S3
+        run: |
+          aws s3 sync client/dist/ "s3://${S3_BUCKET}/" --delete
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{env.CLOUDFRONT_DISTRIBUTION_ID}} --paths "/*"
