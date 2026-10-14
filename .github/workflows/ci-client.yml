@@ -1,73 +1,73 @@
 name: Client CI
 on:
-    pull_request:
-        branches:
-            - main
-        paths:
-            - 'client/**'
-            - '.github/workflows/ci-client.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "client/**"
+      - ".github/workflows/ci-client.yml"
 
-    push:
-        branches:
-            - main
-        paths:
-            - 'client/**'
-            - '.github/workflows/ci-client.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - "client/**"
+      - ".github/workflows/ci-client.yml"
 
-    workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    build:
-        name: Typecheck, lint, Format and build
-        runs-on: ubuntu-latest
+  build:
+    name: Typecheck, lint, Format and build
+    runs-on: ubuntu-latest
 
-        defaults:
-            run:
-                working-directory: client
-        
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    defaults:
+      run:
+        working-directory: client
 
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                version: 11.25.0
-            
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                node-version: 24.20.0
-                cache: pnpm
-                cache-dependency-path: client/pnpm-lock.yaml
-            
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Typecheck
-              run: pnpm run typecheck
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
 
-            - name: Lint
-              run: pnpm run lint
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
 
-            - name: Format check
-              run: pnpm run format:check
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Build
-              run: pnpm run build
-              env:
-                VITE_API_URL: ${{vars.VITE_API_URL}}
-                VITE_GOOGLE_CLIENT_ID: ${{vars.VITE_GOOGLE_CLIENT_ID}}
-                VITE_RAZORPAY_KEY_ID: ${{vars.VITE_RAZORPAY_KEY_ID}}
-                VITE_GOOGLE_PLACES_API_KEY: ${{vars.VITE_GOOGLE_PLACES_API_KEY}}
-            
-            - name: Upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                name: washqueue-client
-                path: client/dist
-                if-no-files-found: error
-                retention-days: 7
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Format check
+        run: pnpm run format:check
+
+      - name: Build
+        run: pnpm run build
+        env:
+          VITE_API_URL: ${{vars.VITE_API_URL}}
+          VITE_GOOGLE_CLIENT_ID: ${{vars.VITE_GOOGLE_CLIENT_ID}}
+          VITE_RAZORPAY_KEY_ID: ${{vars.VITE_RAZORPAY_KEY_ID}}
+          VITE_GOOGLE_PLACES_API_KEY: ${{vars.VITE_GOOGLE_PLACES_API_KEY}}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: washqueue-client
+          path: client/dist
+          if-no-files-found: error
+          retention-days: 7

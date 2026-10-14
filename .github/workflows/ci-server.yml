@@ -3,11 +3,22 @@ name: Server CI
 on:
   push:
     branches: main
+    paths:
+      - "server/**"
+      - ".github/workflows/ci-server.yml"
   pull_request:
     branches: main
+    paths:
+      - "server/**"
+      - ".github/workflows/ci-server.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  server:
+  build:
+    name: Typecheck, lint, format and build
     runs-on: ubuntu-latest
     defaults:
       run:
