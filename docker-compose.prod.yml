@@ -1,0 +1,71 @@
+services:
+  server:
+    image: "${ECR_REGISTRY:?ECR_REGISTRY is required}/${ECR_REPOSITORY:?ECR_REPOSITORY is required}:${IMAGE_TAG:?IMAGE_TAG is required}"
+    container_name: washqueue-server
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:${HOST_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: "${NODE_ENV:?NODE_ENV is required}"
+      PORT: "3000"
+      MONGODB_URI: "${MONGODB_URI:?MONGODB_URI is required}"
+      ACCESS_TOKEN_SECRET: "${ACCESS_TOKEN_SECRET:?ACCESS_TOKEN_SECRET is required}"
+      ACCESS_TOKEN_EXPIRES_IN: "${ACCESS_TOKEN_EXPIRES_IN:?ACCESS_TOKEN_EXPIRES_IN is required}"
+      REFRESH_TOKEN_SECRET: "${REFRESH_TOKEN_SECRET:?REFRESH_TOKEN_SECRET is required}"
+      REFRESH_TOKEN_EXPIRES_IN: "${REFRESH_TOKEN_EXPIRES_IN:?REFRESH_TOKEN_EXPIRES_IN is required}"
+      REDIS_HOST: "valkey"
+      REDIS_PORT: "6379"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      SMTP_FROM: "${SMTP_FROM:-}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      CLIENT_URL: "${CLIENT_URL:?CLIENT_URL is required}"
+      CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME:-}"
+      CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY:-}"
+      CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET:-}"
+      RAZORPAY_KEY_ID: "${RAZORPAY_KEY_ID:-}"
+      RAZORPAY_KEY_SECRET: "${RAZORPAY_KEY_SECRET:-}"
+      RAZORPAY_WEBHOOK_SECRET: "${RAZORPAY_WEBHOOK_SECRET:-}"
+      RAZORPAYX_ACCOUNT_NUMBER: "${RAZORPAYX_ACCOUNT_NUMBER:-}"
+      RAZORPAYX_WEBHOOK_SECRET: "${RAZORPAYX_WEBHOOK_SECRET:-}"
+      OLLAMA_LLM_MODEL: "${OLLAMA_LLM_MODEL:-}"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      AI_EMBEDDING_MODEL: "${AI_EMBEDDING_MODEL:-}"
+      VECTOR_STORE_PROVIDER: "${VECTOR_STORE_PROVIDER:-}"
+      QDRANT_URL: "${QDRANT_URL:-}"
+      QDRANT_API_KEY: "${QDRANT_API_KEY:-}"
+      GEMINI_BASE_URL: "${GEMINI_BASE_URL:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-}"
+    depends_on:
+      valkey:
+        condition: service_healthy
+    networks:
+      - washqueue
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: valkey
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - valkey-data:/data
+    networks:
+      - washqueue
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  washqueue:
+    driver: bridge
+
+volumes:
+  valkey-data:
+

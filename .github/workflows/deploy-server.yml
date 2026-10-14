@@ -1,115 +1,218 @@
-
-name: Deploy Server Image
+name: Deploy Server
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Server CI"]
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - "server/**"
-      - ".github/workflows/deploy-server.yml"
 
-  workflow_dispatch:
+permissions: {}
 
-permissions:
-  contents: read
-  id-token: write
-
-env:
-  AWS_REGION: ap-south-1
-  ECR_REPOSITORY: rashidnarikkodan/washqueue-server
-  AWS_ACCOUNT_ID: "900160667047"
+concurrency:
+  group: washqueue-server-production
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    name: Build, Push, and Deploy Server
+  deploy:
+    name: Build and Deploy to EC2
+    if: >-
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN_SERVER }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+      IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+      IMAGE_PLATFORM: linux/amd64            # NEW: must match `uname -m` on the EC2
 
     steps:
-      - name: Checkout repository
+      - name: Checkout CI commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Validate deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          : "${AWS_REGION:?Missing repository variable AWS_REGION}"
+          : "${AWS_ROLE_ARN:?Missing repository variable AWS_ROLE_ARN_SERVER}"
+          : "${ECR_REPOSITORY:?Missing repository variable ECR_REPOSITORY}"
+          : "${EC2_INSTANCE_ID:?Missing repository variable EC2_INSTANCE_ID}"
+          : "${IMAGE_TAG:?Missing CI commit SHA}"
+
+          test -f server/Dockerfile
+          test -f docker-compose.prod.yml
+
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$ECR_REPOSITORY" =~ ^[a-z0-9]+([._/-][a-z0-9]+)*$ ]]
+          [[ "$EC2_INSTANCE_ID" =~ ^i-[0-9a-f]+$ ]]
+
+      - name: Verify commit is still latest on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MAIN_SHA=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/commits/main" \
+            --jq '.sha')
+
+          if [[ "$MAIN_SHA" != "$IMAGE_TAG" ]]; then
+            echo "Skipping stale deployment."
+            echo "CI commit: $IMAGE_TAG"
+            echo "Current main: $MAIN_SHA"
+            exit 1
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::900160667047:role/WashQueueServerDeployRole
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          role-session-name: WashQueueServerDeploy
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-
-      - name: Deploy server through SSM
         env:
-          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        shell: bash
         run: |
           set -euo pipefail
 
-          if [ -z "$EC2_INSTANCE_ID" ]; then
-            echo "::error::Set the EC2_INSTANCE_ID repository variable."
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+          # NEW: a re-run of the same commit must not fail on an existing tag
+          if aws ecr describe-images \
+               --repository-name "$ECR_REPOSITORY" \
+               --image-ids imageTag="$IMAGE_TAG" >/dev/null 2>&1; then
+            echo "Image already in ECR, skipping build: $IMAGE_URI"
+            exit 0
+          fi
+
+          docker build \
+            --pull \
+            --platform "$IMAGE_PLATFORM" \
+            --label "org.opencontainers.image.revision=${IMAGE_TAG}" \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --tag "$IMAGE_URI" \
+            ./server
+
+          docker push "$IMAGE_URI"
+          echo "Pushed image: $IMAGE_URI"
+
+      - name: Prepare Compose transfer
+        id: compose
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # CHANGED: gzip first, so the payload stays far below the size guard
+          COMPOSE_B64=$(gzip -9nc docker-compose.prod.yml | base64 -w 0)
+
+          if (( ${#COMPOSE_B64} > 5000 )); then
+            echo "::error::Compose file exceeds the safe SSM transfer size."
             exit 1
           fi
+
+          echo "content=$COMPOSE_B64" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy through SSM
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          COMPOSE_B64: ${{ steps.compose.outputs.content }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          [[ "$ECR_REGISTRY" =~ ^[0-9]+\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com(\.cn)?$ ]]
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]]
+
+          # CHANGED: @sh shell-quotes every value; Doppler token comes from the file on the EC2
+          COMMANDS=$(jq -nc \
+            --arg region "$AWS_REGION" \
+            --arg registry "$ECR_REGISTRY" \
+            --arg repository "$ECR_REPOSITORY" \
+            --arg tag "$IMAGE_TAG" \
+            --arg compose "$COMPOSE_B64" \
+            '{
+              executionTimeout: ["900"],
+              commands: [
+                "set -eu",
+                "export HOME=/root",
+                "test -s /etc/washqueue/doppler.token",
+                "install -d -m 0750 /opt/washqueue",
+                ("printf %s " + ($compose|@sh) + " | base64 -d | gunzip > /opt/washqueue/docker-compose.prod.yml"),
+                "chmod 0640 /opt/washqueue/docker-compose.prod.yml",
+                ("aws ecr get-login-password --region " + ($region|@sh) +
+                  " | docker login --username AWS --password-stdin " + ($registry|@sh)),
+                "cd /opt/washqueue",
+                "export DOPPLER_TOKEN=\"$(cat /etc/washqueue/doppler.token)\"",
+                ("export ECR_REGISTRY=" + ($registry|@sh) +
+                  " ECR_REPOSITORY=" + ($repository|@sh) +
+                  " IMAGE_TAG=" + ($tag|@sh)),
+                "doppler run -- docker compose -f docker-compose.prod.yml config --quiet",
+                "doppler run -- docker compose -f docker-compose.prod.yml pull server",
+                "doppler run -- docker compose -f docker-compose.prod.yml up -d --remove-orphans --wait --wait-timeout 120",
+                "doppler run -- docker compose -f docker-compose.prod.yml ps",
+                "docker image prune -af --filter until=168h >/dev/null || true"
+              ]
+            }')
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$EC2_INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploy WashQueue server $GITHUB_SHA" \
-            --parameters 'commands=[
-              "set -eu",
-              "cd /home/ubuntu/washqueue",
-              "aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 900160667047.dkr.ecr.ap-south-1.amazonaws.com",
-              "docker compose pull server",
-              "docker compose up -d --no-deps server",
-              "docker compose ps server"
-            ]' \
-            --query "Command.CommandId" \
+            --comment "Deploy WashQueue server ${IMAGE_TAG:0:12}" \
+            --parameters "$COMMANDS" \
+            --timeout-seconds 120 \
+            --query 'Command.CommandId' \
             --output text)
 
           echo "SSM command ID: $COMMAND_ID"
 
-          for attempt in $(seq 1 60); do
+          # CHANGED: own polling loop (the CLI waiter quits after ~100s)
+          STATUS=Pending
+          for _ in $(seq 1 180); do
             STATUS=$(aws ssm get-command-invocation \
               --command-id "$COMMAND_ID" \
               --instance-id "$EC2_INSTANCE_ID" \
-              --query "Status" \
-              --output text 2>/dev/null || true)
-
+              --query Status --output text 2>/dev/null || echo Pending)
             case "$STATUS" in
-              Success)
-                echo "Server deployment succeeded."
-                aws ssm get-command-invocation \
-                  --command-id "$COMMAND_ID" \
-                  --instance-id "$EC2_INSTANCE_ID" \
-                  --query "StandardOutputContent" \
-                  --output text
-                exit 0
-                ;;
-              Failed|Cancelled|TimedOut)
-                echo "::error::Server deployment failed with status: $STATUS"
-                aws ssm get-command-invocation \
-                  --command-id "$COMMAND_ID" \
-                  --instance-id "$EC2_INSTANCE_ID" \
-                  --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
-                  --output json || true
-                exit 1
-                ;;
+              Success|Failed|Cancelled|TimedOut) break ;;
             esac
-
             sleep 5
           done
 
-          echo "::error::Timed out waiting for SSM deployment."
-          exit 1
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" \
+            --output json | jq '{
+              Status: .Status,
+              StatusDetails: .StatusDetails,
+              Output: .StandardOutputContent,
+              Errors: .StandardErrorContent
+            }'
+
+          if [[ "$STATUS" != "Success" ]]; then
+            echo "::error::WashQueue server deployment failed (status: $STATUS)."
+            exit 1
+          fi
+
+          echo "Deployment command completed successfully."
