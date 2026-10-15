@@ -416,5 +416,77 @@ describe("Notification Module Unit Tests", () => {
         })
       )
     })
+
+    it("should dispatch persistent notifications for WASH_STARTED and WASH_COMPLETED events", async () => {
+      const mockDispatcher = {
+        dispatch: vi.fn().mockResolvedValue(null),
+        dispatchToUsers: vi.fn().mockResolvedValue([]),
+        dispatchToAdmins: vi.fn().mockResolvedValue([]),
+        dispatchToStationStakeholders: vi.fn().mockResolvedValue(undefined),
+      }
+
+      const service = new BookingNotificationService(mockDispatcher)
+
+      const mockBooking = new Booking({
+        id: "bk-123",
+        bookingNumber: "WQ-7890",
+        userId: "u-1",
+        ownerId: "own-1",
+        stationId: "st-1",
+        vehicleId: "v-1",
+        vehicleSnapshot: {
+          vehicleCategoryId: "cat-1",
+          vehicleClassId: "cls-1",
+        },
+        serviceType: ServiceType.FULL,
+        pricingSnapshot: {
+          basePrice: 300,
+          extraPrice: 0,
+          totalPrice: 300,
+          currency: "INR",
+        },
+        extraServices: [],
+        paymentMethod: PaymentMethod.WALLET,
+        paymentStatus: PaymentStatus.PAID,
+        depositAmount: 300,
+        cashAmount: 0,
+        refundAmount: 0,
+        settlement: { platformCommission: 30, stationSettlement: 270 },
+        status: BookingStatus.IN_SERVICE,
+        isWalkIn: false,
+        createdByUserId: "u-1",
+        qr: {
+          qrTokenHash: "hash-123",
+          qrExpiresAt: new Date(Date.now() + 3600000),
+        },
+        scheduling: {
+          timeWindowId: "tw-1",
+          windowStart: new Date("2026-09-10T10:00:00Z"),
+          windowEnd: new Date("2026-09-10T10:30:00Z"),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      // Test WASH_STARTED
+      await service.notify("WASH_STARTED", mockBooking)
+      expect(mockDispatcher.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientId: "u-1",
+          title: "Wash Service In Progress",
+          type: "QUEUE",
+        })
+      )
+
+      // Test WASH_COMPLETED
+      await service.notify("WASH_COMPLETED", mockBooking)
+      expect(mockDispatcher.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientId: "u-1",
+          title: "Vehicle Ready for Pickup! 🚗✨",
+          type: "QUEUE",
+        })
+      )
+    })
   })
 })
