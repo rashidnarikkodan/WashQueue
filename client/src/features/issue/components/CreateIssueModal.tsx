@@ -75,35 +75,72 @@ export default function CreateIssueModal({
     setError(null)
 
     try {
-      const { signature, timestamp, folder, apiKey, cloudName } =
-        await bookingApi.getInspectionUploadSignature()
+      const uploadSig = await bookingApi.getInspectionUploadSignature()
 
-      const uploadPromises = Array.from(files).map(async (file, idx) => {
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("api_key", apiKey)
-        formData.append("timestamp", String(timestamp))
-        formData.append("signature", signature)
-        formData.append("folder", folder)
+      let uploadedResults: Evidence[] = []
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-          method: "POST",
-          body: formData,
+      if (uploadSig.provider === "s3") {
+        const uploadPromises = Array.from(files).map(async (file, idx) => {
+          const presigned = await bookingApi.getInspectionUploadSignature({
+            filename: file.name,
+            contentType: file.type || "image/jpeg",
+            folder: "washqueue/issues",
+          })
+
+          if (!presigned.uploadUrl || !presigned.fileUrl || !presigned.key) {
+            throw new Error(`Failed to generate S3 upload URL for ${file.name}`)
+          }
+
+          const response = await fetch(presigned.uploadUrl, {
+            method: "PUT",
+            body: file,
+            headers: {
+              "Content-Type": file.type || "image/jpeg",
+            },
+          })
+
+          if (!response.ok) {
+            throw new Error(`Failed to upload ${file.name} to S3`)
+          }
+
+          return {
+            public_id: presigned.key || `proof-${Date.now()}-${idx}`,
+            url: presigned.fileUrl,
+            description: file.name,
+          }
         })
+        uploadedResults = await Promise.all(uploadPromises)
+      } else {
+        const { signature, timestamp, folder, apiKey, cloudName } = uploadSig
+        const uploadPromises = Array.from(files).map(async (file, idx) => {
+          const formData = new FormData()
+          formData.append("file", file)
+          formData.append("api_key", apiKey || "")
+          formData.append("timestamp", String(timestamp || ""))
+          formData.append("signature", signature || "")
+          formData.append("folder", folder || "washqueue/inspections")
 
-        if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`)
-        }
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          )
 
-        const result = await response.json()
-        return {
-          public_id: result.public_id || `proof-${Date.now()}-${idx}`,
-          url: result.secure_url || result.url,
-          description: file.name,
-        }
-      })
+          if (!response.ok) {
+            throw new Error(`Failed to upload ${file.name}`)
+          }
 
-      const uploadedResults = await Promise.all(uploadPromises)
+          const result = await response.json()
+          return {
+            public_id: result.public_id || `proof-${Date.now()}-${idx}`,
+            url: result.secure_url || result.url,
+            description: file.name,
+          }
+        })
+        uploadedResults = await Promise.all(uploadPromises)
+      }
       setEvidenceList((prev) => [...prev, ...uploadedResults])
       toast.success(`${uploadedResults.length} photo(s) uploaded successfully.`)
     } catch (uploadErr) {
