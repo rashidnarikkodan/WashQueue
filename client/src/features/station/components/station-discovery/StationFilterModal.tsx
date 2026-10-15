@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { X, Star, Bike, Car, Truck, SlidersHorizontal, Check, Sparkles } from "lucide-react"
 import { vehicleCatelogApi } from "@/shared/apis/catelog.api"
 import { stationApi } from "@/shared/apis/station.api"
@@ -48,10 +48,101 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
   const isRendered = isOpen || isVisible
 
+  const getInitialHeight = () => {
+    if (typeof window !== "undefined") {
+      return Math.round(window.innerHeight * 0.85)
+    }
+    return 650
+  }
+
+  const [modalHeight, setModalHeight] = useState<number>(getInitialHeight)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartYRef = useRef<number>(0)
+  const dragStartHeightRef = useRef<number>(0)
+  const modalHeightRef = useRef<number>(modalHeight)
+
+  useEffect(() => {
+    modalHeightRef.current = modalHeight
+  }, [modalHeight])
+
+  // Drag handlers for both mobile (touch) and laptop (mouse)
+  const handleDragStart = useCallback((clientY: number) => {
+    setIsDragging(true)
+    dragStartYRef.current = clientY
+    dragStartHeightRef.current = modalHeightRef.current
+  }, [])
+
+  const handleDragMove = useCallback((clientY: number) => {
+    const deltaY = clientY - dragStartYRef.current
+    const maxHeight = Math.round(window.innerHeight * 0.96)
+    const newHeight = dragStartHeightRef.current - deltaY
+    const clamped = Math.min(maxHeight, Math.max(100, newHeight))
+    setModalHeight(clamped)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false)
+    const currentH = modalHeightRef.current
+    const winH = window.innerHeight
+
+    // Drag completely down / below 1/4 of screen (25% height) closes modal
+    if (currentH < winH * 0.25) {
+      onClose()
+      return
+    }
+
+    // Dragged above 90% of screen snaps to 95vh
+    if (currentH > winH * 0.9) {
+      setModalHeight(Math.round(winH * 0.95))
+      return
+    }
+
+    // Otherwise, keep the exact height adjusted as per user's intent
+    setModalHeight(currentH)
+  }, [onClose])
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const onMouseMove = (e: MouseEvent) => {
+      e.preventDefault()
+      handleDragMove(e.clientY)
+    }
+
+    const onMouseUp = () => {
+      handleDragEnd()
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleDragMove(e.touches[0].clientY)
+      }
+    }
+
+    const onTouchEnd = () => {
+      handleDragEnd()
+    }
+
+    window.addEventListener("mousemove", onMouseMove)
+    window.addEventListener("mouseup", onMouseUp)
+    window.addEventListener("touchmove", onTouchMove, { passive: true })
+    window.addEventListener("touchend", onTouchEnd)
+    window.addEventListener("touchcancel", onTouchEnd)
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove)
+      window.removeEventListener("mouseup", onMouseUp)
+      window.removeEventListener("touchmove", onTouchMove)
+      window.removeEventListener("touchend", onTouchEnd)
+      window.removeEventListener("touchcancel", onTouchEnd)
+    }
+  }, [isDragging, handleDragMove, handleDragEnd])
+
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen)
     if (isOpen) {
       setDraftFilters(currentFilters)
+      setModalHeight(getInitialHeight())
     } else {
       setIsVisible(false)
     }
@@ -144,12 +235,35 @@ export const StationFilterModal: React.FC<StationFilterModalProps> = ({
       />
 
       <div
-        className={`relative w-full max-w-full max-h-[92vh] flex flex-col rounded-t-[36px] sm:rounded-t-[44px] bg-card border-t border-border shadow-2xl z-10 overflow-hidden transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
-        }`}
+        style={{ height: `${modalHeight}px` }}
+        className={`relative w-full max-w-full max-h-[96vh] min-h-[220px] flex flex-col rounded-t-[32px] sm:rounded-t-[44px] bg-card border-t border-border shadow-2xl z-10 overflow-hidden transform ${
+          isDragging
+            ? "transition-none select-none"
+            : "transition-[height,transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        } ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
       >
-        <div className="flex justify-center items-center pt-3.5 pb-1 shrink-0">
-          <div className="w-12 h-1.5 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 transition-colors" />
+        {/* Holdable & Draggable pill handle */}
+        <div
+          onMouseDown={(e) => {
+            e.preventDefault()
+            handleDragStart(e.clientY)
+          }}
+          onTouchStart={(e) => {
+            if (e.touches.length > 0) {
+              handleDragStart(e.touches[0].clientY)
+            }
+          }}
+          className="flex justify-center items-center pt-3 pb-1.5 shrink-0 cursor-grab active:cursor-grabbing select-none touch-none w-full group"
+          aria-label="Drag to resize or dismiss filter modal"
+          title="Drag up or down to adjust modal height, drag completely down to close"
+        >
+          <div
+            className={`rounded-full transition-all duration-150 ${
+              isDragging
+                ? "w-16 h-2 bg-primary shadow-xs scale-105"
+                : "w-12 h-1.5 bg-muted-foreground/30 group-hover:bg-muted-foreground/60 group-hover:w-14"
+            }`}
+          />
         </div>
 
         <div className="flex items-start justify-between px-6 sm:px-12 py-4 border-b border-border/60 shrink-0">

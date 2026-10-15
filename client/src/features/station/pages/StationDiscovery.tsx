@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   SlidersHorizontal,
@@ -12,7 +12,8 @@ import {
   Loader2,
   Car,
   Sparkles,
-  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import StationCard from "@/shared/components/cards/StationCard"
 import { useStationStore } from "@/features/station/store/station.store"
@@ -21,7 +22,6 @@ import { StationFilterModal } from "../components/station-discovery/StationFilte
 import StationDiscoveryMap from "../components/station-discovery/StationDiscoveryMap"
 import LocationAutocomplete from "../components/station-discovery/LocationAutocomplete"
 import { DEFAULT_FILTERS, type FilterOptions, type Station } from "@/features/station/types"
-import SelectInput from "@/shared/components/form/SelectInput"
 import { useDebounce } from "@/shared/hooks/useDebounce"
 import Pagination from "@/shared/components/ui/Pagination"
 import { useAuthStore } from "@/features/auth/store/auth.store"
@@ -31,6 +31,14 @@ const StationDiscovery = () => {
   const { stations, pagination, isLoading, error, fetchStations } = useStationStore()
   const { vehicles, loadVehicles } = useVehicleStore()
   const user = useAuthStore()
+  const vehicleSliderRef = useRef<HTMLDivElement>(null)
+
+  const handleScrollVehicles = (direction: "left" | "right") => {
+    if (vehicleSliderRef.current) {
+      const scrollAmount = direction === "left" ? -180 : 180
+      vehicleSliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
+    }
+  }
 
   useEffect(() => {
     if (user.isAuthenticated && vehicles.length === 0) {
@@ -157,20 +165,55 @@ const StationDiscovery = () => {
   }
 
   return (
-    <div className="min-h-screen pt-4 sm:pt-8 pb-24 px-6 sm:px-12 lg:px-16 w-full max-w-full space-y-8 relative">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-border/60 pb-6 text-left">
+    <div className="min-h-screen pt-3 sm:pt-8 pb-24 px-3 sm:px-12 lg:px-16 w-full max-w-full space-y-4 sm:space-y-8 relative">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 border-b border-border/60 pb-4 sm:pb-6 text-left">
         <div className="shrink-0 space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground whitespace-nowrap">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground whitespace-nowrap">
             Find Wash Stations
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base font-medium">
+          <p className="text-muted-foreground text-xs sm:text-base font-medium">
             {pagination ? `${pagination.total} stations found` : `${stations.length} results`}
             {selectedVehicleName ? ` • Rate for ${selectedVehicleName}` : ""}
             {userLocation ? " • Nearby your location" : ` • ${filters.maxDistanceKm}km radius`}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 justify-start lg:justify-end">
+        {/* Mobile search + map view row */}
+        <div className="flex sm:hidden items-center gap-2 w-full">
+          <div className="flex-1 min-w-0">
+            <LocationAutocomplete
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onLocationSelect={(location) => {
+                setUserLocation(location)
+                setLocationError(null)
+                setPage(1)
+              }}
+              className="w-full"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setViewMode((prev) => (prev === "grid" ? "map" : "grid"))}
+            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-bold transition-all shadow-xs cursor-pointer select-none shrink-0"
+            aria-label={viewMode === "grid" ? "Switch to Map View" : "Switch to Grid View"}
+          >
+            {viewMode === "grid" ? (
+              <>
+                <MapIcon className="w-4 h-4 text-primary" />
+                <span>Map view</span>
+              </>
+            ) : (
+              <>
+                <LayoutGrid className="w-4 h-4 text-primary" />
+                <span>Grid view</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Desktop search and filters controls */}
+        <div className="hidden sm:flex flex-wrap items-center gap-3 justify-start lg:justify-end">
           <LocationAutocomplete
             value={searchQuery}
             onChange={setSearchQuery}
@@ -207,28 +250,6 @@ const StationDiscovery = () => {
               </>
             )}
           </button>
-
-          <div className="w-52 shrink-0">
-            <SelectInput
-              value={filters.sortBy}
-              leftIcon={<ArrowUpDown className="w-4 h-4 text-primary" />}
-              onChange={(val) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  sortBy: val as FilterOptions["sortBy"],
-                }))
-              }
-              options={[
-                { label: "Sort: Recommended", value: "RECOMMENDED" },
-                { label: "Sort: Nearest First", value: "DISTANCE" },
-                { label: "Sort: Highest Rated", value: "RATING" },
-                { label: "Sort: Fastest Service", value: "WAIT_TIME" },
-                { label: "Sort: Price Low to High", value: "PRICE_LOW_TO_HIGH" },
-                { label: "Sort: Price High to Low", value: "PRICE_HIGH_TO_LOW" },
-              ]}
-            />
-          </div>
-
           <button
             onClick={() => setIsFilterModalOpen(true)}
             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
@@ -266,51 +287,78 @@ const StationDiscovery = () => {
       </div>
 
       {user.isAuthenticated && vehicles.length > 0 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-1 text-xs">
-          <span className="text-muted-foreground font-semibold text-xs shrink-0 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            My Vehicles:
-          </span>
-          <button
-            onClick={() =>
-              setFilters((prev) => ({
-                ...prev,
-                selectedVehicleId: undefined,
-                vehicleClassId: undefined,
-              }))
-            }
-            className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold shrink-0 transition-all cursor-pointer ${
-              !filters.selectedVehicleId
-                ? "bg-primary/10 border-primary text-primary shadow-sm"
-                : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
-          >
-            All Vehicles
-          </button>
-          {vehicles.map((v) => {
-            const isSelected = filters.selectedVehicleId === v.id
-            return (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs w-full min-w-0">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto shrink-0">
+            <span className="text-muted-foreground font-bold text-xs shrink-0 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              My Vehicles:
+            </span>
+
+            <div className="flex items-center gap-1">
               <button
-                key={v.id}
-                onClick={() =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    selectedVehicleId: isSelected ? undefined : v.id,
-                    vehicleClassId: isSelected ? undefined : v.classId,
-                    vehicleCategory: isSelected ? "all" : v.categoryId,
-                  }))
-                }
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
-                    : "bg-card border-border text-foreground hover:bg-muted"
-                }`}
+                type="button"
+                onClick={() => handleScrollVehicles("left")}
+                className="flex items-center justify-center h-6 w-6 rounded-full bg-card border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer shadow-xs active:scale-95"
+                aria-label="Scroll vehicles left"
               >
-                <Car className="w-3.5 h-3.5" />
-                <span>{v.nickname || `${v.brand} ${v.model}`}</span>
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-            )
-          })}
+              <button
+                type="button"
+                onClick={() => handleScrollVehicles("right")}
+                className="flex items-center justify-center h-6 w-6 rounded-full bg-card border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer shadow-xs active:scale-95"
+                aria-label="Scroll vehicles right"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div
+            ref={vehicleSliderRef}
+            className="flex items-center gap-2 overflow-x-auto min-w-0 flex-1 w-full scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-0.5"
+          >
+            <button
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  selectedVehicleId: undefined,
+                  vehicleClassId: undefined,
+                }))
+              }
+              className={`px-3 py-1.5 rounded-full border text-xs font-semibold shrink-0 transition-all cursor-pointer whitespace-nowrap ${
+                !filters.selectedVehicleId
+                  ? "bg-primary/10 border-primary text-primary shadow-xs"
+                  : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              All Vehicles
+            </button>
+            {vehicles.map((v) => {
+              const isSelected = filters.selectedVehicleId === v.id
+              return (
+                <button
+                  key={v.id}
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      selectedVehicleId: isSelected ? undefined : v.id,
+                      vehicleClassId: isSelected ? undefined : v.classId,
+                      vehicleCategory: isSelected ? "all" : v.categoryId,
+                    }))
+                  }
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
+                      : "bg-card border-border text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Car className="w-3.5 h-3.5" />
+                  <span>{v.nickname || `${v.brand} ${v.model}`}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
 
@@ -361,11 +409,11 @@ const StationDiscovery = () => {
       )}
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
-              className="h-96 rounded-3xl bg-muted/40 animate-pulse border border-border"
+              className="h-64 sm:h-96 rounded-2xl sm:rounded-3xl bg-muted/40 animate-pulse border border-border"
             />
           ))}
         </div>
@@ -397,7 +445,7 @@ const StationDiscovery = () => {
           onStationSelect={(id) => navigate(`/stations/${id}`)}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
           {stations.map((station: Station) => (
             <StationCard
               key={station.id}
@@ -437,24 +485,24 @@ const StationDiscovery = () => {
         </div>
       )}
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-3.5 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-auto max-w-[92vw]">
         <div
           onClick={() => setIsFilterModalOpen(true)}
-          className="flex items-center gap-4 px-6 py-3.5 rounded-full bg-card/95 hover:bg-card border border-border hover:border-primary/50 text-foreground shadow-2xl backdrop-blur-md cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 select-none group"
+          className="flex items-center justify-center gap-2.5 sm:gap-4 px-4 sm:px-6 py-2 sm:py-3.5 rounded-full bg-card/95 hover:bg-card border border-border hover:border-primary/50 text-foreground shadow-2xl backdrop-blur-md cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 select-none group whitespace-nowrap"
         >
-          <div className="flex items-center gap-2.5">
-            <SlidersHorizontal className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
-            <span className="text-sm font-bold text-foreground">Filter & Sort</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <SlidersHorizontal className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-primary group-hover:rotate-12 transition-transform shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-foreground">Filter & Sort</span>
             {activeFilterCount > 0 && (
-              <span className="bg-primary text-primary-foreground text-[11px] font-black px-2 py-0.5 rounded-full shadow-xs">
+              <span className="bg-primary text-primary-foreground text-[10px] sm:text-[11px] font-black px-1.5 py-0.5 rounded-full shadow-xs">
                 {activeFilterCount}
               </span>
             )}
           </div>
 
-          <div className="h-4 w-px bg-border" />
+          <div className="h-3.5 sm:h-4 w-px bg-border" />
 
-          <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors truncate max-w-[140px] sm:max-w-none">
             {getSortLabel()}
           </span>
         </div>

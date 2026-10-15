@@ -5,18 +5,15 @@ import { useVehicleCatelogStore } from "@/features/vehicle-catelog/store/catelog
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import AddVehicleModal from "./AddVehicleModal"
 import VehicleCard from "./VehicleCard"
-import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
 import AuthRequiredModal from "@/shared/components/modals/AuthRequiredModal"
-import type { Vehicle } from "../types"
 
 export default function GarageSection() {
-  const { vehicles, isActionLoading, loadVehicles, addVehicle, deleteVehicle } = useVehicleStore()
+  const { vehicles, isActionLoading, loadVehicles, addVehicle } = useVehicleStore()
   const { categories, classes, loadData } = useVehicleCatelogStore()
   const { isAuthenticated, user } = useAuthStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -68,14 +65,6 @@ export default function GarageSection() {
       return
     }
     setIsModalOpen(true)
-  }
-
-  const handleDeleteConfirm = async () => {
-    if (!vehicleToDelete) return
-    const success = await deleteVehicle(vehicleToDelete.id)
-    if (success) {
-      setVehicleToDelete(null)
-    }
   }
 
   return (
@@ -136,7 +125,6 @@ export default function GarageSection() {
                 vehicle={vehicle}
                 className={className}
                 categoryName={categoryName}
-                onDelete={(v) => setVehicleToDelete(v)}
               />
             </div>
           )
@@ -177,19 +165,6 @@ export default function GarageSection() {
         title="Sign in to Register Vehicle"
         message="You must be logged in to add vehicles to your digital garage for customized booking slots and wait alerts."
         actionName="add a vehicle"
-      />
-
-      <ConfirmationModal
-        isOpen={Boolean(vehicleToDelete)}
-        onClose={() => setVehicleToDelete(null)}
-        onConfirm={handleDeleteConfirm}
-        title="Remove Vehicle"
-        message={`Are you sure you want to remove ${
-          vehicleToDelete ? `${vehicleToDelete.brand} ${vehicleToDelete.model}` : "this vehicle"
-        } from your digital garage?`}
-        confirmText="Delete Vehicle"
-        confirmVariant="danger"
-        isLoading={isActionLoading}
       />
     </section>
   )

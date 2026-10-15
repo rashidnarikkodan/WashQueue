@@ -165,9 +165,9 @@ const StationCard: React.FC<StationCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="group flex flex-col rounded-3xl bg-card border border-border shadow-lg hover:shadow-2xl hover:border-primary/30 transition-all duration-300 overflow-hidden relative w-full cursor-pointer"
+      className="group flex flex-col rounded-xl sm:rounded-3xl bg-card border border-border shadow-2xs sm:shadow-lg hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden relative w-full cursor-pointer"
     >
-      <div className="relative h-48 w-full overflow-hidden shrink-0 bg-muted">
+      <div className="relative h-28 sm:h-48 w-full overflow-hidden shrink-0 bg-muted">
         {hasValidImage ? (
           <img
             src={image}
@@ -176,17 +176,21 @@ const StationCard: React.FC<StationCardProps> = ({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground bg-muted/60">
-            <ImageOff size={32} className="opacity-50" />
-            <span className="text-xs font-bold tracking-wide uppercase opacity-70">No Image</span>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-muted-foreground bg-muted/60">
+            <ImageOff size={22} className="opacity-50" />
+            <span className="text-[10px] sm:text-xs font-bold tracking-wide uppercase opacity-70">
+              No Image
+            </span>
           </div>
         )}
 
         <div
-          className={`absolute top-3.5 left-3.5 flex items-center px-3 py-1 gap-1.5 ${statusCfg.bg} backdrop-blur-md rounded-full border shadow-sm z-10`}
+          className={`absolute top-2 sm:top-3.5 left-2 sm:left-3.5 flex items-center px-2 sm:px-3 py-0.5 sm:py-1 gap-1 sm:gap-1.5 ${statusCfg.bg} backdrop-blur-md rounded-full border shadow-xs z-10`}
         >
           <div className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot} animate-pulse`} />
-          <span className={`${statusCfg.text} text-[10px] font-bold tracking-wider uppercase`}>
+          <span
+            className={`${statusCfg.text} text-[8px] sm:text-[10px] font-bold tracking-wider uppercase`}
+          >
             {statusCfg.label}
           </span>
         </div>
@@ -195,84 +199,90 @@ const StationCard: React.FC<StationCardProps> = ({
           <button
             onClick={handleFavClick}
             disabled={isTogglingFavorite}
-            className={`absolute top-3.5 right-3.5 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`absolute top-2 sm:top-3.5 right-2 sm:right-3.5 flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full border backdrop-blur-md transition-all duration-200 z-10 disabled:opacity-60 disabled:cursor-not-allowed ${
               favorite
                 ? "bg-rose-500/20 border-rose-500/40 text-rose-500"
                 : "bg-card/70 border-border text-muted-foreground hover:text-foreground hover:bg-card"
             }`}
             aria-label="Toggle Favorite"
           >
-            <Heart className={`w-4 h-4 ${favorite ? "fill-rose-500 text-rose-500" : ""}`} />
+            <Heart
+              className={`w-3 h-3 sm:w-4 sm:h-4 ${favorite ? "fill-rose-500 text-rose-500" : ""}`}
+            />
           </button>
         )}
       </div>
 
-      <div className="flex flex-col justify-between p-5 gap-3 flex-1">
-        <div className="flex justify-between items-start gap-2">
-          <h3 className="text-foreground text-lg font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors">
+      <div className="flex flex-col justify-between p-2.5 sm:p-5 gap-1.5 sm:gap-3 flex-1">
+        <div className="flex justify-between items-start gap-1 sm:gap-2">
+          <h3 className="text-foreground text-xs sm:text-lg font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors">
             {name}
           </h3>
-          <div className="flex items-center gap-1 shrink-0 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
-            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-            <span className="text-amber-400 text-xs font-bold">{rating.toFixed(1)}</span>
-            <span className="text-muted-foreground text-[10px]">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 bg-amber-500/10 border border-amber-500/20 px-1.5 sm:px-2 py-0.5 rounded-md sm:rounded-lg">
+            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 text-amber-500" />
+            <span className="text-amber-400 text-[10px] sm:text-xs font-bold">
+              {rating.toFixed(1)}
+            </span>
+            <span className="text-muted-foreground text-[9px] sm:text-[10px]">
               ({reviewCount >= 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount})
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-muted-foreground text-xs leading-tight">
-          <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <div className="flex items-center gap-1 sm:gap-1.5 text-muted-foreground text-[10px] sm:text-xs leading-tight">
+          <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground shrink-0" />
           <span className="line-clamp-1">
             {address}
-            {distanceKm !== undefined ? ` • ${distanceKm.toFixed(1)} km away` : ""}
+            {distanceKm !== undefined ? ` • ${distanceKm.toFixed(1)} km` : ""}
           </span>
         </div>
 
         {selectedVehicleName && (halfWashPrice !== undefined || fullWashPrice !== undefined) && (
-          <div className="flex items-center justify-between py-1.5 px-1 border-y border-border/50">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center justify-between py-1 px-0.5 border-y border-border/50">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[9px] sm:text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
                 Half
               </span>
-              <span className="text-base sm:text-lg font-black text-blue-400">
+              <span className="text-xs sm:text-lg font-black text-blue-400">
                 ${halfWashPrice ?? "—"}
               </span>
             </div>
 
             <div className="w-1 h-1 rounded-full bg-border" />
 
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[9px] sm:text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
                 Full
               </span>
-              <span className="text-base sm:text-lg font-black text-emerald-400">
+              <span className="text-xs sm:text-lg font-black text-emerald-400">
                 ${fullWashPrice ?? "—"}
               </span>
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between text-xs py-0.5">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between text-[10px] sm:text-xs py-0.5">
+          <div className="flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-foreground font-semibold text-xs">
+            <span className="text-foreground font-semibold text-[10px] sm:text-xs truncate">
               {baysCount > 0 ? `${baysCount} Bays` : "Bays N/A"}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-amber-400 font-semibold text-xs">
+          <div className="flex items-center gap-1 text-amber-400 font-semibold text-[10px] sm:text-xs truncate">
             <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 animate-pulse" />
             <span>{queueCount} in queue</span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+        <div className="flex flex-col gap-0.5 text-[10px] sm:text-xs text-muted-foreground">
           <p className="line-clamp-1 font-medium text-muted-foreground/90">{servicesText}</p>
-          <p className="line-clamp-1 text-[11px] text-muted-foreground/75">{categoriesText}</p>
+          <p className="line-clamp-1 text-[9px] sm:text-[11px] text-muted-foreground/75 hidden sm:block">
+            {categoriesText}
+          </p>
         </div>
 
-        <div className="flex flex-col gap-2 mt-auto pt-1">
+        <div className="flex flex-col gap-1 sm:gap-2 mt-auto pt-1">
           {onPrimaryAction && (
             <button
               onClick={(e) => {
@@ -283,7 +293,7 @@ const StationCard: React.FC<StationCardProps> = ({
                   onClick?.()
                 }
               }}
-              className={`w-full py-2.5 px-4 rounded-xl text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer select-none ${actionBtn.className}`}
+              className={`w-full py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer select-none truncate ${actionBtn.className}`}
             >
               {actionBtn.label}
             </button>
@@ -294,7 +304,7 @@ const StationCard: React.FC<StationCardProps> = ({
                 e.stopPropagation()
                 onSecondaryAction()
               }}
-              className="w-full py-2 px-4 bg-muted hover:bg-muted/80 rounded-xl text-foreground text-xs font-semibold text-center transition-all cursor-pointer select-none"
+              className="w-full py-1 sm:py-2 px-2 sm:px-4 bg-muted hover:bg-muted/80 rounded-lg sm:rounded-xl text-foreground text-[10px] sm:text-xs font-semibold text-center transition-all cursor-pointer select-none truncate"
             >
               View Details
             </button>
