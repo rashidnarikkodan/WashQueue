@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { XCircle, Sparkles, CheckCircle2, Phone, Printer } from "lucide-react"
 import { toast } from "sonner"
 import { bookingApi, type BookingResponse } from "@/shared/apis/booking.api"
@@ -103,6 +103,7 @@ export function StaffSidebarWorkflowPanel({
   isAdvancingStatus?: boolean
 }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   return (
     <div className="p-6 rounded-3xl border border-border bg-card shadow-xl space-y-3 text-left">
@@ -142,9 +143,12 @@ export function StaffSidebarWorkflowPanel({
       {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
         <button
           type="button"
-          onClick={() =>
-            navigate("/owner/check-in", { state: { bookingNumber: booking.bookingNumber } })
-          }
+          onClick={() => {
+            const checkInPath = pathname.startsWith("/manager")
+              ? "/manager/check-in"
+              : "/owner/check-in"
+            navigate(checkInPath, { state: { bookingNumber: booking.bookingNumber } })
+          }}
           className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-primary/20"
         >
           CHECK-IN VEHICLE

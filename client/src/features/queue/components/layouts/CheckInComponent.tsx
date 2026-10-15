@@ -1,18 +1,27 @@
 import { toast } from "sonner"
 import { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { QrCode, Keyboard, CheckCircle2, HelpCircle, ArrowRight, Sparkles } from "lucide-react"
 import { bookingApi } from "@/shared/apis/booking.api"
 import { QrCameraScanner } from "../ui/QrCameraScanner"
 import type { BookingResponse } from "@/shared/apis/booking.api"
 import { useQueueBasePath } from "@/features/queue/hooks/useQueueBasePath"
 
+interface CheckInLocationState {
+  bookingNumber?: string
+}
+
 export default function CheckInComponent() {
-  const state = useLocation().state
-  console.log(state)
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const basePath = useQueueBasePath()
-  const [bookingIdInput, setBookingIdInput] = useState(state.bookingNumber || "")
+
+  const state = location.state as CheckInLocationState | null | undefined
+  const initialBookingId =
+    state?.bookingNumber || searchParams.get("bookingNumber") || searchParams.get("bookingId") || ""
+
+  const [bookingIdInput, setBookingIdInput] = useState(initialBookingId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedBooking, setConfirmedBooking] = useState<BookingResponse | null>(null)
 
@@ -135,7 +144,8 @@ export default function CheckInComponent() {
             <div>
               <h3 className="text-2xl font-bold text-foreground">Customer Checked In!</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Booking #{confirmedBooking.bookingNumber} • Vehicle added to Queue
+                Booking #{confirmedBooking.bookingNumber || confirmedBooking.id} • Vehicle added to
+                Queue
               </p>
             </div>
 
