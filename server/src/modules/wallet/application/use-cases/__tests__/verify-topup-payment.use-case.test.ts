@@ -86,7 +86,11 @@ describe("VerifyTopUpPaymentUseCase", () => {
   it("should reject when transaction has already been credited (idempotency)", async () => {
     transactionRepository.findByReferenceId.mockResolvedValue({
       id: "existing_tx",
-    } as unknown as ReturnType<IWalletTransactionRepository["findByReferenceId"]> extends Promise<infer U> ? U : never)
+    } as unknown as ReturnType<IWalletTransactionRepository["findByReferenceId"]> extends Promise<
+      infer U
+    >
+      ? U
+      : never)
 
     await expect(
       useCase.execute("user_1", 500, {

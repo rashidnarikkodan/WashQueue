@@ -110,9 +110,13 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     return this.verifyPaymentSignature(orderId, paymentId, signature)
   }
 
-  async getOrderDetails(
-    orderId: string
-  ): Promise<{ id: string; amountInPaise: number; currency: string; status: string; notes?: Record<string, string> }> {
+  async getOrderDetails(orderId: string): Promise<{
+    id: string
+    amountInPaise: number
+    currency: string
+    status: string
+    notes?: Record<string, string>
+  }> {
     try {
       const order = await this.razorpay.orders.fetch(orderId)
       return {
