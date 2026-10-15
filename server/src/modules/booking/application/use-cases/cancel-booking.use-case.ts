@@ -12,6 +12,7 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { ICancelBookingUseCase } from "../interfaces/booking-usecases.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
+import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
@@ -20,7 +21,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     private readonly redisQueueService: IBookingQueueService,
     private readonly notificationService: IBookingNotificationService,
     private readonly evaluateAndProcessRefundUseCase?: IEvaluateAndProcessRefundUseCase,
-    private readonly transactionRunner?: ITransactionRunner
+    private readonly transactionRunner?: ITransactionRunner,
+    private readonly timeWindowRepository?: ITimeWindowRepository
   ) {}
 
   async execute(
@@ -53,6 +55,10 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
     const isStaffCancellation =
       userRole === "MANAGER" || userRole === "OWNER" || userRole === "ADMIN"
+
+    if (!isStaffCancellation && booking.userId !== userId) {
+      throw new AppError("You are not authorized to cancel this booking", HTTP_STATUS.FORBIDDEN)
+    }
 
     const now = new Date()
     const fromStatus = booking.status
@@ -94,6 +100,16 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         "Cancellation failed. Booking may have already been cancelled or in service.",
         HTTP_STATUS.CONFLICT
       )
+    }
+
+    if (this.timeWindowRepository && domainBooking.scheduling?.timeWindowId) {
+      try {
+        await this.timeWindowRepository.releaseCapacityAtomically(
+          domainBooking.scheduling.timeWindowId
+        )
+      } catch (err) {
+        console.error("Failed to release time window capacity on cancellation:", err)
+      }
     }
 
     const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
