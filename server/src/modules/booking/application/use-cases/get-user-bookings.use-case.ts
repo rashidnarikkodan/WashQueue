@@ -58,6 +58,9 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
     }
 
     if (normRole === "ADMIN") {
+      if (queryFilter.stationId === "ALL" || queryFilter.stationId === "all") {
+        delete queryFilter.stationId
+      }
       const result = await this.bookingRepository.findBookings(queryFilter)
       return {
         bookings: result.bookings.map((b) => BookingDTOMapper.toDTO(b)),
@@ -78,8 +81,15 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
         stationIds = managed.map((s) => s.id)
       }
 
-      if (queryFilter.stationId) {
-        stationIds = stationIds.filter((id) => id === queryFilter.stationId)
+      const specificStationId =
+        queryFilter.stationId &&
+        queryFilter.stationId !== "ALL" &&
+        queryFilter.stationId !== "all"
+          ? queryFilter.stationId
+          : undefined
+
+      if (specificStationId) {
+        stationIds = stationIds.filter((id) => id === specificStationId)
       }
 
       if (stationIds.length === 0) {
@@ -90,6 +100,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
 
       queryFilter.stationIds = stationIds
+      delete queryFilter.stationId
       const result = await this.bookingRepository.findBookings(queryFilter)
 
       return {
@@ -105,8 +116,15 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
         ownedStationIds = ownedStations.map((s) => s.id)
       }
 
-      if (queryFilter.stationId) {
-        ownedStationIds = ownedStationIds.filter((id) => id === queryFilter.stationId)
+      const specificStationId =
+        queryFilter.stationId &&
+        queryFilter.stationId !== "ALL" &&
+        queryFilter.stationId !== "all"
+          ? queryFilter.stationId
+          : undefined
+
+      if (specificStationId) {
+        ownedStationIds = ownedStationIds.filter((id) => id === specificStationId)
       }
 
       if (ownedStationIds.length === 0) {
@@ -117,6 +135,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
 
       queryFilter.stationIds = ownedStationIds
+      delete queryFilter.stationId
       const result = await this.bookingRepository.findBookings(queryFilter)
 
       return {
@@ -125,6 +144,9 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
     }
 
+    if (queryFilter.stationId === "ALL" || queryFilter.stationId === "all") {
+      delete queryFilter.stationId
+    }
     queryFilter.userId = userId
     const result = await this.bookingRepository.findBookings(queryFilter)
 
