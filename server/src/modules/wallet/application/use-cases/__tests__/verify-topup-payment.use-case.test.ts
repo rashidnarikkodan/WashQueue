@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest"
 import { VerifyTopUpPaymentUseCase } from "../verify-topup-payment.use-case"
 import { IWalletPaymentGateway } from "../../interfaces/wallet-payment-gateway.interface"
 import { CreditWalletUseCase } from "../credit-wallet.use-case"
@@ -6,9 +6,9 @@ import { IWalletTransactionRepository } from "../../../domain/repositories/walle
 import { AppError } from "@/common/errors/app-error"
 
 describe("VerifyTopUpPaymentUseCase", () => {
-  let paymentGateway: vi.Mocked<IWalletPaymentGateway>
-  let creditWalletUseCase: vi.Mocked<CreditWalletUseCase>
-  let transactionRepository: vi.Mocked<IWalletTransactionRepository>
+  let paymentGateway: Mocked<IWalletPaymentGateway>
+  let creditWalletUseCase: Mocked<CreditWalletUseCase>
+  let transactionRepository: Mocked<IWalletTransactionRepository>
   let useCase: VerifyTopUpPaymentUseCase
 
   beforeEach(() => {
@@ -35,11 +35,11 @@ describe("VerifyTopUpPaymentUseCase", () => {
         balanceAfter: 500,
         createdAt: new Date(),
       }),
-    } as unknown as vi.Mocked<CreditWalletUseCase>
+    } as unknown as Mocked<CreditWalletUseCase>
 
     transactionRepository = {
       findByReferenceId: vi.fn().mockResolvedValue(null),
-    } as unknown as vi.Mocked<IWalletTransactionRepository>
+    } as unknown as Mocked<IWalletTransactionRepository>
 
     useCase = new VerifyTopUpPaymentUseCase(
       paymentGateway,
