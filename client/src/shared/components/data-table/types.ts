@@ -69,4 +69,6 @@ export interface DataTableProps<T> {
 
   pagination?: PaginationMeta
   onPageChange?: (page: number) => void
+
+  renderMobileCard?: (row: T, index: number) => React.ReactNode
 }

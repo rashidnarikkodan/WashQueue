@@ -43,10 +43,10 @@ export function DataTableToolbar({
 
   return (
     <div
-      className={`relative z-30 rounded-2xl border border-border/40 bg-card/50 backdrop-blur-md flex flex-col p-1 shadow-md ${className}`}
+      className={`relative z-30 rounded-xl sm:rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm sm:backdrop-blur-md flex flex-col p-1 shadow-xs sm:shadow-md ${className}`}
     >
       {tabs.length > 0 && (
-        <div className={`px-3 pt-3 ${showFilterRow ? "pb-2" : "pb-3"}`}>
+        <div className={`px-2.5 sm:px-3 pt-2.5 sm:pt-3 ${showFilterRow ? "pb-2" : "pb-3"}`}>
           <ScrollableTabs
             tabs={tabs}
             activeTab={activeTab}
@@ -56,7 +56,7 @@ export function DataTableToolbar({
       )}
 
       {showFilterRow && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 px-5 pb-5 pt-2 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 sm:gap-5 px-3 sm:px-5 pb-3 sm:pb-5 pt-2 items-end">
           {onSearchChange && (
             <Search
               value={searchQuery}

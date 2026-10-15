@@ -13,6 +13,7 @@ import { getUserColumns } from "../table/columns"
 import { userTabs } from "../table/tabs"
 import { buildUserFilters } from "../table/filters"
 import ConfirmationModal from "@/shared/components/modals/ConfirmationModal"
+import UserMobileCard from "../components/ui/UserMobileCard"
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([])
@@ -167,23 +168,23 @@ const UserManagement = () => {
   const isBlocking = pendingToggleUser ? !pendingToggleUser.isBlocked : false
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 md:px-8 pt-2 pb-12 sm:pb-16 space-y-4 sm:space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs items={[{ label: "Admin", path: "/admin/dashboard" }, { label: "Users" }]} />
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
             User Management
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+          <p className="text-[11px] sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 font-medium">
             Manage users, owners, and administration accounts
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={handleExport}
-            className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs cursor-pointer"
           >
             <svg className="w-3.5 h-3.5 fill-muted-foreground" viewBox="0 0 10 10">
               <path d="M4.74448 2.38526L7.62842 5.33429L6.80237 6.17096L5.30272 4.63746L5.24967 9.39133L4.08308 9.37832L4.13613 4.62444L2.60263 6.12409L1.79545 5.2692L4.74448 2.38526ZM8.2703 0.091126C8.59112 0.094706 8.86448 0.211999 9.09039 0.443006C9.31629 0.674013 9.42746 0.949924 9.42388 1.27074L9.40435 3.02063L8.23776 3.00761L8.25728 1.25772L1.25772 1.17961L1.23819 2.9295L0.071599 2.91649L0.091126 1.16659C0.094706 0.84578 0.211999 0.572419 0.443006 0.34651C0.674013 0.120602 0.949924 0.00943805 1.27074 0.013018L8.2703 0.091126Z" />
@@ -221,6 +222,13 @@ const UserManagement = () => {
         emptyMessage="No users found matching the query."
         pagination={paginationMeta}
         onPageChange={setCurrentPage}
+        renderMobileCard={(user) => (
+          <UserMobileCard
+            key={user.id}
+            user={user}
+            onToggleClick={(u) => setPendingToggleUser(u)}
+          />
+        )}
       />
 
       <ConfirmationModal
