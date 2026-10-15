@@ -47,7 +47,11 @@ export class BookingController {
 
   getById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { bookingId } = req.params as { bookingId: string }
-    const booking = await this.getBookingUseCase.execute(bookingId, req.user?.userId)
+    const booking = await this.getBookingUseCase.execute(
+      bookingId,
+      req.user?.userId,
+      req.user?.role
+    )
     success(res, booking, HTTP_STATUS.OK, "Booking retrieved successfully")
   }
 

@@ -14,7 +14,8 @@ export class GetBookingUseCase implements IGetBookingUseCase {
 
   async execute(
     bookingIdOrNumber: string,
-    _requestingUserId?: string
+    requestingUserId?: string,
+    requestingRole?: string
   ): Promise<BookingResponseDTO> {
     let booking = await this.bookingRepository.findById(bookingIdOrNumber)
     if (!booking) {
@@ -23,6 +24,14 @@ export class GetBookingUseCase implements IGetBookingUseCase {
 
     if (!booking) {
       throw new AppError("Booking not found", HTTP_STATUS.NOT_FOUND)
+    }
+
+    const normRole = (requestingRole || "").toUpperCase()
+    if (requestingUserId && normRole !== "ADMIN") {
+      const isStaff = normRole === "MANAGER" || normRole === "OWNER"
+      if (!isStaff && booking.userId && booking.userId !== requestingUserId) {
+        throw new AppError("You are not authorized to view this booking", HTTP_STATUS.FORBIDDEN)
+      }
     }
 
     let statusLogs

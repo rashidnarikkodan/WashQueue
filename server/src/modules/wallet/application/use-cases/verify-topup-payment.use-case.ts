@@ -15,7 +15,7 @@ export class VerifyTopUpPaymentUseCase implements IVerifyTopUpPaymentUseCase {
 
   public async execute(
     userId: string,
-    amount: number,
+    amount: number | undefined,
     dto: VerifyTopUpPaymentDTO
   ): Promise<WalletTransactionDTO> {
     const isValidSignature = this.paymentGateway.verifyTopUpSignature(
@@ -36,9 +36,22 @@ export class VerifyTopUpPaymentUseCase implements IVerifyTopUpPaymentUseCase {
       )
     }
 
+    const order = await this.paymentGateway.getOrderDetails(dto.razorpayOrderId)
+    if (order.notes?.userId && order.notes.userId !== userId) {
+      throw new AppError("Payment order does not belong to this user", HTTP_STATUS.FORBIDDEN)
+    }
+
+    const verifiedAmount = order.amountInPaise / 100
+    if (amount !== undefined && Math.abs(amount - verifiedAmount) > 0.01) {
+      throw new AppError(
+        "Payment amount mismatch with verified gateway order",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+
     return this.creditWalletUseCase.execute({
       userId,
-      amount,
+      amount: verifiedAmount,
       category: "TOP_UP",
       description: `Wallet top-up via Razorpay (${dto.razorpayPaymentId})`,
       referenceId: dto.razorpayPaymentId,

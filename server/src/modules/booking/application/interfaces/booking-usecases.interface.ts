@@ -14,7 +14,11 @@ export interface ICreateWalkInBookingUseCase {
 }
 
 export interface IGetBookingUseCase {
-  execute(bookingId: string, requestingUserId?: string): Promise<BookingResponseDTO>
+  execute(
+    bookingId: string,
+    requestingUserId?: string,
+    requestingRole?: string
+  ): Promise<BookingResponseDTO>
 }
 
 export interface GetBookingsFilterInput extends FindBookingsFilter {

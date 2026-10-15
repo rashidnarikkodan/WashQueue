@@ -141,26 +141,6 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       "Settlement claimed for payout processing"
     )
 
-    if (this.notificationDispatcher && owner.userId) {
-      try {
-        await this.notificationDispatcher.dispatch({
-          recipientId: owner.userId,
-          type: "PAYMENT",
-          title: `Settlement Payout Processed (₹${guardedSettlement.stationSettlementAmount})`,
-          message: `Payout of ₹${guardedSettlement.stationSettlementAmount} has been processed for booking #${guardedSettlement.bookingId}.`,
-          data: {
-            settlementId: guardedSettlement.id,
-            bookingId: guardedSettlement.bookingId,
-            amount: guardedSettlement.stationSettlementAmount,
-            url: "/owner/financial-records",
-          },
-          actionType: "NAVIGATE",
-        })
-      } catch {
-        // Non-blocking
-      }
-    }
-
     try {
       let providerResult: PayoutProviderResult
       if (payout.razorpayPayoutId) {
@@ -190,6 +170,30 @@ export class ProcessSettlementUseCase implements IProcessSettlementUseCase {
       logger.info(providerResult)
 
       applyPayoutOutcome(payout, guardedSettlement, providerResult)
+
+      if (
+        this.notificationDispatcher &&
+        owner.userId &&
+        guardedSettlement.status === SettlementStatus.PROCESSED
+      ) {
+        try {
+          await this.notificationDispatcher.dispatch({
+            recipientId: owner.userId,
+            type: "PAYMENT",
+            title: `Settlement Payout Processed (₹${guardedSettlement.stationSettlementAmount})`,
+            message: `Payout of ₹${guardedSettlement.stationSettlementAmount} has been processed for booking #${guardedSettlement.bookingId}.`,
+            data: {
+              settlementId: guardedSettlement.id,
+              bookingId: guardedSettlement.bookingId,
+              amount: guardedSettlement.stationSettlementAmount,
+              url: "/owner/financial-records",
+            },
+            actionType: "NAVIGATE",
+          })
+        } catch {
+          // Non-blocking
+        }
+      }
     } catch (error: unknown) {
       const errMessage = error instanceof Error ? error.message : "Failed to create payout"
       guardedSettlement.markFailed(errMessage)

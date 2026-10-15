@@ -47,13 +47,11 @@ export class BookingMongoRepository implements IBookingRepository {
 
     if (filter.stationId && Types.ObjectId.isValid(filter.stationId)) {
       query.stationId = new Types.ObjectId(filter.stationId)
-    } else if (filter.stationIds && filter.stationIds.length > 0) {
+    } else if (filter.stationIds !== undefined) {
       const validStationIds = filter.stationIds
         .filter((id) => Types.ObjectId.isValid(id))
         .map((id) => new Types.ObjectId(id))
-      if (validStationIds.length > 0) {
-        query.stationId = { $in: validStationIds }
-      }
+      query.stationId = { $in: validStationIds }
     }
 
     if (filter.ownerId && Types.ObjectId.isValid(filter.ownerId)) {

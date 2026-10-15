@@ -57,23 +57,31 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
       await this.stationRatingSyncService.syncStationRating(booking.stationId)
     }
 
-    // Optional notification to owner
-    if (this.notificationDispatcher && booking.ownerId) {
+    // Notify station stakeholders (Owner and active Station Managers)
+    if (this.notificationDispatcher && booking.stationId) {
       try {
-        await this.notificationDispatcher.dispatch({
-          recipientId: booking.ownerId,
-          type: "SYSTEM",
-          title: `New ${input.rating}★ Review Received`,
-          message: input.comment
-            ? `A customer rated your station ${input.rating}/5: "${input.comment.slice(0, 80)}..."`
-            : `A customer gave a ${input.rating}/5 star rating for booking #${booking.id.slice(-6)}.`,
-          data: {
-            reviewId: createdReview.id,
-            bookingId: booking.id,
-            stationId: booking.stationId,
-            rating: input.rating,
+        const title = `New ${input.rating}★ Review Received`
+        const message = input.comment
+          ? `A customer rated your station ${input.rating}/5: "${input.comment.slice(0, 80)}..."`
+          : `A customer gave a ${input.rating}/5 star rating for booking #${booking.id.slice(-6)}.`
+
+        await this.notificationDispatcher.dispatchToStationStakeholders({
+          stationId: booking.stationId,
+          notifyOwner: true,
+          notifyManagers: true,
+          defaultPayload: {
+            type: "SYSTEM",
+            title,
+            message,
+            data: {
+              reviewId: createdReview.id,
+              bookingId: booking.id,
+              stationId: booking.stationId,
+              rating: input.rating,
+              url: `/owner/stations/${booking.stationId}/reviews`,
+            },
+            actionType: "NAVIGATE",
           },
-          actionType: "NAVIGATE",
         })
       } catch {
         // Non-blocking notification
