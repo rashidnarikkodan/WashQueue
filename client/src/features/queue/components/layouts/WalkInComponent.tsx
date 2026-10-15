@@ -266,7 +266,7 @@ export default function WalkInComponent() {
       })
 
       toast.success(
-        `✓ Walk-In Booking Created! (${res.bookingNumber}) Navigating to Pre-Service Inspection...`
+        `✓ Walk-In Booking Created! (${res.bookingNumber || res.id}) Navigating to Pre-Service Inspection...`
       )
       setCreatedBooking(res)
       navigate(`${basePath}/bookings/${res.id}/pre-inspection`)
@@ -634,7 +634,8 @@ export default function WalkInComponent() {
             <div>
               <h3 className="text-2xl font-bold text-foreground">Walk-In Booking Created</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Ticket #{createdBooking.bookingNumber} • Cash Paid: ₹{grandTotal}
+                Ticket #{createdBooking.bookingNumber || createdBooking.id || "N/A"} • Cash Paid: ₹
+                {grandTotal}
               </p>
             </div>
 
