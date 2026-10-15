@@ -110,6 +110,31 @@ export class SharedRazorpayService implements IPaymentGatewayService, IWalletPay
     return this.verifyPaymentSignature(orderId, paymentId, signature)
   }
 
+  async getOrderDetails(orderId: string): Promise<{
+    id: string
+    amountInPaise: number
+    currency: string
+    status: string
+    notes?: Record<string, string>
+  }> {
+    try {
+      const order = await this.razorpay.orders.fetch(orderId)
+      return {
+        id: order.id,
+        amountInPaise: Number(order.amount),
+        currency: order.currency,
+        status: order.status,
+        notes: (order.notes as Record<string, string>) || {},
+      }
+    } catch (error) {
+      console.error("Razorpay order fetch failed:", error)
+      throw new AppError(
+        "Failed to fetch order details from payment gateway",
+        HTTP_STATUS.BAD_REQUEST
+      )
+    }
+  }
+
   verifyWebhookSignature(rawBody: string, signature: string): boolean {
     const webhookSecret = env.RAZORPAY_KEY_SECRET
     if (!webhookSecret || !signature) return false

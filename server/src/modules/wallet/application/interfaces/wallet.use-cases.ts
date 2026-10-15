@@ -39,5 +39,9 @@ export interface IRefundWalletUseCase {
 }
 
 export interface IVerifyTopUpPaymentUseCase {
-  execute(userId: string, amount: number, dto: VerifyTopUpPaymentDTO): Promise<WalletTransactionDTO>
+  execute(
+    userId: string,
+    amount: number | undefined,
+    dto: VerifyTopUpPaymentDTO
+  ): Promise<WalletTransactionDTO>
 }
