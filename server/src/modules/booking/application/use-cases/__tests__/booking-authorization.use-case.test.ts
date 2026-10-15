@@ -7,7 +7,13 @@ import { IBookingStatusLogRepository } from "../../../domain/repositories/bookin
 import { IBookingQueueService } from "@/modules/queue/application/interfaces/booking-queue.interface"
 import { IBookingNotificationService } from "@/modules/notification/notification.module"
 import { ITimeWindowRepository } from "@/modules/station/domain/repositories/time-window.repository"
-import { Booking, BookingStatus, PaymentMethod, PaymentStatus, ServiceType } from "../../../domain/entities/Booking"
+import {
+  Booking,
+  BookingStatus,
+  PaymentMethod,
+  PaymentStatus,
+  ServiceType,
+} from "../../../domain/entities/Booking"
 import { AppError } from "@/common/errors/app-error"
 
 describe("Booking Authorization and Capacity Release", () => {
@@ -188,9 +194,9 @@ describe("Booking Authorization and Capacity Release", () => {
 
       const useCase = new GetBookingUseCase(bookingRepository, bookingStatusLogRepository)
 
-      await expect(
-        useCase.execute("booking_123", "attacker_user", "CUSTOMER")
-      ).rejects.toThrow(AppError)
+      await expect(useCase.execute("booking_123", "attacker_user", "CUSTOMER")).rejects.toThrow(
+        AppError
+      )
     })
 
     it("should allow customer viewing their own booking", async () => {
