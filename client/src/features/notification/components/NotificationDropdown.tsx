@@ -179,69 +179,78 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[450px] md:w-[500px] max-w-[90vw] origin-top-right rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[85vh] animate-in fade-in slide-in-from-top-3 duration-200">
-          <div className="flex flex-col p-6 pb-4 gap-4 border-b border-border/40">
-            <NotificationHeader
-              unreadCount={unreadCount}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onMarkAllAsRead={markAllAsRead}
-              onClose={() => setIsOpen(false)}
-            />
-            <NotificationFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
-          </div>
+        <>
+          {/* Mobile backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:hidden"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
 
-          <div className="flex-1 overflow-y-auto p-6 py-4 space-y-4 max-h-[450px]">
-            {isLoading ? (
-              <NotificationSkeletonList count={3} />
-            ) : filteredNotifications.length > 0 ? (
-              filteredNotifications.map((n) => (
-                <NotificationItemCard
-                  key={n.id}
-                  notification={n}
-                  onClick={handleNotificationClick}
-                  onActionClick={handleActionClick}
-                  onMarkAsRead={handleMarkAsRead}
-                />
-              ))
-            ) : (
-              <NotificationEmptyState />
-            )}
-          </div>
+          <div className="fixed inset-x-3 top-14 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 w-auto sm:w-[450px] md:w-[500px] max-w-lg mx-auto sm:mx-0 origin-top rounded-2xl border border-border bg-card shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden z-50 flex flex-col max-h-[82vh] animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="flex flex-col p-3 sm:p-6 pb-2 sm:pb-4 gap-2 sm:gap-4 border-b border-border/40">
+              <NotificationHeader
+                unreadCount={unreadCount}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onMarkAllAsRead={markAllAsRead}
+                onClose={() => setIsOpen(false)}
+              />
+              <NotificationFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
 
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border/40 bg-muted/20">
-            <button
-              type="button"
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0 && filteredNotifications.length === 0}
-              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <CheckCheck className="h-4 w-4" />
-              Mark All
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                if (user?.role === ROLE.ADMIN) {
-                  navigate("/admin/notifications")
-                } else if (activeViewMode === VIEW_MODE.CUSTOMER) {
-                  navigate("/notifications")
-                } else if (activeViewMode === VIEW_MODE.OWNER) {
-                  navigate("/owner/notifications")
-                } else if (activeViewMode === VIEW_MODE.MANAGER) {
-                  navigate("/manager/notifications")
-                } else {
-                  navigate("/notifications")
-                }
-              }}
-              className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            >
-              <Settings className="h-4 w-4" />
-              Notification Center
-            </button>
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 py-2.5 sm:py-4 space-y-2.5 sm:space-y-4 max-h-[450px]">
+              {isLoading ? (
+                <NotificationSkeletonList count={3} />
+              ) : filteredNotifications.length > 0 ? (
+                filteredNotifications.map((n) => (
+                  <NotificationItemCard
+                    key={n.id}
+                    notification={n}
+                    onClick={handleNotificationClick}
+                    onActionClick={handleActionClick}
+                    onMarkAsRead={handleMarkAsRead}
+                  />
+                ))
+              ) : (
+                <NotificationEmptyState />
+              )}
+            </div>
+
+            <div className="flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-4 border-t border-border/40 bg-muted/20">
+              <button
+                type="button"
+                onClick={markAllAsRead}
+                disabled={unreadCount === 0 && filteredNotifications.length === 0}
+                className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CheckCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Mark All
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false)
+                  if (user?.role === ROLE.ADMIN) {
+                    navigate("/admin/notifications")
+                  } else if (activeViewMode === VIEW_MODE.CUSTOMER) {
+                    navigate("/notifications")
+                  } else if (activeViewMode === VIEW_MODE.OWNER) {
+                    navigate("/owner/notifications")
+                  } else if (activeViewMode === VIEW_MODE.MANAGER) {
+                    navigate("/manager/notifications")
+                  } else {
+                    navigate("/notifications")
+                  }
+                }}
+                className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              >
+                <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Notification Center
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

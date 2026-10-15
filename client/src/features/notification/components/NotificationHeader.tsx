@@ -18,11 +18,11 @@ export function NotificationHeader({
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Bell className="h-5.5 w-5.5" />
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-primary/10 text-primary shrink-0">
+            <Bell className="h-4.5 w-4.5 sm:h-5.5 sm:w-5.5" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Notifications</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-foreground">Notifications</h2>
         </div>
 
         <div className="flex items-center gap-1">
