@@ -51,6 +51,27 @@ export class GetManagedStationUseCase implements IGetManagedStationUseCase {
       }
     }
 
+    if (result.length === 0) {
+      const ownedStations = await this.stationRepository.findByOwnerId(managerUserId)
+      for (const station of ownedStations) {
+        const props = station.getProps()
+        result.push({
+          stationId: station.id,
+          stationName: props.name,
+          stationAddress: props.address ? `${props.address.street}, ${props.address.city}` : "",
+          permissions: [
+            ManagerPermission.BOOKING_MANAGEMENT,
+            ManagerPermission.QUEUE_MANAGEMENT,
+            ManagerPermission.CUSTOMER_MANAGEMENT,
+            ManagerPermission.PRICING_MANAGEMENT,
+            ManagerPermission.REPORTS_VIEW,
+            ManagerPermission.STATION_SETTINGS,
+          ],
+          status: "ACTIVE",
+        })
+      }
+    }
+
     return result
   }
 }

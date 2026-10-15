@@ -277,11 +277,7 @@ describe("Booking Authorization and Capacity Release", () => {
         stationRepository
       )
 
-      const result = await useCase.execute(
-        "owner_user_id",
-        { stationId: "ALL" },
-        "OWNER"
-      )
+      const result = await useCase.execute("owner_user_id", { stationId: "ALL" }, "OWNER")
 
       expect(stationRepository.findByOwnerId).toHaveBeenCalledWith("owner_user_id")
       expect(bookingRepository.findBookings).toHaveBeenCalledWith(
@@ -310,11 +306,7 @@ describe("Booking Authorization and Capacity Release", () => {
         stationRepository
       )
 
-      const result = await useCase.execute(
-        "owner_user_id",
-        { stationId: "station_1" },
-        "OWNER"
-      )
+      const result = await useCase.execute("owner_user_id", { stationId: "station_1" }, "OWNER")
 
       expect(bookingRepository.findBookings).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -325,9 +317,7 @@ describe("Booking Authorization and Capacity Release", () => {
     })
 
     it("should return empty bookings if OWNER requests a station they do not own", async () => {
-      stationRepository.findByOwnerId.mockResolvedValue([
-        { id: "station_1" } as Station,
-      ])
+      stationRepository.findByOwnerId.mockResolvedValue([{ id: "station_1" } as Station])
 
       const useCase = new GetUserBookingsUseCase(
         bookingRepository,
@@ -355,11 +345,7 @@ describe("Booking Authorization and Capacity Release", () => {
         stationRepository
       )
 
-      const result = await useCase.execute(
-        "owner_user_id",
-        { stationId: "ALL" },
-        "OWNER"
-      )
+      const result = await useCase.execute("owner_user_id", { stationId: "ALL" }, "OWNER")
 
       expect(bookingRepository.findBookings).not.toHaveBeenCalled()
       expect(result.bookings).toHaveLength(0)

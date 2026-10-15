@@ -16,6 +16,7 @@ import { ICreateSettlementUseCase } from "@/modules/settlement/settlement.module
 import logger from "@/configs/logger.config"
 
 import { SavePostInspectionInput } from "../dtos/queue-operations.dto"
+import { isStaffAuthorizedForStation } from "../utils/queue-authorization.util"
 
 export type { SavePostInspectionInput }
 
@@ -61,20 +62,13 @@ export class SavePostInspectionUseCase implements ISavePostInspectionUseCase {
       throw new AppError("Station not found for this booking", HTTP_STATUS.NOT_FOUND)
     }
 
-    const isOwner = station.getProps().ownerId === managerUserId
-    let isAuthorizedManager = isOwner
+    const isAuthorized = await isStaffAuthorizedForStation(
+      station,
+      managerUserId,
+      this.managerAssignmentRepository
+    )
 
-    if (!isAuthorizedManager) {
-      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
-        managerUserId,
-        booking.stationId
-      )
-      if (assignment && assignment.status === "ACTIVE") {
-        isAuthorizedManager = true
-      }
-    }
-
-    if (!isAuthorizedManager) {
+    if (!isAuthorized) {
       throw new AppError(
         "You are not authorized to complete post-inspection for this station",
         HTTP_STATUS.FORBIDDEN

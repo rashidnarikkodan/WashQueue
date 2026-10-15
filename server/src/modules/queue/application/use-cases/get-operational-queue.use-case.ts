@@ -5,6 +5,7 @@ import { OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
 import { IStationRepository } from "@/modules/station/domain/repositories/station.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
 import { IGetOperationalQueueUseCase } from "../interfaces/queue-usecases.interface"
+import { isStaffAuthorizedForStation } from "../utils/queue-authorization.util"
 
 export class GetOperationalQueueUseCase implements IGetOperationalQueueUseCase {
   constructor(
@@ -23,20 +24,13 @@ export class GetOperationalQueueUseCase implements IGetOperationalQueueUseCase {
       throw new AppError("Station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    const isOwner = station.ownerId === managerUserId
-    let isAuthorizedManager = isOwner
+    const isAuthorized = await isStaffAuthorizedForStation(
+      station,
+      managerUserId,
+      this.managerAssignmentRepository
+    )
 
-    if (!isAuthorizedManager) {
-      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
-        managerUserId,
-        stationId
-      )
-      if (assignment && assignment.status === "ACTIVE") {
-        isAuthorizedManager = true
-      }
-    }
-
-    if (!isAuthorizedManager) {
+    if (!isAuthorized) {
       throw new AppError(
         "You are not authorized to view the operational queue for this station",
         HTTP_STATUS.FORBIDDEN

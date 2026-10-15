@@ -31,10 +31,7 @@ export class StationMongoRepository
 
     try {
       const ownerDocs = await OwnerModel.find({
-        $or: [
-          { _id: new Types.ObjectId(ownerId) },
-          { userId: new Types.ObjectId(ownerId) },
-        ],
+        $or: [{ _id: new Types.ObjectId(ownerId) }, { userId: new Types.ObjectId(ownerId) }],
       })
         .select("_id userId")
         .lean()
@@ -99,10 +96,7 @@ export class StationMongoRepository
 
     try {
       const ownerDocs = await OwnerModel.find({
-        $or: [
-          { _id: new Types.ObjectId(ownerId) },
-          { userId: new Types.ObjectId(ownerId) },
-        ],
+        $or: [{ _id: new Types.ObjectId(ownerId) }, { userId: new Types.ObjectId(ownerId) }],
       })
         .select("_id userId")
         .lean()
