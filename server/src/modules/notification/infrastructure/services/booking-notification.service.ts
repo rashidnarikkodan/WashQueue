@@ -331,6 +331,7 @@ export class BookingNotificationService implements IBookingNotificationService {
 
       case "CUSTOMER_CHECKED_IN":
       case "CHECKIN_SUCCESS":
+      case "BOOKING_CHECKED_IN":
         notifType = "QUEUE"
         userTitle = `Checked In Successfully`
         userMessage = `You have arrived and checked in for ${refNumber}. Your queue position is active.`
@@ -338,6 +339,7 @@ export class BookingNotificationService implements IBookingNotificationService {
         stakeholderMessage = `Customer arrived and validated QR for booking ${refNumber}.`
         break
 
+      case "WASH_STARTED":
       case "SERVICE_STARTED":
         notifType = "QUEUE"
         userTitle = `Wash Service In Progress`
@@ -345,6 +347,7 @@ export class BookingNotificationService implements IBookingNotificationService {
         break
 
       case "SERVICE_STALLED":
+      case "BOOKING_STALLED":
         notifType = "QUEUE"
         userTitle = `Service Delay Alert`
         userMessage = `Wash service for ${refNumber} is temporarily paused (${metadata?.reason || "Bay delay"}). Our team will resume shortly.`
@@ -358,7 +361,10 @@ export class BookingNotificationService implements IBookingNotificationService {
         userMessage = `Wash service for ${refNumber} has resumed in the bay.`
         break
 
+      case "WASH_COMPLETED":
       case "SERVICE_COMPLETED":
+      case "POST_INSPECTION_COMPLETED":
+      case "HANDOVER_READY":
       case "READY_FOR_PICKUP":
         notifType = "QUEUE"
         userTitle = `Vehicle Ready for Pickup! 🚗✨`
