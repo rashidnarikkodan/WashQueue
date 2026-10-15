@@ -9,6 +9,7 @@ import { CUSTOMER_BOOKING_TABS } from "../config/booking-tabs.config"
 import { getCustomerColumns } from "../config/booking-columns.config"
 import { useBookingList } from "../hooks/useBookingList"
 import { CancellationModal } from "../components"
+import BookingMobileCard from "../components/BookingMobileCard"
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()
@@ -81,15 +82,15 @@ export default function MyBookingsPage() {
   }, [pagination, filteredBookings.length, page])
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-16 space-y-6 min-h-screen text-left animate-in fade-in duration-300">
+    <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 md:px-8 pt-2 pb-12 sm:pb-16 space-y-4 sm:space-y-6 min-h-screen text-left animate-in fade-in duration-300">
       <Breadcrumbs items={[{ label: "Home", path: "/" }, { label: "My Bookings" }]} />
 
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border/60">
+      <div className="flex items-center justify-between gap-3 pb-2 border-b border-border/60">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
             My Bookings
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">
+          <p className="text-[11px] sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 font-medium">
             View and manage your scheduled vehicle wash appointments and history
           </p>
         </div>
@@ -97,11 +98,11 @@ export default function MyBookingsPage() {
         <button
           type="button"
           onClick={handleRefresh}
-          className="px-4 py-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
+          className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl border border-border bg-card text-foreground hover:bg-muted font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs cursor-pointer shrink-0"
           title="Refresh list"
         >
           <RefreshCw
-            size={15}
+            size={14}
             className={isLoading ? "animate-spin text-primary" : "text-primary"}
           />
           <span>Refresh</span>
@@ -109,7 +110,7 @@ export default function MyBookingsPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold flex items-center justify-between">
+        <div className="p-3 sm:p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs sm:text-sm font-semibold flex items-center justify-between">
           <span>{error}</span>
           <button onClick={handleRefresh} className="underline hover:opacity-80 text-xs">
             Retry
@@ -136,6 +137,13 @@ export default function MyBookingsPage() {
         emptyMessage="No bookings found. You don't have any bookings matching your current filter criteria."
         pagination={paginationMeta}
         onPageChange={(p: number) => updateParams({ page: p })}
+        renderMobileCard={(booking) => (
+          <BookingMobileCard
+            key={booking.id}
+            booking={booking}
+            onNavigate={(id) => navigate(`/bookings/${id}`)}
+          />
+        )}
       />
 
       {selectedBookingForQr && (

@@ -76,28 +76,28 @@ export function NotificationItemCard({
   return (
     <div
       onClick={() => onClick(n)}
-      className={`group flex flex-col gap-3 rounded-2xl p-4 transition-all duration-200 bg-muted/30 border border-border/40 hover:bg-muted/50 relative overflow-hidden cursor-pointer ${
+      className={`group flex flex-col gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-200 bg-muted/30 border border-border/40 hover:bg-muted/50 relative overflow-hidden cursor-pointer ${
         isUnread ? "border-l-4 border-l-primary" : ""
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         <div className="relative shrink-0">
           <div
-            className={`flex h-11 w-11 items-center justify-center rounded-xl ${getIconBackground(
+            className={`flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl ${getIconBackground(
               n.type
             )}`}
           >
             {renderIcon(n.type)}
           </div>
           {isUnread && (
-            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-primary" />
+            <span className="absolute -top-1 -right-1 h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 border-card bg-primary" />
           )}
         </div>
 
         <div className="flex-1 space-y-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <h3 className="text-sm font-bold text-foreground truncate">{n.title}</h3>
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground truncate">{n.title}</h3>
               {n.type === "QUEUE" && (
                 <span className="relative flex h-2 w-2 shrink-0">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
@@ -105,7 +105,7 @@ export function NotificationItemCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               <span className="text-[9px] font-bold tracking-wider text-muted-foreground uppercase">
                 {formatTimeAgo(n.createdAt)}
               </span>
@@ -113,30 +113,32 @@ export function NotificationItemCard({
                 <button
                   type="button"
                   onClick={(e) => onMarkAsRead(e, n.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary rounded-md hover:bg-primary/10 transition-all cursor-pointer"
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary rounded-md hover:bg-primary/10 transition-all cursor-pointer"
                   title="Mark as read"
                   aria-label="Mark as read"
                 >
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </button>
               )}
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground leading-relaxed">{n.message}</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+            {n.message}
+          </p>
 
           {imageUrl && (
-            <div className="mt-2.5 rounded-xl overflow-hidden h-28 w-full border border-border/60">
+            <div className="mt-2 rounded-xl overflow-hidden h-24 sm:h-28 w-full border border-border/60">
               <img src={imageUrl} alt={n.title} className="w-full h-full object-cover" />
             </div>
           )}
 
           {n.actionType === "NAVIGATE" && (
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2 pt-1.5">
               <button
                 type="button"
                 onClick={(e) => onActionClick(e, n)}
-                className="px-3.5 py-1.5 text-xs font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                className="px-3 py-1 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs font-bold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
               >
                 View Details
               </button>

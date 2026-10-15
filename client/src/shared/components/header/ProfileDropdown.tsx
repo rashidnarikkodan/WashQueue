@@ -149,157 +149,170 @@ export default function ProfileDropdown({ currentRole }: ProfileDropdownProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-96 rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-card-foreground">
-          <Link
-            to={currentRole === "customer" ? "/profile" : `/${currentRole}/profile`}
+        <>
+          {/* Mobile backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 sm:hidden"
             onClick={() => setIsOpen(false)}
-            className="p-5 border-b border-border/50 bg-muted/30 flex items-center justify-between hover:bg-muted/50 transition-colors group cursor-pointer"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-base font-extrabold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
-                {initials}
-              </div>
+            aria-hidden="true"
+          />
 
-              <div className="flex flex-col overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-extrabold text-foreground text-sm truncate group-hover:text-primary transition-colors">
-                    {user.name}
-                  </h3>
-                  <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                    {getRoleLabel()}
-                  </span>
+          <div className="fixed inset-x-3 top-14 sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 z-50 w-auto sm:w-96 max-w-sm mx-auto sm:mx-0 rounded-2xl sm:rounded-3xl border border-border bg-card/98 sm:bg-card/95 backdrop-blur-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-card-foreground">
+            <Link
+              to={currentRole === "customer" ? "/profile" : `/${currentRole}/profile`}
+              onClick={() => setIsOpen(false)}
+              className="p-3 sm:p-5 border-b border-border/50 bg-muted/30 flex items-center justify-between hover:bg-muted/50 transition-colors group cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-primary text-primary-foreground text-xs sm:text-base font-extrabold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
+                  {initials}
                 </div>
-                <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-          </Link>
 
-          {cta && (
-            <div className="p-3 ">
-              <button
-                type="button"
-                onClick={handleRoleSwitch}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                    <Wrench className="h-4.5 w-4.5" />
+                <div className="flex flex-col overflow-hidden">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <h3 className="font-extrabold text-foreground text-xs sm:text-sm truncate group-hover:text-primary transition-colors">
+                      {user.name}
+                    </h3>
+                    <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                      {getRoleLabel()}
+                    </span>
                   </div>
-                  <div className="text-left">
-                    <>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+            </Link>
+
+            {cta && (
+              <div className="p-2 sm:p-3">
+                <button
+                  type="button"
+                  onClick={handleRoleSwitch}
+                  className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-primary text-primary-foreground shadow-sm shrink-0">
+                      <Wrench className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                    </div>
+                    <div className="text-left">
                       <span className="block text-xs font-extrabold text-foreground">
                         {cta.title}
                       </span>
-                      <span className="block text-[11px] text-muted-foreground">{cta.desc}</span>
-                    </>
+                      <span className="block text-[10px] sm:text-[11px] text-muted-foreground">
+                        {cta.desc}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform shrink-0" />
+                </button>
+              </div>
+            )}
+
+            <div className="p-1.5 sm:p-2 space-y-0.5 sm:space-y-1">
+              <button
+                type="button"
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    {resolvedTheme === "dark" ? (
+                      <Moon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                    ) : (
+                      <Sun className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-xs font-bold text-foreground">Theme</span>
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground capitalize">
+                      {resolvedTheme === "dark" ? "Dark Mode" : "Light Mode"}
+                    </span>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted border border-border/50 text-[10px] font-semibold text-muted-foreground group-hover:text-foreground">
+                  {resolvedTheme === "dark" ? <Moon size={11} /> : <Sun size={11} />}
+                  <span className="capitalize">{resolvedTheme}</span>
+                </div>
+              </button>
+
+              <Link
+                to={currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    <Calendar className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-foreground">My Bookings</span>
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground">
+                      Track wash history & queue
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+
+              <Link
+                to="/wallet"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    <CreditCard className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-foreground">
+                      Wallet & Refunds
+                    </span>
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground">
+                      Balance & transaction logs
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+
+              <Link
+                to={currentRole === "customer" ? "/issues" : `/${currentRole}/issues`}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                    <Headphones className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-foreground">Help & Support</span>
+                    <span className="block text-[10px] sm:text-[11px] text-muted-foreground">
+                      Support tickets & issues
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            </div>
+
+            <div className="p-2.5 sm:p-3 border-t border-border/40 bg-muted/20 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false)
+                  logout()
+                  navigate("/login")
+                }}
+                className="w-full flex items-center justify-center gap-2 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-xs font-extrabold transition-all cursor-pointer"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Log Out</span>
               </button>
             </div>
-          )}
-
-          <div className="p-2 space-y-1">
-            <button
-              type="button"
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  {resolvedTheme === "dark" ? (
-                    <Moon className="h-4.5 w-4.5" />
-                  ) : (
-                    <Sun className="h-4.5 w-4.5" />
-                  )}
-                </div>
-                <div className="text-left">
-                  <span className="block text-xs font-bold text-foreground">Theme</span>
-                  <span className="block text-[11px] text-muted-foreground capitalize">
-                    {resolvedTheme === "dark" ? "Dark Mode" : "Light Mode"}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted border border-border/50 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground">
-                {resolvedTheme === "dark" ? <Moon size={12} /> : <Sun size={12} />}
-                <span className="capitalize">{resolvedTheme}</span>
-              </div>
-            </button>
-
-            <Link
-              to={currentRole === "customer" ? "/bookings" : `/${currentRole}/bookings`}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <Calendar className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-foreground">My Bookings</span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Track wash history & queue
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </Link>
-
-            <Link
-              to="/wallet"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <CreditCard className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-foreground">Wallet & Refunds</span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Balance & transaction logs
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </Link>
-
-            <Link
-              to={currentRole === "customer" ? "/issues" : `/${currentRole}/issues`}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-muted/60 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <Headphones className="h-4.5 w-4.5" />
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-foreground">Help & Support</span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Support tickets & issues
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-            </Link>
           </div>
-
-          <div className="p-3 border-t border-border/40 bg-muted/20 flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                logout()
-                navigate("/login")
-              }}
-              className="w-full flex items-center justify-center gap-2 p-2.5 rounded-2xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-xs font-extrabold transition-all cursor-pointer"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Log Out</span>
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   )

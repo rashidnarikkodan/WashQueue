@@ -24,23 +24,25 @@ export default function ProfileFooterActions({
   role = "customer",
 }: ProfileFooterActionsProps) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl text-card-foreground">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-8 space-y-4 sm:space-y-6 shadow-xs sm:shadow-xl text-card-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h3 className="text-xl font-bold text-foreground">Quick Role Actions & Security</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h3 className="text-lg sm:text-xl font-bold text-foreground">
+            Quick Role Actions & Security
+          </h3>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
             Manage navigation shortcuts and account security credentials
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {isLocal && (
             <button
               type="button"
               onClick={onChangePasswordClick}
-              className="px-5 py-2.5 rounded-xl border border-border bg-muted/50 hover:bg-muted text-foreground font-bold text-xs transition-colors flex items-center gap-2 cursor-pointer"
+              className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl border border-border bg-muted/50 hover:bg-muted text-foreground font-bold text-xs transition-colors flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer"
             >
-              <KeyRound className="w-4 h-4 text-primary" />
+              <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               <span>Change Password</span>
             </button>
           )}
@@ -48,20 +50,20 @@ export default function ProfileFooterActions({
           <button
             type="button"
             onClick={onSignOutClick}
-            className="px-5 py-2.5 rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 font-extrabold text-xs transition-colors flex items-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Sign Out</span>
           </button>
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border/60">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block mb-3">
+      <div className="pt-3 sm:pt-4 border-t border-border/60">
+        <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block mb-2 sm:mb-3">
           Role Shortcuts
         </span>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
           {role === "owner" && (
             <>
               <Link

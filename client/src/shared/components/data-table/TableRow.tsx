@@ -18,7 +18,7 @@ function TableRow<T>({ row, columns }: TableRowProps<T>) {
         return (
           <td
             key={col.id}
-            className={`py-4 px-6 ${
+            className={`py-2.5 px-3 sm:py-4 sm:px-6 text-xs sm:text-sm ${
               col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""
             }`}
           >

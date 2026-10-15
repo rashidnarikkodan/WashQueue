@@ -86,7 +86,7 @@ export default function ConfirmationModal({
 
   const getConfirmButtonClasses = () => {
     const base =
-      "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md select-none shrink-0"
+      "flex items-center justify-center gap-1.5 sm:gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs sm:shadow-md select-none shrink-0"
     if (isLoading || isSubmitting) {
       return `${base} bg-muted text-muted-foreground cursor-not-allowed border border-border`
     }
@@ -106,12 +106,12 @@ export default function ConfirmationModal({
     <dialog
       ref={dialogRef}
       onCancel={handleCancelClick}
-      className="m-auto w-full max-w-md rounded-2xl border border-border bg-card p-0 shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
+      className="m-auto w-[calc(100%-1.5rem)] sm:w-full max-w-md rounded-xl sm:rounded-2xl border border-border bg-card p-0 shadow-lg sm:shadow-2xl backdrop:bg-background/80 backdrop:backdrop-blur-sm sm:backdrop:backdrop-blur-md overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
     >
-      <div className="flex flex-col p-6 space-y-4">
-        <div className="flex items-start gap-4">
+      <div className="flex flex-col p-4 sm:p-6 space-y-3 sm:space-y-4">
+        <div className="flex items-start gap-3 sm:gap-4">
           <div
-            className={`p-2.5 rounded-xl border shrink-0 ${
+            className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shrink-0 ${
               confirmVariant === "danger"
                 ? "bg-destructive/10 border-destructive/20"
                 : confirmVariant === "warning"
@@ -124,9 +124,11 @@ export default function ConfirmationModal({
             {getIcon()}
           </div>
 
-          <div className="space-y-1.5 grow min-w-0 text-left">
-            <h3 className="text-lg font-bold text-foreground leading-snug">{title}</h3>
-            <p className="text-xs text-muted-foreground font-medium leading-relaxed">{message}</p>
+          <div className="space-y-1 sm:space-y-1.5 grow min-w-0 text-left">
+            <h3 className="text-base sm:text-lg font-bold text-foreground leading-snug">{title}</h3>
+            <p className="text-[11px] sm:text-xs text-muted-foreground font-medium leading-relaxed">
+              {message}
+            </p>
           </div>
 
           <button
@@ -136,16 +138,16 @@ export default function ConfirmationModal({
             className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             aria-label="Close modal"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-2 sm:gap-3 pt-2">
           <button
             type="button"
             onClick={handleCancel}
             disabled={isLoading || isSubmitting}
-            className="px-5 py-2.5 rounded-xl border border-border bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl border border-border bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-xs sm:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed select-none"
           >
             {cancelText}
           </button>

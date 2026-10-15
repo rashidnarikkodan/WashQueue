@@ -68,36 +68,36 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
   const authDetails = getAuthProviderDetails(profile.authProvider)
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl text-card-foreground">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-          <Settings className="w-5 h-5" />
+    <div className="bg-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-8 space-y-4 sm:space-y-6 shadow-xs sm:shadow-xl text-card-foreground">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Account Information</h2>
+        <h2 className="text-lg sm:text-2xl font-bold text-foreground">Account Information</h2>
       </div>
 
       <div className="w-full">
-        <div className="w-full bg-muted/50 border border-border/80 p-5 rounded-xl space-y-3">
+        <div className="w-full bg-muted/50 border border-border/80 p-3.5 sm:p-5 rounded-lg sm:rounded-xl space-y-2 sm:space-y-3">
           <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
               AUTHENTICATION METHOD
             </span>
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${authDetails.badgeColor}`}
+              className={`px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider border shrink-0 ${authDetails.badgeColor}`}
             >
               {authDetails.badge}
             </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-            <div className="p-2 rounded-lg bg-background border border-border w-fit shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 pt-0.5 sm:pt-1">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-background border border-border w-fit shrink-0">
               {authDetails.icon}
             </div>
             <div className="min-w-0">
-              <p className="text-base font-bold text-foreground leading-tight">
+              <p className="text-sm sm:text-base font-bold text-foreground leading-tight">
                 {authDetails.label}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5 break-words">
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-words">
                 {authDetails.description}
               </p>
             </div>
@@ -105,13 +105,15 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+        <div className="bg-muted/50 border border-border/80 p-3.5 sm:p-5 rounded-lg sm:rounded-xl space-y-0.5 sm:space-y-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground mb-1">
             <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs font-bold uppercase tracking-wider">LAST UPDATED</span>
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+              LAST UPDATED
+            </span>
           </div>
-          <p className="text-lg font-semibold text-foreground">
+          <p className="text-sm sm:text-lg font-semibold text-foreground">
             {new Date().toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
@@ -120,12 +122,14 @@ export default function AccountDetailsCard({ profile }: AccountDetailsCardProps)
           </p>
         </div>
 
-        <div className="bg-muted/50 border border-border/80 p-5 rounded-xl space-y-1">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <div className="bg-muted/50 border border-border/80 p-3.5 sm:p-5 rounded-lg sm:rounded-xl space-y-0.5 sm:space-y-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground mb-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span className="text-xs font-bold uppercase tracking-wider">MEMBER SINCE</span>
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+              MEMBER SINCE
+            </span>
           </div>
-          <p className="text-lg font-semibold text-foreground">{formattedMemberSince}</p>
+          <p className="text-sm sm:text-lg font-semibold text-foreground">{formattedMemberSince}</p>
         </div>
       </div>
     </div>
