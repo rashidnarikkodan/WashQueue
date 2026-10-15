@@ -49,3 +49,13 @@ export interface IGetPublicStationQueueUseCase {
 export interface IProcessNoShowBookingsUseCase {
   execute(gracePeriodMinutes?: number): Promise<ProcessNoShowResult>
 }
+
+export interface AdvanceBookingStatusInput {
+  bookingId: string
+  targetStatus: string
+  reason?: string
+}
+
+export interface IAdvanceBookingStatusUseCase {
+  execute(managerUserId: string, input: AdvanceBookingStatusInput): Promise<BookingResponseDTO>
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
 import { bookingApi } from "@/shared/apis/booking.api"
@@ -34,7 +34,9 @@ const isActiveQueueStatus = (status: string) => {
 
 export default function ManagerQueuePage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const basePath = useQueueBasePath()
+  const targetStationId = searchParams.get("stationId")
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
     stationName: string
@@ -74,7 +76,9 @@ export default function ManagerQueuePage() {
         const stations = await managerApi.getManagedStation()
 
         if (stations && stations.length > 0) {
-          const activeStation = stations[0]
+          const activeStation =
+            (targetStationId && stations.find((s) => s.stationId === targetStationId)) ||
+            stations[0]
           setStationInfo({
             stationId: activeStation.stationId,
             stationName: activeStation.stationName,
@@ -122,7 +126,7 @@ export default function ManagerQueuePage() {
         if (!silent) setIsLoading(false)
       }
     },
-    [getCheckInTime]
+    [getCheckInTime, targetStationId]
   )
 
   useEffect(() => {

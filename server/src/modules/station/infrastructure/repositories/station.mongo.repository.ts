@@ -25,8 +25,34 @@ export class StationMongoRepository
   }
 
   async findByOwnerId(ownerId: string): Promise<Station[]> {
+    if (!Types.ObjectId.isValid(ownerId)) return []
+
+    const candidateOwnerIds: Types.ObjectId[] = [new Types.ObjectId(ownerId)]
+
+    try {
+      const ownerDocs = await OwnerModel.find({
+        $or: [{ _id: new Types.ObjectId(ownerId) }, { userId: new Types.ObjectId(ownerId) }],
+      })
+        .select("_id userId")
+        .lean()
+        .exec()
+
+      for (const doc of ownerDocs) {
+        const ownerObjId = doc._id as Types.ObjectId | undefined
+        const userObjId = doc.userId as Types.ObjectId | undefined
+        if (ownerObjId && !candidateOwnerIds.some((id) => id.equals(ownerObjId))) {
+          candidateOwnerIds.push(ownerObjId)
+        }
+        if (userObjId && !candidateOwnerIds.some((id) => id.equals(userObjId))) {
+          candidateOwnerIds.push(userObjId)
+        }
+      }
+    } catch (err) {
+      console.error("Failed to resolve owner in findByOwnerId:", err)
+    }
+
     const docs = await this.model
-      .find({ ownerId: new Types.ObjectId(ownerId) })
+      .find({ ownerId: { $in: candidateOwnerIds } })
       .sort({ name: 1 })
       .exec()
     return docs.map((doc) => this.mapper.toDomain(doc))
@@ -64,8 +90,34 @@ export class StationMongoRepository
     managerUserId: string,
     excludeStationId?: string
   ): Promise<Station | null> {
+    if (!Types.ObjectId.isValid(ownerId)) return null
+
+    const candidateOwnerIds: Types.ObjectId[] = [new Types.ObjectId(ownerId)]
+
+    try {
+      const ownerDocs = await OwnerModel.find({
+        $or: [{ _id: new Types.ObjectId(ownerId) }, { userId: new Types.ObjectId(ownerId) }],
+      })
+        .select("_id userId")
+        .lean()
+        .exec()
+
+      for (const doc of ownerDocs) {
+        const ownerObjId = doc._id as Types.ObjectId | undefined
+        const userObjId = doc.userId as Types.ObjectId | undefined
+        if (ownerObjId && !candidateOwnerIds.some((id) => id.equals(ownerObjId))) {
+          candidateOwnerIds.push(ownerObjId)
+        }
+        if (userObjId && !candidateOwnerIds.some((id) => id.equals(userObjId))) {
+          candidateOwnerIds.push(userObjId)
+        }
+      }
+    } catch (err) {
+      console.error("Failed to resolve owner in findStationManagedByOwner:", err)
+    }
+
     const query: Record<string, unknown> = {
-      ownerId: Types.ObjectId.isValid(ownerId) ? new Types.ObjectId(ownerId) : ownerId,
+      ownerId: { $in: candidateOwnerIds },
       managerId: Types.ObjectId.isValid(managerUserId)
         ? new Types.ObjectId(managerUserId)
         : managerUserId,

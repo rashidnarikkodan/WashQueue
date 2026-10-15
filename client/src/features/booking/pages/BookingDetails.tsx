@@ -129,10 +129,43 @@ export default function BookingDetails({ role }: BookingDetailsProps = {}) {
 
   const handleAdvanceStatus = async (targetStatus: string) => {
     if (!booking) return
+
+    if (
+      targetStatus === "SERVICE_COMPLETED" ||
+      (booking.status === "IN_SERVICE" && targetStatus === "COMPLETED")
+    ) {
+      navigate(`${bookingsListPath}/bookings/${booking.id}/post-inspection`)
+      return
+    }
+
     setIsAdvancingStatus(true)
     try {
-      const updated = await bookingApi.advanceStatus(booking.id, targetStatus)
-      toast.success(`Status updated to ${targetStatus.replace("_", " ")}`)
+      let updated: BookingResponse
+      if (targetStatus === "IN_SERVICE") {
+        updated = await bookingApi.startService(booking.id)
+        toast.success("✓ Wash service started! Vehicle moved to Bay.")
+      } else if (targetStatus === "COMPLETED") {
+        updated = await bookingApi.completeHandover(booking.id)
+        const outcome = updated.settlementOutcome
+        if (!outcome) {
+          toast.success("✓ Vehicle handover completed & booking closed!")
+        } else if (outcome.status === "PROCESSED") {
+          toast.success("✓ Handover completed & payout transferred to owner!")
+        } else if (outcome.status === "HELD") {
+          toast.warning(
+            `Handover completed. Payout on hold: ${outcome.holdReason || "payout account not linked"}`
+          )
+        } else if (outcome.status === "FAILED") {
+          toast.warning(
+            `Handover completed, but payout transfer failed: ${outcome.failureReason || "unknown error"}`
+          )
+        } else {
+          toast.success("✓ Handover completed. Payout is being processed.")
+        }
+      } else {
+        updated = await bookingApi.advanceStatus(booking.id, targetStatus)
+        toast.success(`Booking status updated to ${targetStatus.replace("_", " ")}`)
+      }
       setBooking(updated)
     } catch (err: unknown) {
       const errorObj = err as { message?: string }

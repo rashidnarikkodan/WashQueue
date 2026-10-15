@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Car, Sparkles, CheckCircle2, Clock, Printer, Check, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { managerApi } from "@/shared/apis/manager.api"
@@ -14,7 +14,9 @@ import SelectInput from "@/shared/components/form/SelectInput"
 
 export default function WalkInComponent() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const basePath = useQueueBasePath()
+  const targetStationId = searchParams.get("stationId")
   const [stationInfo, setStationInfo] = useState<{
     stationId: string
     stationName: string
@@ -68,10 +70,12 @@ export default function WalkInComponent() {
     try {
       const stations = await managerApi.getManagedStation()
       if (stations && stations.length > 0) {
-        const sId = stations[0].stationId
+        const activeStation =
+          (targetStationId && stations.find((s) => s.stationId === targetStationId)) || stations[0]
+        const sId = activeStation.stationId
         setStationInfo({
           stationId: sId,
-          stationName: stations[0].stationName,
+          stationName: activeStation.stationName,
         })
         try {
           const detail = await stationApi.getStationById(sId)
@@ -95,7 +99,7 @@ export default function WalkInComponent() {
     } catch (err) {
       console.error("Failed to load station:", err)
     }
-  }, [])
+  }, [targetStationId])
 
   useEffect(() => {
     let ignore = false

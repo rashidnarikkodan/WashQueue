@@ -17,6 +17,7 @@ import { IStationRepository } from "@/modules/station/domain/repositories/statio
 import { IBookingStatusLogRepository } from "@/modules/booking/domain/repositories/booking-status-log.repository"
 import { BookingStatusLog } from "@/modules/booking/domain/entities/BookingStatusLog"
 import { IBookingNotificationService } from "@/modules/notification/notification.module"
+import { isStaffAuthorizedForStation } from "../utils/queue-authorization.util"
 
 export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase {
   constructor(
@@ -177,20 +178,13 @@ export class ValidateQRForCheckInUseCase implements IValidateQRForCheckInUseCase
       throw new AppError("Booking station not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    const isOwner = station.ownerId === managerUserId
-    let isAuthorizedManager = isOwner
+    const isAuthorized = await isStaffAuthorizedForStation(
+      station,
+      managerUserId,
+      this.managerAssignmentRepository
+    )
 
-    if (!isAuthorizedManager) {
-      const assignment = await this.managerAssignmentRepository.findByUserAndStation(
-        managerUserId,
-        booking.stationId
-      )
-      if (assignment && assignment.status === "ACTIVE") {
-        isAuthorizedManager = true
-      }
-    }
-
-    if (!isAuthorizedManager) {
+    if (!isAuthorized) {
       throw new AppError(
         "You are not authorized to check in bookings for this station",
         HTTP_STATUS.FORBIDDEN
