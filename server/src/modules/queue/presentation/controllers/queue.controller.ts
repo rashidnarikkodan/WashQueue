@@ -214,7 +214,10 @@ export class QueueController {
     const { targetStatus, reason } = req.body as { targetStatus: string; reason?: string }
 
     if (!this.advanceBookingStatusUseCase) {
-      throw new AppError("Status advancement service is unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      throw new AppError(
+        "Status advancement service is unavailable",
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      )
     }
 
     const booking = await this.advanceBookingStatusUseCase.execute(managerUserId, {

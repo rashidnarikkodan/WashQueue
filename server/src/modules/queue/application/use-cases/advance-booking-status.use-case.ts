@@ -88,9 +88,7 @@ export class AdvanceBookingStatusUseCase implements IAdvanceBookingStatusUseCase
       booking.markNoShow()
       if (this.timeWindowRepository && booking.scheduling?.timeWindowId) {
         try {
-          await this.timeWindowRepository.releaseCapacityAtomically(
-            booking.scheduling.timeWindowId
-          )
+          await this.timeWindowRepository.releaseCapacityAtomically(booking.scheduling.timeWindowId)
         } catch (err) {
           logger.error({ err, bookingId }, "Failed to release capacity on NO_SHOW")
         }
@@ -99,9 +97,7 @@ export class AdvanceBookingStatusUseCase implements IAdvanceBookingStatusUseCase
       booking.cancel(reason || "Cancelled by staff", managerUserId)
       if (this.timeWindowRepository && booking.scheduling?.timeWindowId) {
         try {
-          await this.timeWindowRepository.releaseCapacityAtomically(
-            booking.scheduling.timeWindowId
-          )
+          await this.timeWindowRepository.releaseCapacityAtomically(booking.scheduling.timeWindowId)
         } catch (err) {
           logger.error({ err, bookingId }, "Failed to release capacity on CANCELLED")
         }

@@ -127,7 +127,10 @@ describe("AdvanceBookingStatusUseCase", () => {
   })
 
   it("should delegate to startServiceUseCase when targetStatus is IN_SERVICE", async () => {
-    const mockDTO = { id: "booking_1", status: BookingStatus.IN_SERVICE } as unknown as BookingResponseDTO
+    const mockDTO = {
+      id: "booking_1",
+      status: BookingStatus.IN_SERVICE,
+    } as unknown as BookingResponseDTO
     startServiceUseCase.execute.mockResolvedValue(mockDTO)
 
     const result = await useCase.execute("owner_user", {
@@ -142,7 +145,10 @@ describe("AdvanceBookingStatusUseCase", () => {
   it("should delegate to completeHandoverUseCase when targetStatus is COMPLETED and booking is in SERVICE_COMPLETED", async () => {
     const mockBooking = createMockBooking(BookingStatus.SERVICE_COMPLETED)
     bookingRepository.findById.mockResolvedValue(mockBooking)
-    const mockDTO = { id: "booking_1", status: BookingStatus.COMPLETED } as unknown as BookingResponseDTO
+    const mockDTO = {
+      id: "booking_1",
+      status: BookingStatus.COMPLETED,
+    } as unknown as BookingResponseDTO
     completeHandoverUseCase.execute.mockResolvedValue(mockDTO)
 
     const result = await useCase.execute("owner_user", {

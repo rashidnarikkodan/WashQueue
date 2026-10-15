@@ -81,7 +81,10 @@ describe("isStaffAuthorizedForStation", () => {
     const result = await isStaffAuthorizedForStation(station, "manager_user_1", mockAssignmentRepo)
 
     expect(result).toBe(true)
-    expect(mockAssignmentRepo.findByUserAndStation).toHaveBeenCalledWith("manager_user_1", stationId)
+    expect(mockAssignmentRepo.findByUserAndStation).toHaveBeenCalledWith(
+      "manager_user_1",
+      stationId
+    )
   })
 
   it("should return false if user has an inactive manager assignment and is not owner", async () => {
