@@ -39,7 +39,9 @@ describe("ProcessSettlementUseCase", () => {
 
   beforeEach(() => {
     mockSettlementRepo = {
-      findById: vi.fn().mockImplementation(() => Promise.resolve(new Settlement(sampleSettlementProps))),
+      findById: vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(new Settlement(sampleSettlementProps))),
       save: vi.fn().mockImplementation((s) => Promise.resolve(s)),
       updateStatusWithGuard: vi.fn().mockImplementation((_id, status) => {
         const updated = new Settlement({
@@ -110,7 +112,9 @@ describe("ProcessSettlementUseCase", () => {
   })
 
   it("should NOT dispatch payout processed notification when payout provider fails", async () => {
-    mockPayoutProvider.createPayout = vi.fn().mockRejectedValue(new Error("RazorpayX balance insufficient"))
+    mockPayoutProvider.createPayout = vi
+      .fn()
+      .mockRejectedValue(new Error("RazorpayX balance insufficient"))
 
     const result = await useCase.execute("stl-1")
 
