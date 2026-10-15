@@ -16,6 +16,7 @@ import {
   completeHandoverSchema,
   stallBookingSchema,
   resolveStalledSchema,
+  updateBookingStatusSchema,
 } from "../schema/queue.schema"
 
 export const createQueueRouter = (queueController: QueueController): Router => {
@@ -95,6 +96,14 @@ export const createQueueRouter = (queueController: QueueController): Router => {
     validateRequest(bookingIdParamSchema, "params"),
     validateRequest(resolveStalledSchema),
     asyncHandler(queueController.resolveStalled)
+  )
+
+  router.patch(
+    "/:bookingId/status",
+    authorize(ROLE.MANAGER, ROLE.OWNER, ROLE.ADMIN),
+    validateRequest(bookingIdParamSchema, "params"),
+    validateRequest(updateBookingStatusSchema),
+    asyncHandler(queueController.advanceStatus)
   )
 
   return router

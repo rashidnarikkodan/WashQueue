@@ -5,6 +5,7 @@ import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authentic
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
+import { AppError } from "@/common/errors/app-error"
 import success from "@/common/utils/success"
 import {
   ICompleteHandoverUseCase,
@@ -16,6 +17,7 @@ import {
   IStartServiceUseCase,
   IStallBookingUseCase,
   IValidateQRForCheckInUseCase,
+  IAdvanceBookingStatusUseCase,
 } from "../../application/interfaces/queue-usecases.interface"
 
 export class QueueController {
@@ -28,7 +30,8 @@ export class QueueController {
     private readonly completeHandoverUseCase: ICompleteHandoverUseCase,
     private readonly stallBookingUseCase: IStallBookingUseCase,
     private readonly resolveStalledBookingUseCase: IResolveStalledBookingUseCase,
-    private readonly getPublicStationQueueUseCase: IGetPublicStationQueueUseCase
+    private readonly getPublicStationQueueUseCase: IGetPublicStationQueueUseCase,
+    private readonly advanceBookingStatusUseCase?: IAdvanceBookingStatusUseCase
   ) {}
 
   getPublicStationQueue = async (req: Request, res: Response): Promise<void> => {
@@ -199,5 +202,26 @@ export class QueueController {
       targetStatus: req.body.targetStatus,
     })
     success(res, booking, HTTP_STATUS.OK, "Stalled booking resolved successfully")
+  }
+
+  advanceStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const managerUserId = req.user?.userId
+    if (!managerUserId) {
+      throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
+    }
+
+    const { bookingId } = req.params as { bookingId: string }
+    const { targetStatus, reason } = req.body as { targetStatus: string; reason?: string }
+
+    if (!this.advanceBookingStatusUseCase) {
+      throw new AppError("Status advancement service is unavailable", HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    }
+
+    const booking = await this.advanceBookingStatusUseCase.execute(managerUserId, {
+      bookingId,
+      targetStatus,
+      reason,
+    })
+    success(res, booking, HTTP_STATUS.OK, `Booking status updated to ${targetStatus}`)
   }
 }

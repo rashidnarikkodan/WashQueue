@@ -50,3 +50,8 @@ export const resolveStalledSchema = z.object({
   resolution: z.string().min(1, "Resolution is required"),
   targetStatus: z.enum(["CHECKED_IN", "IN_SERVICE", "CANCELLED"]).optional(),
 })
+
+export const updateBookingStatusSchema = z.object({
+  targetStatus: z.string().min(1, "Target status is required"),
+  reason: z.string().optional(),
+})

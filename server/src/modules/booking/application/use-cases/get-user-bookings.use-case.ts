@@ -82,9 +82,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
 
       const specificStationId =
-        queryFilter.stationId &&
-        queryFilter.stationId !== "ALL" &&
-        queryFilter.stationId !== "all"
+        queryFilter.stationId && queryFilter.stationId !== "ALL" && queryFilter.stationId !== "all"
           ? queryFilter.stationId
           : undefined
 
@@ -117,9 +115,7 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
       }
 
       const specificStationId =
-        queryFilter.stationId &&
-        queryFilter.stationId !== "ALL" &&
-        queryFilter.stationId !== "all"
+        queryFilter.stationId && queryFilter.stationId !== "ALL" && queryFilter.stationId !== "all"
           ? queryFilter.stationId
           : undefined
 

@@ -86,7 +86,14 @@ export class BookingMapper {
               model: vehicleObj.vehicle_model,
               registrationNumber: vehicleObj.registrationNumber,
             }
-          : undefined,
+          : doc.walkInVehicle
+            ? {
+                nickname: doc.walkInVehicle.registrationNumber || "Walk-In Vehicle",
+                brand: "Walk-In",
+                model: "Vehicle",
+                registrationNumber: doc.walkInVehicle.registrationNumber || "",
+              }
+            : undefined,
       customerDetails:
         userObj && "name" in userObj
           ? {
