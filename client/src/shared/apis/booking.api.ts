@@ -96,10 +96,21 @@ export const bookingApi = {
     }
   },
 
-  advanceStatus: async (bookingId: string, targetStatus: string): Promise<BookingResponse> => {
+  advanceStatus: async (
+    bookingId: string,
+    targetStatus: string,
+    reason?: string
+  ): Promise<BookingResponse> => {
     try {
+      if (targetStatus === "IN_SERVICE") {
+        return await bookingApi.startService(bookingId)
+      }
+      if (targetStatus === "COMPLETED") {
+        return await bookingApi.completeHandover(bookingId, reason)
+      }
       const response = await api.patch(`${API_ROUTES.BOOKINGS.ROOT}/${bookingId}/status`, {
         targetStatus,
+        reason,
       })
       return response.data.data
     } catch (error) {

@@ -1,7 +1,7 @@
 import { bookingRepository, bookingStatusLogRepository } from "@/modules/booking/booking.module"
 import { createSettlementUseCase } from "@/modules/settlement/settlement.module"
 import { managerAssignmentRepository } from "@/modules/manager/manager.module"
-import { stationRepository } from "@/modules/station/station.module"
+import { stationRepository, timeWindowRepository } from "@/modules/station/station.module"
 import { bookingNotificationService } from "@/modules/notification/notification.module"
 import { evaluateAndProcessRefundUseCase } from "@/modules/payment/payment.module"
 
@@ -17,6 +17,7 @@ import { CompleteHandoverUseCase } from "./application/use-cases/complete-handov
 import { StallBookingUseCase } from "./application/use-cases/stall-booking.use-case"
 import { ResolveStalledBookingUseCase } from "./application/use-cases/resolve-stalled-booking.use-case"
 import { ProcessNoShowBookingsUseCase } from "./application/use-cases/process-no-show-bookings.use-case"
+import { AdvanceBookingStatusUseCase } from "./application/use-cases/advance-booking-status.use-case"
 
 import { QueueController } from "./presentation/controllers/queue.controller"
 import { createQueueRouter } from "./presentation/routers/queue.routes"
@@ -105,6 +106,17 @@ export const processNoShowBookingsUseCase = new ProcessNoShowBookingsUseCase(
   bookingNotificationService
 )
 
+export const advanceBookingStatusUseCase = new AdvanceBookingStatusUseCase(
+  bookingRepository,
+  bookingStatusLogRepository,
+  stationRepository,
+  managerAssignmentRepository,
+  startServiceUseCase,
+  completeHandoverUseCase,
+  timeWindowRepository,
+  bookingNotificationService
+)
+
 const queueController = new QueueController(
   validateQRUseCase,
   savePreInspectionUseCase,
@@ -114,7 +126,8 @@ const queueController = new QueueController(
   completeHandoverUseCase,
   stallBookingUseCase,
   resolveStalledBookingUseCase,
-  getPublicStationQueueUseCase
+  getPublicStationQueueUseCase,
+  advanceBookingStatusUseCase
 )
 
 export const queueRouter = createQueueRouter(queueController)
