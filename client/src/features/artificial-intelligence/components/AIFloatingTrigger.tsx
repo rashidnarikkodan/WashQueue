@@ -32,7 +32,7 @@ export const AIFloatingTrigger: React.FC = () => {
       <AIRainEffect active={isHovered} />
 
       <div
-        className="fixed bottom-6 right-6 z-40 select-none"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 select-none"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -46,7 +46,7 @@ export const AIFloatingTrigger: React.FC = () => {
           <img
             src="/QynAi.png"
             alt="Qyn AI"
-            className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-2xl"
+            className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-lg sm:drop-shadow-2xl"
             draggable={false}
           />
         </button>

@@ -125,3 +125,26 @@ body {
   background: rgb(var(--background));
   color: rgb(var(--foreground));
 }
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea,
+  button {
+    touch-action: manipulation;
+  }
+}

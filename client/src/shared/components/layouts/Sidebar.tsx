@@ -70,22 +70,22 @@ const Sidebar = ({ items }: Props) => {
         onClick={() => setIsOpenMobile(true)}
         aria-label="Open sidebar menu"
         className={`
-          fixed left-0 top-24 z-50 md:hidden
+          fixed left-0 top-16 sm:top-24 z-50 md:hidden
           flex items-center justify-center
-          w-7 h-12 rounded-r-xl
-          bg-primary text-primary-foreground shadow-lg shadow-primary/20
+          w-6 h-10 rounded-r-lg
+          bg-primary text-primary-foreground shadow-md shadow-primary/20
           border border-l-0 border-primary/30
           transition-all duration-300 active:scale-95 cursor-pointer
           ${isOpenMobile ? "opacity-0 pointer-events-none -translate-x-full" : "opacity-100 translate-x-0"}
         `}
       >
-        <ChevronRight size={18} className="animate-pulse" />
+        <ChevronRight size={16} />
       </button>
 
       {isOpenMobile && (
         <div
           onClick={() => setIsOpenMobile(false)}
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-xs md:hidden transition-opacity duration-300"
           aria-hidden="true"
         />
       )}
@@ -95,24 +95,31 @@ const Sidebar = ({ items }: Props) => {
           group
           fixed
           left-0
-          top-[96px]
-          [@media(max-height:800px)]:top-[80px]
+          top-[64px]
+          sm:top-[96px]
+          [@media(max-height:800px)]:top-[60px]
+          sm:[@media(max-height:800px)]:top-[80px]
           z-40
           flex
           h-auto
-          max-h-[calc(100vh-120px)]
-          [@media(max-height:800px)]:max-h-[calc(100vh-100px)]
+          max-h-[calc(100vh-80px)]
+          sm:max-h-[calc(100vh-120px)]
+          [@media(max-height:800px)]:max-h-[calc(100vh-80px)]
+          sm:[@media(max-height:800px)]:max-h-[calc(100vh-100px)]
           flex-col
-          rounded-r-[2rem]
+          rounded-r-2xl
+          md:rounded-r-[2rem]
           border
-          border-border/80
+          border-border
           bg-card/95
           backdrop-blur-md
-          p-3
-          [@media(max-height:800px)]:p-2
+          p-2
+          sm:p-3
+          [@media(max-height:800px)]:p-1.5
+          sm:[@media(max-height:800px)]:p-2
           transition-all
           duration-300
-          shadow-xl
+          shadow-lg
           overflow-y-auto
           scrollbar-none
 
@@ -120,11 +127,11 @@ const Sidebar = ({ items }: Props) => {
           md:hover:w-[280px]
           md:translate-x-0
 
-          ${isOpenMobile ? "w-[260px] translate-x-0" : "-translate-x-full w-[260px] md:translate-x-0"}
+          ${isOpenMobile ? "w-[240px] translate-x-0" : "-translate-x-full w-[240px] md:translate-x-0"}
         `}
       >
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/40 md:hidden px-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border/40 md:hidden px-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Navigation
           </span>
           <button
@@ -133,11 +140,11 @@ const Sidebar = ({ items }: Props) => {
             className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close sidebar"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1.5 [@media(max-height:800px)]:gap-1 overflow-y-auto max-h-full scrollbar-none">
+        <nav className="flex flex-col gap-1 sm:gap-1.5 overflow-y-auto max-h-full scrollbar-none">
           {items.map((item, index) => {
             const Icon = item.icon
 
@@ -157,10 +164,14 @@ const Sidebar = ({ items }: Props) => {
                   md:justify-center
                   md:group-hover:justify-start
                   overflow-hidden
-                  rounded-2xl
-                  p-3
-                  [@media(max-height:800px)]:p-2
-                  px-4
+                  rounded-xl
+                  md:rounded-2xl
+                  p-2
+                  sm:p-3
+                  [@media(max-height:800px)]:p-1.5
+                  sm:[@media(max-height:800px)]:p-2
+                  px-3
+                  sm:px-4
                   md:px-3
                   md:group-hover:px-4
                   md:group-focus:text-black
@@ -178,16 +189,18 @@ const Sidebar = ({ items }: Props) => {
                 `
                 }
               >
-                <div className="w-7 h-7 min-w-7 flex items-center justify-center">
-                  <Icon size={20} />
+                <div className="w-6 h-6 min-w-6 sm:w-7 sm:h-7 sm:min-w-7 flex items-center justify-center">
+                  <Icon size={18} />
                 </div>
 
                 <span
                   className="
                       whitespace-nowrap
-                      text-sm
+                      text-xs
+                      sm:text-sm
                       font-semibold
-                      ml-3
+                      ml-2.5
+                      sm:ml-3
                       md:ml-0
                       md:max-w-0
                       md:opacity-0
