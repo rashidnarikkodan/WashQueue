@@ -84,7 +84,8 @@ export function createCancelBookingUseCase(
     queueService,
     bookingNotificationService,
     refundUseCase,
-    transactionRunner
+    transactionRunner,
+    timeWindowRepository
   )
 }
 

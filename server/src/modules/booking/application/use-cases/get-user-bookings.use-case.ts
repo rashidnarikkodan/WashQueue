@@ -82,6 +82,13 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
         stationIds = stationIds.filter((id) => id === queryFilter.stationId)
       }
 
+      if (stationIds.length === 0) {
+        return {
+          bookings: [],
+          pagination: buildPaginationMeta({ total: 0, page, limit }),
+        }
+      }
+
       queryFilter.stationIds = stationIds
       const result = await this.bookingRepository.findBookings(queryFilter)
 
@@ -100,6 +107,13 @@ export class GetUserBookingsUseCase implements IGetUserBookingsUseCase {
 
       if (queryFilter.stationId) {
         ownedStationIds = ownedStationIds.filter((id) => id === queryFilter.stationId)
+      }
+
+      if (ownedStationIds.length === 0) {
+        return {
+          bookings: [],
+          pagination: buildPaginationMeta({ total: 0, page, limit }),
+        }
       }
 
       queryFilter.stationIds = ownedStationIds
