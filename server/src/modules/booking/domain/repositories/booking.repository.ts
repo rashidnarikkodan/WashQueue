@@ -24,7 +24,7 @@ export interface FindBookingsResult {
 export interface RefundDetailsSnapshot {
   refundType: string
   refundMethod: string
-  status: "PROCESSED" | "NONE"
+  status: "PROCESSED" | "FAILED" | "NONE"
   amount: number
   reason: string
   transactionId: string | null

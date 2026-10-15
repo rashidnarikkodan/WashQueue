@@ -10,6 +10,7 @@ import { IBookingNotificationService } from "@/modules/notification/notification
 import { BookingDTOMapper } from "@/modules/booking/application/mappers/booking-dto.mapper"
 import { BookingResponseDTO } from "@/modules/booking/application/dtos/booking-response.dto"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
+import logger from "@/configs/logger.config"
 
 import { ResolveStalledBookingInput } from "../dtos/queue-operations.dto"
 
@@ -77,11 +78,18 @@ export class ResolveStalledBookingUseCase implements IResolveStalledBookingUseCa
     const now = domainBooking.stalledInfo?.resolvedAt || new Date()
 
     if (finalTargetStatus === BookingStatus.CANCELLED && this.evaluateAndProcessRefundUseCase) {
-      await this.evaluateAndProcessRefundUseCase.execute({
-        bookingId: domainBooking.id,
-        responsibility: "STATION",
-        reason: `Cancelled from stalled state: ${resolution}`,
-      })
+      try {
+        await this.evaluateAndProcessRefundUseCase.execute({
+          bookingId: domainBooking.id,
+          responsibility: "STATION",
+          reason: `Cancelled from stalled state: ${resolution}`,
+        })
+      } catch (err) {
+        logger.error(
+          { error: err, bookingId: domainBooking.id },
+          "[ResolveStalledBooking] Booking cancelled from stalled state but refund processing failed; recorded as FAILED"
+        )
+      }
     }
 
     const statusLog = new BookingStatusLog({
