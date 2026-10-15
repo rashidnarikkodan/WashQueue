@@ -56,8 +56,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pt-6 pb-16 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="min-h-screen bg-background text-foreground font-sans pt-3 sm:pt-6 pb-12 sm:pb-16 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4 sm:space-y-8">
         <ProfileHeader profile={profile} onEditClick={() => setEditModalOpen(true)} />
 
         <ProfileActivityStats stats={stats} role={profile.role} />
@@ -82,7 +82,7 @@ export default function ProfilePage() {
         )}
 
         {/* Common Details Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 items-stretch">
           <PersonalDetailsCard profile={profile} />
           <AccountDetailsCard profile={profile} />
         </div>

@@ -124,31 +124,31 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         onClose()
       }}
       onClick={handleBackdropClick}
-      className="fixed inset-0 m-auto bg-card border border-border shadow-xl rounded-3xl p-0 w-full max-w-md overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground"
+      className="fixed inset-0 m-auto bg-card border border-border shadow-lg sm:shadow-xl rounded-2xl sm:rounded-3xl p-0 w-[calc(100%-1.5rem)] sm:w-full max-w-md overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-sm sm:backdrop:backdrop-blur-md text-foreground"
     >
-      <div className="flex justify-between items-center px-6 py-5 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary/10 text-primary">
-            <KeyRound className="w-5 h-5" />
+      <div className="flex justify-between items-center px-4 py-3.5 sm:px-6 sm:py-5 border-b border-border">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-primary/10 text-primary">
+            <KeyRound className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">
             {isGoogleAccount ? "Account Security" : "Change Password"}
           </h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+          className="p-1 sm:p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
       {isGoogleAccount ? (
-        <div className="p-6 space-y-5 text-left">
-          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm space-y-2">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 text-left">
+          <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm space-y-1.5 sm:space-y-2">
             <h4 className="font-bold text-foreground">Google Managed Account</h4>
-            <p className="leading-relaxed text-muted-foreground">
+            <p className="leading-relaxed text-muted-foreground text-xs sm:text-sm">
               Your account is authenticated via Google OAuth 2.0 Single Sign-On. Passwords and
               security credentials are managed directly through your Google Account.
             </p>
@@ -157,14 +157,14 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-all cursor-pointer shadow-md"
+              className="px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-all cursor-pointer shadow-xs sm:shadow-md"
             >
               Got it
             </button>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3.5 sm:space-y-4" noValidate>
           <FormInput
             label="Current Password"
             type="password"
@@ -197,12 +197,12 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             required
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <div className="flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-5 py-3 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground font-bold text-xs tracking-wider transition-all cursor-pointer"
+              className="px-4 py-2 sm:px-5 sm:py-3 rounded-lg sm:rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground font-bold text-xs tracking-wider transition-all cursor-pointer"
             >
               Cancel
             </button>
@@ -210,9 +210,9 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-2"
+              className="px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs tracking-wider transition-all cursor-pointer shadow-xs sm:shadow-md flex items-center gap-1.5 sm:gap-2"
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmitting && <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />}
               Update Password
             </button>
           </div>

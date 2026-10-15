@@ -60,20 +60,21 @@ const VARIANT_CONFIG: Record<StatVariant, { text: string; bg: string }> = {
 
 const GRID_COLS_MAP: Record<number, string> = {
   1: "grid-cols-1",
-  2: "grid-cols-1 sm:grid-cols-2",
-  3: "grid-cols-1 sm:grid-cols-3",
-  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-  5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
+  2: "grid-cols-2",
+  3: "grid-cols-2 sm:grid-cols-3",
+  4: "grid-cols-2 lg:grid-cols-4",
+  5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
 }
 
 export const StatsHUD: React.FC<StatsHUDProps> = ({ stats, columns, className = "" }) => {
   if (!stats || stats.length === 0) return null
 
   const colsCount = columns || (Math.min(Math.max(stats.length, 1), 5) as 1 | 2 | 3 | 4 | 5)
-  const gridClass = GRID_COLS_MAP[colsCount] || "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+  const gridClass = GRID_COLS_MAP[colsCount] || "grid-cols-2 lg:grid-cols-4"
+  const isOdd = stats.length % 2 !== 0
 
   return (
-    <div className={`grid ${gridClass} gap-4 ${className}`}>
+    <div className={`grid ${gridClass} gap-2.5 sm:gap-4 ${className}`}>
       {stats.map((stat, idx) => {
         const variant = stat.variant || "default"
         const defaultConfig = VARIANT_CONFIG[variant] || VARIANT_CONFIG.default
@@ -81,34 +82,45 @@ export const StatsHUD: React.FC<StatsHUDProps> = ({ stats, columns, className = 
         const bgContainer = stat.bgClass || defaultConfig.bg
 
         const Icon = stat.icon
+        const isLastOdd = isOdd && idx === stats.length - 1
 
         return (
           <div
             key={stat.id || stat.label || idx}
             onClick={stat.onClick}
-            className={`flex items-center justify-between p-5 rounded-2xl border border-border/80 bg-card/65 backdrop-blur-sm transition-all duration-200 ${
+            className={`flex items-center justify-between p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-border bg-card transition-all duration-200 shadow-xs sm:shadow-sm ${
+              isLastOdd ? "col-span-2 sm:col-span-1" : ""
+            } ${
               stat.onClick
-                ? "cursor-pointer hover:border-primary/40 hover:bg-card/90 hover:scale-[1.01]"
+                ? "cursor-pointer hover:border-primary/40 hover:bg-card/90 active:scale-[0.99] sm:hover:scale-[1.01]"
                 : ""
             }`}
           >
-            <div className="space-y-1 text-left">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="space-y-0.5 sm:space-y-1 text-left min-w-0 pr-1.5 sm:pr-2">
+              <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate block">
                 {stat.label}
               </span>
-              <p className={`text-3xl font-bold ${textColor}`}>{stat.value}</p>
+              <p className={`text-xl sm:text-3xl font-bold tracking-tight truncate ${textColor}`}>
+                {stat.value}
+              </p>
               {stat.description && (
-                <p className="text-[11px] text-muted-foreground mt-0.5">{stat.description}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                  {stat.description}
+                </p>
               )}
             </div>
 
             {Icon && (
-              <div className={`p-3 rounded-xl shrink-0 ${bgContainer}`}>
+              <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl shrink-0 ${bgContainer}`}>
                 {React.isValidElement(Icon)
                   ? Icon
-                  : React.createElement(Icon as React.ComponentType<{ size?: number }>, {
-                      size: 22,
-                    })}
+                  : React.createElement(
+                      Icon as React.ComponentType<{ size?: number; className?: string }>,
+                      {
+                        size: 18,
+                        className: "sm:w-[22px] sm:h-[22px]",
+                      }
+                    )}
               </div>
             )}
           </div>

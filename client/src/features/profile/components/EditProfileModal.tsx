@@ -196,16 +196,18 @@ export default function EditProfileModal({
         onClose()
       }}
       onClick={handleBackdropClick}
-      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-[24px] p-0 w-full max-w-[850px] max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-md text-foreground"
+      className="fixed inset-0 m-auto bg-card border border-border shadow-2xl rounded-2xl sm:rounded-[24px] p-0 w-[calc(100%-1.5rem)] sm:w-full max-w-[850px] max-h-[92vh] sm:max-h-[90vh] overflow-hidden backdrop:bg-background/80 backdrop:backdrop-blur-sm sm:backdrop:backdrop-blur-md text-foreground"
     >
-      <div className="flex justify-between items-center px-8 py-6 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-            <UserCheck className="w-6 h-6 text-primary" />
+      <div className="flex justify-between items-center px-4 py-3.5 sm:px-8 sm:py-6 border-b border-border bg-card">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-primary/10 text-primary">
+            <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-foreground tracking-tight">Edit Profile</h2>
-            <p className="text-xs text-muted-foreground capitalize font-medium">
+            <h2 className="text-lg sm:text-2xl font-black text-foreground tracking-tight">
+              Edit Profile
+            </h2>
+            <p className="text-[11px] sm:text-xs text-muted-foreground capitalize font-medium">
               Updating details for {role} account
             </p>
           </div>
@@ -214,18 +216,21 @@ export default function EditProfileModal({
         <button
           type="button"
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(90vh-170px)]">
-        <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4 flex flex-col items-center sm:items-start gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col max-h-[calc(92vh-130px)] sm:max-h-[calc(90vh-170px)]"
+      >
+        <div className="p-4 sm:p-8 space-y-4 sm:space-y-8 overflow-y-auto custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-8 items-start">
+            <div className="md:col-span-4 flex flex-col items-center sm:items-start gap-3 sm:gap-4">
               <div className="relative">
-                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-border overflow-hidden bg-gradient-to-br from-muted to-card flex items-center justify-center shadow-xl">
+                <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full border-2 sm:border-4 border-border overflow-hidden bg-gradient-to-br from-muted to-card flex items-center justify-center shadow-xs sm:shadow-xl">
                   {avatar && !imgError ? (
                     <img
                       src={avatar}
@@ -510,32 +515,32 @@ export default function EditProfileModal({
           </div>
         </div>
 
-        <div className="flex justify-between items-center px-8 py-6 border-t border-border bg-card">
+        <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2.5 sm:gap-4 px-4 py-3 sm:px-8 sm:py-6 border-t border-border bg-card">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-6 py-3 rounded-xl text-muted-foreground hover:text-foreground font-bold text-sm transition-colors cursor-pointer"
+            className="px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-muted-foreground hover:text-foreground font-bold text-xs sm:text-sm transition-colors cursor-pointer"
           >
             Cancel
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               type="button"
               onClick={resetForm}
               disabled={isSubmitting}
-              className="px-6 py-3 rounded-xl border border-border bg-muted/60 hover:bg-muted text-foreground font-bold text-sm transition-colors cursor-pointer"
+              className="px-3.5 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl border border-border bg-muted/60 hover:bg-muted text-foreground font-bold text-xs sm:text-sm transition-colors cursor-pointer"
             >
-              Reset Changes
+              Reset
             </button>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm shadow-md transition-all cursor-pointer flex items-center gap-2"
+              className="px-4 py-2 sm:px-8 sm:py-3 rounded-lg sm:rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold sm:font-black text-xs sm:text-sm shadow-xs sm:shadow-md transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2"
             >
-              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmitting && <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />}
               Save Changes
             </button>
           </div>
