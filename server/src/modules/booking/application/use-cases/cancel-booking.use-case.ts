@@ -12,6 +12,7 @@ import { BookingResponseDTO } from "../dtos/booking-response.dto"
 import { ICancelBookingUseCase } from "../interfaces/booking-usecases.interface"
 import type { IEvaluateAndProcessRefundUseCase } from "@/modules/payment/application/interfaces/payment-usecases.interface"
 import { ITransactionRunner } from "@/core/domain/transaction.interface"
+import logger from "@/configs/logger.config"
 
 export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
@@ -98,11 +99,18 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
     const responsibility = isStaffCancellation ? "STATION" : "CUSTOMER"
     if (this.evaluateAndProcessRefundUseCase) {
-      await this.evaluateAndProcessRefundUseCase.execute({
-        bookingId: domainBooking.id,
-        responsibility,
-        reason: cancellationReason,
-      })
+      try {
+        await this.evaluateAndProcessRefundUseCase.execute({
+          bookingId: domainBooking.id,
+          responsibility,
+          reason: cancellationReason,
+        })
+      } catch (refundError) {
+        logger.error(
+          { error: refundError, bookingId: domainBooking.id },
+          "[CancelBooking] Booking cancelled but refund processing failed; recorded as FAILED for retry"
+        )
+      }
     }
 
     await this.redisQueueService.updateQueueStatus(domainBooking)

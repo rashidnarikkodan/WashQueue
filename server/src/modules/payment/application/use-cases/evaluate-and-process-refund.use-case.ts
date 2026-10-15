@@ -1,7 +1,7 @@
 import { AppError } from "@/common/errors/app-error"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { PaymentStatus } from "@/modules/booking/domain/entities/Booking"
-import { IBookingRepository } from "@/modules/booking/domain/repositories/booking.repository"
+import { IBookingRepository, RefundDetailsSnapshot } from "@/modules/booking/domain/repositories/booking.repository"
 import { CreditWalletUseCase } from "@/modules/wallet/application/use-cases/credit-wallet.use-case"
 import { IBookingNotificationService } from "@/modules/notification/notification.module"
 import { RefundPolicyEngine } from "../../domain/services/RefundPolicyEngine"
@@ -71,6 +71,8 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
     })
 
     let transactionId: string | null = null
+    let refundStatus: RefundDetailsSnapshot["status"] = "PROCESSED"
+    let executionError: unknown = null
 
     const targetUserId = domainBooking.userId
 
@@ -96,11 +98,15 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
           { error: err, bookingId: domainBooking.id },
           "[Refund] Failed to process wallet refund"
         )
+        refundStatus = "FAILED"
+        executionError = err
       }
     }
 
     const newPaymentStatus =
-      policyResult.refundAmount > 0 && policyResult.refundAmount >= paidAmount
+      refundStatus === "PROCESSED" &&
+      policyResult.refundAmount > 0 &&
+      policyResult.refundAmount >= paidAmount
         ? PaymentStatus.REFUNDED
         : domainBooking.paymentStatus
 
@@ -109,15 +115,23 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
       {
         refundType: policyResult.refundType,
         refundMethod: policyResult.refundMethod,
-        status: "PROCESSED",
+        status: refundStatus,
         amount: policyResult.refundAmount,
-        reason: policyResult.reason,
+        reason:
+          refundStatus === "FAILED"
+            ? `Wallet refund failed: ${executionError instanceof Error ? executionError.message : String(executionError)}`
+            : policyResult.reason,
         transactionId,
       },
       newPaymentStatus
     )
 
-    if (updatedBooking && this.notificationService && policyResult.refundAmount > 0) {
+    if (
+      refundStatus === "PROCESSED" &&
+      updatedBooking &&
+      this.notificationService &&
+      policyResult.refundAmount > 0
+    ) {
       try {
         await this.notificationService.notify("REFUND_COMPLETED", updatedBooking, {
           refundAmount: policyResult.refundAmount,
@@ -130,6 +144,10 @@ export class EvaluateAndProcessRefundUseCase implements IEvaluateAndProcessRefun
           "[Refund] Failed to send refund notification"
         )
       }
+    }
+
+    if (executionError) {
+      throw executionError
     }
 
     return policyResult
