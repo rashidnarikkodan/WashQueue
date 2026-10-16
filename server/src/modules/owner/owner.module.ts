@@ -10,15 +10,15 @@ import { SubmitOnboardingUseCase } from "./application/use-cases/submit-onboardi
 import { ApproveOwnerUseCase } from "./application/use-cases/approve-owner.use-case"
 import { OwnerController } from "./presentation/owner.controller"
 import { createOwnerRouter } from "./presentation/owner.routes"
-import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
+import { StorageFactory } from "@/infrastructure/storage/storage.factory"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { MailService } from "@/core/application/services/mail.service"
 import { razorpayXPayoutProvider } from "@/infrastructure/payment/razorpayx-payout.service"
 import { OnboardingStepRequestMapper } from "./application/mappers/onboarding-step.mapper"
 
 export const ownerRepository = new OwnerMongoRepository()
-const cloudinaryService = new CloudinaryService()
-const mediaUploadService = new MediaUploadService(cloudinaryService)
+const mediaStorage = StorageFactory.getStorageService()
+const mediaUploadService = new MediaUploadService(mediaStorage)
 const mailService = new MailService()
 
 const onboardingStepMapper = new OnboardingStepRequestMapper(mediaUploadService)

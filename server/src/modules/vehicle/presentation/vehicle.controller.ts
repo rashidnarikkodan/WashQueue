@@ -36,7 +36,11 @@ export class VehicleController {
 
     const file = req.file as Express.Multer.File | undefined
     if (file) {
-      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      const uploaded = await this.mediaStorage.upload(
+        file.buffer,
+        file.originalname,
+        "washqueue/vehicles"
+      )
       body.image = { url: uploaded.url, publicId: uploaded.publicId || "" }
     }
 
@@ -58,7 +62,11 @@ export class VehicleController {
     const body = { ...req.body }
     const file = req.file as Express.Multer.File | undefined
     if (file) {
-      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      const uploaded = await this.mediaStorage.upload(
+        file.buffer,
+        file.originalname,
+        "washqueue/vehicles"
+      )
       body.image = { url: uploaded.url, publicId: uploaded.publicId || "" }
     }
 

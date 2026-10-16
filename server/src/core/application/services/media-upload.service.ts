@@ -7,9 +7,9 @@ import { MulterFileMap } from "../types/media-upload.types"
 export class MediaUploadService {
   constructor(private readonly mediaStorage: IMediaStorage) {}
 
-  async uploadFile(file: Express.Multer.File): Promise<UploadedFile> {
+  async uploadFile(file: Express.Multer.File, folder?: string): Promise<UploadedFile> {
     try {
-      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname)
+      const uploaded = await this.mediaStorage.upload(file.buffer, file.originalname, folder)
       if (!uploaded || !uploaded.url) {
         throw new AppError(
           `Failed to process upload for file ${file.originalname}`,
@@ -28,24 +28,26 @@ export class MediaUploadService {
 
   async uploadFileByFieldname(
     files: MulterFileMap | undefined,
-    fieldname: string
+    fieldname: string,
+    folder?: string
   ): Promise<string | undefined> {
     const file = files?.[fieldname]?.[0]
     if (!file) {
       return undefined
     }
-    const uploaded = await this.uploadFile(file)
+    const uploaded = await this.uploadFile(file, folder)
     return uploaded.url
   }
 
   async uploadMultipleFiles(
-    files: Express.Multer.File[] | undefined
+    files: Express.Multer.File[] | undefined,
+    folder?: string
   ): Promise<{ url: string; publicId: string }[]> {
     if (!files || files.length === 0) {
       return []
     }
 
-    const uploads = await Promise.all(files.map((file) => this.uploadFile(file)))
+    const uploads = await Promise.all(files.map((file) => this.uploadFile(file, folder)))
     return uploads.map((u, idx) => ({
       url: u.url,
       publicId: u.publicId ?? `img-${Date.now()}-${idx}`,

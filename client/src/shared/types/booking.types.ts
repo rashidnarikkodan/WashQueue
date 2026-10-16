@@ -160,10 +160,16 @@ export interface BookingListApiResponse {
   }
 }
 
-export interface CloudinarySignatureResponse {
-  signature: string
-  timestamp: number
-  folder: string
-  apiKey: string
-  cloudName: string
+export interface MediaUploadSignatureResponse {
+  provider?: "cloudinary" | "s3"
+  signature?: string
+  timestamp?: number
+  folder?: string
+  apiKey?: string
+  cloudName?: string
+  uploadUrl?: string
+  fileUrl?: string
+  key?: string
 }
+
+export type CloudinarySignatureResponse = MediaUploadSignatureResponse

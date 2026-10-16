@@ -16,7 +16,7 @@ import { GetStationsUseCase } from "./application/use-cases/get-stations.usecase
 import { OwnerMongoRepository } from "../owner/infrastructure/repository/owner.mongo.repository"
 import { StationRequestMapper } from "./application/mappers/station-request.mapper"
 import { ReviewStationUseCase } from "./application/use-cases/review-station.usecase"
-import { CloudinaryService } from "@/infrastructure/storage/cloudinary.service"
+import { StorageFactory } from "@/infrastructure/storage/storage.factory"
 import { MediaUploadService } from "@/core/application/services/media-upload.service"
 import { StationStepParserFactory } from "./application/mappers/station-step.parser"
 import { ConfigureSlotConfigUseCase } from "./application/use-cases/configure-slot-config.usecase"
@@ -43,8 +43,8 @@ export const slotConfigRepository = new SlotConfigMongoRepository()
 export const timeWindowRepository = new TimeWindowMongoRepository()
 
 const timeWindowGenerationService = new TimeWindowGenerationService()
-const cloudinaryService = new CloudinaryService()
-const mediaUploadService = new MediaUploadService(cloudinaryService)
+const mediaStorage = StorageFactory.getStorageService()
+const mediaUploadService = new MediaUploadService(mediaStorage)
 
 const stationStepParserFactory = new StationStepParserFactory()
 const stationRequestMapper = new StationRequestMapper(stationStepParserFactory)
@@ -97,7 +97,7 @@ const updateStationUseCase = new UpdateStationUseCase(
   ownerRepository,
   stationPricingRepository,
   extraServiceRepository,
-  cloudinaryService,
+  mediaStorage,
   mediaUploadService,
   managerAssignmentRepository,
   slotConfigRepository,

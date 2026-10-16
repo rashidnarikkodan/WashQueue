@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import cloudinary from "@/configs/cloudinary.config"
 import env from "@/configs/env.config"
+import { StorageFactory } from "@/infrastructure/storage/storage.factory"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { ERROR_MESSAGES } from "@/common/constants/error.constants"
@@ -75,6 +76,34 @@ export class QueueController {
       throw new UnauthorizedError(ERROR_MESSAGES.UNAUTHORIZED)
     }
 
+    if (StorageFactory.getActiveProvider() === "s3") {
+      const { filename, contentType, folder } = req.query as {
+        filename?: string
+        contentType?: string
+        folder?: string
+      }
+      const s3Storage = StorageFactory.getS3Service()
+      const presigned = await s3Storage.generatePresignedUploadUrl({
+        filename,
+        contentType,
+        folder: folder || "washqueue/inspections",
+      })
+
+      success(
+        res,
+        {
+          provider: "s3",
+          uploadUrl: presigned.uploadUrl,
+          fileUrl: presigned.fileUrl,
+          key: presigned.key,
+          folder: folder || "washqueue/inspections",
+        },
+        HTTP_STATUS.OK,
+        "S3 presigned upload URL generated"
+      )
+      return
+    }
+
     const timestamp = Math.round(Date.now() / 1000)
     const folder = "washqueue/inspections"
     const signature = cloudinary.utils.api_sign_request(
@@ -85,6 +114,7 @@ export class QueueController {
     success(
       res,
       {
+        provider: "cloudinary",
         signature,
         timestamp,
         folder,

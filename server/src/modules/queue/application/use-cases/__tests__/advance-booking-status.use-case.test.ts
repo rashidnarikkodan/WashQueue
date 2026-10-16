@@ -188,10 +188,7 @@ describe("AdvanceBookingStatusUseCase", () => {
     })
 
     expect(result.status).toBe(BookingStatus.NO_SHOW)
-    expect(timeWindowRepository.releaseCapacityAtomically).toHaveBeenCalledWith(
-      "window_1",
-      "standard"
-    )
+    expect(timeWindowRepository.releaseCapacityAtomically).toHaveBeenCalledWith("window_1")
     expect(bookingStatusLogRepository.save).toHaveBeenCalled()
     expect(notificationService.notify).toHaveBeenCalledWith(
       "BOOKING_NO_SHOW",
