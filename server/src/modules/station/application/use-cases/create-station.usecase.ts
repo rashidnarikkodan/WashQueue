@@ -37,7 +37,10 @@ export class CreateStationUseCase implements ICreateStationUseCase {
     let images: StationImage[] = input.images ? [...input.images] : []
 
     if (input.newFiles && input.newFiles.length > 0 && this.mediaUploadService) {
-      const uploadedImages = await this.mediaUploadService.uploadMultipleFiles(input.newFiles)
+      const uploadedImages = await this.mediaUploadService.uploadMultipleFiles(
+        input.newFiles,
+        "washqueue/stations"
+      )
       const newStationImages: StationImage[] = uploadedImages.map((img, idx) => ({
         url: img.url,
         publicId: img.publicId,

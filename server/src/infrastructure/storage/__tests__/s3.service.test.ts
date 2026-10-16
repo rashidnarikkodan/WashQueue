@@ -28,6 +28,16 @@ describe("S3StorageService", () => {
       expect(result.url).toBeDefined()
       expect(result.publicId).toBeDefined()
       expect(result.publicId).toContain("test-document.pdf")
+      expect(result.publicId).toContain("washqueue/uploads/")
+    })
+
+    it("should upload a file with custom folder", async () => {
+      const buffer = Buffer.from("test file content")
+      const result = await s3Service.upload(buffer, "vehicle.jpg", "washqueue/vehicles")
+
+      expect(mockS3Client.send).toHaveBeenCalledTimes(1)
+      expect(result.publicId).toContain("washqueue/vehicles/")
+      expect(result.publicId).toContain("vehicle.jpg")
     })
 
     it("should throw AppError when S3 upload fails", async () => {

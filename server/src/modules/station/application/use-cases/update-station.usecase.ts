@@ -185,7 +185,10 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
         const props = station.getProps()
         let currentImages: StationImage[] = updates.images ?? props.images
         if (updates.newFiles && updates.newFiles.length > 0 && this.mediaUploadService) {
-          const uploaded = await this.mediaUploadService.uploadMultipleFiles(updates.newFiles)
+          const uploaded = await this.mediaUploadService.uploadMultipleFiles(
+            updates.newFiles,
+            "washqueue/stations"
+          )
           const newStationImages: StationImage[] = uploaded.map((img, idx) => ({
             url: img.url,
             publicId: img.publicId,

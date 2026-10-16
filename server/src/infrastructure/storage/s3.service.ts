@@ -14,7 +14,7 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { s3Client as defaultS3Client, s3StorageConfig } from "@/configs/s3.config"
 
 export class S3StorageService implements IPresignedMediaStorage {
-  private readonly defaultFolder = "washqueue/onboarding"
+  private readonly defaultFolder = "washqueue/uploads"
   private readonly client: S3Client
   private readonly bucketName: string
   private readonly region: string
@@ -27,8 +27,12 @@ export class S3StorageService implements IPresignedMediaStorage {
     this.cloudFrontDomain = s3StorageConfig.cloudFrontDomain
   }
 
-  async upload(fileBuffer: Buffer, filename?: string): Promise<UploadedFile> {
-    const key = this.generateKey(this.defaultFolder, filename)
+  async upload(
+    fileBuffer: Buffer,
+    filename?: string,
+    folder: string = this.defaultFolder
+  ): Promise<UploadedFile> {
+    const key = this.generateKey(folder, filename)
     const contentType = this.getContentType(filename)
 
     try {
@@ -51,7 +55,12 @@ export class S3StorageService implements IPresignedMediaStorage {
     }
   }
 
-  async update(publicId: string, fileBuffer: Buffer, filename?: string): Promise<UploadedFile> {
+  async update(
+    publicId: string,
+    fileBuffer: Buffer,
+    filename?: string,
+    _folder?: string
+  ): Promise<UploadedFile> {
     const contentType = this.getContentType(filename)
 
     try {

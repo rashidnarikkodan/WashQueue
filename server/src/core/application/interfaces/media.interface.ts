@@ -17,8 +17,13 @@ export interface PresignedUploadResult {
 }
 
 export interface IMediaStorage {
-  upload(fileBuffer: Buffer, filename?: string): Promise<UploadedFile>
-  update(publicId: string, fileBuffer: Buffer, filename?: string): Promise<UploadedFile>
+  upload(fileBuffer: Buffer, filename?: string, folder?: string): Promise<UploadedFile>
+  update(
+    publicId: string,
+    fileBuffer: Buffer,
+    filename?: string,
+    folder?: string
+  ): Promise<UploadedFile>
   delete(publicId: string): Promise<void>
 }
 

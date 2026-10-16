@@ -43,10 +43,18 @@ export class OnboardingStepRequestMapper {
     }
 
     const [idProofUrl, businessLicenseUrl, gstCertificateUrl, bankProofUrl] = await Promise.all([
-      this.mediaUploadService.uploadFileByFieldname(files, "idProofFile"),
-      this.mediaUploadService.uploadFileByFieldname(files, "businessLicenseFile"),
-      this.mediaUploadService.uploadFileByFieldname(files, "gstCertificateFile"),
-      this.mediaUploadService.uploadFileByFieldname(files, "bankProofFile"),
+      this.mediaUploadService.uploadFileByFieldname(files, "idProofFile", "washqueue/onboarding"),
+      this.mediaUploadService.uploadFileByFieldname(
+        files,
+        "businessLicenseFile",
+        "washqueue/onboarding"
+      ),
+      this.mediaUploadService.uploadFileByFieldname(
+        files,
+        "gstCertificateFile",
+        "washqueue/onboarding"
+      ),
+      this.mediaUploadService.uploadFileByFieldname(files, "bankProofFile", "washqueue/onboarding"),
     ])
 
     if (idProofUrl) details.idProofUrl = idProofUrl
