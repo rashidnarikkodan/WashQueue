@@ -7,21 +7,32 @@ import { HTTP_STATUS } from "@/common/constants/http.constants"
 import cloudinary from "@/configs/cloudinary.config"
 
 export class CloudinaryService implements IMediaStorage {
-  private readonly defaultFolder = "washqueue/onboarding"
+  private readonly defaultFolder = "washqueue/uploads"
 
-  async upload(fileBuffer: Buffer, filename?: string): Promise<UploadedFile> {
+  async upload(
+    fileBuffer: Buffer,
+    filename?: string,
+    folder: string = this.defaultFolder
+  ): Promise<UploadedFile> {
     return this.uploadToCloudinary({
       fileBuffer,
       filename,
+      folder,
     })
   }
 
-  async update(publicId: string, fileBuffer: Buffer, filename?: string): Promise<UploadedFile> {
+  async update(
+    publicId: string,
+    fileBuffer: Buffer,
+    filename?: string,
+    folder?: string
+  ): Promise<UploadedFile> {
     return this.uploadToCloudinary({
       fileBuffer,
       filename,
       publicId,
       overwrite: true,
+      folder,
     })
   }
 
@@ -49,16 +60,18 @@ export class CloudinaryService implements IMediaStorage {
     filename,
     publicId,
     overwrite = false,
+    folder = this.defaultFolder,
   }: {
     fileBuffer: Buffer
     filename?: string
     publicId?: string
     overwrite?: boolean
+    folder?: string
   }): Promise<UploadedFile> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: this.defaultFolder,
+          folder,
           resource_type: "auto",
           overwrite,
           invalidate: overwrite,

@@ -5,7 +5,7 @@ import type {
   BookingResponse,
   GetUserBookingsParams,
   BookingListApiResponse,
-  CloudinarySignatureResponse,
+  MediaUploadSignatureResponse,
 } from "../types/booking.types"
 export * from "../types/booking.types"
 import { api } from "@/shared/config/axios"
@@ -15,9 +15,15 @@ import type { StationQueueResponse } from "@/features/station/types"
 import { PAYMENT_METHOD } from "@/shared/constants/payment.constants"
 
 export const bookingApi = {
-  getInspectionUploadSignature: async (): Promise<CloudinarySignatureResponse> => {
+  getInspectionUploadSignature: async (params?: {
+    filename?: string
+    contentType?: string
+    folder?: string
+  }): Promise<MediaUploadSignatureResponse> => {
     try {
-      const response = await api.get(API_ROUTES.QUEUE.INSPECTION_UPLOAD_SIGNATURE)
+      const response = await api.get(API_ROUTES.QUEUE.INSPECTION_UPLOAD_SIGNATURE, {
+        params,
+      })
       return response.data.data
     } catch (error) {
       throw handleApiError(error, "Failed to prepare photo upload")
