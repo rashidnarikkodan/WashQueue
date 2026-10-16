@@ -160,7 +160,7 @@ export interface BookingListApiResponse {
   }
 }
 
-export interface CloudinarySignatureResponse {
+export interface MediaUploadSignatureResponse {
   provider?: "cloudinary" | "s3"
   signature?: string
   timestamp?: number
@@ -171,3 +171,5 @@ export interface CloudinarySignatureResponse {
   fileUrl?: string
   key?: string
 }
+
+export type CloudinarySignatureResponse = MediaUploadSignatureResponse

@@ -5,7 +5,7 @@ import type {
   BookingResponse,
   GetUserBookingsParams,
   BookingListApiResponse,
-  CloudinarySignatureResponse,
+  MediaUploadSignatureResponse,
 } from "../types/booking.types"
 export * from "../types/booking.types"
 import { api } from "@/shared/config/axios"
@@ -19,7 +19,7 @@ export const bookingApi = {
     filename?: string
     contentType?: string
     folder?: string
-  }): Promise<CloudinarySignatureResponse> => {
+  }): Promise<MediaUploadSignatureResponse> => {
     try {
       const response = await api.get(API_ROUTES.QUEUE.INSPECTION_UPLOAD_SIGNATURE, {
         params,

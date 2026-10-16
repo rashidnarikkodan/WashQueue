@@ -1,21 +1,25 @@
 import { bookingApi } from "@/shared/apis/booking.api"
 
-interface CloudinaryImage {
+export interface UploadedInspectionPhoto {
   position: string
   public_id: string
   secured_url: string
 }
+
+export type CloudinaryImage = UploadedInspectionPhoto
 
 interface PositionedFile {
   position: string
   file: File
 }
 
-export async function inspectionImagesUpload(photos: PositionedFile[]): Promise<CloudinaryImage[]> {
+export async function inspectionImagesUpload(
+  photos: PositionedFile[]
+): Promise<UploadedInspectionPhoto[]> {
   const uploadSig = await bookingApi.getInspectionUploadSignature()
 
   if (uploadSig.provider === "s3") {
-    const uploaded: CloudinaryImage[] = await Promise.all(
+    const uploaded: UploadedInspectionPhoto[] = await Promise.all(
       photos.map(async ({ position, file }) => {
         const presigned = await bookingApi.getInspectionUploadSignature({
           filename: file.name,
