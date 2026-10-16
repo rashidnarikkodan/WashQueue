@@ -367,7 +367,7 @@ export class BookingNotificationService implements IBookingNotificationService {
       case "HANDOVER_READY":
       case "READY_FOR_PICKUP":
         notifType = "QUEUE"
-        userTitle = `Vehicle Ready for Pickup! 🚗✨`
+        userTitle = `Vehicle Ready for Pickup!`
         userMessage = `Your vehicle wash for ${refNumber} is completed and inspected. Ready for handover.`
         break
 
