@@ -3,6 +3,7 @@ import { VehicleResponseDto } from "../dtos/get-vehicle.dto"
 import { IVehicleRepository } from "../../domain/repositories/vehicle.repository"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { VehicleDTOMapper } from "../mappers/vehicle-dto.mapper"
 
 export class SetPrimaryVehicleUseCase implements ISetPrimaryVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
@@ -22,6 +23,6 @@ export class SetPrimaryVehicleUseCase implements ISetPrimaryVehicleUseCase {
     vehicle.setPrimary()
     const savedVehicle = await this.vehicleRepository.save(vehicle)
 
-    return savedVehicle.data
+    return VehicleDTOMapper.toDTO(savedVehicle)
   }
 }

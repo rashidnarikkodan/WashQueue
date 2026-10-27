@@ -3,6 +3,7 @@ import { INotificationRepository } from "../../domain/repositories/notification.
 import { CreateNotificationDto } from "../dtos/create-notification.dto"
 import { NotificationResponseDto } from "../dtos/notification-response.dto"
 import { ICreateNotificationUseCase } from "../interfaces/notification-usecases.interface"
+import { NotificationDTOMapper } from "../mappers/notification-dto.mapper"
 
 export class CreateNotificationUseCase implements ICreateNotificationUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
@@ -33,6 +34,6 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
     })
 
     const saved = await this.notificationRepository.save(notification)
-    return saved.data
+    return NotificationDTOMapper.toDTO(saved)
   }
 }

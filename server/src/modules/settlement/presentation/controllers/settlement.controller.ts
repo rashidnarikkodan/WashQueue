@@ -15,6 +15,7 @@ import {
   IRetrySettlementUseCase,
 } from "../../application/interfaces/settlement-usecases.interface"
 import { SettlementStatus } from "../../domain/entities/Settlement"
+import { SettlementDTOMapper } from "../../application/mappers/settlement-dto.mapper"
 
 export class SettlementController {
   constructor(
@@ -162,7 +163,7 @@ export class SettlementController {
 
     success(
       res,
-      settlement.getProps(),
+      SettlementDTOMapper.toDTO(settlement),
       HTTP_STATUS.OK,
       `Settlement retry executed; status is now ${settlement.status}`
     )
@@ -174,7 +175,7 @@ export class SettlementController {
     const { reason = "Manual admin hold" } = req.body as { reason?: string }
 
     const settlement = await this.manageSettlementHoldUseCase.hold(id, reason)
-    success(res, settlement.getProps(), HTTP_STATUS.OK, "Settlement placed on hold")
+    success(res, SettlementDTOMapper.toDTO(settlement), HTTP_STATUS.OK, "Settlement placed on hold")
   }
 
   // Admin: Release Settlement
@@ -182,6 +183,6 @@ export class SettlementController {
     const { id } = req.params as { id: string }
     const settlement = await this.manageSettlementHoldUseCase.release(id)
 
-    success(res, settlement.getProps(), HTTP_STATUS.OK, "Settlement hold released")
+    success(res, SettlementDTOMapper.toDTO(settlement), HTTP_STATUS.OK, "Settlement hold released")
   }
 }

@@ -5,7 +5,6 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import success from "@/common/utils/success"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
 import { AppError } from "@/common/errors/app-error"
-import { Issue } from "../../domain/entities/Issue"
 import { IssueStatus } from "../../domain/value-objects/issue-status.vo"
 import { IssuePriority } from "../../domain/value-objects/issue-priority.vo"
 import {
@@ -20,6 +19,7 @@ import {
   IEscalateIssueUseCase,
   ICloseIssueUseCase,
 } from "../../application/interfaces/issue-usecases.interface"
+import { IssueDTOMapper } from "../../application/mappers/issue-dto.mapper"
 
 interface IssueQueryParams {
   page?: number
@@ -59,7 +59,7 @@ export class IssueController {
       customerId,
     })
 
-    success(res, result.data, HTTP_STATUS.CREATED, "Issue reported successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.CREATED, "Issue reported successfully")
   }
 
   getMyIssues = async (req: AuthenticatedRequest, res: Response) => {
@@ -83,7 +83,7 @@ export class IssueController {
     success(
       res,
       {
-        issues: result.issues.map((i: Issue) => i.data),
+        issues: IssueDTOMapper.toListDTO(result.issues),
         total: result.total,
         page: result.page,
         limit: result.limit,
@@ -115,7 +115,7 @@ export class IssueController {
     success(
       res,
       {
-        issues: result.issues.map((i: Issue) => i.data),
+        issues: IssueDTOMapper.toListDTO(result.issues),
         total: result.total,
         page: result.page,
         limit: result.limit,
@@ -144,7 +144,7 @@ export class IssueController {
     success(
       res,
       {
-        issues: result.issues.map((i: Issue) => i.data),
+        issues: IssueDTOMapper.toListDTO(result.issues),
         total: result.total,
         page: result.page,
         limit: result.limit,
@@ -164,7 +164,7 @@ export class IssueController {
     }
 
     const issue = await this.getIssueByIdUseCase.execute(issueId, userId, role)
-    success(res, issue.data, HTTP_STATUS.OK, "Issue retrieved successfully")
+    success(res, IssueDTOMapper.toDTO(issue), HTTP_STATUS.OK, "Issue retrieved successfully")
   }
 
   updateStatus = async (req: AuthenticatedRequest, res: Response) => {
@@ -180,7 +180,7 @@ export class IssueController {
       ...req.body,
     })
 
-    success(res, result.data, HTTP_STATUS.OK, "Issue status updated successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.OK, "Issue status updated successfully")
   }
 
   assign = async (req: AuthenticatedRequest, res: Response) => {
@@ -196,7 +196,7 @@ export class IssueController {
       assignedBy,
     })
 
-    success(res, result.data, HTTP_STATUS.OK, "Manager assigned successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.OK, "Manager assigned successfully")
   }
 
   escalate = async (req: AuthenticatedRequest, res: Response) => {
@@ -212,7 +212,7 @@ export class IssueController {
       escalatedBy,
     })
 
-    success(res, result.data, HTTP_STATUS.OK, "Issue escalated successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.OK, "Issue escalated successfully")
   }
 
   resolve = async (req: AuthenticatedRequest, res: Response) => {
@@ -230,7 +230,7 @@ export class IssueController {
       resolvedBy,
     })
 
-    success(res, result.data, HTTP_STATUS.OK, "Issue resolved successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.OK, "Issue resolved successfully")
   }
 
   close = async (req: AuthenticatedRequest, res: Response) => {
@@ -246,6 +246,6 @@ export class IssueController {
       notes: req.body.notes,
     })
 
-    success(res, result.data, HTTP_STATUS.OK, "Issue closed successfully")
+    success(res, IssueDTOMapper.toDTO(result), HTTP_STATUS.OK, "Issue closed successfully")
   }
 }

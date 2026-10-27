@@ -7,6 +7,7 @@ import {
   IGetOwnerDashboardUseCase,
 } from "../application/interfaces/analytics-usecases.interface"
 import { IExportOwnerAnalyticsUseCase } from "../application/use-cases/export-owner-analytics.use-case"
+import { AnalyticsDTOMapper } from "../application/mappers/analytics-dto.mapper"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { UnauthorizedError } from "@/common/errors/unauthorized-error"
@@ -26,7 +27,12 @@ export class AnalyticsController {
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined
     const data = await this.getAdminDashboardUseCase.execute(range, year, month, startDate, endDate)
-    success(res, data, HTTP_STATUS.OK, "Admin dashboard fetched successfully")
+    success(
+      res,
+      AnalyticsDTOMapper.toAdminDashboardDTO(data),
+      HTTP_STATUS.OK,
+      "Admin dashboard fetched successfully"
+    )
   }
 
   getOwnerDashboard = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -49,7 +55,12 @@ export class AnalyticsController {
       startDate,
       endDate
     )
-    success(res, data, HTTP_STATUS.OK, "Owner dashboard fetched successfully")
+    success(
+      res,
+      AnalyticsDTOMapper.toOwnerDashboardDTO(data),
+      HTTP_STATUS.OK,
+      "Owner dashboard fetched successfully"
+    )
   }
 
   getManagerDashboard = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -72,7 +83,12 @@ export class AnalyticsController {
       startDate,
       endDate
     )
-    success(res, data, HTTP_STATUS.OK, "Manager dashboard fetched successfully")
+    success(
+      res,
+      AnalyticsDTOMapper.toManagerDashboardDTO(data),
+      HTTP_STATUS.OK,
+      "Manager dashboard fetched successfully"
+    )
   }
 
   exportOwnerAnalytics = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

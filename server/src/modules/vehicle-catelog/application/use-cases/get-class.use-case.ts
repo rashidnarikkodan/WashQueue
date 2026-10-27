@@ -3,6 +3,8 @@ import { ClassResponseDto } from "../dtos/class.dto"
 import { IVehicleClassRepository } from "../../domain/repositories/vehicle-class.repsoitory"
 import { NotFoundError } from "@/common/errors/not-found-error"
 
+import { VehicleCatalogDTOMapper } from "../mappers/vehicle-catalog-dto.mapper"
+
 export class GetClassUseCase implements IGetClassUseCase {
   constructor(private readonly classRepository: IVehicleClassRepository) {}
 
@@ -12,14 +14,6 @@ export class GetClassUseCase implements IGetClassUseCase {
       throw new NotFoundError("Vehicle class not found")
     }
 
-    return {
-      id: vehicleClass.id,
-      categoryId: vehicleClass.categoryId,
-      name: vehicleClass.name,
-      slug: vehicleClass.slug,
-      description: vehicleClass.description,
-      order: vehicleClass.order,
-      isActive: vehicleClass.isActive,
-    }
+    return VehicleCatalogDTOMapper.toClassDTO(vehicleClass)
   }
 }

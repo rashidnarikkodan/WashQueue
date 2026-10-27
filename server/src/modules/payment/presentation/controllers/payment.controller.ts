@@ -11,6 +11,7 @@ import {
   ICancelBookingReservationUseCase,
   IProcessRazorpayWebhookUseCase,
 } from "../../application/interfaces/payment-usecases.interface"
+import { PaymentDTOMapper } from "../../application/mappers/payment-dto.mapper"
 
 export class PaymentController {
   constructor(
@@ -30,15 +31,7 @@ export class PaymentController {
 
     success(
       res,
-      {
-        order_id: result.paymentOrderId,
-        id: result.paymentOrderId,
-        amount: result.amount,
-        currency: result.currency,
-        reservation_id: result.reservationId,
-        wallet_amount: result.walletAmount,
-        expires_at: result.expiresAt,
-      },
+      PaymentDTOMapper.toOrderDTO(result),
       HTTP_STATUS.OK,
       "Payment order created successfully"
     )
@@ -56,11 +49,7 @@ export class PaymentController {
 
     success(
       res,
-      {
-        booking: bookingDto,
-        order_id: razorpay_order_id,
-        payment_id: razorpay_payment_id,
-      },
+      PaymentDTOMapper.toVerificationDTO(bookingDto, razorpay_order_id, razorpay_payment_id),
       HTTP_STATUS.OK,
       "Payment verified and booking confirmed successfully"
     )

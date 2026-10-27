@@ -4,6 +4,7 @@ import { IStationPricingRepository } from "../../domain/repositories/station-pri
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
 import { IGetStationUseCase } from "../interfaces/station-usecases.interface"
+import { StationDTOMapper } from "../mappers/station-dto.mapper"
 
 export class GetStationUseCase implements IGetStationUseCase {
   constructor(
@@ -21,10 +22,6 @@ export class GetStationUseCase implements IGetStationUseCase {
     const pricing = await this.stationPricingRepository.findByStationId(stationId)
     const extraServices = await this.extraServiceRepository.findByStationId(stationId)
 
-    return {
-      station: station.getProps(),
-      pricing: pricing.map((p) => p.getProps()),
-      extraServices: extraServices.map((es) => es.getProps()),
-    }
+    return StationDTOMapper.toDetailDTO(station, pricing, extraServices)
   }
 }

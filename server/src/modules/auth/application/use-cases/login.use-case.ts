@@ -7,6 +7,7 @@ import { IUserRepository } from "@/modules/user/domain/repositories/user.reposit
 import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { AuthDTOMapper } from "../mappers/auth-dto.mapper"
 import { Otp } from "../../domain/entities/otp.entity"
 import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
@@ -93,20 +94,12 @@ export class LoginUseCase implements ILoginUseCase {
     }
 
     return {
-      user: {
-        id: user.id!,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        phone: user.phone,
-        walletBalance: user.walletBalance,
+      user: AuthDTOMapper.toAuthUserDTO(user, {
         isVerified,
         onboardingStep,
-        authProvider: user.authProvider,
         ownerId,
         isManager,
-      },
+      }),
       tokens: {
         accessToken,
         refreshToken,

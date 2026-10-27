@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { HealthService } from "./health.service"
+import { HealthDTOMapper } from "./health-dto.mapper"
 import success from "@/common/utils/success"
 import { HTTP_STATUS } from "@/common/constants/http.constants"
 import { AppError } from "@/common/errors/app-error"
@@ -12,17 +13,13 @@ export class HealthController {
     const statusCode =
       report.status === "unhealthy" ? HTTP_STATUS.SERVICE_UNAVAILABLE : HTTP_STATUS.OK
 
-    success(res, report, statusCode, `Server is ${report.status}`)
+    success(res, HealthDTOMapper.toReportDTO(report), statusCode, `Server is ${report.status}`)
   }
 
   getLive = async (_req: Request, res: Response): Promise<void> => {
     success(
       res,
-      {
-        status: "ok",
-        timestamp: new Date().toISOString(),
-        uptime: Math.floor(process.uptime()),
-      },
+      HealthDTOMapper.toLiveDTO(process.uptime()),
       HTTP_STATUS.OK,
       "Server process is alive"
     )
@@ -39,10 +36,7 @@ export class HealthController {
 
     success(
       res,
-      {
-        status: "ready",
-        timestamp: new Date().toISOString(),
-      },
+      HealthDTOMapper.toReadyDTO(),
       HTTP_STATUS.OK,
       "Server is ready to receive traffic"
     )
@@ -52,29 +46,7 @@ export class HealthController {
     const report = await this.healthService.getFullReport()
     success(
       res,
-      {
-        uptime: report.uptime,
-        memory: report.system.memory,
-        cpu: report.system.cpu,
-        services: {
-          mongodb: {
-            status: report.services.mongodb.status,
-            latencyMs: report.services.mongodb.latencyMs,
-          },
-          redis: {
-            status: report.services.redis.status,
-            latencyMs: report.services.redis.latencyMs,
-          },
-          qdrant: {
-            status: report.services.qdrant.status,
-            latencyMs: report.services.qdrant.latencyMs,
-          },
-          ollama: {
-            status: report.services.ollama.status,
-            latencyMs: report.services.ollama.latencyMs,
-          },
-        },
-      },
+      HealthDTOMapper.toMetricsDTO(report),
       HTTP_STATUS.OK,
       "Server metrics retrieved"
     )

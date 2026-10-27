@@ -20,6 +20,7 @@ import {
 } from "../application/interfaces/owner-usecases.interfaces"
 import { createOwnerSchema, updateOwnerSchema } from "./schema/owner.schema"
 import { OnboardingStepRequestMapper } from "../application/mappers/onboarding-step.mapper"
+import { OwnerDTOMapper } from "../application/mappers/owner-dto.mapper"
 
 export class OwnerController {
   constructor(
@@ -88,7 +89,12 @@ export class OwnerController {
       userId,
     })
 
-    success(res, data, HTTP_STATUS.CREATED, SUCCESS_MESSAGES.OWNER_CREATED_SUCCESS)
+    success(
+      res,
+      OwnerDTOMapper.toDTO(data),
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGES.OWNER_CREATED_SUCCESS
+    )
   }
 
   getOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
@@ -102,7 +108,12 @@ export class OwnerController {
       throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)
     }
 
-    success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_RETRIEVED_SUCCESS)
+    success(
+      res,
+      OwnerDTOMapper.toDTO(data),
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGES.OWNER_RETRIEVED_SUCCESS
+    )
   }
 
   updateOwnerProfile = async (req: AuthenticatedRequest, res: Response) => {
@@ -120,7 +131,12 @@ export class OwnerController {
       throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)
     }
 
-    success(res, data, HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS)
+    success(
+      res,
+      OwnerDTOMapper.toDTO(data),
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS
+    )
   }
 
   approveOwner = async (req: AuthenticatedRequest, res: Response) => {
@@ -149,6 +165,6 @@ export class OwnerController {
       ? "Owner application approved successfully"
       : "Owner application rejected successfully"
 
-    success(res, updatedOwner.toJSON(), HTTP_STATUS.OK, message)
+    success(res, OwnerDTOMapper.toDTO(updatedOwner), HTTP_STATUS.OK, message)
   }
 }

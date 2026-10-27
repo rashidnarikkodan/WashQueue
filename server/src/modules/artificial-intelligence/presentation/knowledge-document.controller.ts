@@ -14,6 +14,7 @@ import {
   UpdateKnowledgeDocumentDto,
   GetKnowledgeDocumentsQuery,
 } from "../application/dto/knowledge-document.dto"
+import { KnowledgeDocumentDTOMapper } from "../application/mappers/knowledge-document-dto.mapper"
 
 export class KnowledgeDocumentController {
   constructor(
@@ -27,26 +28,49 @@ export class KnowledgeDocumentController {
 
   create = async (req: Request, res: Response) => {
     const data = await this.createUseCase.execute(req.body as CreateKnowledgeDocumentDto)
-    success(res, data, HTTP_STATUS.CREATED, "Knowledge document created successfully")
+    success(
+      res,
+      KnowledgeDocumentDTOMapper.toDTO(data),
+      HTTP_STATUS.CREATED,
+      "Knowledge document created successfully"
+    )
   }
 
   getAll = async (req: Request, res: Response) => {
     const data = await this.getAllUseCase.execute(
       req.query as unknown as GetKnowledgeDocumentsQuery
     )
-    success(res, data, HTTP_STATUS.OK, "Knowledge documents retrieved successfully")
+    success(
+      res,
+      {
+        data: KnowledgeDocumentDTOMapper.toListDTO(data.data),
+        total: data.total,
+      },
+      HTTP_STATUS.OK,
+      "Knowledge documents retrieved successfully"
+    )
   }
 
   getById = async (req: Request, res: Response) => {
     const id = req.params.id as string
     const data = await this.getByIdUseCase.execute(id)
-    success(res, data, HTTP_STATUS.OK, "Knowledge document retrieved successfully")
+    success(
+      res,
+      KnowledgeDocumentDTOMapper.toDTO(data),
+      HTTP_STATUS.OK,
+      "Knowledge document retrieved successfully"
+    )
   }
 
   update = async (req: Request, res: Response) => {
     const id = req.params.id as string
     const data = await this.updateUseCase.execute(id, req.body as UpdateKnowledgeDocumentDto)
-    success(res, data, HTTP_STATUS.OK, "Knowledge document updated successfully")
+    success(
+      res,
+      KnowledgeDocumentDTOMapper.toDTO(data),
+      HTTP_STATUS.OK,
+      "Knowledge document updated successfully"
+    )
   }
 
   delete = async (req: Request, res: Response) => {

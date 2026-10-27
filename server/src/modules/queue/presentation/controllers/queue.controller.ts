@@ -20,6 +20,7 @@ import {
   IValidateQRForCheckInUseCase,
   IAdvanceBookingStatusUseCase,
 } from "../../application/interfaces/queue-usecases.interface"
+import { QueueDTOMapper } from "../../application/mappers/queue-dto.mapper"
 
 export class QueueController {
   constructor(
@@ -40,7 +41,7 @@ export class QueueController {
     const publicQueueData = await this.getPublicStationQueueUseCase.execute(stationId)
     success(
       res,
-      publicQueueData,
+      QueueDTOMapper.toPublicQueueDTO(publicQueueData),
       HTTP_STATUS.OK,
       "Public station live queue retrieved successfully"
     )
@@ -54,7 +55,12 @@ export class QueueController {
 
     const { stationId } = req.params as { stationId: string }
     const queueData = await this.getOperationalQueueUseCase.execute(managerUserId, stationId)
-    success(res, queueData, HTTP_STATUS.OK, "Operational queue retrieved successfully")
+    success(
+      res,
+      QueueDTOMapper.toOperationalStationQueueDTO(queueData),
+      HTTP_STATUS.OK,
+      "Operational queue retrieved successfully"
+    )
   }
 
   validateQr = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

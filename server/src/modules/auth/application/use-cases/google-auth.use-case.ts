@@ -3,6 +3,7 @@ import { AppError } from "@/common/errors/app-error"
 import env from "@/configs/env.config"
 import logger from "@/configs/logger.config"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { AuthDTOMapper } from "../mappers/auth-dto.mapper"
 
 import { User } from "@/modules/user/domain/entities/User"
 import { IUserRepository } from "@/modules/user/domain/repositories/user.repository"
@@ -143,18 +144,13 @@ export class GoogleAuthUseCase implements IGoogleAuthUseCase {
     }
 
     return {
-      user: {
-        id: user.id!,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+      user: AuthDTOMapper.toAuthUserDTO(user, {
         isVerified,
         onboardingStep,
         isNewUser,
-        authProvider: user.authProvider,
         ownerId,
         isManager,
-      },
+      }),
       tokens: {
         accessToken,
         refreshToken,
