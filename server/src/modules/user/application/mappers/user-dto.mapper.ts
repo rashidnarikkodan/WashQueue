@@ -12,8 +12,6 @@ export interface UserDTO {
   avatar?: string
   isBlocked: boolean
   isVerified: boolean
-  bookmarks?: string[]
-  walletBalance: number
   authProvider?: string
   lastLoginAt?: Date
   createdAt?: Date
@@ -31,8 +29,6 @@ export class UserDTOMapper {
       avatar: user.avatar,
       isBlocked: user.isBlocked,
       isVerified: user.isVerified,
-      bookmarks: user.bookmarks ? [...user.bookmarks] : [],
-      walletBalance: user.walletBalance ?? 0,
       authProvider: user.authProvider,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -78,8 +74,6 @@ export class UserDTOMapper {
         isBlocked: u.isBlocked,
         avatar: u.avatar,
         lastLoginAt: u.lastLoginAt,
-        walletBalance: u.walletBalance ?? 0,
-        bookmarks: u.bookmarks,
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         onboardingStep: u.onboardingStep,
