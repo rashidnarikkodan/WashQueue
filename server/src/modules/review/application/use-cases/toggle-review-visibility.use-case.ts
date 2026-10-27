@@ -25,6 +25,6 @@ export class ToggleReviewVisibilityUseCase implements IToggleReviewVisibilityUse
       await this.stationRatingSyncService.syncStationRating(review.stationId)
     }
 
-    return ReviewDTOMapper.toDTO(saved)
+    return ReviewDTOMapper.toDTO(saved, undefined, true)
   }
 }

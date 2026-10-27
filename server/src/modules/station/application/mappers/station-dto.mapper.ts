@@ -89,7 +89,7 @@ export class StationDTOMapper {
       reviewCount: props.reviewCount ?? 0,
       status: props.status,
       isActive: props.isActive ?? false,
-      rejectionReason: props.rejectionReason,
+      rejectionReason: props.status === "REJECTED" ? props.rejectionReason : undefined,
       verifiedAt: props.verifiedAt,
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,

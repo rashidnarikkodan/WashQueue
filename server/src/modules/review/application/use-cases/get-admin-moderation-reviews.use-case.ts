@@ -19,10 +19,14 @@ export class GetAdminModerationReviewsUseCase implements IGetAdminModerationRevi
     ])
 
     const reviews = reviewsResult.items.map((item) =>
-      ReviewDTOMapper.toDTO(item.review, {
-        user: item.user,
-        station: item.station,
-      })
+      ReviewDTOMapper.toDTO(
+        item.review,
+        {
+          user: item.user,
+          station: item.station,
+        },
+        true
+      )
     )
 
     return {
