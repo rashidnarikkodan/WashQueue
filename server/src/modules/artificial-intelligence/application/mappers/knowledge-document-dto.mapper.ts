@@ -28,8 +28,10 @@ export class KnowledgeDocumentDTOMapper {
       locale: doc.locale,
       version: doc.version,
       publishedAt: doc.publishedAt ? new Date(doc.publishedAt).toISOString() : null,
-      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt),
-      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt),
+      createdAt:
+        doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt),
+      updatedAt:
+        doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt),
     }
   }
 

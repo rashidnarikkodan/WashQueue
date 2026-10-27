@@ -1,7 +1,4 @@
-import {
-  OperationalQueueItemDTO,
-  OperationalStationQueueDTO,
-} from "../dtos/operational-queue.dto"
+import { OperationalQueueItemDTO, OperationalStationQueueDTO } from "../dtos/operational-queue.dto"
 import { PublicStationQueueDTO } from "../dtos/queue-operations.dto"
 
 export class QueueDTOMapper {

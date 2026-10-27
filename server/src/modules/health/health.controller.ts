@@ -34,21 +34,11 @@ export class HealthController {
       )
     }
 
-    success(
-      res,
-      HealthDTOMapper.toReadyDTO(),
-      HTTP_STATUS.OK,
-      "Server is ready to receive traffic"
-    )
+    success(res, HealthDTOMapper.toReadyDTO(), HTTP_STATUS.OK, "Server is ready to receive traffic")
   }
 
   getMetrics = async (_req: Request, res: Response): Promise<void> => {
     const report = await this.healthService.getFullReport()
-    success(
-      res,
-      HealthDTOMapper.toMetricsDTO(report),
-      HTTP_STATUS.OK,
-      "Server metrics retrieved"
-    )
+    success(res, HealthDTOMapper.toMetricsDTO(report), HTTP_STATUS.OK, "Server metrics retrieved")
   }
 }

@@ -131,12 +131,7 @@ export class OwnerController {
       throw new NotFoundError(ERROR_MESSAGES.OWNER_NOT_FOUND)
     }
 
-    success(
-      res,
-      OwnerDTOMapper.toDTO(data),
-      HTTP_STATUS.OK,
-      SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS
-    )
+    success(res, OwnerDTOMapper.toDTO(data), HTTP_STATUS.OK, SUCCESS_MESSAGES.OWNER_UPDATED_SUCCESS)
   }
 
   approveOwner = async (req: AuthenticatedRequest, res: Response) => {

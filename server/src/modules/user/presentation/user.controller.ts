@@ -84,12 +84,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
     }
-    success(
-      res,
-      UserDTOMapper.toDTO(user),
-      HTTP_STATUS.OK,
-      SUCCESS_MESSAGES.USER_UPDATED_SUCCESS
-    )
+    success(res, UserDTOMapper.toDTO(user), HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS)
   }
 
   getBookmarks = async (req: AuthenticatedRequest, res: Response) => {

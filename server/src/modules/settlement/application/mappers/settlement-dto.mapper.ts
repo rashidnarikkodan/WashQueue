@@ -28,7 +28,8 @@ export class SettlementDTOMapper {
       bookingNumber: typeof extra.bookingNumber === "string" ? extra.bookingNumber : undefined,
       stationName: typeof extra.stationName === "string" ? extra.stationName : undefined,
       customerName: typeof extra.customerName === "string" ? extra.customerName : undefined,
-      vehicleRegNumber: typeof extra.vehicleRegNumber === "string" ? extra.vehicleRegNumber : undefined,
+      vehicleRegNumber:
+        typeof extra.vehicleRegNumber === "string" ? extra.vehicleRegNumber : undefined,
       serviceName: typeof extra.serviceName === "string" ? extra.serviceName : undefined,
       paymentMethod: typeof extra.paymentMethod === "string" ? extra.paymentMethod : undefined,
     }
