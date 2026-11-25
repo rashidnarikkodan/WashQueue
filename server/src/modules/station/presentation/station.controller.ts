@@ -22,6 +22,7 @@ import {
 } from "../application/interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { StationRequestMapper } from "../application/mappers/station-request.mapper"
+import { StationDTOMapper } from "../application/mappers/station-dto.mapper"
 import {
   configureSlotConfigSchema,
   getAvailableTimeWindowsQuerySchema,
@@ -57,7 +58,7 @@ export class StationController {
 
     success(
       res,
-      { stationId: station.id, station: station.getProps() },
+      { stationId: station.id, station: StationDTOMapper.toDTO(station) },
       HTTP_STATUS.CREATED,
       "Station draft created successfully"
     )
@@ -98,17 +99,7 @@ export class StationController {
     const limit = Math.max(1, Number(query.limit))
     const totalPages = Math.ceil(total / limit) || 1
 
-    const data = stations.map((station) => ({
-      ...station.getProps(),
-      distanceKm: (station as unknown as Record<string, unknown>).distanceKm,
-      startingPrice: (station as unknown as Record<string, unknown>).startingPrice,
-      halfWashPrice: (station as unknown as Record<string, unknown>).halfWashPrice,
-      fullWashPrice: (station as unknown as Record<string, unknown>).fullWashPrice,
-      estimatedWaitMins: (station as unknown as Record<string, unknown>).estimatedWaitMins,
-      queueDepth: (station as unknown as Record<string, unknown>).queueDepth,
-      isOpen: (station as unknown as Record<string, unknown>).isOpen,
-      isFavorite: station.isFavorite,
-    }))
+    const data = StationDTOMapper.toListDTO(stations)
 
     success(
       res,
@@ -138,7 +129,12 @@ export class StationController {
     const stationId = this.stationMapper.extractStationId(req)
     const station = await this.submitStationUseCase.execute(stationId, userId)
 
-    success(res, station.getProps(), HTTP_STATUS.OK, "Station submitted for review successfully")
+    success(
+      res,
+      StationDTOMapper.toDTO(station),
+      HTTP_STATUS.OK,
+      "Station submitted for review successfully"
+    )
   }
 
   review = async (req: AuthenticatedRequest, res: Response) => {
@@ -153,7 +149,7 @@ export class StationController {
 
     success(
       res,
-      station.getProps(),
+      StationDTOMapper.toDTO(station),
       HTTP_STATUS.OK,
       `Station ${action.toLowerCase()}d successfully`
     )
@@ -183,13 +179,13 @@ export class StationController {
 
     const stationId = this.stationMapper.extractStationId(req)
     const station = await this.toggleActiveStationUseCase.execute(stationId, userId)
-    const props = station.getProps()
+    const dto = StationDTOMapper.toDTO(station)
 
     success(
       res,
-      props,
+      dto,
       HTTP_STATUS.OK,
-      `Station ${props.isActive ? "activated" : "deactivated"} successfully`
+      `Station ${dto.isActive ? "activated" : "deactivated"} successfully`
     )
   }
 

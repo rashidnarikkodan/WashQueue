@@ -5,6 +5,7 @@ import { IStationPricingRepository } from "../../domain/repositories/station-pri
 import { IExtraServiceRepository } from "../../domain/repositories/extra-service.repository"
 import { UpdateStationInput } from "../dtos/update-station.dto"
 import { StationDetailResponseDto } from "../dtos/get-station.dto"
+import { StationDTOMapper } from "../mappers/station-dto.mapper"
 import { IUpdateStationUseCase } from "../interfaces/station-usecases.interface"
 import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repository"
 import { IManagerAssignmentRepository } from "@/modules/manager/domain/repositories/manager-assignment.repository"
@@ -377,10 +378,6 @@ export class UpdateStationUseCase implements IUpdateStationUseCase {
     const pricing = await this.stationPricingRepository.findByStationId(stationId)
     const extraServices = await this.extraServiceRepository.findByStationId(stationId)
 
-    return {
-      station: updatedStation.getProps(),
-      pricing: pricing.map((p) => p.getProps()),
-      extraServices: extraServices.map((es) => es.getProps()),
-    }
+    return StationDTOMapper.toDetailDTO(updatedStation, pricing, extraServices)
   }
 }

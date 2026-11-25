@@ -3,6 +3,7 @@ import { VehicleResponseDto } from "../dtos/get-vehicle.dto"
 import { IVehicleRepository } from "../../domain/repositories/vehicle.repository"
 import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
+import { VehicleDTOMapper } from "../mappers/vehicle-dto.mapper"
 
 export class GetVehicleUseCase implements IGetVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
@@ -17,6 +18,6 @@ export class GetVehicleUseCase implements IGetVehicleUseCase {
       throw new ForbiddenError("You are not authorized to view this vehicle")
     }
 
-    return vehicle.data
+    return VehicleDTOMapper.toDTO(vehicle)
   }
 }

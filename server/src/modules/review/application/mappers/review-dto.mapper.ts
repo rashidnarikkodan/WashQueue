@@ -20,7 +20,8 @@ export class ReviewDTOMapper {
         serviceType?: string
         dateTime?: string
       }
-    }
+    },
+    isAdmin: boolean = false
   ): ReviewResponseDTO {
     const data = review.data
     return {
@@ -33,11 +34,17 @@ export class ReviewDTOMapper {
       comment: data.comment,
       updateCount: data.updateCount,
       isVisible: data.isVisible ?? true,
-      reportCount: data.reportCount ?? 0,
-      flags: data.flags ? [...data.flags] : [],
+      reportCount: isAdmin ? (data.reportCount ?? 0) : undefined,
+      flags: isAdmin && data.flags ? [...data.flags] : undefined,
       createdAt: data.createdAt?.toISOString(),
       updatedAt: data.updatedAt?.toISOString(),
-      user: extra?.user,
+      user: extra?.user
+        ? {
+            name: extra.user.name,
+            avatar: extra.user.avatar,
+            email: isAdmin ? extra.user.email : undefined,
+          }
+        : undefined,
       station: extra?.station,
       booking: extra?.booking,
     }

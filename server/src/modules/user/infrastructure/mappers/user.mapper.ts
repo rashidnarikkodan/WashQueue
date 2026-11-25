@@ -62,8 +62,6 @@ export class UserMapper implements IMapper<User, IUser> {
       isBlocked: user.isBlocked,
       avatar: user.avatar,
       lastLoginAt: user.lastLoginAt,
-      walletBalance: user.walletBalance,
-      bookmarks: user.bookmarks,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     }

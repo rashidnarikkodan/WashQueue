@@ -33,6 +33,6 @@ export class DismissReviewReportsUseCase implements IDismissReviewReportsUseCase
 
     review.dismissReports()
     const saved = await this.reviewRepository.save(review)
-    return ReviewDTOMapper.toDTO(saved)
+    return ReviewDTOMapper.toDTO(saved, undefined, true)
   }
 }

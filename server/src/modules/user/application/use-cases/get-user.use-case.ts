@@ -3,6 +3,7 @@ import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repo
 import { UserProfileDto } from "../dto"
 import { IGetUserUseCase } from "../interfaces"
 import { ROLE } from "@/common/constants/role.constants"
+import { UserDTOMapper } from "../mappers/user-dto.mapper"
 
 export class GetUserUseCase implements IGetUserUseCase {
   constructor(
@@ -44,22 +45,10 @@ export class GetUserUseCase implements IGetUserUseCase {
       }
     }
 
-    return {
-      id: user.id,
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      isBlocked: user.isBlocked,
-      lastLoginAt: user.lastLoginAt,
-      walletBalance: user.walletBalance,
-      createdAt: user.createdAt,
-      authProvider: user.authProvider,
+    return UserDTOMapper.toProfileDTO(user, {
       isVerified,
       onboardingStep,
       onboardingDetails,
-      updatedAt: user.updatedAt,
-    }
+    })
   }
 }

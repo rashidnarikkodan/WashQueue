@@ -7,6 +7,7 @@ import { IOwnerRepository } from "@/modules/owner/domain/repositories/owner.repo
 import { AuthUser } from "../dto"
 import { IGetMeUseCase } from "../interfaces"
 import { ROLE } from "@/common/constants/role.constants"
+import { AuthDTOMapper } from "../mappers/auth-dto.mapper"
 
 export class GetMeUseCase implements IGetMeUseCase {
   constructor(
@@ -39,19 +40,11 @@ export class GetMeUseCase implements IGetMeUseCase {
       }
     }
 
-    return {
-      id: user.id!,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      phone: user.phone,
-      walletBalance: user.walletBalance,
+    return AuthDTOMapper.toAuthUserDTO(user, {
       isVerified,
       onboardingStep,
-      authProvider: user.authProvider,
       ownerId,
       isManager,
-    }
+    })
   }
 }

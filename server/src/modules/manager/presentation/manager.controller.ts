@@ -18,6 +18,7 @@ import {
   IVerifyInvitationTokenUseCase,
   ISelfAssignManagerUseCase,
 } from "../application/interfaces/manager-usecases.interface"
+import { ManagerDTOMapper } from "../application/mappers/manager-dto.mapper"
 
 export class ManagerController {
   constructor(
@@ -66,7 +67,12 @@ export class ManagerController {
   getOwnerInvitations = async (req: AuthenticatedRequest, res: Response) => {
     const ownerUserId = req.user!.userId
     const invitations = await this.getOwnerInvitationsUseCase.execute(ownerUserId)
-    success(res, invitations, HTTP_STATUS.OK, "Invitations retrieved successfully")
+    success(
+      res,
+      ManagerDTOMapper.toInvitationListDTO(invitations),
+      HTTP_STATUS.OK,
+      "Invitations retrieved successfully"
+    )
   }
 
   updatePermissions = async (req: AuthenticatedRequest, res: Response) => {
@@ -78,21 +84,36 @@ export class ManagerController {
       assignmentId,
       permissions
     )
-    success(res, updated, HTTP_STATUS.OK, "Manager permissions updated successfully")
+    success(
+      res,
+      ManagerDTOMapper.toAssignmentDTO(updated),
+      HTTP_STATUS.OK,
+      "Manager permissions updated successfully"
+    )
   }
 
   suspend = async (req: AuthenticatedRequest, res: Response) => {
     const ownerUserId = req.user!.userId
     const assignmentId = (req.params.managerId || req.params.assignmentId) as string
     const updated = await this.suspendManagerUseCase.execute(ownerUserId, assignmentId)
-    success(res, updated, HTTP_STATUS.OK, "Manager suspended successfully")
+    success(
+      res,
+      ManagerDTOMapper.toAssignmentDTO(updated),
+      HTTP_STATUS.OK,
+      "Manager suspended successfully"
+    )
   }
 
   reactivate = async (req: AuthenticatedRequest, res: Response) => {
     const ownerUserId = req.user!.userId
     const assignmentId = (req.params.managerId || req.params.assignmentId) as string
     const updated = await this.reactivateManagerUseCase.execute(ownerUserId, assignmentId)
-    success(res, updated, HTTP_STATUS.OK, "Manager reactivated successfully")
+    success(
+      res,
+      ManagerDTOMapper.toAssignmentDTO(updated),
+      HTTP_STATUS.OK,
+      "Manager reactivated successfully"
+    )
   }
 
   remove = async (req: AuthenticatedRequest, res: Response) => {
@@ -106,7 +127,12 @@ export class ManagerController {
     const ownerUserId = req.user!.userId
     const invitationId = req.params.invitationId as string
     const invitation = await this.resendInvitationUseCase.execute(ownerUserId, invitationId)
-    success(res, invitation, HTTP_STATUS.OK, "Invitation resent successfully")
+    success(
+      res,
+      ManagerDTOMapper.toInvitationDTO(invitation),
+      HTTP_STATUS.OK,
+      "Invitation resent successfully"
+    )
   }
 
   cancelInvitation = async (req: AuthenticatedRequest, res: Response) => {
@@ -119,7 +145,12 @@ export class ManagerController {
   verifyToken = async (req: Request, res: Response) => {
     const token = req.query.token as string
     const invitation = await this.verifyInvitationTokenUseCase.execute(token)
-    success(res, invitation, HTTP_STATUS.OK, "Invitation token is valid")
+    success(
+      res,
+      ManagerDTOMapper.toInvitationDTO(invitation),
+      HTTP_STATUS.OK,
+      "Invitation token is valid"
+    )
   }
 
   acceptInvitation = async (req: Request, res: Response) => {

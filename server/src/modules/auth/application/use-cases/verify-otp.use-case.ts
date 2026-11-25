@@ -6,6 +6,7 @@ import { IOtpRepository } from "../../domain/repositories/otp.repository"
 import { IRefreshTokenRepository } from "../../domain/repositories/refresh-token.repository"
 import { RefreshToken } from "../../domain/entities/refresh-token.entity"
 import { TokenPayloadMapper } from "../mappers/token-payload.mapper"
+import { AuthDTOMapper } from "../mappers/auth-dto.mapper"
 import { IHashService, ITokenService, IVerifyOtpUseCase } from "../interfaces"
 import { AuthOutput, VerifyOtpInput } from "../dto"
 
@@ -46,14 +47,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     await this.refreshTokenRepository.save(user.id!, new RefreshToken(hashedRefreshToken))
 
     return {
-      user: {
-        id: user.id!,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: true,
-        authProvider: user.authProvider,
-      },
+      user: AuthDTOMapper.toAuthUserDTO(user, { isVerified: true }),
       tokens: {
         accessToken,
         refreshToken,

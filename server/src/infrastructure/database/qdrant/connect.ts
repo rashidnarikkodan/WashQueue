@@ -8,16 +8,24 @@ import { VECTOR_COLLECTIONS } from "@/common/constants/vector-collections.consta
 
 export async function initializeQdrant() {
   const collectionName = VECTOR_COLLECTIONS.KNOWLEDGE_DOCUMENT
-  const collectionInfo = await qdrant.collectionExists(collectionName)
-  if (!collectionInfo.exists) {
-    await qdrant.createCollection(collectionName, {
-      vectors: {
-        size: 768,
-        distance: "Cosine",
-      },
-    })
-    logger.info("Qdrant DB Initialized")
-  } else {
-    logger.info("Qdrant DB Already Initialized")
+  try {
+    const collectionInfo = await qdrant.collectionExists(collectionName)
+    if (!collectionInfo.exists) {
+      await qdrant.createCollection(collectionName, {
+        vectors: {
+          size: 768,
+          distance: "Cosine",
+        },
+      })
+      logger.info("Qdrant DB Initialized")
+    } else {
+      logger.info("Qdrant DB Already Initialized")
+    }
+  } catch (error) {
+    logger.error(
+      { error, qdrantUrl: env.QDRANT_URL, collectionName },
+      "Error initializing Qdrant DB"
+    )
+    throw error
   }
 }

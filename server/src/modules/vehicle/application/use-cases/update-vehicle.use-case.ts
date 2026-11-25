@@ -6,6 +6,7 @@ import { NotFoundError } from "@/common/errors/not-found-error"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 
 import { VehicleProps } from "../../domain/entities/Vehicle"
+import { VehicleDTOMapper } from "../mappers/vehicle-dto.mapper"
 
 export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
@@ -38,6 +39,6 @@ export class UpdateVehicleUseCase implements IUpdateVehicleUseCase {
       throw new NotFoundError("Vehicle not found")
     }
 
-    return updatedVehicle.data
+    return VehicleDTOMapper.toDTO(updatedVehicle)
   }
 }

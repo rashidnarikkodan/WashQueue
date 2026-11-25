@@ -1,6 +1,7 @@
 import { INotificationRepository } from "../../domain/repositories/notification.repository.interface"
 import { GetNotificationsQueryDto, PaginatedNotificationsDto } from "../dtos/get-notifications.dto"
 import { IGetNotificationsUseCase } from "../interfaces/notification-usecases.interface"
+import { NotificationDTOMapper } from "../mappers/notification-dto.mapper"
 
 export class GetNotificationsUseCase implements IGetNotificationsUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
@@ -19,15 +20,6 @@ export class GetNotificationsUseCase implements IGetNotificationsUseCase {
         limit,
       })
 
-    const totalPages = Math.ceil(total / limit) || 1
-
-    return {
-      items: notifications.map((n) => n.data),
-      total,
-      page,
-      limit,
-      totalPages,
-      unreadCount,
-    }
+    return NotificationDTOMapper.toPaginatedDTO(notifications, total, page, limit, unreadCount)
   }
 }

@@ -3,6 +3,7 @@ import { CreateVehicleDto } from "../dtos/create-vehicle.dto"
 import { VehicleResponseDto } from "../dtos/get-vehicle.dto"
 import { IVehicleRepository } from "../../domain/repositories/vehicle.repository"
 import { Vehicle } from "../../domain/entities/Vehicle"
+import { VehicleDTOMapper } from "../mappers/vehicle-dto.mapper"
 
 export class CreateVehicleUseCase implements ICreateVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
@@ -33,6 +34,6 @@ export class CreateVehicleUseCase implements ICreateVehicleUseCase {
     })
 
     const savedVehicle = await this.vehicleRepository.save(vehicle)
-    return savedVehicle.data
+    return VehicleDTOMapper.toDTO(savedVehicle)
   }
 }

@@ -17,6 +17,7 @@ import { ERROR_MESSAGES } from "@/common/constants/error.constants"
 import { AuthenticatedRequest } from "@/infrastructure/http/middleware/authenticate"
 import { ForbiddenError } from "@/common/errors/forbidden-error"
 import { ROLE } from "@/common/constants/role.constants"
+import { UserDTOMapper } from "../application/mappers/user-dto.mapper"
 
 const ADMIN_ONLY_UPDATE_FIELDS = ["isBlocked", "isVerified"] as const
 
@@ -83,7 +84,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND)
     }
-    success(res, user, HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS)
+    success(res, UserDTOMapper.toDTO(user), HTTP_STATUS.OK, SUCCESS_MESSAGES.USER_UPDATED_SUCCESS)
   }
 
   getBookmarks = async (req: AuthenticatedRequest, res: Response) => {
@@ -99,7 +100,8 @@ export class UserController {
     const { stationId } = req.body
     if (!stationId) throw new NotFoundError("Station ID is required")
     const user = await this.toggleBookmarkUseCase.execute(userId, stationId)
-    success(res, user, HTTP_STATUS.OK, "Bookmarks updated successfully")
+    if (!user) throw new NotFoundError("User not found")
+    success(res, UserDTOMapper.toDTO(user), HTTP_STATUS.OK, "Bookmarks updated successfully")
   }
 
   exportUsers = async (req: Request, res: Response) => {

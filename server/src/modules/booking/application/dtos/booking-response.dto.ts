@@ -66,7 +66,7 @@ export interface BookingResponseDTO {
   depositAmount: number
   cashAmount: number
   refundAmount: number
-  settlement: {
+  settlement?: {
     platformCommission: number
     stationSettlement: number
   }

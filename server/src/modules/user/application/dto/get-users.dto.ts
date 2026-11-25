@@ -10,8 +10,6 @@ export interface UserSummaryDto {
   isBlocked: boolean
   avatar?: string
   lastLoginAt?: Date
-  walletBalance?: number
-  bookmarks?: string[]
   createdAt?: Date
   updatedAt?: Date
   onboardingStep?: number

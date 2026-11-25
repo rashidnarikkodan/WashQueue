@@ -4,6 +4,8 @@ import { INotificationRepository } from "../../domain/repositories/notification.
 import { NotificationResponseDto } from "../dtos/notification-response.dto"
 import { IGetNotificationByIdUseCase } from "../interfaces/notification-usecases.interface"
 
+import { NotificationDTOMapper } from "../mappers/notification-dto.mapper"
+
 export class GetNotificationByIdUseCase implements IGetNotificationByIdUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
@@ -14,6 +16,6 @@ export class GetNotificationByIdUseCase implements IGetNotificationByIdUseCase {
       throw new AppError("Notification not found", HTTP_STATUS.NOT_FOUND)
     }
 
-    return notification.data
+    return NotificationDTOMapper.toDTO(notification)
   }
 }

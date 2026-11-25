@@ -6,7 +6,8 @@ export class BookingDTOMapper {
   static toDTO(
     booking: Booking,
     rawQrToken?: string,
-    statusLogs?: BookingStatusLog[]
+    statusLogs?: BookingStatusLog[],
+    opts?: { includeSettlement?: boolean }
   ): BookingResponseDTO {
     const props = booking.getProps()
 
@@ -57,7 +58,7 @@ export class BookingDTOMapper {
       depositAmount: props.depositAmount,
       cashAmount: props.cashAmount,
       refundAmount: props.refundAmount,
-      settlement: props.settlement,
+      settlement: opts?.includeSettlement ? props.settlement : undefined,
       status: props.status,
       checkedInAt: props.checkedInAt ? props.checkedInAt.toISOString() : null,
       serviceStartedAt: props.serviceStartedAt ? props.serviceStartedAt.toISOString() : null,

@@ -19,8 +19,8 @@ export interface ReviewResponseDTO {
   comment: string
   updateCount: number
   isVisible: boolean
-  reportCount: number
-  flags: string[]
+  reportCount?: number
+  flags?: string[]
   createdAt?: string
   updatedAt?: string
   user?: {

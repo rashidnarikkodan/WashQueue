@@ -3,6 +3,8 @@ import { CategoryResponseDto } from "../dtos/category.dto"
 import { IVehicleCategoryRepository } from "../../domain/repositories/vehicle-category.repsoitory"
 import { NotFoundError } from "@/common/errors/not-found-error"
 
+import { VehicleCatalogDTOMapper } from "../mappers/vehicle-catalog-dto.mapper"
+
 export class GetCategoryUseCase implements IGetCategoryUseCase {
   constructor(private readonly categoryRepository: IVehicleCategoryRepository) {}
 
@@ -12,13 +14,6 @@ export class GetCategoryUseCase implements IGetCategoryUseCase {
       throw new NotFoundError("Vehicle category not found")
     }
 
-    return {
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description,
-      order: category.order,
-      isActive: category.isActive,
-    }
+    return VehicleCatalogDTOMapper.toCategoryDTO(category)
   }
 }
